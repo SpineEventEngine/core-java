@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,32 +28,34 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.query.CustomColumn;
+import io.spine.query.Column;
 import io.spine.server.entity.Entity;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
- * Describes the system columns defined for this type of {@link Entity}.
+ * A container for the columns which values are calculated on top of an {@code Entity} instance.
  *
  * @param <E>
- *         the type of entity which columns are described
+ *         the type of {@code Entity} serving as a source for the column values
  */
 @Immutable
-final class SystemColumns<E extends Entity<?, ?>> implements Iterable<CustomColumn<E, ?>> {
+@SuppressWarnings("Immutable")      /* Effectively immutable. */
+public final class Columns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
 
-    private final ImmutableSet<CustomColumn<E, ?>> columns;
+    private final ImmutableSet<Column<E, ?>> columns;
 
     /**
      * Creates a new instance from the passed columns.
      */
-    SystemColumns(Set<CustomColumn<E, ?>> columns) {
+    Columns(Set<Column<E, ?>> columns) {
         this.columns = ImmutableSet.copyOf(columns);
     }
 
     @Override
-    public Iterator<CustomColumn<E, ?>> iterator() {
+    public Iterator<Column<E, ?>> iterator() {
         return columns.iterator();
     }
 
@@ -56,5 +64,12 @@ final class SystemColumns<E extends Entity<?, ?>> implements Iterable<CustomColu
      */
     int size() {
         return columns.size();
+    }
+
+    /**
+     * Returns a new stream on top of the stored columns.
+     */
+    Stream<Column<E, ?>> stream() {
+        return columns.stream();
     }
 }

@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,36 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
-
-import io.spine.query.ColumnName;
-import io.spine.query.CustomColumn;
-import io.spine.server.entity.Entity;
-
 /**
- * A column of an entity, which tells if the entity is archived.
+ * Test environment classes for the {@code Aggregate}
+ * {@link io.spine.server.aggregate.AggregateTest.AllowValidatedAggregates AllowValidatedAggregates}
+ * test.
  */
-final class ArchivedColumn extends CustomColumn<Entity<?, ?>, Boolean> {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.aggregate.given.thermometer;
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")   // Used in a different context.
-    private static final ColumnName ARCHIVED = ColumnName.of("archived");
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    ArchivedColumn() {
-        super();
-    }
-
-    @Override
-    public ColumnName name() {
-        return ARCHIVED;
-    }
-
-    @Override
-    public Class<Boolean> type() {
-        return Boolean.class;
-    }
-
-    @Override
-    public Boolean valueIn(Entity<?, ?> entity) {
-        return entity.lifecycleFlags().getArchived();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

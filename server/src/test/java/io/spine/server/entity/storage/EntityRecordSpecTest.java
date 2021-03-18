@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,10 +41,6 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.server.entity.storage.AssertColumns.assertContains;
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
-import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
-import static io.spine.server.entity.storage.EntityRecordColumn.version;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -106,14 +108,15 @@ class EntityRecordSpecTest {
         assertThat(result).isEmpty();
     }
 
+    //TODO:2021-01-18:alex.tymchenko: test the types of the `column`-marked columns.
     @Test
     @DisplayName("return the list of columns")
     void returnColumns() {
-        int systemColumnCount = EntityRecordColumn.values()
-                                                  .length;
+        int lifecycleColumnCount = EntityRecordColumn.names()
+                                                     .size();
         int protoColumnCount = 4;
 
-        int expectedSize = systemColumnCount + protoColumnCount;
+        int expectedSize = lifecycleColumnCount + protoColumnCount;
         assertThat(spec().columnCount()).isEqualTo(expectedSize);
 
     }
@@ -137,22 +140,5 @@ class EntityRecordSpecTest {
                 ColumnName.of("due_date"), projection.state()
                                                      .getDueDate()
         );
-    }
-
-    @Test
-    @DisplayName("return system columns of an entity")
-    void returnLifecycleColumns() {
-
-        SystemColumns<TaskViewProjection> cols = spec().systemColumns();
-        assertThat(cols).hasSize(3);
-        assertContains(cols, rawNameOf(archived));
-        assertContains(cols, rawNameOf(deleted));
-        assertContains(cols, rawNameOf(version));
-    }
-
-    private static String rawNameOf(EntityRecordColumn archived) {
-        return archived.get()
-                       .name()
-                       .value();
     }
 }

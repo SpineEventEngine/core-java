@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -84,11 +90,12 @@ abstract class AggregateEndpoint<I,
     private void storeAndPost(A aggregate, DispatchOutcome outcome, LifecycleFlags flagsBefore) {
         Success success = outcome.getSuccess();
         LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
-        if (success.hasProducedEvents() ||
+        boolean withEvents = success.hasEvents();
+        if (withEvents ||
                 (flagsAfter != null && !flagsBefore.equals(flagsAfter))) {
             store(aggregate);
         }
-        if (success.hasProducedEvents()) {
+        if (withEvents) {
             List<Event> events = success.getProducedEvents()
                                         .getEventList();
             post(events);
@@ -116,7 +123,7 @@ abstract class AggregateEndpoint<I,
     final DispatchOutcome handleAndApplyEvents(A aggregate) {
         DispatchOutcome outcome = invokeDispatcher(aggregate);
         Success successfulOutcome = outcome.getSuccess();
-        return successfulOutcome.hasProducedEvents()
+        return successfulOutcome.hasEvents()
                ? applyProducedEvents(aggregate, outcome)
                : outcome;
     }

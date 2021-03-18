@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,6 +36,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.client.ArchivedColumn;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
 import io.spine.client.IdFilter;
@@ -68,7 +75,6 @@ import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.assertMatches;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.emptyFormat;
 import static io.spine.server.entity.given.RecordBasedRepositoryTestEnv.orderByName;
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -557,7 +563,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        CompositeFilter filter = all(eq(archived.name(), false));
+        CompositeFilter filter = all(eq(ArchivedColumn.instance(), false));
         TargetFilters filters = TargetFilters
                 .newBuilder()
                 .addFilter(filter)

@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,6 +32,8 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
 import io.spine.query.ColumnName;
 import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
@@ -45,8 +53,6 @@ import java.util.Map;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
-import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -99,7 +105,8 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ColumnName columnName = archived.columnName();
+        ColumnName columnName = ArchivedColumn.instance()
+                                              .name();
         Object value = false;
         EntityRecordWithColumns<?> emptyFieldsEnvelope =
                 EntityRecordWithColumns.of(sampleEntityRecord());
@@ -133,7 +140,7 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("have default system columns even if the entity does not define custom ones")
+    @DisplayName("have `Entity` lifecycle columns even if the entity does not define custom ones")
     void supportEmptyColumns() {
         EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(TASK_ID);
 
@@ -192,7 +199,7 @@ class EntityRecordWithColumnsTest {
     class BeInitializedWith {
 
         @Test
-        @DisplayName("an Entity identifier and a record")
+        @DisplayName("an `Entity` identifier and a record")
         void idAndRecord() {
             EntityRecord rawRecord = sampleEntityRecord();
             Long id = 199L;
@@ -203,7 +210,7 @@ class EntityRecordWithColumnsTest {
         }
 
         @Test
-        @DisplayName("an Entity and a record")
+        @DisplayName("an `Entity` and a record")
         void entityAndRecord() {
             TestEntity entity = new TestEntity(PROJECT_ID);
             EntityRecord rawRecord = sampleEntityRecord();
@@ -220,7 +227,8 @@ class EntityRecordWithColumnsTest {
                                      .collect(toImmutableSet());
             assertThat(names).containsAtLeastElementsIn(expectedNames);
             assertThat(names).containsAtLeastElementsIn(
-                    ImmutableSet.of(archived.columnName(), deleted.columnName()));
+                    ImmutableSet.of(ArchivedColumn.instance().name(),
+                                    DeletedColumn.instance().name()));
         }
     }
 
@@ -239,7 +247,8 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("column values")
         void columnValues() {
-            ColumnName columnName = archived.columnName();
+            ColumnName columnName = DeletedColumn.instance()
+                                                 .name();
             Object value = false;
             Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
             EntityRecordWithColumns<?> record =

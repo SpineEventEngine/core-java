@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,10 +26,15 @@
 
 package io.spine.server.model;
 
+import io.spine.base.Identifier;
+import io.spine.model.contexts.projects.ProjectId;
+import io.spine.model.contexts.projects.command.SigCreateProject;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DupEventFilterValueWhere;
 import io.spine.server.model.given.map.DuplicateCommandHandlers;
+import io.spine.server.model.given.map.RejectionsDispatchingTestEnv;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
 import io.spine.server.model.given.method.OneParamSignature;
 import io.spine.server.model.given.method.StubHandler;
@@ -31,12 +42,14 @@ import io.spine.server.type.EventClass;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
 import io.spine.test.event.ProjectStarred;
+import io.spine.testing.server.blackbox.ContextAwareTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`HandlerMap` should")
@@ -96,5 +109,31 @@ class HandlerMapTest {
                 HandlerMap.create(StubHandler.class, new OneParamSignature());
         assertThrows(IllegalStateException.class,
                      () -> map.handlerOf(EventClass.from(ProjectStarred.class)));
+    }
+
+    @Nested
+    @DisplayName("gracefully handle a missing handler for a rejection with a specific origin")
+    class SpecificRejection extends ContextAwareTest {
+
+        @Override
+        protected BoundedContextBuilder contextBuilder() {
+            return BoundedContextBuilder
+                    .assumingTests()
+                    .add(RejectionsDispatchingTestEnv.ProjectAgg.class)
+                    .addEventDispatcher(new RejectionsDispatchingTestEnv.CompletionWatch());
+        }
+
+        @Test
+        void handleThrownRejectionGracefully() {
+            ProjectId project = ProjectId
+                    .newBuilder()
+                    .setId(Identifier.newUuid())
+                    .vBuild();
+            SigCreateProject createProject = SigCreateProject
+                    .newBuilder()
+                    .setId(project)
+                    .vBuild();
+            assertDoesNotThrow(() -> context().receivesCommand(createProject));
+        }
     }
 }

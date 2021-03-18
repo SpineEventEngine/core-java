@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,8 +43,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
-import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static java.util.Collections.emptyMap;
 
 /**
@@ -67,8 +71,8 @@ public final class EntityRecordWithColumns<I>
      *         the type of the entity
      * @return a new instance of {@code EntityRecordWithColumns}
      */
-    public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
-    create(E entity, EntityRecord record) {
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    EntityRecordWithColumns<I> create(E entity, EntityRecord record) {
         checkNotNull(entity);
         checkNotNull(record);
         EntityRecordSpec<I, S, E> recordSpec = EntityRecordSpec.of(entity);
@@ -94,12 +98,7 @@ public final class EntityRecordWithColumns<I>
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
         checkNotNull(id);
         checkNotNull(record);
-        LifecycleFlags flags = record.getLifecycleFlags();
-        ImmutableMap<ColumnName, Object> lifecycleValues =
-                ImmutableMap.of(archived.get()
-                                        .name(), flags.getArchived(),
-                                deleted.get()
-                                       .name(), flags.getArchived());
+        ImmutableMap<ColumnName, Object> lifecycleValues = EntityRecordColumn.valuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 

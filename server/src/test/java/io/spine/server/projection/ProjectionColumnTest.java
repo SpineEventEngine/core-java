@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,9 +26,11 @@
 
 package io.spine.server.projection;
 
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
+import io.spine.client.VersionColumn;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
-import io.spine.server.entity.storage.EntityRecordColumn;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.projection.given.SavedString;
 import io.spine.server.projection.given.SavingProjection;
@@ -44,14 +52,14 @@ class ProjectionColumnTest {
     @Test
     @DisplayName("`version`")
     void version() {
-        assertHasColumn(EntityRecordColumn.version.columnName());
+        assertHasColumn(VersionColumn.instance().name());
     }
 
     @Test
     @DisplayName("`archived` and `deleted`")
     void lifecycleColumns() {
-        assertHasColumn(EntityRecordColumn.archived.columnName());
-        assertHasColumn(EntityRecordColumn.deleted.columnName());
+        assertHasColumn(ArchivedColumn.instance().name());
+        assertHasColumn(DeletedColumn.instance().name());
     }
 
     private static void assertHasColumn(ColumnName columnName) {

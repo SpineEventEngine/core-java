@@ -26,12 +26,12 @@
 
 package io.spine.gradle.internal
 
-import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
+import java.io.File
 
 /**
  * A Gradle task which runs another Gradle build.

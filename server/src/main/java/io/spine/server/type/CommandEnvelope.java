@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,11 +27,9 @@
 package io.spine.server.type;
 
 import io.spine.base.CommandMessage;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.type.TypeName;
 
@@ -91,19 +95,6 @@ public final class CommandEnvelope
     @Override
     public CommandClass messageClass() {
         return commandClass;
-    }
-
-    /**
-     * Obtains the actor context of the enclosed command.
-     */
-    @Override
-    public ActorContext actorContext() {
-        return context().getActorContext();
-    }
-
-    @Override
-    public Origin asMessageOrigin() {
-        return command().asMessageOrigin();
     }
 
     /**

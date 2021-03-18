@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,6 +37,7 @@ import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -44,6 +51,11 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregate;
 import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
+import io.spine.server.aggregate.given.thermometer.SafeThermometer;
+import io.spine.server.aggregate.given.thermometer.SafeThermometerRepo;
+import io.spine.server.aggregate.given.thermometer.Thermometer;
+import io.spine.server.aggregate.given.thermometer.ThermometerId;
+import io.spine.server.aggregate.given.thermometer.event.TemperatureChanged;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.dispatch.BatchDispatchOutcome;
@@ -75,7 +87,7 @@ import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.BlackBox;
+import io.spine.testing.server.blackbox.ContextAwareTest;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.AfterEach;
@@ -303,13 +315,13 @@ public class AggregateTest {
         dispatchCommand(aggregate, command(createProject));
 
         // Get the first event since the command handler produces only one event message.
-        Aggregate<?, ?, ?> agg = this.aggregate;
+        Aggregate<?, ?, ?> agg = aggregate;
         List<Event> uncommittedEvents = agg.getUncommittedEvents()
                                            .list();
         Event event = uncommittedEvents.get(0);
-
-        assertEquals(this.aggregate.version(), event.context()
-                                                    .getVersion());
+        EventContext context = event.context();
+        assertThat(aggregate.version())
+                .isEqualTo(context.getVersion());
     }
 
     @Test
@@ -813,21 +825,12 @@ public class AggregateTest {
 
     @Nested
     @DisplayName("create a single event when emitting a pair without second value")
-    class CreateSingleEventForPair {
+    class CreateSingleEventForPair extends ContextAwareTest {
 
-        private BlackBox context;
-
-        @BeforeEach
-        void prepareContext() {
-            context = BlackBox.from(
-                    BoundedContextBuilder.assumingTests()
-                                         .add(new TaskAggregateRepository())
-            );
-        }
-
-        @AfterEach
-        void closeContext() {
-            context.close();
+        @Override
+        protected BoundedContextBuilder contextBuilder() {
+            return BoundedContextBuilder.assumingTests()
+                                        .add(new TaskAggregateRepository());
         }
 
         /**
@@ -841,10 +844,10 @@ public class AggregateTest {
         @Test
         @DisplayName("when dispatching a command")
         void fromCommandDispatch() {
-            context.receivesCommand(createTask())
-                   .assertEvents()
-                   .withType(AggTaskCreated.class)
-                   .isNotEmpty();
+            context().receivesCommand(createTask())
+                     .assertEvents()
+                     .withType(AggTaskCreated.class)
+                     .isNotEmpty();
         }
 
         /**
@@ -859,8 +862,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on an event")
         void fromEventReact() {
-            EventSubject assertEvents = context.receivesCommand(assignTask())
-                                               .assertEvents();
+            EventSubject assertEvents = context().receivesCommand(assignTask())
+                                                 .assertEvents();
             assertEvents.hasSize(2);
             assertEvents.withType(AggTaskAssigned.class)
                         .hasSize(1);
@@ -880,13 +883,55 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
-            EventSubject assertEvents = context.receivesCommand(reassignTask())
-                                               .assertEvents();
+            EventSubject assertEvents = context().receivesCommand(reassignTask())
+                                                 .assertEvents();
             assertEvents.hasSize(2);
             assertEvents.withType(AggCannotReassignUnassignedTask.class)
                         .hasSize(1);
             assertEvents.withType(AggUserNotified.class)
                         .hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("allow having validation on the aggregate state and")
+    class AllowValidatedAggregates extends ContextAwareTest {
+
+        private final ThermometerId thermometer = ThermometerId.generate();
+
+        @Override
+        protected BoundedContextBuilder contextBuilder() {
+            return BoundedContextBuilder
+                    .assumingTests()
+                    .add(new SafeThermometerRepo(thermometer));
+        }
+
+        @Test
+        @DisplayName("not change the Aggregate state when there is no reaction on the event")
+        void notChangeStateIfNoReaction() {
+            TemperatureChanged booksOnFire =
+                    TemperatureChanged.newBuilder()
+                                      .setFahrenheit(451)
+                                      .vBuild();
+            context().receivesExternalEvent(booksOnFire)
+                     .assertEntity(thermometer, SafeThermometer.class)
+                     .doesNotExist();
+        }
+
+        @Test
+        @DisplayName("save valid aggregate state on change")
+        void safelySaveValidState() {
+            TemperatureChanged gettingWarmer =
+                    TemperatureChanged.newBuilder()
+                                      .setFahrenheit(72)
+                                      .vBuild();
+            context().receivesExternalEvent(gettingWarmer);
+            Thermometer expected = Thermometer
+                    .newBuilder()
+                    .setId(thermometer)
+                    .setFahrenheit(72)
+                    .vBuild();
+            context().assertState(thermometer, expected);
         }
     }
 }

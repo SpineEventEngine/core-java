@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,12 +28,10 @@ package io.spine.server.type;
 
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.ActorContext;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.Origin;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 import io.spine.server.enrich.EnrichmentService;
@@ -103,16 +107,6 @@ public final class EventEnvelope
     @Override
     public EventClass messageClass() {
         return this.eventClass;
-    }
-
-    @Override
-    public ActorContext actorContext() {
-        return outerObject().actorContext();
-    }
-
-    @Override
-    public Origin asMessageOrigin() {
-        return outerObject().asMessageOrigin();
     }
 
     /**

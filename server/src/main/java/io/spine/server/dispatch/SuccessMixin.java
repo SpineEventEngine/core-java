@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -42,5 +48,25 @@ interface SuccessMixin extends SuccessOrBuilder, FieldAwareMessage {
             default:
                 return getField(field);
         }
+    }
+
+    /**
+     * Determines if the outcome has any produced events.
+     *
+     * @implNote Prefer using this method over the generated {@code hasProducedEvents}
+     *         while the latter only checks if the message is set.
+     */
+    default boolean hasEvents() {
+        return hasProducedEvents() && getProducedEvents().getEventCount() > 0;
+    }
+
+    /**
+     * Determines if the outcome has any produced commands.
+     *
+     * @implNote Prefer using this method over the generated {@code hasProducedCommands}
+     *         while the latter only checks if the message is set.
+     */
+    default boolean hasCommands() {
+        return hasProducedCommands() && getProducedCommands().getCommandCount() > 0;
     }
 }

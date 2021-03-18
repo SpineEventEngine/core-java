@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -147,8 +153,7 @@ class CommandReactionMethodTest {
         void setUp() {
             target = supplier.get();
             rawMethod = target.getMethod();
-            method = signature.classify(rawMethod)
-                                .get();
+            method = signature.classify(rawMethod).get();
             id = ProjectId.newBuilder()
                           .setId(newUuid())
                           .build();
@@ -184,8 +189,8 @@ class CommandReactionMethodTest {
 
             DispatchOutcome outcome = method.invoke(target, envelope(message));
 
-            assertThat(outcome.getSuccess().getProducedCommands().getCommandList())
-                    .isEmpty();
+            assertThat(outcome.getSuccess().hasCommands())
+                    .isFalse();
         }
 
         private static CmdProjectCreated createVoidEvent(ProjectId givenId) {
@@ -250,9 +255,9 @@ class CommandReactionMethodTest {
                 .build();
         assertTrue(outcome.hasSuccess());
         Success success = outcome.getSuccess();
-        assertTrue(success.hasProducedCommands());
+        assertTrue(success.hasCommands());
         List<Command> commands = success.getProducedCommands()
-                                    .getCommandList();
+                                        .getCommandList();
         List<CommandMessage> commandMessages = commands
                 .stream()
                 .map(Command::enclosedMessage)

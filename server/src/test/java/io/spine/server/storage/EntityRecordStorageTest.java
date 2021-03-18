@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,6 +33,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.client.ArchivedColumn;
+import io.spine.client.DeletedColumn;
 import io.spine.core.Version;
 import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
@@ -62,8 +70,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isDefault;
 import static io.spine.server.ContextSpec.singleTenant;
-import static io.spine.server.entity.storage.EntityRecordColumn.archived;
-import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity.PROJECT_VERSION_TIMESTAMP;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.archive;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.assertIteratorsEqual;
@@ -256,7 +262,7 @@ public class EntityRecordStorageTest
 
             StgProject.Query query =
                     StgProject.query()
-                              .where(archived.lifecycle(), true)
+                              .where(ArchivedColumn.is(), true)
                               .build();
             assertQueryHasSingleResult(query, archivedRecord, storage);
         }
@@ -351,8 +357,8 @@ public class EntityRecordStorageTest
                     StgProject.query()
                               .id().is(targetId)
                               .projectStatusValue().is(CANCELLED_VALUE)
-                              .where(archived.lifecycle(), false)
-                              .where(deleted.lifecycle(), false)
+                              .where(ArchivedColumn.is(), false)
+                              .where(DeletedColumn.is(), false)
                               .build();
 
             Iterator<EntityRecord> read = storage.findAll(query);
@@ -436,13 +442,13 @@ public class EntityRecordStorageTest
 
             StgProject.Query queryArchived =
                     StgProject.query()
-                              .where(archived.lifecycle(), true)
+                              .where(ArchivedColumn.is(), true)
                               .build();
             assertQueryHasSingleResult(queryArchived, expectedArchived, storage);
 
             StgProject.Query queryDeleted =
                     StgProject.query()
-                              .where(deleted.lifecycle(), true)
+                              .where(DeletedColumn.is(), true)
                               .build();
             assertQueryHasSingleResult(queryDeleted, expectedDeleted, storage);
         }

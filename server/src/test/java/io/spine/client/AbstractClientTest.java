@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -73,7 +79,7 @@ abstract class AbstractClientTest {
         return Client.inProcess(serverName)
                      // When shutting down, terminate the client immediately since all
                      // the requests made in tests are going to be complete by that time.
-                     .shutdownTimout(0, TimeUnit.SECONDS);
+                     .shutdownTimeout(0, TimeUnit.SECONDS);
     }
 
     @AfterEach

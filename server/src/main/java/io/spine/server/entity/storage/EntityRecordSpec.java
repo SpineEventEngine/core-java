@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -60,23 +66,12 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      */
     private final EntityClass<E> entityClass;
 
-    /**
-     * The {@linkplain SystemColumn system columns} of the entity.
-     */
-    private final SystemColumns<E> systemColumns;
+    private final Columns<E> columns;
 
-    /**
-     * The entity-state-based columns of the entity.
-     */
-    private final StateColumns<S> stateColumns;
-
-    private EntityRecordSpec(EntityClass<E> entityClass,
-                             StateColumns<S> stateColumns,
-                             SystemColumns<E> systemColumns) {
+    private EntityRecordSpec(EntityClass<E> entityClass, Columns<E> columns) {
         super(idClass(entityClass), EntityRecord.class);
         this.entityClass = entityClass;
-        this.stateColumns = stateColumns;
-        this.systemColumns = systemColumns;
+        this.columns = columns;
     }
 
     /**
@@ -94,8 +89,8 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityRecordSpec<I, S, E> of(EntityClass<E> entityClass) {
         checkNotNull(entityClass);
-        Scanner<I, S, E> scan = new Scanner<>(entityClass);
-        return new EntityRecordSpec<>(entityClass, scan.stateColumns(), scan.systemColumns());
+        Scanner<S, E> scanner = new Scanner<>(entityClass);
+        return new EntityRecordSpec<>(entityClass, scanner.columns());
     }
 
     /**
@@ -114,16 +109,16 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     EntityRecordSpec<I, S, E> of(E entity) {
         checkNotNull(entity);
         @SuppressWarnings("unchecked")  // Ensured by the entity type declaration.
-            EntityClass<E> modelClass = (EntityClass<E>) entity.modelClass();
-        Scanner<I, S, E> scan = new Scanner<>(modelClass);
-        return new EntityRecordSpec<>(modelClass, scan.stateColumns(), scan.systemColumns());
+        EntityClass<E> modelClass = (EntityClass<E>) entity.modelClass();
+        Scanner<S, E> scanner = new Scanner<>(modelClass);
+        return new EntityRecordSpec<>(modelClass, scanner.columns());
     }
 
     /**
      * Gathers columns of the entity class.
      */
-    public static <I, S extends EntityState<I>, E extends Entity<I, S>>  EntityRecordSpec<I, S, E>
-    of(Class<E> cls) {
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    EntityRecordSpec<I, S, E> of(Class<E> cls) {
         EntityClass<E> aClass = asParameterizedEntityClass(cls);
         return of(aClass);
     }
@@ -142,11 +137,8 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     public Map<ColumnName, @Nullable Object> valuesIn(E entity) {
         checkNotNull(entity);
         Map<ColumnName, @Nullable Object> result = new HashMap<>();
-        systemColumns.forEach(
+        columns.forEach(
                 column -> result.put(column.name(), column.valueIn(entity))
-        );
-        stateColumns.forEach(
-                column -> result.put(column.name(), column.valueIn(entity.state()))
         );
         return unmodifiableMap(result);
     }
@@ -159,25 +151,12 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     @Override
     public Optional<Column<?, ?>> findColumn(ColumnName name) {
         checkNotNull(name);
-        Column<?, ?> resultInSimple = lookForColumn(name, stateColumns);
-        if (resultInSimple != null) {
-            return Optional.of(resultInSimple);
-        }
-        Column<?, ?> resultInSystem = lookForColumn(name, systemColumns);
-        if (resultInSystem != null) {
-            return Optional.of(resultInSystem);
-        }
-        return Optional.empty();
-    }
-
-    private static @Nullable Column<?, ?>
-    lookForColumn(ColumnName name, Iterable<? extends Column<?, ?>> columns) {
         for (Column<?, ?> column : columns) {
             if(column.name().equals(name)) {
-                return column;
+                return Optional.of(column);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -192,15 +171,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      */
     @VisibleForTesting
     int columnCount() {
-        return systemColumns.size() + stateColumns.size();
-    }
-
-    /**
-     * Returns the discovered system columns.
-     */
-    @VisibleForTesting
-    SystemColumns<E> systemColumns() {
-        return systemColumns;
+        return columns.size();
     }
 
     @SuppressWarnings("unchecked")  // Ensured by the `Entity` declaration.

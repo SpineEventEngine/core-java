@@ -1,5 +1,11 @@
 /*
- * Copyright 2020, TeamDev. All rights reserved.
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,14 +28,10 @@ package io.spine.server.delivery;
 
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.test.delivery.DCreateTask;
-import io.spine.test.delivery.DTask;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
