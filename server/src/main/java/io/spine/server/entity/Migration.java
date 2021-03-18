@@ -30,6 +30,7 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
@@ -73,7 +74,10 @@ import static io.spine.protobuf.Messages.isDefault;
  *         the entity state type
  */
 @Experimental
-public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S extends EntityState<I>>
+public abstract class Migration<I,
+                                E extends TransactionalEntity<I, S, B>,
+                                S extends EntityState<I, B, S>,
+                                B extends ValidatingBuilder<S>>
         implements Function<S, S>, Logging {
 
     /**
@@ -187,7 +191,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * Opens a transaction on an entity.
      */
     @Internal
-    protected abstract Transaction<I, E, S, ?> startTransaction(E entity);
+    protected abstract Transaction<I, E, S, B> startTransaction(E entity);
 
     /**
      * Opens a transaction with an {@link EntityLifecycleMonitor} as a {@link TransactionListener}.
@@ -195,10 +199,10 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * <p>The monitor is configured to have a {@link MigrationApplied} instance as the last handled
      * message.
      */
-    private Transaction<I, E, S, ?> txWithLifecycleMonitor() {
+    private Transaction<I, E, S, B> txWithLifecycleMonitor() {
         E entity = currentOperation().entity;
         I id = entity.id();
-        Transaction<I, E, S, ?> tx = startTransaction(entity);
+        Transaction<I, E, S, B> tx = startTransaction(entity);
         EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id);
         tx.setListener(monitor);
         currentOperation().tx = tx;
@@ -246,7 +250,7 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
      * {@link Migration#applyTo(TransactionalEntity, RecordBasedRepository)}, modifying it in-place.
      * */
     private static class Operation<I,
-                                   S extends EntityState<I>,
+                                   S extends EntityState<I, ?, S>,
                                    E extends TransactionalEntity<I, S, ?>> {
 
         private boolean archive;

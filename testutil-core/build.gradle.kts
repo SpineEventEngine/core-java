@@ -31,6 +31,8 @@ val spineBaseVersion: String by extra
 dependencies {
     api(project(":client"))
     api("io.spine:spine-testlib:$spineBaseVersion")
-    Deps.test.junit5Api.forEach { api(it) }
-    Deps.test.truth.forEach { api(it) }
+    Deps.test.apply {
+        junit.api.forEach { api(it) }
+        truth.libs.forEach { api(it) }
+    }
 }

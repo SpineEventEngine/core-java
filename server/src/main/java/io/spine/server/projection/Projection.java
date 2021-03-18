@@ -29,9 +29,9 @@ package io.spine.server.projection;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
+import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.EventValidationError;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
@@ -62,7 +62,7 @@ import static java.lang.String.format;
  *         the type of the state objects holding projection data
  */
 public abstract class Projection<I,
-                                 M extends EntityState<I>,
+                                 M extends EntityState<I, B, M>,
                                  B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
         implements EventPlayer, EventSubscriber,

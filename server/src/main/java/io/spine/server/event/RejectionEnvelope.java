@@ -31,7 +31,7 @@ import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.base.RejectionMessage;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -88,62 +88,62 @@ public final class RejectionEnvelope
 
     /**
      * Creates an instance of {@code Rejection} from the rejected command and a {@link Throwable}
-     * caused by the {@link ThrowableMessage}.
+     * caused by the {@link RejectionThrowable}.
      *
-     * <p>If the producer is not {@linkplain ThrowableMessage#initProducer(Any) set}, uses
+     * <p>If the producer is not {@linkplain RejectionThrowable#initProducer(Any) set}, uses
      * the {@link #DEFAULT_EVENT_PRODUCER} as the producer.
      *
      * @param origin    the rejected command
      * @param throwable the caught error
      * @return new instance of {@code Rejection}
      * @throws IllegalArgumentException if the given {@link Throwable} is not caused by
-     *                                  a {@link ThrowableMessage}
+     *                                  a {@link RejectionThrowable}
      */
     public static RejectionEnvelope from(CommandEnvelope origin, Throwable throwable) {
         checkNotNull(origin);
         checkNotNull(throwable);
 
-        ThrowableMessage throwableMessage = unwrap(throwable);
-        Event rejectionEvent = produceEvent(origin, throwableMessage);
+        RejectionThrowable RejectionThrowable = unwrap(throwable);
+        Event rejectionEvent = produceEvent(origin, RejectionThrowable);
         EventEnvelope event = EventEnvelope.of(rejectionEvent);
 
         return from(event);
     }
 
-    private static ThrowableMessage unwrap(Throwable causedByRejection) {
+    private static RejectionThrowable unwrap(Throwable causedByRejection) {
         Throwable cause = getRootCause(causedByRejection);
-        boolean correctType = cause instanceof ThrowableMessage;
+        boolean correctType = cause instanceof RejectionThrowable;
         checkArgument(correctType);
-        ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-        return throwableMessage;
+        RejectionThrowable RejectionThrowable = (RejectionThrowable) cause;
+        return RejectionThrowable;
     }
 
-    private static Event produceEvent(CommandEnvelope origin, ThrowableMessage throwableMessage) {
-        Any producerId = throwableMessage.producerId()
+    private static Event produceEvent(CommandEnvelope origin, RejectionThrowable RejectionThrowable) {
+        Any producerId = RejectionThrowable.producerId()
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
-        RejectionMessage thrownMessage = throwableMessage.messageThrown();
-        RejectionEventContext context = rejectionContext(origin.outerObject(), throwableMessage);
+        RejectionMessage thrownMessage = RejectionThrowable.messageThrown();
+        RejectionEventContext context = rejectionContext(origin.outerObject(), RejectionThrowable);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
     }
 
     /**
      * Constructs a new {@link RejectionEventContext} from the given command message and
-     * {@link ThrowableMessage}.
+     * {@link RejectionThrowable}.
      *
      * @param command
      *         the rejected command
-     * @param throwableMessage
+     * @param RejectionThrowable
      *         the thrown rejection
      * @return the new instance of {@code RejectionEventContext}
      */
     private static RejectionEventContext rejectionContext(Command command,
-                                                          ThrowableMessage throwableMessage) {
+                                                          RejectionThrowable RejectionThrowable) {
         checkNotNull(command);
-        checkNotNull(throwableMessage);
+        checkNotNull(RejectionThrowable);
 
-        String stacktrace = getStackTraceAsString(throwableMessage);
+        String stacktrace = getStackTraceAsString(RejectionThrowable);
         return RejectionEventContext
                 .newBuilder()
                 .setCommand(command)

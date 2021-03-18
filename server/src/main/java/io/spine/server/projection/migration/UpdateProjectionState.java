@@ -28,7 +28,7 @@ package io.spine.server.projection.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
+import io.spine.base.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionMigration;
@@ -51,7 +51,7 @@ import io.spine.server.projection.ProjectionMigration;
 @Experimental
 public final class UpdateProjectionState<I,
                                          P extends Projection<I, S, B>,
-                                         S extends EntityState<I>,
+                                         S extends EntityState<I, B, S>,
                                          B extends ValidatingBuilder<S>>
         extends ProjectionMigration<I, P, S, B> {
 

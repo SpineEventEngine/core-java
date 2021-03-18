@@ -121,7 +121,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
      * Domestic rejection reactions
      *
      * Since this class reacts on own rejections (which are derived from
-     * ThrowableMessage and have the same names as corresponding rejection
+     * RejectionThrowable and have the same names as corresponding rejection
      * message classes), we cannot import the nested classes because of
      * the name clash.
      *********************************************************************/

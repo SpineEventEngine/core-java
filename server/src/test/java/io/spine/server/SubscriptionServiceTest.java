@@ -305,8 +305,8 @@ class SubscriptionServiceTest {
         // `activationObserver::onCompleted` to be called.
         verifyState(activationObserver, false);
 
-        EntityState<?> actual = memoizedEntity(activationObserver, AggProject.class);
-        EntityState<?> expected = toExpected(entityId);
+        EntityState<?, ?, ?> actual = memoizedEntity(activationObserver, AggProject.class);
+        EntityState<?, ?, ?> expected = toExpected(entityId);
         ProtoTruth.assertThat(actual)
                   .comparingExpectedFieldsOnly()
                   .isEqualTo(expected);
@@ -325,13 +325,13 @@ class SubscriptionServiceTest {
         return projectId;
     }
 
-    private static EntityState<?> toExpected(ProjectId entityId) {
+    private static EntityState<?, ?, ?> toExpected(ProjectId entityId) {
         return AggProject.newBuilder()
                          .setId(entityId)
                          .build();
     }
 
-    private static <T extends EntityState<?>>
+    private static <T extends EntityState<?, ?, ?>>
     T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> stateType) {
         SubscriptionUpdate update = observer.firstResponse();
         EntityUpdates entityUpdates = update.getEntityUpdates();

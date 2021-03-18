@@ -51,7 +51,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.core.Status.StatusCase.REJECTION;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.TestValues.newUuidValue;
 
@@ -113,8 +112,8 @@ class AcksTest extends UtilityClassTest<Acks> {
     }
 
     @Test
-    @DisplayName("create 'reject with ThrowableMessage' `Ack` instance")
-    void rejectWithThrowableMessage() {
+    @DisplayName("create 'reject with RejectionThrowable' `Ack` instance")
+    void rejectWithRejectionThrowable() {
         TestActorRequestFactory requestFactory = new TestActorRequestFactory(BusFilterTest.class);
         Command command = requestFactory.generateCommand();
         CommandEnvelope origin = CommandEnvelope.of(command);

@@ -59,7 +59,7 @@ public final class InMemoryRootDirectory implements AggregateRootDirectory {
     @Override
     public Optional<? extends AggregatePartRepository<?, ?, ?, ?>>
     findPart(Class<? extends AggregateRoot<?>> rootClass,
-             Class<? extends EntityState<?>> partStateClass) {
+             Class<? extends EntityState<?, ?, ?>> partStateClass) {
         Set<AggregatePartRepository<?, ?, ?, ?>> parts = repositories.get(rootClass);
         if (parts.isEmpty()) {
             return Optional.empty();

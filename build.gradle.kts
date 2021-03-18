@@ -64,9 +64,9 @@ plugins {
     kotlin("jvm") version "1.4.21"
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    with(io.spine.gradle.internal.Deps.versions) {
-        id("com.google.protobuf") version protobufPlugin
-        id("net.ltgt.errorprone") version errorPronePlugin
+    io.spine.gradle.internal.Deps.build.apply {
+        id("com.google.protobuf") version protobuf.gradlePluginVersion
+        id("net.ltgt.errorprone") version errorProne.gradlePluginVersion
     }
 }
 
@@ -146,20 +146,24 @@ subprojects {
 
     dependencies {
         Deps.build.apply {
-            errorprone(errorProneCore)
-            errorproneJavac(errorProneJavac)
-            implementation(guava)
-            compileOnlyApi(jsr305Annotations)
-            compileOnlyApi(checkerAnnotations)
-            errorProneAnnotations.forEach { compileOnlyApi(it) }
+            errorprone(errorProne.core)
+            errorproneJavac(errorProne.javacPlugin)
+
+            protobuf.libs.forEach { api(it) }
+            api(flogger.lib)
+            implementation(guava.lib)
+            implementation(guava.lib)
+            implementation(checker.annotations)
+            implementation(jsr305Annotations)
+            errorProne.annotations.forEach { implementation(it) }
         }
         implementation(kotlin("stdlib-jdk8"))
 
         Deps.test.apply {
             testImplementation(guavaTestlib)
-            junit5Api.forEach { testImplementation(it) }
-            truth.forEach { testImplementation(it) }
-            testRuntimeOnly(junit5Runner)
+            testImplementation(junit.runner)
+            testImplementation(junit.pioneer)
+            junit.api.forEach { testImplementation(it) }
         }
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }

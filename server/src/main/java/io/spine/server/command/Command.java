@@ -136,7 +136,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <p>As a command-handling method, a command-transforming method may reject an incoming command.
  * In this case, it should declare a generated class derived from
- * {@link io.spine.base.ThrowableMessage ThrowableMessage} in {@code throws} clause:
+ * {@link io.spine.base.RejectionThrowable RejectionThrowable} in {@code throws} clause:
  *
  * <pre>
  *

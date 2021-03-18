@@ -30,7 +30,7 @@ plugins {
 
 repositories {
     mavenLocal()
-    jcenter()
+    mavenCentral()
 }
 
 val jacksonVersion = "2.11.0"

@@ -127,13 +127,13 @@ class EntityVisibilityTest {
     }
 
     private static EntityVisibility
-    assertVisibility(Class<? extends EntityState<?>> stateClass, EntityOption.Visibility expected) {
+    assertVisibility(Class<? extends EntityState<?, ?, ?>> stateClass, EntityOption.Visibility expected) {
         EntityVisibility actual = visibilityOf(stateClass);
         assertTrue(actual.is(expected));
         return actual;
     }
 
-    private static EntityVisibility visibilityOf(Class<? extends EntityState<?>> stateClass) {
+    private static EntityVisibility visibilityOf(Class<? extends EntityState<?, ?, ?>> stateClass) {
         Optional<EntityVisibility> visibility = EntityVisibility.of(stateClass);
         assertThat(visibility).isPresent();
         return visibility.get();

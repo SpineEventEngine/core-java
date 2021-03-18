@@ -42,7 +42,7 @@ import static io.spine.client.Filters.createFilter;
 /**
  * A subscription filter which targets an {@link EntityState}.
  */
-public final class EntityStateFilter extends TypedFilter<EntityState<?>> {
+public final class EntityStateFilter extends TypedFilter<EntityState<?, ?, ?>> {
 
     private static final long serialVersionUID = 0L;
 

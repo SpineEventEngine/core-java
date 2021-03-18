@@ -32,10 +32,10 @@ import com.google.protobuf.Empty;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
+import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
@@ -59,7 +59,6 @@ import java.util.function.Predicate;
 import static com.google.common.collect.Iterators.any;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**

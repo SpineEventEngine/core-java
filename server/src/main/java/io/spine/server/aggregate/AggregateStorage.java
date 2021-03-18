@@ -351,7 +351,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
         }
     }
 
-    private Class<? extends EntityState<?>> stateClass() {
+    private Class<? extends EntityState<?, ?, ?>> stateClass() {
         return stateStorage.recordSpec()
                            .entityClass()
                            .stateClass();

@@ -45,7 +45,7 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
  * See {@code io.spine.query} package documentation for more details on usage.
  */
 @Deprecated
-public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState<?>> {
+public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState<?, ?, ?>> {
 
     private static final long serialVersionUID = 0L;
 

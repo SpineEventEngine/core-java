@@ -31,7 +31,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Event;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -52,7 +52,7 @@ public final class EventClass extends MessageClass<EventMessage> {
     private static final long serialVersionUID = 0L;
     
     /**
-     * The name of the {@link ThrowableMessage#messageThrown()} method.
+     * The name of the {@link RejectionThrowable#messageThrown()} method.
      *
      * @see #from(Class)
      */
@@ -80,14 +80,14 @@ public final class EventClass extends MessageClass<EventMessage> {
     /**
      * Obtains the class of the rejection by the class of corresponding throwable message.
      */
-    public static EventClass fromThrowable(Class<? extends ThrowableMessage> cls) {
+    public static EventClass fromThrowable(Class<? extends RejectionThrowable> cls) {
         Method messageThrownMethod;
         try {
             messageThrownMethod = cls.getMethod(MESSAGE_THROWN_METHOD);
         } catch (NoSuchMethodException e) {
             throw illegalStateWithCauseOf(e);
         }
-        @SuppressWarnings("unchecked") // Safe as declared by `ThrowableMessage.messageThrown`.
+        @SuppressWarnings("unchecked") // Safe as declared by `RejectionThrowable.messageThrown`.
         Class<? extends RejectionMessage> returnType = (Class<? extends RejectionMessage>)
                 messageThrownMethod.getReturnType();
         return from(returnType);

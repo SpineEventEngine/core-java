@@ -62,5 +62,5 @@ public interface AggregateRootDirectory {
      */
     Optional<? extends AggregatePartRepository<?, ?, ?, ?>>
     findPart(Class<? extends AggregateRoot<?>> rootClass,
-             Class<? extends EntityState<?>> partStateClass);
+             Class<? extends EntityState<?, ?, ?>> partStateClass);
 }

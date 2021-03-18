@@ -535,7 +535,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         private void assertRepositories() {
             for (Repository<?, ?> repository : repositories) {
-                Class<? extends EntityState<?>> stateClass =
+                Class<? extends EntityState<?, ?, ?>> stateClass =
                         repository.entityModelClass()
                                   .stateClass();
                 assertDoesNotThrow(() -> context.repositoryOf(stateClass));

@@ -26,15 +26,14 @@
 package io.spine.server.entity;
 
 import io.spine.base.EntityState;
+import io.spine.base.ValidatingBuilder;
 import io.spine.core.Versions;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.given.TeEntity;
 import io.spine.server.test.shared.EmptyEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;

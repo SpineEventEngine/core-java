@@ -49,7 +49,6 @@ import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.client.Filters.all;
-import static io.spine.client.Filters.createFilter;
 import static io.spine.client.Filters.either;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
@@ -107,7 +106,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
 
     @Override
     public Query apply(EntityQuery<?, ?, ?> query) {
-        Class<? extends EntityState<?>> entityStateType = query.subject()
+        Class<? extends EntityState<?, ?, ?>> entityStateType = query.subject()
                                                                .recordType();
         QueryBuilder builder = factory.select(entityStateType);
         Query result = toProtoQuery(builder, query);

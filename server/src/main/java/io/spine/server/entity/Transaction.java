@@ -33,10 +33,10 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.type.TypeUrl;
@@ -83,7 +83,7 @@ import static java.lang.String.format;
 @Internal
 public abstract class Transaction<I,
                                   E extends TransactionalEntity<I, S, B>,
-                                  S extends EntityState<I>,
+                                  S extends EntityState<I, B, S>,
                                   B extends ValidatingBuilder<S>> {
 
     /**
@@ -197,7 +197,7 @@ public abstract class Transaction<I,
     @VisibleForTesting
     static <I,
             E extends TransactionalEntity<I, S, B>,
-            S extends EntityState<I>,
+            S extends EntityState<I, B, S>,
             B extends ValidatingBuilder<S>>
     B toBuilder(E entity) {
         S currentState = entity.state();

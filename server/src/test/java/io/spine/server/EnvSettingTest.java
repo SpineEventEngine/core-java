@@ -26,9 +26,9 @@
 
 package io.spine.server;
 
-import io.spine.base.EnvironmentType;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.EnvironmentType;
+import io.spine.environment.Production;
+import io.spine.environment.Tests;
 import io.spine.server.given.environment.Local;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;

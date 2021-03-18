@@ -104,7 +104,7 @@ class AggregateQueryingTest {
         void includeAll() {
             Query query = MRPhoto.query()
                                  .build(transformWith(queries));
-            List<? extends EntityState<?>> readMessages = execute(query);
+            List<? extends EntityState<?, ?, ?>> readMessages = execute(query);
             assertThat(readMessages).containsExactlyElementsIn(givenPhotos);
         }
 
@@ -246,12 +246,12 @@ class AggregateQueryingTest {
         }
 
         private void checkRead(Query query, MRPhoto... expected) {
-            List<? extends EntityState<?>> readMessages = execute(query);
+            List<? extends EntityState<?, ?, ?>> readMessages = execute(query);
             assertThat(readMessages).containsExactlyElementsIn(expected);
         }
 
         private void checkReadsNothing(Query query) {
-            List<? extends EntityState<?>> readMessages = execute(query);
+            List<? extends EntityState<?, ?, ?>> readMessages = execute(query);
             assertThat(readMessages).isEmpty();
         }
 
@@ -280,15 +280,15 @@ class AggregateQueryingTest {
             dispatchCommand(delete(photo));
         }
 
-        private List<? extends EntityState<?>> execute(Query query) {
+        private List<? extends EntityState<?, ?, ?>> execute(Query query) {
             Iterator<EntityRecord> records = repository.findRecords(query.filters(),
                                                                     query.responseFormat());
             ImmutableList<EntityRecord> asList = ImmutableList.copyOf(records);
-            List<? extends EntityState<?>> result =
+            List<? extends EntityState<?, ?, ?>> result =
                     asList.stream()
                           .map(EntityRecord::getState)
                           .map(unpackFunc())
-                          .map((s) -> (EntityState<?>) s)
+                          .map((s) -> (EntityState<?, ?, ?>) s)
                           .collect(toList());
             return result;
         }

@@ -188,11 +188,7 @@
     <inspection_tool class="DoubleLiteralMayBeFloatLiteral" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DuplicateBooleanBranch" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DuplicatePropertyInspection" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="CURRENT_FILE" value="true" />
-      <option name="MODULE_WITH_DEPENDENCIES" value="false" />
       <option name="CHECK_DUPLICATE_VALUES" value="false" />
-      <option name="CHECK_DUPLICATE_KEYS" value="true" />
-      <option name="CHECK_DUPLICATE_KEYS_WITH_DIFFERENT_VALUES" value="true" />
     </inspection_tool>
     <inspection_tool class="DuplicateStringLiteralInspection" enabled="true" level="TYPO" enabled_by_default="true">
       <scope name="Production" level="WARNING" enabled="true">
@@ -477,6 +473,13 @@
     </inspection_tool>
     <inspection_tool class="NewExceptionWithoutArguments" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="NewMethodNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Production" level="WARNING" enabled="true">
+        <extension name="InstanceMethodNamingConvention" enabled="true">
+          <option name="m_regex" value="[a-z][A-Za-z\d]*" />
+          <option name="m_minLength" value="2" />
+          <option name="m_maxLength" value="32" />
+        </extension>
+      </scope>
       <scope name="Tests" level="INFO" enabled="true">
         <extension name="InstanceMethodNamingConvention" enabled="true">
           <option name="m_regex" value="[a-z][A-Za-z\d]*" />
@@ -487,13 +490,6 @@
           <option name="m_regex" value="[a-z][A-Za-z\d]*" />
           <option name="m_minLength" value="2" />
           <option name="m_maxLength" value="64" />
-        </extension>
-      </scope>
-      <scope name="Production" level="WARNING" enabled="true">
-        <extension name="InstanceMethodNamingConvention" enabled="true">
-          <option name="m_regex" value="[a-z][A-Za-z\d]*" />
-          <option name="m_minLength" value="2" />
-          <option name="m_maxLength" value="32" />
         </extension>
       </scope>
       <extension name="InstanceMethodNamingConvention" enabled="true">
@@ -735,6 +731,9 @@
     <inspection_tool class="ThrowCaughtLocally" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreRethrownExceptions" value="false" />
     </inspection_tool>
+    <inspection_tool class="ThrowableNotThrown" enabled="true" level="WARNING" enabled_by_default="true">
+      <scope name="Tests" level="WARNING" enabled="false" />
+    </inspection_tool>
     <inspection_tool class="ThrowablePrintStackTrace" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ThrownExceptionsPerMethod" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_limit" value="3" />
@@ -759,13 +758,13 @@
     <inspection_tool class="TrivialStringConcatenation" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TsLint" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="TypeMayBeWeakened" enabled="true" level="INFO" enabled_by_default="true">
-      <scope name="Tests" level="INFO" enabled="true">
+      <scope name="Problems" level="INFO" enabled="true">
         <option name="useRighthandTypeAsWeakestTypeInAssignments" value="true" />
         <option name="useParameterizedTypeForCollectionMethods" value="true" />
         <option name="doNotWeakenToJavaLangObject" value="true" />
         <option name="onlyWeakentoInterface" value="true" />
       </scope>
-      <scope name="Problems" level="INFO" enabled="true">
+      <scope name="Tests" level="INFO" enabled="true">
         <option name="useRighthandTypeAsWeakestTypeInAssignments" value="true" />
         <option name="useParameterizedTypeForCollectionMethods" value="true" />
         <option name="doNotWeakenToJavaLangObject" value="true" />

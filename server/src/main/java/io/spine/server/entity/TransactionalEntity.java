@@ -28,9 +28,9 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkState;
  * to modify the state from the descendants.
  */
 public abstract class TransactionalEntity<I,
-                                          S extends EntityState<I>,
+                                          S extends EntityState<I, B, S>,
                                           B extends ValidatingBuilder<S>>
                       extends AbstractEntity<I, S> {
 

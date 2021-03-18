@@ -28,8 +28,8 @@ package io.spine.server.entity
 
 import io.spine.annotation.Experimental
 import io.spine.base.EntityState
-import io.spine.base.EnvironmentType
-import io.spine.protobuf.ValidatingBuilder
+import io.spine.base.ValidatingBuilder
+import io.spine.environment.EnvironmentType
 import io.spine.server.ServerEnvironment
 
 /**
@@ -57,7 +57,10 @@ import io.spine.server.ServerEnvironment
  * while inline functions can use only `public` API.
  */
 @Experimental
-fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
+fun <I,
+     E : TransactionalEntity<I, S, B>,
+     S : EntityState<I, ValidatingBuilder<S>, S>,
+     B : ValidatingBuilder<S>>
         E.update(block: B.() -> Unit): B {
     val builder = builderOf(this)
     block.invoke(builder)
@@ -70,7 +73,9 @@ fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuil
  * @apiNote We employ the fact that we are in the same package with [TransactionalEntity] and
  * because of this can access its `protected` API.
  */
-private fun <I, S : EntityState<I>, B : ValidatingBuilder<S>>
+private fun <I,
+        S : EntityState<I, ValidatingBuilder<S>, S>,
+        B : ValidatingBuilder<S>>
         builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
 
 /**

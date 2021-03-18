@@ -30,7 +30,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -275,7 +275,7 @@ public abstract class AbstractHandlerMethod<T,
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
             checkNotNull(cause);
-            if (cause instanceof ThrowableMessage) {
+            if (cause instanceof RejectionThrowable) {
                 Success success = asRejection(target, envelope, cause);
                 outcome.setSuccess(success);
             } else {
@@ -300,7 +300,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     private Success asRejection(T target, E envelope, Throwable cause) {
-        ThrowableMessage throwable = (ThrowableMessage) cause;
+        RejectionThrowable throwable = (RejectionThrowable) cause;
         Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
         return maybeSuccess.orElseThrow(this::cannotThrowRejections);
     }
@@ -310,7 +310,7 @@ public abstract class AbstractHandlerMethod<T,
         return new IllegalOutcomeException(errorMessage);
     }
 
-    protected Optional<Success> handleRejection(ThrowableMessage throwableMessage, T target,
+    protected Optional<Success> handleRejection(RejectionThrowable RejectionThrowable, T target,
                                                 E origin) {
         return Optional.empty();
     }

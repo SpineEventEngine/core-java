@@ -81,8 +81,8 @@ class ClientRequestTest extends AbstractClientTest {
         @Test
         @DisplayName("`SubscriptionRequest`")
         void subscription() {
-            Class<? extends EntityState<?>> messageType = UserAccount.class;
-            SubscriptionRequest<? extends EntityState<?>> subscriptionRequest =
+            Class<? extends EntityState<?, ?, ?>> messageType = UserAccount.class;
+            SubscriptionRequest<? extends EntityState<?, ?, ?>> subscriptionRequest =
                     request.subscribeTo(messageType);
 
             assertThat(subscriptionRequest.messageType())

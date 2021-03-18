@@ -63,7 +63,6 @@ import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.com
 import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.createTask;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("AggregatePart should")
 class AggregatePartTest {
@@ -122,13 +121,13 @@ class AggregatePartTest {
         assertEquals(ASSIGNEE, task.getAssignee());
     }
 
-    private void assertEntityCount(Class<? extends EntityState<?>> stateType, int expectedCount) {
-        Collection<? extends EntityState<?>> entityStates = queryEntities(stateType);
+    private void assertEntityCount(Class<? extends EntityState<?, ?, ?>> stateType, int expectedCount) {
+        Collection<? extends EntityState<?, ?, ?>> entityStates = queryEntities(stateType);
         assertThat(entityStates).hasSize(expectedCount);
     }
 
-    private Collection<? extends EntityState<?>>
-    queryEntities(Class<? extends EntityState<?>> entityClass) {
+    private Collection<? extends EntityState<?, ?, ?>>
+    queryEntities(Class<? extends EntityState<?, ?, ?>> entityClass) {
         Query query = factory.query()
                              .all(entityClass);
         MemoizingObserver<QueryResponse> observer = memoizingObserver();

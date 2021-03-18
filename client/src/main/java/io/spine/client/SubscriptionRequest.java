@@ -40,7 +40,7 @@ import static io.spine.client.Filters.extractFilters;
  * @param <S>
  *         the type of entity state to subscribe
  */
-public final class SubscriptionRequest<S extends EntityState<?>>
+public final class SubscriptionRequest<S extends EntityState<?, ?, ?>>
         extends SubscribingRequest<S, EmptyContext, S, SubscriptionRequest<S>> {
 
     private final StateConsumers.Builder<S> consumers;

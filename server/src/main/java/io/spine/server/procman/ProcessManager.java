@@ -29,7 +29,7 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
+import io.spine.base.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;

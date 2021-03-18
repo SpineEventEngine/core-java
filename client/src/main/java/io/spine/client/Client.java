@@ -303,7 +303,7 @@ public class Client implements AutoCloseable {
     /**
      * Queries the read-side with the specified query.
      */
-    <S extends EntityState<?>> ImmutableList<S> read(Query query, Class<S> stateType) {
+    <S extends EntityState<?, ?, ?>> ImmutableList<S> read(Query query, Class<S> stateType) {
         ImmutableList<S> result = queryService
                 .read(query)
                 .states(stateType);

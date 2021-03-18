@@ -29,7 +29,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.EventFactory;
 import io.spine.server.type.CommandEnvelope;
@@ -78,7 +78,7 @@ public class EventsTest extends UtilityClassTest<Events> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
-        EntityAlreadyArchived defaultThrowableMessage = EntityAlreadyArchived
+        EntityAlreadyArchived defaultRejectionThrowable = EntityAlreadyArchived
                 .newBuilder()
                 .setEntityId(Any.getDefaultInstance())
                 .build();
@@ -86,7 +86,7 @@ public class EventsTest extends UtilityClassTest<Events> {
               .setDefault(EventContext.class, GivenEvent.context())
               .setDefault(Version.class, Version.getDefaultInstance())
               .setDefault(Event.class, Event.getDefaultInstance())
-              .setDefault(ThrowableMessage.class, defaultThrowableMessage);
+              .setDefault(RejectionThrowable.class, defaultRejectionThrowable);
     }
 
     @Test

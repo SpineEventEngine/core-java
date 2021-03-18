@@ -44,7 +44,7 @@ public final class RecordBasedRepositoryTestEnv {
 
     public static <E extends AbstractEntity<?, ?>>
     void assertMatches(E entity, FieldMask fieldMask) {
-        EntityState<?> state = entity.state();
+        EntityState<?, ?, ?> state = entity.state();
         assertMatchesMask(state, fieldMask);
     }
 

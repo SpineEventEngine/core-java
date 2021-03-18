@@ -27,7 +27,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.EnvironmentType;
+import io.spine.environment.EnvironmentType;
 
 import java.util.HashMap;
 import java.util.Map;

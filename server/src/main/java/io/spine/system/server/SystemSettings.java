@@ -29,8 +29,8 @@ package io.spine.system.server;
 import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
-import io.spine.base.Environment;
-import io.spine.base.Tests;
+import io.spine.environment.Environment;
+import io.spine.environment.Tests;
 
 /**
  * A configuration of features of a system context.
