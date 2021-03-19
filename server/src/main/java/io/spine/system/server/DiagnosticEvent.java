@@ -27,12 +27,12 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EventMessage;
+import com.google.protobuf.Message;
 
 /**
  * A common marker interface for events that occur within the System context in response to
  * misconfigurations or runtime errors.
  */
 @Immutable
-public interface DiagnosticEvent extends EventMessage {
+public interface DiagnosticEvent extends Message {
 }
