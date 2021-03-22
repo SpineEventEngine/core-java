@@ -30,7 +30,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -41,6 +40,7 @@ import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -53,11 +53,9 @@ import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static io.spine.server.type.given.GivenEvent.withMessageAndVersion;
 import static io.spine.testing.TestValues.randomString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base class for testing the {@linkplain Transaction transactions} for different

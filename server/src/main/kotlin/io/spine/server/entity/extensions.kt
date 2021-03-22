@@ -28,9 +28,9 @@ package io.spine.server.entity
 
 import io.spine.annotation.Experimental
 import io.spine.base.EntityState
-import io.spine.base.ValidatingBuilder
 import io.spine.environment.EnvironmentType
 import io.spine.server.ServerEnvironment
+import io.spine.validate.ValidatingBuilder
 
 /**
  * Extends [TransactionalEntity] with the `update` block for accessing
@@ -59,7 +59,7 @@ import io.spine.server.ServerEnvironment
 @Experimental
 fun <I,
      E : TransactionalEntity<I, S, B>,
-     S : EntityState<I, ValidatingBuilder<S>, S>,
+     S : EntityState<I>,
      B : ValidatingBuilder<S>>
         E.update(block: B.() -> Unit): B {
     val builder = builderOf(this)
@@ -74,7 +74,7 @@ fun <I,
  * because of this can access its `protected` API.
  */
 private fun <I,
-        S : EntityState<I, B, S>,
+        S : EntityState<I>,
         B : ValidatingBuilder<S>>
         builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
 

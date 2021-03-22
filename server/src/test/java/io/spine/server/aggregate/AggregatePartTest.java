@@ -121,13 +121,13 @@ class AggregatePartTest {
         assertEquals(ASSIGNEE, task.getAssignee());
     }
 
-    private void assertEntityCount(Class<? extends EntityState<?, ?, ?>> stateType, int expectedCount) {
-        Collection<? extends EntityState<?, ?, ?>> entityStates = queryEntities(stateType);
+    private void assertEntityCount(Class<? extends EntityState<?>> stateType, int expectedCount) {
+        Collection<? extends EntityState<?>> entityStates = queryEntities(stateType);
         assertThat(entityStates).hasSize(expectedCount);
     }
 
-    private Collection<? extends EntityState<?, ?, ?>>
-    queryEntities(Class<? extends EntityState<?, ?, ?>> entityClass) {
+    private Collection<? extends EntityState<?>>
+    queryEntities(Class<? extends EntityState<?>> entityClass) {
         Query query = factory.query()
                              .all(entityClass);
         MemoizingObserver<QueryResponse> observer = memoizingObserver();

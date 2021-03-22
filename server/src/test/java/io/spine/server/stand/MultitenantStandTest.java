@@ -46,7 +46,6 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.server.stand.given.StandTestEnv.createRequestFactory;
 import static io.spine.server.stand.given.StandTestEnv.einCustomer;
-import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.server.stand.given.StandTestEnv.subscribeAndActivate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -109,7 +108,7 @@ class MultitenantStandTest extends StandTest {
     MemoizeSubscriptionCallback
     subscribeToAllOf(Stand stand,
                      ActorRequestFactory requestFactory,
-                     Class<? extends EntityState<?, ?, ?>> stateClass) {
+                     Class<? extends EntityState<?>> stateClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(stateClass);
         MemoizeSubscriptionCallback action = new MemoizeSubscriptionCallback();

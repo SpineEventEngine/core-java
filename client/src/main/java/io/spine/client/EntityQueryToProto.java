@@ -107,7 +107,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
 
     @Override
     public Query apply(EntityQuery<?, ?, ?> query) {
-        Class<? extends EntityState<?, ?, ?>> entityStateType = query.subject()
+        Class<? extends EntityState<?>> entityStateType = query.subject()
                                                                .recordType();
         QueryBuilder builder = factory.select(entityStateType);
         Query result = toProtoQuery(builder, query);

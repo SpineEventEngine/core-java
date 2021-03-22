@@ -50,7 +50,7 @@ import static java.util.stream.Collectors.toList;
  * @param <R>
  *         the type returned by the {@linkplain Route#apply(Message, Message) routing function}
  */
-abstract class MessageRouting<M extends Message, C extends MessageContext<?, ?>, R>
+abstract class MessageRouting<M extends Message, C extends MessageContext, R>
         implements Route<M, C, R> {
 
     private static final long serialVersionUID = 0L;

@@ -61,7 +61,7 @@ buildscript {
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.4.30"
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     io.spine.gradle.internal.Deps.build.apply {
@@ -85,7 +85,7 @@ extra["projectsToPublish"] = listOf(
     "model-assembler",
     "model-verifier"
 )
-extra["credentialsPropertyFile"] = PublishingRepos.cloudRepo.credentials
+extra["publishToRepository"] = PublishingRepos.cloudRepo
 
 allprojects {
     apply {

@@ -28,7 +28,6 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Version;
 import io.spine.server.command.DispatchCommand;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -40,6 +39,7 @@ import io.spine.server.entity.VersionIncrement;
 import io.spine.server.event.EventDispatch;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.

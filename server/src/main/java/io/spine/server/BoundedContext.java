@@ -338,7 +338,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      *
      * <p>This method does not take into account visibility of entity states.
      */
-    public boolean hasEntitiesWithState(Class<? extends EntityState<?, ?, ?>> stateClass) {
+    public boolean hasEntitiesWithState(Class<? extends EntityState<?>> stateClass) {
         boolean result = guard.hasRepository(stateClass);
         return result;
     }
@@ -519,7 +519,7 @@ public abstract class BoundedContext implements Closeable, Logging {
          * @throws IllegalStateException
          *         if there is not repository entities of which have the passed state
          */
-        public Repository<?, ?> getRepository(Class<? extends EntityState<?, ?, ?>> stateClass) {
+        public Repository<?, ?> getRepository(Class<? extends EntityState<?>> stateClass) {
             return guard.get(stateClass);
         }
 
@@ -541,7 +541,7 @@ public abstract class BoundedContext implements Closeable, Logging {
          *         if the requested repository is not registered
          * @see VisibilityGuard
          */
-        public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState<?, ?, ?>> stateCls) {
+        public Optional<Repository<?, ?>> findRepository(Class<? extends EntityState<?>> stateCls) {
             // See if there is a repository for this state at all.
             if (!guard.hasRepository(stateCls)) {
                 throw newIllegalStateException(

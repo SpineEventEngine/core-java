@@ -30,11 +30,11 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.logging.Logging;
 import io.spine.system.server.event.MigrationApplied;
+import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -43,7 +43,6 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Versions.increment;
-import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * A stored {@link Entity} transformation done to account for the domain model changes.
@@ -76,7 +75,7 @@ import static io.spine.protobuf.Messages.isDefault;
 @Experimental
 public abstract class Migration<I,
                                 E extends TransactionalEntity<I, S, B>,
-                                S extends EntityState<I, B, S>,
+                                S extends EntityState<I>,
                                 B extends ValidatingBuilder<S>>
         implements Function<S, S>, Logging {
 
@@ -250,7 +249,7 @@ public abstract class Migration<I,
      * {@link Migration#applyTo(TransactionalEntity, RecordBasedRepository)}, modifying it in-place.
      * */
     private static class Operation<I,
-                                   S extends EntityState<I, ?, S>,
+                                   S extends EntityState<I>,
                                    E extends TransactionalEntity<I, S, ?>> {
 
         private boolean archive;

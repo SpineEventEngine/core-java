@@ -29,7 +29,6 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
@@ -47,9 +46,9 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine

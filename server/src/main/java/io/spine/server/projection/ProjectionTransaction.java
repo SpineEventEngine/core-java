@@ -28,12 +28,12 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Version;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayingTransaction;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.type.EventEnvelope;
+import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

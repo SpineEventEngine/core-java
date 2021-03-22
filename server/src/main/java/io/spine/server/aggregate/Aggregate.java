@@ -32,7 +32,6 @@ import com.google.protobuf.Empty;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -50,6 +49,7 @@ import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.Iterator;
 import java.util.List;

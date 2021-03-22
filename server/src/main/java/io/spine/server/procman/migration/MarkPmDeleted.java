@@ -28,11 +28,11 @@ package io.spine.server.procman.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Migration;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerMigration;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A migration operation that marks a {@link ProcessManager} as {@link Entity#isDeleted() deleted}.

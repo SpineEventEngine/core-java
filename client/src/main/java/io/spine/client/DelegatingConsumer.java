@@ -50,7 +50,7 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
         return new DelegatingEventConsumer<>(consumer);
     }
 
-    static <S extends EntityState<?, ?, ?>> StateConsumer<S> ofState(Consumer<S> consumer) {
+    static <S extends EntityState<?>> StateConsumer<S> ofState(Consumer<S> consumer) {
         checkNotNull(consumer);
         return new DelegatingStateConsumer<>(consumer);
     }
@@ -98,7 +98,7 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
     /**
      * Adapts a {@code Consumer} of an {@code EntityState} to the {@link StateConsumer} interface.
      */
-    private static final class DelegatingStateConsumer<S extends EntityState<?, ?, ?>>
+    private static final class DelegatingStateConsumer<S extends EntityState<?>>
             extends DelegatingConsumer<S, EmptyContext>
             implements StateConsumer<S> {
 

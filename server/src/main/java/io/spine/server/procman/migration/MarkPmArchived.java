@@ -28,11 +28,11 @@ package io.spine.server.procman.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Migration;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerMigration;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A migration operation that marks a {@link ProcessManager} as
@@ -46,7 +46,7 @@ import io.spine.server.procman.ProcessManagerMigration;
 @Experimental
 public final class MarkPmArchived<I,
                                   P extends ProcessManager<I, S, B>,
-                                  S extends EntityState<I, B, S>,
+                                  S extends EntityState<I>,
                                   B extends ValidatingBuilder<S>>
         extends ProcessManagerMigration<I, P, S, B> {
 

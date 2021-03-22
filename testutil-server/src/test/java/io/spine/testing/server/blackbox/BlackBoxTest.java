@@ -95,7 +95,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
@@ -535,7 +534,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         private void assertRepositories() {
             for (Repository<?, ?> repository : repositories) {
-                Class<? extends EntityState<?, ?, ?>> stateClass =
+                Class<? extends EntityState<?>> stateClass =
                         repository.entityModelClass()
                                   .stateClass();
                 assertDoesNotThrow(() -> context.repositoryOf(stateClass));

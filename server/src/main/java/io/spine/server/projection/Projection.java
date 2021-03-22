@@ -29,7 +29,6 @@ package io.spine.server.projection;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.EventValidationError;
 import io.spine.server.dispatch.BatchDispatchOutcome;
@@ -41,6 +40,7 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
@@ -62,7 +62,7 @@ import static java.lang.String.format;
  *         the type of the state objects holding projection data
  */
 public abstract class Projection<I,
-                                 M extends EntityState<I, B, M>,
+                                 M extends EntityState<I>,
                                  B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
         implements EventPlayer, EventSubscriber,

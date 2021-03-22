@@ -62,7 +62,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     private final Class<?> idClass;
 
     /** The class of the entity state. */
-    private final Class<? extends EntityState<?, ?, ?>> stateClass;
+    private final Class<? extends EntityState<?>> stateClass;
 
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
@@ -72,7 +72,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
 
     /** The default state of entities of this class. */
     @LazyInit
-    private transient volatile @MonotonicNonNull EntityState<?, ?, ?> defaultState;
+    private transient volatile @MonotonicNonNull EntityState<?> defaultState;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
@@ -148,13 +148,13 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     /**
      * Obtains the default state for this class of entities.
      */
-    public final EntityState<?, ?, ?> defaultState() {
-        EntityState<?, ?, ?> result = defaultState;
+    public final EntityState<?> defaultState() {
+        EntityState<?> result = defaultState;
         if (result == null) {
             synchronized (this) {
                 result = defaultState;
                 if (result == null) {
-                    Class<? extends EntityState<?, ?, ?>> stateClass = stateClass();
+                    Class<? extends EntityState<?>> stateClass = stateClass();
                     defaultState = defaultInstance(stateClass);
                     result = defaultState;
                 }
@@ -180,7 +180,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     /**
      * Obtains the class of the state of entities of this class.
      */
-    public final Class<? extends EntityState<?, ?, ?>> stateClass() {
+    public final Class<? extends EntityState<?>> stateClass() {
         return stateClass;
     }
 
@@ -282,7 +282,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      * public API. It is used internally by other framework routines and not designed for efficient
      * execution by Spine users.
      */
-    public static <S extends EntityState<?, ?, ?>> Class<S>
+    public static <S extends EntityState<?>> Class<S>
     stateClassOf(Class<? extends Entity<?, ?>> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);

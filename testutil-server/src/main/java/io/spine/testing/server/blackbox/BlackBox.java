@@ -585,7 +585,7 @@ public abstract class BlackBox implements Logging {
     }
 
     @VisibleForTesting
-    final Repository<?, ?> repositoryOf(Class<? extends EntityState<?, ?, ?>> stateClass) {
+    final Repository<?, ?> repositoryOf(Class<? extends EntityState<?>> stateClass) {
         Repository<?, ?> repository =
                 context.internalAccess()
                        .getRepository(stateClass);

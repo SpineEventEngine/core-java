@@ -42,7 +42,7 @@ import java.util.Set;
  *         the type of the entity state
  */
 @Immutable
-final class StateColumns<S extends EntityState<?, ?, ?>> implements Iterable<EntityColumn<S, ?>> {
+final class StateColumns<S extends EntityState<?>> implements Iterable<EntityColumn<S, ?>> {
 
     private final ImmutableSet<EntityColumn<S, ?>> columns;
 
@@ -59,7 +59,7 @@ final class StateColumns<S extends EntityState<?, ?, ?>> implements Iterable<Ent
      * @param <S>
      *         the type of the entity state which columns are described
      */
-    static <S extends EntityState<?, ?, ?>> StateColumns<S> none() {
+    static <S extends EntityState<?>> StateColumns<S> none() {
         return new StateColumns<>(ImmutableSet.of());
     }
 

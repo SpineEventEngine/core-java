@@ -27,6 +27,8 @@
 package io.spine.gradle.internal
 
 import java.net.URI
+import java.util.*
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -38,10 +40,54 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
  *  https://github.com/uber/NullAway/blob/master/gradle/dependencies.gradle
  */
 
+/**
+ * A Maven repository.
+ */
 data class Repository(
     val releases: String,
     val snapshots: String,
-    val credentials: String
+    private val credentialsFile: String? = null,
+    private val credentials: Credentials? = null
+) {
+
+    /**
+     * Obtains the publishing password credentials to this repository.
+     *
+     * If the credentials are represented by a `.properties` file, reads the file and parses
+     * the credentials. The file must have properties `user.name` and `user.password`, which store
+     * the username and the password for the Maven repository auth.
+     */
+    fun credentials(project: Project): Credentials {
+        if (credentials != null) {
+            return credentials
+        } else {
+            credentialsFile!!
+            val log = project.logger
+            log.info("Using credentials from `$credentialsFile`.")
+            val file = project.rootProject.file(credentialsFile)
+            if (!file.exists()) {
+                throw InvalidUserDataException(
+                    "Unable to find credentials file `${file}`." +
+                            " Please create the file named `${credentialsFile}` in" +
+                            " the project root."
+                )
+            }
+            val properties = Properties()
+            properties.load(file.inputStream())
+            val username = properties.getProperty("user.name")
+            val password = properties.getProperty("user.password")
+            log.info("Publishing build as `${username}`.")
+            return Credentials(username, password)
+        }
+    }
+}
+
+/**
+ * Password credentials for a Maven repository.
+ */
+data class Credentials(
+    val username: String?,
+    val password: String?
 )
 
 /**
@@ -50,16 +96,31 @@ data class Repository(
  * See `publish.gradle` for details of the publishing process.
  */
 object PublishingRepos {
+
     val mavenTeamDev = Repository(
         releases = "http://maven.teamdev.com/repository/spine",
         snapshots = "http://maven.teamdev.com/repository/spine-snapshots",
-        credentials = "credentials.properties"
+        credentialsFile = "credentials.properties"
     )
     val cloudRepo = Repository(
         releases = "https://spine.mycloudrepo.io/public/repositories/releases",
         snapshots = "https://spine.mycloudrepo.io/public/repositories/snapshots",
-        credentials = "cloudrepo.properties"
+        credentialsFile = "cloudrepo.properties"
     )
+
+    fun gitHub(repoName: String): Repository {
+        return Repository(
+            releases = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
+            snapshots = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
+            credentials = Credentials(
+                username = System.getenv("GITHUB_ACTOR"),
+                // This is a trick. Gradle only supports password or AWS credentials. Thus,
+                // we pass the GitHub token as a "password".
+                // https://docs.github.com/en/actions/guides/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
+                password = System.getenv("GITHUB_TOKEN")
+            )
+        )
+    }
 }
 
 // Specific repositories.

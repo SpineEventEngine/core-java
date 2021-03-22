@@ -28,10 +28,10 @@ package io.spine.server.projection.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionMigration;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A migration operation that physically deletes the entity record from the
@@ -45,7 +45,7 @@ import io.spine.server.projection.ProjectionMigration;
 @Experimental
 public final class RemoveProjectionFromStorage<I,
                                                P extends Projection<I, S, B>,
-                                               S extends EntityState<I, B, S>,
+                                               S extends EntityState<I>,
                                                B extends ValidatingBuilder<S>>
         extends ProjectionMigration<I, P, S, B> {
 

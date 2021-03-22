@@ -29,11 +29,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
@@ -41,6 +41,7 @@ import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -83,7 +84,7 @@ import static java.lang.String.format;
 @Internal
 public abstract class Transaction<I,
                                   E extends TransactionalEntity<I, S, B>,
-                                  S extends EntityState<I, B, S>,
+                                  S extends EntityState<I>,
                                   B extends ValidatingBuilder<S>> {
 
     /**
@@ -197,7 +198,7 @@ public abstract class Transaction<I,
     @VisibleForTesting
     static <I,
             E extends TransactionalEntity<I, S, B>,
-            S extends EntityState<I, B, S>,
+            S extends EntityState<I>,
             B extends ValidatingBuilder<S>>
     B toBuilder(E entity) {
         S currentState = entity.state();
@@ -525,7 +526,7 @@ public abstract class Transaction<I,
         E entity = entity();
         Any entityId = Identifier.pack(entity.id());
         Version version = entity.version();
-        Any state = pack(entity.state());
+        Any state = pack((Message) entity.state());
         LifecycleFlags lifecycleFlags = entity.lifecycleFlags();
         return EntityRecord
                 .newBuilder()
@@ -556,7 +557,7 @@ public abstract class Transaction<I,
     final void initAll(S state, Version version) {
         B builder = builder();
         builder.clear();
-        builder.mergeFrom(state);
+        builder.mergeFrom((Message) state);
         initVersion(version);
     }
 

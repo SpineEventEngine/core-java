@@ -28,9 +28,9 @@ package io.spine.server.procman;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A {@link Migration} applied to a {@link ProcessManager} instance.
@@ -38,7 +38,7 @@ import io.spine.server.entity.Transaction;
 @Experimental
 public abstract class ProcessManagerMigration<I,
                                               P extends ProcessManager<I, S, B>,
-                                              S extends EntityState<I, B, S>,
+                                              S extends EntityState<I>,
                                               B extends ValidatingBuilder<S>>
         extends Migration<I, P, S, B> {
 

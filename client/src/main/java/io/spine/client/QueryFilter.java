@@ -46,7 +46,7 @@ import static io.spine.client.Filters.createFilter;
  * See {@code io.spine.query} package documentation for more details on usage.
  */
 @Deprecated
-public final class QueryFilter extends TypedFilter<EntityState<?, ?, ?>> {
+public final class QueryFilter extends TypedFilter<EntityState<?>> {
 
     private static final long serialVersionUID = 0L;
 

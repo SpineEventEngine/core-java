@@ -40,10 +40,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         the type of the entity state
  */
 @FunctionalInterface
-public interface StateConsumer<S extends EntityState<?, ?, ?>>
+public interface StateConsumer<S extends EntityState<?>>
         extends Consumer<S>, MessageConsumer<S, EmptyContext> {
 
-    static <S extends EntityState<?, ?, ?>> StateConsumer<S> from(Consumer<S> consumer) {
+    static <S extends EntityState<?>> StateConsumer<S> from(Consumer<S> consumer) {
         checkNotNull(consumer);
         return DelegatingConsumer.ofState(consumer);
     }

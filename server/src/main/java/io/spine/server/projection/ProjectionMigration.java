@@ -28,10 +28,10 @@ package io.spine.server.projection;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
 import io.spine.server.procman.ProcessManager;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A {@link Migration} applied to a {@link ProcessManager} instance.
@@ -39,7 +39,7 @@ import io.spine.server.procman.ProcessManager;
 @Experimental
 public abstract class ProjectionMigration<I,
                                           P extends Projection<I, S, B>,
-                                          S extends EntityState<I, B, S>,
+                                          S extends EntityState<I>,
                                           B extends ValidatingBuilder<S>>
         extends Migration<I, P, S, B> {
 

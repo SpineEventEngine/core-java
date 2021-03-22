@@ -29,8 +29,8 @@ package io.spine.server.integration.given;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.server.projection.Projection;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
 

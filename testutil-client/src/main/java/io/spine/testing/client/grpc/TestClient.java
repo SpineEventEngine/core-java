@@ -107,7 +107,7 @@ public class TestClient implements Logging {
      *         an entity type to query
      * @return query response with the state of entities obtained from the server
      */
-    public QueryResponse queryAll(Class<? extends EntityState<?, ?, ?>> messageType) {
+    public QueryResponse queryAll(Class<? extends EntityState<?>> messageType) {
         Query query = requestFactory.query()
                                     .all(messageType);
         try {

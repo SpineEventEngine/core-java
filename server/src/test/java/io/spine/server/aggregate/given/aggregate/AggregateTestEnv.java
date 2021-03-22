@@ -119,7 +119,7 @@ public class AggregateTestEnv {
         return TestEventFactory.newInstance(requestFactory());
     }
 
-    public static EventMessage event(EntityState<?, ?, ?> state) {
+    public static EventMessage event(EntityState<?> state) {
         return StateImported
                 .newBuilder()
                 .setState(AnyPacker.pack(state))

@@ -52,7 +52,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 final class VisibilityGuard {
 
     private final
-    Map<Class<? extends EntityState<?, ?, ?>>, RepositoryAccess> repositories = new HashMap<>();
+    Map<Class<? extends EntityState<?>>, RepositoryAccess> repositories = new HashMap<>();
 
     /** Prevent instantiation from outside. */
     private VisibilityGuard() {
@@ -71,12 +71,12 @@ final class VisibilityGuard {
     void register(Repository<?, ?> repository) {
         checkNotNull(repository);
         EntityClass<?> entityClass = repository.entityModelClass();
-        Class<? extends EntityState<?, ?, ?>> stateClass = entityClass.stateClass();
+        Class<? extends EntityState<?>> stateClass = entityClass.stateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 
-    private void checkNotAlreadyRegistered(Class<? extends EntityState<?, ?, ?>> stateClass) {
+    private void checkNotAlreadyRegistered(Class<? extends EntityState<?>> stateClass) {
         RepositoryAccess alreadyRegistered = repositories.get(stateClass);
         if (alreadyRegistered != null) {
             throw newIllegalStateException(
@@ -90,7 +90,7 @@ final class VisibilityGuard {
     /**
      * Verifies if there is a registered repository for the passed entity state class.
      */
-    boolean hasRepository(Class<? extends EntityState<?, ?, ?>> stateClass) {
+    boolean hasRepository(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
         boolean result = repositories.containsKey(stateClass);
         return result;
@@ -109,13 +109,13 @@ final class VisibilityGuard {
      *         prior to this call, or if all repositories were
      *         {@linkplain #shutDownRepositories() shut down}
      */
-    Optional<Repository<?, ?>> repositoryFor(Class<? extends EntityState<?, ?, ?>> stateClass) {
+    Optional<Repository<?, ?>> repositoryFor(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
         RepositoryAccess repositoryAccess = findOrThrow(stateClass);
         return repositoryAccess.get();
     }
 
-    private RepositoryAccess findOrThrow(Class<? extends EntityState<?, ?, ?>> stateClass) {
+    private RepositoryAccess findOrThrow(Class<? extends EntityState<?>> stateClass) {
         RepositoryAccess repository = repositories.get(stateClass);
         if (repository == null) {
             throw newIllegalStateException(
@@ -132,7 +132,7 @@ final class VisibilityGuard {
      * @throws IllegalStateException
      *         if there is not repository entities of which have the passed state
      */
-    Repository<?, ?> get(Class<? extends EntityState<?, ?, ?>> stateClass) {
+    Repository<?, ?> get(Class<? extends EntityState<?>> stateClass) {
         RepositoryAccess access = findOrThrow(stateClass);
         return access.repository;
     }

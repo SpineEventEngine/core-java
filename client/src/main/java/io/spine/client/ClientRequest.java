@@ -87,7 +87,7 @@ public class ClientRequest {
     /**
      * Creates a builder for customizing subscription for the passed entity state type.
      */
-    public <S extends EntityState<?, ?, ?>> SubscriptionRequest<S> subscribeTo(Class<S> type) {
+    public <S extends EntityState<?>> SubscriptionRequest<S> subscribeTo(Class<S> type) {
         checkNotNull(type);
         return new SubscriptionRequest<>(this, type);
     }
@@ -121,7 +121,7 @@ public class ClientRequest {
      * @param <S>
      *         the type of the entity state for which the query is run
      */
-    public <S extends EntityState<?, ?, ?>> ImmutableList<S> run(EntityQuery<?, S, ?> query) {
+    public <S extends EntityState<?>> ImmutableList<S> run(EntityQuery<?, S, ?> query) {
         QueryRequest<S> request = new QueryRequest<>(this, query);
         ImmutableList<S> results = request.run();
         return results;

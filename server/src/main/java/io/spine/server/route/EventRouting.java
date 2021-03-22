@@ -96,8 +96,8 @@ public final class EventRouting<I>
      * <p>Overrides for return type covariance.
      */
     @Override
-    public final EventRoute<I, EventMessage<?, ?>> defaultRoute() {
-        return (EventRoute<I, EventMessage<?, ?>>) super.defaultRoute();
+    public final EventRoute<I, EventMessage> defaultRoute() {
+        return (EventRoute<I, EventMessage>) super.defaultRoute();
     }
 
     /**

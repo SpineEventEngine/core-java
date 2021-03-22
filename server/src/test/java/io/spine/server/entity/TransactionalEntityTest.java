@@ -26,22 +26,19 @@
 package io.spine.server.entity;
 
 import io.spine.base.EntityState;
-import io.spine.base.ValidatingBuilder;
 import io.spine.core.Versions;
 import io.spine.server.entity.given.TeEntity;
 import io.spine.server.test.shared.EmptyEntity;
+import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.testing.TestValues.newUuidValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("rawtypes")   // for simplicity
 @DisplayName("TransactionalEntity should")
