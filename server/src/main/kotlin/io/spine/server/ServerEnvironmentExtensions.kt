@@ -24,59 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity
+package io.spine.server
 
-import io.spine.annotation.Experimental
-import io.spine.base.EntityState
 import io.spine.environment.EnvironmentType
-import io.spine.server.ServerEnvironment
-import io.spine.validate.ValidatingBuilder
-
-/**
- * Extends [TransactionalEntity] with the `update` block for accessing
- * properties of the entity state [builder][TransactionalEntity.builder].
- *
- * For example, a method that applies an event may look like this:
- *
- * ```kotlin
- * @Apply
- * fun event(e: TaskCreated) {
- *     update {
- *         title = e.title
- *         description = e.description
- *     }
- * }
- * ```
- *
- * @param I the type of the entity identifiers
- * @param E the type of the transactional entity
- * @param S the type of the entity state
- * @param B the type of the entity state builder
- *
- * @apiNote This function is not `inline` because [TransactionalEntity.builder] is `protected`
- * while inline functions can use only `public` API.
- */
-@Experimental
-fun <I,
-     E : TransactionalEntity<I, S, B>,
-     S : EntityState<I>,
-     B : ValidatingBuilder<S>>
-        E.update(block: B.() -> Unit): B {
-    val builder = builderOf(this)
-    block.invoke(builder)
-    return builder
-}
-
-/**
- * Obtains the builder from the passed entity.
- *
- * @apiNote We employ the fact that we are in the same package with [TransactionalEntity] and
- * because of this can access its `protected` API.
- */
-private fun <I,
-        S : EntityState<I>,
-        B : ValidatingBuilder<S>>
-        builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
 
 /**
  * Allows to configure [ServerEnvironment] features under various environments.
@@ -98,5 +48,5 @@ private fun <I,
 inline fun <reified E : EnvironmentType>
         under(block: ServerEnvironment.TypeConfigurator.() -> Unit) {
     val configurator = ServerEnvironment.`when`(E::class.java)
-    block.invoke(configurator)
+    configurator.block()
 }

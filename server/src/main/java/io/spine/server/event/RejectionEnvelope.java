@@ -103,8 +103,8 @@ public final class RejectionEnvelope
         checkNotNull(origin);
         checkNotNull(throwable);
 
-        RejectionThrowable RejectionThrowable = unwrap(throwable);
-        Event rejectionEvent = produceEvent(origin, RejectionThrowable);
+        RejectionThrowable rt = unwrap(throwable);
+        Event rejectionEvent = produceEvent(origin, rt);
         EventEnvelope event = EventEnvelope.of(rejectionEvent);
 
         return from(event);
@@ -114,8 +114,8 @@ public final class RejectionEnvelope
         Throwable cause = getRootCause(causedByRejection);
         boolean correctType = cause instanceof RejectionThrowable;
         checkArgument(correctType);
-        RejectionThrowable RejectionThrowable = (RejectionThrowable) cause;
-        return RejectionThrowable;
+        RejectionThrowable rt = (RejectionThrowable) cause;
+        return rt;
     }
 
     private static Event produceEvent(CommandEnvelope origin, RejectionThrowable RejectionThrowable) {
@@ -134,16 +134,15 @@ public final class RejectionEnvelope
      *
      * @param command
      *         the rejected command
-     * @param RejectionThrowable
+     * @param th
      *         the thrown rejection
      * @return the new instance of {@code RejectionEventContext}
      */
-    private static RejectionEventContext rejectionContext(Command command,
-                                                          RejectionThrowable RejectionThrowable) {
+    private static RejectionEventContext rejectionContext(Command command, RejectionThrowable th) {
         checkNotNull(command);
-        checkNotNull(RejectionThrowable);
+        checkNotNull(th);
 
-        String stacktrace = getStackTraceAsString(RejectionThrowable);
+        String stacktrace = getStackTraceAsString(th);
         return RejectionEventContext
                 .newBuilder()
                 .setCommand(command)

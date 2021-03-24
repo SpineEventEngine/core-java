@@ -78,11 +78,12 @@ import static java.util.stream.Collectors.joining;
  *         the type of the produced message classes
  */
 @Immutable
-public abstract class AbstractHandlerMethod<T,
-                                            M extends Message,
-                                            C extends MessageClass<M>,
-                                            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
-                                            R extends MessageClass<?>>
+public abstract class AbstractHandlerMethod<
+            T,
+            M extends Message,
+            C extends MessageClass<M>,
+            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
+            R extends MessageClass<?>>
         implements HandlerMethod<T, C, E, R> {
 
     /** The method to be called. */

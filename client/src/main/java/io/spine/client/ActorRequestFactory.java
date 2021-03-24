@@ -110,7 +110,10 @@ public class ActorRequestFactory {
 
     /**
      * Obtains the offset of the time zone in which the actor works.
+     *
+     * @deprecated please use {@link #zoneId()} instead
      */
+    @Deprecated
     public ZoneOffset zoneOffset() {
         return zoneOffset;
     }
@@ -258,7 +261,9 @@ public class ActorRequestFactory {
          * Obtains the zone offset set in the builder.
          *
          * @return the zone offset or {@code null} if the value was not set
+         * @deprecated please use {@link #getZoneId()} instead
          */
+        @Deprecated
         public @Nullable ZoneOffset getZoneOffset() {
             return zoneOffset;
         }
@@ -267,7 +272,9 @@ public class ActorRequestFactory {
          * Sets the offset of the time zone in which the user works.
          *
          * @param zoneOffset the offset of the time zone the user works in
+         * @deprecated please use {@link #setZoneId(ZoneId)} instead
          */
+        @Deprecated
         @CanIgnoreReturnValue
         public Builder setZoneOffset(ZoneOffset zoneOffset) {
             this.zoneOffset = checkNotNull(zoneOffset);
@@ -328,10 +335,7 @@ public class ActorRequestFactory {
             java.time.ZoneId currentZone = Time.currentTimeZone();
 
             if (zoneOffset == null) {
-                ZoneOffset currentOffset = ZoneOffsets.of(
-                        currentZone.getRules().getOffset(Instant.now())
-                );
-                setZoneOffset(currentOffset);
+                applyOffset(currentZone);
             }
 
             if (zoneId == null) {
@@ -339,6 +343,14 @@ public class ActorRequestFactory {
             }
 
             return new ActorRequestFactory(this);
+        }
+
+        @SuppressWarnings("deprecation")
+        private void applyOffset(java.time.ZoneId currentZone) {
+            ZoneOffset currentOffset = ZoneOffsets.of(
+                    currentZone.getRules().getOffset(Instant.now())
+            );
+            setZoneOffset(currentOffset);
         }
     }
 }

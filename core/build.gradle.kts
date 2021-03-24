@@ -35,7 +35,7 @@ dependencies {
     api("io.spine:spine-time:$spineTimeVersion")
 
     testImplementation(project(":testutil-core"))
-    testImplementation("io.spine:spine-testutil-time:$spineTimeVersion")
+    testImplementation("io.spine.tools:spine-testutil-time:$spineTimeVersion")
 }
 
 modelCompiler {

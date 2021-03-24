@@ -61,7 +61,9 @@ message ActorContext {
     // The zero value of this field means UTC. That's why it's not marked as `required`.
     // If a request is not made from time-zone with a zero offset, a valid offset must be provided.
     //
-    time.ZoneOffset zone_offset = 4;
+    // Please use `zone_id` instead.
+    //
+    time.ZoneOffset zone_offset = 4 [deprecated = true];
 
     // The ID of the time-zone from which the request is made.
     //

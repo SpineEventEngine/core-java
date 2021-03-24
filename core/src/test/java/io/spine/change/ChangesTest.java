@@ -31,7 +31,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.testing.UtilityClassTest;
-import io.spine.time.testing.TimeTests;
+import io.spine.time.testing.Past;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -94,7 +94,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         @Test
         @DisplayName("`Timestamp`")
         void forTimestamps() {
-            Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
+            Timestamp fiveMinutesAgo = Past.minutesAgo(5);
             Timestamp now = currentTime();
 
             TimestampChange result = Changes.of(fiveMinutesAgo, now);

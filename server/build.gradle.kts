@@ -37,7 +37,7 @@ dependencies {
     testAnnotationProcessor(Deps.build.autoService.processor)
     testCompileOnly(Deps.build.autoService.annotations)
     testImplementation(Deps.grpc.nettyShaded)
-    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
