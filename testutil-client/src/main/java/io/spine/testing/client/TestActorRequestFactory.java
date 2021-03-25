@@ -56,7 +56,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         super(ActorRequestFactory
                       .newBuilder()
                       .setActor(actor)
-                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
@@ -66,7 +65,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
                       .newBuilder()
                       .setTenantId(tenantId)
                       .setActor(actor)
-                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
@@ -148,7 +146,10 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /**
      * Obtains the current offset for the passed time zone.
+     *
+     * @deprecated please use {@link #zoneId()}.
      */
+    @Deprecated
     public static ZoneOffset toOffset(ZoneId zoneId) {
         java.time.ZoneOffset offset =
                 ZoneIds.toJavaTime(zoneId)
