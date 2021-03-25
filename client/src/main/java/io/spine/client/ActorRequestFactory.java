@@ -134,20 +134,17 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates a copy of this factory placed at a new time zone with the passed offset and ID.
+     * Creates a copy of this factory placed at a new time zone.
      *
-     * <p>Use this method for obtaining new request factory as the user moves to a new location.
-     *
-     * @param zoneOffset the offset of the new time zone
-     * @param zoneId     the ID of the new time zone
-     * @return new factory at the new time zone
+     * @deprecated please use {@link #switchTimeZone(ZoneId)}
      */
-    public ActorRequestFactory switchTimeZone(ZoneOffset zoneOffset, ZoneId zoneId) {
-        checkNotNull(zoneOffset);
+    @Deprecated
+    public ActorRequestFactory switchTimeZone(ZoneOffset ignored, ZoneId zoneId) {
+        checkNotNull(ignored);
         checkNotNull(zoneId);
         ActorRequestFactory result =
                 newBuilder().setActor(actor())
-                            .setZoneOffset(zoneOffset)
+                            .setZoneOffset(ignored)
                             .setZoneId(zoneId)
                             .setTenantId(tenantId())
                             .build();
@@ -157,17 +154,18 @@ public class ActorRequestFactory {
     /**
      * Creates a copy of this factory placed at a new time zone with the passed ID.
      *
-     * <p>The zone offset is calculated using the current time.
-     *
-     * @param zoneId the ID of the new time zone
+     * @param zoneId
+     *         the ID of the new time zone
      * @return new factory at the new time zone
      */
     public ActorRequestFactory switchTimeZone(ZoneId zoneId) {
         checkNotNull(zoneId);
-        java.time.ZoneId id = java.time.ZoneId.of(zoneId.getValue());
-        java.time.ZoneOffset offset = java.time.OffsetTime.now(id)
-                                                          .getOffset();
-        return switchTimeZone(ZoneOffsets.of(offset), zoneId);
+        ActorRequestFactory result =
+                newBuilder().setActor(actor())
+                            .setZoneId(zoneId)
+                            .setTenantId(tenantId())
+                            .build();
+        return result;
     }
 
     /**
@@ -223,7 +221,6 @@ public class ActorRequestFactory {
                 .newBuilder()
                 .setActor(actor)
                 .setTimestamp(currentTime())
-                .setZoneOffset(zoneOffset)
                 .setZoneId(zoneId);
         if (tenantId != null) {
             builder.setTenantId(tenantId);

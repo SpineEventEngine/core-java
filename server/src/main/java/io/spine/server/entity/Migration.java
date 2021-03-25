@@ -43,6 +43,7 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Versions.increment;
+import static io.spine.protobuf.Messages.isDefault;
 
 /**
  * A stored {@link Entity} transformation done to account for the domain model changes.

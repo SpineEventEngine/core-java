@@ -50,8 +50,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Time.currentTime;
-import static io.spine.time.testing.TimeTests.Past.minutesAgo;
-import static io.spine.time.testing.TimeTests.Past.secondsAgo;
+import static io.spine.time.testing.Past.minutesAgo;
+import static io.spine.time.testing.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 

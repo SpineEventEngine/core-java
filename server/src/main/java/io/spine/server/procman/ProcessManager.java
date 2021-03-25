@@ -49,6 +49,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine

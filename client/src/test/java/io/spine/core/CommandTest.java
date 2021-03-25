@@ -45,9 +45,9 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.Durations2.seconds;
-import static io.spine.time.testing.TimeTests.Future.secondsFromNow;
-import static io.spine.time.testing.TimeTests.Past.minutesAgo;
-import static io.spine.time.testing.TimeTests.Past.secondsAgo;
+import static io.spine.time.testing.Future.secondsFromNow;
+import static io.spine.time.testing.Past.minutesAgo;
+import static io.spine.time.testing.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
