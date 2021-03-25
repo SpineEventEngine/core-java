@@ -118,12 +118,12 @@ public final class RejectionEnvelope
         return rt;
     }
 
-    private static Event produceEvent(CommandEnvelope origin, RejectionThrowable RejectionThrowable) {
-        Any producerId = RejectionThrowable.producerId()
+    private static Event produceEvent(CommandEnvelope origin, RejectionThrowable throwable) {
+        Any producerId = throwable.producerId()
                                          .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
-        RejectionMessage thrownMessage = RejectionThrowable.messageThrown();
-        RejectionEventContext context = rejectionContext(origin.outerObject(), RejectionThrowable);
+        RejectionMessage thrownMessage = throwable.messageThrown();
+        RejectionEventContext context = rejectionContext(origin.outerObject(), throwable);
         Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
         return rejectionEvent;
     }

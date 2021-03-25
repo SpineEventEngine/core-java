@@ -59,6 +59,7 @@ import java.util.function.Predicate;
 import static com.google.common.collect.Iterators.any;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**

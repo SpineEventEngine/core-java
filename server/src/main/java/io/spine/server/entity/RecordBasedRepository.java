@@ -71,6 +71,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkValid;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The base class for repositories that store entities as records.
@@ -161,7 +162,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
     public final <T extends TransactionalEntity<I, S, ?>>
-    void applyMigration(I id, Migration<I, T, S> migration) {
+    void applyMigration(I id, Migration<I, T, S, ?> migration) {
         checkNotNull(id);
         checkNotNull(migration);
         checkEntityIsTransactional();
@@ -197,7 +198,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @SuppressWarnings("unchecked") // Checked at runtime.
     @Experimental
     public final <T extends TransactionalEntity<I, S, ?>>
-    void applyMigration(Set<I> ids, Migration<I, T, S> migration) {
+    void applyMigration(Set<I> ids, Migration<I, T, S, ?> migration) {
         checkNotNull(ids);
         checkNotNull(migration);
         checkEntityIsTransactional();
@@ -478,7 +479,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Deletes an entity record as a result of the {@link Migration} operation.
      */
-    private void delete(I id, Migration<I, ?, S> migration) {
+    private void delete(I id, Migration<I, ?, S, ?> migration) {
         Optional<Event> event = migration.systemEvent();
         boolean deleted = event.map(value -> deleteAndPostEvent(id, value))
                                .orElseGet(() -> delete(id));
@@ -494,7 +495,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @VisibleForTesting
     RecordWithColumns<I, EntityRecord> toRecord(E entity) {
         EntityRecord record = storageConverter().convert(entity);
-        checkNotNull(record);
+        requireNonNull(record);
         RecordWithColumns<I, EntityRecord> result =
                 EntityRecordWithColumns.create(entity, record);
         return result;
@@ -507,7 +508,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     protected E toEntity(EntityRecord record) {
         E result = storageConverter().reverse()
                                      .convert(record);
-        checkNotNull(result);
+        requireNonNull(result);
         return result;
     }
 
@@ -536,7 +537,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
 
         @Override
-        public @Nullable I apply(@Nullable EntityId input) {
+        public @Nullable I apply(EntityId input) {
             checkNotNull(input);
             Any idAsAny = input.getId();
 

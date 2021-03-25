@@ -86,9 +86,9 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
 
     @Override
     protected final Optional<Success>
-    handleRejection(RejectionThrowable RejectionThrowable, T target, CommandEnvelope origin) {
-        RejectionThrowable.initProducer(target.producerId());
-        RejectionEnvelope envelope = RejectionEnvelope.from(origin, RejectionThrowable);
+    handleRejection(RejectionThrowable throwable, T target, CommandEnvelope origin) {
+        throwable.initProducer(target.producerId());
+        RejectionEnvelope envelope = RejectionEnvelope.from(origin, throwable);
         Success success = Success
                 .newBuilder()
                 .setRejection(envelope.outerObject())

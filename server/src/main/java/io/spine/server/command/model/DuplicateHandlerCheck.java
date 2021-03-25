@@ -106,7 +106,7 @@ public final class DuplicateHandlerCheck implements Logging {
             if (keyClass.isAssignableFrom(cls)) {
                 Appender appender = appenders.get(keyClass);
                 appender.apply(cls);
-                debug.log("`%s` has been added to the Model.");
+                debug.log("`%s` has been added to the Model.", cls);
                 return;
             }
         }

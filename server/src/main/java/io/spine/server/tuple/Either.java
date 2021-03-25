@@ -107,7 +107,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
         }
         Either other = (Either) obj;
         return Objects.equals(this.value, other.value)
-                && Objects.equals(this.index, other.index);
+                && (this.index == other.index);
     }
 
     @Override

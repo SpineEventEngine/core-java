@@ -35,6 +35,8 @@ import io.spine.test.client.TestEntity;
 import io.spine.time.Temporals;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
+import io.spine.time.ZoneOffset;
+import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,9 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * Base tests for the {@linkplain ActorRequestFactory} descendants.
  */
-@SuppressWarnings("unused") /* We're suppressing this warning since IDEA does not recognize
-    nested JUnit classes in an abstract test base class. They are used via reflection by JUnit. */
-@DisplayName("Actor request factory should")
+@DisplayName("`ActorRequestFactory` should")
 class ActorRequestFactoryTest {
 
     private ActorRequestFactory factory;
@@ -77,27 +77,34 @@ class ActorRequestFactoryTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(Message.class, TestEntity.getDefaultInstance())
+        NullPointerTester tester = new NullPointerTester();
+        tester.setDefault(Message.class, TestEntity.getDefaultInstance())
                 .setDefault(new TypeToken<Class<? extends Message>>() {}.getRawType(),
                             TestEntity.class)
                 .setDefault(new TypeToken<Set<? extends Message>>() {}.getRawType(),
                             newHashSet(Any.getDefaultInstance()))
-                .setDefault(ZoneId.class, ZoneIds.systemDefault())
-                .testInstanceMethods(factory, NullPointerTester.Visibility.PUBLIC);
+                .setDefault(ZoneId.class, ZoneIds.systemDefault());
+        setDeprecatedDefaultsToo(tester);
+        tester.testInstanceMethods(factory, NullPointerTester.Visibility.PUBLIC);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void setDeprecatedDefaultsToo(NullPointerTester tester) {
+        tester.setDefault(ZoneOffset.class, ZoneOffsets.utc());
     }
 
     @Test
-    @DisplayName("require actor in Builder")
+    @DisplayName("require actor in `Builder`")
     void requireActorInBuilder() {
         assertThrows(NullPointerException.class,
                      () -> requestFactoryBuilder()
+                             .setZoneId(ZoneIds.systemDefault())
                              .build()
         );
     }
 
     @Test
-    @DisplayName("return values set in Builder")
+    @DisplayName("return values set in `Builder`")
     void returnValuesSetInBuilder() {
         ActorRequestFactory.Builder builder = requestFactoryBuilder()
                 .setActor(ACTOR)

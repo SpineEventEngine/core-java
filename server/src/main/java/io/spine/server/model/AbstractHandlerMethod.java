@@ -311,8 +311,7 @@ public abstract class AbstractHandlerMethod<
         return new IllegalOutcomeException(errorMessage);
     }
 
-    protected Optional<Success> handleRejection(RejectionThrowable RejectionThrowable, T target,
-                                                E origin) {
+    protected Optional<Success> handleRejection(RejectionThrowable throwable, T target, E origin) {
         return Optional.empty();
     }
 
