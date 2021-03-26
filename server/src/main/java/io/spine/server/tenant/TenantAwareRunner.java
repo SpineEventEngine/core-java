@@ -67,7 +67,7 @@ public final class TenantAwareRunner {
      * @return new instance of {@code TenantAwareRunner}
      */
     public static TenantAwareRunner withCurrentTenant(boolean multitenant) {
-        return with(TenantAware.getCurrentTenant(multitenant));
+        return with(TenantAware.currentTenant(multitenant));
     }
 
     /**

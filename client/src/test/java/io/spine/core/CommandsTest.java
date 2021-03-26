@@ -39,8 +39,6 @@ import io.spine.test.commands.CmdStopProject;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +93,6 @@ class CommandsTest extends UtilityClassTest<Commands> {
               .setDefault(Duration.class, Durations2.ZERO)
               .setDefault(Command.class, requestFactory.createCommand(createProject, minutesAgo(1)))
               .setDefault(CommandContext.class, requestFactory.createCommandContext())
-              .setDefault(ZoneOffset.class, ZoneOffsets.utc())
               .setDefault(UserId.class, GivenUserId.newUuid());
     }
 

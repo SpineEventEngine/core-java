@@ -33,15 +33,15 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.test.model.contexts.tasks.Task;
 import io.spine.test.model.contexts.tasks.TaskId;
 import io.spine.time.InstantConverter;
-import io.spine.time.testing.TimeTests;
+import io.spine.time.testing.Past;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 import java.time.Instant;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -70,7 +70,7 @@ class EntityClassTest {
     @DisplayName("create and initialize entity instance")
     void createEntityInstance() {
         TaskId id = TaskId.generate();
-        Timestamp before = TimeTests.Past.secondsAgo(1);
+        Timestamp before = Past.secondsAgo(1);
 
         // Create and init the entity.
         EntityClass<TaskEntity> entityClass = new EntityClass<>(TaskEntity.class);
@@ -81,13 +81,19 @@ class EntityClassTest {
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));
 
-        assertEquals(id, entity.id());
-        assertEquals(0, entity.version()
-                              .getNumber());
-        assertTrue(whileWeCreate.contains(toInstant(entity.whenModified())));
-        assertEquals(Task.getDefaultInstance(), entity.state());
-        assertFalse(entity.isArchived());
-        assertFalse(entity.isDeleted());
+        assertThat(entity.id()).isEqualTo(id);
+        assertTrue(entity.version().isZero());
+
+        Instant whenModifier = toInstant(entity.whenModified());
+        assertTrue(whileWeCreate.contains(whenModifier));
+
+        assertThat(entity.state())
+                .isEqualTo(Task.getDefaultInstance());
+
+        assertThat(entity.isArchived())
+                .isFalse();
+        assertThat(entity.isDeleted())
+                .isFalse();
     }
 
     /** A test entity which defines ID and state. */

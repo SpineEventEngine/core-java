@@ -28,6 +28,7 @@ package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
@@ -88,14 +89,14 @@ abstract class TenantAware {
      * @return current tenant ID or {@link SingleTenantIndex#tenantId() singleTenant()}
      * @throws IllegalStateException if there is no current tenant set in a multi-tenant context
      */
-    static TenantId getCurrentTenant(boolean multitenantContext) {
+    static TenantId currentTenant(boolean multitenantContext) {
         if (!multitenantContext) {
             return SingleTenantIndex.tenantId();
         }
         return CurrentTenant.ensure();
     }
 
-    TenantId tenantId() {
+    final @NonNull TenantId tenantId() {
         return tenantId;
     }
 }

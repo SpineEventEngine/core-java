@@ -28,25 +28,34 @@ package io.spine.testing.server.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.base.Environment;
-import io.spine.base.Tests;
 import io.spine.core.TenantId;
+import io.spine.environment.Environment;
+import io.spine.environment.Tests;
 import io.spine.server.tenant.TenantAwareTestSupport;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.server.tenant.TenantIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Abstract base for test suites that test tenant-aware functionality.
  *
- * <p>This class must be used only from {@linkplain io.spine.base.Tests test execution environment}.
+ * <p>This class must be used only from {@linkplain io.spine.environment.Tests
+ * test execution environment}.
  */
 @Internal
 @VisibleForTesting
 public abstract class TenantAwareTest {
 
+    /**
+     * Creates a default implementation of {@link TenantIndex} for this test suite.
+     *
+     * @param multitenant
+     *  set to {@code true} when a suite tests a multi-tenant context, {@code false} otherwise
+     * @return a new tenant index
+     */
     public static TenantIndex createTenantIndex(boolean multitenant) {
         return multitenant
                ? TenantIndex.createDefault()
@@ -91,12 +100,13 @@ public abstract class TenantAwareTest {
     }
 
     private static TenantId currentTenant() {
-        TenantId result = new TenantFunction<TenantId>(true) {
+        TenantFunction<TenantId> fn = new TenantFunction<TenantId>(true) {
             @Override
             public TenantId apply(TenantId id) {
                 return id;
             }
-        }.execute();
-        return checkNotNull(result);
+        };
+        TenantId result = fn.execute();
+        return requireNonNull(result);
     }
 }

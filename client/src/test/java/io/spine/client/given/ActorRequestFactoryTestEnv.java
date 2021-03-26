@@ -31,15 +31,12 @@ import io.spine.core.UserId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 
 import static io.spine.base.Identifier.newUuid;
 
 public class ActorRequestFactoryTestEnv {
 
     public static final UserId ACTOR = GivenUserId.of(newUuid());
-    public static final ZoneOffset ZONE_OFFSET = ZoneOffsets.getDefault();
     public static final ZoneId ZONE_ID = ZoneIds.systemDefault();
 
     /** Prevents instantiation of this test environment class. */
@@ -51,8 +48,7 @@ public class ActorRequestFactoryTestEnv {
     }
 
     public static ActorRequestFactory requestFactory() {
-        return requestFactoryBuilder().setZoneOffset(ZONE_OFFSET)
-                                      .setZoneId(ZONE_ID)
+        return requestFactoryBuilder().setZoneId(ZONE_ID)
                                       .setActor(ACTOR)
                                       .build();
     }

@@ -28,10 +28,10 @@ package io.spine.server;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth8;
-import io.spine.base.Environment;
-import io.spine.base.EnvironmentType;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.Environment;
+import io.spine.environment.EnvironmentType;
+import io.spine.environment.Production;
+import io.spine.environment.Tests;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.given.environment.Local;

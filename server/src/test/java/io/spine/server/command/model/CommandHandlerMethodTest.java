@@ -27,6 +27,7 @@
 package io.spine.server.command.model;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
@@ -69,7 +70,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -208,7 +209,7 @@ class CommandHandlerMethodTest {
         }
 
         private void checkIllegalOutcome(DispatchOutcome outcome, Command command) {
-            assertThat(outcome)
+            ProtoTruth.assertThat(outcome)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(DispatchOutcome
                                        .newBuilder()

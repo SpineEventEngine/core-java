@@ -42,8 +42,6 @@ import io.spine.time.LocalDates;
 
 import java.time.LocalDate;
 
-import static io.spine.time.LocalDates.toJavaTime;
-
 /**
  * A test environment {@code EventReactor} class.
  *
@@ -59,7 +57,7 @@ public class ConferenceSetup implements EventReactor {
     @React // Just pretend that the event is external.
     SpeakersInvited invitationPolicy(@External ConferenceAnnounced event) {
         LocalDate speakerSubmissionDeadline =
-                toJavaTime(event.getDate()).plusWeeks(3);
+                event.getDate().toJavaTime().plusWeeks(3);
         return SpeakersInvited
                 .newBuilder()
                 .setConference(event.getConference())

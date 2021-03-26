@@ -56,6 +56,7 @@ import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Base class for testing the {@linkplain Transaction transactions} for different
@@ -426,7 +427,8 @@ public abstract class TransactionTest<I,
     protected final void advanceVersionFromEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
-        assertEquals(entity.version(), tx.version());
+        assertThat(tx.version())
+                .isEqualTo(entity.version());
 
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);

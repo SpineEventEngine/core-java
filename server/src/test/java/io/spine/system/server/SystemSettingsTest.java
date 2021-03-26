@@ -26,9 +26,9 @@
 
 package io.spine.system.server;
 
-import io.spine.base.Environment;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.Environment;
+import io.spine.environment.Production;
+import io.spine.environment.Tests;
 import io.spine.server.given.environment.Local;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

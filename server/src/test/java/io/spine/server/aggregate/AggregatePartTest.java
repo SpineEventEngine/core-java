@@ -118,7 +118,8 @@ class AggregatePartTest {
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
         AggTask task = taskCommentsPart.partState(AggTask.class);
-        assertEquals(ASSIGNEE, task.getAssignee());
+        assertThat(task.getAssignee())
+                .isEqualTo(ASSIGNEE);
     }
 
     private void assertEntityCount(Class<? extends EntityState<?>> stateType, int expectedCount) {

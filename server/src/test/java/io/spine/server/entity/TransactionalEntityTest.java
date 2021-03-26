@@ -34,14 +34,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.testing.TestValues.newUuidValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("rawtypes")   // for simplicity
-@DisplayName("TransactionalEntity should")
+@DisplayName("`TransactionalEntity` should")
 class TransactionalEntityTest {
 
     @Nested
@@ -127,7 +130,8 @@ class TransactionalEntityTest {
         Transaction tx = new StubTransaction(entity, true, true);
         entity.injectTransaction(tx);
 
-        assertEquals(tx, entity.transaction());
+        assertThat(entity.transaction())
+                .isEqualTo(tx);
     }
 
     @SuppressWarnings("unchecked")  // OK for the test.
@@ -223,7 +227,8 @@ class TransactionalEntityTest {
             EntityState modifiedState = toBuilder(entity)
                     .build();
 
-            assertThat(newState).isEqualTo(modifiedState);
+            assertThat(newState)
+                    .isEqualTo(modifiedState);
         }
     }
 

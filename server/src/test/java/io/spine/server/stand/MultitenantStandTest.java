@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.server.stand.given.StandTestEnv.createRequestFactory;
 import static io.spine.server.stand.given.StandTestEnv.einCustomer;
+import static io.spine.server.stand.given.StandTestEnv.newStand;
 import static io.spine.server.stand.given.StandTestEnv.subscribeAndActivate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

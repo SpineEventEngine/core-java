@@ -45,6 +45,8 @@ import static io.spine.option.EntityOption.Visibility.FULL;
 import static io.spine.option.EntityOption.Visibility.NONE;
 import static io.spine.option.EntityOption.Visibility.QUERY;
 import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EntityVisibility should")
 class EntityVisibilityTest {

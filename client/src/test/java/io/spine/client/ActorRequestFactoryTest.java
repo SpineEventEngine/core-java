@@ -35,8 +35,6 @@ import io.spine.test.client.TestEntity;
 import io.spine.time.Temporals;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -90,7 +88,10 @@ class ActorRequestFactoryTest {
 
     @SuppressWarnings("deprecation")
     private static void setDeprecatedDefaultsToo(NullPointerTester tester) {
-        tester.setDefault(ZoneOffset.class, ZoneOffsets.utc());
+        tester.setDefault(
+                io.spine.time.ZoneOffset.class,
+                io.spine.time.ZoneOffset.getDefaultInstance()
+        );
     }
 
     @Test

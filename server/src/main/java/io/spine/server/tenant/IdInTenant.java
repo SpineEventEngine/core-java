@@ -59,7 +59,7 @@ public final class IdInTenant<I> {
      */
     public static <I> IdInTenant<I> of(I id, boolean multitenant) {
         checkNotNull(id);
-        TenantId tenant = TenantAware.getCurrentTenant(multitenant);
+        TenantId tenant = TenantAware.currentTenant(multitenant);
         return new IdInTenant<>(id, tenant);
     }
 

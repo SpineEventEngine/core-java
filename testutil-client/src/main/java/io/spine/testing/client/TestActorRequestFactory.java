@@ -40,8 +40,6 @@ import io.spine.testing.client.command.TestCommandMessage;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
@@ -150,11 +148,11 @@ public class TestActorRequestFactory extends ActorRequestFactory {
      * @deprecated please use {@link #zoneId()}.
      */
     @Deprecated
-    public static ZoneOffset toOffset(ZoneId zoneId) {
+    public static io.spine.time.ZoneOffset toOffset(ZoneId zoneId) {
         java.time.ZoneOffset offset =
                 ZoneIds.toJavaTime(zoneId)
                        .getRules()
                        .getOffset(Instant.now());
-        return ZoneOffsets.of(offset);
+        return io.spine.time.ZoneOffsets.of(offset);
     }
 }

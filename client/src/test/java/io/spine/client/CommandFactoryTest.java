@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.client.given.ActorRequestFactoryTestEnv.ACTOR;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_OFFSET;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
 import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
 import static io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND;
@@ -106,7 +105,6 @@ class CommandFactoryTest {
             ActorRequestFactory mtFactory = requestFactoryBuilder()
                     .setTenantId(tenantId)
                     .setActor(ACTOR)
-                    .setZoneOffset(ZONE_OFFSET)
                     .build();
             Command command = mtFactory.command().create(command());
             assertEquals(tenantId, command.context()

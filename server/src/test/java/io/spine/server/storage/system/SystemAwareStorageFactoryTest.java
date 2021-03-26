@@ -28,9 +28,9 @@ package io.spine.server.storage.system;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
-import io.spine.base.Environment;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.Environment;
+import io.spine.environment.Production;
+import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
