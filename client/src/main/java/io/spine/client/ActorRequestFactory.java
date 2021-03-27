@@ -246,7 +246,8 @@ public class ActorRequestFactory {
          * @deprecated please use {@link #getZoneId()} instead
          */
         @Deprecated
-        public io.spine.time.@Nullable ZoneOffset getZoneOffset() {
+        @SuppressWarnings("ReturnOfNull")
+        public io.spine.time.ZoneOffset getZoneOffset() {
             return null;
         }
 
