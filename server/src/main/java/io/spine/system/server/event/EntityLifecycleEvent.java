@@ -29,6 +29,7 @@ package io.spine.system.server.event;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
+import io.spine.base.EventMessage;
 import io.spine.core.MessageId;
 import io.spine.type.TypeUrl;
 
@@ -38,7 +39,7 @@ import io.spine.type.TypeUrl;
 @Immutable
 @GeneratedMixin
 @Internal
-public interface EntityLifecycleEvent {
+public interface EntityLifecycleEvent extends EventMessage {
 
     MessageId getEntity();
 
