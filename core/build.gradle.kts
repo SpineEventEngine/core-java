@@ -31,9 +31,6 @@ val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
 dependencies {
-    api("io.spine:spine-base:$spineBaseVersion")
-    api("io.spine:spine-time:$spineTimeVersion")
-
     testImplementation(project(":testutil-core"))
     testImplementation("io.spine.tools:spine-testutil-time:$spineTimeVersion")
 }

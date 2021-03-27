@@ -160,15 +160,9 @@ subprojects {
             errorprone(errorProne.core)
             errorproneJavac(errorProne.javacPlugin)
 
-            protobuf.libs.forEach { api(it) }
-            api(flogger.lib)
-            implementation(guava.lib)
-            implementation(guava.lib)
-            implementation(checker.annotations)
-            implementation(jsr305Annotations)
-            errorProne.annotations.forEach { implementation(it) }
+            api("io.spine:spine-base:$spineBaseVersion")
+            api("io.spine:spine-time:$spineTimeVersion")
         }
-        implementation(kotlin("stdlib-jdk8"))
 
         Deps.test.apply {
             testImplementation(guavaTestlib)
