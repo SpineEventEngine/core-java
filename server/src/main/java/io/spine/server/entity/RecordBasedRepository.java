@@ -207,7 +207,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                                        .getFilters();
         Iterator<E> entities = find(filters, ResponseFormat.getDefaultInstance());
 
-        Deque<E> toStore = newLinkedList();
+        Deque<E> migratedEntities = newLinkedList();
         while (entities.hasNext()) {
             E entity = entities.next();
             migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
@@ -215,11 +215,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                 I id = entity.id();
                 delete(id, migration);
             } else {
-                toStore.add(entity);
+                migratedEntities.add(entity);
             }
             migration.finishCurrentOperation();
         }
-        store(toStore);
+        store(migratedEntities);
     }
 
     @Override
