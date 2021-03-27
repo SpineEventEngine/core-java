@@ -43,11 +43,13 @@ public final class BbProjectFailerProcess
         extends ProcessManager<BbProjectId, BbProjectFailer, BbProjectFailer.Builder> {
 
     @Assign
+    @SuppressWarnings("DoNotCallSuggester") // Does not apply to this test env. case.
     BbProjectFailed on(BbFailProject c) {
         throw new RuntimeException("Command handling failed unexpectedly.");
     }
 
     @React
+    @SuppressWarnings("DoNotCallSuggester") // Does not apply to this test env. case.
     Nothing on(BbProjectFailed e) {
         throw new RuntimeException("Reaction on the event failed unexpectedly.");
     }
