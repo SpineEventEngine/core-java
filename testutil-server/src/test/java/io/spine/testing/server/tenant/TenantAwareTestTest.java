@@ -52,7 +52,7 @@ class TenantAwareTestTest {
         @Test
         @DisplayName("multi-tenant context")
         void forMultiTenant() {
-            TenantIndex index = TenantAwareTest.createTenantIndex(false);
+            TenantIndex index = TenantAwareTest.createTenantIndex(true);
 
             // Check that the index is empty. It's enough for the purpose of this test.
             assertThat(index.all()).isEmpty();
