@@ -315,14 +315,7 @@ class ChangesTest extends UtilityClassTest<Changes> {
         @DisplayName("`int32`")
         void int32s() {
             int value = 1614;
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
-        }
-
-        @Test
-        @DisplayName("`int64`")
-        void int64s() {
-            long value = 1666L;
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(value, value));
+            assertThrows(IllegalArgumentException.class, () -> Changes.ofInt32(value, value));
         }
 
         @Test
@@ -333,13 +326,6 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("`uint64`")
-        void uint64s() {
-            long value = 1690L;
-            assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt64(value, value));
-        }
-
-        @Test
         @DisplayName("`sint32`")
         void sint32s() {
             int value = 1694;
@@ -347,17 +333,31 @@ class ChangesTest extends UtilityClassTest<Changes> {
         }
 
         @Test
-        @DisplayName("`sint64`")
-        void sint64s() {
-            long value = 1729L;
-            assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt64(value, value));
-        }
-
-        @Test
         @DisplayName("`fixed32`")
         void fixed32s() {
             int value = 1736;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofFixed32(value, value));
+        }
+
+        @Test
+        @DisplayName("`int64`")
+        void int64s() {
+            long value = 1666L;
+            assertThrows(IllegalArgumentException.class, () -> Changes.ofInt64(value, value));
+        }
+
+        @Test
+        @DisplayName("`uint64`")
+        void uint64s() {
+            long value = 1690L;
+            assertThrows(IllegalArgumentException.class, () -> Changes.ofUInt64(value, value));
+        }
+
+        @Test
+        @DisplayName("`sint64`")
+        void sint64s() {
+            long value = 1729L;
+            assertThrows(IllegalArgumentException.class, () -> Changes.ofSInt64(value, value));
         }
 
         @Test
