@@ -41,7 +41,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.Versions.increment;
 import static io.spine.protobuf.Messages.isDefault;
 
@@ -89,14 +89,44 @@ public abstract class Migration<I,
      * Applies the migration {@linkplain Operation operation} to a given {@code entity}.
      */
     final void applyTo(E entity, RecordBasedRepository<I, E, S> repository) {
-        currentOperation = new Operation<>(entity, repository);
+        startOperation(entity, repository);
+        applyTo(entity);
+    }
 
+    private void startOperation(E entity, RecordBasedRepository<I, E, S> repository) {
+        currentOperation = new Operation<>(entity, repository);
+    }
+
+    private void applyTo(E entity) {
         Transaction<I, E, S, ?> tx = txWithLifecycleMonitor();
         S oldState = entity.state();
         S newState = apply(oldState);
-        currentOperation().updateState(newState);
-        currentOperation().updateLifecycle();
+        Operation<I, S, E> op = currentOperation();
+        op.updateState(newState);
+        op.updateLifecycle();
         tx.commit();
+    }
+
+    /**
+     * Releases the {@linkplain #currentOperation currently performed operation}.
+     *
+     * <p>This method is used by Spine routines to reset the {@code Migration} instance passed to
+     * {@link RecordBasedRepository#applyMigration(Object, Migration)
+     * repository.applyMigration(I, Migration)}. It shouldn't be invoked by the user code directly.
+     */
+    final void finishCurrentOperation() {
+        currentOperation = null;
+    }
+
+    private boolean isOperationInProgress() {
+        return currentOperation != null;
+    }
+
+    private Operation<I, S, E> currentOperation() {
+        checkState(isOperationInProgress(),
+                   "Getter and mutator methods of migration should only be invoked " +
+                           "from within `apply(S)` method.");
+        return currentOperation;
     }
 
     /**
@@ -160,7 +190,6 @@ public abstract class Migration<I,
      * Returns {@code true} if the migration operation is configured to physically remove entity
      * record from the storage.
      */
-    @Internal
     final boolean physicallyRemoveRecord() {
         return currentOperation().physicallyRemoveRecord();
     }
@@ -170,21 +199,8 @@ public abstract class Migration<I,
      *
      * <p>If system events posting is disabled, returns an empty {@code Optional}.
      */
-    @Internal
     final Optional<Event> systemEvent() {
         return Optional.ofNullable(currentOperation().systemEvent());
-    }
-
-    /**
-     * Releases the {@linkplain #currentOperation currently performed operation}.
-     *
-     * <p>This method is used by Spine routines to reset the {@code Migration} instance passed to
-     * {@link RecordBasedRepository#applyMigration(Object, Migration)
-     * repository.applyMigration(I, Migration)}. It shouldn't be invoked by the user code directly.
-     */
-    @Internal
-    final void finishCurrentOperation() {
-        currentOperation = null;
     }
 
     /**
@@ -229,12 +245,6 @@ public abstract class Migration<I,
     private void warnOnNoSystemEventsPosted() {
         _warn().log("Couldn't post an instance of `%s` event. No system events will occur " +
                             "during the migration.", MigrationApplied.class.getCanonicalName());
-    }
-
-    private Operation<I, S, E> currentOperation() {
-        return checkNotNull(currentOperation,
-                            "Getter and mutator methods of migration should only be invoked " +
-                                    "from within `apply(S)` method.");
     }
 
     /**
