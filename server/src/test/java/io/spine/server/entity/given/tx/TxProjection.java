@@ -74,6 +74,7 @@ public final class TxProjection
      * @see io.spine.server.projection.ProjectionTransactionTest#failingInHandler
      */
     @Subscribe
+    @SuppressWarnings("DoNotCallSuggester") // Does not apply to this test env. class.
     void event(TxErrorRequested e) {
         throw new RuntimeException("that tests the projection tx behaviour");
     }

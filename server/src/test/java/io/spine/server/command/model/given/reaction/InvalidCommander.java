@@ -112,11 +112,13 @@ public final class InvalidCommander extends AbstractCommander {
     }
 
     @React
+    @SuppressWarnings("DoNotCallSuggester") // Not relevant in this case of to test data.
     SigTaskStarted declaredThrowable(SigTaskAddedToProject event) throws IOException {
         throw new IOException("An invalid commander method has thrown an exception");
     }
 
     @React
+    @SuppressWarnings("DoNotCallSuggester") // Not relevant in this case of to test data.
     SigTaskStarted declaredRejection(SigTaskAddedToProject e) throws SigCannotCreateProject {
         throw EventMessages.cannotCreateProject();
     }

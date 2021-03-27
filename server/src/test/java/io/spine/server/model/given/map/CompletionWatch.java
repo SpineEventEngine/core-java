@@ -24,30 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.given.map;
 
-import io.spine.server.event.React;
-import io.spine.server.event.given.InvalidReactor;
-import io.spine.server.event.given.ValidReactor;
-import io.spine.server.model.MethodSignatureTest;
+import io.spine.core.Subscribe;
+import io.spine.model.contexts.projects.command.SigCreateProject;
+import io.spine.model.contexts.projects.command.SigStartProject;
+import io.spine.model.contexts.projects.rejection.ProjectRejections;
+import io.spine.server.event.AbstractEventSubscriber;
 
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
+/**
+ * A test environment for the rejection subscriptions tests.
+ *
+ * <p>The subscriber is interested in the rejection thrown upon trying to
+ * {@linkplain SigStartProject start} the project, but not in rejections thrown when the project
+ * is just being {@linkplain SigCreateProject created}.
+ */
+public final class CompletionWatch extends AbstractEventSubscriber {
 
-class EventReactorSignatureTest extends MethodSignatureTest<EventReactorSignature> {
-
-    @Override
-    protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(React.class, ValidReactor.class).stream();
-    }
-
-    @Override
-    protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(React.class, InvalidReactor.class).stream();
-    }
-
-    @Override
-    protected EventReactorSignature signature() {
-        return new EventReactorSignature();
+    @Subscribe
+    void on(ProjectRejections.SigProjectAlreadyCompleted rejection, SigStartProject cmd) {
+        // do nothing.
     }
 }

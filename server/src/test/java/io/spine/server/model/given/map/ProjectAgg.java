@@ -26,70 +26,48 @@
 
 package io.spine.server.model.given.map;
 
-import io.spine.core.Subscribe;
 import io.spine.model.contexts.projects.Project;
 import io.spine.model.contexts.projects.ProjectId;
 import io.spine.model.contexts.projects.command.SigCreateProject;
 import io.spine.model.contexts.projects.command.SigStartProject;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.model.contexts.projects.event.SigProjectStarted;
-import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.model.contexts.projects.rejection.SigProjectAlreadyCompleted;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.AbstractEventSubscriber;
 
-public final class RejectionsDispatchingTestEnv {
+/**
+ * A test aggregate that throws {@link SigProjectAlreadyCompleted} rejection for any
+ * handled command.
+ */
+public final class ProjectAgg extends Aggregate<ProjectId, Project, Project.Builder> {
 
-    private RejectionsDispatchingTestEnv() {
+    @Assign
+    @SuppressWarnings("DoNotCallSuggester") // Does not apply to this test env. class
+    SigProjectStarted handle(SigStartProject c) throws SigProjectAlreadyCompleted {
+        throw SigProjectAlreadyCompleted
+                .newBuilder()
+                .setProject(c.getId())
+                .build();
     }
 
-    /**
-     * A test aggregate that throws {@link SigProjectAlreadyCompleted} rejection for any
-     * handled command.
-     */
-    public static final class ProjectAgg extends Aggregate<ProjectId, Project, Project.Builder> {
-
-        @Assign
-        SigProjectStarted handle(SigStartProject c) throws SigProjectAlreadyCompleted {
-            throw SigProjectAlreadyCompleted
-                    .newBuilder()
-                    .setProject(c.getId())
-                    .build();
-        }
-
-        @Assign
-        SigProjectCreated handle(SigCreateProject c) throws SigProjectAlreadyCompleted {
-            throw SigProjectAlreadyCompleted
-                    .newBuilder()
-                    .setProject(c.getId())
-                    .build();
-        }
-
-        @Apply
-        private void on(SigProjectStarted e) {
-            // do nothing.
-        }
-
-        @Apply
-        private void on(SigProjectCreated e) {
-            // do nothing.
-        }
+    @Assign
+    @SuppressWarnings("DoNotCallSuggester") // Does not apply to this test env. class
+    SigProjectCreated handle(SigCreateProject c) throws SigProjectAlreadyCompleted {
+        throw SigProjectAlreadyCompleted
+                .newBuilder()
+                .setProject(c.getId())
+                .build();
     }
 
-    /**
-     * A test environment for the rejection subscriptions tests.
-     *
-     * <p>The subscriber is interested in the rejection thrown upon trying to
-     * {@linkplain SigStartProject start} the project, but not in rejections thrown when the project
-     * is just being {@linkplain SigCreateProject created}.
-     */
-    public static final class CompletionWatch extends AbstractEventSubscriber {
+    @Apply
+    private void on(SigProjectStarted e) {
+        // do nothing.
+    }
 
-        @Subscribe
-        void on(ProjectRejections.SigProjectAlreadyCompleted rejection, SigStartProject cmd) {
-            // do nothing.
-        }
+    @Apply
+    private void on(SigProjectCreated e) {
+        // do nothing.
     }
 }
