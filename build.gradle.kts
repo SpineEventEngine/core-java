@@ -159,17 +159,14 @@ subprojects {
         Deps.build.apply {
             errorprone(errorProne.core)
             errorproneJavac(errorProne.javacPlugin)
-
             api("io.spine:spine-base:$spineBaseVersion")
             api("io.spine:spine-time:$spineTimeVersion")
         }
 
         Deps.test.apply {
-            testImplementation(guavaTestlib)
             testImplementation(junit.runner)
-            testImplementation(junit.pioneer)
-            junit.api.forEach { testImplementation(it) }
         }
+        testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }
 
@@ -182,7 +179,8 @@ subprojects {
                     "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
 
                     "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
+                    "io.spine:spine-time:$spineTimeVersion",
+                    "io.spine.tools:spine-testlib:$spineBaseVersion"
                 )
             }
         }
