@@ -127,13 +127,13 @@ public final class InvalidReactor extends AbstractEventReactor {
     }
 
     @React
-    @SuppressWarnings("DoNotCallSuggester")
-        // Always throws for the purpose of the tests.
+    @SuppressWarnings("DoNotCallSuggester") // Always throws for the purpose of the tests.
     SigTaskStarted declaredThrowable(SigTaskAddedToProject event) throws IOException {
         throw new IOException("An invalid reactor method has thrown an exception");
     }
 
     @React
+    @SuppressWarnings("DoNotCallSuggester") // Always throws for the purpose of the tests.
     SigTaskStarted declaredRejection(SigTaskAddedToProject e) throws SigCannotCreateProject {
         throw SigCannotCreateProject.newBuilder()
                                     .build();
@@ -143,7 +143,7 @@ public final class InvalidReactor extends AbstractEventReactor {
         return SigTaskStarted.getDefaultInstance();
     }
 
-    static SigProjectCreated projectCreated() {
+    private static SigProjectCreated projectCreated() {
         return SigProjectCreated.getDefaultInstance();
     }
 }
