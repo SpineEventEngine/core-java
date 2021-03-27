@@ -29,7 +29,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
@@ -486,8 +485,7 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
-    @VisibleForTesting
-    final void rollback(Event cause) {
+    private void rollback(Event cause) {
         doRollback(record -> listener().onTransactionFailed(cause, record));
     }
 
@@ -526,7 +524,7 @@ public abstract class Transaction<I,
         E entity = entity();
         Any entityId = Identifier.pack(entity.id());
         Version version = entity.version();
-        Any state = pack((Message) entity.state());
+        Any state = pack(entity.state());
         LifecycleFlags lifecycleFlags = entity.lifecycleFlags();
         return EntityRecord
                 .newBuilder()
@@ -557,7 +555,7 @@ public abstract class Transaction<I,
     final void initAll(S state, Version version) {
         B builder = builder();
         builder.clear();
-        builder.mergeFrom((Message) state);
+        builder.mergeFrom(state);
         initVersion(version);
     }
 
