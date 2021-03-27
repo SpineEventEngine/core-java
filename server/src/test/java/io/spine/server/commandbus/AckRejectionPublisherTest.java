@@ -73,17 +73,17 @@ class AckRejectionPublisherTest {
         Command command = requestFactory.generateCommand();
         CommandEnvelope origin = CommandEnvelope.of(command);
 
-        CmdBusEntryDenied RejectionThrowable = CmdBusEntryDenied
+        CmdBusEntryDenied throwable = CmdBusEntryDenied
                 .newBuilder()
                 .setId(CmdBusCaffetteriaId.generate())
                 .setVisitorCount(15)
                 .setReason("Test command bus rejection.")
                 .build();
-        RejectionEnvelope rejection = RejectionEnvelope.from(origin, RejectionThrowable);
+        RejectionEnvelope rejection = RejectionEnvelope.from(origin, throwable);
         Ack ack = Acks.reject(CommandId.generate(), rejection);
         publisher.onNext(ack);
         assertThat(listener.lastReceived).isNotNull();
-        assertThat(listener.lastReceived.message()).isEqualTo(RejectionThrowable.messageThrown());
+        assertThat(listener.lastReceived.message()).isEqualTo(throwable.messageThrown());
     }
 
     @Test
