@@ -233,6 +233,7 @@ public class EventReactorSignatureTestEnv {
         }
 
         @React
+        @SuppressWarnings("DoNotCallSuggester") // Always throws for the purpose of the tests.
         SigTaskStarted declaredThrowable(SigTaskAddedToProject event) throws IOException {
             throw new IOException("An invalid reactor method has thrown an exception");
         }
