@@ -77,8 +77,8 @@ val spineTimeVersion: String by extra
 
 spinePublishing {
     targetRepositories.addAll(setOf(
-        PublishingRepos.cloudRepo,
-        PublishingRepos.gitHub("core-java")
+        PublishingRepos.cloudRepo
+        //, PublishingRepos.gitHub("core-java")
     ))
     projectsToPublish.addAll(
         "core",
