@@ -82,8 +82,10 @@ class AckRejectionPublisherTest {
         RejectionEnvelope rejection = RejectionEnvelope.from(origin, throwable);
         Ack ack = Acks.reject(CommandId.generate(), rejection);
         publisher.onNext(ack);
-        assertThat(listener.lastReceived).isNotNull();
-        assertThat(listener.lastReceived.message()).isEqualTo(throwable.messageThrown());
+        assertThat(listener.lastReceived)
+                .isNotNull();
+        assertThat(listener.lastReceived.message())
+                .isEqualTo(throwable.messageThrown());
     }
 
     @Test
@@ -91,7 +93,8 @@ class AckRejectionPublisherTest {
     void ignoreNonRejection() {
         Ack ack = Acks.acknowledge(CommandId.generate());
         publisher.onNext(ack);
-        assertThat(listener.lastReceived).isNull();
+        assertThat(listener.lastReceived)
+                .isNull();
     }
 
     @Test
@@ -100,7 +103,8 @@ class AckRejectionPublisherTest {
         RuntimeException exception = new RuntimeException("Test Ack publisher exception.");
         IllegalStateException thrown = assertThrows(IllegalStateException.class,
                                                     () -> publisher.onError(exception));
-        assertThat(thrown.getCause()).isEqualTo(exception);
+        assertThat(thrown.getCause())
+                .isEqualTo(exception);
     }
 
     private static class MemoizingListener implements Listener<EventEnvelope> {
