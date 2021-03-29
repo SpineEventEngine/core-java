@@ -46,7 +46,8 @@ class TenantAwareTestTest {
             TenantIndex index = TenantAwareTest.createTenantIndex(false);
 
             // Check that it already has one tenant. It's enough for the purpose of this test.
-            assertThat(index.all()).hasSize(1);
+            assertThat(index.all())
+                .hasSize(1);
         }
 
         @Test
@@ -55,7 +56,8 @@ class TenantAwareTestTest {
             TenantIndex index = TenantAwareTest.createTenantIndex(true);
 
             // Check that the index is empty. It's enough for the purpose of this test.
-            assertThat(index.all()).isEmpty();
+            assertThat(index.all())
+                .isEmpty();
         }
     }
 }
