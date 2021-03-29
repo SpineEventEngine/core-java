@@ -71,7 +71,5 @@ fun <I,
  * @apiNote We employ the fact that we are in the same package with [TransactionalEntity] and
  * because of this can access its `protected` API.
  */
-private fun <I,
-        S : EntityState<I>,
-        B : ValidatingBuilder<S>>
+private fun <I, S : EntityState<I>, B : ValidatingBuilder<S>>
         builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
