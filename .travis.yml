@@ -16,6 +16,7 @@ env:
     # This email is used as a commit author email when updating the Javadoc hosted on GitHub Pages.
     # See `scripts/update-gh-pages.gradle`
     - FORMAL_GIT_HUB_PAGES_AUTHOR: "developers@spine.io"
+    - REPO_SLUG: "$TRAVIS_REPO_SLUG"
 
 before_install:
   - chmod +x gradlew
