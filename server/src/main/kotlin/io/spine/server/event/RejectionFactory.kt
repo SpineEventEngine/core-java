@@ -36,11 +36,13 @@ import io.spine.server.type.CommandEnvelope
 /**
  * A factory for producing rejection events.
  */
-internal class RejectionFactory(val origin: CommandEnvelope, val throwable: RejectionThrowable) :
-    EventFactory(
-        EventOrigin.fromAnotherMessage(origin),
-        throwable.producerId().orElse(PRODUCER_UNKNOWN)
-    ) {
+internal class RejectionFactory(
+    val origin: CommandEnvelope,
+    val throwable: RejectionThrowable
+) : EventFactory(
+    EventOrigin.fromAnotherMessage(origin),
+    throwable.producerId().orElse(PRODUCER_UNKNOWN)
+) {
 
     /**
      * Creates a rejection event which does not have version information.
