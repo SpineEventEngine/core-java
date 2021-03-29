@@ -73,8 +73,8 @@ public interface VersionMixin extends VersionOrBuilder, FieldAwareMessage, WithT
         return number() <= other.getNumber();
     }
 
-    @Override
     @Internal
+    @Override
     default Object readValue(FieldDescriptor field) {
         switch (field.getIndex()) {
             case 0:
