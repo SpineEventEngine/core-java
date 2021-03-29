@@ -46,7 +46,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.spine.testing.Assertions.assertIllegalState;
 
 @DisplayName("`AckRejectionPublisher` should")
 class AckRejectionPublisherTest {
@@ -101,8 +101,7 @@ class AckRejectionPublisherTest {
     @DisplayName("re-throw an error passed to `onError` as `IllegalStateException`")
     void rethrowError() {
         RuntimeException exception = new RuntimeException("Test Ack publisher exception.");
-        IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                                                    () -> publisher.onError(exception));
+        IllegalStateException thrown = assertIllegalState(() -> publisher.onError(exception));
         assertThat(thrown.getCause())
                 .isEqualTo(exception);
     }
