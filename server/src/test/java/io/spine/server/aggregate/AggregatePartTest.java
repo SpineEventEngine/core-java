@@ -63,7 +63,6 @@ import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.com
 import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.createTask;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("AggregatePart should")
 class AggregatePartTest {
@@ -119,7 +118,8 @@ class AggregatePartTest {
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
         AggTask task = taskCommentsPart.partState(AggTask.class);
-        assertEquals(ASSIGNEE, task.getAssignee());
+        assertThat(task.getAssignee())
+                .isEqualTo(ASSIGNEE);
     }
 
     private void assertEntityCount(Class<? extends EntityState<?>> stateType, int expectedCount) {

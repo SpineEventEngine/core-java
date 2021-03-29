@@ -29,7 +29,7 @@ package io.spine.server.command.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.server.EventProducer;
 import io.spine.server.dispatch.Success;
 import io.spine.server.event.RejectionEnvelope;
@@ -77,8 +77,8 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
         @SuppressWarnings("unchecked") // The cast is safe as we filter before.
         ImmutableSet<EventClass> result =
                 Arrays.stream(exceptionTypes)
-                      .filter(ThrowableMessage.class::isAssignableFrom)
-                      .map(c -> (Class<ThrowableMessage>) c)
+                      .filter(RejectionThrowable.class::isAssignableFrom)
+                      .map(c -> (Class<RejectionThrowable>) c)
                       .map(EventClass::fromThrowable)
                       .collect(toImmutableSet());
         return result;
@@ -86,9 +86,9 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
 
     @Override
     protected final Optional<Success>
-    handleRejection(ThrowableMessage throwableMessage, T target, CommandEnvelope origin) {
-        throwableMessage.initProducer(target.producerId());
-        RejectionEnvelope envelope = RejectionEnvelope.from(origin, throwableMessage);
+    handleRejection(RejectionThrowable throwable, T target, CommandEnvelope origin) {
+        throwable.initProducer(target.producerId());
+        RejectionEnvelope envelope = RejectionEnvelope.from(origin, throwable);
         Success success = Success
                 .newBuilder()
                 .setRejection(envelope.outerObject())

@@ -193,8 +193,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
             case LESS_OR_EQUALS:
                 result = createFilter(colName, value, LESS_OR_EQUAL); break;
             default:
-                throw newIllegalStateException("Unsupported comparison operator `%s`",
-                                               comparison);
+                throw newIllegalStateException("Unsupported comparison operator `%s`.", comparison);
         }
         return result;
     }

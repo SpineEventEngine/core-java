@@ -35,7 +35,6 @@ import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
@@ -50,6 +49,7 @@ import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.Iterator;
 import java.util.List;

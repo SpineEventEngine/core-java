@@ -28,8 +28,8 @@ package io.spine.server.trace;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.base.Tests;
 import io.spine.core.Command;
+import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;

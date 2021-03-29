@@ -30,7 +30,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -78,11 +78,12 @@ import static java.util.stream.Collectors.joining;
  *         the type of the produced message classes
  */
 @Immutable
-public abstract class AbstractHandlerMethod<T,
-                                            M extends Message,
-                                            C extends MessageClass<M>,
-                                            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
-                                            R extends MessageClass<?>>
+public abstract
+class AbstractHandlerMethod<T,
+                            M extends Message,
+                            C extends MessageClass<M>,
+                            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
+                            R extends MessageClass<?>>
         implements HandlerMethod<T, C, E, R> {
 
     /** The method to be called. */
@@ -102,7 +103,7 @@ public abstract class AbstractHandlerMethod<T,
      * <p>This field is initialized in {@link #discoverAttributes()} to allow derived classes to
      * {@linkplain #attributeSuppliers() customize} the set of supported method attributes.
      */
-    @SuppressWarnings("Immutable")
+    @SuppressWarnings({"Immutable", "NonFinalFieldInImmutable"})
     private ImmutableSet<Attribute<?>> attributes;
 
     /**
@@ -275,8 +276,8 @@ public abstract class AbstractHandlerMethod<T,
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
             checkNotNull(cause);
-            if (cause instanceof ThrowableMessage) {
-                Success success = asRejection(target, envelope, cause);
+            if (cause instanceof RejectionThrowable) {
+                Success success = asRejection(target, envelope, (RejectionThrowable) cause);
                 outcome.setSuccess(success);
             } else {
                 Error error = causeOf(cause);
@@ -299,9 +300,8 @@ public abstract class AbstractHandlerMethod<T,
         return toSuccessfulOutcome(rawOutput, target, envelope);
     }
 
-    private Success asRejection(T target, E envelope, Throwable cause) {
-        ThrowableMessage throwable = (ThrowableMessage) cause;
-        Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
+    private Success asRejection(T target, E envelope, RejectionThrowable cause) {
+        Optional<Success> maybeSuccess = handleRejection(cause, target, envelope);
         return maybeSuccess.orElseThrow(this::cannotThrowRejections);
     }
 
@@ -310,8 +310,7 @@ public abstract class AbstractHandlerMethod<T,
         return new IllegalOutcomeException(errorMessage);
     }
 
-    protected Optional<Success> handleRejection(ThrowableMessage throwableMessage, T target,
-                                                E origin) {
+    protected Optional<Success> handleRejection(RejectionThrowable throwable, T target, E origin) {
         return Optional.empty();
     }
 
@@ -344,9 +343,10 @@ public abstract class AbstractHandlerMethod<T,
         String className = method.getDeclaringClass()
                                  .getName();
         String methodName = method.getName();
-        String parameterTypes = Stream.of(method.getParameterTypes())
-                                      .map(Class::getSimpleName)
-                                      .collect(joining(", "));
+        String parameterTypes =
+                Stream.of(method.getParameterTypes())
+                      .map(Class::getSimpleName)
+                      .collect(joining(", "));
         String result = format(template, className, methodName, parameterTypes);
         return result;
     }
@@ -370,8 +370,7 @@ public abstract class AbstractHandlerMethod<T,
         if (!(obj instanceof AbstractHandlerMethod)) {
             return false;
         }
-        AbstractHandlerMethod other = (AbstractHandlerMethod) obj;
-
+        AbstractHandlerMethod<?, ?, ?, ?, ?> other = (AbstractHandlerMethod<?, ?, ?, ?, ?>) obj;
         return Objects.equals(this.method, other.method);
     }
 

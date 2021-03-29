@@ -29,7 +29,7 @@ package io.spine.server.command.model;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.CommandContext;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.HandlerMethod;
@@ -57,7 +57,7 @@ abstract class CommandAcceptingSignature
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // to save on allocations.
     private static final Optional<Class<? extends Throwable>>
-            ALLOWED_THROWABLE = Optional.of(ThrowableMessage.class);
+            ALLOWED_THROWABLE = Optional.of(RejectionThrowable.class);
 
     CommandAcceptingSignature(Class<? extends Annotation> annotation) {
         super(annotation);
@@ -69,10 +69,10 @@ abstract class CommandAcceptingSignature
     }
 
     /**
-     * Returns {@code ThrowableMessage.class} wrapped into {@code Optional}.
+     * Returns {@code RejectionThrowable.class} wrapped into {@code Optional}.
      *
      * <p>The methods accepting commands may reject the command by throwing {@linkplain
-     * ThrowableMessage command rejections} which are based on {@code ThrowableMessage}.
+     * RejectionThrowable command rejections} which are based on {@code RejectionThrowable}.
      */
     @Override
     protected Optional<Class<? extends Throwable>> allowedThrowable() {

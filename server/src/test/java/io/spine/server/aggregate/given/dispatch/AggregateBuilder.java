@@ -30,10 +30,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EntityState;
 import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateTransaction;
 import io.spine.server.entity.EntityBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building aggregates for tests.

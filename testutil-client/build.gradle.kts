@@ -28,10 +28,12 @@ import io.spine.gradle.internal.Deps
 
 val spineTimeVersion: String by extra
 
+group = "io.spine.tools"
+
 dependencies {
     api(project(":client"))
     api(project(":testutil-core"))
-    api("io.spine:spine-testutil-time:$spineTimeVersion")
+    api("io.spine.tools:spine-testutil-time:$spineTimeVersion")
 
     implementation(Deps.grpc.protobuf)
 }

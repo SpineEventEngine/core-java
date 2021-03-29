@@ -35,7 +35,7 @@ dependencies {
     implementation(Deps.grpc.protobuf)
     implementation(Deps.grpc.core)
 
-    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
 }

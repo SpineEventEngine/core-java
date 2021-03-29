@@ -161,7 +161,8 @@ public final class QueryFactory {
      *         the property paths for the {@code FieldMask} applied to each of the results
      * @return an instance of {@code Query} formed according to the passed parameters
      */
-    public Query allWithMask(Class<? extends EntityState<?>> entityClass, String... maskPaths) {
+    public Query allWithMask(Class<? extends EntityState<?>> entityClass,
+                             String... maskPaths) {
         checkSpecified(entityClass);
         checkNotNull(maskPaths);
         FieldMask fieldMask = fromPaths(maskPaths);

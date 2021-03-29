@@ -87,15 +87,15 @@ apply {
 DependencyResolution.defaultRepositories(repositories)
 
 tasks.compileJava {
-    options.compilerArgs.addAll(listOf("-processor",
-                                       "io.spine.model.assemble.AssignLookup",
-                                       "-AspineDirRoot=${rootDir}"))
+    options.compilerArgs.addAll(listOf(
+        "-processor",
+        "io.spine.model.assemble.AssignLookup",
+        "-AspineDirRoot=${rootDir}"
+    ))
 }
 
 dependencies {
-    Deps.build.protobuf.forEach { implementation(it) }
     implementation("io.spine:spine-server:$versionToPublish")
-
     annotationProcessor("io.spine.tools:spine-model-assembler:$versionToPublish")
 }
 

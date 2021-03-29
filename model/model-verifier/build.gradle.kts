@@ -40,7 +40,7 @@ dependencies {
     implementation(project(":model-assembler"))
 
     testImplementation(gradleTestKit())
-    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
     testImplementation(project(":testutil-server"))
 }

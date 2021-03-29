@@ -97,8 +97,8 @@ class EventClassTest {
     }
 
     @Test
-    @DisplayName("obtain the value by `ThrowableMessage` class")
-    void byThrowableMessage() {
+    @DisplayName("obtain the value by `RejectionThrowable` class")
+    void byRejectionThrowable() {
         assertThat(EventClass.fromThrowable(PhoneNotFound.class).value())
                 .isEqualTo(TestRejections.PhoneNotFound.class);
     }

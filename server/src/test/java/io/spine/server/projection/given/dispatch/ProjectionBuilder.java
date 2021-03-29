@@ -30,10 +30,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EntityState;
 import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EntityBuilder;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionTransaction;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building test {@code Projection}s.

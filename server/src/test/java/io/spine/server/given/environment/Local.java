@@ -26,7 +26,7 @@
 
 package io.spine.server.given.environment;
 
-import io.spine.base.EnvironmentType;
+import io.spine.environment.EnvironmentType;
 
 /**
  * A custom environment for testing the {@link io.spine.server.ServerEnvironment} and

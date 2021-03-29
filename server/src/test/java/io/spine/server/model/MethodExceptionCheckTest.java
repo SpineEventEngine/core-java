@@ -27,7 +27,7 @@
 package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.server.model.given.StubMethodContainer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -72,7 +72,7 @@ class MethodExceptionCheckTest {
         @Test
         @DisplayName("allowed exception types descendants are thrown by method")
         void forAllowedDescendantsThrown() {
-            assertNoViolations(check(method("derivedException"), ThrowableMessage.class));
+            assertNoViolations(check(method("derivedException"), RejectionThrowable.class));
         }
 
         void assertNoViolations(MethodExceptionCheck check) {

@@ -114,14 +114,14 @@ class BusFilterTest {
 
     @Test
     @DisplayName("reject the message with a rejection")
-    void rejectWithThrowableMessage() {
+    void rejectWithRejectionThrowable() {
         ShareCannotBeTraded rejection = ShareCannotBeTraded
                 .newBuilder()
                 .setShare(ShareId.newBuilder().setValue(newUuid()).build())
                 .setReason("The test rejection.")
                 .build();
         BusFilter<CommandEnvelope> filter =
-                new BusFilters.RejectingWithThrowableMessage(rejection);
+                new BusFilters.RejectingWithRejectionThrowable(rejection);
         Optional<Ack> ack = filter.filter(commandEnvelope);
         assertThat(ack).isPresent();
 
@@ -136,7 +136,7 @@ class BusFilterTest {
 
     @Test
     @DisplayName("throw `IAE` when throwing business rejection from non-command-handling filter")
-    void failOnThrowableMessageForNonCommand() {
+    void failOnRejectionThrowableForNonCommand() {
         BusFilters.Throwing throwingFilter = new BusFilters.Throwing();
         assertThrows(IllegalArgumentException.class,
                      () -> throwingFilter.filter(eventEnvelope()));

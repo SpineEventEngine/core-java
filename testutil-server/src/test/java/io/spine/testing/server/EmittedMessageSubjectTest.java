@@ -30,9 +30,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.TruthFailureSubject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
-import io.spine.base.SerializableMessage;
 import io.spine.core.Signal;
 import io.spine.testing.SubjectTest;
+import io.spine.type.SerializableMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.generate;
 
 abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M>,
-                                         W extends Signal,
+                                         W extends Signal<?, ?, ?>,
                                          M extends SerializableMessage>
         extends SubjectTest<S, Iterable<W>> {
 

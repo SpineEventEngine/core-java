@@ -30,7 +30,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;

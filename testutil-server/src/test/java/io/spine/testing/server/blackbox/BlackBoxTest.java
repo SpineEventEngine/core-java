@@ -29,10 +29,10 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Subject;
+import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
-import io.spine.base.Tests;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -40,6 +40,7 @@ import io.spine.client.TopicFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.UserId;
+import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
@@ -52,7 +53,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.type.CommandClass;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
@@ -83,7 +83,6 @@ import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import io.spine.time.ZoneOffset;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,7 +94,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
@@ -566,7 +564,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
         }
 
         private void assertEnricher() {
-            assertThat(eventBus().enricher()).hasValue(enricher);
+            Truth8.assertThat(eventBus().enricher())
+                  .hasValue(enricher);
         }
 
         /**
@@ -780,15 +779,13 @@ abstract class BlackBoxTest<T extends BlackBox> {
                                          .get(0)
                                          .context()
                                          .actorContext();
-            ZoneOffset expectedOffset = TestActorRequestFactory.toOffset(zoneId);
+            ActorContext expected = ActorContext.newBuilder()
+                    .setActor(actor)
+                    .setZoneId(zoneId)
+                    .buildPartial();
             assertThat(context)
                     .comparingExpectedFieldsOnly()
-                    .isEqualTo(ActorContext
-                                       .newBuilder()
-                                       .setActor(actor)
-                                       .setZoneId(zoneId)
-                                       .setZoneOffset(expectedOffset)
-                                       .buildPartial());
+                    .isEqualTo(expected);
         }
 
         @Test
@@ -808,14 +805,12 @@ abstract class BlackBoxTest<T extends BlackBox> {
                                          .get(0)
                                          .context()
                                          .actorContext();
-            ZoneOffset expectedOffset = TestActorRequestFactory.toOffset(zoneId);
+            ActorContext expected = ActorContext.newBuilder()
+                    .setZoneId(zoneId)
+                    .buildPartial();
             assertThat(context)
                     .comparingExpectedFieldsOnly()
-                    .isEqualTo(ActorContext
-                                       .newBuilder()
-                                       .setZoneId(zoneId)
-                                       .setZoneOffset(expectedOffset)
-                                       .buildPartial());
+                    .isEqualTo(expected);
         }
     }
 }

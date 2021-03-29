@@ -26,13 +26,13 @@
 
 package io.spine.server.command;
 
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 
 /**
- * A set of utilities for working with rejections and {@link ThrowableMessage}s.
+ * A set of utilities for working with rejections and {@link RejectionThrowable}s.
  */
 public final class Rejections {
 
@@ -43,7 +43,7 @@ public final class Rejections {
     }
 
     /**
-     * Tells whether or not the given {@code throwable} is caused by a {@link ThrowableMessage}.
+     * Tells whether or not the given {@code throwable} is caused by a {@link RejectionThrowable}.
      *
      * @param throwable the {@link Throwable} to check
      * @return {@code true} is the given {@code throwable} is caused by a rejection, {@code false}
@@ -51,9 +51,8 @@ public final class Rejections {
      */
     public static boolean causedByRejection(Throwable throwable) {
         checkNotNull(throwable);
-
         Throwable cause = getRootCause(throwable);
-        boolean result = cause instanceof ThrowableMessage;
+        boolean result = cause instanceof RejectionThrowable;
         return result;
     }
 }

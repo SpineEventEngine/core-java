@@ -28,9 +28,13 @@ import io.spine.gradle.internal.Deps
 
 val spineBaseVersion: String by extra
 
+group = "io.spine.tools"
+
 dependencies {
     api(project(":client"))
-    api("io.spine:spine-testlib:$spineBaseVersion")
-    Deps.test.junit5Api.forEach { api(it) }
-    Deps.test.truth.forEach { api(it) }
+    api("io.spine.tools:spine-testlib:$spineBaseVersion")
+    Deps.test.apply {
+        junit.api.forEach { api(it) }
+        truth.libs.forEach { api(it) }
+    }
 }

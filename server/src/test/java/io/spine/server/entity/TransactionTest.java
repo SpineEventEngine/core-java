@@ -33,7 +33,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.given.MemoizingTransactionListener;
 import io.spine.server.entity.given.tx.Id;
@@ -41,6 +40,7 @@ import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -53,7 +53,6 @@ import static io.spine.server.entity.Transaction.toBuilder;
 import static io.spine.server.type.given.GivenEvent.withMessage;
 import static io.spine.server.type.given.GivenEvent.withMessageAndVersion;
 import static io.spine.testing.TestValues.randomString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -428,7 +427,8 @@ public abstract class TransactionTest<I,
     protected final void advanceVersionFromEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
-        assertEquals(entity.version(), tx.version());
+        assertThat(tx.version())
+                .isEqualTo(entity.version());
 
         Event event = withMessage(createEventMessage());
         applyEvent(tx, event);

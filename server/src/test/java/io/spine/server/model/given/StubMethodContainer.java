@@ -27,7 +27,7 @@
 package io.spine.server.model.given;
 
 import io.spine.base.RejectionMessage;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.test.model.Rejections;
 
 import java.io.IOException;
@@ -63,7 +63,7 @@ public final class StubMethodContainer {
         throw new DerivedThrowable(rejection);
     }
 
-    private static final class DerivedThrowable extends ThrowableMessage {
+    private static final class DerivedThrowable extends RejectionThrowable {
 
         private static final long serialVersionUID = 0L;
 

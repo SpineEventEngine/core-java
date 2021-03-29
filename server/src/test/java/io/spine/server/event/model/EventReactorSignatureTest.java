@@ -27,8 +27,8 @@
 package io.spine.server.event.model;
 
 import io.spine.server.event.React;
-import io.spine.server.event.given.EventReactorSignatureTestEnv.InvalidReactor;
-import io.spine.server.event.given.EventReactorSignatureTestEnv.ValidReactor;
+import io.spine.server.event.given.InvalidReactor;
+import io.spine.server.event.given.ValidReactor;
 import io.spine.server.model.MethodSignatureTest;
 
 import java.lang.reflect.Method;

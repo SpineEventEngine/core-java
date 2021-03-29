@@ -27,7 +27,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Event;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -78,9 +78,9 @@ public interface EventProducingRepository {
      * posts the rejection to the associated {@link #eventBus() EventBus}.
      */
     default void postIfCommandRejected(SignalEnvelope<?, ?, ?> signal, Throwable cause) {
-        if (signal instanceof CommandEnvelope && cause instanceof ThrowableMessage) {
+        if (signal instanceof CommandEnvelope && cause instanceof RejectionThrowable) {
             CommandEnvelope command = (CommandEnvelope) signal;
-            ThrowableMessage rejection = (ThrowableMessage) cause;
+            RejectionThrowable rejection = (RejectionThrowable) cause;
             RejectionEnvelope re = RejectionEnvelope.from(command, rejection);
             postEvents(ImmutableSet.of(re.outerObject()));
         }

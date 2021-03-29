@@ -30,9 +30,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EntityState;
 import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.EntityBuilder;
 import io.spine.server.procman.ProcessManager;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building test instances of {@code ProcessManager}.

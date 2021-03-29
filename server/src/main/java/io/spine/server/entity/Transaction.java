@@ -36,11 +36,11 @@ import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -485,8 +485,7 @@ public abstract class Transaction<I,
      * @param cause
      *         the reason of the rollback
      */
-    @VisibleForTesting
-    final void rollback(Event cause) {
+    private void rollback(Event cause) {
         doRollback(record -> listener().onTransactionFailed(cause, record));
     }
 

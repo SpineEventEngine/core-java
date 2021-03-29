@@ -1,6 +1,12 @@
 /*
  * Copyright 2021, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -34,17 +40,17 @@
 /**
  * Version of this library.
  */
-val coreJava = "2.0.0-SNAPSHOT.1"
+val coreJava = "2.0.0-SNAPSHOT.5"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "2.0.0-SNAPSHOT.0"
-val time = "2.0.0-SNAPSHOT.0"
+val base = "2.0.0-SNAPSHOT.5"
+val time = "2.0.0-SNAPSHOT.5"
 
 project.extra.apply {
     this["versionToPublish"] = coreJava
     this["spineBaseVersion"] = base
     this["spineTimeVersion"] = time
-    this["kotlinVersion"] = "1.4.21"
+    this["kotlinVersion"] = "1.4.30"
 }

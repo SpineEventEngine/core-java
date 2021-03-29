@@ -31,7 +31,6 @@ import io.spine.base.EntityState;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventValidationError;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
@@ -41,6 +40,7 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;

@@ -28,10 +28,10 @@ package io.spine.server.projection;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
 import io.spine.server.procman.ProcessManager;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A {@link Migration} applied to a {@link ProcessManager} instance.
@@ -41,12 +41,12 @@ public abstract class ProjectionMigration<I,
                                           P extends Projection<I, S, B>,
                                           S extends EntityState<I>,
                                           B extends ValidatingBuilder<S>>
-        extends Migration<I, P, S> {
+        extends Migration<I, P, S, B> {
 
-    @SuppressWarnings("unchecked") // Logically correct.
     @Override
-    protected Transaction<I, P, S, ?> startTransaction(P entity) {
-        Transaction<I, P, S, ?> tx = (Transaction<I, P, S, ?>) ProjectionTransaction.start(entity);
+    @SuppressWarnings("unchecked") // Logically correct.
+    protected Transaction<I, P, S, B> startTransaction(P entity) {
+        Transaction<I, P, S, B> tx = (Transaction<I, P, S, B>) ProjectionTransaction.start(entity);
         return tx;
     }
 }

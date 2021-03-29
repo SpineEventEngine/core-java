@@ -48,7 +48,7 @@ public abstract class TenantFunction<T> extends TenantAware implements Function<
      *                    {@code false} for single-tenant context
      */
     protected TenantFunction(boolean multitenant) {
-        super(TenantAware.getCurrentTenant(multitenant));
+        super(TenantAware.currentTenant(multitenant));
     }
 
     /**

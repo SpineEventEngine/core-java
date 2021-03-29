@@ -35,5 +35,5 @@ val spineBaseVersion: String by extra
 dependencies {
     implementation(project(":server"))
 
-    testImplementation("io.spine:spine-testlib:$spineBaseVersion")
+    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
 }

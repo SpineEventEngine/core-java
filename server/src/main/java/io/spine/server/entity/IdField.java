@@ -30,8 +30,8 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.option.Required;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

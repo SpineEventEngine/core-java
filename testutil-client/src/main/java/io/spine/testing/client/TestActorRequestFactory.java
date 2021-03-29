@@ -40,8 +40,6 @@ import io.spine.testing.client.command.TestCommandMessage;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
@@ -56,7 +54,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
         super(ActorRequestFactory
                       .newBuilder()
                       .setActor(actor)
-                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
@@ -66,7 +63,6 @@ public class TestActorRequestFactory extends ActorRequestFactory {
                       .newBuilder()
                       .setTenantId(tenantId)
                       .setActor(actor)
-                      .setZoneOffset(toOffset(zoneId))
                       .setZoneId(zoneId)
         );
     }
@@ -148,12 +144,15 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /**
      * Obtains the current offset for the passed time zone.
+     *
+     * @deprecated please use {@link #zoneId()}.
      */
-    public static ZoneOffset toOffset(ZoneId zoneId) {
+    @Deprecated
+    public static io.spine.time.ZoneOffset toOffset(ZoneId zoneId) {
         java.time.ZoneOffset offset =
                 ZoneIds.toJavaTime(zoneId)
                        .getRules()
                        .getOffset(Instant.now());
-        return ZoneOffsets.of(offset);
+        return io.spine.time.ZoneOffsets.of(offset);
     }
 }

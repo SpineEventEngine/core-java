@@ -26,6 +26,8 @@
 
 import io.spine.gradle.internal.Deps
 
+group = "io.spine.tools"
+
 dependencies {
     api(project(":server"))
     api(project(":testutil-client"))

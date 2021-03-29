@@ -28,9 +28,13 @@ plugins {
     `kotlin-dsl`
 }
 
+kotlinDslPluginOptions {
+    experimentalWarning.set(false)
+}
+
 repositories {
     mavenLocal()
-    jcenter()
+    mavenCentral()
 }
 
 val jacksonVersion = "2.11.0"

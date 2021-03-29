@@ -46,7 +46,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static io.spine.testing.Assertions.assertIllegalState;
 
 @DisplayName("`AckRejectionPublisher` should")
 class AckRejectionPublisherTest {
@@ -73,17 +73,19 @@ class AckRejectionPublisherTest {
         Command command = requestFactory.generateCommand();
         CommandEnvelope origin = CommandEnvelope.of(command);
 
-        CmdBusEntryDenied throwableMessage = CmdBusEntryDenied
+        CmdBusEntryDenied throwable = CmdBusEntryDenied
                 .newBuilder()
                 .setId(CmdBusCaffetteriaId.generate())
                 .setVisitorCount(15)
                 .setReason("Test command bus rejection.")
                 .build();
-        RejectionEnvelope rejection = RejectionEnvelope.from(origin, throwableMessage);
+        RejectionEnvelope rejection = RejectionEnvelope.from(origin, throwable);
         Ack ack = Acks.reject(CommandId.generate(), rejection);
         publisher.onNext(ack);
-        assertThat(listener.lastReceived).isNotNull();
-        assertThat(listener.lastReceived.message()).isEqualTo(throwableMessage.messageThrown());
+        assertThat(listener.lastReceived)
+                .isNotNull();
+        assertThat(listener.lastReceived.message())
+                .isEqualTo(throwable.messageThrown());
     }
 
     @Test
@@ -91,16 +93,17 @@ class AckRejectionPublisherTest {
     void ignoreNonRejection() {
         Ack ack = Acks.acknowledge(CommandId.generate());
         publisher.onNext(ack);
-        assertThat(listener.lastReceived).isNull();
+        assertThat(listener.lastReceived)
+                .isNull();
     }
 
     @Test
     @DisplayName("re-throw an error passed to `onError` as `IllegalStateException`")
     void rethrowError() {
         RuntimeException exception = new RuntimeException("Test Ack publisher exception.");
-        IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                                                    () -> publisher.onError(exception));
-        assertThat(thrown.getCause()).isEqualTo(exception);
+        IllegalStateException thrown = assertIllegalState(() -> publisher.onError(exception));
+        assertThat(thrown.getCause())
+                .isEqualTo(exception);
     }
 
     private static class MemoizingListener implements Listener<EventEnvelope> {

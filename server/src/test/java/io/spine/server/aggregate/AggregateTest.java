@@ -89,7 +89,8 @@ import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.ContextAwareTest;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.time.testing.TimeTests;
+import io.spine.time.testing.BackToTheFuture;
+import io.spine.time.testing.FrozenMadHatterParty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -407,7 +408,7 @@ public class AggregateTest {
     void recordModificationUponCommandHandled() {
         try {
             Timestamp frozenTime = Time.currentTime();
-            Time.setProvider(new TimeTests.FrozenMadHatterParty(frozenTime));
+            Time.setProvider(new FrozenMadHatterParty(frozenTime));
 
             dispatchCommand(aggregate, command(createProject));
 
@@ -579,7 +580,7 @@ public class AggregateTest {
     @DisplayName("record modification timestamp")
     void recordModificationTimestamp() {
         try {
-            TimeTests.BackToTheFuture provider = new TimeTests.BackToTheFuture();
+            BackToTheFuture provider = new BackToTheFuture();
             Time.setProvider(provider);
 
             Timestamp currentTime = Time.currentTime();

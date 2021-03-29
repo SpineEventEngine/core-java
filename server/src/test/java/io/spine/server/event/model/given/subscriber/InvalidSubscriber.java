@@ -113,11 +113,13 @@ public final class InvalidSubscriber extends AbstractEventSubscriber {
     }
 
     @Subscribe
+    @SuppressWarnings("DoNotCallSuggester") // Always throws for the purpose of the tests.
     void declaredThrowable(SigTaskAddedToProject event) throws IOException {
         throw new IOException("An invalid subscriber method has thrown an exception");
     }
 
     @Subscribe
+    @SuppressWarnings("DoNotCallSuggester") // Always throws for the purpose of the tests.
     void declaredRejection(SigTaskAddedToProject e) throws SigCannotCreateProject {
         throw SigCannotCreateProject.newBuilder()
                                     .build();

@@ -71,7 +71,7 @@ public class EventFactory {
      *         the ID of the entity producing the events
      * @return new event factory
      */
-    public static EventFactory on(MessageEnvelope origin, Any producerId) {
+    public static EventFactory on(MessageEnvelope<?, ?, ?> origin, Any producerId) {
         checkNotNull(origin);
         checkNotNull(producerId);
         EventOrigin eventOrigin = fromAnotherMessage(origin);
@@ -120,7 +120,7 @@ public class EventFactory {
     }
 
     /**
-     * Creates a rejection event for the passed rejection message.
+     * Creates a rejection event.
      *
      * @param message
      *         the rejection message

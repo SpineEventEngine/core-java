@@ -63,6 +63,7 @@ public final class ValidHandler extends AbstractCommandHandler {
     }
 
     @Command
+    @SuppressWarnings("DoNotCallSuggester") // Not relevant in this case of to test data.
     SigProjectCreated declaredRejection(SigCreateProject cmd) throws SigCannotCreateProject {
         throw SigCannotCreateProject
                 .newBuilder()

@@ -31,12 +31,11 @@ import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.base.RejectionMessage;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 import io.spine.server.type.AbstractMessageEnvelope;
 import io.spine.server.type.CommandEnvelope;
@@ -47,7 +46,6 @@ import io.spine.server.type.SignalEnvelope;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.base.Throwables.getStackTraceAsString;
 
 /**
  * The holder of a rejection {@code Event} which provides convenient access to its properties.
@@ -57,13 +55,13 @@ public final class RejectionEnvelope
         implements SignalEnvelope<EventId, Event, EventContext> {
 
     /**
-     * The default producer ID for rejection events.
+     * A placeholder for telling that a rejection origin is not known.
      *
      * <p>Represented by a packed {@link com.google.protobuf.StringValue StringValue} of
      * {@code "Unknown"}.
      */
     @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence
-    private static final Any DEFAULT_EVENT_PRODUCER = Identifier.pack("Unknown");
+    static final Any PRODUCER_UNKNOWN = Identifier.pack("Unknown");
 
     private final EventEnvelope event;
 
@@ -82,73 +80,41 @@ public final class RejectionEnvelope
      */
     public static RejectionEnvelope from(EventEnvelope event) {
         checkNotNull(event);
-        checkArgument(event.isRejection(), "`%s` is not a rejection", event.messageClass());
+        checkArgument(event.isRejection(), "`%s` is not a rejection.", event.messageClass());
         return new RejectionEnvelope(event);
     }
 
     /**
      * Creates an instance of {@code Rejection} from the rejected command and a {@link Throwable}
-     * caused by the {@link ThrowableMessage}.
+     * caused by the {@link RejectionThrowable}.
      *
-     * <p>If the producer is not {@linkplain ThrowableMessage#initProducer(Any) set}, uses
-     * the {@link #DEFAULT_EVENT_PRODUCER} as the producer.
+     * <p>If the producer is not {@linkplain RejectionThrowable#initProducer(Any) set}, uses
+     * the {@link #PRODUCER_UNKNOWN} as the producer.
      *
      * @param origin    the rejected command
      * @param throwable the caught error
      * @return new instance of {@code Rejection}
      * @throws IllegalArgumentException if the given {@link Throwable} is not caused by
-     *                                  a {@link ThrowableMessage}
+     *                                  a {@link RejectionThrowable}
      */
     public static RejectionEnvelope from(CommandEnvelope origin, Throwable throwable) {
         checkNotNull(origin);
         checkNotNull(throwable);
 
-        ThrowableMessage throwableMessage = unwrap(throwable);
-        Event rejectionEvent = produceEvent(origin, throwableMessage);
+        RejectionThrowable rt = unwrap(throwable);
+        RejectionFactory factory = new RejectionFactory(origin, rt);
+        Event rejectionEvent = factory.createRejection();
         EventEnvelope event = EventEnvelope.of(rejectionEvent);
 
         return from(event);
     }
 
-    private static ThrowableMessage unwrap(Throwable causedByRejection) {
+    private static RejectionThrowable unwrap(Throwable causedByRejection) {
         Throwable cause = getRootCause(causedByRejection);
-        boolean correctType = cause instanceof ThrowableMessage;
+        boolean correctType = cause instanceof RejectionThrowable;
         checkArgument(correctType);
-        ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-        return throwableMessage;
-    }
-
-    private static Event produceEvent(CommandEnvelope origin, ThrowableMessage throwableMessage) {
-        Any producerId = throwableMessage.producerId()
-                                         .orElse(DEFAULT_EVENT_PRODUCER);
-        EventFactory factory = EventFactory.on(origin, producerId);
-        RejectionMessage thrownMessage = throwableMessage.messageThrown();
-        RejectionEventContext context = rejectionContext(origin.outerObject(), throwableMessage);
-        Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
-        return rejectionEvent;
-    }
-
-    /**
-     * Constructs a new {@link RejectionEventContext} from the given command message and
-     * {@link ThrowableMessage}.
-     *
-     * @param command
-     *         the rejected command
-     * @param throwableMessage
-     *         the thrown rejection
-     * @return the new instance of {@code RejectionEventContext}
-     */
-    private static RejectionEventContext rejectionContext(Command command,
-                                                          ThrowableMessage throwableMessage) {
-        checkNotNull(command);
-        checkNotNull(throwableMessage);
-
-        String stacktrace = getStackTraceAsString(throwableMessage);
-        return RejectionEventContext
-                .newBuilder()
-                .setCommand(command)
-                .setStacktrace(stacktrace)
-                .build();
+        RejectionThrowable rt = (RejectionThrowable) cause;
+        return rt;
     }
 
     @Override
@@ -187,24 +153,45 @@ public final class RejectionEnvelope
     }
 
     /**
-     * Obtains the origin command.
+     * Obtains the command which cased the rejection.
      *
      * @return the rejected command
      */
-    public Command getOrigin() {
+    public Command origin() {
         return context().getRejection()
                         .getCommand();
+    }
+
+    /**
+     * Obtains the command which cased the rejection.
+     *
+     * @deprecated please use {@link #origin()}.
+     */
+    @Deprecated
+    public Command getOrigin() {
+        return origin();
+    }
+
+    /**
+     * Obtains the message of the command which cased the rejection.
+     *
+     * @return the rejected command message
+     */
+    public CommandMessage originMessage() {
+        CommandMessage commandMessage = context().getRejection()
+                                                 .getCommand()
+                                                 .enclosedMessage();
+        return commandMessage;
     }
 
     /**
      * Obtains the origin command message.
      *
      * @return the rejected command message
+     * @deprecated please use {@link #originMessage()}.
      */
+    @Deprecated
     public CommandMessage getOriginMessage() {
-        CommandMessage commandMessage = context().getRejection()
-                                                 .getCommand()
-                                                 .enclosedMessage();
-        return commandMessage;
+        return originMessage();
     }
 }

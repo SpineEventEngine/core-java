@@ -26,7 +26,8 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.validate.FieldAwareMessage;
@@ -35,39 +36,46 @@ import io.spine.validate.FieldAwareMessage;
  * A mixin interface for the {@link Version} message type.
  */
 @GeneratedMixin
-public interface VersionMixin extends VersionOrBuilder, FieldAwareMessage {
+public interface VersionMixin extends VersionOrBuilder, FieldAwareMessage, WithTime {
 
-    /**
-     * Checks if the version is an increment relative to the {@code other} version.
-     */
-    default boolean isIncrement(VersionOrBuilder other) {
-        return getNumber() > other.getNumber();
-    }
-
-    /**
-     * Checks if the version is an increment or at least equal to the {@code other} version.
-     */
-    default boolean isIncrementOrEqual(VersionOrBuilder other) {
-        return getNumber() >= other.getNumber();
-    }
-
-    /**
-     * Checks if the version is a decrement relative to the {@code other} version.
-     */
-    default boolean isDecrement(VersionOrBuilder other) {
-        return getNumber() < other.getNumber();
-    }
-
-    /**
-     * Checks if the version is a decrement or at least equal to the {@code other} version.
-     */
-    default boolean isDecrementOrEqual(VersionOrBuilder other) {
-        return getNumber() <= other.getNumber();
+    /** Obtains the number part of the version. */
+    default int number() {
+        return getNumber();
     }
 
     @Override
+    default Timestamp timestamp() {
+        return getTimestamp();
+    }
+
+    /** Verifies if this version is zero. */
+    default boolean isZero() {
+        return number() == 0;
+    }
+
+    /** Checks if the version is an increment relative to the {@code other} version. */
+    default boolean isIncrement(VersionOrBuilder other) {
+        return number() > other.getNumber();
+    }
+
+    /** Checks if the version is an increment or at least equal to the {@code other} version. */
+    default boolean isIncrementOrEqual(VersionOrBuilder other) {
+        return number() >= other.getNumber();
+    }
+
+    /** Checks if the version is a decrement relative to the {@code other} version. */
+    default boolean isDecrement(VersionOrBuilder other) {
+        return number() < other.getNumber();
+    }
+
+    /** Checks if the version is a decrement or at least equal to the {@code other} version. */
+    default boolean isDecrementOrEqual(VersionOrBuilder other) {
+        return number() <= other.getNumber();
+    }
+
     @Internal
-    default Object readValue(Descriptors.FieldDescriptor field) {
+    @Override
+    default Object readValue(FieldDescriptor field) {
         switch (field.getIndex()) {
             case 0:
                 return getNumber();

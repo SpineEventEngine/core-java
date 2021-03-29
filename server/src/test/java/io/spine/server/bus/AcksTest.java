@@ -113,8 +113,8 @@ class AcksTest extends UtilityClassTest<Acks> {
     }
 
     @Test
-    @DisplayName("create 'reject with ThrowableMessage' `Ack` instance")
-    void rejectWithThrowableMessage() {
+    @DisplayName("create 'reject with RejectionThrowable' `Ack` instance")
+    void rejectWithRejectionThrowable() {
         TestActorRequestFactory requestFactory = new TestActorRequestFactory(BusFilterTest.class);
         Command command = requestFactory.generateCommand();
         CommandEnvelope origin = CommandEnvelope.of(command);

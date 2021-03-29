@@ -27,12 +27,13 @@
 package io.spine.server.command.model;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
@@ -70,7 +71,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -209,15 +209,16 @@ class CommandHandlerMethodTest {
         }
 
         private void checkIllegalOutcome(DispatchOutcome outcome, Command command) {
-            assertThat(outcome)
-                    .comparingExpectedFieldsOnly()
-                    .isEqualTo(DispatchOutcome
-                                       .newBuilder()
-                                       .setPropagatedSignal(command.messageId())
-                                       .setError(Error.newBuilder()
-                                                      .setType(IllegalOutcomeException.class
-                                                                       .getCanonicalName()))
-                                       .buildPartial());
+            Error.Builder error =
+                    Error.newBuilder()
+                         .setType(IllegalOutcomeException.class.getCanonicalName());
+            DispatchOutcome expected = DispatchOutcome.newBuilder()
+                    .setPropagatedSignal(command.messageId())
+                    .setError(error)
+                    .buildPartial();
+            ProtoTruth.assertThat(outcome)
+                      .comparingExpectedFieldsOnly()
+                      .isEqualTo(expected);
         }
     }
 
@@ -268,8 +269,8 @@ class CommandHandlerMethodTest {
         private void assertCauseAndId(Throwable e, Object handlerId) {
             Throwable cause = getRootCause(e);
 
-            assertTrue(cause instanceof ThrowableMessage);
-            ThrowableMessage thrown = (ThrowableMessage) cause;
+            assertTrue(cause instanceof RejectionThrowable);
+            RejectionThrowable thrown = (RejectionThrowable) cause;
 
             assertTrue(thrown.producerId()
                              .isPresent());

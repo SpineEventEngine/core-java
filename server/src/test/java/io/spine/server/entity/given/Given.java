@@ -27,7 +27,6 @@
 package io.spine.server.entity.given;
 
 import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
@@ -37,6 +36,7 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.given.dispatch.ProcessManagerBuilder;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.dispatch.ProjectionBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

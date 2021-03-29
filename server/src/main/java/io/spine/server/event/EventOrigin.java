@@ -74,7 +74,7 @@ public final class EventOrigin {
      */
     public static EventOrigin from(Origin origin) {
         checkNotNull(origin);
-        return new EventOrigin(origin,null);
+        return new EventOrigin(origin, null);
     }
 
     /**

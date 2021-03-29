@@ -29,9 +29,9 @@ package io.spine.server.aggregate;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.aggregate.model.AggregatePartClass;
+import io.spine.validate.ValidatingBuilder;
 
 import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
 

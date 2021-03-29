@@ -27,7 +27,7 @@
 package io.spine.server.bus.given;
 
 import io.spine.base.Error;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.type.CommandEnvelope;
@@ -77,11 +77,11 @@ public final class BusFilters {
         }
     }
 
-    public static final class RejectingWithThrowableMessage implements BusFilter<CommandEnvelope> {
+    public static final class RejectingWithRejectionThrowable implements BusFilter<CommandEnvelope> {
 
-        private final ThrowableMessage rejection;
+        private final RejectionThrowable rejection;
 
-        public RejectingWithThrowableMessage(ThrowableMessage rejection) {
+        public RejectingWithRejectionThrowable(RejectionThrowable rejection) {
             this.rejection = rejection;
         }
 

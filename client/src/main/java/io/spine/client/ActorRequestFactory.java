@@ -35,11 +35,7 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.time.Instant;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
@@ -50,14 +46,6 @@ import static io.spine.base.Time.currentTime;
 public class ActorRequestFactory {
 
     private final UserId actor;
-
-    /**
-     * The offset of a time zone from which a request is made.
-     *
-     * <p>In case the zone offset is not defined when {@linkplain #newBuilder() constructing
-     * the factory}, the current time zone offset value is set by default.
-     */
-    private final ZoneOffset zoneOffset;
 
     /**
      * The ID of the time zone from which a request is made.
@@ -76,7 +64,6 @@ public class ActorRequestFactory {
 
     protected ActorRequestFactory(Builder builder) {
         this.actor = builder.actor;
-        this.zoneOffset = builder.zoneOffset;
         this.zoneId = builder.zoneId;
         this.tenantId = builder.tenantId;
     }
@@ -96,7 +83,6 @@ public class ActorRequestFactory {
         Builder builder = newBuilder()
                 .setActor(actorContext.getActor())
                 .setTenantId(actorContext.getTenantId())
-                .setZoneOffset(actorContext.getZoneOffset())
                 .setZoneId(actorContext.getZoneId());
         return builder.build();
     }
@@ -110,9 +96,13 @@ public class ActorRequestFactory {
 
     /**
      * Obtains the offset of the time zone in which the actor works.
+     *
+     * @deprecated please use {@link #zoneId()} instead
+     * @return default instance always
      */
-    public ZoneOffset zoneOffset() {
-        return zoneOffset;
+    @Deprecated
+    public io.spine.time.ZoneOffset zoneOffset() {
+        return io.spine.time.ZoneOffset.getDefaultInstance();
     }
 
     /**
@@ -131,20 +121,16 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates a copy of this factory placed at a new time zone with the passed offset and ID.
+     * Creates a copy of this factory placed at a new time zone.
      *
-     * <p>Use this method for obtaining new request factory as the user moves to a new location.
-     *
-     * @param zoneOffset the offset of the new time zone
-     * @param zoneId     the ID of the new time zone
-     * @return new factory at the new time zone
+     * @deprecated please use {@link #switchTimeZone(ZoneId)}
      */
-    public ActorRequestFactory switchTimeZone(ZoneOffset zoneOffset, ZoneId zoneId) {
-        checkNotNull(zoneOffset);
+    @Deprecated
+    public ActorRequestFactory switchTimeZone(io.spine.time.ZoneOffset ignored, ZoneId zoneId) {
+        checkNotNull(ignored);
         checkNotNull(zoneId);
         ActorRequestFactory result =
                 newBuilder().setActor(actor())
-                            .setZoneOffset(zoneOffset)
                             .setZoneId(zoneId)
                             .setTenantId(tenantId())
                             .build();
@@ -154,17 +140,18 @@ public class ActorRequestFactory {
     /**
      * Creates a copy of this factory placed at a new time zone with the passed ID.
      *
-     * <p>The zone offset is calculated using the current time.
-     *
-     * @param zoneId the ID of the new time zone
+     * @param zoneId
+     *         the ID of the new time zone
      * @return new factory at the new time zone
      */
     public ActorRequestFactory switchTimeZone(ZoneId zoneId) {
         checkNotNull(zoneId);
-        java.time.ZoneId id = java.time.ZoneId.of(zoneId.getValue());
-        java.time.ZoneOffset offset = java.time.OffsetTime.now(id)
-                                                          .getOffset();
-        return switchTimeZone(ZoneOffsets.of(offset), zoneId);
+        ActorRequestFactory result =
+                newBuilder().setActor(actor())
+                            .setZoneId(zoneId)
+                            .setTenantId(tenantId())
+                            .build();
+        return result;
     }
 
     /**
@@ -220,7 +207,6 @@ public class ActorRequestFactory {
                 .newBuilder()
                 .setActor(actor)
                 .setTimestamp(currentTime())
-                .setZoneOffset(zoneOffset)
                 .setZoneId(zoneId);
         if (tenantId != null) {
             builder.setTenantId(tenantId);
@@ -234,7 +220,6 @@ public class ActorRequestFactory {
     public static class Builder {
 
         private UserId actor;
-        private ZoneOffset zoneOffset;
         private ZoneId zoneId;
 
         private @Nullable TenantId tenantId;
@@ -257,20 +242,23 @@ public class ActorRequestFactory {
         /**
          * Obtains the zone offset set in the builder.
          *
-         * @return the zone offset or {@code null} if the value was not set
+         * @return {@code null} always
+         * @deprecated please use {@link #getZoneId()} instead
          */
-        public @Nullable ZoneOffset getZoneOffset() {
-            return zoneOffset;
+        @Deprecated
+        @SuppressWarnings("ReturnOfNull")
+        public io.spine.time.ZoneOffset getZoneOffset() {
+            return null;
         }
 
         /**
          * Sets the offset of the time zone in which the user works.
          *
-         * @param zoneOffset the offset of the time zone the user works in
+         * @deprecated please use {@link #setZoneId(ZoneId)} instead
          */
+        @Deprecated
         @CanIgnoreReturnValue
-        public Builder setZoneOffset(ZoneOffset zoneOffset) {
-            this.zoneOffset = checkNotNull(zoneOffset);
+        public Builder setZoneOffset(@SuppressWarnings("unused") io.spine.time.ZoneOffset ignored) {
             return this;
         }
 
@@ -317,27 +305,17 @@ public class ActorRequestFactory {
         /**
          * Ensures that all the {@code Builder} parameters are set properly.
          *
-         * <p>Initializes {@code zoneOffset} and {@code zoneId} with default values if they are
-         * not defined.
+         * <p>Initializes {@code zoneOffset} and {@code zoneId} with default values if
+         * they are not defined.
          *
          * @return a new instance of the factory
          */
         public ActorRequestFactory build() {
             checkNotNull(actor, "`actor` must be defined");
-
             java.time.ZoneId currentZone = Time.currentTimeZone();
-
-            if (zoneOffset == null) {
-                ZoneOffset currentOffset = ZoneOffsets.of(
-                        currentZone.getRules().getOffset(Instant.now())
-                );
-                setZoneOffset(currentOffset);
-            }
-
             if (zoneId == null) {
                 setZoneId(ZoneIds.of(currentZone));
             }
-
             return new ActorRequestFactory(this);
         }
     }

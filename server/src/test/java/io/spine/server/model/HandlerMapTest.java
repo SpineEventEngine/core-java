@@ -31,10 +31,11 @@ import io.spine.model.contexts.projects.ProjectId;
 import io.spine.model.contexts.projects.command.SigCreateProject;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.model.given.map.CompletionWatch;
 import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DupEventFilterValueWhere;
 import io.spine.server.model.given.map.DuplicateCommandHandlers;
-import io.spine.server.model.given.map.RejectionsDispatchingTestEnv;
+import io.spine.server.model.given.map.ProjectAgg;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
 import io.spine.server.model.given.method.OneParamSignature;
 import io.spine.server.model.given.method.StubHandler;
@@ -119,8 +120,8 @@ class HandlerMapTest {
         protected BoundedContextBuilder contextBuilder() {
             return BoundedContextBuilder
                     .assumingTests()
-                    .add(RejectionsDispatchingTestEnv.ProjectAgg.class)
-                    .addEventDispatcher(new RejectionsDispatchingTestEnv.CompletionWatch());
+                    .add(ProjectAgg.class)
+                    .addEventDispatcher(new CompletionWatch());
         }
 
         @Test

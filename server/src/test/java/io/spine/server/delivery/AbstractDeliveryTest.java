@@ -27,7 +27,7 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.util.Durations;
-import io.spine.base.Tests;
+import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

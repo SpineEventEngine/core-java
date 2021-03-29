@@ -28,10 +28,10 @@ package io.spine.server.projection.migration;
 
 import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.entity.Migration;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionMigration;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A migration operation that triggers the update of the {@link Projection} state according

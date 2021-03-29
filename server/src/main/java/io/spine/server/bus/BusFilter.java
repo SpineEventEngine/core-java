@@ -28,7 +28,7 @@ package io.spine.server.bus;
 
 import io.spine.annotation.SPI;
 import io.spine.base.Error;
-import io.spine.base.ThrowableMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
@@ -136,7 +136,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *         if the filtered {@code envelope} is not a
      *         {@linkplain io.spine.server.type.CommandEnvelope command}
      */
-    default Optional<Ack> reject(E envelope, ThrowableMessage cause) {
+    default Optional<Ack> reject(E envelope, RejectionThrowable cause) {
         checkNotNull(envelope);
         checkNotNull(cause);
         checkArgument(envelope instanceof CommandEnvelope);

@@ -29,7 +29,6 @@ package io.spine.server.event;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.protobuf.ValidatingBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
@@ -38,6 +37,7 @@ import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.Optional;
 import java.util.Set;

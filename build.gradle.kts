@@ -27,11 +27,11 @@
 import io.spine.gradle.internal.DependencyResolution
 import io.spine.gradle.internal.Deps
 import io.spine.gradle.internal.PublishingRepos
+import io.spine.gradle.internal.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    apply(from = "version.gradle.kts")
-    apply(from = "$rootDir/config/gradle/dependencies.gradle")
+    apply(from = "$rootDir/version.gradle.kts")
 
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     with(io.spine.gradle.internal.DependencyResolution) {
@@ -61,39 +61,49 @@ buildscript {
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.4.30"
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    with(io.spine.gradle.internal.Deps.versions) {
-        id("com.google.protobuf") version protobufPlugin
-        id("net.ltgt.errorprone") version errorPronePlugin
+    io.spine.gradle.internal.Deps.build.apply {
+        id("com.google.protobuf") version protobuf.gradlePluginVersion
+        id("net.ltgt.errorprone") version errorProne.gradlePluginVersion
     }
 }
 
-apply(from = "version.gradle.kts")
+apply(from = "$rootDir/version.gradle.kts")
 val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
-extra["projectsToPublish"] = listOf(
-    "core",
-    "client",
-    "server",
-    "testutil-core",
-    "testutil-client",
-    "testutil-server",
-    "model-assembler",
-    "model-verifier"
-)
-extra["credentialsPropertyFile"] = PublishingRepos.cloudRepo.credentials
+spinePublishing {
+    targetRepositories.addAll(setOf(
+        PublishingRepos.cloudRepo
+        //, PublishingRepos.gitHub("core-java")
+    ))
+    projectsToPublish.addAll(
+        "core",
+        "client",
+        "server",
+        "testutil-core",
+        "testutil-client",
+        "testutil-server",
+        "model-assembler",
+        "model-verifier"
+    )
+}
 
 allprojects {
     apply {
         plugin("jacoco")
         plugin("idea")
         plugin("project-report")
+    }
 
+    // Apply “legacy” dependency definitions which are not yet migrated to Kotlin.
+    // The `ext.deps` project property is used by `.gradle` scripts under `config/gradle`.
+    apply {
         from("$rootDir/version.gradle.kts")
+        from("$rootDir/config/gradle/dependencies.gradle")
     }
 
     group = "io.spine"
@@ -107,8 +117,9 @@ subprojects {
         plugin("kotlin")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
-        plugin("pmd")
         plugin("io.spine.tools.spine-model-compiler")
+        plugin("pmd")
+        plugin("maven-publish")
 
         with(Deps.scripts) {
             from(javacArgs(project))
@@ -146,21 +157,20 @@ subprojects {
 
     dependencies {
         Deps.build.apply {
-            errorprone(errorProneCore)
-            errorproneJavac(errorProneJavac)
-            implementation(guava)
-            compileOnlyApi(jsr305Annotations)
-            compileOnlyApi(checkerAnnotations)
-            errorProneAnnotations.forEach { compileOnlyApi(it) }
+            errorprone(errorProne.core)
+            errorproneJavac(errorProne.javacPlugin)
+            // Somehow IDEA time after time does not see this transitive API dependency exposed
+            // by `base`. Add it explicitly so that IDEA does not display false errors in the
+            // annotated `package-info.java` files.
+            //api(jsr305Annotations)
+            api("io.spine:spine-base:$spineBaseVersion")
+            api("io.spine:spine-time:$spineTimeVersion")
         }
-        implementation(kotlin("stdlib-jdk8"))
 
         Deps.test.apply {
-            testImplementation(guavaTestlib)
-            junit5Api.forEach { testImplementation(it) }
-            truth.forEach { testImplementation(it) }
-            testRuntimeOnly(junit5Runner)
+            testImplementation(junit.runner)
         }
+        testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }
 
@@ -173,7 +183,8 @@ subprojects {
                     "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
 
                     "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
+                    "io.spine:spine-time:$spineTimeVersion",
+                    "io.spine.tools:spine-testlib:$spineBaseVersion"
                 )
             }
         }
@@ -281,12 +292,12 @@ subprojects {
 
 apply {
     with(Deps.scripts) {
-        from(publish(project))
         // Aggregated coverage report across all subprojects.
         from(jacoco(project))
         // Generate a repository-wide report of 3rd-party dependencies and their licenses.
         from(repoLicenseReport(project))
-        // Generate a `pom.xml` file containing first-level dependency of all projects in the repository.
+        // Generate a `pom.xml` file containing first-level dependency of all projects
+        // in the repository.
         from(generatePom(project))
     }
 }
