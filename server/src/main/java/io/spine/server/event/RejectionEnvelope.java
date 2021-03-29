@@ -57,13 +57,13 @@ public final class RejectionEnvelope
         implements SignalEnvelope<EventId, Event, EventContext> {
 
     /**
-     * The default producer ID for rejection events.
+     * A placeholder for telling that a rejection origin is not known.
      *
      * <p>Represented by a packed {@link com.google.protobuf.StringValue StringValue} of
      * {@code "Unknown"}.
      */
     @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence
-    private static final Any DEFAULT_EVENT_PRODUCER = Identifier.pack("Unknown");
+    private static final Any PRODUCER_UNKNOWN = Identifier.pack("Unknown");
 
     private final EventEnvelope event;
 
@@ -82,7 +82,7 @@ public final class RejectionEnvelope
      */
     public static RejectionEnvelope from(EventEnvelope event) {
         checkNotNull(event);
-        checkArgument(event.isRejection(), "`%s` is not a rejection", event.messageClass());
+        checkArgument(event.isRejection(), "`%s` is not a rejection.", event.messageClass());
         return new RejectionEnvelope(event);
     }
 
@@ -91,7 +91,7 @@ public final class RejectionEnvelope
      * caused by the {@link RejectionThrowable}.
      *
      * <p>If the producer is not {@linkplain RejectionThrowable#initProducer(Any) set}, uses
-     * the {@link #DEFAULT_EVENT_PRODUCER} as the producer.
+     * the {@link #PRODUCER_UNKNOWN} as the producer.
      *
      * @param origin    the rejected command
      * @param throwable the caught error
@@ -119,8 +119,9 @@ public final class RejectionEnvelope
     }
 
     private static Event produceEvent(CommandEnvelope origin, RejectionThrowable throwable) {
-        Any producerId = throwable.producerId()
-                                         .orElse(DEFAULT_EVENT_PRODUCER);
+        Any producerId =
+                throwable.producerId()
+                         .orElse(PRODUCER_UNKNOWN);
         EventFactory factory = EventFactory.on(origin, producerId);
         RejectionMessage thrownMessage = throwable.messageThrown();
         RejectionEventContext context = rejectionContext(origin.outerObject(), throwable);
