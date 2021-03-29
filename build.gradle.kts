@@ -162,7 +162,7 @@ subprojects {
             // Somehow IDEA time after time does not see this transitive API dependency exposed
             // by `base`. Add it explicitly so that IDEA does not display false errors in the
             // annotated `package-info.java` files.
-            api(jsr305Annotations)
+            //api(jsr305Annotations)
             api("io.spine:spine-base:$spineBaseVersion")
             api("io.spine:spine-time:$spineTimeVersion")
         }
