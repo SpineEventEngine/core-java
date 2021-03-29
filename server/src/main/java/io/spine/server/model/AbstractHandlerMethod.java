@@ -277,7 +277,7 @@ class AbstractHandlerMethod<T,
             Throwable cause = e.getCause();
             checkNotNull(cause);
             if (cause instanceof RejectionThrowable) {
-                Success success = asRejection(target, envelope, cause);
+                Success success = asRejection(target, envelope, (RejectionThrowable) cause);
                 outcome.setSuccess(success);
             } else {
                 Error error = causeOf(cause);
@@ -300,9 +300,8 @@ class AbstractHandlerMethod<T,
         return toSuccessfulOutcome(rawOutput, target, envelope);
     }
 
-    private Success asRejection(T target, E envelope, Throwable cause) {
-        RejectionThrowable throwable = (RejectionThrowable) cause;
-        Optional<Success> maybeSuccess = handleRejection(throwable, target, envelope);
+    private Success asRejection(T target, E envelope, RejectionThrowable cause) {
+        Optional<Success> maybeSuccess = handleRejection(cause, target, envelope);
         return maybeSuccess.orElseThrow(this::cannotThrowRejections);
     }
 
