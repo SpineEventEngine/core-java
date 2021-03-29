@@ -209,15 +209,16 @@ class CommandHandlerMethodTest {
         }
 
         private void checkIllegalOutcome(DispatchOutcome outcome, Command command) {
+            Error.Builder error =
+                    Error.newBuilder()
+                         .setType(IllegalOutcomeException.class.getCanonicalName());
+            DispatchOutcome expected = DispatchOutcome.newBuilder()
+                    .setPropagatedSignal(command.messageId())
+                    .setError(error)
+                    .buildPartial();
             ProtoTruth.assertThat(outcome)
-                    .comparingExpectedFieldsOnly()
-                    .isEqualTo(DispatchOutcome
-                                       .newBuilder()
-                                       .setPropagatedSignal(command.messageId())
-                                       .setError(Error.newBuilder()
-                                                      .setType(IllegalOutcomeException.class
-                                                                       .getCanonicalName()))
-                                       .buildPartial());
+                      .comparingExpectedFieldsOnly()
+                      .isEqualTo(expected);
         }
     }
 
