@@ -41,7 +41,6 @@ import java.lang.reflect.Constructor;
 import java.time.Instant;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,9 +53,8 @@ class EntityClassTest {
     @Test
     @DisplayName("return ID class")
     void returnIdClass() {
-        @SuppressWarnings("unchecked")
-        Class<TaskId> actual = (Class<TaskId>) entityClass.idClass();
-        assertEquals(TaskId.class, actual);
+        assertThat(entityClass.idClass())
+                .isEqualTo(TaskId.class);
     }
 
     @Test
@@ -81,8 +79,10 @@ class EntityClassTest {
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));
 
-        assertThat(entity.id()).isEqualTo(id);
-        assertTrue(entity.version().isZero());
+        assertThat(entity.id())
+                .isEqualTo(id);
+        assertThat(entity.version().isZero())
+                .isTrue();
 
         Instant whenModifier = toInstant(entity.whenModified());
         assertTrue(whileWeCreate.contains(whenModifier));
