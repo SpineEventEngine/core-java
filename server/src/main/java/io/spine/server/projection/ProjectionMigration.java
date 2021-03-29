@@ -43,8 +43,8 @@ public abstract class ProjectionMigration<I,
                                           B extends ValidatingBuilder<S>>
         extends Migration<I, P, S, B> {
 
-    @SuppressWarnings("unchecked") // Logically correct.
     @Override
+    @SuppressWarnings("unchecked") // Logically correct.
     protected Transaction<I, P, S, B> startTransaction(P entity) {
         Transaction<I, P, S, B> tx = (Transaction<I, P, S, B>) ProjectionTransaction.start(entity);
         return tx;
