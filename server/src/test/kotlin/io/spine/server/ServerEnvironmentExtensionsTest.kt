@@ -37,7 +37,8 @@ class ServerEnvironmentExtensionsTest {
     @Test
     fun `add 'under' top-level function for 'ServerEnvironment' configuration`() {
         under<Tests> {
-            Truth.assertThat(type()).isEqualTo(Tests::class.java)
+            Truth.assertThat(type())
+                .isEqualTo(Tests::class.java)
         }
     }
 }
