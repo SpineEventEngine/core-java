@@ -282,7 +282,7 @@ class ProcessManagerTest {
         void rejectionAndCommandMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
             dispatch(processManager, rejection.getEvent());
-            assertReceived(rejection.getOrigin()
+            assertReceived(rejection.origin()
                                     .getMessage());
         }
 
