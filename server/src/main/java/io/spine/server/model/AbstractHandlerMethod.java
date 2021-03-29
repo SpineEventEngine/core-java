@@ -78,12 +78,12 @@ import static java.util.stream.Collectors.joining;
  *         the type of the produced message classes
  */
 @Immutable
-public abstract class AbstractHandlerMethod<
-            T,
-            M extends Message,
-            C extends MessageClass<M>,
-            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
-            R extends MessageClass<?>>
+public abstract
+class AbstractHandlerMethod<T,
+                            M extends Message,
+                            C extends MessageClass<M>,
+                            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
+                            R extends MessageClass<?>>
         implements HandlerMethod<T, C, E, R> {
 
     /** The method to be called. */
@@ -103,7 +103,7 @@ public abstract class AbstractHandlerMethod<
      * <p>This field is initialized in {@link #discoverAttributes()} to allow derived classes to
      * {@linkplain #attributeSuppliers() customize} the set of supported method attributes.
      */
-    @SuppressWarnings("Immutable")
+    @SuppressWarnings({"Immutable", "NonFinalFieldInImmutable"})
     private ImmutableSet<Attribute<?>> attributes;
 
     /**
@@ -344,9 +344,10 @@ public abstract class AbstractHandlerMethod<
         String className = method.getDeclaringClass()
                                  .getName();
         String methodName = method.getName();
-        String parameterTypes = Stream.of(method.getParameterTypes())
-                                      .map(Class::getSimpleName)
-                                      .collect(joining(", "));
+        String parameterTypes =
+                Stream.of(method.getParameterTypes())
+                      .map(Class::getSimpleName)
+                      .collect(joining(", "));
         String result = format(template, className, methodName, parameterTypes);
         return result;
     }
@@ -370,8 +371,7 @@ public abstract class AbstractHandlerMethod<
         if (!(obj instanceof AbstractHandlerMethod)) {
             return false;
         }
-        AbstractHandlerMethod other = (AbstractHandlerMethod) obj;
-
+        AbstractHandlerMethod<?, ?, ?, ?, ?> other = (AbstractHandlerMethod<?, ?, ?, ?, ?>) obj;
         return Objects.equals(this.method, other.method);
     }
 
