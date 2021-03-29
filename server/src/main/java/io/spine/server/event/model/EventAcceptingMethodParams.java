@@ -74,8 +74,8 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             Message message = event.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(event);
             CommandContext context =
-                    rejection.getOrigin()
-                             .getContext();
+                    rejection.origin()
+                             .context();
             return new Object[]{message, context};
         }
     },
@@ -92,7 +92,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(event);
-            Message commandMessage = rejection.getOriginMessage();
+            Message commandMessage = rejection.originMessage();
             return new Object[]{message, commandMessage};
         }
     },
@@ -110,7 +110,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
             RejectionEnvelope rejection = RejectionEnvelope.from(event);
-            Command origin = rejection.getOrigin();
+            Command origin = rejection.origin();
             CommandMessage commandMessage = origin.enclosedMessage();
             CommandContext context = origin.context();
             return new Object[]{message, commandMessage, context};
