@@ -30,8 +30,8 @@ import com.google.common.base.Throwables
 import io.spine.base.RejectionThrowable
 import io.spine.core.Event
 import io.spine.core.RejectionEventContext
-import io.spine.server.event.RejectionEnvelope.PRODUCER_UNKNOWN
 import io.spine.server.type.CommandEnvelope
+import io.spine.server.type.RejectionEnvelope.PRODUCER_UNKNOWN
 
 /**
  * A factory for producing rejection events.

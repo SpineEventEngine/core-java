@@ -30,9 +30,9 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Event;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
+import io.spine.server.type.RejectionEnvelope;
 import io.spine.server.type.SignalEnvelope;
 
 import java.util.Collection;

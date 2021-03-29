@@ -38,8 +38,6 @@ import io.spine.server.ContextAware;
 import io.spine.server.Identity;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.SystemWriteSide;
@@ -50,6 +48,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.type.OriginsKt.originOfRejection;
 
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
@@ -135,8 +134,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
                              .asCommandId())
                 .setRejectionEvent(rejection)
                 .vBuild();
-        Origin origin = RejectionEnvelope.from(EventEnvelope.of(rejection))
-                                         .asMessageOrigin();
+        Origin origin = originOfRejection(rejection);
         system.postEvent(commandRejected, origin);
     }
 

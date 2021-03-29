@@ -34,7 +34,7 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.Responses;
 import io.spine.core.Status;
-import io.spine.server.event.RejectionEnvelope;
+import io.spine.server.type.RejectionEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;

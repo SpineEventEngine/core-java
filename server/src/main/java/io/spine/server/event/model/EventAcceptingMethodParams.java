@@ -35,12 +35,12 @@ import io.spine.base.RejectionMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.RejectionEnvelope;
 
 import static io.spine.server.model.TypeMatcher.classImplementing;
 import static io.spine.server.model.TypeMatcher.exactly;
@@ -72,7 +72,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(event);
+            RejectionEnvelope rejection = RejectionEnvelope.from(event.outerObject());
             CommandContext context =
                     rejection.origin()
                              .context();
@@ -91,7 +91,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(event);
+            RejectionEnvelope rejection = RejectionEnvelope.from(event.outerObject());
             Message commandMessage = rejection.originMessage();
             return new Object[]{message, commandMessage};
         }
@@ -109,7 +109,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             Message message = event.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(event);
+            RejectionEnvelope rejection = RejectionEnvelope.from(event.outerObject());
             Command origin = rejection.origin();
             CommandMessage commandMessage = origin.enclosedMessage();
             CommandContext context = origin.context();

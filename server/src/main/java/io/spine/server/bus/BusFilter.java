@@ -30,9 +30,9 @@ import io.spine.annotation.SPI;
 import io.spine.base.Error;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
+import io.spine.server.type.RejectionEnvelope;
 
 import java.util.Optional;
 

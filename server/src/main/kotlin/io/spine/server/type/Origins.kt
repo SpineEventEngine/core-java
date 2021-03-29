@@ -24,35 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.type
 
-import io.spine.base.RejectionThrowable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
+import io.spine.core.Command
+import io.spine.core.Event
+import io.spine.core.Origin
 
 /**
- * A set of utilities for working with rejections and {@link RejectionThrowable}s.
+ * Obtains the origin of the passed command.
  */
-public final class Rejections {
+internal fun originOf(c: Command): Origin = CommandEnvelope.of(c).asMessageOrigin()
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private Rejections() {
-    }
+/**
+ * Obtains the origin of the passed event.
+ */
+internal fun originOf(e: Event): Origin = EventEnvelope.of(e).asMessageOrigin()
 
-    /**
-     * Tells whether or not the given {@code throwable} is caused by a {@link RejectionThrowable}.
-     *
-     * @param throwable the {@link Throwable} to check
-     * @return {@code true} is the given {@code throwable} is caused by a rejection, {@code false}
-     *         otherwise
-     */
-    public static boolean causedByRejection(Throwable throwable) {
-        checkNotNull(throwable);
-        Throwable cause = getRootCause(throwable);
-        boolean result = cause instanceof RejectionThrowable;
-        return result;
-    }
-}
+/**
+ * Obtains the origin of the passed rejection.
+ *
+ * Throws an [IllegalArgumentException] if the passed wrapping object
+ * does not contain a rejection message.
+ */
+internal fun originOfRejection(rejection: Event): Origin =
+    RejectionEnvelope.from(rejection).asMessageOrigin()

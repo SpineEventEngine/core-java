@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.type;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
@@ -37,15 +37,13 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.TenantId;
-import io.spine.server.type.AbstractMessageEnvelope;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.SignalEnvelope;
+import io.spine.server.event.RejectionFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.protobuf.TextFormat.shortDebugString;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The holder of a rejection {@code Event} which provides convenient access to its properties.
@@ -61,27 +59,43 @@ public final class RejectionEnvelope
      * {@code "Unknown"}.
      */
     @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence
-    static final Any PRODUCER_UNKNOWN = Identifier.pack("Unknown");
+    public static final Any PRODUCER_UNKNOWN = Identifier.pack("Unknown");
 
-    private final EventEnvelope event;
+    private final EventEnvelope delegate;
 
-    private RejectionEnvelope(EventEnvelope event) {
-        super(event.outerObject());
-        this.event = event;
+    private RejectionEnvelope(Event rejection) {
+        super(rejection);
+        this.delegate = EventEnvelope.of(rejection);
     }
 
     /**
-     * Creates a new {@code RejectionEnvelope} from the given event.
+     * Creates a new instance from the given rejection event.
      *
-     * <p>Throws an {@link IllegalArgumentException} if the given event is not a rejection.
+     * <p>Throws an {@link IllegalArgumentException} if the passed wrapping object
+     *  does not contain a rejection message.
      *
-     * @param event the rejection event
-     * @return new
+     * @param rejection the rejection event
+     * @return new instance
      */
+    public static RejectionEnvelope from(Event rejection) {
+        checkNotNull(rejection);
+        if (!rejection.isRejection()) {
+            throw newIllegalArgumentException(
+                    "The passed event does not contain a rejection message: `%s`",
+                    shortDebugString(rejection)
+            );
+        }
+        return new RejectionEnvelope(rejection);
+    }
+
+    /**
+     * Creates a new instance from the given rejection event envelope.
+     *
+     * @deprecated please use {@link #from(Event)}
+     */
+    @Deprecated
     public static RejectionEnvelope from(EventEnvelope event) {
-        checkNotNull(event);
-        checkArgument(event.isRejection(), "`%s` is not a rejection.", event.messageClass());
-        return new RejectionEnvelope(event);
+        return from(event.outerObject());
     }
 
     /**
@@ -104,9 +118,7 @@ public final class RejectionEnvelope
         RejectionThrowable rt = unwrap(throwable);
         RejectionFactory factory = new RejectionFactory(origin, rt);
         Event rejectionEvent = factory.createRejection();
-        EventEnvelope event = EventEnvelope.of(rejectionEvent);
-
-        return from(event);
+        return from(rejectionEvent);
     }
 
     private static RejectionThrowable unwrap(Throwable causedByRejection) {
@@ -119,22 +131,22 @@ public final class RejectionEnvelope
 
     @Override
     public TenantId tenantId() {
-        return event.tenantId();
+        return delegate.tenantId();
     }
 
     @Override
     public EventId id() {
-        return event.id();
+        return delegate.id();
     }
 
     @Override
     public RejectionMessage message() {
-        return (RejectionMessage) event.message();
+        return (RejectionMessage) delegate.message();
     }
 
     @Override
     public EventClass messageClass() {
-        EventClass eventClass = event.messageClass();
+        EventClass eventClass = delegate.messageClass();
         @SuppressWarnings("unchecked") // Checked at runtime.
         Class<? extends RejectionMessage> value =
                 (Class<? extends RejectionMessage>) eventClass.value();
@@ -144,12 +156,12 @@ public final class RejectionEnvelope
 
     @Override
     public EventContext context() {
-        return event.context();
+        return delegate.context();
     }
 
     @VisibleForTesting
     public EventEnvelope getEvent() {
-        return event;
+        return delegate;
     }
 
     /**
@@ -178,9 +190,10 @@ public final class RejectionEnvelope
      * @return the rejected command message
      */
     public CommandMessage originMessage() {
-        CommandMessage commandMessage = context().getRejection()
-                                                 .getCommand()
-                                                 .enclosedMessage();
+        CommandMessage commandMessage =
+                context().getRejection()
+                         .getCommand()
+                         .enclosedMessage();
         return commandMessage;
     }
 
