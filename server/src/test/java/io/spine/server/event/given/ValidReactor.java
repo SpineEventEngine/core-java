@@ -49,7 +49,7 @@ import java.util.Optional;
 /**
  * A standalone event reactor which declares valid {@linkplain React event-reacting handlers}
  * for the purposes of {@link io.spine.server.event.model.EventReactorSignatureTest
- * EventReactorSignatureTest}..
+ * EventReactorSignatureTest}.
  *
  * <p>This class declares the duplicate handlers for some events, hence it cannot be
  * registered in any Bounded Context. This is done for simplicity of enumerating all possible
