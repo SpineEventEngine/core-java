@@ -27,9 +27,9 @@
 package io.spine.server.type;
 
 import io.spine.base.RejectionThrowable;
+import io.spine.base.ThrowableExtensionsKt;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * A set of utilities for working with rejections and {@link RejectionThrowable}s.
@@ -47,11 +47,11 @@ public final class Rejections {
      * @param throwable the {@link Throwable} to check
      * @return {@code true} is the given {@code throwable} is caused by a rejection, {@code false}
      *         otherwise
+     * @deprecated please use {@link ThrowableExtensionsKt#causedByRejection(Throwable)}
      */
+    @Deprecated
     public static boolean causedByRejection(Throwable throwable) {
         checkNotNull(throwable);
-        Throwable cause = getRootCause(throwable);
-        boolean result = cause instanceof RejectionThrowable;
-        return result;
+        return ThrowableExtensionsKt.causedByRejection(throwable);
     }
 }
