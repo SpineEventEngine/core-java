@@ -36,17 +36,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class Rejections {
 
-    /**
-     * Prevents the utility class instantiation.
-     */
+    /** Prevents the utility class instantiation. */
     private Rejections() {
     }
+
     /**
      * Tells whether or not the given {@code throwable} is caused by a {@link RejectionThrowable}.
      *
-     * @param throwable the {@link Throwable} to check
-     * @return {@code true} is the given {@code throwable} is caused by a rejection, {@code false}
-     *         otherwise
      * @deprecated please use {@link ThrowableExtensionsKt#causedByRejection(Throwable)}
      */
     @Deprecated
