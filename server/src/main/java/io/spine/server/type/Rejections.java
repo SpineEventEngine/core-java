@@ -27,8 +27,6 @@
 package io.spine.server.type;
 
 import io.spine.base.RejectionThrowable;
-import io.spine.core.Event;
-import io.spine.core.Origin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
@@ -54,18 +52,6 @@ public final class Rejections {
         checkNotNull(throwable);
         Throwable cause = getRootCause(throwable);
         boolean result = cause instanceof RejectionThrowable;
-        return result;
-    }
-
-    /**
-     * Obtains the origin of the passed rejection.
-     *
-     * <p>Throws an {@link IllegalArgumentException} if the passed wrapping object
-     *  does not contain a rejection message.
-     */
-    public static Origin originOfRejection(Event rejection) {
-        RejectionEnvelope envelope = RejectionEnvelope.from(rejection);
-        Origin result = envelope.asMessageOrigin();
         return result;
     }
 }
