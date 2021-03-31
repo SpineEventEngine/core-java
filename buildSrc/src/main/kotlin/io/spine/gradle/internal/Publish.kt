@@ -120,10 +120,10 @@ class Publish : Plugin<Project> {
                         publishingExtension.setUpRepositories(p, extension)
                         p.prepareTasks(publish, checkCredentials)
                     }
-                    if (state.executed) {
+                    if (p.state.executed) {
                         action()
                     } else {
-                        afterEvaluate { action() }
+                        p.afterEvaluate { action() }
                     }
                 }
         }
@@ -199,7 +199,7 @@ class Publish : Plugin<Project> {
 
     private fun PublishingExtension.createMavenPublication(project: Project,
                                                            extension: PublishExtension) {
-        val artifactIdForPublishing = if(extension.spinePrefix.get()) {
+        val artifactIdForPublishing = if (extension.spinePrefix.get()) {
             "spine-${project.name}"
         } else {
             project.name
