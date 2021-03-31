@@ -45,7 +45,7 @@ val coreJava = "2.0.0-SNAPSHOT.7"
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "2.0.0-SNAPSHOT.5"
+val base = "2.0.0-SNAPSHOT.13"
 val time = "2.0.0-SNAPSHOT.5"
 
 project.extra.apply {
