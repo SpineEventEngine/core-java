@@ -28,21 +28,32 @@ package io.spine.server.event
 
 import com.google.common.base.Throwables
 import io.spine.base.RejectionThrowable
+import io.spine.core.Command
 import io.spine.core.Event
 import io.spine.core.RejectionEventContext
-import io.spine.server.type.CommandEnvelope
 import io.spine.server.type.RejectionEnvelope.PRODUCER_UNKNOWN
 
 /**
  * A factory for producing rejection events.
  */
-internal class RejectionFactory(
-    val origin: CommandEnvelope,
+class RejectionFactory(
+    val command: Command,
     val throwable: RejectionThrowable
-) : EventFactory(
-    EventOrigin.fromAnotherMessage(origin),
+) : EventFactoryBase(
+    EventOrigin.from(command.asMessageOrigin()),
     throwable.producerId().orElse(PRODUCER_UNKNOWN)
 ) {
+
+    /**
+     * Creates a factory instance for creating a rejection for the passed command and
+     * the throwable.
+     *
+     * The cause of the throwable must implement [RejectionThrowable].
+     *
+     * @throws IllegalArgumentException
+     *          if the cause of the passed `throwable` does not implement `RejectionThrowable`
+     */
+    constructor(command: Command, throwable: Throwable) : this(command, unwrap(throwable))
 
     /**
      * Creates a rejection event which does not have version information.
@@ -50,18 +61,39 @@ internal class RejectionFactory(
     fun createRejection(): Event {
         val msg = throwable.messageThrown()
         val context = rejectionContext()
-        return createRejectionEvent(msg, null, context)
+        val outerContext = createContext(null, context)
+        return doCreateEvent(msg, outerContext)
     }
 
     /**
      * Constructs a new [RejectionEventContext].
      */
     private fun rejectionContext(): RejectionEventContext {
-        val command = origin.outerObject()
-        val stacktrace = Throwables.getStackTraceAsString(throwable)
-        return RejectionEventContext.newBuilder()
-            .setCommand(command)
-            .setStacktrace(stacktrace)
-            .build()
+        val st = Throwables.getStackTraceAsString(throwable)
+        return with(RejectionEventContext.newBuilder()) {
+            command = this.command
+            stacktrace = st
+            vBuild()
+        }
+    }
+
+    companion object {
+
+        /**
+         * Extracts a `RejectionThrowable` from the passed instance.
+         *
+         * @throws IllegalArgumentException
+         *          if the cause does not implement `RejectionThrowable`
+         */
+        fun unwrap(throwable: Throwable): RejectionThrowable {
+            val cause = Throwables.getRootCause(throwable)
+            if (cause !is RejectionThrowable) {
+                throw IllegalArgumentException(
+                    "The cause of `${throwable}` has the type `${cause.javaClass}`." +
+                            " Expected: `${RejectionThrowable::class}`."
+                )
+            }
+            return cause
+        }
     }
 }

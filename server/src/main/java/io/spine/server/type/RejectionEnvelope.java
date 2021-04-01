@@ -39,9 +39,7 @@ import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.server.event.RejectionFactory;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -53,12 +51,12 @@ public final class RejectionEnvelope
         implements SignalEnvelope<EventId, Event, EventContext> {
 
     /**
-     * A placeholder for telling that a rejection origin is not known.
+     * A placeholder for telling that a producer of a rejection is not known.
      *
      * <p>Represented by a packed {@link com.google.protobuf.StringValue StringValue} of
      * {@code "Unknown"}.
      */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Used in another context.
     public static final Any PRODUCER_UNKNOWN = Identifier.pack("Unknown");
 
     private final EventEnvelope delegate;
@@ -99,8 +97,8 @@ public final class RejectionEnvelope
     }
 
     /**
-     * Creates an instance of {@code Rejection} from the rejected command and a {@link Throwable}
-     * caused by the {@link RejectionThrowable}.
+     * Creates an wrapped instance of a rejection event from the rejected command and
+     * a {@link Throwable} caused by the {@link RejectionThrowable}.
      *
      * <p>If the producer is not {@linkplain RejectionThrowable#initProducer(Any) set}, uses
      * the {@link #PRODUCER_UNKNOWN} as the producer.
@@ -114,20 +112,11 @@ public final class RejectionEnvelope
     public static RejectionEnvelope from(CommandEnvelope origin, Throwable throwable) {
         checkNotNull(origin);
         checkNotNull(throwable);
-
-        RejectionThrowable rt = unwrap(throwable);
-        RejectionFactory factory = new RejectionFactory(origin, rt);
-        Event rejectionEvent = factory.createRejection();
-        return from(rejectionEvent);
+        RejectionFactory factory = new RejectionFactory(origin.outerObject(), throwable);
+        Event rejection = factory.createRejection();
+        return from(rejection);
     }
 
-    private static RejectionThrowable unwrap(Throwable causedByRejection) {
-        Throwable cause = getRootCause(causedByRejection);
-        boolean correctType = cause instanceof RejectionThrowable;
-        checkArgument(correctType);
-        RejectionThrowable rt = (RejectionThrowable) cause;
-        return rt;
-    }
 
     @Override
     public TenantId tenantId() {
