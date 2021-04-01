@@ -90,6 +90,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.dispatch.PmDispatcher.dispatch;
@@ -287,8 +288,9 @@ class ProcessManagerTest {
         }
 
         private void assertReceived(Any expected) {
-            assertEquals(expected, processManager.state()
-                                                 .getAny());
+            assertThat(processManager.state()
+                                     .getAny())
+                    .isEqualTo(expected);
         }
     }
 

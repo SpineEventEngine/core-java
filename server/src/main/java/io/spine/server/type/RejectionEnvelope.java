@@ -100,6 +100,17 @@ public final class RejectionEnvelope
      * Creates an wrapped instance of a rejection event from the rejected command and
      * a {@link Throwable} caused by the {@link RejectionThrowable}.
      *
+     * @deprecated please use {@link #from(Command, Throwable)}
+     */
+    @Deprecated
+    public static RejectionEnvelope from(CommandEnvelope origin, Throwable throwable) {
+        return from(origin.outerObject(), throwable);
+    }
+
+    /**
+     * Creates an wrapped instance of a rejection event from the rejected command and
+     * a {@link Throwable} caused by the {@link RejectionThrowable}.
+     *
      * <p>If the producer is not {@linkplain RejectionThrowable#initProducer(Any) set}, uses
      * the {@link #PRODUCER_UNKNOWN} as the producer.
      *
@@ -109,14 +120,13 @@ public final class RejectionEnvelope
      * @throws IllegalArgumentException if the given {@link Throwable} is not caused by
      *                                  a {@link RejectionThrowable}
      */
-    public static RejectionEnvelope from(CommandEnvelope origin, Throwable throwable) {
+    public static RejectionEnvelope from(Command origin, Throwable throwable) {
         checkNotNull(origin);
         checkNotNull(throwable);
-        RejectionFactory factory = new RejectionFactory(origin.outerObject(), throwable);
+        RejectionFactory factory = new RejectionFactory(origin, throwable);
         Event rejection = factory.createRejection();
         return from(rejection);
     }
-
 
     @Override
     public TenantId tenantId() {

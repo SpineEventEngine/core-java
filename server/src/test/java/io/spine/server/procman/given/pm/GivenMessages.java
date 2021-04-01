@@ -32,7 +32,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.server.commandbus.Given;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
-import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.RejectionEnvelope;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
@@ -96,11 +95,11 @@ public class GivenMessages {
     entityAlreadyArchived(Class<? extends CommandMessage> commandClass) {
         Any id = Identifier.pack(TestProcessManager.class.getName());
         Command command = Given.ACommand.withMessage(messageOfType(commandClass));
-        RejectionEnvelope result = RejectionEnvelope.from(CommandEnvelope.of(command),
-                                                          EntityAlreadyArchived
-                                                                  .newBuilder()
-                                                                  .setEntityId(id)
-                                                                  .build());
+        Throwable throwable = EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(id)
+                .build();
+        RejectionEnvelope result = RejectionEnvelope.from(command, throwable);
         return result;
     }
 

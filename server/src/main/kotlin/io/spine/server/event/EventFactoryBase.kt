@@ -42,7 +42,9 @@ import io.spine.type.TypeName
 import io.spine.validate.Validate
 import io.spine.validate.ValidationException
 
-
+/**
+ * The base class for event factories.
+ */
 abstract class EventFactoryBase(
     val origin: EventOrigin,
     val producerId: Any
@@ -52,34 +54,26 @@ abstract class EventFactoryBase(
         /**
          * Creates a new `Event` instance.
          *
-         * @param id
-         * the ID of the event
-         * @param message
-         * the event message
-         * @param context
-         * the event context
+         * @param id      the ID of the event
+         * @param message the event message
+         * @param context the event context
          * @return created event instance
          */
         @JvmStatic
         fun createEvent(id: EventId, message: EventMessage, context: EventContext): Event {
             val packed = pack(message)
-            val result = Event
-                .newBuilder()
+            return Event.newBuilder()
                 .setId(id)
                 .setMessage(packed)
                 .setContext(context)
                 .vBuild()
-            return result
         }
 
         @JvmStatic
         fun doCreateEvent(message: EventMessage, context: EventContext): Event {
-            // We validate now, before emitting the next ID.
-            validate(message)
-
+            validate(message) // Validate before emitting the next ID.
             val eventId = Events.generateId()
-            val result = createEvent(eventId, message, context)
-            return result
+            return createEvent(eventId, message, context)
         }
 
         /**
@@ -109,7 +103,8 @@ abstract class EventFactoryBase(
      * which produced the event.
      */
     fun createContext(version: Version?): EventContext =
-        newContext(version).vBuild()
+        newContext(version)
+            .vBuild()
 
     fun createContext(version: Version?, context: RejectionEventContext): EventContext =
         newContext(version)
