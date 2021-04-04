@@ -34,6 +34,8 @@ import io.spine.server.type.MessageEnvelope;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
+import static io.spine.server.bus.MessageIdExtensionsKt.causedError;
 
 /**
  * The filter for the messages posted to a bus.
@@ -88,7 +90,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      */
     default Optional<Ack> reject(E envelope) {
         checkNotNull(envelope);
-        Ack ack = MessageIdExtensionsKt.acknowledge(envelope.id());
+        Ack ack = acknowledge(envelope.id());
         return Optional.of(ack);
     }
 
@@ -108,7 +110,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     default Optional<Ack> reject(E envelope, Error cause) {
         checkNotNull(envelope);
         checkNotNull(cause);
-        Ack ack = MessageIdExtensionsKt.causedError(envelope.id(), cause);
+        Ack ack = causedError(envelope.id(), cause);
         return Optional.of(ack);
     }
 
