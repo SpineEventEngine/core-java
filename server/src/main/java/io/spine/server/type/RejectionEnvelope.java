@@ -27,15 +27,14 @@
 package io.spine.server.type;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
-import io.spine.base.Identifier;
 import io.spine.base.RejectionMessage;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
+import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -48,15 +47,6 @@ import static io.spine.server.event.RejectionFactoryKt.reject;
 public final class RejectionEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
         implements SignalEnvelope<EventId, Event, EventContext> {
-
-    /**
-     * A placeholder for telling that a producer of a rejection is not known.
-     *
-     * <p>Represented by a packed {@link com.google.protobuf.StringValue StringValue} of
-     * {@code "Unknown"}.
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Used in another context.
-    public static final Any PRODUCER_UNKNOWN = Identifier.pack("Unknown");
 
     private final EventEnvelope delegate;
 
@@ -76,19 +66,6 @@ public final class RejectionEnvelope
     public static RejectionEnvelope from(EventEnvelope delegate) {
         checkArgument(delegate.isRejection());
         return new RejectionEnvelope(delegate);
-    }
-
-    /**
-     * Creates an wrapped instance of a rejection event from the rejected command and
-     * a {@link Throwable} caused by the {@link RejectionThrowable}.
-     *
-     * @deprecated please use {@link #from(Command, Throwable)}
-     */
-    @Deprecated
-    public static RejectionEnvelope from(CommandEnvelope origin, Throwable throwable) {
-        checkNotNull(origin);
-        checkNotNull(throwable);
-        return from(origin.outerObject(), throwable);
     }
 
     /**
@@ -126,6 +103,11 @@ public final class RejectionEnvelope
         return (RejectionMessage) delegate.message();
     }
 
+    @VisibleForTesting
+    public EventEnvelope delegate() {
+        return delegate;
+    }
+
     @Override
     public EventClass messageClass() {
         EventClass eventClass = delegate.messageClass();
@@ -141,9 +123,8 @@ public final class RejectionEnvelope
         return delegate.context();
     }
 
-    @VisibleForTesting
-    public EventEnvelope getEvent() {
-        return delegate;
+    private RejectionEventContext rejectionContext() {
+        return context().getRejection();
     }
 
     /**
@@ -152,18 +133,7 @@ public final class RejectionEnvelope
      * @return the rejected command
      */
     public Command origin() {
-        return context().getRejection()
-                        .getCommand();
-    }
-
-    /**
-     * Obtains the command which cased the rejection.
-     *
-     * @deprecated please use {@link #origin()}.
-     */
-    @Deprecated
-    public Command getOrigin() {
-        return origin();
+        return rejectionContext().getCommand();
     }
 
     /**
@@ -172,21 +142,7 @@ public final class RejectionEnvelope
      * @return the rejected command message
      */
     public CommandMessage originMessage() {
-        CommandMessage commandMessage =
-                context().getRejection()
-                         .getCommand()
-                         .enclosedMessage();
+        CommandMessage commandMessage = origin().enclosedMessage();
         return commandMessage;
-    }
-
-    /**
-     * Obtains the origin command message.
-     *
-     * @return the rejected command message
-     * @deprecated please use {@link #originMessage()}.
-     */
-    @Deprecated
-    public CommandMessage getOriginMessage() {
-        return originMessage();
     }
 }

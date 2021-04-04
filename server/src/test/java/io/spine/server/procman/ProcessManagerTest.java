@@ -272,7 +272,7 @@ class ProcessManagerTest {
         @DisplayName("rejection message only")
         void rejectionMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
-            dispatch(processManager, rejection.getEvent());
+            dispatch(processManager, rejection.delegate());
             assertReceived(rejection.outerObject()
                                     .getMessage());
         }
@@ -281,7 +281,7 @@ class ProcessManagerTest {
         @DisplayName("rejection and command message")
         void rejectionAndCommandMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
-            dispatch(processManager, rejection.getEvent());
+            dispatch(processManager, rejection.delegate());
             assertReceived(rejection.origin()
                                     .getMessage());
         }
