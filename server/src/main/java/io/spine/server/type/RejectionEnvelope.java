@@ -40,9 +40,7 @@ import io.spine.core.TenantId;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.event.RejectionFactoryKt.reject;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The holder of a rejection {@code Event} which provides convenient access to its properties.
@@ -73,26 +71,6 @@ public final class RejectionEnvelope
     }
 
     /**
-     * Creates a new instance from the given rejection event.
-     *
-     * <p>Throws an {@link IllegalArgumentException} if the passed wrapping object
-     *  does not contain a rejection message.
-     *
-     * @param rejection the rejection event
-     * @return new instance
-     */
-    public static RejectionEnvelope from(Event rejection) {
-        checkNotNull(rejection);
-        if (!rejection.isRejection()) {
-            throw newIllegalArgumentException(
-                    "The passed event does not contain a rejection message: `%s`",
-                    shortDebugString(rejection)
-            );
-        }
-        return new RejectionEnvelope(rejection);
-    }
-
-    /**
      * Creates a new instance from the given rejection event envelope.
      */
     public static RejectionEnvelope from(EventEnvelope delegate) {
@@ -117,20 +95,20 @@ public final class RejectionEnvelope
      * Creates an wrapped instance of a rejection event from the rejected command and
      * a {@link Throwable} caused by the {@link RejectionThrowable}.
      *
-     * <p>If the producer is not {@linkplain RejectionThrowable#initProducer(Any) set}, uses
-     * the {@link #PRODUCER_UNKNOWN} as the producer.
-     *
-     * @param origin    the rejected command
-     * @param throwable the caught error
+     * @param origin
+     *         the rejected command
+     * @param throwable
+     *         the caught error
      * @return new instance of {@code Rejection}
-     * @throws IllegalArgumentException if the given {@link Throwable} is not caused by
-     *                                  a {@link RejectionThrowable}
+     * @throws IllegalArgumentException
+     *         if the given {@link Throwable} is not caused by
+     *         a {@link RejectionThrowable}
      */
     public static RejectionEnvelope from(Command origin, Throwable throwable) {
         checkNotNull(origin);
         checkNotNull(throwable);
         Event rejection = reject(origin, throwable);
-        return from(rejection);
+        return new RejectionEnvelope(rejection);
     }
 
     @Override

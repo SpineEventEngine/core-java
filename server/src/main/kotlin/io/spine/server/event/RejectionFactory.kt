@@ -27,19 +27,31 @@
 package io.spine.server.event
 
 import com.google.common.base.Throwables
+import com.google.protobuf.Any
+import io.spine.base.Identifier
 import io.spine.base.RejectionThrowable
 import io.spine.core.Command
 import io.spine.core.Event
 import io.spine.core.RejectionEventContext
-import io.spine.server.type.RejectionEnvelope.PRODUCER_UNKNOWN
+
+/**
+ * A placeholder to be used when a producer of a rejection is not available.
+ */
+val unknownProducer: Any = Identifier.pack("Unknown")
 
 /**
  * Creates a rejection event for the passed command and the throwable.
  *
- * The cause of the throwable must implement [RejectionThrowable].
+ * If the ID of the actor generating the rejection was not [set][RejectionThrowable.initProducer],
+ * in the rejection, a placeholder with the string `"Unknown"` will be used as the producer ID.
  *
+ * @param command
+ *          the command to be rejected
+ * @param throwable
+ *          the reason for the command to be rejected, must implement [RejectionThrowable],
+ *          or have its cause implementing this interface
  * @throws IllegalArgumentException
- *          if the cause of the passed `throwable` does not implement `RejectionThrowable`
+ *          if neither the passed throwable nor its cause implement [RejectionThrowable]
  */
 fun reject(command: Command, throwable: Throwable): Event {
     val rt = unwrap(throwable)
@@ -49,9 +61,6 @@ fun reject(command: Command, throwable: Throwable): Event {
 
 /**
  * Extracts a `RejectionThrowable` from the passed instance.
- *
- * @throws IllegalArgumentException
- *          if the cause does not implement `RejectionThrowable`
  */
 private fun unwrap(throwable: Throwable): RejectionThrowable {
     if (throwable is RejectionThrowable) {
@@ -73,19 +82,8 @@ private fun unwrap(throwable: Throwable): RejectionThrowable {
 private class RejectionFactory(val command: Command, val throwable: RejectionThrowable) :
     EventFactoryBase(
         EventOrigin.from(command.asMessageOrigin()),
-        throwable.producerId().orElse(PRODUCER_UNKNOWN)
+        throwable.producerId().orElse(unknownProducer)
     ) {
-
-    /**
-     * Creates a factory instance for creating a rejection for the passed command and
-     * the throwable.
-     *
-     * The cause of the throwable must implement [RejectionThrowable].
-     *
-     * @throws IllegalArgumentException
-     *          if the cause of the passed `throwable` does not implement `RejectionThrowable`
-     */
-    private constructor(command: Command, throwable: Throwable) : this(command, unwrap(throwable))
 
     /**
      * Creates a rejection event which does not have version information.
