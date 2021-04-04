@@ -64,21 +64,17 @@ public final class Responses {
     }
 
     /**
-     * Checks if the response is OK.
-     *
-     * @deprecated please use {@link Response#isOk()}
+     * Creates an error status with the passed cause.
      */
-    @Deprecated
-    public static boolean isOk(Response response) {
-        return response.isOk();
-    }
-
     public static Status errorWith(Error cause) {
         return Status.newBuilder()
                      .setError(cause)
                      .build();
     }
 
+    /**
+     * Creates a rejection status with the passed rejection.
+     */
     public static Status rejectedBecauseOf(Event rejection) {
         checkNotDefaultArg(rejection);
         Status status = Status.newBuilder()
