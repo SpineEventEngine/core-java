@@ -32,9 +32,7 @@ import com.google.protobuf.Message
 import io.spine.base.EventMessage
 import io.spine.core.Event
 import io.spine.core.EventContext
-import io.spine.core.EventId
 import io.spine.core.Events
-import io.spine.core.RejectionEventContext
 import io.spine.core.Version
 import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.AnyPacker.pack
@@ -47,39 +45,38 @@ abstract class EventFactoryBase(
     val origin: EventOrigin,
     val producerId: Any
 ) {
-    companion object {
+    /**
+     * Creates a new event context with an optionally passed version of the entity
+     * which produced the event.
+     */
+    fun createContext(version: Version?): EventContext =
+        newContext(version).vBuild()
+
+    protected fun newContext(version: Version?): EventContext.Builder {
+        val builder = origin.contextBuilder().setProducerId(producerId)
+        if (version != null) {
+            builder.version = version
+        }
+        return builder
+    }
+
+    internal companion object {
 
         /**
          * Creates a new `Event` instance.
-         *
-         * @param id
-         * the ID of the event
-         * @param message
-         * the event message
-         * @param context
-         * the event context
-         * @return created event instance
          */
         @JvmStatic
-        fun createEvent(id: EventId, message: EventMessage, context: EventContext): Event {
-            val packed = pack(message)
-            val result = Event
-                .newBuilder()
-                .setId(id)
-                .setMessage(packed)
-                .setContext(context)
-                .vBuild()
-            return result
-        }
-
-        @JvmStatic
-        fun doCreateEvent(message: EventMessage, context: EventContext): Event {
+        fun assemble(message: EventMessage, context: EventContext): Event {
             // We validate now, before emitting the next ID.
             validate(message)
-
             val eventId = Events.generateId()
-            val result = createEvent(eventId, message, context)
-            return result
+            val packed = pack(message)
+            return with(Event.newBuilder()) {
+                id = eventId
+                this.message = packed
+                this.context = context
+                vBuild()
+            }
         }
 
         /**
@@ -90,7 +87,7 @@ abstract class EventFactoryBase(
          */
         @JvmStatic
         @Throws(ValidationException::class)
-        fun validate(messageOrAny: Message) {
+        private fun validate(messageOrAny: Message) {
             val message = if (messageOrAny is Any) {
                 AnyPacker.unpack(messageOrAny)
             } else {
@@ -102,25 +99,5 @@ abstract class EventFactoryBase(
             )
             Validate.checkValid(message)
         }
-    }
-
-    /**
-     * Creates a new event context with an optionally passed version of the entity
-     * which produced the event.
-     */
-    fun createContext(version: Version?): EventContext =
-        newContext(version).vBuild()
-
-    fun createContext(version: Version?, context: RejectionEventContext): EventContext =
-        newContext(version)
-            .setRejection(context)
-            .vBuild()
-
-    private fun newContext(version: Version?): EventContext.Builder {
-        val builder = origin.contextBuilder().setProducerId(producerId)
-        if (version != null) {
-            builder.version = version
-        }
-        return builder
     }
 }

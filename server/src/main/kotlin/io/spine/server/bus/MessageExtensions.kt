@@ -24,51 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.type;
+package io.spine.server.bus
 
-import com.google.protobuf.Message;
-import io.spine.core.Origin;
-import io.spine.type.MessageClass;
+import com.google.protobuf.Message
+import io.spine.base.Error
+import io.spine.core.Ack
+import io.spine.core.CommandId
+import io.spine.core.Event
+import io.spine.core.Responses
+import io.spine.core.Status
+import io.spine.protobuf.AnyPacker
 
 /**
- * A common interface for obtaining messages from wrapping objects.
- *
- * @param <I>
- *         the type of the message ID
- * @param <T>
- *         the type of the object that wraps a message
- * @param <C>
- *         the type of the message context
+ * Acknowledges this message with the OK status.
  */
-public interface MessageEnvelope<I extends Message, T, C extends Message> {
+fun Message.acknowledge(): Ack =
+    ackWithStatus(this, Responses.statusOk())
 
-    /**
-     * The ID of the message.
-     */
-    I id();
+/**
+ * Rejects message with this ID because the passed error occurred.
+ */
+fun Message.causedError(cause: Error): Ack =
+    ackWithStatus(this, Responses.errorWith(cause))
 
-    /**
-     * Obtains the object which contains the message of interest.
-     */
-    T outerObject();
+/**
+ * Reject a command with this ID with the passed rejection event.
+ */
+fun CommandId.reject(rejection: Event): Ack =
+    ackWithStatus(this, Responses.rejectedBecauseOf(rejection))
 
-    /**
-     * Obtains the message.
-     */
-    Message message();
-
-    /**
-     * Obtains the message class.
-     */
-    MessageClass<?> messageClass();
-
-    /**
-     * Obtains the context of the message.
-     */
-    C context();
-
-    /**
-     * Packs this message as an {@link Origin} of an event.
-     */
-    Origin asMessageOrigin();
+private fun ackWithStatus(id: Message, status: Status): Ack {
+    val packedId = AnyPacker.pack(id)
+    return with(Ack.newBuilder()) {
+        messageId = packedId
+        this.status = status
+        vBuild()
+    }
 }

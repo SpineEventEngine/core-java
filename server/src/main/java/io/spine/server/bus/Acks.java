@@ -26,24 +26,24 @@
 
 package io.spine.server.bus;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Ack;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.core.Responses;
-import io.spine.core.Status;
 import io.spine.server.type.RejectionEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * A utility for producing {@link Ack} instances.
+ *
+ * @deprecated please use {@link MessageExtensionsKt}.
  */
 @Internal
+@Deprecated
 public final class Acks {
 
     /** Prevents instantiation of this utility class. */
@@ -53,12 +53,12 @@ public final class Acks {
     /**
      * Creates an {@code Ack} with the {@code OK} status.
      *
-     * @param id
-     *         the ID of the message which has been posted
+     * @deprecated please use {@link MessageExtensionsKt}
      */
+    @Deprecated
     public static Ack acknowledge(Message id) {
         checkNotNull(id);
-        return setStatus(id, Responses.statusOk());
+        return MessageExtensionsKt.acknowledge(id);
     }
 
     /**
@@ -68,44 +68,26 @@ public final class Acks {
      *         the ID of the message which has been posted
      * @param cause
      *         the error
+     * @deprecated please use {@link MessageExtensionsKt#causedError(Message, Error)}
      */
+    @Deprecated
     public static Ack reject(Message id, Error cause) {
         checkNotDefaultArg(id);
         checkNotDefaultArg(cause);
-        Status status = Status
-                .newBuilder()
-                .setError(cause)
-                .build();
-        return setStatus(id, status);
+        return MessageExtensionsKt.causedError(id, cause);
     }
 
     /**
      * Creates an {@code Ack} with the business rejection status.
      *
-     * @param id
-     *         the ID of the message which has been posted
-     * @param cause
-     *         the cause of the rejection
+     * @deprecated please use {@link MessageExtensionsKt#reject(CommandId, Event)}
      */
+    @Deprecated
     public static Ack reject(Message id, RejectionEnvelope cause) {
         checkNotNull(id);
         checkNotNull(cause);
-        Event event = cause.outerObject();
-        checkNotDefaultArg(event);
-        Status status = Status
-                .newBuilder()
-                .setRejection(event)
-                .build();
-        return setStatus(id, status);
-    }
-
-    private static Ack setStatus(Message id, Status status) {
-        Any packedId = pack(id);
-        Ack result = Ack
-                .newBuilder()
-                .setMessageId(packedId)
-                .setStatus(status)
-                .build();
-        return result;
+        CommandId casted = (CommandId) id;
+        Event rejection = cause.outerObject();
+        return MessageExtensionsKt.reject(casted, rejection);
     }
 }

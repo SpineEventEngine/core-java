@@ -27,20 +27,26 @@
 package io.spine.core;
 
 import com.google.protobuf.Empty;
+import io.spine.base.Error;
+
+import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
  * Utilities for working with {@link Response Response} objects.
  */
 public final class Responses {
 
-    private static final Status STATUS_OK = Status.newBuilder()
-                                                  .setOk(Empty.getDefaultInstance())
-                                                  .build();
+    private static final Status STATUS_OK =
+            Status.newBuilder()
+                  .setOk(Empty.getDefaultInstance())
+                  .build();
 
     /** The response returned on successful acceptance of a message for processing. */
-    private static final Response RESPONSE_OK = Response.newBuilder()
-                                                        .setStatus(STATUS_OK)
-                                                        .build();
+    private static final Response RESPONSE_OK =
+            Response.newBuilder()
+                    .setStatus(STATUS_OK)
+                    .build();
+
     /** Prevent instantiation of this utility class. */
     private Responses() {
     }
@@ -65,5 +71,19 @@ public final class Responses {
     @Deprecated
     public static boolean isOk(Response response) {
         return response.isOk();
+    }
+
+    public static Status errorWith(Error cause) {
+        return Status.newBuilder()
+                     .setError(cause)
+                     .build();
+    }
+
+    public static Status rejectedBecauseOf(Event rejection) {
+        checkNotDefaultArg(rejection);
+        Status status = Status.newBuilder()
+                .setRejection(rejection)
+                .build();
+        return status;
     }
 }

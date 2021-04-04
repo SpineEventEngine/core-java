@@ -61,8 +61,10 @@ class RejectionFactory(
     fun createRejection(): Event {
         val msg = throwable.messageThrown()
         val context = rejectionContext()
-        val outerContext = createContext(null, context)
-        return doCreateEvent(msg, outerContext)
+        val outerContext = newContext(null)
+            .setRejection(context)
+            .vBuild()
+        return assemble(msg, outerContext)
     }
 
     /**

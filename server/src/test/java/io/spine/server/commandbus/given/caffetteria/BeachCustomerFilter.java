@@ -27,7 +27,7 @@
 package io.spine.server.commandbus.given.caffetteria;
 
 import io.spine.core.Ack;
-import io.spine.server.bus.BusFilter;
+import io.spine.server.commandbus.CommandFilter;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commandbus.command.CmdBusAllocateTable;
 import io.spine.test.commandbus.command.CmdBusEntryDenied;
@@ -36,7 +36,7 @@ import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 
-public final class BeachCustomerFilter implements BusFilter<CommandEnvelope> {
+public final class BeachCustomerFilter implements CommandFilter {
 
     @Override
     public Optional<Ack> filter(CommandEnvelope envelope) {

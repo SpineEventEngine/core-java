@@ -30,14 +30,10 @@ import io.spine.base.Error;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.commandbus.CommandFilter;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.EventEnvelope;
-import io.spine.test.bus.ShareId;
-import io.spine.test.bus.command.ShareCannotBeTraded;
 
 import java.util.Optional;
-
-import static io.spine.base.Identifier.newUuid;
 
 public final class BusFilters {
 
@@ -77,7 +73,7 @@ public final class BusFilters {
         }
     }
 
-    public static final class RejectingWithRejectionThrowable implements BusFilter<CommandEnvelope> {
+    public static final class RejectingWithRejectionThrowable implements CommandFilter {
 
         private final RejectionThrowable rejection;
 
@@ -91,16 +87,4 @@ public final class BusFilters {
         }
     }
 
-    public static final class Throwing implements BusFilter<EventEnvelope> {
-
-        @Override
-        public Optional<Ack> filter(EventEnvelope envelope) {
-            ShareCannotBeTraded rejection = ShareCannotBeTraded
-                    .newBuilder()
-                    .setShare(ShareId.newBuilder().setValue(newUuid()).build())
-                    .setReason("Test filter rejection.")
-                    .build();
-            return reject(envelope, rejection);
-        }
-    }
 }

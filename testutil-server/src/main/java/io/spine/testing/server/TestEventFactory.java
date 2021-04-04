@@ -88,26 +88,23 @@ public class TestEventFactory extends EventFactory {
     }
 
     /**
-     * Creates an event without version information.
-     */
-    public Event createEvent(EventMessage message) {
-        return createEvent(message, null);
-    }
-
-    /**
      * Creates an event produced at the passed time.
      */
     public Event createEvent(EventMessage message, @Nullable Version version, Timestamp atTime) {
         checkNotNull(message);
         checkNotNull(atTime);
-        Event event = createEvent(message, version);
-        EventContext context = event.context()
-                                    .toBuilder()
-                                    .setTimestamp(atTime)
-                                    .build();
-        Event result = event.toBuilder()
-                            .setContext(context)
-                            .build();
+        Event event = version != null
+                      ? createEvent(message, version)
+                      : createEvent(message);
+        EventContext context =
+                event.context()
+                     .toBuilder()
+                     .setTimestamp(atTime)
+                     .build();
+        Event result =
+                event.toBuilder()
+                     .setContext(context)
+                     .build();
         return result;
     }
 }

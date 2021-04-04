@@ -48,7 +48,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.server.bus.Acks.acknowledge;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 import static java.util.Collections.singleton;
 
@@ -334,7 +333,8 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E envelope : envelopes) {
             SignalId signalId = envelope.id();
-            observer.onNext(acknowledge(signalId));
+            Ack ack = MessageExtensionsKt.acknowledge(signalId);
+            observer.onNext(ack);
             onDispatchingStarted(signalId);
             try {
                 dispatch(envelope);

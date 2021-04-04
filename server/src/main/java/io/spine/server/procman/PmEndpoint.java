@@ -26,7 +26,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -92,8 +91,8 @@ abstract class PmEndpoint<I,
                     .onDispatchingFailed(envelope(), error);
     }
 
-    private void postRejection(Event rejectionEvent) {
-        repository().postEvents(ImmutableList.of(rejectionEvent));
+    private void postRejection(Event rejection) {
+        repository().postEvents(rejection.toSet());
     }
 
     protected DispatchOutcome runTransactionFor(P processManager) {

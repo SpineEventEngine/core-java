@@ -27,6 +27,7 @@ package io.spine.server.transport.memory;
 
 import com.google.protobuf.Any;
 import io.spine.core.Ack;
+import io.spine.server.bus.MessageExtensionsKt;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.AbstractChannel;
 import io.spine.server.transport.ChannelId;
@@ -34,8 +35,6 @@ import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 
 import java.util.function.Function;
-
-import static io.spine.server.bus.Acks.acknowledge;
 
 /**
  * An in-memory implementation of the {@link Publisher}.
@@ -60,7 +59,7 @@ public final class InMemoryPublisher extends AbstractChannel implements Publishe
         for (Subscriber localSubscriber : localSubscribers) {
             localSubscriber.onMessage(message);
         }
-        return acknowledge(messageId);
+        return MessageExtensionsKt.acknowledge(messageId);
     }
 
     private Iterable<Subscriber> subscribers() {
