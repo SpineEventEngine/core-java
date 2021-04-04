@@ -23,91 +23,60 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.event.model
 
-package io.spine.server.event.model;
-
-import io.spine.base.CommandMessage;
-import io.spine.base.RejectionMessage;
-import io.spine.core.Command;
-import io.spine.core.CommandContext;
-import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.core.EventId;
-import io.spine.core.TenantId;
-import io.spine.server.type.AbstractMessageEnvelope;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.SignalEnvelope;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import io.spine.base.CommandMessage
+import io.spine.base.RejectionMessage
+import io.spine.core.Command
+import io.spine.core.CommandContext
+import io.spine.core.Event
+import io.spine.core.EventContext
+import io.spine.core.EventId
+import io.spine.core.TenantId
+import io.spine.server.type.AbstractMessageEnvelope
+import io.spine.server.type.EventClass
+import io.spine.server.type.EventEnvelope
+import io.spine.server.type.SignalEnvelope
 
 /**
- * The holder of a rejection {@code Event} which provides convenient access to its properties.
+ * The holder of a rejection `Event` which provides convenient access to its properties.
  */
-final class RejectionEnvelope
-        extends AbstractMessageEnvelope<EventId, Event, EventContext>
-        implements SignalEnvelope<EventId, Event, EventContext> {
+internal class RejectionEnvelope(delegate: EventEnvelope) :
+    AbstractMessageEnvelope<EventId, Event, EventContext>(delegate.outerObject()),
+    SignalEnvelope<EventId, Event, EventContext> {
 
-    private final EventEnvelope delegate;
+    private val delegate: EventEnvelope
 
-    /**
-     * Creates a new instance from the given rejection event envelope.
-     *
-     * @param delegate an envelope with a rejection event
-     */
-    RejectionEnvelope(EventEnvelope delegate) {
-        super(delegate.outerObject());
-        checkArgument(delegate.isRejection());
-        this.delegate = delegate;
+    /** Ensures the passed delegate contains a rejection. */
+    init {
+        require(delegate.isRejection)
+        this.delegate = delegate
     }
 
-    @Override
-    public TenantId tenantId() {
-        return delegate.tenantId();
+    override fun tenantId(): TenantId = delegate.tenantId()
+
+    override fun id(): EventId = delegate.id()
+
+    override fun message(): RejectionMessage = delegate.message() as RejectionMessage
+
+    /** Obtains the rejection message. */
+    fun rejectionMessage(): RejectionMessage = message()
+
+    override fun messageClass(): EventClass {
+        val eventClass = delegate.messageClass()
+        @Suppress("UNCHECKED_CAST") // Ensured by the type of delegate.
+        val value = eventClass.value() as Class<out RejectionMessage>
+        return EventClass.from(value)
     }
 
-    @Override
-    public EventId id() {
-        return delegate.id();
-    }
+    override fun context(): EventContext = delegate.context()
 
-    @Override
-    public RejectionMessage message() {
-        return (RejectionMessage) delegate.message();
-    }
+    /** Obtains the command which caused the rejection.  */
+    private fun command(): Command = context().rejection.command
 
-    RejectionMessage rejectionMessage() {
-        return message();
-    }
+    /** Obtains the message of the command which cased the rejection.  */
+    fun commandMessage(): CommandMessage = command().enclosedMessage()
 
-    @Override
-    public EventClass messageClass() {
-        EventClass eventClass = delegate.messageClass();
-        @SuppressWarnings("unchecked") // Checked at runtime.
-        Class<? extends RejectionMessage> value =
-                (Class<? extends RejectionMessage>) eventClass.value();
-        EventClass rejectionClass = EventClass.from(value);
-        return rejectionClass;
-    }
-
-    @Override
-    public EventContext context() {
-        return delegate.context();
-    }
-
-    /** Obtains the command which caused the rejection. */
-    private Command command() {
-        return context().getRejection()
-                        .getCommand();
-    }
-
-    /** Obtains the message of the command which cased the rejection. */
-    CommandMessage commandMessage() {
-        return command().enclosedMessage();
-    }
-
-    /** Obtains the context of the rejected command. */
-    CommandContext commandContext() {
-        return command().context();
-    }
+    /** Obtains the context of the rejected command.  */
+    fun commandContext(): CommandContext = command().context()
 }

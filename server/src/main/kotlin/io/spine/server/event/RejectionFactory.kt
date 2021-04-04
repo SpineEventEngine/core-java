@@ -64,11 +64,9 @@ private fun unwrap(throwable: Throwable): RejectionThrowable {
         return throwable
     }
     val cause = Throwables.getRootCause(throwable)
-    if (cause !is RejectionThrowable) {
-        throw IllegalArgumentException(
-            "The cause of `${throwable}` has the type `${cause.javaClass}`." +
-                    " Expected: `${RejectionThrowable::class}`."
-        )
+    require(cause is RejectionThrowable) {
+        "The cause of `${throwable}` has the type `${cause.javaClass}`." +
+                " Expected: `${RejectionThrowable::class}`."
     }
     return cause
 }
