@@ -35,7 +35,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.Listener;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionFactory;
+import io.spine.server.event.RejectionFactoryKt;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.commandbus.CmdBusCaffetteriaId;
 import io.spine.test.commandbus.command.CmdBusEntryDenied;
@@ -75,8 +75,7 @@ class AckRejectionPublisherTest {
         Command command = requestFactory.generateCommand();
 
         RejectionThrowable throwable = stubThrowable();
-        RejectionFactory factory = new RejectionFactory(command, throwable);
-        Event rejection = factory.createRejection();
+        Event rejection = RejectionFactoryKt.reject(command, throwable);
         Ack ack = reject(CommandId.generate(), rejection);
         publisher.onNext(ack);
         assertThat(listener.lastReceived)

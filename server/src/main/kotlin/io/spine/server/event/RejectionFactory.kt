@@ -34,15 +34,47 @@ import io.spine.core.RejectionEventContext
 import io.spine.server.type.RejectionEnvelope.PRODUCER_UNKNOWN
 
 /**
+ * Creates a rejection event for the passed command and the throwable.
+ *
+ * The cause of the throwable must implement [RejectionThrowable].
+ *
+ * @throws IllegalArgumentException
+ *          if the cause of the passed `throwable` does not implement `RejectionThrowable`
+ */
+fun reject(command: Command, throwable: Throwable): Event {
+    val rt = unwrap(throwable)
+    val factory = RejectionFactory(command, rt)
+    return factory.createRejection()
+}
+
+/**
+ * Extracts a `RejectionThrowable` from the passed instance.
+ *
+ * @throws IllegalArgumentException
+ *          if the cause does not implement `RejectionThrowable`
+ */
+private fun unwrap(throwable: Throwable): RejectionThrowable {
+    if (throwable is RejectionThrowable) {
+        return throwable
+    }
+    val cause = Throwables.getRootCause(throwable)
+    if (cause !is RejectionThrowable) {
+        throw IllegalArgumentException(
+            "The cause of `${throwable}` has the type `${cause.javaClass}`." +
+                    " Expected: `${RejectionThrowable::class}`."
+        )
+    }
+    return cause
+}
+
+/**
  * A factory for producing rejection events.
  */
-class RejectionFactory(
-    val command: Command,
-    val throwable: RejectionThrowable
-) : EventFactoryBase(
-    EventOrigin.from(command.asMessageOrigin()),
-    throwable.producerId().orElse(PRODUCER_UNKNOWN)
-) {
+private class RejectionFactory(val command: Command, val throwable: RejectionThrowable) :
+    EventFactoryBase(
+        EventOrigin.from(command.asMessageOrigin()),
+        throwable.producerId().orElse(PRODUCER_UNKNOWN)
+    ) {
 
     /**
      * Creates a factory instance for creating a rejection for the passed command and
@@ -53,7 +85,7 @@ class RejectionFactory(
      * @throws IllegalArgumentException
      *          if the cause of the passed `throwable` does not implement `RejectionThrowable`
      */
-    constructor(command: Command, throwable: Throwable) : this(command, unwrap(throwable))
+    private constructor(command: Command, throwable: Throwable) : this(command, unwrap(throwable))
 
     /**
      * Creates a rejection event which does not have version information.
@@ -76,25 +108,5 @@ class RejectionFactory(
             .setCommand(command)
             .setStacktrace(st)
             .vBuild()
-    }
-
-    companion object {
-
-        /**
-         * Extracts a `RejectionThrowable` from the passed instance.
-         *
-         * @throws IllegalArgumentException
-         *          if the cause does not implement `RejectionThrowable`
-         */
-        fun unwrap(throwable: Throwable): RejectionThrowable {
-            val cause = Throwables.getRootCause(throwable)
-            if (cause !is RejectionThrowable) {
-                throw IllegalArgumentException(
-                    "The cause of `${throwable}` has the type `${cause.javaClass}`." +
-                            " Expected: `${RejectionThrowable::class}`."
-                )
-            }
-            return cause
-        }
     }
 }

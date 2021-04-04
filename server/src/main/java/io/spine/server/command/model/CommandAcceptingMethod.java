@@ -34,7 +34,6 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.EventProducer;
 import io.spine.server.dispatch.Success;
-import io.spine.server.event.RejectionFactory;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
@@ -47,6 +46,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.event.RejectionFactoryKt.reject;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -91,8 +91,7 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
     handleRejection(T target, CommandEnvelope origin, RejectionThrowable throwable) {
         Command command = origin.outerObject();
         throwable.initProducer(target.producerId());
-        RejectionFactory factory = new RejectionFactory(command, throwable);
-        Event rejection = factory.createRejection();
+        Event rejection = reject(command, throwable);
         Success success = Success.newBuilder()
                                  .setRejection(rejection)
                                  .vBuild();

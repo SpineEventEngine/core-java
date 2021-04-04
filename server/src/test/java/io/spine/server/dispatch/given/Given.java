@@ -37,12 +37,12 @@ import io.spine.server.dispatch.DispatchOutcomeHandlerTest;
 import io.spine.server.dispatch.given.command.CreateDispatch;
 import io.spine.server.dispatch.given.event.DispatchCreated;
 import io.spine.server.dispatch.given.rejection.DispatchRejections;
-import io.spine.server.event.RejectionFactory;
 import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.event.RejectionFactoryKt.reject;
 
 public final class Given {
 
@@ -64,8 +64,7 @@ public final class Given {
     public static Event rejectionEvent() {
         Command cmd = commandFactory.create(createDispatch());
         RejectionThrowable throwable = new StubRejectionThrowable();
-        RejectionFactory rf = new RejectionFactory(cmd, throwable);
-        Event rejection = rf.createRejection();
+        Event rejection = reject(cmd, throwable);
         return rejection;
     }
 

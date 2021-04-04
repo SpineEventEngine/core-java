@@ -37,9 +37,10 @@ import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
-import io.spine.server.event.RejectionFactory;
+import io.spine.server.event.RejectionFactoryKt;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
@@ -248,8 +249,8 @@ class CommandAckMonitorTest {
                 .build();
 
         RuntimeException exception = throwableCausedByRejection();
-        RejectionFactory factory = new RejectionFactory(command, exception);
-        return reject(commandId, factory.createRejection());
+        Event rejection = RejectionFactoryKt.reject(command, exception);
+        return reject(commandId, rejection);
     }
 
     private static RuntimeException throwableCausedByRejection() {

@@ -26,22 +26,19 @@
 
 package io.spine.server.event
 
-import com.google.common.base.Preconditions
 import com.google.protobuf.Any
-import com.google.protobuf.Message
 import io.spine.base.EventMessage
 import io.spine.core.Event
 import io.spine.core.EventContext
 import io.spine.core.Events
 import io.spine.core.Version
-import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.AnyPacker.pack
-import io.spine.type.TypeName
-import io.spine.validate.Validate
-import io.spine.validate.ValidationException
+import io.spine.validate.Validate.checkValid
 
-
-abstract class EventFactoryBase(
+/**
+ * Abstract base for event factories.
+ */
+internal abstract class EventFactoryBase(
     val origin: EventOrigin,
     val producerId: Any
 ) {
@@ -49,9 +46,13 @@ abstract class EventFactoryBase(
      * Creates a new event context with an optionally passed version of the entity
      * which produced the event.
      */
-    fun createContext(version: Version?): EventContext =
+    protected fun createContext(version: Version?): EventContext =
         newContext(version).vBuild()
 
+    /**
+     * Creates a builder for a new context of the event with optionally set
+     * version of an entity which is generating the event.
+     */
     protected fun newContext(version: Version?): EventContext.Builder {
         val builder = origin.contextBuilder().setProducerId(producerId)
         if (version != null) {
@@ -60,44 +61,18 @@ abstract class EventFactoryBase(
         return builder
     }
 
-    internal companion object {
-
-        /**
-         * Creates a new `Event` instance.
-         */
-        @JvmStatic
-        fun assemble(message: EventMessage, context: EventContext): Event {
-            // We validate now, before emitting the next ID.
-            validate(message)
-            val eventId = Events.generateId()
-            val packed = pack(message)
-            return with(Event.newBuilder()) {
-                id = eventId
-                this.message = packed
-                this.context = context
-                vBuild()
-            }
-        }
-
-        /**
-         * Validates an event message according to their Protobuf definition.
-         *
-         * If the given `messageOrAny` is an instance of `Any`, it is unpacked
-         * for the validation.
-         */
-        @JvmStatic
-        @Throws(ValidationException::class)
-        private fun validate(messageOrAny: Message) {
-            val message = if (messageOrAny is Any) {
-                AnyPacker.unpack(messageOrAny)
-            } else {
-                messageOrAny
-            }
-            Preconditions.checkArgument(
-                messageOrAny is EventMessage,
-                "`%s` is not an event type.", TypeName.of(messageOrAny)
-            )
-            Validate.checkValid(message)
+    /**
+     * Creates a new `Event` instance.
+     */
+    protected fun assemble(message: EventMessage, context: EventContext): Event {
+        checkValid(message)
+        val eventId = Events.generateId()
+        val packed = pack(message)
+        return with(Event.newBuilder()) {
+            id = eventId
+            this.message = packed
+            this.context = context
+            vBuild()
         }
     }
 }

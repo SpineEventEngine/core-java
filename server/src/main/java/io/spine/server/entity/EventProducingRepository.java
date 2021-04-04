@@ -31,12 +31,13 @@ import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionFactory;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.SignalEnvelope;
 
 import java.util.Collection;
+
+import static io.spine.server.event.RejectionFactoryKt.reject;
 
 /**
  * Operations common for repositories that can post to {@link #eventBus() EventBus}.
@@ -83,9 +84,7 @@ public interface EventProducingRepository {
     default void postIfCommandRejected(SignalEnvelope<?, ?, ?> signal, Throwable cause) {
         if (signal instanceof CommandEnvelope && cause instanceof RejectionThrowable) {
             Command command = ((CommandEnvelope) signal).outerObject();
-            RejectionThrowable rt = (RejectionThrowable) cause;
-            RejectionFactory factory = new RejectionFactory(command, rt);
-            Event rejection = factory.createRejection();
+            Event rejection = reject(command, cause);
             postEvents(rejection.toSet());
         }
     }

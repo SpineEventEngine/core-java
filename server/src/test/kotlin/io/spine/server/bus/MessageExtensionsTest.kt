@@ -32,7 +32,7 @@ import io.spine.core.Ack
 import io.spine.core.CommandId
 import io.spine.core.Status.StatusCase
 import io.spine.protobuf.AnyPacker
-import io.spine.server.event.RejectionFactory
+import io.spine.server.event.reject
 import io.spine.test.bus.ShareId
 import io.spine.test.bus.command.ShareCannotBeTraded
 import io.spine.testing.client.TestActorRequestFactory
@@ -43,16 +43,14 @@ import org.junit.jupiter.api.Test
 internal class MessageExtensionsTest {
 
     @Test
-    @DisplayName("create 'acknowledge' `Ack` instance")
-    fun acknowledge() {
+    fun `acknowledge() with OK status`() {
         val ack = ID.acknowledge()
         assertIdEquals(ack)
         assertStatusCase(ack, StatusCase.OK)
     }
 
     @Test
-    @DisplayName("create 'reject with Error' `Ack` instance")
-    fun rejectWithError() {
+    fun `reject() with ERROR status`() {
         val error = with(Error.newBuilder()) {
             type = MessageExtensionsTest::class.java.canonicalName
             message = "A test error."
@@ -64,8 +62,7 @@ internal class MessageExtensionsTest {
     }
 
     @Test
-    @DisplayName("create 'reject with RejectionThrowable' `Ack` instance")
-    fun rejectWithRejectionThrowable() {
+    fun `reject() a command with REJECTION status`() {
         val requestFactory = TestActorRequestFactory(javaClass)
         val command = requestFactory.generateCommand()
         val rejection = ShareCannotBeTraded
@@ -77,8 +74,7 @@ internal class MessageExtensionsTest {
             )
             .setReason("Ack factory test.")
             .build()
-        val factory = RejectionFactory(command, rejection)
-        val re = factory.createRejection()
+        val re = reject(command, rejection)
         val ack = ID.reject(re)
         assertIdEquals(ack)
         assertStatusCase(ack, StatusCase.REJECTION)

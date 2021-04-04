@@ -37,10 +37,11 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.TenantId;
-import io.spine.server.event.RejectionFactory;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static io.spine.server.event.RejectionFactoryKt.reject;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -66,6 +67,11 @@ public final class RejectionEnvelope
         this.delegate = EventEnvelope.of(rejection);
     }
 
+    private RejectionEnvelope(EventEnvelope delegate) {
+        super(delegate.outerObject());
+        this.delegate = delegate;
+    }
+
     /**
      * Creates a new instance from the given rejection event.
      *
@@ -88,12 +94,10 @@ public final class RejectionEnvelope
 
     /**
      * Creates a new instance from the given rejection event envelope.
-     *
-     * @deprecated please use {@link #from(Event)}
      */
-    @Deprecated
-    public static RejectionEnvelope from(EventEnvelope event) {
-        return from(event.outerObject());
+    public static RejectionEnvelope from(EventEnvelope delegate) {
+        checkArgument(delegate.isRejection());
+        return new RejectionEnvelope(delegate);
     }
 
     /**
@@ -125,11 +129,9 @@ public final class RejectionEnvelope
     public static RejectionEnvelope from(Command origin, Throwable throwable) {
         checkNotNull(origin);
         checkNotNull(throwable);
-        RejectionFactory factory = new RejectionFactory(origin, throwable);
-        Event rejection = factory.createRejection();
+        Event rejection = reject(origin, throwable);
         return from(rejection);
     }
-
 
     @Override
     public TenantId tenantId() {

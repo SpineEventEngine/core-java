@@ -36,7 +36,6 @@ import io.spine.base.Time;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventFactory;
-import io.spine.server.event.RejectionFactory;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
@@ -52,6 +51,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.event.RejectionFactoryKt.reject;
 import static io.spine.server.type.given.EventsTestEnv.commandContext;
 import static io.spine.server.type.given.EventsTestEnv.event;
 import static io.spine.server.type.given.EventsTestEnv.tenantId;
@@ -217,9 +217,7 @@ public class EventTest extends UtilityClassTest<Events> {
     void tellWhenRejection() {
         TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
         Command cmd = requestFactory.createCommand(commandMessage());
-        RejectionFactory rf = new RejectionFactory(cmd, new StubRejectionThrowable());
-
-        Event event = rf.createRejection();
+        Event event = reject(cmd, new StubRejectionThrowable());
 
         assertThat(event.isRejection())
                 .isTrue();

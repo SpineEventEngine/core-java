@@ -32,9 +32,9 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.MessageExtensionsKt;
+import io.spine.server.event.RejectionFactoryKt;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
-import io.spine.server.type.RejectionEnvelope;
 
 import java.util.Optional;
 
@@ -64,8 +64,7 @@ public interface CommandFilter extends BusFilter<CommandEnvelope> {
     default Optional<Ack> reject(CommandEnvelope command, RejectionThrowable cause) {
         checkNotNull(command);
         checkNotNull(cause);
-        RejectionEnvelope re = RejectionEnvelope.from(command.command(), cause);
-        Event rejection = re.outerObject();
+        Event rejection = RejectionFactoryKt.reject(command.command(), cause);
         CommandId commandId = command.id();
         Ack ack = MessageExtensionsKt.reject(commandId, rejection);
         return Optional.of(ack);
