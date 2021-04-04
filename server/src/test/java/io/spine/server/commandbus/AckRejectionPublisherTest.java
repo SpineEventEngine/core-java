@@ -46,8 +46,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.bus.MessageExtensionsKt.acknowledge;
-import static io.spine.server.bus.MessageExtensionsKt.reject;
+import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
+import static io.spine.server.bus.MessageIdExtensionsKt.reject;
 import static io.spine.testing.Assertions.assertIllegalState;
 
 @DisplayName("`AckRejectionPublisher` should")

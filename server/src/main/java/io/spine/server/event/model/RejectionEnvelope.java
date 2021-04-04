@@ -24,67 +24,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.type;
+package io.spine.server.event.model;
 
 import io.spine.base.CommandMessage;
 import io.spine.base.RejectionMessage;
-import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
+import io.spine.server.type.AbstractMessageEnvelope;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.event.RejectionFactoryKt.reject;
 
 /**
  * The holder of a rejection {@code Event} which provides convenient access to its properties.
  */
-public final class RejectionEnvelope
+final class RejectionEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
         implements SignalEnvelope<EventId, Event, EventContext> {
 
     private final EventEnvelope delegate;
 
-    private RejectionEnvelope(Event rejection) {
-        super(rejection);
-        this.delegate = EventEnvelope.of(rejection);
-    }
-
-    private RejectionEnvelope(EventEnvelope delegate) {
-        super(delegate.outerObject());
-        this.delegate = delegate;
-    }
-
     /**
      * Creates a new instance from the given rejection event envelope.
-     */
-    public static RejectionEnvelope from(EventEnvelope delegate) {
-        checkArgument(delegate.isRejection());
-        return new RejectionEnvelope(delegate);
-    }
-
-    /**
-     * Creates an wrapped instance of a rejection event from the rejected command and
-     * a {@link Throwable} caused by the {@link RejectionThrowable}.
      *
-     * @param origin
-     *         the rejected command
-     * @param throwable
-     *         the caught error
-     * @return new instance of {@code Rejection}
-     * @throws IllegalArgumentException
-     *         if the given {@link Throwable} is not caused by
-     *         a {@link RejectionThrowable}
+     * @param delegate an envelope with a rejection event
      */
-    public static RejectionEnvelope from(Command origin, Throwable throwable) {
-        checkNotNull(origin);
-        checkNotNull(throwable);
-        Event rejection = reject(origin, throwable);
-        return new RejectionEnvelope(rejection);
+    RejectionEnvelope(EventEnvelope delegate) {
+        super(delegate.outerObject());
+        checkArgument(delegate.isRejection());
+        this.delegate = delegate;
     }
 
     @Override
@@ -102,6 +76,10 @@ public final class RejectionEnvelope
         return (RejectionMessage) delegate.message();
     }
 
+    RejectionMessage rejectionMessage() {
+        return message();
+    }
+
     @Override
     public EventClass messageClass() {
         EventClass eventClass = delegate.messageClass();
@@ -117,26 +95,19 @@ public final class RejectionEnvelope
         return delegate.context();
     }
 
-    private RejectionEventContext rejectionContext() {
-        return context().getRejection();
+    /** Obtains the command which caused the rejection. */
+    private Command command() {
+        return context().getRejection()
+                        .getCommand();
     }
 
-    /**
-     * Obtains the command which cased the rejection.
-     *
-     * @return the rejected command
-     */
-    public Command origin() {
-        return rejectionContext().getCommand();
+    /** Obtains the message of the command which cased the rejection. */
+    CommandMessage commandMessage() {
+        return command().enclosedMessage();
     }
 
-    /**
-     * Obtains the message of the command which cased the rejection.
-     *
-     * @return the rejected command message
-     */
-    public CommandMessage originMessage() {
-        CommandMessage commandMessage = origin().enclosedMessage();
-        return commandMessage;
+    /** Obtains the context of the rejected command. */
+    CommandContext commandContext() {
+        return command().context();
     }
 }

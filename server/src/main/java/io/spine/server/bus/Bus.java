@@ -333,7 +333,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E envelope : envelopes) {
             SignalId signalId = envelope.id();
-            Ack ack = MessageExtensionsKt.acknowledge(signalId);
+            Ack ack = MessageIdExtensionsKt.acknowledge(signalId);
             observer.onNext(ack);
             onDispatchingStarted(signalId);
             try {

@@ -58,9 +58,9 @@ import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.bus.MessageExtensionsKt.acknowledge;
-import static io.spine.server.bus.MessageExtensionsKt.causedError;
-import static io.spine.server.bus.MessageExtensionsKt.reject;
+import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
+import static io.spine.server.bus.MessageIdExtensionsKt.causedError;
+import static io.spine.server.bus.MessageIdExtensionsKt.reject;
 import static io.spine.testing.Assertions.assertIllegalState;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

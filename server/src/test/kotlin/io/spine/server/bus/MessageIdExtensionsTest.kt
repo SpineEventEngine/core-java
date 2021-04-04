@@ -39,8 +39,8 @@ import io.spine.testing.client.TestActorRequestFactory
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@DisplayName("`MessageExtensions` should")
-internal class MessageExtensionsTest {
+@DisplayName("`MessageIdExtensions` should")
+internal class MessageIdExtensionsTest {
 
     @Test
     fun `acknowledge() with OK status`() {
@@ -52,7 +52,7 @@ internal class MessageExtensionsTest {
     @Test
     fun `reject() with ERROR status`() {
         val error = with(Error.newBuilder()) {
-            type = MessageExtensionsTest::class.java.canonicalName
+            type = MessageIdExtensionsTest::class.java.canonicalName
             message = "A test error."
             vBuild()
         }
