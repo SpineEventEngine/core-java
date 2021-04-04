@@ -54,7 +54,9 @@ internal abstract class EventFactoryBase(
      * version of an entity which is generating the event.
      */
     protected fun newContext(version: Version?): EventContext.Builder {
-        val builder = origin.contextBuilder().setProducerId(producerId)
+        val builder =
+            origin.contextBuilder()
+                  .setProducerId(producerId)
         if (version != null) {
             builder.version = version
         }

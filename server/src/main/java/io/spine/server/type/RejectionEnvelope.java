@@ -26,7 +26,6 @@
 
 package io.spine.server.type;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.CommandMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.base.RejectionThrowable;
@@ -101,11 +100,6 @@ public final class RejectionEnvelope
     @Override
     public RejectionMessage message() {
         return (RejectionMessage) delegate.message();
-    }
-
-    @VisibleForTesting
-    public EventEnvelope delegate() {
-        return delegate;
     }
 
     @Override

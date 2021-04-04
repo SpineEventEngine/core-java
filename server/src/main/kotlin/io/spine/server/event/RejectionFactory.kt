@@ -32,11 +32,10 @@ import io.spine.base.Identifier
 import io.spine.base.RejectionThrowable
 import io.spine.core.Command
 import io.spine.core.Event
+import io.spine.core.EventContext
 import io.spine.core.RejectionEventContext
 
-/**
- * A placeholder to be used when a producer of a rejection is not available.
- */
+/** A placeholder to be used when a producer of a rejection is not available. */
 val unknownProducer: Any = Identifier.pack("Unknown")
 
 /**
@@ -59,9 +58,7 @@ fun reject(command: Command, throwable: Throwable): Event {
     return factory.createRejection()
 }
 
-/**
- * Extracts a `RejectionThrowable` from the passed instance.
- */
+/** Extracts a `RejectionThrowable` from the passed instance. */
 private fun unwrap(throwable: Throwable): RejectionThrowable {
     if (throwable is RejectionThrowable) {
         return throwable
@@ -76,35 +73,29 @@ private fun unwrap(throwable: Throwable): RejectionThrowable {
     return cause
 }
 
-/**
- * A factory for producing rejection events.
- */
-private class RejectionFactory(val command: Command, val throwable: RejectionThrowable) :
-    EventFactoryBase(
-        EventOrigin.from(command.asMessageOrigin()),
-        throwable.producerId().orElse(unknownProducer)
-    ) {
+/** The factory for producing rejection events. */
+private class RejectionFactory(
+    val command: Command,
+    val throwable: RejectionThrowable
+) : EventFactoryBase(
+    EventOrigin.from(command.asMessageOrigin()),
+    throwable.producerId().orElse(unknownProducer)
+) {
 
-    /**
-     * Creates a rejection event which does not have version information.
-     */
+    /** Creates a rejection event which does not have version information. */
     fun createRejection(): Event {
         val msg = throwable.messageThrown()
-        val context = rejectionContext()
-        val outerContext = newContext(null)
-            .setRejection(context)
-            .vBuild()
-        return assemble(msg, outerContext)
+        val ctx = createContext()
+        return assemble(msg, ctx)
     }
 
-    /**
-     * Constructs a new [RejectionEventContext].
-     */
-    private fun rejectionContext(): RejectionEventContext {
-        val st = Throwables.getStackTraceAsString(throwable)
-        return RejectionEventContext.newBuilder()
+    private fun createContext(): EventContext {
+        val rejectionContext = RejectionEventContext.newBuilder()
             .setCommand(command)
-            .setStacktrace(st)
+            .setStacktrace(throwable.stackTraceToString())
+            .vBuild()
+        return newContext(null)
+            .setRejection(rejectionContext)
             .vBuild()
     }
 }
