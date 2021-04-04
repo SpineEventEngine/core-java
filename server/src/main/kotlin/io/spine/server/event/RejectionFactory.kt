@@ -72,11 +72,10 @@ class RejectionFactory(
      */
     private fun rejectionContext(): RejectionEventContext {
         val st = Throwables.getStackTraceAsString(throwable)
-        return with(RejectionEventContext.newBuilder()) {
-            command = this.command
-            stacktrace = st
-            vBuild()
-        }
+        return RejectionEventContext.newBuilder()
+            .setCommand(command)
+            .setStacktrace(st)
+            .vBuild()
     }
 
     companion object {
