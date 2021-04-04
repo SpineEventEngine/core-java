@@ -73,14 +73,14 @@ private fun unwrap(throwable: Throwable): RejectionThrowable {
     return cause
 }
 
-/** The factory for producing rejection events. */
-private class RejectionFactory(
-    val command: Command,
-    val throwable: RejectionThrowable
-) : EventFactoryBase(
-    EventOrigin.from(command.asMessageOrigin()),
-    throwable.producerId().orElse(unknownProducer)
-) {
+/**
+ * The factory for producing rejection events.
+ */
+private class RejectionFactory(val command: Command, val throwable: RejectionThrowable) :
+    EventFactoryBase(
+        EventOrigin.from(command.asMessageOrigin()),
+        throwable.producerId().orElse(unknownProducer)
+    ) {
 
     /** Creates a rejection event which does not have version information. */
     fun createRejection(): Event {
@@ -89,6 +89,7 @@ private class RejectionFactory(
         return assemble(msg, ctx)
     }
 
+    /** Creates an event context holding a rejection context. */
     private fun createContext(): EventContext {
         val rejectionContext = RejectionEventContext.newBuilder()
             .setCommand(command)

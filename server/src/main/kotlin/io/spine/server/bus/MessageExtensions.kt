@@ -31,30 +31,41 @@ import io.spine.base.Error
 import io.spine.core.Ack
 import io.spine.core.CommandId
 import io.spine.core.Event
-import io.spine.core.Responses
+import io.spine.core.Responses.errorWith
+import io.spine.core.Responses.rejectedBecauseOf
+import io.spine.core.Responses.statusOk
 import io.spine.core.Status
 import io.spine.protobuf.AnyPacker
 
 /**
  * Acknowledges this message with the OK status.
+ *
+ * @receiver the ID of the acknowledged message
  */
-fun Message.acknowledge(): Ack =
-    ackWithStatus(this, Responses.statusOk())
+fun Message.acknowledge(): Ack = ackWithStatus(statusOk())
 
 /**
  * Rejects message with this ID because the passed error occurred.
+ *
+ * @param cause the error which prevented the message from being handled
+ * @receiver the ID of the message which caused the error
  */
-fun Message.causedError(cause: Error): Ack =
-    ackWithStatus(this, Responses.errorWith(cause))
+fun Message.causedError(cause: Error): Ack = ackWithStatus(errorWith(cause))
 
 /**
  * Reject a command with this ID with the passed rejection event.
+ *
+ * @receiver the ID of the rejected command
  */
-fun CommandId.reject(rejection: Event): Ack =
-    ackWithStatus(this, Responses.rejectedBecauseOf(rejection))
+fun CommandId.reject(rejection: Event): Ack = ackWithStatus(rejectedBecauseOf(rejection))
 
-private fun ackWithStatus(id: Message, status: Status): Ack {
-    val packedId = AnyPacker.pack(id)
+/**
+ * Creates an acknowledgement with the passed status.
+ *
+ * @receiver the ID of the message being processed
+ */
+private fun Message.ackWithStatus(status: Status): Ack {
+    val packedId = AnyPacker.pack(this)
     return with(Ack.newBuilder()) {
         messageId = packedId
         this.status = status
