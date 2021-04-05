@@ -83,9 +83,6 @@ fun Command.reject(cause: RejectionThrowable): Ack {
  * @receiver the ID of the message being processed
  */
 private fun Message.ackWithStatus(status: Status): Ack {
-    // Safety check to ensure that the function is called only on message ID types.
-    check(this is SignalId || this is MessageId)
-
     val packedId = AnyPacker.pack(this)
     return with(Ack.newBuilder()) {
         messageId = packedId
