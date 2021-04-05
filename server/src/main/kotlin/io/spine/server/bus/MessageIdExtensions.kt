@@ -24,33 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:JvmName("MessageIdExtensions")
+
 package io.spine.server.bus
 
 import com.google.protobuf.Message
 import io.spine.base.Error
+import io.spine.base.RejectionThrowable
 import io.spine.core.Ack
+import io.spine.core.Command
 import io.spine.core.CommandId
 import io.spine.core.Event
+import io.spine.core.MessageId
 import io.spine.core.Responses.errorWith
 import io.spine.core.Responses.rejectedBecauseOf
 import io.spine.core.Responses.statusOk
+import io.spine.core.SignalId
 import io.spine.core.Status
 import io.spine.protobuf.AnyPacker
+import io.spine.server.event.reject
 
 /**
- * Acknowledges this message with the OK status.
+ * Acknowledges the message with this ID (e.g. [MessageId] or [SignalId]) with the OK status.
  *
- * @receiver the ID of the acknowledged message
+ * @receiver the ID of the acknowledged message,
  */
 fun Message.acknowledge(): Ack = ackWithStatus(statusOk())
 
 /**
- * Rejects message with this ID because the passed error occurred.
+ * Rejects message with this ID (e.g. [MessageId] or [SignalId]) because the passed error occurred.
  *
  * @param cause the error which prevented the message from being handled
  * @receiver the ID of the message which caused the error
  */
-fun Message.causedError(cause: Error): Ack = ackWithStatus(errorWith(cause))
+internal fun Message.causedError(cause: Error): Ack = ackWithStatus(errorWith(cause))
 
 /**
  * Reject a command with this ID with the passed rejection event.
@@ -60,11 +67,25 @@ fun Message.causedError(cause: Error): Ack = ackWithStatus(errorWith(cause))
 fun CommandId.reject(rejection: Event): Ack = ackWithStatus(rejectedBecauseOf(rejection))
 
 /**
+ * Creates a rejection acknowledgement with the passed cause.
+ *
+ * @receiver the rejected command
+ */
+fun Command.reject(cause: RejectionThrowable): Ack {
+    val rejection = reject(this, cause)
+    val commandId = id()
+    return commandId.reject(rejection)
+}
+
+/**
  * Creates an acknowledgement with the passed status.
  *
  * @receiver the ID of the message being processed
  */
 private fun Message.ackWithStatus(status: Status): Ack {
+    // Safety check to ensure that the function is called only on message ID types.
+    check(this is SignalId || this is MessageId)
+
     val packedId = AnyPacker.pack(this)
     return with(Ack.newBuilder()) {
         messageId = packedId

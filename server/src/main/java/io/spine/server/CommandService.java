@@ -36,7 +36,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.logging.Logging;
-import io.spine.server.bus.MessageIdExtensionsKt;
+import io.spine.server.bus.MessageIdExtensions;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
@@ -88,7 +88,7 @@ public final class CommandService
                 .log("Unsupported command posted to `CommandService`.");
         Error error = unsupported.asError();
         CommandId id = command.getId();
-        Ack response = MessageIdExtensionsKt.causedError(id, error);
+        Ack response = MessageIdExtensions.causedError(id, error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

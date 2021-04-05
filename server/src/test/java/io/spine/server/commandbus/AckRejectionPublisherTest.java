@@ -35,7 +35,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.Listener;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionFactoryKt;
+import io.spine.server.event.RejectionFactory;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.commandbus.CmdBusCaffetteriaId;
 import io.spine.test.commandbus.command.CmdBusEntryDenied;
@@ -46,8 +46,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
-import static io.spine.server.bus.MessageIdExtensionsKt.reject;
+import static io.spine.server.bus.MessageIdExtensions.acknowledge;
+import static io.spine.server.bus.MessageIdExtensions.reject;
 import static io.spine.testing.Assertions.assertIllegalState;
 
 @DisplayName("`AckRejectionPublisher` should")
@@ -75,7 +75,7 @@ class AckRejectionPublisherTest {
         Command command = requestFactory.generateCommand();
 
         RejectionThrowable throwable = stubThrowable();
-        Event rejection = RejectionFactoryKt.reject(command, throwable);
+        Event rejection = RejectionFactory.reject(command, throwable);
         Ack ack = reject(CommandId.generate(), rejection);
         publisher.onNext(ack);
         assertThat(listener.lastReceived)

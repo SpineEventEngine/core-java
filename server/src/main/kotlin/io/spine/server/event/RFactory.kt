@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:JvmName("RejectionFactory")
+
 package io.spine.server.event
 
 import com.google.common.base.Throwables
@@ -54,7 +56,7 @@ val unknownProducer: Any = Identifier.pack("Unknown")
  */
 fun reject(command: Command, throwable: Throwable): Event {
     val rt = unwrap(throwable)
-    val factory = RejectionFactory(command, rt)
+    val factory = RFactory(command, rt)
     return factory.createRejection()
 }
 
@@ -74,7 +76,7 @@ private fun unwrap(throwable: Throwable): RejectionThrowable {
 /**
  * The factory for producing rejection events.
  */
-private class RejectionFactory(val command: Command, val throwable: RejectionThrowable) :
+private class RFactory(val command: Command, val throwable: RejectionThrowable) :
     EventFactoryBase(
         EventOrigin.from(command.asMessageOrigin()),
         throwable.producerId().orElse(unknownProducer)

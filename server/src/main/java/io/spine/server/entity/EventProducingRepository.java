@@ -37,7 +37,7 @@ import io.spine.server.type.SignalEnvelope;
 
 import java.util.Collection;
 
-import static io.spine.server.event.RejectionFactoryKt.reject;
+import static io.spine.server.event.RejectionFactory.reject;
 
 /**
  * Operations common for repositories that can post to {@link #eventBus() EventBus}.

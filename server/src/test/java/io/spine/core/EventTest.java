@@ -51,7 +51,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.event.RejectionFactoryKt.reject;
+import static io.spine.server.event.RejectionFactory.reject;
 import static io.spine.server.type.given.EventsTestEnv.commandContext;
 import static io.spine.server.type.given.EventsTestEnv.event;
 import static io.spine.server.type.given.EventsTestEnv.tenantId;

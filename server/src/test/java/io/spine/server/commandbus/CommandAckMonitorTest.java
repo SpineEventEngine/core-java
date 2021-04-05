@@ -40,7 +40,7 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
-import io.spine.server.event.RejectionFactoryKt;
+import io.spine.server.event.RejectionFactory;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
@@ -58,9 +58,9 @@ import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
-import static io.spine.server.bus.MessageIdExtensionsKt.causedError;
-import static io.spine.server.bus.MessageIdExtensionsKt.reject;
+import static io.spine.server.bus.MessageIdExtensions.acknowledge;
+import static io.spine.server.bus.MessageIdExtensions.causedError;
+import static io.spine.server.bus.MessageIdExtensions.reject;
 import static io.spine.testing.Assertions.assertIllegalState;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -249,7 +249,7 @@ class CommandAckMonitorTest {
                 .build();
 
         RuntimeException exception = throwableCausedByRejection();
-        Event rejection = RejectionFactoryKt.reject(command, exception);
+        Event rejection = RejectionFactory.reject(command, exception);
         return reject(commandId, rejection);
     }
 

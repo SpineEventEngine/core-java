@@ -45,7 +45,7 @@ import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 
-import static io.spine.server.event.RejectionFactoryKt.reject;
+import static io.spine.server.event.RejectionFactory.reject;
 import static io.spine.server.procman.given.pm.TestProcessManager.ID;
 import static io.spine.testdata.Sample.messageOfType;
 

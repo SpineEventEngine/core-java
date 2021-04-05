@@ -28,11 +28,9 @@ package io.spine.server.commandbus;
 
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
-import io.spine.core.CommandId;
-import io.spine.core.Event;
+import io.spine.core.Command;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.MessageIdExtensionsKt;
-import io.spine.server.event.RejectionFactoryKt;
+import io.spine.server.bus.MessageIdExtensions;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
 
@@ -64,9 +62,8 @@ public interface CommandFilter extends BusFilter<CommandEnvelope> {
     default Optional<Ack> reject(CommandEnvelope command, RejectionThrowable cause) {
         checkNotNull(command);
         checkNotNull(cause);
-        Event rejection = RejectionFactoryKt.reject(command.command(), cause);
-        CommandId commandId = command.id();
-        Ack ack = MessageIdExtensionsKt.reject(commandId, rejection);
+        Command cmd = command.command();
+        Ack ack = MessageIdExtensions.reject(cmd, cause);
         return Optional.of(ack);
     }
 }

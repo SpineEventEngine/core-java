@@ -46,7 +46,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static io.spine.server.event.RejectionFactoryKt.reject;
+import static io.spine.server.event.RejectionFactory.reject;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.

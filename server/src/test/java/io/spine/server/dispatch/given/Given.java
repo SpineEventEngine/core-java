@@ -42,7 +42,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.protobuf.TypeConverter.toAny;
-import static io.spine.server.event.RejectionFactoryKt.reject;
+import static io.spine.server.event.RejectionFactory.reject;
 
 public final class Given {
 

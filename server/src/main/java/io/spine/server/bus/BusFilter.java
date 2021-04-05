@@ -34,8 +34,8 @@ import io.spine.server.type.MessageEnvelope;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
-import static io.spine.server.bus.MessageIdExtensionsKt.causedError;
+import static io.spine.server.bus.MessageIdExtensions.acknowledge;
+import static io.spine.server.bus.MessageIdExtensions.causedError;
 
 /**
  * The filter for the messages posted to a bus.
