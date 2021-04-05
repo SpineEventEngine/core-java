@@ -32,8 +32,6 @@ import io.spine.core.CommandContext
 import io.spine.core.Event
 import io.spine.core.EventContext
 import io.spine.core.EventId
-import io.spine.core.TenantId
-import io.spine.server.type.AbstractMessageEnvelope
 import io.spine.server.type.EventClass
 import io.spine.server.type.EventEnvelope
 import io.spine.server.type.SignalEnvelope
@@ -42,8 +40,7 @@ import io.spine.server.type.SignalEnvelope
  * The holder of a rejection `Event` which provides convenient access to its properties.
  */
 internal class RejectionEnvelope(delegate: EventEnvelope) :
-    AbstractMessageEnvelope<EventId, Event, EventContext>(delegate.outerObject()),
-    SignalEnvelope<EventId, Event, EventContext> {
+    SignalEnvelope<EventId, Event, EventContext> by delegate {
 
     private val delegate: EventEnvelope
 
@@ -53,10 +50,6 @@ internal class RejectionEnvelope(delegate: EventEnvelope) :
         this.delegate = delegate
     }
 
-    override fun tenantId(): TenantId = delegate.tenantId()
-
-    override fun id(): EventId = delegate.id()
-
     override fun message(): RejectionMessage = delegate.message() as RejectionMessage
 
     /** Obtains the rejection message. */
@@ -64,12 +57,11 @@ internal class RejectionEnvelope(delegate: EventEnvelope) :
 
     override fun messageClass(): EventClass {
         val eventClass = delegate.messageClass()
+
         @Suppress("UNCHECKED_CAST") // Ensured by the type of delegate.
         val value = eventClass.value() as Class<out RejectionMessage>
         return EventClass.from(value)
     }
-
-    override fun context(): EventContext = delegate.context()
 
     /** Obtains the command which caused the rejection.  */
     private fun command(): Command = context().rejection.command
