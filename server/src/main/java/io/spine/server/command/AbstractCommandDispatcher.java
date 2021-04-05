@@ -38,8 +38,6 @@ import io.spine.server.ContextAware;
 import io.spine.server.Identity;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.SystemWriteSide;
@@ -125,7 +123,8 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
                 .setHandledSignal(signal.messageId())
                 .setError(error)
                 .vBuild();
-        system.postEvent(systemEvent, signal.asMessageOrigin());
+        Origin origin = signal.asMessageOrigin();
+        system.postEvent(systemEvent, origin);
     }
 
     private void postSignalRejected(SignalEnvelope<?, ?, ?> signal, Event rejection) {
@@ -135,8 +134,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
                              .asCommandId())
                 .setRejectionEvent(rejection)
                 .vBuild();
-        Origin origin = RejectionEnvelope.from(EventEnvelope.of(rejection))
-                                         .asMessageOrigin();
+        Origin origin = rejection.asMessageOrigin();
         system.postEvent(commandRejected, origin);
     }
 

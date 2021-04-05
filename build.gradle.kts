@@ -114,10 +114,10 @@ subprojects {
 
     apply {
         plugin("java-library")
-        plugin("kotlin")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("io.spine.tools.spine-model-compiler")
+        plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
 
@@ -146,12 +146,6 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
-   tasks.withType<KotlinCompile>().configureEach {
-      kotlinOptions {
-          jvmTarget = JavaVersion.VERSION_1_8.toString()
-      }
-   }
 
     DependencyResolution.defaultRepositories(repositories)
 
@@ -211,6 +205,23 @@ subprojects {
             resources.srcDirs("$srcDir/test/resources", "$generatedDir/test/resources")
             proto.srcDirs("$srcDir/test/proto")
         }
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
+            useIR = true
+        }
+    }
+
+    val generateRejections by tasks.getting
+    tasks.compileKotlin {
+        dependsOn(generateRejections)
+    }
+
+    val generateTestRejections by tasks.getting
+    tasks.compileTestKotlin {
+        dependsOn(generateTestRejections)
     }
 
     tasks.test {

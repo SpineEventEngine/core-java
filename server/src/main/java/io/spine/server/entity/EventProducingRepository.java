@@ -28,14 +28,16 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.RejectionThrowable;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.SignalEnvelope;
 
 import java.util.Collection;
+
+import static io.spine.server.event.RejectionFactory.reject;
 
 /**
  * Operations common for repositories that can post to {@link #eventBus() EventBus}.
@@ -76,13 +78,14 @@ public interface EventProducingRepository {
     /**
      * If the passed signal is a command and the thrown cause is a rejection,
      * posts the rejection to the associated {@link #eventBus() EventBus}.
+     *
+     * <p>Otherwise, does nothing.
      */
     default void postIfCommandRejected(SignalEnvelope<?, ?, ?> signal, Throwable cause) {
         if (signal instanceof CommandEnvelope && cause instanceof RejectionThrowable) {
-            CommandEnvelope command = (CommandEnvelope) signal;
-            RejectionThrowable rejection = (RejectionThrowable) cause;
-            RejectionEnvelope re = RejectionEnvelope.from(command, rejection);
-            postEvents(ImmutableSet.of(re.outerObject()));
+            Command command = ((CommandEnvelope) signal).outerObject();
+            Event rejection = reject(command, cause);
+            postEvents(rejection.toSet());
         }
     }
 }

@@ -134,7 +134,7 @@ public final class EventEnvelope
      * @return the class of origin message or {@link EmptyClass} if the origin message type is
      *         unknown
      */
-    public MessageClass originClass() {
+    public MessageClass<?> originClass() {
         if (isRejection()) {
             RejectionEventContext rejection = context().getRejection();
             CommandMessage commandMessage = rejection.getCommand()

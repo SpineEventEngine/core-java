@@ -51,7 +51,6 @@ import io.spine.server.delivery.event.ProjectionStateCleared;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
@@ -209,8 +208,7 @@ public class EntityLifecycle {
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asMessageOrigin();
+        Origin systemEventOrigin = command.asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 
@@ -225,8 +223,7 @@ public class EntityLifecycle {
                 .newBuilder()
                 .setId(command.getId())
                 .vBuild();
-        Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asMessageOrigin();
+        Origin systemEventOrigin = command.asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -244,9 +241,8 @@ public class EntityLifecycle {
                 .setId(commandId)
                 .setRejectionEvent(rejection)
                 .vBuild();
-        Origin systemEventOrigin = RejectionEnvelope.from(EventEnvelope.of(rejection))
-                                                    .asMessageOrigin();
-        postEvent(systemEvent, systemEventOrigin);
+        Origin origin = rejection.asMessageOrigin();
+        postEvent(systemEvent, origin);
     }
 
     /**
@@ -263,9 +259,8 @@ public class EntityLifecycle {
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asMessageOrigin();
-        postEvent(systemCommand, systemEventOrigin);
+        Origin origin = event.asMessageOrigin();
+        postEvent(systemCommand, origin);
     }
 
     public final void onEventImported(Event event) {
@@ -276,8 +271,7 @@ public class EntityLifecycle {
                 .setWhenImported(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asMessageOrigin();
+        Origin systemEventOrigin = event.asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -295,9 +289,8 @@ public class EntityLifecycle {
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin systemEventOrigin = EventEnvelope.of(event)
-                                                .asMessageOrigin();
-        postEvent(systemCommand, systemEventOrigin);
+        Origin origin = event.asMessageOrigin();
+        postEvent(systemCommand, origin);
     }
 
     /**

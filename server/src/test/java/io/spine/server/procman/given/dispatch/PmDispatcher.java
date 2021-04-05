@@ -51,6 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A test utility for dispatching commands and events to a {@code ProcessManager} in test purposes.
  */
+@SuppressWarnings("rawtypes") // to simplify signatures this test env. class
 @VisibleForTesting
 @CanIgnoreReturnValue
 public final class PmDispatcher {

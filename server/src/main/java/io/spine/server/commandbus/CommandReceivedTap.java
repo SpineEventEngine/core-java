@@ -29,7 +29,6 @@ package io.spine.server.commandbus;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
-import io.spine.server.bus.BusFilter;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
@@ -48,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>The filter never terminates the command processing, i.e. {@link #filter(CommandEnvelope)}
  * always returns an empty value.
  */
-final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
+final class CommandReceivedTap implements CommandFilter {
 
     private final WriteSideFunction writeSideFunction;
 

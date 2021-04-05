@@ -24,67 +24,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus.given;
+package io.spine.server.commandbus;
 
-import io.spine.base.Error;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
+import io.spine.core.Command;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.commandbus.CommandFilter;
+import io.spine.server.bus.MessageIdExtensions;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
 
-public final class BusFilters {
+import static com.google.common.base.Preconditions.checkNotNull;
+
+/**
+ * Filters commands posted to {@link CommandBus}.
+ */
+public interface CommandFilter extends BusFilter<CommandEnvelope> {
 
     /**
-     * Prevents instantiation of this test env class.
+     * Rejects the message with a {@linkplain io.spine.base.RejectionMessage rejection} status.
+     *
+     * <p>This method is a shortcut which can be used in {@link #filter(MessageEnvelope)} when the
+     * message does not pass the filter due to a business rejection.
+     *
+     * <p>Such rejection method can be used when no technical error occurs but due to the business
+     * rules the command should be immediately disqualified from being executed. A typical scenario
+     * would be when the permissions of the user who made the request aren't broad enough.
+     *
+     * @param command
+     *          the envelope with the message to filter
+     * @param cause
+     *         the cause of the rejection
+     * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
      */
-    private BusFilters() {
+    default Optional<Ack> reject(CommandEnvelope command, RejectionThrowable cause) {
+        checkNotNull(command);
+        checkNotNull(cause);
+        Command cmd = command.command();
+        Ack ack = MessageIdExtensions.reject(cmd, cause);
+        return Optional.of(ack);
     }
-
-    public static final class Accepting implements BusFilter<CommandEnvelope> {
-
-        @Override
-        public Optional<Ack> filter(CommandEnvelope envelope) {
-            return letPass();
-        }
-    }
-
-    public static final class RejectingWithOk implements BusFilter<CommandEnvelope> {
-
-        @Override
-        public Optional<Ack> filter(CommandEnvelope envelope) {
-            return reject(envelope);
-        }
-    }
-
-    public static final class RejectingWithError implements BusFilter<CommandEnvelope> {
-
-        private final Error error;
-
-        public RejectingWithError(Error error) {
-            this.error = error;
-        }
-
-        @Override
-        public Optional<Ack> filter(CommandEnvelope envelope) {
-            return reject(envelope, error);
-        }
-    }
-
-    public static final class RejectingWithRejectionThrowable implements CommandFilter {
-
-        private final RejectionThrowable rejection;
-
-        public RejectingWithRejectionThrowable(RejectionThrowable rejection) {
-            this.rejection = rejection;
-        }
-
-        @Override
-        public Optional<Ack> filter(CommandEnvelope envelope) {
-            return reject(envelope, rejection);
-        }
-    }
-
 }

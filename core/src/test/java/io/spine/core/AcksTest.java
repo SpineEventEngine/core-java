@@ -37,7 +37,7 @@ import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.core.Acks.toCommandId;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Acks utility class should")
+@DisplayName("`Acks` utility class should")
 class AcksTest extends UtilityClassTest<Acks> {
 
     AcksTest() {

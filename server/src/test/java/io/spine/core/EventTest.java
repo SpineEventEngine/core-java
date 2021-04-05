@@ -28,9 +28,9 @@ package io.spine.core;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.base.RejectionMessage;
 import io.spine.base.RejectionThrowable;
 import io.spine.base.Time;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
@@ -39,6 +39,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
+import io.spine.test.core.given.EtDoSomething;
 import io.spine.test.core.given.EtProjectCreated;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.event.RejectionFactory.reject;
 import static io.spine.server.type.given.EventsTestEnv.commandContext;
 import static io.spine.server.type.given.EventsTestEnv.event;
 import static io.spine.server.type.given.EventsTestEnv.tenantId;
@@ -68,8 +70,6 @@ public class EventTest extends UtilityClassTest<Events> {
     private static final TestActorRequestFactory requestFactory =
             new TestActorRequestFactory(EventTest.class);
 
-    private EventFactory eventFactory;
-
     private Event event;
     private EventContext context;
 
@@ -81,7 +81,7 @@ public class EventTest extends UtilityClassTest<Events> {
     void setUp() {
         CommandEnvelope cmd = generate();
         StringValue producerId = StringValue.of(getClass().getSimpleName());
-        eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
+        EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.context();
     }
@@ -215,19 +215,14 @@ public class EventTest extends UtilityClassTest<Events> {
     @Test
     @DisplayName("tell if it is a rejection")
     void tellWhenRejection() {
-        RejectionEventContext rejectionContext = RejectionEventContext
-                .newBuilder()
-                .setStacktrace("at package.name.Class.method(Class.java:42)")
-                .build();
-        RejectionMessage message = StandardRejections.EntityAlreadyArchived
-                .newBuilder()
-                .setEntityId(pack(Time.currentTime()))
-                .build();
-        Event event =
-                eventFactory.createRejectionEvent(message, null, rejectionContext);
+        TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
+        Command cmd = requestFactory.createCommand(commandMessage());
+        Event event = reject(cmd, new StubRejectionThrowable());
+
         assertThat(event.isRejection())
                 .isTrue();
     }
+
 
     @Test
     @DisplayName("tell if it is NOT a rejection")
@@ -300,5 +295,27 @@ public class EventTest extends UtilityClassTest<Events> {
     private EventContext.Builder contextWithoutOrigin() {
         return context.toBuilder()
                       .clearOrigin();
+    }
+
+    private static CommandMessage commandMessage() {
+        return EtDoSomething.newBuilder()
+                            .setId(EventTest.class.getName())
+                            .build();
+    }
+
+    private static class StubRejectionThrowable extends RejectionThrowable {
+
+        private static final long serialVersionUID = 0L;
+
+        private StubRejectionThrowable() {
+            super(rejectionMessage());
+        }
+
+        private static StandardRejections.EntityAlreadyArchived rejectionMessage() {
+            return StandardRejections.EntityAlreadyArchived
+                    .newBuilder()
+                    .setEntityId(pack(Time.currentTime()))
+                    .build();
+        }
     }
 }

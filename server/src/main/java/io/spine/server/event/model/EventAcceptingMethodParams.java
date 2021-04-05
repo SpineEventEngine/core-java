@@ -28,14 +28,11 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
-import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
@@ -51,38 +48,40 @@ import static io.spine.server.model.TypeMatcher.exactly;
 @Immutable
 enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
-    MESSAGE(classImplementing(EventMessage.class)) {
-
+    MESSAGE(
+            classImplementing(EventMessage.class)
+    ) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[]{event.message()};
         }
     },
 
-    MESSAGE_EVENT_CTX(classImplementing(EventMessage.class), exactly(EventContext.class)) {
-
+    MESSAGE_EVENT_CTX(
+            classImplementing(EventMessage.class),
+            exactly(EventContext.class)
+    ) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
             return new Object[]{event.message(), event.context()};
         }
     },
 
-    MESSAGE_COMMAND_CTX(classImplementing(RejectionMessage.class), exactly(CommandContext.class)) {
-
+    MESSAGE_COMMAND_CTX(
+            classImplementing(RejectionMessage.class),
+            exactly(CommandContext.class)
+    ) {
         @Override
         public Object[] extractArguments(EventEnvelope event) {
-            Message message = event.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(event);
-            CommandContext context =
-                    rejection.origin()
-                             .context();
-            return new Object[]{message, context};
+            RejectionEnvelope re = new RejectionEnvelope(event);
+            return new Object[]{re.rejectionMessage(), re.commandContext()};
         }
     },
 
-    MESSAGE_COMMAND_MSG(classImplementing(RejectionMessage.class),
-                        classImplementing(CommandMessage.class)) {
-
+    MESSAGE_COMMAND_MSG(
+            classImplementing(RejectionMessage.class),
+            classImplementing(CommandMessage.class)
+    ) {
         @Override
         public boolean acceptsCommand() {
             return true;
@@ -90,17 +89,16 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
         @Override
         public Object[] extractArguments(EventEnvelope event) {
-            Message message = event.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(event);
-            Message commandMessage = rejection.originMessage();
-            return new Object[]{message, commandMessage};
+            RejectionEnvelope re = new RejectionEnvelope(event);
+            return new Object[]{re.rejectionMessage(), re.commandMessage()};
         }
     },
 
-    MESSAGE_COMMAND_MSG_COMMAND_CTX(classImplementing(RejectionMessage.class),
-                                    classImplementing(CommandMessage.class),
-                                    exactly(CommandContext.class)) {
-
+    MESSAGE_COMMAND_MSG_COMMAND_CTX(
+            classImplementing(RejectionMessage.class),
+            classImplementing(CommandMessage.class),
+            exactly(CommandContext.class)
+    ) {
         @Override
         public boolean acceptsCommand() {
             return true;
@@ -108,12 +106,8 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
         @Override
         public Object[] extractArguments(EventEnvelope event) {
-            Message message = event.message();
-            RejectionEnvelope rejection = RejectionEnvelope.from(event);
-            Command origin = rejection.origin();
-            CommandMessage commandMessage = origin.enclosedMessage();
-            CommandContext context = origin.context();
-            return new Object[]{message, commandMessage, context};
+            RejectionEnvelope re = new RejectionEnvelope(event);
+            return new Object[]{re.rejectionMessage(), re.commandMessage(), re.commandContext()};
         }
     };
 
@@ -121,15 +115,15 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
     private final ImmutableList<TypeMatcher> criteria;
 
+    EventAcceptingMethodParams(TypeMatcher... criteria) {
+        this.criteria = ImmutableList.copyOf(criteria);
+    }
+
     /**
      * Obtains specification of parameters allowed for event-handling methods.
      */
     static AllowedParams<EventEnvelope> allowed() {
         return PARAMS;
-    }
-
-    EventAcceptingMethodParams(TypeMatcher... criteria) {
-        this.criteria = ImmutableList.copyOf(criteria);
     }
 
     @Override

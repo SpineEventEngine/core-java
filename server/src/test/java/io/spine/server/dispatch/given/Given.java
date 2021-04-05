@@ -29,10 +29,10 @@ package io.spine.server.dispatch.given;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
+import io.spine.base.RejectionThrowable;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.RejectionEventContext;
 import io.spine.server.dispatch.DispatchOutcomeHandlerTest;
 import io.spine.server.dispatch.given.command.CreateDispatch;
 import io.spine.server.dispatch.given.event.DispatchCreated;
@@ -42,6 +42,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.event.RejectionFactory.reject;
 
 public final class Given {
 
@@ -61,11 +62,10 @@ public final class Given {
     }
 
     public static Event rejectionEvent() {
-        RejectionEventContext rejectionContext = RejectionEventContext
-                .newBuilder()
-                .setStacktrace("at package.name.Class.method(Class.java:42)")
-                .build();
-        return eventFactory.createRejectionEvent(cannotCreateDispatch(), null, rejectionContext);
+        Command cmd = commandFactory.create(createDispatch());
+        RejectionThrowable throwable = new StubRejectionThrowable();
+        Event rejection = reject(cmd, throwable);
+        return rejection;
     }
 
     public static Event event() {
@@ -76,8 +76,8 @@ public final class Given {
         return commandFactory.create(createDispatch());
     }
 
-    private static RejectionMessage cannotCreateDispatch() {
-        return DispatchRejections.CannotCreateDispatch
+    private static CommandMessage createDispatch() {
+        return CreateDispatch
                 .newBuilder()
                 .setId(ID)
                 .build();
@@ -90,10 +90,19 @@ public final class Given {
                 .build();
     }
 
-    private static CommandMessage createDispatch() {
-        return CreateDispatch
-                .newBuilder()
-                .setId(ID)
-                .build();
+    private static class StubRejectionThrowable extends RejectionThrowable {
+
+        private static final long serialVersionUID = 0L;
+
+        private StubRejectionThrowable() {
+            super(cannotCreateDispatch());
+        }
+
+        private static RejectionMessage cannotCreateDispatch() {
+            return DispatchRejections.CannotCreateDispatch
+                    .newBuilder()
+                    .setId(ID)
+                    .build();
+        }
     }
 }
