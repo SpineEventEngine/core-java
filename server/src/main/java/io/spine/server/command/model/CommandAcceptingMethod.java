@@ -30,6 +30,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.RejectionThrowable;
+import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.server.EventProducer;
 import io.spine.server.dispatch.Success;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -37,7 +39,6 @@ import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.RejectionEnvelope;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.event.RejectionFactoryKt.reject;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -86,13 +88,13 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
 
     @Override
     protected final Optional<Success>
-    handleRejection(RejectionThrowable throwable, T target, CommandEnvelope origin) {
+    handleRejection(T target, CommandEnvelope origin, RejectionThrowable throwable) {
+        Command command = origin.outerObject();
         throwable.initProducer(target.producerId());
-        RejectionEnvelope envelope = RejectionEnvelope.from(origin, throwable);
-        Success success = Success
-                .newBuilder()
-                .setRejection(envelope.outerObject())
-                .vBuild();
+        Event rejection = reject(command, throwable);
+        Success success = Success.newBuilder()
+                                 .setRejection(rejection)
+                                 .vBuild();
         return Optional.of(success);
     }
 }

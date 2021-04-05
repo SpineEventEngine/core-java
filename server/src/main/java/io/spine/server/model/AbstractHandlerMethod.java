@@ -301,7 +301,7 @@ class AbstractHandlerMethod<T,
     }
 
     private Success asRejection(T target, E envelope, RejectionThrowable cause) {
-        Optional<Success> maybeSuccess = handleRejection(cause, target, envelope);
+        Optional<Success> maybeSuccess = handleRejection(target, envelope, cause);
         return maybeSuccess.orElseThrow(this::cannotThrowRejections);
     }
 
@@ -310,7 +310,7 @@ class AbstractHandlerMethod<T,
         return new IllegalOutcomeException(errorMessage);
     }
 
-    protected Optional<Success> handleRejection(RejectionThrowable throwable, T target, E origin) {
+    protected Optional<Success> handleRejection(T target, E origin, RejectionThrowable throwable) {
         return Optional.empty();
     }
 

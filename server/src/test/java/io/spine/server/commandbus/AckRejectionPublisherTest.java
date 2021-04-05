@@ -26,17 +26,17 @@
 
 package io.spine.server.commandbus;
 
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.bus.Acks;
 import io.spine.server.bus.Listener;
 import io.spine.server.event.EventBus;
-import io.spine.server.type.CommandEnvelope;
+import io.spine.server.event.RejectionFactoryKt;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.RejectionEnvelope;
 import io.spine.test.commandbus.CmdBusCaffetteriaId;
 import io.spine.test.commandbus.command.CmdBusEntryDenied;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -46,6 +46,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
+import static io.spine.server.bus.MessageIdExtensionsKt.reject;
 import static io.spine.testing.Assertions.assertIllegalState;
 
 @DisplayName("`AckRejectionPublisher` should")
@@ -71,16 +73,10 @@ class AckRejectionPublisherTest {
         TestActorRequestFactory requestFactory =
                 new TestActorRequestFactory(AckRejectionPublisherTest.class);
         Command command = requestFactory.generateCommand();
-        CommandEnvelope origin = CommandEnvelope.of(command);
 
-        CmdBusEntryDenied throwable = CmdBusEntryDenied
-                .newBuilder()
-                .setId(CmdBusCaffetteriaId.generate())
-                .setVisitorCount(15)
-                .setReason("Test command bus rejection.")
-                .build();
-        RejectionEnvelope rejection = RejectionEnvelope.from(origin, throwable);
-        Ack ack = Acks.reject(CommandId.generate(), rejection);
+        RejectionThrowable throwable = stubThrowable();
+        Event rejection = RejectionFactoryKt.reject(command, throwable);
+        Ack ack = reject(CommandId.generate(), rejection);
         publisher.onNext(ack);
         assertThat(listener.lastReceived)
                 .isNotNull();
@@ -88,10 +84,20 @@ class AckRejectionPublisherTest {
                 .isEqualTo(throwable.messageThrown());
     }
 
+    private static CmdBusEntryDenied stubThrowable() {
+        CmdBusEntryDenied throwable = CmdBusEntryDenied
+                .newBuilder()
+                .setId(CmdBusCaffetteriaId.generate())
+                .setVisitorCount(15)
+                .setReason("Test command bus rejection.")
+                .build();
+        return throwable;
+    }
+
     @Test
     @DisplayName("ignore non-rejection `Ack`s")
     void ignoreNonRejection() {
-        Ack ack = Acks.acknowledge(CommandId.generate());
+        Ack ack = acknowledge(CommandId.generate());
         publisher.onNext(ack);
         assertThat(listener.lastReceived)
                 .isNull();

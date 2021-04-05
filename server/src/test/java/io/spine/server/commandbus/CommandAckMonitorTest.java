@@ -28,20 +28,19 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.bus.Acks;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.RejectionEnvelope;
+import io.spine.server.event.RejectionFactoryKt;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.event.CommandAcknowledged;
@@ -56,9 +55,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
+import static io.spine.server.bus.MessageIdExtensionsKt.causedError;
+import static io.spine.server.bus.MessageIdExtensionsKt.reject;
+import static io.spine.testing.Assertions.assertIllegalState;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("InnerClassMayBeStatic")
@@ -154,10 +157,12 @@ class CommandAckMonitorTest {
             Message lastSeenEvent = writeSide.lastSeenEvent()
                                              .message();
 
-            assertThat(lastSeenEvent).isInstanceOf(CommandAcknowledged.class);
+            assertThat(lastSeenEvent)
+                    .isInstanceOf(CommandAcknowledged.class);
 
             CommandAcknowledged actualEvent = (CommandAcknowledged) lastSeenEvent;
-            assertThat(actualEvent.getId()).isEqualTo(commandId);
+            assertThat(actualEvent.getId())
+                    .isEqualTo(commandId);
         }
 
         @Test
@@ -169,13 +174,15 @@ class CommandAckMonitorTest {
             Message lastSeenEvent = writeSide.lastSeenEvent()
                                              .message();
 
-            assertThat(lastSeenEvent).isInstanceOf(CommandErrored.class);
+            assertThat(lastSeenEvent)
+                    .isInstanceOf(CommandErrored.class);
 
             CommandErrored actualEvent = (CommandErrored) lastSeenEvent;
 
-            assertThat(actualEvent.getId()).isEqualTo(commandId);
-            assertThat(actualEvent.getError()).isEqualTo(ack.getStatus()
-                                                            .getError());
+            assertThat(actualEvent.getId())
+                    .isEqualTo(commandId);
+            assertThat(actualEvent.getError())
+                    .isEqualTo(ack.getStatus().getError());
         }
 
         @Test
@@ -189,8 +196,10 @@ class CommandAckMonitorTest {
             assertThat(lastSeenEvent).isInstanceOf(CommandRejected.class);
 
             CommandRejected actualEvent = (CommandRejected) lastSeenEvent;
-            assertThat(actualEvent.getId()).isEqualTo(commandId);
-            assertThat(actualEvent.getRejectionEvent()).isEqualTo(ack.getStatus().getRejection());
+            assertThat(actualEvent.getId())
+                    .isEqualTo(commandId);
+            assertThat(actualEvent.getRejectionEvent())
+                    .isEqualTo(ack.getStatus().getRejection());
         }
     }
 
@@ -205,13 +214,14 @@ class CommandAckMonitorTest {
                 .setPostedCommands(ImmutableSet.of(mockCommand))
                 .build();
         RuntimeException error = new RuntimeException("The command Ack monitor test error.");
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-                                                       () -> monitor.onError(error));
-        Truth.assertThat(exception).hasCauseThat().isEqualTo(error);
+        IllegalStateException exception = assertIllegalState(() -> monitor.onError(error));
+        assertThat(exception)
+             .hasCauseThat()
+             .isEqualTo(error);
     }
 
     private static Ack okAck(CommandId commandId) {
-        return Acks.acknowledge(commandId);
+        return acknowledge(commandId);
     }
 
     private static Ack errorAck(CommandId commandId) {
@@ -220,7 +230,7 @@ class CommandAckMonitorTest {
                 .setCode(42)
                 .setMessage("Wrong question")
                 .build();
-        return Acks.reject(commandId, error);
+        return causedError(commandId, error);
     }
 
     private static Ack rejectionAck(CommandId commandId) {
@@ -237,16 +247,17 @@ class CommandAckMonitorTest {
                 .setId(commandId)
                 .setMessage(pack(commandMessage))
                 .build();
-        CommandEnvelope envelope = CommandEnvelope.of(command);
 
+        RuntimeException exception = throwableCausedByRejection();
+        Event rejection = RejectionFactoryKt.reject(command, exception);
+        return reject(commandId, rejection);
+    }
+
+    private static RuntimeException throwableCausedByRejection() {
         Any entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
-        CannotModifyArchivedEntity rejectionThrowable = CannotModifyArchivedEntity
-                .newBuilder()
+        RejectionThrowable rt = CannotModifyArchivedEntity.newBuilder()
                 .setEntityId(entityId)
                 .build();
-        RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
-        RejectionEnvelope rejection = RejectionEnvelope.from(envelope, wrapperThrowable);
-
-        return Acks.reject(commandId, rejection);
+        return new RuntimeException(rt);
     }
 }

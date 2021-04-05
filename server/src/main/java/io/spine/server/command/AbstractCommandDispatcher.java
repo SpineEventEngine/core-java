@@ -48,7 +48,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.type.OriginsKt.originOfRejection;
 
 /**
  * The abstract base for non-aggregate classes that dispatch commands to their methods
@@ -124,7 +123,8 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
                 .setHandledSignal(signal.messageId())
                 .setError(error)
                 .vBuild();
-        system.postEvent(systemEvent, signal.asMessageOrigin());
+        Origin origin = signal.asMessageOrigin();
+        system.postEvent(systemEvent, origin);
     }
 
     private void postSignalRejected(SignalEnvelope<?, ?, ?> signal, Event rejection) {
@@ -134,7 +134,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
                              .asCommandId())
                 .setRejectionEvent(rejection)
                 .vBuild();
-        Origin origin = originOfRejection(rejection);
+        Origin origin = rejection.asMessageOrigin();
         system.postEvent(commandRejected, origin);
     }
 

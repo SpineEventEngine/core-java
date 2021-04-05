@@ -34,7 +34,6 @@ import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.validate.ValidationException;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.EventOrigin.fromAnotherMessage;
@@ -90,18 +89,30 @@ public class EventFactory extends EventFactoryBase {
      * definition. If the message is invalid, an {@linkplain ValidationException
      * exception} is thrown.
      *
-     * @param message
-     *         the message of the event
+     * @param msg
+     *         the event message
      * @param version
      *         the version of the entity which produces the event, or
      *         {@code null} if the version information is not available
      * @throws ValidationException
-     *         if the passed message does not satisfy the constraints
-     *         set for it in its Protobuf definition
+     *         if the passed message does not satisfy the validation constraints
+     * @see #createEvent(EventMessage)
      */
-    public Event createEvent(EventMessage message, @Nullable Version version)
+    public Event createEvent(EventMessage msg, Version version)
             throws ValidationException {
         EventContext context = createContext(version);
-        return doCreateEvent(message, context);
+        return assemble(msg, context);
+    }
+
+    /**
+     * Creates an event without version information.
+     *
+     * @throws ValidationException
+     *         if the passed message does not satisfy the validation constraints
+     * @see #createEvent(EventMessage, Version)
+     */
+    public Event createEvent(EventMessage msg) throws ValidationException {
+        EventContext context = createContext(null);
+        return assemble(msg, context);
     }
 }

@@ -55,7 +55,6 @@ import static io.spine.core.Status.StatusCase.OK;
 import static io.spine.core.Status.StatusCase.REJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`BusFilter` should")
 class BusFilterTest {
@@ -132,14 +131,6 @@ class BusFilterTest {
                                                 .getRejection()
                                                 .getMessage());
         assertThat(rejectionMessage).isEqualTo(rejection.messageThrown());
-    }
-
-    @Test
-    @DisplayName("throw `IAE` when throwing business rejection from non-command-handling filter")
-    void failOnRejectionThrowableForNonCommand() {
-        BusFilters.Throwing throwingFilter = new BusFilters.Throwing();
-        assertThrows(IllegalArgumentException.class,
-                     () -> throwingFilter.filter(eventEnvelope()));
     }
 
     private void assertIdEquals(Ack ack) {

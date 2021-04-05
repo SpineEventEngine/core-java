@@ -28,16 +28,14 @@ package io.spine.server.bus;
 
 import io.spine.annotation.SPI;
 import io.spine.base.Error;
-import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
-import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
-import io.spine.server.type.RejectionEnvelope;
 
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
+import static io.spine.server.bus.MessageIdExtensionsKt.causedError;
 
 /**
  * The filter for the messages posted to a bus.
@@ -92,7 +90,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      */
     default Optional<Ack> reject(E envelope) {
         checkNotNull(envelope);
-        Ack ack = Acks.acknowledge(envelope.id());
+        Ack ack = acknowledge(envelope.id());
         return Optional.of(ack);
     }
 
@@ -112,41 +110,11 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     default Optional<Ack> reject(E envelope, Error cause) {
         checkNotNull(envelope);
         checkNotNull(cause);
-        Ack ack = Acks.reject(envelope.id(), cause);
+        Ack ack = causedError(envelope.id(), cause);
         return Optional.of(ack);
     }
 
-    /**
-     * Rejects the message with a {@linkplain io.spine.base.RejectionMessage rejection} status.
-     *
-     * <p>This method is a shortcut which can be used in {@link #filter(MessageEnvelope)} when the
-     * message does not pass the filter due to a business rejection.
-     *
-     * <p>Such rejection method can be used when no technical error occurs but due to the business
-     * rules the command should be immediately disqualified from being executed. A typical scenario
-     * would be when the permissions of the user who made the request aren't broad enough.
-     *
-     * @param envelope
-     *          the envelope with the message to filter
-     * @param cause
-     *         the cause of the rejection
-     * @return the {@code Optional.of(Ack)} signaling that the message does not pass the filter
-     *
-     * @throws IllegalArgumentException
-     *         if the filtered {@code envelope} is not a
-     *         {@linkplain io.spine.server.type.CommandEnvelope command}
-     */
-    default Optional<Ack> reject(E envelope, RejectionThrowable cause) {
-        checkNotNull(envelope);
-        checkNotNull(cause);
-        checkArgument(envelope instanceof CommandEnvelope);
-        CommandEnvelope origin = (CommandEnvelope) envelope;
-        RejectionEnvelope rejection = RejectionEnvelope.from(origin, cause);
-        Ack ack = Acks.reject(envelope.id(), rejection);
-        return Optional.of(ack);
-    }
-
-    /**
+   /**
      * {@inheritDoc}
      *
      * <p>By default, performs no action.

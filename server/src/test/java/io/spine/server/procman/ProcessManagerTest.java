@@ -26,12 +26,15 @@
 
 package io.spine.server.procman;
 
+import com.google.common.truth.IntegerSubject;
+import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
+import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -47,7 +50,6 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.RejectionEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.test.procman.ElephantProcess;
 import io.spine.test.procman.PmDontHandle;
@@ -90,7 +92,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.dispatch.PmDispatcher.dispatch;
@@ -112,7 +114,6 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 import static io.spine.testdata.Sample.messageOfType;
 import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
 import static io.spine.testing.server.Assertions.assertEventClassesExactly;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -121,9 +122,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProcessManagerTest {
 
     private static final int VERSION = 2;
+    private static final Any PRODUCER_ID = Identifier.pack(TestProcessManager.ID);
 
     private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(Identifier.pack(TestProcessManager.ID), getClass());
+            TestEventFactory.newInstance(PRODUCER_ID, getClass());
     private final TestActorRequestFactory requestFactory =
             new TestActorRequestFactory(getClass());
 
@@ -136,11 +138,12 @@ class ProcessManagerTest {
         context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        processManager = Given.processManagerOfClass(TestProcessManager.class)
-                              .withId(TestProcessManager.ID)
-                              .withVersion(VERSION)
-                              .withState(ElephantProcess.getDefaultInstance())
-                              .build();
+        processManager =
+                Given.processManagerOfClass(TestProcessManager.class)
+                     .withId(TestProcessManager.ID)
+                     .withVersion(VERSION)
+                     .withState(ElephantProcess.getDefaultInstance())
+                     .build();
     }
 
     @AfterEach
@@ -155,23 +158,30 @@ class ProcessManagerTest {
                 .getSuccess()
                 .getProducedEvents()
                 .getEventList();
+        Any expected = pack(eventMessage);
+        assertState().isEqualTo(expected);
+        return result;
+    }
+
+    private Subject assertState() {
         Any pmState = processManager.state()
                                     .getAny();
-        Any expected = pack(eventMessage);
-        assertEquals(expected, pmState);
-        return result;
+        Subject assertState = assertThat(pmState);
+        return assertState;
     }
 
     @CanIgnoreReturnValue
     private List<Event> testDispatchCommand(CommandMessage commandMsg) {
-        CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
-                                                                    .create(commandMsg));
+        Command command =
+                requestFactory.command()
+                              .create(commandMsg);
+        CommandEnvelope envelope = CommandEnvelope.of(command);
         List<Event> events = dispatch(processManager, envelope)
                 .getSuccess()
                 .getProducedEvents()
                 .getEventList();
-        assertEquals(pack(commandMsg), processManager.state()
-                                                     .getAny());
+        Any expected = pack(commandMsg);
+        assertState().isEqualTo(expected);
         return events;
     }
 
@@ -191,8 +201,10 @@ class ProcessManagerTest {
             List<? extends Message> eventMessages =
                     testDispatchEvent(messageOfType(PmProjectStarted.class));
 
-            assertEquals(1, eventMessages.size());
-            assertTrue(eventMessages.get(0) instanceof Event);
+            assertThat(eventMessages)
+                    .hasSize(1);
+            assertThat(eventMessages.get(0))
+                    .isInstanceOf(Event.class);
         }
     }
 
@@ -237,19 +249,19 @@ class ProcessManagerTest {
         }
 
         private void checkIncrementsOnCommand(CommandMessage commandMessage) {
-            assertEquals(VERSION, processManager.version()
-                                                .getNumber());
+            assertVersion().isEqualTo(VERSION);
             testDispatchCommand(commandMessage);
-            assertEquals(VERSION + 1, processManager.version()
-                                                    .getNumber());
+            assertVersion().isEqualTo(VERSION + 1);
         }
 
         private void checkIncrementsOnEvent(EventMessage eventMessage) {
-            assertEquals(VERSION, processManager.version()
-                                                .getNumber());
+            assertVersion().isEqualTo(VERSION);
             testDispatchEvent(eventMessage);
-            assertEquals(VERSION + 1, processManager.version()
-                                                    .getNumber());
+            assertVersion().isEqualTo(VERSION + 1);
+        }
+
+        private IntegerSubject assertVersion() {
+            return assertThat(processManager.version().getNumber());
         }
     }
 
@@ -258,11 +270,13 @@ class ProcessManagerTest {
     void dispatchCommandAndReturnEvents() {
         List<Event> events = testDispatchCommand(createProject());
 
-        assertEquals(1, events.size());
+        assertThat(events)
+                .hasSize(1);
         Event event = events.get(0);
         assertNotNull(event);
         PmProjectCreated message = unpack(event.getMessage(), PmProjectCreated.class);
-        assertEquals(TestProcessManager.ID, message.getProjectId());
+        assertThat(message.getProjectId())
+                .isEqualTo(TestProcessManager.ID);
     }
 
     @Nested
@@ -272,25 +286,26 @@ class ProcessManagerTest {
         @Test
         @DisplayName("rejection message only")
         void rejectionMessage() {
-            RejectionEnvelope rejection = entityAlreadyArchived(PmDontHandle.class);
-            dispatch(processManager, rejection.getEvent());
-            assertReceived(rejection.outerObject()
-                                    .getMessage());
+            EventEnvelope re = entityAlreadyArchived(PmDontHandle.class);
+            dispatch(processManager, re);
+            Event rejection = re.outerObject();
+            assertReceived(rejection.getMessage());
         }
 
         @Test
         @DisplayName("rejection and command message")
         void rejectionAndCommandMessage() {
-            RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
-            dispatch(processManager, rejection.getEvent());
-            assertReceived(rejection.origin()
-                                    .getMessage());
+            EventEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
+            dispatch(processManager, rejection);
+            Command command =
+                    rejection.context()
+                             .getRejection()
+                             .getCommand();
+            assertReceived(command.getMessage());
         }
 
         private void assertReceived(Any expected) {
-            assertThat(processManager.state()
-                                     .getAny())
-                    .isEqualTo(expected);
+            assertState().isEqualTo(expected);
         }
     }
 

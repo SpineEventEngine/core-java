@@ -150,6 +150,7 @@ subprojects {
    tasks.withType<KotlinCompile>().configureEach {
       kotlinOptions {
           jvmTarget = JavaVersion.VERSION_1_8.toString()
+          useIR = true
       }
    }
 

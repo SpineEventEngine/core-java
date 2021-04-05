@@ -35,7 +35,7 @@ import io.spine.server.transport.Subscriber;
 
 import java.util.function.Function;
 
-import static io.spine.server.bus.Acks.acknowledge;
+import static io.spine.server.bus.MessageIdExtensionsKt.acknowledge;
 
 /**
  * An in-memory implementation of the {@link Publisher}.

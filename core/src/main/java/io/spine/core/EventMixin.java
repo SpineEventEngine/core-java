@@ -26,6 +26,7 @@
 
 package io.spine.core;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Timestamp;
@@ -186,6 +187,14 @@ interface EventMixin
         return identityBuilder()
                 .setVersion(context().getVersion())
                 .vBuild();
+    }
+
+    /**
+     * Creates a one-element set with this instance.
+     */
+    @SuppressWarnings("ClassReferencesSubclass") // which is the only impl.
+    default ImmutableSet<Event> toSet() {
+        return ImmutableSet.of((Event) this);
     }
 
     @Override

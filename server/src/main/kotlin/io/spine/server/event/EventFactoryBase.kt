@@ -26,96 +26,55 @@
 
 package io.spine.server.event
 
-import com.google.common.base.Preconditions
 import com.google.protobuf.Any
-import com.google.protobuf.Message
 import io.spine.base.EventMessage
 import io.spine.core.Event
 import io.spine.core.EventContext
-import io.spine.core.EventId
 import io.spine.core.Events
-import io.spine.core.RejectionEventContext
 import io.spine.core.Version
-import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.AnyPacker.pack
-import io.spine.type.TypeName
-import io.spine.validate.Validate
-import io.spine.validate.ValidationException
+import io.spine.validate.Validate.checkValid
 
 /**
- * The base class for event factories.
+ * Abstract base for event factories.
  */
-abstract class EventFactoryBase(
+internal abstract class EventFactoryBase(
     val origin: EventOrigin,
     val producerId: Any
 ) {
-    companion object {
-
-        /**
-         * Creates a new `Event` instance.
-         *
-         * @param id      the ID of the event
-         * @param message the event message
-         * @param context the event context
-         * @return created event instance
-         */
-        @JvmStatic
-        fun createEvent(id: EventId, message: EventMessage, context: EventContext): Event {
-            val packed = pack(message)
-            return Event.newBuilder()
-                .setId(id)
-                .setMessage(packed)
-                .setContext(context)
-                .vBuild()
-        }
-
-        @JvmStatic
-        fun doCreateEvent(message: EventMessage, context: EventContext): Event {
-            validate(message) // Validate before emitting the next ID.
-            val eventId = Events.generateId()
-            return createEvent(eventId, message, context)
-        }
-
-        /**
-         * Validates an event message according to their Protobuf definition.
-         *
-         * If the given `messageOrAny` is an instance of `Any`, it is unpacked
-         * for the validation.
-         */
-        @JvmStatic
-        @Throws(ValidationException::class)
-        fun validate(messageOrAny: Message) {
-            val message = if (messageOrAny is Any) {
-                AnyPacker.unpack(messageOrAny)
-            } else {
-                messageOrAny
-            }
-            Preconditions.checkArgument(
-                messageOrAny is EventMessage,
-                "`%s` is not an event type.", TypeName.of(messageOrAny)
-            )
-            Validate.checkValid(message)
-        }
-    }
-
     /**
      * Creates a new event context with an optionally passed version of the entity
      * which produced the event.
      */
-    fun createContext(version: Version?): EventContext =
-        newContext(version)
-            .vBuild()
+    protected fun createContext(version: Version?): EventContext =
+        newContext(version).vBuild()
 
-    fun createContext(version: Version?, context: RejectionEventContext): EventContext =
-        newContext(version)
-            .setRejection(context)
-            .vBuild()
-
-    private fun newContext(version: Version?): EventContext.Builder {
-        val builder = origin.contextBuilder().setProducerId(producerId)
+    /**
+     * Creates a builder for a new context of the event with optionally set
+     * version of an entity which is generating the event.
+     */
+    protected fun newContext(version: Version?): EventContext.Builder {
+        val builder =
+            origin.contextBuilder()
+                  .setProducerId(producerId)
         if (version != null) {
             builder.version = version
         }
         return builder
+    }
+
+    /**
+     * Creates a new `Event` instance.
+     */
+    protected fun assemble(message: EventMessage, context: EventContext): Event {
+        checkValid(message)
+        val eventId = Events.generateId()
+        val packed = pack(message)
+        return with(Event.newBuilder()) {
+            id = eventId
+            this.message = packed
+            this.context = context
+            vBuild()
+        }
     }
 }

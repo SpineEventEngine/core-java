@@ -30,9 +30,10 @@ import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.server.commandbus.Given;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
-import io.spine.server.type.RejectionEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
@@ -44,6 +45,7 @@ import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 
+import static io.spine.server.event.RejectionFactoryKt.reject;
 import static io.spine.server.procman.given.pm.TestProcessManager.ID;
 import static io.spine.testdata.Sample.messageOfType;
 
@@ -91,15 +93,16 @@ public class GivenMessages {
                 .build();
     }
 
-    public static RejectionEnvelope
+    public static EventEnvelope
     entityAlreadyArchived(Class<? extends CommandMessage> commandClass) {
         Any id = Identifier.pack(TestProcessManager.class.getName());
         Command command = Given.ACommand.withMessage(messageOfType(commandClass));
-        Throwable throwable = EntityAlreadyArchived
+        EntityAlreadyArchived throwable = EntityAlreadyArchived
                 .newBuilder()
                 .setEntityId(id)
                 .build();
-        RejectionEnvelope result = RejectionEnvelope.from(command, throwable);
+        Event rejection = reject(command, throwable);
+        EventEnvelope result = EventEnvelope.of(rejection);
         return result;
     }
 
