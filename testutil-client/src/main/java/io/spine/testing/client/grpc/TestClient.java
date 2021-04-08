@@ -92,7 +92,7 @@ public class TestClient implements Logging {
         try {
             _debug().log("Sending command: `%s` ...", commandType);
             result = commandClient.post(command);
-            _debug().log("Ack: `%s`.", result.toString());
+            _debug().log("Ack: `%s`.", result);
         } catch (RuntimeException e) {
             _warn().withCause(e)
                    .log(RPC_FAILED);

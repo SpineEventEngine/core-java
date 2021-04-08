@@ -54,8 +54,7 @@ public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builde
     Nothing event(TxCreated e) {
         receivedEvents.add(e);
         builder().setId(id())
-                 .setName(e.getName())
-                 .build();
+                 .setName(e.getName());
         return nothing();
     }
 
