@@ -61,7 +61,7 @@ buildscript {
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.4.30"
+    kotlin("jvm") version io.spine.gradle.internal.Kotlin.version
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     io.spine.gradle.internal.Deps.build.apply {

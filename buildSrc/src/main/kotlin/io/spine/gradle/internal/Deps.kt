@@ -102,6 +102,7 @@ data class Credentials(
  */
 object PublishingRepos {
 
+    @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
     val mavenTeamDev = Repository(
         name = "maven.teamdev.com",
         releases = "http://maven.teamdev.com/repository/spine",
@@ -132,6 +133,7 @@ object PublishingRepos {
 }
 
 // Specific repositories.
+@Suppress("unused")
 object Repos {
     val oldSpine: String = PublishingRepos.mavenTeamDev.releases
     val oldSpineSnapshots: String = PublishingRepos.mavenTeamDev.snapshots
@@ -139,8 +141,8 @@ object Repos {
     val spine: String = PublishingRepos.cloudRepo.releases
     val spineSnapshots: String = PublishingRepos.cloudRepo.snapshots
 
-    val sonatypeSnapshots: String = "https://oss.sonatype.org/content/repositories/snapshots"
-    val gradlePlugins = "https://plugins.gradle.org/m2/"
+    const val sonatypeSnapshots: String = "https://oss.sonatype.org/content/repositories/snapshots"
+    const val gradlePlugins = "https://plugins.gradle.org/m2/"
 }
 
 /**
@@ -150,56 +152,44 @@ object Repos {
  *
  * See also: https://github.com/SpineEventEngine/config/issues/171
  */
-object Versions {
-    val animalSniffer    = "1.19"
-    val apacheHttpClient = "2.1.2"
-    val assertK          = "0.23"
-    val bouncyCastlePkcs = "1.66"
-    val checkstyle       = "8.29"
-    val findBugs         = "3.0.2"
-    val firebaseAdmin    = "6.12.2"
-    val httpClient       = "1.34.2"
-    val jackson          = "2.9.10.5"
-    val javaPoet         = "1.13.0"
-    val javaxAnnotation  = "1.3.2"
-    val klaxon           = "5.4"
-    val licensePlugin    = "1.13"
-    val ouathJwt         = "3.11.0"
-    val pmd              = "6.24.0"
-    val roaster          = "2.21.2.Final"
 
-    /**
-     * Version of the SLF4J library.
-     *
-     * Spine used to log with SLF4J. Now we use Flogger. Whenever a choice comes up, we recommend to
-     * use the latter.
-     *
-     * Some third-party libraries may clash with different versions of the library. Thus, we specify
-     * this version and force it via [forceConfiguration(..)][DependencyResolution.forceConfiguration].
-     */
-    @Deprecated("Use Flogger over SLF4J.", replaceWith = ReplaceWith("flogger"))
-    val slf4j            = "1.7.30"
+// https://www.mojohaus.org/animal-sniffer/animal-sniffer-maven-plugin/
+object AnimalSniffer {
+    private const val version = "1.19"
+    const val lib = "org.codehaus.mojo:animal-sniffer-annotations:${version}"
+}
+
+/**
+ * Assertion library for tests in Kotlin
+ *
+ * [AssertK](https://github.com/willowtreeapps/assertk)
+ */
+object AssertK {
+    private const val version = "0.23.1"
+    const val libJvm = "com.willowtreeapps.assertk:assertk-jvm:${version}"
 }
 
 // https://github.com/google/auto
 object AutoCommon {
-    private const val version = "0.11"
+    private const val version = "1.0"
     const val lib = "com.google.auto:auto-common:${version}"
 }
 
 // https://github.com/google/auto
 object AutoValue {
-    private const val version = "1.7.4"
+    private const val version = "1.8"
     const val annotations = "com.google.auto.value:auto-value-annotations:${version}"
 }
 
 // https://github.com/google/auto
 object AutoService {
-    private const val version = "1.0-rc7"
+    private const val version = "1.0"
     const val annotations = "com.google.auto.service:auto-service-annotations:${version}"
+    @Suppress("unused")
     const val processor   = "com.google.auto.service:auto-service:${version}"
 }
 
+// https://cloud.google.com/java/docs/reference
 object AppEngine {
     private const val version = "1.9.82"
     private const val gradlePluginVersion = "2.2.0"
@@ -208,22 +198,65 @@ object AppEngine {
     const val gradlePlugin = "com.google.cloud.tools:appengine-gradle-plugin:${gradlePluginVersion}"
 }
 
+// https://www.bouncycastle.org/java.html
+object BouncyCastle {
+    const val libPkcsJdk15 = "org.bouncycastle:bcpkix-jdk15on:1.68"
+}
+
 // https://checkerframework.org/
 object CheckerFramework {
-    private const val version = "3.7.1"
+    private const val version = "3.12.0"
     const val annotations = "org.checkerframework:checker-qual:${version}"
+    @Suppress("unused")
     val dataflow = listOf(
         "org.checkerframework:dataflow:${version}",
         "org.checkerframework:javacutil:${version}"
     )
+    /**
+     * This is discontinued artifact, which we do not use directly.
+     * This is a transitive dependency for us, which we force in
+     * [DependencyResolution.forceConfiguration]
+     */
+    const val compatQual = "org.checkerframework:checker-compat-qual:2.5.5"
+}
+
+// https://checkstyle.sourceforge.io/
+// See `config/gradle.checkstyle.gradle`.
+@Suppress("unused")
+object CheckStyle {
+    const val version = "8.29"
+}
+
+/**
+ * Commons CLI is a transitive dependency which we don't use directly.
+ * We `force` it in [DependencyResolution.forceConfiguration].
+ *
+ * [Commons CLI]](https://commons.apache.org/proper/commons-cli/)
+ */
+object CommonsCli {
+    private const val version = "1.4"
+    const val lib = "commons-cli:commons-cli:${version}"
+}
+
+/**
+ * Commons Logging is a transitive dependency which we don't use directly.
+ * We `force` it in [DependencyResolution.forceConfiguration].
+ *
+ * [Commons Logging](https://commons.apache.org/proper/commons-logging/)
+ */
+object CommonsLogging {
+    private const val version = "1.2"
+    const val lib = "commons-logging:commons-logging:${version}"
 }
 
 // https://errorprone.info/
+@Suppress("unused")
 object ErrorProne {
-    private const val version = "2.5.1"
+    private const val version = "2.6.0"
+    @Suppress("MemberVisibilityCanBePrivate")
     const val gradlePluginVersion = "1.3.0"
-    // Taken from here: https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
-    const val javacPluginVersion = "9+181-r4173-1"
+    // https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
+    private const val javacPluginVersion = "9+181-r4173-1"
 
     val annotations = listOf(
         "com.google.errorprone:error_prone_annotations:${version}",
@@ -232,15 +265,33 @@ object ErrorProne {
     const val core = "com.google.errorprone:error_prone_core:${version}"
     const val checkApi = "com.google.errorprone:error_prone_check_api:${version}"
     const val testHelpers = "com.google.errorprone:error_prone_test_helpers:${version}"
-
     const val javacPlugin  = "com.google.errorprone:javac:${javacPluginVersion}"
     const val gradlePlugin = "net.ltgt.gradle:gradle-errorprone-plugin:${gradlePluginVersion}"
 }
 
+/**
+ * The FindBugs project is dead since 2017. It has a successor called SpotBugs, but we don't use it.
+ * We use ErrorProne for static analysis instead. The only reason for having this dependency is
+ * the annotations for null-checking introduced by JSR-305. These annotations are troublesome,
+ * but no alternatives are known for some of them so far.  Please see
+ * [this issue](https://github.com/SpineEventEngine/base/issues/108) for more details.
+ */
+object FindBugs {
+    private const val version = "3.0.2"
+    const val annotations = "com.google.code.findbugs:jsr305:${version}"
+}
+
+// https://firebase.google.com/docs/admin/setup#java
+object Firebase {
+    private const val adminVersion = "6.12.2"
+    const val admin = "com.google.firebase:firebase-admin:${adminVersion}"
+}
+
 // https://github.com/google/flogger
 object Flogger {
-    internal const val version = "0.5.1"
+    internal const val version = "0.6"
     const val lib     = "com.google.flogger:flogger:${version}"
+    @Suppress("unused")
     object Runtime {
         const val systemBackend = "com.google.flogger:flogger-system-backend:${version}"
         const val log4J         = "com.google.flogger:flogger-log4j:${version}"
@@ -250,15 +301,16 @@ object Flogger {
 
 // https://github.com/google/guava
 object Guava {
-    private const val version = "30.1-jre"
+    private const val version = "30.1.1-jre"
     const val lib     = "com.google.guava:guava:${version}"
     const val testLib = "com.google.guava:guava-testlib:${version}"
 }
 
 // https://github.com/grpc/grpc-java
+@Suppress("unused")
 object Grpc {
     @Suppress("MemberVisibilityCanBePrivate")
-    const val version     = "1.35.0"
+    const val version     = "1.35.1"
     const val core        = "io.grpc:grpc-core:${version}"
     const val stub        = "io.grpc:grpc-stub:${version}"
     const val okHttp      = "io.grpc:grpc-okhttp:${version}"
@@ -268,40 +320,135 @@ object Grpc {
     const val context     = "io.grpc:grpc-context:${version}"
 }
 
+/**
+ * Gson is a transitive dependency which we don't use directly.
+ * We `force` it in [DependencyResolution.forceConfiguration()].
+ *
+ * [Gson](https://github.com/google/gson)
+ */
+object Gson {
+    private const val version = "2.8.6"
+    const val lib = "com.google.code.gson:gson:${version}"
+}
+
+/**
+ * Google implementations of HTTP client.
+ */
+object HttpClient {
+    const val google = "com.google.http-client:google-http-client:1.39.1"
+    const val apache = "com.google.http-client:google-http-client-apache:2.1.2"
+}
+
+/**
+ * J2ObjC is a transitive dependency which we don't use directly.
+ * We `force` it in [DependencyResolution.forceConfiguration()].
+ *
+ * [J2ObjC](https://developers.google.com/j2objc)
+ */
+object J2ObjC {
+    private const val version = "1.3"
+    const val lib = "com.google.j2objc:j2objc-annotations:${version}"
+}
+
+// https://github.com/FasterXML/jackson-databind
+object Jackson {
+    private const val version = "2.9.10.5"
+    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
+}
+
+// https://github.com/square/javapoet
+object JavaPoet {
+    private const val version = "1.13.0"
+    const val lib = "com.squareup:javapoet:${version}"
+}
+
+// This artifact which used to be a part of J2EE moved under Eclipse EE4J project.
+// https://github.com/eclipse-ee4j/common-annotations-api
+object JavaX {
+    const val annotations = "javax.annotation:javax.annotation-api:1.3.2"
+}
+
 // https://junit.org/junit5/
 object JUnit {
-    private const val version            = "5.7.0"
+    private const val version            = "5.7.1"
+    private const val platformVersion    = "1.7.1"
     private const val legacyVersion      = "4.13.1"
-    private const val apiGuardianVersion = "1.1.0"
-    private const val pioneerVersion     = "1.0.0"
-    private const val platformVersion    = "1.7.0"
+
+    // https://github.com/apiguardian-team/apiguardian
+    private const val apiGuardianVersion = "1.1.1"
+    // https://github.com/junit-pioneer/junit-pioneer
+    private const val pioneerVersion     = "1.3.8"
 
     const val legacy = "junit:junit:${legacyVersion}"
     val api = listOf(
+        "org.apiguardian:apiguardian-api:${apiGuardianVersion}",
         "org.junit.jupiter:junit-jupiter-api:${version}",
-        "org.junit.jupiter:junit-jupiter-params:${version}",
-        "org.apiguardian:apiguardian-api:${apiGuardianVersion}"
+        "org.junit.jupiter:junit-jupiter-params:${version}"
     )
     const val runner  = "org.junit.jupiter:junit-jupiter-engine:${version}"
+    @Suppress("unused")
     const val pioneer = "org.junit-pioneer:junit-pioneer:${pioneerVersion}"
     const val platformCommons = "org.junit.platform:junit-platform-commons:${platformVersion}"
+    const val platformLauncher = "org.junit.platform:junit-platform-launcher:${platformVersion}"
+}
+
+/**
+ * A JSON parser in Kotlin
+ *
+ * [Klaxon](https://github.com/cbeust/klaxon)
+ */
+object Klaxon {
+    private const val version = "5.4"
+    const val lib = "com.beust:klaxon:${version}"
 }
 
 // https://github.com/JetBrains/kotlin
 // https://github.com/Kotlin
 object Kotlin {
     @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version      = "1.4.21"
+    const val version      = "1.5.0-M2"
     const val reflect      = "org.jetbrains.kotlin:kotlin-reflect:${version}"
     const val stdLib       = "org.jetbrains.kotlin:kotlin-stdlib:${version}"
     const val stdLibCommon = "org.jetbrains.kotlin:kotlin-stdlib-common:${version}"
     const val stdLibJdk8   = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version}"
 }
 
+// https://github.com/jk1/Gradle-License-Report
+object LicenseReport {
+    private const val version = "1.16"
+    const val gradlePlugin = "com.github.jk1:gradle-license-report:${version}"
+}
+
+/**
+ * A Java implementation of JSON Web Token (JWT) - RFC 7519.
+ *
+ * [Java JWT](https://github.com/auth0/java-jwt)
+ */
+object JavaJwt {
+    private const val version = "3.14.0"
+    const val lib = "com.auth0:java-jwt:${version}"
+}
+
+/**
+ * Okio is a transitive dependency which we don't use directly.
+ * We `force` it in [DependencyResolution.forceConfiguration].
+ */
+object Okio {
+    // This is the last version before next major.
+    private const val version = "1.17.5"
+    const val lib = "com.squareup.okio:okio:${version}"
+}
+
+// https://pmd.github.io/
+@Suppress("unused") // Will be used when `config/gradle/pmd.gradle` migrates to Kotlin.
+object Pmd {
+    const val version = "6.33.0"
+}
+
 // https://github.com/protocolbuffers/protobuf
+@Suppress("MemberVisibilityCanBePrivate") // used directly from outside
 object Protobuf {
-    @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version    = "3.13.0"
+    const val version    = "3.15.7"
     const val gradlePluginVersion = "0.8.13"
     val libs = listOf(
         "com.google.protobuf:protobuf-java:${version}",
@@ -311,11 +458,36 @@ object Protobuf {
     const val gradlePlugin = "com.google.protobuf:protobuf-gradle-plugin:${gradlePluginVersion}"
 }
 
+/**
+ * Plexus Utils is a transitive dependency which we don't use directly.
+ * We `force` it in [DependencyResolution.forceConfiguration].
+ *
+ * [Plexus Utils](https://codehaus-plexus.github.io/plexus-utils/)
+ */
+object Plexus {
+    private const val version = "3.3.0"
+    const val utils = "org.codehaus.plexus:plexus-utils:${version}"
+}
+
 // https://github.com/forge/roaster
 object Roaster {
-    private const val version = "2.21.2.Final"
-    const val api     = "org.jboss.forge.roaster:roaster-api:${version}"
-    const val jdt     = "org.jboss.forge.roaster:roaster-jdt:${version}"
+    private const val version = "2.22.2.Final"
+    const val api = "org.jboss.forge.roaster:roaster-api:${version}"
+    const val jdt = "org.jboss.forge.roaster:roaster-jdt:${version}"
+}
+
+/**
+ * Spine used to log with SLF4J. Now we use Flogger. Whenever a choice comes up, we recommend to
+ * use the latter.
+ *
+ * Some third-party libraries may clash with different versions of the library. Thus, we specify
+ * this version and force it via [forceConfiguration(..)][DependencyResolution.forceConfiguration].
+ */
+@Deprecated("Use Flogger over SLF4J.", replaceWith = ReplaceWith("flogger"))
+object Slf4J {
+    private const val version = "1.7.30"
+    const val lib = "org.slf4j:slf4j-api:${version}"
+    const val jdk14 = "org.slf4j:slf4j-jdk14:${version}"
 }
 
 // https://github.com/google/truth
@@ -336,25 +508,26 @@ object GradlePlugins {
     const val errorProne  = ErrorProne.gradlePlugin
     const val protobuf    = Protobuf.gradlePlugin
     const val appengine   = AppEngine.gradlePlugin
-    val licenseReport = "com.github.jk1:gradle-license-report:${Versions.licensePlugin}"
+    @Suppress("unused")
+    val licenseReport = LicenseReport.gradlePlugin
 }
 
+@Suppress("unused")
 object Build {
-    val animalSniffer = "org.codehaus.mojo:animal-sniffer-annotations:${Versions.animalSniffer}"
+    const val animalSniffer = AnimalSniffer.lib
     const val autoCommon = AutoCommon.lib
     val autoService = AutoService
     const val appEngine = AppEngine.sdk
     val checker = CheckerFramework
     val errorProne = ErrorProne
-    val firebaseAdmin = "com.google.firebase:firebase-admin:${Versions.firebaseAdmin}"
+    const val firebaseAdmin = Firebase.admin
     val flogger = Flogger
     val guava = Guava
-    val googleHttpClient = "com.google.http-client:google-http-client:${Versions.httpClient}"
-    val googleHttpClientApache =
-        "com.google.http-client:google-http-client-apache:${Versions.apacheHttpClient}"
+    const val googleHttpClient = HttpClient.google
+    const val googleHttpClientApache = HttpClient.apache
     val gradlePlugins = GradlePlugins
-    val jacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:${Versions.jackson}"
-    val jsr305Annotations = "com.google.code.findbugs:jsr305:${Versions.findBugs}"
+    const val jacksonDatabind = Jackson.databind
+    const val jsr305Annotations = FindBugs.annotations
     val kotlin = Kotlin
     val protobuf = Protobuf
     val roaster = Roaster
@@ -362,44 +535,51 @@ object Build {
     val ci = "true".equals(System.getenv("CI"))
 
     @Deprecated("Use Flogger over SLF4J.", replaceWith = ReplaceWith("flogger"))
-    @Suppress("DEPRECATION") // Version of SLF4J.
-    val slf4j = "org.slf4j:slf4j-api:${Versions.slf4j}"
+    @Suppress("DEPRECATION")
+    val slf4j = Slf4J.lib
 }
 
 object Gen {
-    val javaPoet        = "com.squareup:javapoet:${Versions.javaPoet}"
-    val javaxAnnotation = "javax.annotation:javax.annotation-api:${Versions.javaxAnnotation}"
+    const val javaPoet = JavaPoet.lib
+    @Suppress("unused")
+    const val javaxAnnotation = JavaX.annotations
 }
 
+@Suppress("unused")
 object Publishing {
-    val klaxon           = "com.beust:klaxon:${Versions.klaxon}"
-    val oauthJwt         = "com.auth0:java-jwt:${Versions.ouathJwt}"
-    val bouncyCastlePkcs = "org.bouncycastle:bcpkix-jdk15on:${Versions.bouncyCastlePkcs}"
-    val assertK          = "com.willowtreeapps.assertk:assertk-jvm:${Versions.assertK}"
+    const val klaxon = Klaxon.lib
+    const val oauthJwt = JavaJwt.lib
+    const val bouncyCastlePkcs = BouncyCastle.libPkcsJdk15
+    const val assertK = AssertK.libJvm
 }
 
 object Runtime {
+    @Suppress("unused")
     val flogger = Flogger.Runtime
 }
 
 object Test {
-    val junit4        = JUnit.legacy
-    val junit         = JUnit
-    val guavaTestlib  = Guava.testLib
-    val truth         = Truth
+    const val guavaTestlib = Guava.testLib
+    val truth = Truth
+
+    val junit = JUnit
+    const val junit4 = JUnit.legacy
 
     @Deprecated("Please do not use.")
-    val mockito       = "org.mockito:mockito-core:2.12.0"
+    const val mockito = "org.mockito:mockito-core:2.12.0"
 
     @Deprecated("Please use Google Truth instead")
-    val hamcrest = "org.hamcrest:hamcrest-all:1.3"
+    const val hamcrest = "org.hamcrest:hamcrest-all:1.3"
 
-    @Deprecated("Use Flogger over SLF4J.",
-        replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend"))
-    @Suppress("DEPRECATION") // Version of SLF4J.
-    val slf4j         = "org.slf4j:slf4j-jdk14:${Versions.slf4j}"
+    @Deprecated(
+        "Use Flogger over SLF4J.",
+        replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend")
+    )
+    @Suppress("DEPRECATION")
+    const val slf4j = Slf4J.jdk14
 }
 
+@Suppress("unused")
 object Scripts {
     private const val commonPath = "/config/gradle/"
 
@@ -438,8 +618,8 @@ object Deps {
     val gen = Gen
     val runtime = Runtime
     val test = Test
-    val versions = Versions
     val scripts = Scripts
+    @Suppress("unused")
     val publishing = Publishing
 }
 
@@ -476,28 +656,28 @@ object DependencyResolution {
                         guavaTestlib,
                         junit.api,
                         junit.platformCommons,
+                        junit.platformLauncher,
                         junit4,
                         truth.libs
                     )
                 }
 
+                // Force transitive dependencies of 3rd party components that we don't use directly.
                 force(
-                    // Transitive dependencies of 3rd party components that we don't use directly.
                     AutoValue.annotations,
-                    "com.google.code.gson:gson:2.8.6",
-                    "com.google.j2objc:j2objc-annotations:1.3",
-                    "org.codehaus.plexus:plexus-utils:3.3.0",
-                    "com.squareup.okio:okio:1.17.5", // Last version before next major.
-                    "commons-cli:commons-cli:1.4",
-
-                    // Force discontinued transitive dependency until everybody migrates off it.
-                    "org.checkerframework:checker-compat-qual:2.5.5",
-                    "commons-logging:commons-logging:1.2"
+                    Gson.lib,
+                    J2ObjC.lib,
+                    Plexus.utils,
+                    Okio.lib,
+                    CommonsCli.lib,
+                    CheckerFramework.compatQual,
+                    CommonsLogging.lib
                 )
             }
         }
     }
 
+    @Suppress("unused")
     fun excludeProtobufLite(configurations: ConfigurationContainer) {
         excludeProtoLite(configurations, "runtime")
         excludeProtoLite(configurations, "testRuntime")
@@ -512,6 +692,7 @@ object DependencyResolution {
             .exclude(mapOf("group" to "com.google.protobuf", "module" to "protobuf-lite"))
     }
 
+    @Suppress("unused")
     fun defaultRepositories(repositories: RepositoryHandler) {
         repositories.mavenLocal()
         repositories.maven {
