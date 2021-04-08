@@ -568,7 +568,7 @@ object Test {
     @Deprecated("Please do not use.")
     const val mockito = "org.mockito:mockito-core:2.12.0"
 
-    @Deprecated("Please use Google Truth instead")
+    @Deprecated("Please use Google Truth instead.")
     const val hamcrest = "org.hamcrest:hamcrest-all:1.3"
 
     @Deprecated(
