@@ -134,19 +134,21 @@ subprojects {
         setProperty("generateValidation", true)
     }
 
-    val isTravis = System.getenv("TRAVIS") == "true"
-    if (isTravis) {
-        tasks.javadoc {
-            val opt = options
-            if (opt is CoreJavadocOptions) {
-                opt.addStringOption("Xmaxwarns", "1")
-            }
-        }
-    }
-
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlin {
+        explicitApi()
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
+            useIR = true
+            freeCompilerArgs = listOf("-Xskip-prerelease-check")
+        }
     }
 
     DependencyResolution.defaultRepositories(repositories)
@@ -209,14 +211,6 @@ subprojects {
         }
     }
 
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
-            useIR = true
-            freeCompilerArgs = listOf("-Xskip-prerelease-check")
-        }
-    }
-
     val generateRejections by tasks.getting
     tasks.compileKotlin {
         dependsOn(generateRejections)
@@ -230,6 +224,16 @@ subprojects {
     tasks.test {
         useJUnitPlatform {
             includeEngines("junit-jupiter")
+        }
+    }
+
+    val isTravis = System.getenv("TRAVIS") == "true"
+    if (isTravis) {
+        tasks.javadoc {
+            val opt = options
+            if (opt is CoreJavadocOptions) {
+                opt.addStringOption("Xmaxwarns", "1")
+            }
         }
     }
 
@@ -309,7 +313,6 @@ apply {
         // Aggregated coverage report across all subprojects.
         from(jacoco(project))
 
-        //TODO:2021-04-11:alexander.yevsyukov: Uncomment when the rest is clear.
         // Generate a repository-wide report of 3rd-party dependencies and their licenses.
         from(repoLicenseReport(project))
 
