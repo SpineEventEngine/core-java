@@ -26,10 +26,8 @@
 
 package io.spine.gradle.internal
 
-import java.io.File
+import io.spine.gradle.internal.license.LicenseReportDependency
 import java.net.URI
-import java.util.*
-import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 
@@ -39,111 +37,6 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
  * Inspired by dependency management of the Uber's NullAway project:
  *  https://github.com/uber/NullAway/blob/master/gradle/dependencies.gradle
  */
-
-/**
- * A Maven repository.
- */
-data class Repository(
-    val releases: String,
-    val snapshots: String,
-    private val credentialsFile: String? = null,
-    private val credentials: Credentials? = null,
-    val name: String = "Maven repository `$releases`"
-) {
-
-    /**
-     * Obtains the publishing password credentials to this repository.
-     *
-     * If the credentials are represented by a `.properties` file, reads the file and parses
-     * the credentials. The file must have properties `user.name` and `user.password`, which store
-     * the username and the password for the Maven repository auth.
-     */
-    fun credentials(project: Project): Credentials? {
-        if (credentials != null) {
-            return credentials
-        }
-        credentialsFile!!
-        val log = project.logger
-        log.info("Using credentials from `$credentialsFile`.")
-        val file = project.rootProject.file(credentialsFile)
-        if (!file.exists()) {
-            return null
-        }
-        val creds = file.readCredentials()
-        log.info("Publishing build as `${creds.username}`.")
-        return creds
-    }
-
-    private fun File.readCredentials(): Credentials {
-        val properties = Properties()
-        properties.load(inputStream())
-        val username = properties.getProperty("user.name")
-        val password = properties.getProperty("user.password")
-        return Credentials(username, password)
-    }
-
-    override fun toString(): String {
-        return name
-    }
-}
-
-/**
- * Password credentials for a Maven repository.
- */
-data class Credentials(
-    val username: String?,
-    val password: String?
-)
-
-/**
- * Repositories to which we may publish. Normally, only one repository will be used.
- *
- * See `publish.gradle` for details of the publishing process.
- */
-object PublishingRepos {
-
-    @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
-    val mavenTeamDev = Repository(
-        name = "maven.teamdev.com",
-        releases = "http://maven.teamdev.com/repository/spine",
-        snapshots = "http://maven.teamdev.com/repository/spine-snapshots",
-        credentialsFile = "credentials.properties"
-    )
-    val cloudRepo = Repository(
-        name = "CloudRepo",
-        releases = "https://spine.mycloudrepo.io/public/repositories/releases",
-        snapshots = "https://spine.mycloudrepo.io/public/repositories/snapshots",
-        credentialsFile = "cloudrepo.properties"
-    )
-
-    fun gitHub(repoName: String): Repository {
-        return Repository(
-            name = "GitHub Packages",
-            releases = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
-            snapshots = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
-            credentials = Credentials(
-                username = System.getenv("GITHUB_ACTOR"),
-                // This is a trick. Gradle only supports password or AWS credentials. Thus,
-                // we pass the GitHub token as a "password".
-                // https://docs.github.com/en/actions/guides/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
-                password = System.getenv("GITHUB_TOKEN")
-            )
-        )
-    }
-}
-
-// Specific repositories.
-@Suppress("unused")
-object Repos {
-    val oldSpine: String = PublishingRepos.mavenTeamDev.releases
-    val oldSpineSnapshots: String = PublishingRepos.mavenTeamDev.snapshots
-
-    val spine: String = PublishingRepos.cloudRepo.releases
-    val spineSnapshots: String = PublishingRepos.cloudRepo.snapshots
-
-    const val sonatypeSnapshots: String = "https://oss.sonatype.org/content/repositories/snapshots"
-    const val gradlePlugins = "https://plugins.gradle.org/m2/"
-}
 
 /**
  * Versions of one-line dependencies.
@@ -413,12 +306,6 @@ object Kotlin {
     const val stdLibJdk8   = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version}"
 }
 
-// https://github.com/jk1/Gradle-License-Report
-object LicenseReport {
-    private const val version = "1.16"
-    const val gradlePlugin = "com.github.jk1:gradle-license-report:${version}"
-}
-
 /**
  * A Java implementation of JSON Web Token (JWT) - RFC 7519.
  *
@@ -509,7 +396,7 @@ object GradlePlugins {
     const val protobuf    = Protobuf.gradlePlugin
     const val appengine   = AppEngine.gradlePlugin
     @Suppress("unused")
-    val licenseReport = LicenseReport.gradlePlugin
+    val licenseReport = LicenseReportDependency.gradlePlugin
 }
 
 @Suppress("unused")
@@ -579,48 +466,12 @@ object Test {
     const val slf4j = Slf4J.jdk14
 }
 
-@Suppress("unused")
-object Scripts {
-    private const val commonPath = "/config/gradle/"
-
-    fun testArtifacts(p: Project)          = p.script("test-artifacts.gradle")
-    fun testOutput(p: Project)             = p.script("test-output.gradle")
-    fun slowTests(p: Project)              = p.script("slow-tests.gradle")
-    fun javadocOptions(p: Project)         = p.script("javadoc-options.gradle")
-    fun filterInternalJavadocs(p: Project) = p.script("filter-internal-javadoc.gradle")
-    fun jacoco(p: Project)                 = p.script("jacoco.gradle")
-    fun publish(p: Project)                = p.script("publish.gradle")
-    fun publishProto(p: Project)           = p.script("publish-proto.gradle")
-    fun javacArgs(p: Project)              = p.script("javac-args.gradle")
-    fun jsBuildTasks(p: Project)           = p.script("js/build-tasks.gradle")
-    fun jsConfigureProto(p: Project)       = p.script("js/configure-proto.gradle")
-    fun npmPublishTasks(p: Project)        = p.script("js/npm-publish-tasks.gradle")
-    fun npmCli(p: Project)                 = p.script("js/npm-cli.gradle")
-    fun updatePackageVersion(p: Project)   = p.script("js/update-package-version.gradle")
-    fun dartBuildTasks(p: Project)         = p.script("dart/build-tasks.gradle")
-    fun pubPublishTasks(p: Project)        = p.script("dart/pub-publish-tasks.gradle")
-    fun pmd(p: Project)                    = p.script("pmd.gradle")
-    fun checkstyle(p: Project)             = p.script("checkstyle.gradle")
-    fun runBuild(p: Project)               = p.script("run-build.gradle")
-    fun modelCompiler(p: Project)          = p.script("model-compiler.gradle")
-    fun licenseReportCommon(p: Project)    = p.script("license-report-common.gradle")
-    fun projectLicenseReport(p: Project)   = p.script("license-report-project.gradle")
-    fun repoLicenseReport(p: Project)      = p.script("license-report-repo.gradle")
-    fun generatePom(p: Project)            = p.script("generate-pom.gradle")
-    fun updateGitHubPages(p: Project)      = p.script("update-gh-pages.gradle")
-
-    private fun Project.script(name: String) = "${rootDir}${commonPath}${name}"
-}
-
 object Deps {
     val build = Build
     val grpc = Grpc
     val gen = Gen
     val runtime = Runtime
     val test = Test
-    val scripts = Scripts
-    @Suppress("unused")
-    val publishing = Publishing
 }
 
 object DependencyResolution {
