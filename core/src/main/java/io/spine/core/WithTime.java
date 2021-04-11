@@ -27,15 +27,13 @@
 package io.spine.core;
 
 import com.google.protobuf.Timestamp;
-import io.spine.time.InstantConverter;
-import io.spine.time.TimestampTemporal;
+import io.spine.time.TimestampExtensions;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Objects.requireNonNull;
 
 /**
  * An object with associated point in time.
@@ -50,21 +48,17 @@ public interface WithTime {
     /**
      * Verifies if associated time is after the passed point in time.
      */
-    default boolean isAfter(Timestamp bound) {
-        checkNotNull(bound);
-        TimestampTemporal timeTemporal = TimestampTemporal.from(timestamp());
-        TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
-        return timeTemporal.isAfter(boundTemporal);
+    default boolean isAfter(Timestamp other) {
+        checkNotNull(other);
+        return TimestampExtensions.isAfter(timestamp(), other);
     }
 
     /**
      * Verifies if the associated time is before the passed point in time.
      */
-    default boolean isBefore(Timestamp bound) {
-        checkNotNull(bound);
-        TimestampTemporal timeTemporal = TimestampTemporal.from(timestamp());
-        TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
-        return timeTemporal.isBefore(boundTemporal);
+    default boolean isBefore(Timestamp other) {
+        checkNotNull(other);
+        return TimestampExtensions.isBefore(timestamp(), other);
     }
 
     /**
@@ -79,10 +73,7 @@ public interface WithTime {
     default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
         checkNotNull(periodStart);
         checkNotNull(periodEnd);
-        TimestampTemporal thisTime = TimestampTemporal.from(timestamp());
-        TimestampTemporal start = TimestampTemporal.from(periodStart);
-        TimestampTemporal end = TimestampTemporal.from(periodEnd);
-        return thisTime.isBetween(start, end);
+        return TimestampExtensions.isBetween(timestamp(), periodStart, periodEnd);
     }
 
     /**
@@ -91,10 +82,7 @@ public interface WithTime {
      * @see #timestamp()
      */
     default Instant instant() {
-        Timestamp timestamp = timestamp();
-        Instant result = InstantConverter.reversed()
-                                         .convert(timestamp);
-        return requireNonNull(result);
+        return TimestampExtensions.toInstant(timestamp());
     }
 
     /**
