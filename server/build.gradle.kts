@@ -44,8 +44,8 @@ dependencies {
 }
 
 apply {
-    from(Deps.scripts.testArtifacts(project))
-    from(Deps.scripts.publishProto(project))
+    from(io.spine.gradle.internal.Scripts.testArtifacts(project))
+    from(io.spine.gradle.internal.Scripts.publishProto(project))
 }
 
 // Copies the documentation files to the Javadoc output folder.

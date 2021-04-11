@@ -38,4 +38,4 @@ dependencies {
     implementation(Deps.grpc.protobuf)
 }
 
-apply(from = Deps.scripts.testArtifacts(project))
+apply(from = io.spine.gradle.internal.Scripts.testArtifacts(project))

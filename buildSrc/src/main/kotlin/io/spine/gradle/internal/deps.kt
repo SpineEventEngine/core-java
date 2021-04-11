@@ -26,7 +26,6 @@
 
 package io.spine.gradle.internal
 
-import io.spine.gradle.internal.license.LicenseReportDependency
 import java.net.URI
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -395,8 +394,6 @@ object GradlePlugins {
     const val errorProne  = ErrorProne.gradlePlugin
     const val protobuf    = Protobuf.gradlePlugin
     const val appengine   = AppEngine.gradlePlugin
-    @Suppress("unused")
-    val licenseReport = LicenseReportDependency.gradlePlugin
 }
 
 @Suppress("unused")
@@ -460,7 +457,7 @@ object Test {
 
     @Deprecated(
         "Use Flogger over SLF4J.",
-        replaceWith = ReplaceWith("Deps.runtime.floggerSystemBackend")
+        replaceWith = ReplaceWith("Flogger.Runtime.systemBackend")
     )
     @Suppress("DEPRECATION")
     const val slf4j = Slf4J.jdk14

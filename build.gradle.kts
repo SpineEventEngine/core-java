@@ -35,10 +35,9 @@ buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    with(io.spine.gradle.internal.DependencyResolution) {
-        defaultRepositories(repositories)
-        forceConfiguration(configurations)
-    }
+    val resolution = io.spine.gradle.internal.DependencyResolution
+    resolution.defaultRepositories(repositories)
+    resolution.forceConfiguration(configurations)
 
     val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
@@ -60,9 +59,13 @@ buildscript {
     }
 }
 
+apply(from = "$rootDir/version.gradle.kts")
+
 plugins {
+    val kotlinVersion: String by extra
+
     `java-library`
-    kotlin("jvm") version io.spine.gradle.internal.Kotlin.version
+    kotlin("jvm") version kotlinVersion
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     io.spine.gradle.internal.Deps.build.apply {
@@ -71,7 +74,6 @@ plugins {
     }
 }
 
-apply(from = "$rootDir/version.gradle.kts")
 val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
@@ -124,8 +126,7 @@ subprojects {
         with(Scripts) {
             from(javacArgs(project))
             from(modelCompiler(project))
-            //TODO:2021-04-11:alexander.yevsyukov: Uncomment
-            // from(projectLicenseReport(project))
+            from(projectLicenseReport(project))
         }
     }
 
@@ -212,6 +213,7 @@ subprojects {
         kotlinOptions {
             jvmTarget = JavaVersion.VERSION_1_8.toString()
             useIR = true
+            freeCompilerArgs = listOf("-Xskip-prerelease-check")
         }
     }
 
@@ -306,8 +308,11 @@ apply {
     with(Scripts) {
         // Aggregated coverage report across all subprojects.
         from(jacoco(project))
+
+        //TODO:2021-04-11:alexander.yevsyukov: Uncomment when the rest is clear.
         // Generate a repository-wide report of 3rd-party dependencies and their licenses.
         from(repoLicenseReport(project))
+
         // Generate a `pom.xml` file containing first-level dependency of all projects
         // in the repository.
         from(generatePom(project))

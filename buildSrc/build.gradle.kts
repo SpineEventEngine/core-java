@@ -26,13 +26,11 @@
 
 buildscript {
     repositories {
-        maven(url = "https://plugins.gradle.org/m2/")
-        mavenCentral()
+        maven("https://plugins.gradle.org/m2/")
     }
 
     dependencies {
-        //noinspection UnnecessaryQualifiedReference
-        classpath("com.github.jk1.gradle-license-report:1.16")
+        classpath("com.github.jk1:gradle-license-report:1.16")
     }
 }
 

@@ -35,4 +35,4 @@ dependencies {
     testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
 }
 
-apply(from = Deps.scripts.testArtifacts(project))
+apply(from = io.spine.gradle.internal.Scripts.testArtifacts(project))

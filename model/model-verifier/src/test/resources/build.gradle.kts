@@ -25,7 +25,6 @@
  */
 
 import io.spine.gradle.internal.DependencyResolution
-import io.spine.gradle.internal.Deps
 import org.gradle.api.file.SourceDirectorySet
 
 buildscript {
@@ -51,15 +50,10 @@ buildscript {
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
 
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val dependencyResolution = io.spine.gradle.internal.DependencyResolution
-    dependencyResolution.defaultRepositories(repositories)
-
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val deps = io.spine.gradle.internal.Deps
+    io.spine.gradle.internal.DependencyResolution.defaultRepositories(repositories)
 
     dependencies {
-        classpath(deps.build.gradlePlugins.protobuf)
+        classpath(io.spine.gradle.internal.GradlePlugins.protobuf)
         classpath("io.spine.tools:spine-model-compiler:${spineBaseVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
     }
