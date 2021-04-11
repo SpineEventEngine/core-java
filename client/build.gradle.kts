@@ -25,6 +25,7 @@
  */
 
 import io.spine.gradle.internal.Deps
+import io.spine.gradle.internal.Scripts
 
 val spineBaseVersion: String by extra
 
@@ -41,6 +42,6 @@ dependencies {
 }
 
 apply {
-    from(Deps.scripts.testArtifacts(project))
-    from(Deps.scripts.publishProto(project))
+    from(Scripts.testArtifacts(project))
+    from(Scripts.publishProto(project))
 }

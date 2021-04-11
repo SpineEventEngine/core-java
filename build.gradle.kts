@@ -27,6 +27,7 @@
 import io.spine.gradle.internal.DependencyResolution
 import io.spine.gradle.internal.Deps
 import io.spine.gradle.internal.PublishingRepos
+import io.spine.gradle.internal.Scripts
 import io.spine.gradle.internal.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -103,7 +104,6 @@ allprojects {
     // The `ext.deps` project property is used by `.gradle` scripts under `config/gradle`.
     apply {
         from("$rootDir/version.gradle.kts")
-        from("$rootDir/config/gradle/dependencies.gradle")
     }
 
     group = "io.spine"
@@ -121,10 +121,11 @@ subprojects {
         plugin("pmd")
         plugin("maven-publish")
 
-        with(Deps.scripts) {
+        with(Scripts) {
             from(javacArgs(project))
             from(modelCompiler(project))
-            from(projectLicenseReport(project))
+            //TODO:2021-04-11:alexander.yevsyukov: Uncomment
+            // from(projectLicenseReport(project))
         }
     }
 
@@ -231,7 +232,7 @@ subprojects {
     }
 
     apply {
-        with(Deps.scripts) {
+        with(Scripts) {
             from(slowTests(project))
             from(testOutput(project))
             from(javadocOptions(project))
@@ -292,17 +293,17 @@ subprojects {
     // This plugin *must* be applied here, not in the module `build.gradle` files.
     //
     if (shouldPublishJavadoc()) {
-        apply(from = Deps.scripts.updateGitHubPages(project))
+        apply(from = Scripts.updateGitHubPages(project))
         afterEvaluate {
             tasks.getByName("publish").dependsOn("updateGitHubPages")
         }
     }
 
-    apply(from = Deps.scripts.pmd(project))
+    apply(from = Scripts.pmd(project))
 }
 
 apply {
-    with(Deps.scripts) {
+    with(Scripts) {
         // Aggregated coverage report across all subprojects.
         from(jacoco(project))
         // Generate a repository-wide report of 3rd-party dependencies and their licenses.
