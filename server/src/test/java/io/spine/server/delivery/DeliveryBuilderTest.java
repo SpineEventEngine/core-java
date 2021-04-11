@@ -27,7 +27,6 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Duration;
-import io.spine.protobuf.Durations2;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
@@ -35,8 +34,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.protobuf.util.Durations.fromMinutes;
 import static io.spine.testing.TestValues.nullRef;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`DeliveryBuilder` should")
@@ -159,7 +158,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("deduplication window")
         void deduplicationWindow() {
-            Duration duration = Durations2.fromMinutes(123);
+            Duration duration = fromMinutes(123);
             assertEquals(duration, builder().setDeduplicationWindow(duration)
                                             .deduplicationWindow()
                                             .get());

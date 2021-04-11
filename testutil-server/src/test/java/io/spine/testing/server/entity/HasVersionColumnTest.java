@@ -38,8 +38,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("HasVersionColumn should")
-public class HasVersionColumnTest {
+@DisplayName("`HasVersionColumn` should")
+class HasVersionColumnTest {
 
     @ParameterizedTest(name = "\"{0}\"")
     @MethodSource("entityClasses")
@@ -48,6 +48,7 @@ public class HasVersionColumnTest {
         assertThat(cls).isAssignableTo(HasVersionColumn.class);
     }
 
+    @SuppressWarnings("unused") // by `@MethodSource`
     private static Stream<Arguments> entityClasses() {
         return Stream.of(Arguments.of(Projection.class), Arguments.of(ProcessManager.class));
     }

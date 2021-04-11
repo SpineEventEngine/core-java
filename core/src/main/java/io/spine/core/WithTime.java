@@ -29,13 +29,13 @@ package io.spine.core;
 import com.google.protobuf.Timestamp;
 import io.spine.time.InstantConverter;
 import io.spine.time.TimestampTemporal;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * An object with associated point in time.
@@ -54,7 +54,7 @@ public interface WithTime {
         checkNotNull(bound);
         TimestampTemporal timeTemporal = TimestampTemporal.from(timestamp());
         TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
-        return timeTemporal.isLaterThan(boundTemporal);
+        return timeTemporal.isAfter(boundTemporal);
     }
 
     /**
@@ -64,7 +64,7 @@ public interface WithTime {
         checkNotNull(bound);
         TimestampTemporal timeTemporal = TimestampTemporal.from(timestamp());
         TimestampTemporal boundTemporal = TimestampTemporal.from(bound);
-        return timeTemporal.isEarlierThan(boundTemporal);
+        return timeTemporal.isBefore(boundTemporal);
     }
 
     /**
@@ -79,10 +79,10 @@ public interface WithTime {
     default boolean isBetween(Timestamp periodStart, Timestamp periodEnd) {
         checkNotNull(periodStart);
         checkNotNull(periodEnd);
-        TimestampTemporal timeTemporal = TimestampTemporal.from(timestamp());
+        TimestampTemporal thisTime = TimestampTemporal.from(timestamp());
         TimestampTemporal start = TimestampTemporal.from(periodStart);
         TimestampTemporal end = TimestampTemporal.from(periodEnd);
-        return timeTemporal.isBetween(start, end);
+        return thisTime.isBetween(start, end);
     }
 
     /**
@@ -92,10 +92,9 @@ public interface WithTime {
      */
     default Instant instant() {
         Timestamp timestamp = timestamp();
-        @SuppressWarnings("ConstantConditions") // `InstantConverter` guarantees non-null output.
-        @NonNull Instant result = InstantConverter.reversed()
-                                                  .convert(timestamp);
-        return result;
+        Instant result = InstantConverter.reversed()
+                                         .convert(timestamp);
+        return requireNonNull(result);
     }
 
     /**
