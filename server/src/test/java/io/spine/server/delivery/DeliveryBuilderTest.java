@@ -30,13 +30,16 @@ import com.google.protobuf.Duration;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.protobuf.util.Durations.fromMinutes;
+import static io.spine.testing.Assertions.assertIllegalArgument;
+import static io.spine.testing.Assertions.assertNpe;
 import static io.spine.testing.TestValues.nullRef;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`DeliveryBuilder` should")
 class DeliveryBuilderTest {
@@ -52,143 +55,127 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("delivery strategy")
         void strategy() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setStrategy(nullRef()));
+            assertNpe(() -> builder().setStrategy(nullRef()));
         }
 
         @Test
         @DisplayName("Inbox storage")
         void inboxStorage() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setInboxStorage(nullRef()));
+            assertNpe(() -> builder().setInboxStorage(nullRef()));
         }
 
         @Test
         @DisplayName("Catch-up storage")
         void catchUpStorage() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setCatchUpStorage(nullRef()));
+            assertNpe(() -> builder().setCatchUpStorage(nullRef()));
         }
 
         @Test
         @DisplayName("work registry")
         void workRegistry() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setWorkRegistry(nullRef()));
+            assertNpe(() -> builder().setWorkRegistry(nullRef()));
         }
 
         @Test
         @DisplayName("deduplication window")
         void deduplicationWindow() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setDeduplicationWindow(nullRef()));
+            assertNpe(() -> builder().setDeduplicationWindow(nullRef()));
         }
 
         @Test
         @DisplayName("delivery monitor")
         void deliveryMonitor() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setMonitor(nullRef()));
+            assertNpe(() -> builder().setMonitor(nullRef()));
         }
     }
 
     @Test
     @DisplayName("accept only positive page size")
     void acceptOnlyPositivePageSize() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> builder().setPageSize(0));
-        assertThrows(IllegalArgumentException.class,
-                     () -> builder().setPageSize(-3));
+        assertIllegalArgument(() -> builder().setPageSize(0));
+        assertIllegalArgument(() -> builder().setPageSize(-3));
     }
 
     @Test
     @DisplayName("accept only positive catch-up page size")
     void acceptOnlyPositiveCatchUpPageSize() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> builder().setCatchUpPageSize(0));
-        assertThrows(IllegalArgumentException.class,
-                     () -> builder().setCatchUpPageSize(-3));
+        assertIllegalArgument(() -> builder().setCatchUpPageSize(0));
+        assertIllegalArgument(() -> builder().setCatchUpPageSize(-3));
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")    // testing `Builder` getters.
     @Nested
     @DisplayName("return set")
     class ReturnSet {
 
+        private StorageFactory factory;
+        @BeforeEach
+        void createStorageFactory() {
+            factory = ServerEnvironment.instance().storageFactory();            
+        }
+        
         @Test
         @DisplayName("delivery strategy")
         void strategy() {
             DeliveryStrategy strategy = UniformAcrossAllShards.forNumber(42);
-            assertEquals(strategy, builder().setStrategy(strategy)
-                                            .strategy()
-                                            .get());
+            assertThat(builder().setStrategy(strategy).strategy())
+                  .hasValue(strategy);
         }
 
         @Test
         @DisplayName("Inbox storage")
         void inboxStorage() {
-            StorageFactory factory = ServerEnvironment.instance()
-                                                      .storageFactory();
             InboxStorage storage = new InboxStorage(factory, false);
-            assertEquals(storage, builder().setInboxStorage(storage)
-                                           .inboxStorage()
-                                           .get());
+            assertThat(builder().setInboxStorage(storage).inboxStorage())
+                  .hasValue(storage);
         }
 
         @Test
         @DisplayName("Catch-up storage")
         void catchUpStorage() {
-            StorageFactory factory = ServerEnvironment.instance()
-                                                      .storageFactory();
             CatchUpStorage storage = new CatchUpStorage(factory, false);
-            assertEquals(storage, builder().setCatchUpStorage(storage)
-                                           .catchUpStorage()
-                                           .get());
+            assertThat(builder().setCatchUpStorage(storage).catchUpStorage())
+                  .hasValue(storage);
         }
 
         @Test
         @DisplayName("work registry")
         void workRegistry() {
             InMemoryShardedWorkRegistry registry = new InMemoryShardedWorkRegistry();
-            assertEquals(registry, builder().setWorkRegistry(registry)
-                                            .workRegistry()
-                                            .get());
+            assertThat(builder().setWorkRegistry(registry)
+                                       .workRegistry())
+                  .hasValue(registry);
         }
 
         @Test
         @DisplayName("deduplication window")
         void deduplicationWindow() {
             Duration duration = fromMinutes(123);
-            assertEquals(duration, builder().setDeduplicationWindow(duration)
-                                            .deduplicationWindow()
-                                            .get());
+            assertThat(builder().setDeduplicationWindow(duration).deduplicationWindow())
+                    .hasValue(duration);
         }
 
         @Test
         @DisplayName("delivery monitor")
         void deliveryMonitor() {
             DeliveryMonitor monitor = DeliveryMonitor.alwaysContinue();
-            assertEquals(monitor, builder().setMonitor(monitor)
-                                           .deliveryMonitor()
-                                           .get());
+            assertThat(builder().setMonitor(monitor).deliveryMonitor())
+                    .hasValue(monitor);
         }
 
         @Test
         @DisplayName("page size")
         void pageSize() {
             int pageSize = 42;
-            assertEquals(pageSize, builder().setPageSize(pageSize)
-                                            .pageSize()
-                                            .get());
+            assertThat(builder().setPageSize(pageSize).pageSize())
+                    .hasValue(pageSize);
         }
 
         @Test
         @DisplayName("catch-up page size")
         void catchUpPageSize() {
             int catchUpPageSize = 499;
-            assertEquals(catchUpPageSize, builder().setCatchUpPageSize(catchUpPageSize)
-                                                   .catchUpPageSize()
-                                                   .get());
+            assertThat(builder().setCatchUpPageSize(catchUpPageSize).catchUpPageSize())
+                    .hasValue(catchUpPageSize);
         }
     }
 
@@ -199,43 +186,43 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("delivery strategy")
         void strategy() {
-            assertThrows(NullPointerException.class, () -> builder().getStrategy());
+            assertNpe(() -> builder().getStrategy());
         }
 
         @Test
         @DisplayName("Inbox storage")
         void inboxStorage() {
-            assertThrows(NullPointerException.class, () -> builder().getInboxStorage());
+            assertNpe(() -> builder().getInboxStorage());
         }
 
         @Test
         @DisplayName("Catch-up storage")
         void catchUpStorage() {
-            assertThrows(NullPointerException.class, () -> builder().getCatchUpStorage());
+            assertNpe(() -> builder().getCatchUpStorage());
         }
 
         @Test
         @DisplayName("work registry")
         void workRegistry() {
-            assertThrows(NullPointerException.class, () -> builder().getWorkRegistry());
+            assertNpe(() -> builder().getWorkRegistry());
         }
 
         @Test
         @DisplayName("deduplication window")
         void deduplicationWindow() {
-            assertThrows(NullPointerException.class, () -> builder().getDeduplicationWindow());
+            assertNpe(() -> builder().getDeduplicationWindow());
         }
 
         @Test
         @DisplayName("delivery monitor")
         void deliveryMonitor() {
-            assertThrows(NullPointerException.class, () -> builder().getMonitor());
+            assertNpe(() -> builder().getMonitor());
         }
 
         @Test
         @DisplayName("page size")
         void pageSize() {
-            assertThrows(NullPointerException.class, () -> builder().getPageSize());
+            assertNpe(() -> builder().getPageSize());
         }
     }
 }
