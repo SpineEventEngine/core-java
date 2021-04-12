@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:JvmName("ServerEnvironmentExtensions")
+
 package io.spine.server
 
 import io.spine.environment.EnvironmentType
@@ -45,7 +47,7 @@ import io.spine.environment.EnvironmentType
  * @apiNote This function allows to avoid calling [ServerEnvironment.when] from Kotlin, which
  * requires backticking `when` because it is a reserved word.
  */
-inline fun <reified E : EnvironmentType>
+public inline fun <reified E : EnvironmentType>
         under(block: ServerEnvironment.TypeConfigurator.() -> Unit) {
     val configurator = ServerEnvironment.`when`(E::class.java)
     configurator.block()
