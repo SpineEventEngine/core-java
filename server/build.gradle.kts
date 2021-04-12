@@ -24,18 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.gradle.internal.AutoService
 import io.spine.gradle.internal.Deps
+import io.spine.gradle.internal.Grpc
+import io.spine.gradle.internal.Scripts
 
 val spineBaseVersion: String by extra
 
 dependencies {
     api(project(":client"))
 
-    implementation(Deps.grpc.protobuf)
-    implementation(Deps.grpc.core)
+    Grpc.apply {
+        implementation(protobuf)
+        implementation(core)
+    }
 
-    testAnnotationProcessor(Deps.build.autoService.processor)
-    testCompileOnly(Deps.build.autoService.annotations)
+    AutoService.apply {
+        testAnnotationProcessor(processor)
+        testCompileOnly(annotations)
+    }
     testImplementation(Deps.grpc.nettyShaded)
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
@@ -44,8 +51,10 @@ dependencies {
 }
 
 apply {
-    from(io.spine.gradle.internal.Scripts.testArtifacts(project))
-    from(io.spine.gradle.internal.Scripts.publishProto(project))
+    with(Scripts) {
+        from(testArtifacts(project))
+        from(publishProto(project))
+    }
 }
 
 // Copies the documentation files to the Javadoc output folder.
