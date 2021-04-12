@@ -26,7 +26,7 @@
 
 buildscript {
     repositories {
-        maven("https://plugins.gradle.org/m2/")
+        gradlePluginPortal()
     }
 
     dependencies {
@@ -46,7 +46,7 @@ kotlinDslPluginOptions {
 
 repositories {
     mavenLocal()
-    maven("https://plugins.gradle.org/m2/")
+    gradlePluginPortal()
     mavenCentral()
 }
 

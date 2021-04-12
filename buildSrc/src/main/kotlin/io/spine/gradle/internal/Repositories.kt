@@ -27,8 +27,10 @@
 package io.spine.gradle.internal
 
 import java.io.File
+import java.net.URI
 import java.util.*
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 
 /**
  * A Maven repository.
@@ -122,7 +124,11 @@ object PublishingRepos {
     }
 }
 
-// Specific repositories.
+/**
+ * Defines names of the commonly used repositories.
+ *
+ * @see [applyStandard]
+ */
 @Suppress("unused")
 object Repos {
     val oldSpine: String = PublishingRepos.mavenTeamDev.releases
@@ -132,6 +138,35 @@ object Repos {
     val spineSnapshots: String = PublishingRepos.cloudRepo.snapshots
 
     const val sonatypeSnapshots: String = "https://oss.sonatype.org/content/repositories/snapshots"
+
+    @Deprecated("Please use `gradlePluginPortal()` call instead of the hard-coded URL.")
     const val gradlePlugins = "https://plugins.gradle.org/m2/"
 }
 
+/**
+ * Applies repositories commonly used by Spine Event Engine projects.
+ */
+@Suppress("unused")
+fun applyStandard(repositories: RepositoryHandler) {
+    repositories.apply {
+        gradlePluginPortal()
+        mavenLocal()
+        maven {
+            url = URI(Repos.spine)
+            content {
+                includeGroup("io.spine")
+                includeGroup("io.spine.tools")
+                includeGroup("io.spine.gcloud")
+            }
+        }
+        maven {
+            url = URI(Repos.spineSnapshots)
+            content {
+                includeGroup("io.spine")
+                includeGroup("io.spine.tools")
+                includeGroup("io.spine.gcloud")
+            }
+        }
+        mavenCentral()
+    }
+}

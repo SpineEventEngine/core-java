@@ -38,7 +38,7 @@ import io.spine.core.EventContext
 import io.spine.core.RejectionEventContext
 
 /** A placeholder to be used when a producer of a rejection is not available. */
-val unknownProducer: Any = Identifier.pack("Unknown")
+private val unknownProducer: Any = Identifier.pack("Unknown")
 
 /**
  * Creates a rejection event for the passed command and the throwable.
@@ -54,7 +54,7 @@ val unknownProducer: Any = Identifier.pack("Unknown")
  * @throws IllegalArgumentException
  *          if neither the passed throwable nor its cause implement [RejectionThrowable]
  */
-fun reject(command: Command, throwable: Throwable): Event {
+public fun reject(command: Command, throwable: Throwable): Event {
     val rt = unwrap(throwable)
     val factory = RFactory(command, rt)
     return factory.createRejection()

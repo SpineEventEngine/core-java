@@ -26,7 +26,6 @@
 
 package io.spine.gradle.internal
 
-import java.net.URI
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 
@@ -424,6 +423,7 @@ object Build {
 }
 
 object Gen {
+    @Suppress("unused")
     const val javaPoet = JavaPoet.lib
     @Suppress("unused")
     const val javaxAnnotation = JavaX.annotations
@@ -459,10 +459,11 @@ object Test {
         "Use Flogger over SLF4J.",
         replaceWith = ReplaceWith("Flogger.Runtime.systemBackend")
     )
-    @Suppress("DEPRECATION")
+    @Suppress("DEPRECATION", "unused")
     const val slf4j = Slf4J.jdk14
 }
 
+@Suppress("unused")
 object Deps {
     val build = Build
     val grpc = Grpc
@@ -541,27 +542,11 @@ object DependencyResolution {
     }
 
     @Suppress("unused")
+    @Deprecated(
+        "Please use `applyStandard(repositories)` instead.",
+        replaceWith = ReplaceWith("applyStandard(repositories)")
+    )
     fun defaultRepositories(repositories: RepositoryHandler) {
-        repositories.mavenLocal()
-        repositories.maven {
-            url = URI(Repos.spine)
-            content {
-                includeGroup("io.spine")
-                includeGroup("io.spine.tools")
-                includeGroup("io.spine.gcloud")
-            }
-        }
-        repositories.maven {
-            url = URI(Repos.spineSnapshots)
-            content {
-                includeGroup("io.spine")
-                includeGroup("io.spine.tools")
-                includeGroup("io.spine.gcloud")
-            }
-        }
-        repositories.mavenCentral()
-        repositories.maven {
-            url = URI(Repos.gradlePlugins)
-        }
+        applyStandard(repositories)
     }
 }
