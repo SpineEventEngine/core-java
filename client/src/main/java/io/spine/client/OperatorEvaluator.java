@@ -29,7 +29,6 @@ package io.spine.client;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
-import io.spine.time.TimestampTemporal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -37,6 +36,8 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filter.Operator;
+import static io.spine.time.TimestampExtensions.isAfter;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
 /**
@@ -73,28 +74,34 @@ public enum OperatorEvaluator {
                 return false;
             }
             if (left.getClass() != right.getClass()) {
-                throw new IllegalArgumentException(
-                        format("Cannot compare an instance of %s to an instance of %s.",
-                               left.getClass(),
-                               right.getClass())
+                throw newIllegalArgumentException(
+                        "Cannot compare an instance of `%s` to an instance of `%s`.",
+                        classNameOf(left), classNameOf(right)
                 );
             }
             if (left instanceof Timestamp) {
-                TimestampTemporal timeLeft = TimestampTemporal.from((Timestamp) left);
-                TimestampTemporal timeRight = TimestampTemporal.from((Timestamp) right);
-                return timeLeft.isLaterThan(timeRight);
+                return isAfter((Timestamp) left, (Timestamp) right);
             }
             if (left instanceof Comparable<?>) {
-                Comparable cmpLeft = (Comparable<?>) left;
-                Comparable cmpRight = (Comparable<?>) right;
-                @SuppressWarnings("unchecked") // Type is unknown but checked at runtime
-                int comparisonResult = cmpLeft.compareTo(cmpRight);
-                return comparisonResult > 0;
+                return compare((Comparable<?>) left, (Comparable<?>) right);
             }
             throw new UnsupportedOperationException(format(
-                    "Comparison operations are not supported for type %s.",
-                    left.getClass().getCanonicalName())
+                    "Comparison operations are not supported for type `%s`.",
+                    classNameOf(left))
             );
+        }
+
+        private String classNameOf(Object left) {
+            return left.getClass()
+                       .getCanonicalName();
+        }
+
+        @SuppressWarnings({"rawtypes", "unchecked"}) // Type is unknown but checked at runtime.
+        private boolean compare(Comparable<?> left, Comparable<?> right) {
+            Comparable cmpLeft = left;
+            Comparable cmpRight = right;
+            int result = cmpLeft.compareTo(cmpRight);
+            return result > 0;
         }
     },
     LESS_THAN {
