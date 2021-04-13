@@ -31,7 +31,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.External;
-import io.spine.protobuf.Durations2;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.CustomerNotified;
 import io.spine.server.event.CustomerNotified.NotificationMethod;
@@ -52,6 +51,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import static com.google.protobuf.util.Durations.fromHours;
+import static com.google.protobuf.util.Durations.fromMinutes;
+import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.Durations2.isGreaterThan;
 import static io.spine.server.event.CustomerNotified.NotificationMethod.SMS;
@@ -71,7 +73,7 @@ public class AbstractReactorTestEnv {
 
     /** Obtains an event that signifies that some order was sered late. */
     public static OrderServed someOrderServedLate() {
-        Timestamp twoHoursAfter = Timestamps.add(now(), Durations2.fromHours(2));
+        Timestamp twoHoursAfter = add(now(), fromHours(2));
         return someOrderServedOn(twoHoursAfter);
     }
 
@@ -152,7 +154,7 @@ public class AbstractReactorTestEnv {
     public static class ServicePerformanceTracker extends AbstractEventReactor {
 
         /** If the order is not served in 50 minutes, it is considered to be late. */
-        private static final Duration BEFORE_SERVED_LATE = Durations2.fromMinutes(50);
+        private static final Duration BEFORE_SERVED_LATE = fromMinutes(50);
 
         private final List<OrderServed> ordersServed = new ArrayList<>();
         private final List<OrderServedLate> ordersServedLate = new ArrayList<>();

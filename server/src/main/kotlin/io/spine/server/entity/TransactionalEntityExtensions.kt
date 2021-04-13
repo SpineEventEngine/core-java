@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:JvmName("TransactionalEntityExtensions")
+
 package io.spine.server.entity
 
 import io.spine.annotation.Experimental
@@ -55,10 +57,7 @@ import io.spine.validate.ValidatingBuilder
  * while inline functions can use only `public` API.
  */
 @Experimental
-fun <I,
-     E : TransactionalEntity<I, S, B>,
-     S : EntityState<I>,
-     B : ValidatingBuilder<S>>
+public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
         E.update(block: B.() -> Unit): B {
     val builder = builderOf(this)
     block.invoke(builder)

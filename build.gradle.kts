@@ -24,20 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.DependencyResolution
-import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.PublishingRepos
-import io.spine.gradle.internal.spinePublishing
+import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.gradle.DependencyResolution
+import io.spine.internal.gradle.PublishingRepos
+import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.forceVersions
+import io.spine.internal.gradle.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    with(io.spine.gradle.internal.DependencyResolution) {
-        defaultRepositories(repositories)
-        forceConfiguration(configurations)
-    }
+    io.spine.internal.gradle.doApplyStandard(repositories)
+    io.spine.internal.gradle.doForceVersions(configurations)
 
     val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
@@ -59,18 +61,20 @@ buildscript {
     }
 }
 
+apply(from = "$rootDir/version.gradle.kts")
+
 plugins {
     `java-library`
-    kotlin("jvm") version "1.4.30"
+    kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
     idea
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    io.spine.gradle.internal.Deps.build.apply {
-        id("com.google.protobuf") version protobuf.gradlePluginVersion
-        id("net.ltgt.errorprone") version errorProne.gradlePluginVersion
+    io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
+        id(id) version version
+    }
+    io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
+        id(id) version version
     }
 }
 
-apply(from = "$rootDir/version.gradle.kts")
 val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
@@ -103,7 +107,6 @@ allprojects {
     // The `ext.deps` project property is used by `.gradle` scripts under `config/gradle`.
     apply {
         from("$rootDir/version.gradle.kts")
-        from("$rootDir/config/gradle/dependencies.gradle")
     }
 
     group = "io.spine"
@@ -121,7 +124,7 @@ subprojects {
         plugin("pmd")
         plugin("maven-publish")
 
-        with(Deps.scripts) {
+        with(Scripts) {
             from(javacArgs(project))
             from(modelCompiler(project))
             from(projectLicenseReport(project))
@@ -132,43 +135,40 @@ subprojects {
         setProperty("generateValidation", true)
     }
 
-    val isTravis = System.getenv("TRAVIS") == "true"
-    if (isTravis) {
-        tasks.javadoc {
-            val opt = options
-            if (opt is CoreJavadocOptions) {
-                opt.addStringOption("Xmaxwarns", "1")
-            }
-        }
-    }
-
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    DependencyResolution.defaultRepositories(repositories)
+    kotlin {
+        explicitApi()
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
+            useIR = true
+            freeCompilerArgs = listOf("-Xskip-prerelease-check")
+        }
+    }
+
+    repositories.applyStandard()
 
     dependencies {
-        Deps.build.apply {
-            errorprone(errorProne.core)
-            errorproneJavac(errorProne.javacPlugin)
-            // Somehow IDEA time after time does not see this transitive API dependency exposed
-            // by `base`. Add it explicitly so that IDEA does not display false errors in the
-            // annotated `package-info.java` files.
-            //api(jsr305Annotations)
-            api("io.spine:spine-base:$spineBaseVersion")
-            api("io.spine:spine-time:$spineTimeVersion")
+        ErrorProne.apply {
+            errorprone(core)
+            errorproneJavac(javacPlugin)
         }
 
-        Deps.test.apply {
-            testImplementation(junit.runner)
-        }
+        api("io.spine:spine-base:$spineBaseVersion")
+        api("io.spine:spine-time:$spineTimeVersion")
+
+        testImplementation(JUnit.runner)
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }
 
-    DependencyResolution.forceConfiguration(configurations)
+    configurations.forceVersions()
     configurations {
         all {
             resolutionStrategy {
@@ -207,13 +207,6 @@ subprojects {
         }
     }
 
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
-            useIR = true
-        }
-    }
-
     val generateRejections by tasks.getting
     tasks.compileKotlin {
         dependsOn(generateRejections)
@@ -230,8 +223,18 @@ subprojects {
         }
     }
 
+    val isTravis = System.getenv("TRAVIS") == "true"
+    if (isTravis) {
+        tasks.javadoc {
+            val opt = options
+            if (opt is CoreJavadocOptions) {
+                opt.addStringOption("Xmaxwarns", "1")
+            }
+        }
+    }
+
     apply {
-        with(Deps.scripts) {
+        with(Scripts) {
             from(slowTests(project))
             from(testOutput(project))
             from(javadocOptions(project))
@@ -292,21 +295,23 @@ subprojects {
     // This plugin *must* be applied here, not in the module `build.gradle` files.
     //
     if (shouldPublishJavadoc()) {
-        apply(from = Deps.scripts.updateGitHubPages(project))
+        apply(from = Scripts.updateGitHubPages(project))
         afterEvaluate {
             tasks.getByName("publish").dependsOn("updateGitHubPages")
         }
     }
 
-    apply(from = Deps.scripts.pmd(project))
+    apply(from = Scripts.pmd(project))
 }
 
 apply {
-    with(Deps.scripts) {
+    with(Scripts) {
         // Aggregated coverage report across all subprojects.
         from(jacoco(project))
+
         // Generate a repository-wide report of 3rd-party dependencies and their licenses.
         from(repoLicenseReport(project))
+
         // Generate a `pom.xml` file containing first-level dependency of all projects
         // in the repository.
         from(generatePom(project))

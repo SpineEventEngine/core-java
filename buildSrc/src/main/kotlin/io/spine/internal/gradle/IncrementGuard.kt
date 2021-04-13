@@ -24,7 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle.internal
+@file:Suppress("unused")
+
+package io.spine.internal.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

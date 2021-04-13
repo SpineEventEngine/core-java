@@ -49,7 +49,7 @@ import io.spine.server.event.reject
  *
  * @receiver the ID of the acknowledged message,
  */
-fun Message.acknowledge(): Ack = ackWithStatus(statusOk())
+public fun Message.acknowledge(): Ack = ackWithStatus(statusOk())
 
 /**
  * Rejects message with this ID (e.g. [MessageId] or [SignalId]) because the passed error occurred.
@@ -64,14 +64,14 @@ internal fun Message.causedError(cause: Error): Ack = ackWithStatus(errorWith(ca
  *
  * @receiver the ID of the rejected command
  */
-fun CommandId.reject(rejection: Event): Ack = ackWithStatus(rejectedBecauseOf(rejection))
+public fun CommandId.reject(rejection: Event): Ack = ackWithStatus(rejectedBecauseOf(rejection))
 
 /**
  * Creates a rejection acknowledgement with the passed cause.
  *
  * @receiver the rejected command
  */
-fun Command.reject(cause: RejectionThrowable): Ack {
+public fun Command.reject(cause: RejectionThrowable): Ack {
     val rejection = reject(this, cause)
     val commandId = id()
     return commandId.reject(rejection)

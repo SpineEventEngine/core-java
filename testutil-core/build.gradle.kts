@@ -24,17 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.Deps
-
-val spineBaseVersion: String by extra
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Truth
 
 group = "io.spine.tools"
+
+val spineBaseVersion: String by extra
 
 dependencies {
     api(project(":client"))
     api("io.spine.tools:spine-testlib:$spineBaseVersion")
-    Deps.test.apply {
-        junit.api.forEach { api(it) }
-        truth.libs.forEach { api(it) }
+
+    JUnit.api.forEach {
+        api(it)
+    }
+    Truth.libs.forEach {
+       api(it)
     }
 }

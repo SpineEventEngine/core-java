@@ -65,8 +65,7 @@ public class TxAggregate extends Aggregate<Id, AggregateState, AggregateState.Bu
     private void event(TxCreated e) {
         receivedEvents.add(e);
         builder().setId(id())
-                 .setName(e.getName())
-                 .build();
+                 .setName(e.getName());
     }
 
     /**

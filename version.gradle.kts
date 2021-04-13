@@ -40,17 +40,17 @@
 /**
  * Version of this library.
  */
-val coreJava = "2.0.0-SNAPSHOT.7"
+val coreJava = "2.0.0-SNAPSHOT.15"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "2.0.0-SNAPSHOT.13"
-val time = "2.0.0-SNAPSHOT.5"
+val base = "2.0.0-SNAPSHOT.15"
+val time = "2.0.0-SNAPSHOT.18"
 
 project.extra.apply {
     this["versionToPublish"] = coreJava
     this["spineBaseVersion"] = base
     this["spineTimeVersion"] = time
-    this["kotlinVersion"] = "1.4.30"
+    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
 }

@@ -24,8 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.DependencyResolution
-import io.spine.gradle.internal.Deps
+import io.spine.internal.gradle.applyStandard
 import org.gradle.api.file.SourceDirectorySet
 
 buildscript {
@@ -51,15 +50,10 @@ buildscript {
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
 
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val dependencyResolution = io.spine.gradle.internal.DependencyResolution
-    dependencyResolution.defaultRepositories(repositories)
-
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val deps = io.spine.gradle.internal.Deps
+    io.spine.internal.gradle.doApplyStandard(repositories)
 
     dependencies {
-        classpath(deps.build.gradlePlugins.protobuf)
+        classpath(io.spine.internal.dependency.Protobuf.GradlePlugin.lib)
         classpath("io.spine.tools:spine-model-compiler:${spineBaseVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
     }
@@ -84,7 +78,7 @@ apply {
     from("$enclosingRootDir/config/gradle/model-compiler.gradle")
 }
 
-DependencyResolution.defaultRepositories(repositories)
+repositories.applyStandard()
 
 tasks.compileJava {
     options.compilerArgs.addAll(listOf(

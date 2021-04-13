@@ -44,10 +44,9 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>Exposes {@linkplain #builder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
  */
-public abstract class TransactionalEntity<I,
-                                          S extends EntityState<I>,
-                                          B extends ValidatingBuilder<S>>
-                      extends AbstractEntity<I, S> {
+public abstract
+class TransactionalEntity<I, S extends EntityState<I>, B extends ValidatingBuilder<S>>
+        extends AbstractEntity<I, S> {
 
     private final RecentHistory recentHistory = new RecentHistory();
 
@@ -182,7 +181,7 @@ public abstract class TransactionalEntity<I,
         return result;
     }
 
-    @SuppressWarnings({"ObjectEquality", "ReferenceEquality"}
+    @SuppressWarnings({"ObjectEquality", "ReferenceEquality", "PMD.CompareObjectsWithEquals"}
             /* The refs must to point to the same object; see below. */)
     final void injectTransaction(Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx) {
         checkNotNull(tx);
@@ -192,7 +191,7 @@ public abstract class TransactionalEntity<I,
         */
         checkState(tx.entity() == this,
                    "Transaction injected to this %s" +
-                           " is wrapped around a different entity: %s.", this, tx.entity());
+                           " is wrapped around a different entity: `%s`.", this, tx.entity());
 
         this.transaction = tx;
     }
