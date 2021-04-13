@@ -51,6 +51,7 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 /**
  * The function to be used in `buildscript` when a fully-qualified call must be made.
  */
+@Suppress("unused")
 fun doForceVersions(configurations: ConfigurationContainer) {
     configurations.forceVersions()
 }
@@ -101,7 +102,9 @@ private fun ResolutionStrategy.forceTestDependencies() {
     )
 }
 
-/** Forces transitive dependencies of 3rd party components that we don't use directly. */
+/**
+ * Forces transitive dependencies of 3rd party components that we don't use directly.
+ */
 private fun ResolutionStrategy.forceTransitiveDependencies() {
     force(
         AutoValue.annotations,
@@ -118,9 +121,12 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
 fun ConfigurationContainer.excludeProtobufLite() {
 
     fun excludeProtoLite(configurationName: String) {
-        named(configurationName)
-            .get()
-            .exclude(mapOf("group" to "com.google.protobuf", "module" to "protobuf-lite"))
+        named(configurationName).get().exclude(
+            mapOf(
+                "group" to "com.google.protobuf",
+                "module" to "protobuf-lite"
+            )
+        )
     }
 
     excludeProtoLite("runtime")

@@ -64,16 +64,12 @@ buildscript {
 apply(from = "$rootDir/version.gradle.kts")
 
 plugins {
-    val kotlinVersion: String by extra
     `java-library`
-    kotlin("jvm") version kotlinVersion
+    kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
     idea
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
         id(id) version version
     }
-
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
     io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
         id(id) version version
     }
