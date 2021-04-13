@@ -55,7 +55,6 @@ object Build {
     val guava = Guava
     const val googleHttpClient = HttpClient.google
     const val googleHttpClientApache = HttpClient.apache
-    val gradlePlugins = GradlePlugins
     const val jacksonDatabind = Jackson.databind
     const val jsr305Annotations = FindBugs.annotations
     val kotlin = Kotlin
