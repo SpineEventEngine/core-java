@@ -144,27 +144,40 @@ object Repos {
 }
 
 /**
+ * The function to be used in `buildscript` clauses when fully-qualified call must be made.
+ */
+fun doApplyStandard(repositories: RepositoryHandler) {
+    repositories.applyStandard()
+}
+
+/**
  * Applies repositories commonly used by Spine Event Engine projects.
  */
 @Suppress("unused")
-fun applyStandard(repositories: RepositoryHandler) {
-    repositories.apply {
+fun RepositoryHandler.applyStandard() {
+
+    apply {
         gradlePluginPortal()
         mavenLocal()
+
+        val libraryGroup = "io.spine"
+        val toolsGroup = "io.spine.tools"
+        val gcloudGroup = "io.spine.gcloud"
+
         maven {
             url = URI(Repos.spine)
             content {
-                includeGroup("io.spine")
-                includeGroup("io.spine.tools")
-                includeGroup("io.spine.gcloud")
+                includeGroup(libraryGroup)
+                includeGroup(toolsGroup)
+                includeGroup(gcloudGroup)
             }
         }
         maven {
             url = URI(Repos.spineSnapshots)
             content {
-                includeGroup("io.spine")
-                includeGroup("io.spine.tools")
-                includeGroup("io.spine.gcloud")
+                includeGroup(libraryGroup)
+                includeGroup(toolsGroup)
+                includeGroup(gcloudGroup)
             }
         }
         mavenCentral()

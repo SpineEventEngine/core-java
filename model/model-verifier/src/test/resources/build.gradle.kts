@@ -50,7 +50,7 @@ buildscript {
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
 
-    io.spine.internal.gradle.applyStandard(repositories)
+    io.spine.internal.gradle.doApplyStandard(repositories)
 
     dependencies {
         classpath(io.spine.internal.dependency.Protobuf.GradlePlugin.lib)
@@ -78,7 +78,7 @@ apply {
     from("$enclosingRootDir/config/gradle/model-compiler.gradle")
 }
 
-applyStandard(repositories)
+repositories.applyStandard()
 
 tasks.compileJava {
     options.compilerArgs.addAll(listOf(

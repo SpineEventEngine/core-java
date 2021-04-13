@@ -30,6 +30,7 @@ import io.spine.internal.gradle.DependencyResolution
 import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -37,9 +38,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
-    io.spine.internal.gradle.applyStandard(repositories)
-    val resolution = io.spine.internal.gradle.DependencyResolution
-    resolution.forceConfiguration(configurations)
+    io.spine.internal.gradle.doApplyStandard(repositories)
+    io.spine.internal.gradle.doForceVersions(configurations)
 
     val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
@@ -156,7 +156,7 @@ subprojects {
         }
     }
 
-    applyStandard(repositories)
+    repositories.applyStandard()
 
     dependencies {
         ErrorProne.apply {
@@ -172,7 +172,7 @@ subprojects {
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }
 
-    DependencyResolution.forceConfiguration(configurations)
+    configurations.forceVersions()
     configurations {
         all {
             resolutionStrategy {

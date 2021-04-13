@@ -45,80 +45,111 @@ import io.spine.internal.dependency.Plexus
 import io.spine.internal.dependency.Protobuf
 import io.spine.internal.dependency.Truth
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 
-@Suppress("unused")
-object DependencyResolution {
+/**
+ * The function to be used in `buildscript` when a fully-qualified call must be made.
+ */
+fun doForceVersions(configurations: ConfigurationContainer) {
+    configurations.forceVersions()
+}
 
-    fun forceConfiguration(configurations: ConfigurationContainer) {
-        configurations.all {
-            resolutionStrategy {
-                failOnVersionConflict()
-                cacheChangingModulesFor(0, "seconds")
-
-                @Suppress("DEPRECATION") // Force SLF4J version.
-                force(
-                    AnimalSniffer.lib,
-                    AutoCommon.lib,
-                    AutoService.annotations,
-                    CheckerFramework.annotations,
-                    ErrorProne.annotations,
-                    Guava.lib,
-                    FindBugs.annotations,
-                    Kotlin.reflect,
-                    Kotlin.stdLib,
-                    Kotlin.stdLibCommon,
-                    Kotlin.stdLibJdk8,
-                    Protobuf.libs,
-                    Protobuf.GradlePlugin.lib,
-                    io.spine.internal.dependency.Slf4J.lib
-                )
-
-                force( // Test dependencies
-                    Guava.testLib,
-                    JUnit.api,
-                    JUnit.platformCommons,
-                    JUnit.platformLauncher,
-                    JUnit.legacy,
-                    Truth.libs
-                )
-
-                // Force transitive dependencies of 3rd party components that we don't use directly.
-                force(
-                    AutoValue.annotations,
-                    Gson.lib,
-                    J2ObjC.lib,
-                    Plexus.utils,
-                    Okio.lib,
-                    CommonsCli.lib,
-                    CheckerFramework.compatQual,
-                    CommonsLogging.lib
-                )
-            }
+/**
+ * Forces dependencies used in the project.
+ */
+fun ConfigurationContainer.forceVersions() {
+    all {
+        resolutionStrategy {
+            failOnVersionConflict()
+            cacheChangingModulesFor(0, "seconds")
+            forceProductionDependencies()
+            forceTestDependencies()
+            forceTransitiveDependencies()
         }
     }
+}
 
-    @Suppress("unused")
-    fun excludeProtobufLite(configurations: ConfigurationContainer) {
-        excludeProtoLite(configurations, "runtime")
-        excludeProtoLite(configurations, "testRuntime")
-    }
+private fun ResolutionStrategy.forceProductionDependencies() {
+    @Suppress("DEPRECATION") // Force SLF4J version.
+    force(
+        AnimalSniffer.lib,
+        AutoCommon.lib,
+        AutoService.annotations,
+        CheckerFramework.annotations,
+        ErrorProne.annotations,
+        Guava.lib,
+        FindBugs.annotations,
+        Kotlin.reflect,
+        Kotlin.stdLib,
+        Kotlin.stdLibCommon,
+        Kotlin.stdLibJdk8,
+        Protobuf.libs,
+        Protobuf.GradlePlugin.lib,
+        io.spine.internal.dependency.Slf4J.lib
+    )
+}
 
-    private fun excludeProtoLite(
-        configurations: ConfigurationContainer,
-        configurationName: String
-    ) {
-        configurations
-            .named(configurationName).get()
+private fun ResolutionStrategy.forceTestDependencies() {
+    force(
+        Guava.testLib,
+        JUnit.api,
+        JUnit.platformCommons,
+        JUnit.platformLauncher,
+        JUnit.legacy,
+        Truth.libs
+    )
+}
+
+/** Forces transitive dependencies of 3rd party components that we don't use directly. */
+private fun ResolutionStrategy.forceTransitiveDependencies() {
+    force(
+        AutoValue.annotations,
+        Gson.lib,
+        J2ObjC.lib,
+        Plexus.utils,
+        Okio.lib,
+        CommonsCli.lib,
+        CheckerFramework.compatQual,
+        CommonsLogging.lib
+    )
+}
+
+fun ConfigurationContainer.excludeProtobufLite() {
+
+    fun excludeProtoLite(configurationName: String) {
+        named(configurationName)
+            .get()
             .exclude(mapOf("group" to "com.google.protobuf", "module" to "protobuf-lite"))
     }
 
-    @Suppress("unused")
+    excludeProtoLite("runtime")
+    excludeProtoLite("testRuntime")
+}
+
+@Suppress("unused")
+object DependencyResolution {
+    @Deprecated(
+        "Please use `configurations.forceVersions()`.",
+        ReplaceWith("configurations.forceVersions()")
+    )
+    fun forceConfiguration(configurations: ConfigurationContainer) {
+        configurations.forceVersions()
+    }
+
+    @Deprecated(
+        "Please use `configurations.excludeProtobufLite()`.",
+        ReplaceWith("configurations.excludeProtobufLite()")
+    )
+    fun excludeProtobufLite(configurations: ConfigurationContainer) {
+        configurations.excludeProtobufLite()
+    }
+
     @Deprecated(
         "Please use `applyStandard(repositories)` instead.",
         replaceWith = ReplaceWith("applyStandard(repositories)")
     )
     fun defaultRepositories(repositories: RepositoryHandler) {
-        applyStandard(repositories)
+        repositories.applyStandard()
     }
 }
