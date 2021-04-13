@@ -24,21 +24,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle
+
+import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.Truth
 
-group = "io.spine.tools"
+object Test {
+    const val guavaTestlib = Guava.testLib
+    @Suppress("unused")
+    val truth = Truth
 
-val spineBaseVersion: String by extra
+    @Suppress("unused")
+    val junit = JUnit
+    const val junit4 = JUnit.legacy
 
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
+    @Suppress("unused")
+    @Deprecated("Please do not use.")
+    const val mockito = "org.mockito:mockito-core:2.12.0"
 
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+    @Suppress("unused")
+    @Deprecated("Please use Google Truth instead.")
+    const val hamcrest = "org.hamcrest:hamcrest-all:1.3"
+
+    @Deprecated(
+        "Use Flogger over SLF4J.",
+        replaceWith = ReplaceWith("Flogger.Runtime.systemBackend")
+    )
+    @Suppress("DEPRECATION", "unused")
+    const val slf4j = io.spine.internal.dependency.Slf4J.jdk14
 }

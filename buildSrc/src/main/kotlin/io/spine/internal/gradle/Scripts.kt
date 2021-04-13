@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle.internal
+package io.spine.internal.gradle
 
 import org.gradle.api.Project
 
@@ -58,5 +58,5 @@ object Scripts {
     fun generatePom(p: Project)            = p.script("generate-pom.gradle")
     fun updateGitHubPages(p: Project)      = p.script("update-gh-pages.gradle")
 
-    private fun Project.script(name: String) = "${rootDir}${commonPath}${name}"
+    private fun Project.script(name: String) = "${rootDir}$commonPath${name}"
 }

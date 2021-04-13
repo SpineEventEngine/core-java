@@ -24,21 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.dependency
 
-group = "io.spine.tools"
-
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// https://github.com/google/truth
+object Truth {
+    private const val version = "1.1.2"
+    val libs = listOf(
+        "com.google.truth:truth:${version}",
+        "com.google.truth.extensions:truth-java8-extension:${version}",
+        "com.google.truth.extensions:truth-proto-extension:${version}"
+    )
 }

@@ -24,21 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.gradle
 
-group = "io.spine.tools"
+import io.spine.internal.dependency.JavaPoet
+import io.spine.internal.dependency.JavaX
 
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+object Gen {
+    @Suppress("unused")
+    const val javaPoet = JavaPoet.lib
+    @Suppress("unused")
+    const val javaxAnnotation = JavaX.annotations
 }

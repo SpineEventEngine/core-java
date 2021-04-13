@@ -24,11 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle.internal
+package io.spine.internal.gradle
 
-import io.spine.gradle.internal.DefaultArtifact.javadocJar
-import io.spine.gradle.internal.DefaultArtifact.sourceJar
-import io.spine.gradle.internal.DefaultArtifact.testOutputJar
+import io.spine.internal.gradle.DefaultArtifact.javadocJar
+import io.spine.internal.gradle.DefaultArtifact.sourceJar
+import io.spine.internal.gradle.DefaultArtifact.testOutputJar
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -198,7 +198,8 @@ class Publish : Plugin<Project> {
     }
 
     private fun PublishingExtension.createMavenPublication(project: Project,
-                                                           extension: PublishExtension) {
+                                                           extension: PublishExtension
+    ) {
         val artifactIdForPublishing = if (extension.spinePrefix.get()) {
             "spine-${project.name}"
         } else {
@@ -286,6 +287,7 @@ private constructor(
  * methods for the `spinePublishing` configuration. Thus, we proviude this helper function for use
  * in Kotlin build scripts.
  */
+@Suppress("unused")
 fun Project.spinePublishing(action: PublishExtension.() -> Unit) {
     apply<Publish>()
 

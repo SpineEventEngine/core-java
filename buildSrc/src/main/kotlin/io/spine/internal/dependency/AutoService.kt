@@ -24,21 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.dependency
 
-group = "io.spine.tools"
-
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// https://github.com/google/auto
+object AutoService {
+    private const val version = "1.0"
+    const val annotations = "com.google.auto.service:auto-service-annotations:${version}"
+    @Suppress("unused")
+    const val processor   = "com.google.auto.service:auto-service:${version}"
 }

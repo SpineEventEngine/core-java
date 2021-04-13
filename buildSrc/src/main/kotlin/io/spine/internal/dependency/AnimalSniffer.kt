@@ -24,21 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.dependency
 
-group = "io.spine.tools"
+/**
+ * Versions of one-line dependencies.
+ *
+ * For versions of other dependencies please see `version` properties of objects declared below.
+ *
+ * See also: https://github.com/SpineEventEngine/config/issues/171
+ */
 
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// https://www.mojohaus.org/animal-sniffer/animal-sniffer-maven-plugin/
+object AnimalSniffer {
+    private const val version = "1.19"
+    const val lib = "org.codehaus.mojo:animal-sniffer-annotations:${version}"
 }

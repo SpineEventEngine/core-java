@@ -24,10 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.AutoService
-import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.Grpc
-import io.spine.gradle.internal.Scripts
+import io.spine.internal.dependency.AutoService
+import io.spine.internal.dependency.Grpc
+import io.spine.internal.gradle.Scripts
 
 val spineBaseVersion: String by extra
 
@@ -43,7 +42,7 @@ dependencies {
         testAnnotationProcessor(processor)
         testCompileOnly(annotations)
     }
-    testImplementation(Deps.grpc.nettyShaded)
+    testImplementation(Grpc.nettyShaded)
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))

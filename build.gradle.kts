@@ -24,19 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.DependencyResolution
-import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.PublishingRepos
-import io.spine.gradle.internal.Scripts
-import io.spine.gradle.internal.spinePublishing
+import io.spine.internal.gradle.DependencyResolution
+import io.spine.internal.gradle.Deps
+import io.spine.internal.gradle.PublishingRepos
+import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
-    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    val resolution = io.spine.gradle.internal.DependencyResolution
-    resolution.defaultRepositories(repositories)
+    io.spine.internal.gradle.applyStandard(repositories)
+    val resolution = io.spine.internal.gradle.DependencyResolution
     resolution.forceConfiguration(configurations)
 
     val kotlinVersion: String by extra
@@ -63,12 +63,11 @@ apply(from = "$rootDir/version.gradle.kts")
 
 plugins {
     val kotlinVersion: String by extra
-
     `java-library`
     kotlin("jvm") version kotlinVersion
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    io.spine.gradle.internal.Deps.build.apply {
+    io.spine.internal.gradle.Deps.build.apply {
         id("com.google.protobuf") version protobuf.gradlePluginVersion
         id("net.ltgt.errorprone") version errorProne.gradlePluginVersion
     }

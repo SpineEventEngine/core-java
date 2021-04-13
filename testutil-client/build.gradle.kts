@@ -24,7 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.Deps
+import io.spine.internal.dependency.Grpc
+import io.spine.internal.gradle.Scripts
 
 val spineTimeVersion: String by extra
 
@@ -35,7 +36,7 @@ dependencies {
     api(project(":testutil-core"))
     api("io.spine.tools:spine-testutil-time:$spineTimeVersion")
 
-    implementation(Deps.grpc.protobuf)
+    implementation(Grpc.protobuf)
 }
 
-apply(from = io.spine.gradle.internal.Scripts.testArtifacts(project))
+apply(from = Scripts.testArtifacts(project))

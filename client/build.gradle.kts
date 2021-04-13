@@ -24,17 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.Scripts
+import io.spine.internal.dependency.Grpc
+import io.spine.internal.gradle.Scripts
 
 val spineBaseVersion: String by extra
 
 dependencies {
-    api(Deps.grpc.stub)
     api(project(":core"))
 
-    implementation(Deps.grpc.protobuf)
-    implementation(Deps.grpc.core)
+    Grpc.apply {
+        api(stub)
+        implementation(protobuf)
+        implementation(core)
+    }
 
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     testImplementation(project(":testutil-client"))

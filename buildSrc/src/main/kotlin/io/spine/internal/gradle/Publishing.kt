@@ -24,21 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.gradle
 
-group = "io.spine.tools"
+import io.spine.internal.dependency.AssertK
+import io.spine.internal.dependency.BouncyCastle
+import io.spine.internal.dependency.JavaJwt
+import io.spine.internal.dependency.Klaxon
 
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+@Suppress("unused")
+object Publishing {
+    const val klaxon = Klaxon.lib
+    const val oauthJwt = JavaJwt.lib
+    const val bouncyCastlePkcs = BouncyCastle.libPkcsJdk15
+    const val assertK = AssertK.libJvm
 }

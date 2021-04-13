@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.DependencyResolution
+import io.spine.internal.gradle.applyStandard
 import org.gradle.api.file.SourceDirectorySet
 
 buildscript {
@@ -50,10 +50,10 @@ buildscript {
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
 
-    io.spine.gradle.internal.DependencyResolution.defaultRepositories(repositories)
+    io.spine.internal.gradle.applyStandard(repositories)
 
     dependencies {
-        classpath(io.spine.gradle.internal.GradlePlugins.protobuf)
+        classpath(io.spine.internal.dependency.Protobuf.gradlePlugin)
         classpath("io.spine.tools:spine-model-compiler:${spineBaseVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
     }
@@ -78,7 +78,7 @@ apply {
     from("$enclosingRootDir/config/gradle/model-compiler.gradle")
 }
 
-DependencyResolution.defaultRepositories(repositories)
+applyStandard(repositories)
 
 tasks.compileJava {
     options.compilerArgs.addAll(listOf(

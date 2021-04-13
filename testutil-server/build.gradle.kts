@@ -24,15 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.Deps
+import io.spine.internal.dependency.Grpc
+import io.spine.internal.gradle.Scripts
 
 group = "io.spine.tools"
 
 dependencies {
     api(project(":server"))
     api(project(":testutil-client"))
-    testImplementation(Deps.grpc.netty)
+    testImplementation(Grpc.netty)
     testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
 }
 
-apply(from = io.spine.gradle.internal.Scripts.testArtifacts(project))
+apply(from = Scripts.testArtifacts(project))

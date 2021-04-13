@@ -24,21 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.dependency
 
-group = "io.spine.tools"
-
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+/**
+ * Assertion library for tests in Kotlin
+ *
+ * [AssertK](https://github.com/willowtreeapps/assertk)
+ */
+object AssertK {
+    private const val version = "0.23.1"
+    const val libJvm = "com.willowtreeapps.assertk:assertk-jvm:${version}"
 }

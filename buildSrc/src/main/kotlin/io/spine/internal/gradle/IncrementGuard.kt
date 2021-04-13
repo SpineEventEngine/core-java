@@ -26,7 +26,7 @@
 
 @file:Suppress("unused")
 
-package io.spine.gradle.internal
+package io.spine.internal.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

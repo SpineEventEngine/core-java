@@ -24,21 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.dependency
 
-group = "io.spine.tools"
-
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+/**
+ * Spine used to log with SLF4J. Now we use Flogger. Whenever a choice comes up, we recommend to
+ * use the latter.
+ *
+ * Some third-party libraries may clash with different versions of the library. Thus, we specify
+ * this version and force it via [forceConfiguration(..)][DependencyResolution.forceConfiguration].
+ */
+@Deprecated("Use Flogger over SLF4J.", replaceWith = ReplaceWith("flogger"))
+object Slf4J {
+    private const val version = "1.7.30"
+    const val lib = "org.slf4j:slf4j-api:${version}"
+    const val jdk14 = "org.slf4j:slf4j-jdk14:${version}"
 }

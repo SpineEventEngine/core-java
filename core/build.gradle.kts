@@ -24,7 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.gradle.internal.IncrementGuard
+import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.Scripts
 
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
@@ -47,7 +48,7 @@ modelCompiler {
 }
 
 apply {
-    with(io.spine.gradle.internal.Scripts) {
+    with(Scripts) {
         from(testArtifacts(project))
         from(publishProto(project))
     }

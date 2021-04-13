@@ -24,21 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Truth
+package io.spine.internal.dependency
 
-group = "io.spine.tools"
-
-val spineBaseVersion: String by extra
-
-dependencies {
-    api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// https://github.com/JetBrains/kotlin
+// https://github.com/Kotlin
+object Kotlin {
+    @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
+    const val version      = "1.5.0-M2"
+    const val reflect      = "org.jetbrains.kotlin:kotlin-reflect:${version}"
+    const val stdLib       = "org.jetbrains.kotlin:kotlin-stdlib:${version}"
+    const val stdLibCommon = "org.jetbrains.kotlin:kotlin-stdlib-common:${version}"
+    const val stdLibJdk8   = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version}"
 }

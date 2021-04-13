@@ -52,5 +52,5 @@ project.extra.apply {
     this["versionToPublish"] = coreJava
     this["spineBaseVersion"] = base
     this["spineTimeVersion"] = time
-    this["kotlinVersion"] = io.spine.gradle.internal.Kotlin.version
+    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
 }
