@@ -53,7 +53,7 @@ buildscript {
     io.spine.internal.gradle.applyStandard(repositories)
 
     dependencies {
-        classpath(io.spine.internal.dependency.Protobuf.gradlePlugin)
+        classpath(io.spine.internal.dependency.Protobuf.GradlePlugin.lib)
         classpath("io.spine.tools:spine-model-compiler:${spineBaseVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
     }

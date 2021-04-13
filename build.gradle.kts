@@ -24,10 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.JUnit
 import io.spine.internal.gradle.DependencyResolution
-import io.spine.internal.gradle.Deps
 import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -67,9 +69,13 @@ plugins {
     kotlin("jvm") version kotlinVersion
     idea
     @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
-    io.spine.internal.gradle.Deps.build.apply {
-        id("com.google.protobuf") version protobuf.gradlePluginVersion
-        id("net.ltgt.errorprone") version errorProne.gradlePluginVersion
+    io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
+        id(id) version version
+    }
+
+    @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
+    io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
+        id(id) version version
     }
 }
 
@@ -150,23 +156,18 @@ subprojects {
         }
     }
 
-    DependencyResolution.defaultRepositories(repositories)
+    applyStandard(repositories)
 
     dependencies {
-        Deps.build.apply {
-            errorprone(errorProne.core)
-            errorproneJavac(errorProne.javacPlugin)
-            // Somehow IDEA time after time does not see this transitive API dependency exposed
-            // by `base`. Add it explicitly so that IDEA does not display false errors in the
-            // annotated `package-info.java` files.
-            //api(jsr305Annotations)
-            api("io.spine:spine-base:$spineBaseVersion")
-            api("io.spine:spine-time:$spineTimeVersion")
+        ErrorProne.apply {
+            errorprone(core)
+            errorproneJavac(javacPlugin)
         }
 
-        Deps.test.apply {
-            testImplementation(junit.runner)
-        }
+        api("io.spine:spine-base:$spineBaseVersion")
+        api("io.spine:spine-time:$spineTimeVersion")
+
+        testImplementation(JUnit.runner)
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }

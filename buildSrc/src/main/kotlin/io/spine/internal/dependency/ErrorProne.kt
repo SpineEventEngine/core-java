@@ -30,8 +30,6 @@ package io.spine.internal.dependency
 @Suppress("unused")
 object ErrorProne {
     private const val version = "2.6.0"
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val gradlePluginVersion = "1.3.0"
     // https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
     private const val javacPluginVersion = "9+181-r4173-1"
 
@@ -43,5 +41,10 @@ object ErrorProne {
     const val checkApi = "com.google.errorprone:error_prone_check_api:${version}"
     const val testHelpers = "com.google.errorprone:error_prone_test_helpers:${version}"
     const val javacPlugin  = "com.google.errorprone:javac:${javacPluginVersion}"
-    const val gradlePlugin = "net.ltgt.gradle:gradle-errorprone-plugin:${gradlePluginVersion}"
+
+    object GradlePlugin {
+        const val id = "net.ltgt.errorprone"
+        const val version = "1.3.0"
+        const val lib = "net.ltgt.gradle:gradle-errorprone-plugin:${version}"
+    }
 }

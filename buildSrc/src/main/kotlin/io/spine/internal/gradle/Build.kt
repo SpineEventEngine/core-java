@@ -26,44 +26,7 @@
 
 package io.spine.internal.gradle
 
-import io.spine.internal.dependency.AnimalSniffer
-import io.spine.internal.dependency.AppEngine
-import io.spine.internal.dependency.AutoCommon
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.CheckerFramework
-import io.spine.internal.dependency.ErrorProne
-import io.spine.internal.dependency.FindBugs
-import io.spine.internal.dependency.Firebase
-import io.spine.internal.dependency.Flogger
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.HttpClient
-import io.spine.internal.dependency.Jackson
-import io.spine.internal.dependency.Kotlin
-import io.spine.internal.dependency.Protobuf
-import io.spine.internal.dependency.Roaster
-
 @Suppress("unused")
 object Build {
-    const val animalSniffer = AnimalSniffer.lib
-    const val autoCommon = AutoCommon.lib
-    val autoService = AutoService
-    const val appEngine = AppEngine.sdk
-    val checker = CheckerFramework
-    val errorProne = ErrorProne
-    const val firebaseAdmin = Firebase.admin
-    val flogger = Flogger
-    val guava = Guava
-    const val googleHttpClient = HttpClient.google
-    const val googleHttpClientApache = HttpClient.apache
-    const val jacksonDatabind = Jackson.databind
-    const val jsr305Annotations = FindBugs.annotations
-    val kotlin = Kotlin
-    val protobuf = Protobuf
-    val roaster = Roaster
-
     val ci = "true".equals(System.getenv("CI"))
-
-    @Deprecated("Use Flogger over SLF4J.", replaceWith = ReplaceWith("flogger"))
-    @Suppress("DEPRECATION")
-    val slf4j = io.spine.internal.dependency.Slf4J.lib
 }

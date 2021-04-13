@@ -26,12 +26,15 @@
 
 package io.spine.internal.gradle
 
+import io.spine.internal.dependency.AnimalSniffer
+import io.spine.internal.dependency.AutoCommon
 import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.AutoValue
 import io.spine.internal.dependency.CheckerFramework
 import io.spine.internal.dependency.CommonsCli
 import io.spine.internal.dependency.CommonsLogging
 import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.FindBugs
 import io.spine.internal.dependency.Gson
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.J2ObjC
@@ -54,35 +57,31 @@ object DependencyResolution {
                 cacheChangingModulesFor(0, "seconds")
 
                 @Suppress("DEPRECATION") // Force SLF4J version.
-                Deps.build.apply {
-                    force(
-                        animalSniffer,
-                        autoCommon,
-                        AutoService.annotations,
-                        CheckerFramework.annotations,
-                        ErrorProne.annotations,
-                        Guava.lib,
-                        jsr305Annotations,
-                        Kotlin.reflect,
-                        Kotlin.stdLib,
-                        Kotlin.stdLibCommon,
-                        Kotlin.stdLibJdk8,
-                        Protobuf.libs,
-                        Protobuf.gradlePlugin,
-                        slf4j
-                    )
-                }
+                force(
+                    AnimalSniffer.lib,
+                    AutoCommon.lib,
+                    AutoService.annotations,
+                    CheckerFramework.annotations,
+                    ErrorProne.annotations,
+                    Guava.lib,
+                    FindBugs.annotations,
+                    Kotlin.reflect,
+                    Kotlin.stdLib,
+                    Kotlin.stdLibCommon,
+                    Kotlin.stdLibJdk8,
+                    Protobuf.libs,
+                    Protobuf.GradlePlugin.lib,
+                    io.spine.internal.dependency.Slf4J.lib
+                )
 
-                Deps.test.apply {
-                    force(
-                        guavaTestlib,
-                        JUnit.api,
-                        JUnit.platformCommons,
-                        JUnit.platformLauncher,
-                        junit4,
-                        Truth.libs
-                    )
-                }
+                force( // Test dependencies
+                    Guava.testLib,
+                    JUnit.api,
+                    JUnit.platformCommons,
+                    JUnit.platformLauncher,
+                    JUnit.legacy,
+                    Truth.libs
+                )
 
                 // Force transitive dependencies of 3rd party components that we don't use directly.
                 force(
