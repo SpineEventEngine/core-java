@@ -26,10 +26,10 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.DependencyResolution
 import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -41,7 +41,6 @@ buildscript {
     io.spine.internal.gradle.doApplyStandard(repositories)
     io.spine.internal.gradle.doForceVersions(configurations)
 
-    val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
 
@@ -52,8 +51,6 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             force(
-                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion"
             )
@@ -63,6 +60,7 @@ buildscript {
 
 apply(from = "$rootDir/version.gradle.kts")
 
+@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
@@ -75,7 +73,6 @@ plugins {
     }
 }
 
-val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
@@ -169,13 +166,11 @@ subprojects {
     }
 
     configurations.forceVersions()
+    configurations.excludeProtobufLite()
     configurations {
         all {
             resolutionStrategy {
                 force(
-                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion"
@@ -183,7 +178,6 @@ subprojects {
             }
         }
     }
-    DependencyResolution.excludeProtobufLite(configurations)
 
     val srcDir = "$projectDir/src"
     val generatedDir = "$projectDir/generated"
