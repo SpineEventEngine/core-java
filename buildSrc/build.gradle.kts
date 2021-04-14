@@ -30,7 +30,7 @@
  * We cannot use imports or do something else before the `buildscript` or `plugin` clauses.
  *
  * Therefore, when a version of [io.spine.internal.dependency.LicenseReport] changes, it should be
- * changed in the Kotlin object _and_ in this file below thrice.
+ * changed in the Kotlin object _and_ in this file below thrice. 
  */
 buildscript {
     repositories {
