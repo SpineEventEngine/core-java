@@ -26,11 +26,15 @@
 
 package io.spine.internal.dependency
 
+// https://github.com/jk1/Gradle-License-Report
 @Suppress("unused")
-object Jackson {
-    private const val version = "2.12.3"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
+object LicenseReport {
+    private const val version = "1.16"
+    const val lib = "com.github.jk1:gradle-license-report:${version}"
+
+    object GradlePlugin {
+        const val version = LicenseReport.version
+        const val id = "com.github.jk1.dependency-license-report"
+        const val lib = LicenseReport.lib
+    }
 }

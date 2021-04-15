@@ -24,13 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+final def slowTag = 'slow' // See io.spine.testing.SlowTest
 
-@Suppress("unused")
-object Jackson {
-    private const val version = "2.12.3"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
+task fastTest(type: Test) {
+    description = 'Executes all JUnit tests but the ones tagged as "slow".'
+    group = 'Verification'
+
+    useJUnitPlatform {
+        excludeTags slowTag
+    }
+}
+
+task slowTest(type: Test) {
+    description = 'Executes JUnit tests tagged as "slow".'
+    group = 'Verification'
+
+    useJUnitPlatform {
+        includeTags slowTag
+    }
+    shouldRunAfter fastTest
 }

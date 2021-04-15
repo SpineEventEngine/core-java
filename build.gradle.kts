@@ -61,8 +61,11 @@ buildscript {
     }
 }
 
+repositories.applyStandard()
+
 apply(from = "$rootDir/version.gradle.kts")
 
+@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
@@ -173,9 +176,6 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
-                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion"

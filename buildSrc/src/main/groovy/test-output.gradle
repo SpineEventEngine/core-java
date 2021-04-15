@@ -24,13 +24,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+/*
+ * This plugin configured the test output as follows:
+ *
+ *  - the standard streams of the tests execution are logged;
+ *  - exceptions thrown in tests are logged;
+ *  - after all the tests are executed, a short test summary is logged; the summary shown the number
+ *    of tests and their results.
+ */
 
-@Suppress("unused")
-object Jackson {
-    private const val version = "2.12.3"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
+tasks.withType(Test).each {
+    it.testLogging {
+        showStandardStreams = true
+        showExceptions = true
+        showStackTraces = true
+        showCauses = true
+        exceptionFormat = 'full'
+    }
+
+    it.afterSuite { final testDescriptor, final result ->
+        // If the descriptor has no parent, then it is the root test suite, i.e. it includes the
+        // info about all the run tests.
+        if (!testDescriptor.parent) {
+            logger.lifecycle(
+                    """
+                    Test summary:
+                    >> ${result.testCount} tests
+                    >> ${result.successfulTestCount} succeeded
+                    >> ${result.failedTestCount} failed
+                    >> ${result.skippedTestCount} skipped
+                    """
+            )
+        }
+    }
 }

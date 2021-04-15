@@ -24,13 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+/*
+ * This script configures Gradle Checkstyle plugin.
+ */
 
-@Suppress("unused")
-object Jackson {
-    private const val version = "2.12.3"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
+import io.spine.internal.dependency.CheckStyle
+
+apply plugin: 'checkstyle'
+
+checkstyle {
+    toolVersion = "${CheckStyle.version}"
+    configFile = file("$rootDir/config/quality/checkstyle.xml")
+
+    // Disable checking the test sources.
+    checkstyleTest.enabled = false
 }
