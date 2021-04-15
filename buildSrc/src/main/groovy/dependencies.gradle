@@ -25,6 +25,7 @@
  */
 
 //file:noinspection GrDeprecatedAPIUsage
+//file:noinspection UnnecessaryQualifiedReference
 
 /*
  * This file describes shared dependencies of Spine sub-projects.
@@ -41,7 +42,7 @@ ext.repos = [
 ]
 
 final def build = [
-        errorProneJavac        : "${ErrorProne.javacPlugin}",
+        errorProneJavac        : io.spine.internal.dependency.ErrorProne.javacPlugin,
         errorProneAnnotations  : io.spine.internal.dependency.ErrorProne.INSTANCE.annotations.toArray(),
         errorProneCheckApi     : io.spine.internal.dependency.ErrorProne.INSTANCE.checkApi,
         errorProneCore         : io.spine.internal.dependency.ErrorProne.INSTANCE.core,
