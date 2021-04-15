@@ -44,6 +44,7 @@ buildscript {
 
 plugins {
     java
+    groovy
     `kotlin-dsl`
     val licenseReportVersion = "1.16"
     id("com.github.jk1.dependency-license-report").version(licenseReportVersion)

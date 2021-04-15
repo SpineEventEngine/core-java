@@ -42,75 +42,75 @@ ext.repos = [
 
 final def build = [
         errorProneJavac        : "${ErrorProne.javacPlugin}",
-        errorProneAnnotations  : ErrorProne.INSTANCE.annotations.toArray(),
-        errorProneCheckApi     : ErrorProne.INSTANCE.checkApi,
-        errorProneCore         : ErrorProne.INSTANCE.core,
-        errorProneTestHelpers  : ErrorProne.INSTANCE.testHelpers,
+        errorProneAnnotations  : io.spine.internal.dependency.ErrorProne.INSTANCE.annotations.toArray(),
+        errorProneCheckApi     : io.spine.internal.dependency.ErrorProne.INSTANCE.checkApi,
+        errorProneCore         : io.spine.internal.dependency.ErrorProne.INSTANCE.core,
+        errorProneTestHelpers  : io.spine.internal.dependency.ErrorProne.INSTANCE.testHelpers,
 
-        checkerAnnotations     : CheckerFramework.INSTANCE.annotations,
-        checkerDataflow        : CheckerFramework.INSTANCE.dataflow.toArray(),
-        autoCommon             : AutoCommon.lib,
+        checkerAnnotations     : io.spine.internal.dependency.CheckerFramework.INSTANCE.annotations,
+        checkerDataflow        : io.spine.internal.dependency.CheckerFramework.INSTANCE.dataflow.toArray(),
+        autoCommon             : io.spine.internal.dependency.AutoCommon.lib,
         autoService            : [
-                annotations: AutoService.INSTANCE.annotations,
-                processor  : AutoService.processor
+                annotations: io.spine.internal.dependency.AutoService.INSTANCE.annotations,
+                processor  : io.spine.internal.dependency.AutoService.processor
         ],
 
-        jsr305Annotations      : FindBugs.INSTANCE.annotations,
+        jsr305Annotations      : io.spine.internal.dependency.FindBugs.INSTANCE.annotations,
 
-        guava                  : Guava.lib,
-        flogger                : Flogger.lib,
-        slf4j                  : Slf4J.lib,
-        protobuf               : Protobuf.INSTANCE.libs.toArray(),
-        protoc                 : Protobuf.compiler,
-        googleHttpClient       : HttpClient.google,
-        googleHttpClientApache : HttpClient.apache,
-        appengineApi           : AppEngine.sdk,
+        guava                  : io.spine.internal.dependency.Guava.lib,
+        flogger                : io.spine.internal.dependency.Flogger.lib,
+        slf4j                  : io.spine.internal.dependency.Slf4J.lib,
+        protobuf               : io.spine.internal.dependency.Protobuf.INSTANCE.libs.toArray(),
+        protoc                 : io.spine.internal.dependency.Protobuf.compiler,
+        googleHttpClient       : io.spine.internal.dependency.HttpClient.google,
+        googleHttpClientApache : io.spine.internal.dependency.HttpClient.apache,
+        appengineApi           : io.spine.internal.dependency.AppEngine.sdk,
 
-        firebaseAdmin          : Firebase.admin,
-        jacksonDatabind        : Jackson.databind,
+        firebaseAdmin          : io.spine.internal.dependency.Firebase.admin,
+        jacksonDatabind        : io.spine.internal.dependency.Jackson.databind,
 
-        roasterApi             : Roaster.api,
-        roasterJdt             : Roaster.jdt,
-        animalSniffer          : AnimalSniffer.lib,
+        roasterApi             : io.spine.internal.dependency.Roaster.api,
+        roasterJdt             : io.spine.internal.dependency.Roaster.jdt,
+        animalSniffer          : io.spine.internal.dependency.AnimalSniffer.lib,
 
         ci: 'true' == System.getenv('CI'),
 
         gradlePlugins: [
-                errorProne      : ErrorProne.GradlePlugin.lib,
-                protobuf        : Protobuf.GradlePlugin.lib,
-                appengine       : AppEngine.GradlePlugin.lib,
-                licenseReport   : LicenseReport.GradlePlugin.lib
+                errorProne      : io.spine.internal.dependency.ErrorProne.GradlePlugin.lib,
+                protobuf        : io.spine.internal.dependency.Protobuf.GradlePlugin.lib,
+                appengine       : io.spine.internal.dependency.AppEngine.GradlePlugin.lib,
+                licenseReport   : io.spine.internal.dependency.LicenseReport.GradlePlugin.lib
         ]
 ]
 
 final def gen = [
-        javaPoet : JavaPoet.lib
+        javaPoet : io.spine.internal.dependency.JavaPoet.lib
 ]
 
 final def grpc = [
-        grpcCore       : Grpc.core,
-        grpcStub       : Grpc.stub,
-        grpcOkHttp     : Grpc.okHttp,
-        grpcProtobuf   : Grpc.protobuf,
-        grpcNetty      : Grpc.netty,
-        grpcNettyShaded: Grpc.nettyShaded,
-        grpcContext    : Grpc.context
+        grpcCore       : io.spine.internal.dependency.Grpc.core,
+        grpcStub       : io.spine.internal.dependency.Grpc.stub,
+        grpcOkHttp     : io.spine.internal.dependency.Grpc.okHttp,
+        grpcProtobuf   : io.spine.internal.dependency.Grpc.protobuf,
+        grpcNetty      : io.spine.internal.dependency.Grpc.netty,
+        grpcNettyShaded: io.spine.internal.dependency.Grpc.nettyShaded,
+        grpcContext    : io.spine.internal.dependency.Grpc.context
 ]
 
 final def runtime = [
-        floggerSystemBackend: Flogger.Runtime.systemBackend,
-        floggerLog4J        : Flogger.Runtime.log4J,
-        floggerSlf4J        : Flogger.Runtime.slf4J
+        floggerSystemBackend: io.spine.internal.dependency.Flogger.Runtime.systemBackend,
+        floggerLog4J        : io.spine.internal.dependency.Flogger.Runtime.log4J,
+        floggerSlf4J        : io.spine.internal.dependency.Flogger.Runtime.slf4J
 ]
 
 final def test = [
-        junit4        : JUnit.legacy,
-        junit5Api     : JUnit.INSTANCE.api.toArray(),
-        junit5Runner  : JUnit.runner,
-        junitPioneer  : JUnit.pioneer,
-        slf4j         : Slf4J.lib,
-        guavaTestlib  : Guava.testLib,
-        truth         : Truth.INSTANCE.libs.toArray()
+        junit4        : io.spine.internal.dependency.JUnit.legacy,
+        junit5Api     : io.spine.internal.dependency.JUnit.INSTANCE.api.toArray(),
+        junit5Runner  : io.spine.internal.dependency.JUnit.runner,
+        junitPioneer  : io.spine.internal.dependency.JUnit.pioneer,
+        slf4j         : io.spine.internal.dependency.Slf4J.lib,
+        guavaTestlib  : io.spine.internal.dependency.Guava.testLib,
+        truth         : io.spine.internal.dependency.Truth.INSTANCE.libs.toArray()
 ]
 
 final def dir = "$rootDir/" + io.spine.internal.gradle.Scripts.commonPath
@@ -170,29 +170,29 @@ ext.forceConfiguration = { final configurationContainer ->
             // Force dependencies internally used by the framework.
             //noinspection UnnecessaryQualifiedReference
             force(
-                    ErrorProne.annotations,
-                    JavaX.annotations,
-                    CheckerFramework.annotations,
-                    AutoCommon.lib,
-                    Guava.lib,
-                    AnimalSniffer.lib,
-                    Protobuf.lib,
-                    Guava.testLib,
-                    Truth.lib,
-                    JUnit.INSTANCE.api,
-                    JUnit.legacy,
-                    Protobuf.GradlePlugins.lib,
+                    io.spine.internal.dependency.ErrorProne.annotations,
+                    io.spine.internal.dependency.JavaX.annotations,
+                    io.spine.internal.dependency.CheckerFramework.annotations,
+                    io.spine.internal.dependency.AutoCommon.lib,
+                    io.spine.internal.dependency.Guava.lib,
+                    io.spine.internal.dependency.AnimalSniffer.lib,
+                    io.spine.internal.dependency.Protobuf.lib,
+                    io.spine.internal.dependency.Guava.testLib,
+                    io.spine.internal.dependency.Truth.lib,
+                    io.spine.internal.dependency.JUnit.INSTANCE.api,
+                    io.spine.internal.dependency.JUnit.legacy,
+                    io.spine.internal.dependency.Protobuf.GradlePlugins.lib,
             )
 
             // Force transitive dependencies of 3rd party components that we don't use directly.
             force(
-                Gson.lib,
-                J2ObjC.lib,
-                Plexus.utils,
-                Okio.lib,
-                CommonsCli.lib,
-                CheckerFramework.compatQual,
-                CommonsLogging.lib
+                    io.spine.internal.dependency.Gson.lib,
+                    io.spine.internal.dependency.J2ObjC.lib,
+                    io.spine.internal.dependency.Plexus.utils,
+                    io.spine.internal.dependency.Okio.lib,
+                    io.spine.internal.dependency.CommonsCli.lib,
+                    io.spine.internal.dependency.CheckerFramework.compatQual,
+                    io.spine.internal.dependency.CommonsLogging.lib
             )
         }
     }

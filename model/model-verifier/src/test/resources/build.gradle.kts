@@ -36,16 +36,17 @@ buildscript {
     apply(from = "$rootDir/test-env.gradle")
 
     val enclosingRootDir: String by extra
+    val scriptsPath = io.spine.internal.gradle.Scripts.commonPath
 
     // Apply shared dependencies.
-    apply(from = "$enclosingRootDir/config/gradle/dependencies.gradle")
+    apply(from = "${enclosingRootDir}/${scriptsPath}/dependencies.gradle")
 
     // Applying from `version.gradle.kts` inside the `buildscript` section to reuse the properties.
     //
     // As long as `buildscript` section is always evaluated first, we need to apply
     // `version.gradle.kts` explicitly here.
     //
-    apply(from = "$enclosingRootDir/version.gradle.kts")
+    apply(from = "${enclosingRootDir}/version.gradle.kts")
 
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
@@ -70,12 +71,13 @@ apply(from = "$enclosingRootDir/version.gradle.kts")
 val spineBaseVersion: String by extra
 val versionToPublish: String by extra
 
+val scriptsPath = io.spine.internal.gradle.Scripts.commonPath
 apply {
     plugin("com.google.protobuf")
     plugin("io.spine.tools.spine-model-compiler")
     plugin("io.spine.tools.spine-model-verifier")
     from("$enclosingRootDir/version.gradle.kts")
-    from("$enclosingRootDir/config/gradle/model-compiler.gradle")
+    from("$enclosingRootDir/${scriptsPath}/model-compiler.gradle")
 }
 
 repositories.applyStandard()
