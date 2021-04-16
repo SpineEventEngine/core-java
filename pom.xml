@@ -94,7 +94,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-stdlib-jdk8</artifactId>
-    <version>1.5.0-M2</version>
+    <version>1.5.0-RC</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -211,17 +211,17 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-compiler-embeddable</artifactId>
-    <version>1.5.0-M2</version>
+    <version>1.5.0-RC</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-klib-commonizer-embeddable</artifactId>
-    <version>1.5.0-M2</version>
+    <version>1.5.0-RC</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-scripting-compiler-embeddable</artifactId>
-    <version>1.5.0-M2</version>
+    <version>1.5.0-RC</version>
   </dependency>
 </dependencies>
 </project>

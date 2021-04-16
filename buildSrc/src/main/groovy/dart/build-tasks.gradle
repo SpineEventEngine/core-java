@@ -23,34 +23,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package dart
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+import org.apache.tools.ant.taskdefs.condition.Os
 
-/**
- * Version of this library.
- */
-val coreJava = "2.0.0-SNAPSHOT.21"
+final def GROUP = 'Dart'
+final def packageIndex = "$projectDir/.packages" as File
+final def extension = Os.isFamily(Os.FAMILY_WINDOWS) ? '.bat' : ''
+final def PUB_EXECUTABLE = 'pub' + extension
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "2.0.0-SNAPSHOT.21"
-val time = "2.0.0-SNAPSHOT.21"
+task resolveDependencies(type: Exec) {
+    group = GROUP
+    description = 'Fetches the dependencies declared via `pubspec.yaml`.'
 
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineTimeVersion"] = time
-    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
+    inputs.file "$projectDir/pubspec.yaml"
+    outputs.file packageIndex
+
+    commandLine PUB_EXECUTABLE, 'get'
+
+    mustRunAfter 'cleanPackageIndex'
 }
+
+tasks['assemble'].dependsOn 'resolveDependencies'
+
+task cleanPackageIndex(type: Delete) {
+    group = GROUP
+    description = 'Deletes the `.packages` file on this Dart module.'
+    delete = [packageIndex]
+}
+
+tasks['clean'].dependsOn 'cleanPackageIndex'
+
+task testDart(type: Exec) {
+    group = GROUP
+    description = 'Runs Dart tests declared in the `./test` directory. See `https://pub.dev/packages/test#running-tests`.'
+
+    commandLine PUB_EXECUTABLE, 'run', 'test'
+
+    dependsOn 'resolveDependencies'
+}
+
+tasks['check'].dependsOn 'testDart'

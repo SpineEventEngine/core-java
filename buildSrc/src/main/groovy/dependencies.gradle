@@ -1,0 +1,226 @@
+/*
+ * Copyright 2021, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+//file:noinspection GrDeprecatedAPIUsage
+//file:noinspection UnnecessaryQualifiedReference
+
+/*
+ * This file describes shared dependencies of Spine sub-projects.
+ *
+ * Inspired by dependency management of the Uber's NullAway project:
+ *  https://github.com/uber/NullAway/blob/master/gradle/dependencies.gradle
+ */
+
+// Specific repositories.
+ext.repos = [
+        // Snapshots of Error Prone and Guava.
+        sonatypeSnapshots : 'https://oss.sonatype.org/content/repositories/snapshots',
+        gradlePlugins     : 'https://plugins.gradle.org/m2/'
+]
+
+final def build = [
+        errorProneJavac        : io.spine.internal.dependency.ErrorProne.javacPlugin,
+        errorProneAnnotations  : io.spine.internal.dependency.ErrorProne.INSTANCE.annotations.toArray(),
+        errorProneCheckApi     : io.spine.internal.dependency.ErrorProne.INSTANCE.checkApi,
+        errorProneCore         : io.spine.internal.dependency.ErrorProne.INSTANCE.core,
+        errorProneTestHelpers  : io.spine.internal.dependency.ErrorProne.INSTANCE.testHelpers,
+
+        checkerAnnotations     : io.spine.internal.dependency.CheckerFramework.INSTANCE.annotations,
+        checkerDataflow        : io.spine.internal.dependency.CheckerFramework.INSTANCE.dataflow.toArray(),
+        autoCommon             : io.spine.internal.dependency.AutoCommon.lib,
+        autoService            : [
+                annotations: io.spine.internal.dependency.AutoService.INSTANCE.annotations,
+                processor  : io.spine.internal.dependency.AutoService.processor
+        ],
+
+        jsr305Annotations      : io.spine.internal.dependency.FindBugs.INSTANCE.annotations,
+
+        guava                  : io.spine.internal.dependency.Guava.lib,
+        flogger                : io.spine.internal.dependency.Flogger.lib,
+        slf4j                  : io.spine.internal.dependency.Slf4J.lib,
+        protobuf               : io.spine.internal.dependency.Protobuf.INSTANCE.libs.toArray(),
+        protoc                 : io.spine.internal.dependency.Protobuf.compiler,
+        googleHttpClient       : io.spine.internal.dependency.HttpClient.google,
+        googleHttpClientApache : io.spine.internal.dependency.HttpClient.apache,
+        appengineApi           : io.spine.internal.dependency.AppEngine.sdk,
+
+        firebaseAdmin          : io.spine.internal.dependency.Firebase.admin,
+        jacksonDatabind        : io.spine.internal.dependency.Jackson.databind,
+
+        roasterApi             : io.spine.internal.dependency.Roaster.api,
+        roasterJdt             : io.spine.internal.dependency.Roaster.jdt,
+        animalSniffer          : io.spine.internal.dependency.AnimalSniffer.lib,
+
+        ci: 'true' == System.getenv('CI'),
+
+        gradlePlugins: [
+                errorProne      : io.spine.internal.dependency.ErrorProne.GradlePlugin.lib,
+                protobuf        : io.spine.internal.dependency.Protobuf.GradlePlugin.lib,
+                appengine       : io.spine.internal.dependency.AppEngine.GradlePlugin.lib,
+                licenseReport   : io.spine.internal.dependency.LicenseReport.GradlePlugin.lib
+        ]
+]
+
+final def gen = [
+        javaPoet : io.spine.internal.dependency.JavaPoet.lib
+]
+
+final def grpc = [
+        grpcCore       : io.spine.internal.dependency.Grpc.core,
+        grpcStub       : io.spine.internal.dependency.Grpc.stub,
+        grpcOkHttp     : io.spine.internal.dependency.Grpc.okHttp,
+        grpcProtobuf   : io.spine.internal.dependency.Grpc.protobuf,
+        grpcNetty      : io.spine.internal.dependency.Grpc.netty,
+        grpcNettyShaded: io.spine.internal.dependency.Grpc.nettyShaded,
+        grpcContext    : io.spine.internal.dependency.Grpc.context
+]
+
+final def runtime = [
+        floggerSystemBackend: io.spine.internal.dependency.Flogger.Runtime.systemBackend,
+        floggerLog4J        : io.spine.internal.dependency.Flogger.Runtime.log4J,
+        floggerSlf4J        : io.spine.internal.dependency.Flogger.Runtime.slf4J
+]
+
+final def test = [
+        junit4        : io.spine.internal.dependency.JUnit.legacy,
+        junit5Api     : io.spine.internal.dependency.JUnit.INSTANCE.api.toArray(),
+        junit5Runner  : io.spine.internal.dependency.JUnit.runner,
+        junitPioneer  : io.spine.internal.dependency.JUnit.pioneer,
+        slf4j         : io.spine.internal.dependency.Slf4J.lib,
+        guavaTestlib  : io.spine.internal.dependency.Guava.testLib,
+        truth         : io.spine.internal.dependency.Truth.INSTANCE.libs.toArray()
+]
+
+final def dir = "$rootDir/" + io.spine.internal.gradle.Scripts.commonPath
+final def scripts = [
+        testArtifacts          : "$dir/test-artifacts.gradle",
+        testOutput             : "$dir/test-output.gradle",
+        slowTests              : "$dir/slow-tests.gradle",
+        javadocOptions         : "$dir/javadoc-options.gradle",
+        filterInternalJavadocs : "$dir/filter-internal-javadoc.gradle",
+        jacoco                 : "$dir/jacoco.gradle",
+        publish                : "$dir/publish.gradle",
+        publishProto           : "$dir/publish-proto.gradle",
+        javacArgs              : "$dir/javac-args.gradle",
+        jsBuildTasks           : "$dir/js/build-tasks.gradle",
+        jsConfigureProto       : "$dir/js/configure-proto.gradle",
+        npmPublishTasks        : "$dir/js/npm-publish-tasks.gradle",
+        npmCli                 : "$dir/js/npm-cli.gradle",
+        updatePackageVersion   : "$dir/js/update-package-version.gradle",
+        dartBuildTasks         : "$dir/dart/build-tasks.gradle",
+        pubPublishTasks        : "$dir/dart/pub-publish-tasks.gradle",
+        pmd                    : "$dir/pmd.gradle",
+        checkstyle             : "$dir/checkstyle.gradle",
+        runBuild               : "$dir/run-build.gradle",
+        modelCompiler          : "$dir/model-compiler.gradle",
+        licenseReportCommon    : "$dir/license-report-common.gradle",
+        projectLicenseReport   : "$dir/license-report-project.gradle",
+        repoLicenseReport      : "$dir/license-report-repo.gradle",
+        generatePom            : "$dir/generate-pom.gradle",
+        updateGitHubPages      : "$dir/update-gh-pages.gradle"
+]
+
+ext.deps = [
+        'build'    : build,
+        'grpc'     : grpc,
+        'gen'      : gen,
+        'runtime'  : runtime,
+        'test'     : test,
+        'scripts'  : scripts,
+]
+
+/**
+ * Forces default dependencies for the passed object which has {@code configurations} property.
+ *
+ * <p>Typically this should be applied to {@link ScriptHandler} (if in {@code buildscript} section),
+ * or to {@link Project} (if in project definition section).
+ */
+ext.forceConfiguration = { final configurationContainer ->
+
+    configurationContainer.configurations.all {
+        resolutionStrategy {
+            failOnVersionConflict()
+            cacheChangingModulesFor(0, 'seconds')
+
+            // Force deprecated dependencies.
+            force (Slf4J.lib)
+
+            // Force dependencies internally used by the framework.
+            //noinspection UnnecessaryQualifiedReference
+            force(
+                    io.spine.internal.dependency.ErrorProne.annotations,
+                    io.spine.internal.dependency.JavaX.annotations,
+                    io.spine.internal.dependency.CheckerFramework.annotations,
+                    io.spine.internal.dependency.AutoCommon.lib,
+                    io.spine.internal.dependency.Guava.lib,
+                    io.spine.internal.dependency.AnimalSniffer.lib,
+                    io.spine.internal.dependency.Protobuf.lib,
+                    io.spine.internal.dependency.Guava.testLib,
+                    io.spine.internal.dependency.Truth.lib,
+                    io.spine.internal.dependency.JUnit.INSTANCE.api,
+                    io.spine.internal.dependency.JUnit.legacy,
+                    io.spine.internal.dependency.Protobuf.GradlePlugins.lib,
+            )
+
+            // Force transitive dependencies of 3rd party components that we don't use directly.
+            force(
+                    io.spine.internal.dependency.Gson.lib,
+                    io.spine.internal.dependency.J2ObjC.lib,
+                    io.spine.internal.dependency.Plexus.utils,
+                    io.spine.internal.dependency.Okio.lib,
+                    io.spine.internal.dependency.CommonsCli.lib,
+                    io.spine.internal.dependency.CheckerFramework.compatQual,
+                    io.spine.internal.dependency.CommonsLogging.lib
+            )
+        }
+    }
+}
+
+/**
+ * Adds default repositories to the passed object which has {@code repositories} property.
+ *
+ * <p>Typically this should be applied to {@link ScriptHandler} (if in {@code buildscript} section),
+ * or to {@link Project} (if in project definition section).
+ */
+ext.defaultRepositories = { final repositoryContainer ->
+
+    repositoryContainer.repositories {
+        mavenLocal()
+        maven {
+            url = repos.spine
+            content {
+                includeGroup 'io.spine'
+                includeGroup 'io.spine.tools'
+                includeGroup 'io.spine.gcloud'
+            }
+            mavenContent {
+                releasesOnly()
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}

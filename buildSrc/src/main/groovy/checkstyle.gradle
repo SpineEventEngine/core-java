@@ -24,33 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
+/*
+ * This script configures Gradle Checkstyle plugin.
  */
 
-/**
- * Version of this library.
- */
-val coreJava = "2.0.0-SNAPSHOT.21"
+import io.spine.internal.dependency.CheckStyle
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "2.0.0-SNAPSHOT.21"
-val time = "2.0.0-SNAPSHOT.21"
+apply plugin: 'checkstyle'
 
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineTimeVersion"] = time
-    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
+checkstyle {
+    toolVersion = "${CheckStyle.version}"
+    configFile = file("$rootDir/config/quality/checkstyle.xml")
+
+    // Disable checking the test sources.
+    checkstyleTest.enabled = false
 }

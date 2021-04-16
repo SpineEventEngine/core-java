@@ -24,33 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
 
-/**
- * Version of this library.
+/*
+ * This script configures Gradle PMD plugin.
  */
-val coreJava = "2.0.0-SNAPSHOT.21"
+pmd {
+    toolVersion = "${io.spine.internal.dependency.Pmd.version}"
+    consoleOutput = true
+    incrementalAnalysis = true
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "2.0.0-SNAPSHOT.21"
-val time = "2.0.0-SNAPSHOT.21"
+    // The build is going to fail in case of violations.
+    ignoreFailures = false
 
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineTimeVersion"] = time
-    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
+    // Disable the default rule set to use the custom rules (see below).
+    ruleSets = []
+
+    // A set of custom rules.
+    ruleSetFiles = files("$rootDir/config/quality/pmd.xml")
+
+    reportsDir = file("build/reports/pmd")
+
+    // Just analyze the main sources; do not analyze tests.
+    sourceSets = [sourceSets.main]
 }
+
+// Workaround for https://github.com/pmd/pmd/issues/1705.
+pmdMain.classpath += sourceSets.main.runtimeClasspath
