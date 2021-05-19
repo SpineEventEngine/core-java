@@ -104,9 +104,16 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
      * States if the processing of the annotation is finished or not.
      *
      * @return {@code true} if the processing of the annotation is finished, {@code false} otherwise
-     * @see javax.annotation.processing.Processor#process return section for the usage
+     * @deprecated "Claiming" annotations a bad practice. We should always allow other processors
+     * access to the annotation.
+     * See <a href="https://errorprone.info/bugpattern/DoNotClaimAnnotations">this ErrorProne check</a>
+     * for a more detailed description. The {@code SpineAnnotationProcessor.process(..)} method
+     * always returns {@code false}. This method will be removed in future releases.
      */
-    protected abstract boolean isFinished();
+    @Deprecated
+    protected boolean isFinished() {
+        return false;
+    }
 
     /**
      * A lifecycle method called when a processing round is started.
@@ -149,14 +156,12 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
     @Override
     public final boolean process(Set<? extends TypeElement> annotations,
                                  RoundEnvironment roundEnv) {
-        if (roundEnv.errorRaised() || roundEnv.processingOver()) {
-            return true;
+        if (!roundEnv.errorRaised() && !roundEnv.processingOver()) {
+            onRoundStarted();
+            processAnnotation(getAnnotationType(), roundEnv);
+            onRoundFinished();
         }
-        onRoundStarted();
-        processAnnotation(getAnnotationType(), roundEnv);
-        onRoundFinished();
-        boolean result = isFinished();
-        return result;
+        return false;
     }
 
     private void processAnnotation(Class<? extends Annotation> annotation,
