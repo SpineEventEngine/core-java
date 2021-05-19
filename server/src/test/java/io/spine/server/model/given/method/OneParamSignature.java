@@ -26,6 +26,7 @@
 
 package io.spine.server.model.given.method;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.model.AccessModifier;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.MethodSignature;
@@ -51,8 +52,8 @@ public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnve
     }
 
     @Override
-    protected AccessModifier modifier() {
-        return PUBLIC;
+    protected ImmutableSet<AccessModifier> modifier() {
+        return ImmutableSet.of(PUBLIC);
     }
 
     @Override

@@ -27,6 +27,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.string.Diags;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -96,12 +97,13 @@ public enum MatchCriterion {
      * {@linkplain MethodSignature#modifier() expected}.
      */
     ACCESS_MODIFIER(WARN,
-                    "The access modifier of `%s` method is `%s`. We recommend it to be `%s`."
-                            + " Refer to the `%s` annotation docs for details.") {
+                    "The access modifier of `%s` method is `%s`. "
+                            + "We recommend it to be one of: `%s`. "
+                            + "Refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            AccessModifier recommended = signature.modifier();
-            boolean hasMatch = recommended.test(method);
+            ImmutableSet<AccessModifier> recommended = signature.modifier();
+            boolean hasMatch = recommended.stream().anyMatch(m -> m.test(method));
             if (hasMatch) {
                 return Optional.empty();
             }
@@ -111,7 +113,7 @@ public enum MatchCriterion {
         private Optional<SignatureMismatch>
         createMismatch(Method method,
                        MethodSignature<?, ?> signature,
-                       AccessModifier recommended) {
+                       ImmutableSet<AccessModifier> recommended) {
             String methodReference = methodAsString(method);
             String annotationName = signature.annotation().getSimpleName();
             AccessModifier currentModifier = AccessModifier.fromMethod(method);
