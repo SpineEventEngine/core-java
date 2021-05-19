@@ -26,6 +26,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.base.Splitter;
 import kotlin.Metadata;
 import kotlin.jvm.internal.Reflection;
 import kotlin.reflect.KCallable;
@@ -83,11 +84,14 @@ final class J2Kt {
      */
     private static final class SameMethod implements Predicate<KCallable<?>> {
 
+        private static final String KOTLIN_NAME_MODULE_SEPARATOR = "$";
+        private static final Splitter nameSplitter = Splitter.on(KOTLIN_NAME_MODULE_SEPARATOR);
+
         private final String name;
         private final List<KType> javaParamTypes;
 
         private SameMethod(Method javaMethod) {
-            this.name = javaMethod.getName();
+            this.name = deObscureName(javaMethod.getName());
             this.javaParamTypes = stream(javaMethod.getParameterTypes())
                     .map(Reflection::typeOf)
                     .collect(toList());
@@ -101,8 +105,16 @@ final class J2Kt {
         private static List<KType> paramTypes(KCallable<?> method) {
             return method.getParameters()
                          .stream()
+                         .skip(1) // `this` instance as the first parameter.
                          .map(KParameter::getType)
                          .collect(toList());
+        }
+
+        private static String deObscureName(String name) {
+            if (!name.contains(KOTLIN_NAME_MODULE_SEPARATOR)) {
+                return name;
+            }
+            return nameSplitter.splitToList(name).get(0);
         }
     }
 }

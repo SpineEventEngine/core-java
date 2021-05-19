@@ -24,46 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
+package io.spine.server.model.given
 
-val spineBaseVersion: String by extra
+import io.spine.core.Subscribe
+import io.spine.server.event.AbstractEventSubscriber
+import io.spine.test.projection.event.Int32Imported
 
-dependencies {
-    api(project(":client"))
-    implementation(kotlin("reflect"))
+class KotlinEventSubscriber : AbstractEventSubscriber() {
 
-    Grpc.apply {
-        implementation(protobuf)
-        implementation(core)
-    }
-
-    AutoService.apply {
-        testAnnotationProcessor(processor)
-        testCompileOnly(annotations)
-    }
-    testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
-    testImplementation(project(":testutil-server"))
-}
-
-apply {
-    with(Scripts) {
-        from(testArtifacts(project))
-        from(publishProto(project))
-    }
-}
-
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-tasks.javadoc {
-    doLast {
-        copy {
-            from("src/main/docs")
-            into("$buildDir/docs/javadoc")
-        }
+    @Subscribe
+    internal fun on(@Suppress("UNUSED_PARAMETER") e: Int32Imported) {
+        // Do nothing.
     }
 }

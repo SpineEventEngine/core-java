@@ -24,46 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
+package io.spine.server.model
 
-val spineBaseVersion: String by extra
+import com.google.common.truth.Truth8.assertThat
+import io.spine.core.Subscribe
+import io.spine.server.event.model.SubscriberSignature
+import io.spine.server.model.given.KotlinEventSubscriber
+import org.junit.jupiter.api.Test
 
-dependencies {
-    api(project(":client"))
-    implementation(kotlin("reflect"))
+class `Method signature in Kotlin should` {
 
-    Grpc.apply {
-        implementation(protobuf)
-        implementation(core)
-    }
-
-    AutoService.apply {
-        testAnnotationProcessor(processor)
-        testCompileOnly(annotations)
-    }
-    testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
-    testImplementation(project(":testutil-server"))
-}
-
-apply {
-    with(Scripts) {
-        from(testArtifacts(project))
-        from(publishProto(project))
-    }
-}
-
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-tasks.javadoc {
-    doLast {
-        copy {
-            from("src/main/docs")
-            into("$buildDir/docs/javadoc")
-        }
+    @Test
+    fun `be accepted with the 'internal' access modifier`() {
+        val method = KotlinEventSubscriber::class.java
+            .declaredMethods
+            .first { it.isAnnotationPresent(Subscribe::class.java) }
+        val mismatch = MatchCriterion.ACCESS_MODIFIER.test(method, SubscriberSignature())
+        assertThat(mismatch)
+            .isEmpty()
     }
 }

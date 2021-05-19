@@ -34,6 +34,7 @@ import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -103,9 +104,8 @@ public final class AccessModifier implements Predicate<Method> {
      */
     static AccessModifier fromMethod(Method method) {
         checkNotNull(method);
-        AccessModifier matchedModifier = ImmutableList
-                .of(PRIVATE, PACKAGE_PRIVATE, PROTECTED, PUBLIC)
-                .stream()
+        AccessModifier matchedModifier = Stream
+                .of(PRIVATE, PACKAGE_PRIVATE, PROTECTED, KOTLIN_INTERNAL, PUBLIC)
                 .filter(modifier -> modifier.test(method))
                 .findFirst()
                 .orElseThrow(() -> newIllegalArgumentException(
