@@ -26,7 +26,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableList;
 import kotlin.reflect.KCallable;
 
 import java.lang.reflect.Method;
