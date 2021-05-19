@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -82,6 +82,11 @@
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.23.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
      * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
@@ -271,7 +276,7 @@
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.1
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
      * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
      * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -480,12 +485,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:36 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:01 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
@@ -531,6 +536,11 @@ This report was generated on **Thu Apr 15 19:35:36 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.protobuf **Name:** protobuf-java-util **Version:** 3.15.7
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **POM License: 3-Clause BSD License** - [https://opensource.org/licenses/BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
      * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
@@ -716,7 +726,7 @@ This report was generated on **Thu Apr 15 19:35:36 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.1
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
      * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
      * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -925,12 +935,12 @@ This report was generated on **Thu Apr 15 19:35:36 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:37 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:01 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1012,6 +1022,11 @@ This report was generated on **Thu Apr 15 19:35:37 EEST 2021** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.23.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
      * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
@@ -1200,6 +1215,11 @@ This report was generated on **Thu Apr 15 19:35:37 EEST 2021** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.23.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
@@ -1405,12 +1425,12 @@ This report was generated on **Thu Apr 15 19:35:37 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:37 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:02 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1951,12 +1971,12 @@ This report was generated on **Thu Apr 15 19:35:37 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:40 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:03 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2038,6 +2058,11 @@ This report was generated on **Thu Apr 15 19:35:40 EEST 2021** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.23.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** org.checkerframework **Name:** checker-compat-qual **Version:** 2.5.5
      * **POM Project URL:** [https://checkerframework.org](https://checkerframework.org)
@@ -2235,7 +2260,7 @@ This report was generated on **Thu Apr 15 19:35:40 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
-1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.1
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
      * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
      * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -2444,12 +2469,12 @@ This report was generated on **Thu Apr 15 19:35:40 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:41 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:04 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2550,6 +2575,11 @@ This report was generated on **Thu Apr 15 19:35:41 EEST 2021** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.23.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
@@ -2775,6 +2805,11 @@ This report was generated on **Thu Apr 15 19:35:41 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
+
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
@@ -2979,12 +3014,12 @@ This report was generated on **Thu Apr 15 19:35:41 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:42 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:06 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -3085,6 +3120,11 @@ This report was generated on **Thu Apr 15 19:35:42 EEST 2021** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.23.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
@@ -3310,6 +3350,11 @@ This report was generated on **Thu Apr 15 19:35:42 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
+
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
@@ -3514,12 +3559,12 @@ This report was generated on **Thu Apr 15 19:35:42 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:44 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:08 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.15`
+# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.22`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -3620,6 +3665,11 @@ This report was generated on **Thu Apr 15 19:35:44 EEST 2021** using [Gradle-Lic
 1. **Group:** io.perfmark **Name:** perfmark-api **Version:** 0.23.0
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
+
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
@@ -3889,6 +3939,11 @@ This report was generated on **Thu Apr 15 19:35:44 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **POM License: Apache 2.0** - [https://opensource.org/licenses/Apache-2.0](https://opensource.org/licenses/Apache-2.0)
 
+1. **Group:** javax.annotation **Name:** javax.annotation-api **Version:** 1.3.2
+     * **Manifest Project URL:** [https://javaee.github.io/glassfish](https://javaee.github.io/glassfish)
+     * **POM Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **POM License: CDDL + GPLv2 with classpath exception** - [https://github.com/javaee/javax.annotation/blob/master/LICENSE](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
+
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
@@ -4093,4 +4148,4 @@ This report was generated on **Thu Apr 15 19:35:44 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Apr 15 19:35:56 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed May 19 14:58:11 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
