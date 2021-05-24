@@ -48,7 +48,7 @@
  *
  *
  * Be aware that the root project `buildscript` should already have a classpath
- * `io.spine.tools:spine-model-compiler:<version>` classpath dependency.
+ * `io.spine.tools:spine-mc-java:<version>` classpath dependency.
  */
 
 modelCompiler {
@@ -62,7 +62,7 @@ modelCompiler {
     }
 
     methods {
-        applyFactory "io.spine.code.gen.java.UuidMethodFactory", messages().uuid()
+        applyFactory "io.spine.tools.java.code.UuidMethodFactory", messages().uuid()
     }
 
     entityQueries {

@@ -48,4 +48,6 @@ object JUnit {
     const val pioneer = "org.junit-pioneer:junit-pioneer:${pioneerVersion}"
     const val platformCommons = "org.junit.platform:junit-platform-commons:${platformVersion}"
     const val platformLauncher = "org.junit.platform:junit-platform-launcher:${platformVersion}"
+    @Suppress("unused")
+    const val params = "org.junit.jupiter:junit-jupiter-params:${version}"
 }

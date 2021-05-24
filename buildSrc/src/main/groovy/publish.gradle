@@ -69,7 +69,7 @@ projectsToPublish.each {
 
         // Artifact IDs are composed as "spine-<project.name>". Example:
         //
-        //      "spine-model-compiler"
+        //      "spine-mc-java"
         //
         // That helps to distinguish resulting JARs in the final assembly, such as WAR package.
         //
