@@ -85,7 +85,9 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private ImmutableSetMultimap<DispatchKey, H> perform() {
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
-            scanMethod(method);
+            if (!method.isBridge() && !method.isSynthetic()) {
+                scanMethod(method);
+            }
         }
         return ImmutableSetMultimap.copyOf(handlers);
     }

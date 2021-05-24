@@ -26,17 +26,22 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableList;
+import io.spine.reflect.J2Kt;
+import kotlin.reflect.KCallable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Optional;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isProtected;
 import static java.lang.reflect.Modifier.isPublic;
+import static kotlin.reflect.KVisibility.INTERNAL;
 
 /**
  * The predicate for {@linkplain Modifier access modifiers} of {@linkplain Method methods}.
@@ -44,26 +49,34 @@ import static java.lang.reflect.Modifier.isPublic;
 public final class AccessModifier implements Predicate<Method> {
 
     public static final AccessModifier PUBLIC =
-            new AccessModifier(Modifier::isPublic, "public");
+            onJavaMethod(Modifier::isPublic, "public");
 
     public static final AccessModifier PROTECTED =
-            new AccessModifier(Modifier::isProtected, "protected");
+            onJavaMethod(Modifier::isProtected, "protected");
 
     public static final AccessModifier PACKAGE_PRIVATE =
-            new AccessModifier(methodModifier ->
-                                       !(isPublic(methodModifier)
-                                      || isProtected(methodModifier)
-                                      || isPrivate(methodModifier)),
-                               "package-private");
+            onJavaMethod(methodModifier ->
+                                 !(isPublic(methodModifier)
+                                         || isProtected(methodModifier)
+                                         || isPrivate(methodModifier)),
+                         "package-private");
 
     public static final AccessModifier PRIVATE =
-            new AccessModifier(Modifier::isPrivate, "private");
+            onJavaMethod(Modifier::isPrivate, "private");
+
+    @SuppressWarnings("OptionalIsPresent") // More readable this way.
+    public static final AccessModifier KOTLIN_INTERNAL = new AccessModifier(m -> {
+        Optional<KCallable<?>> kotlinMethod = J2Kt.findKotlinMethod(m);
+        if (!kotlinMethod.isPresent()) {
+            return false;
+        }
+        return kotlinMethod.get().getVisibility() == INTERNAL;
+    }, "Kotlin internal");
 
     /**
-     * The predicate which works with the {@linkplain Method#getModifiers() raw representation }
-     * of method's access modifiers.
+     * The predicate which determines if the method has a matching modifier or not.
      */
-    private final Predicate<Integer> checkingMethod;
+    private final Predicate<Method> delegate;
 
     /**
      * The name of the access modifier.
@@ -72,9 +85,14 @@ public final class AccessModifier implements Predicate<Method> {
      */
     private final String name;
 
-    private AccessModifier(Predicate<Integer> checkingMethod, String name) {
-        this.checkingMethod = checkingMethod;
+    private AccessModifier(Predicate<Method> delegate, String name) {
+        this.delegate = delegate;
         this.name = name;
+    }
+
+    private static AccessModifier onJavaMethod(IntPredicate flagPredicate, String name) {
+        Predicate<Method> predicate = m -> flagPredicate.test(m.getModifiers());
+        return new AccessModifier(predicate, name);
     }
 
     /**
@@ -86,9 +104,8 @@ public final class AccessModifier implements Predicate<Method> {
      */
     static AccessModifier fromMethod(Method method) {
         checkNotNull(method);
-        AccessModifier matchedModifier = ImmutableList
-                .of(PRIVATE, PACKAGE_PRIVATE, PROTECTED, PUBLIC)
-                .stream()
+        AccessModifier matchedModifier = Stream
+                .of(PRIVATE, PACKAGE_PRIVATE, PROTECTED, KOTLIN_INTERNAL, PUBLIC)
                 .filter(modifier -> modifier.test(method))
                 .findFirst()
                 .orElseThrow(() -> newIllegalArgumentException(
@@ -108,7 +125,7 @@ public final class AccessModifier implements Predicate<Method> {
      */
     @Override
     public boolean test(Method method) {
-        return checkingMethod.test(method.getModifiers());
+        return delegate.test(method);
     }
 
     @Override

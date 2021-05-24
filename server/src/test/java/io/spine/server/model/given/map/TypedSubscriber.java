@@ -24,30 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.server.model.given.map;
 
-// https://junit.org/junit5/
-object JUnit {
-    private const val version            = "5.7.1"
-    private const val platformVersion    = "1.7.1"
-    private const val legacyVersion      = "4.13.1"
+import io.spine.base.EventMessage;
+import io.spine.server.event.AbstractEventSubscriber;
 
-    // https://github.com/apiguardian-team/apiguardian
-    private const val apiGuardianVersion = "1.1.1"
-    // https://github.com/junit-pioneer/junit-pioneer
-    private const val pioneerVersion     = "1.3.8"
+/**
+ * A subscriber to events of type {@code E}.
+ *
+ * @param <E> target event type
+ */
+abstract class TypedSubscriber<E extends EventMessage>
+        extends AbstractEventSubscriber {
 
-    const val legacy = "junit:junit:${legacyVersion}"
-    val api = listOf(
-        "org.apiguardian:apiguardian-api:${apiGuardianVersion}",
-        "org.junit.jupiter:junit-jupiter-api:${version}",
-        "org.junit.jupiter:junit-jupiter-params:${version}"
-    )
-    const val runner  = "org.junit.jupiter:junit-jupiter-engine:${version}"
-    @Suppress("unused")
-    const val pioneer = "org.junit-pioneer:junit-pioneer:${pioneerVersion}"
-    const val platformCommons = "org.junit.platform:junit-platform-commons:${platformVersion}"
-    const val platformLauncher = "org.junit.platform:junit-platform-launcher:${platformVersion}"
-    @Suppress("unused")
-    const val params = "org.junit.jupiter:junit-jupiter-params:${version}"
+    /**
+     * The subscriber method.
+     *
+     * <p>When overridden, this method will cause a bridge method to appear in the subclass.
+     */
+    @SuppressWarnings("unused")
+    abstract void on(E event);
 }

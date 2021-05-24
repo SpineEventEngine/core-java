@@ -27,6 +27,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Apply;
@@ -63,8 +64,8 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
     }
 
     @Override
-    protected AccessModifier modifier() {
-        return AccessModifier.PRIVATE;
+    protected ImmutableSet<AccessModifier> modifier() {
+        return ImmutableSet.of(AccessModifier.PRIVATE);
     }
 
     @Override

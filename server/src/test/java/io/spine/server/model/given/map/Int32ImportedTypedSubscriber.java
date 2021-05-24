@@ -24,30 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.server.model.given.map;
 
-// https://junit.org/junit5/
-object JUnit {
-    private const val version            = "5.7.1"
-    private const val platformVersion    = "1.7.1"
-    private const val legacyVersion      = "4.13.1"
+import io.spine.core.Subscribe;
+import io.spine.test.projection.event.Int32Imported;
 
-    // https://github.com/apiguardian-team/apiguardian
-    private const val apiGuardianVersion = "1.1.1"
-    // https://github.com/junit-pioneer/junit-pioneer
-    private const val pioneerVersion     = "1.3.8"
+/**
+ * A typed subscriber to {@code Int32Imported} events.
+ *
+ * <p>By implementing {@code on(Int32Imported)}, this class causes the compiler to generate a bridge
+ * method {@code on(EventMessage)}. The bridge will have the same annotations as the handcrafted
+ * method.
+ */
+public class Int32ImportedTypedSubscriber extends TypedSubscriber<Int32Imported> {
 
-    const val legacy = "junit:junit:${legacyVersion}"
-    val api = listOf(
-        "org.apiguardian:apiguardian-api:${apiGuardianVersion}",
-        "org.junit.jupiter:junit-jupiter-api:${version}",
-        "org.junit.jupiter:junit-jupiter-params:${version}"
-    )
-    const val runner  = "org.junit.jupiter:junit-jupiter-engine:${version}"
-    @Suppress("unused")
-    const val pioneer = "org.junit-pioneer:junit-pioneer:${pioneerVersion}"
-    const val platformCommons = "org.junit.platform:junit-platform-commons:${platformVersion}"
-    const val platformLauncher = "org.junit.platform:junit-platform-launcher:${platformVersion}"
-    @Suppress("unused")
-    const val params = "org.junit.jupiter:junit-jupiter-params:${version}"
+    @Subscribe
+    @Override
+    void on(Int32Imported event) {
+        // Do nothing.
+    }
 }

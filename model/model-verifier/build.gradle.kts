@@ -35,7 +35,7 @@ val spineBaseVersion: String by extra
 dependencies {
     implementation(gradleApi())
     implementation("io.spine.tools:spine-plugin-base:$spineBaseVersion")
-    implementation("io.spine.tools:spine-model-compiler:$spineBaseVersion")
+    implementation("io.spine.tools:spine-mc-java:$spineBaseVersion")
     implementation(project(":server"))
     implementation(project(":model-assembler"))
 

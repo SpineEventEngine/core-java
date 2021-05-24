@@ -181,9 +181,4 @@ public class AssignLookup extends SpineAnnotationProcessor {
             }
         }
     }
-
-    @Override
-    protected boolean isFinished() {
-        return true;
-    }
 }

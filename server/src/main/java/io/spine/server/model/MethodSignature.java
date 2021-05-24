@@ -26,6 +26,7 @@
 
 package io.spine.server.model;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.logging.Logging;
 import io.spine.server.type.MessageEnvelope;
 
@@ -37,6 +38,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.AccessModifier.KOTLIN_INTERNAL;
 import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
 import static java.util.stream.Collectors.toList;
 
@@ -86,10 +88,11 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *
      * <p>Override this method to change the allowed access modifiers.
      *
-     * @return {@link AccessModifier#PACKAGE_PRIVATE}
+     * @return {@link AccessModifier#PACKAGE_PRIVATE} for Java and
+     *         {@link AccessModifier#KOTLIN_INTERNAL} for Kotlin
      */
-    protected AccessModifier modifier() {
-        return PACKAGE_PRIVATE;
+    protected ImmutableSet<AccessModifier> modifier() {
+        return ImmutableSet.of(PACKAGE_PRIVATE, KOTLIN_INTERNAL);
     }
 
     /**

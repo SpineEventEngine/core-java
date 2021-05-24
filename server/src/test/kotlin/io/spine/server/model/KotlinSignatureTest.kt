@@ -24,30 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.server.model
 
-// https://junit.org/junit5/
-object JUnit {
-    private const val version            = "5.7.1"
-    private const val platformVersion    = "1.7.1"
-    private const val legacyVersion      = "4.13.1"
+import com.google.common.truth.Truth8.assertThat
+import io.spine.core.Subscribe
+import io.spine.server.event.model.SubscriberSignature
+import io.spine.server.model.given.KotlinEventSubscriber
+import org.junit.jupiter.api.Test
 
-    // https://github.com/apiguardian-team/apiguardian
-    private const val apiGuardianVersion = "1.1.1"
-    // https://github.com/junit-pioneer/junit-pioneer
-    private const val pioneerVersion     = "1.3.8"
+class `Method signature in Kotlin should` {
 
-    const val legacy = "junit:junit:${legacyVersion}"
-    val api = listOf(
-        "org.apiguardian:apiguardian-api:${apiGuardianVersion}",
-        "org.junit.jupiter:junit-jupiter-api:${version}",
-        "org.junit.jupiter:junit-jupiter-params:${version}"
-    )
-    const val runner  = "org.junit.jupiter:junit-jupiter-engine:${version}"
-    @Suppress("unused")
-    const val pioneer = "org.junit-pioneer:junit-pioneer:${pioneerVersion}"
-    const val platformCommons = "org.junit.platform:junit-platform-commons:${platformVersion}"
-    const val platformLauncher = "org.junit.platform:junit-platform-launcher:${platformVersion}"
-    @Suppress("unused")
-    const val params = "org.junit.jupiter:junit-jupiter-params:${version}"
+    @Test
+    fun `be accepted with the 'internal' access modifier`() {
+        val method = KotlinEventSubscriber::class.java
+            .declaredMethods
+            .first { it.isAnnotationPresent(Subscribe::class.java) }
+        val mismatch = MatchCriterion.ACCESS_MODIFIER.test(method, SubscriberSignature())
+        assertThat(mismatch)
+            .isEmpty()
+    }
 }

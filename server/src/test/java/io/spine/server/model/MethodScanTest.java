@@ -31,6 +31,7 @@ import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.event.model.SubscriberSignature;
 import io.spine.server.model.given.map.ARejectionSubscriber;
 import io.spine.server.model.given.map.FilteredSubscription;
+import io.spine.server.model.given.map.Int32ImportedTypedSubscriber;
 import io.spine.string.StringifierRegistry;
 import io.spine.string.Stringifiers;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,8 +59,12 @@ class MethodScanTest {
     void noFiltersInKeys() {
         ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
                 findMethodsBy(FilteredSubscription.class, new SubscriberSignature());
-        map.keySet()
-           .forEach(key -> assertEquals(key.withoutFilter(), key));
+        assertThat(map)
+                .hasSize(2);
+        for (DispatchKey key : map.keySet()) {
+            assertThat(key)
+                    .isEqualTo(key.withoutFilter());
+        }
     }
 
     @Test
@@ -67,6 +72,16 @@ class MethodScanTest {
     void multipleRejectionSubscriptions() {
         ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
                 findMethodsBy(ARejectionSubscriber.class, new SubscriberSignature());
-        assertThat(map.keys()).hasSize(2);
+        assertThat(map.keys())
+                .hasSize(2);
+    }
+
+    @Test
+    @DisplayName("not include bridge methods")
+    void bridgeMethods() {
+        ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
+                findMethodsBy(Int32ImportedTypedSubscriber.class, new SubscriberSignature());
+        assertThat(map.keys())
+                .hasSize(1);
     }
 }
