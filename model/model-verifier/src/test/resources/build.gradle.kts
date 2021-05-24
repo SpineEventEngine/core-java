@@ -55,7 +55,7 @@ buildscript {
 
     dependencies {
         classpath(io.spine.internal.dependency.Protobuf.GradlePlugin.lib)
-        classpath("io.spine.tools:spine-model-compiler:${spineBaseVersion}")
+        classpath("io.spine.tools:spine-mc-java:${spineBaseVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
     }
 }
@@ -74,7 +74,7 @@ val versionToPublish: String by extra
 val scriptsPath = io.spine.internal.gradle.Scripts.commonPath
 apply {
     plugin("com.google.protobuf")
-    plugin("io.spine.tools.spine-model-compiler")
+    plugin("io.spine.mc-java")
     plugin("io.spine.tools.spine-model-verifier")
     from("$enclosingRootDir/version.gradle.kts")
     from("$enclosingRootDir/${scriptsPath}/model-compiler.gradle")

@@ -26,13 +26,14 @@
 
 import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.Kotlin
 import io.spine.internal.gradle.Scripts
 
 val spineBaseVersion: String by extra
 
 dependencies {
     api(project(":client"))
-    implementation(kotlin("reflect"))
+    implementation(Kotlin.reflect)
 
     Grpc.apply {
         implementation(protobuf)

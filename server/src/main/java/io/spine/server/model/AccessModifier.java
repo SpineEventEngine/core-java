@@ -26,6 +26,7 @@
 
 package io.spine.server.model;
 
+import io.spine.reflect.J2Kt;
 import kotlin.reflect.KCallable;
 
 import java.lang.reflect.Method;

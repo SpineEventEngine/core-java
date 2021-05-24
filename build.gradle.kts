@@ -46,7 +46,7 @@ buildscript {
     val spineTimeVersion: String by extra
 
     dependencies {
-        classpath("io.spine.tools:spine-model-compiler:$spineBaseVersion")
+        classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
     }
 
     configurations.all {
@@ -122,7 +122,7 @@ subprojects {
         plugin("java-library")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
-        plugin("io.spine.tools.spine-model-compiler")
+        plugin("io.spine.mc-java")
         plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
