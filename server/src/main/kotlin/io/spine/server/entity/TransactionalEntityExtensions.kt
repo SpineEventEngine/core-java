@@ -41,10 +41,11 @@ import io.spine.validate.ValidatingBuilder
  * ```kotlin
  * @Apply
  * fun event(e: TaskCreated) {
- *     update {
+ *     val builder = update {
  *         title = e.title
  *         description = e.description
  *     }
+ *     // Use `builder` properties.
  * }
  * ```
  *
@@ -53,22 +54,44 @@ import io.spine.validate.ValidatingBuilder
  * @param S the type of the entity state
  * @param B the type of the entity state builder
  *
+ * @see alter for a version of this method that does not return a value
  * @apiNote This function is not `inline` because [TransactionalEntity.builder] is `protected`
  * while inline functions can use only `public` API.
  */
 @Experimental
 public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
         E.update(block: B.() -> Unit): B {
-    val builder = builderOf(this)
-    block.invoke(builder)
+    val builder = builder()
+    block(builder)
     return builder
 }
 
 /**
- * Obtains the builder from the passed entity.
+ * Extends [TransactionalEntity] with the `alter` block for changing
+ * properties of the entity state [builder][TransactionalEntity.builder].
  *
- * @apiNote We employ the fact that we are in the same package with [TransactionalEntity] and
- * because of this can access its `protected` API.
+ * For example, a method that applies an event may look like this:
+ *
+ * ```kotlin
+ * @Apply
+ * fun event(e: TaskCreated) = alter {
+ *     title = e.title
+ *     description = e.description
+ * }
+ * ```
+ *
+ * @param I the type of the entity identifiers
+ * @param E the type of the transactional entity
+ * @param S the type of the entity state
+ * @param B the type of the entity state builder
+ *
+ * @see update for a version of this method that returns the value of the builder
+ * @apiNote This function is not `inline` because [TransactionalEntity.builder] is `protected`
+ * while inline functions can use only `public` API.
  */
-private fun <I, S : EntityState<I>, B : ValidatingBuilder<S>>
-        builderOf(e: TransactionalEntity<I, S, B>): B = e.builder()
+@Experimental
+public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
+        E.alter(block: B.() -> Unit) {
+    val builder = builder()
+    block(builder)
+}
