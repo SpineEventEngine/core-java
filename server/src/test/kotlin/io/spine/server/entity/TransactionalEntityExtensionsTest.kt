@@ -38,8 +38,18 @@ internal class ExtensionsTest {
     fun `add 'update' block handler for passing properties to 'builder'`() {
         val entity = createEntity()
         val str = randomString()
-        entity.apply(str)
-        assertThat(entity.value()).isEqualTo(str)
+        entity.applyUpdate(str)
+        assertThat(entity.value())
+            .isEqualTo(str)
+    }
+
+    @Test
+    fun `add 'alter' block handler for passing properties to 'builder'`() {
+        val entity = createEntity()
+        val str = randomString()
+        entity.txApplyAlteration(str)
+        assertThat(entity.value())
+            .isEqualTo(str)
     }
 }
 
@@ -56,7 +66,7 @@ private fun createEntity() : Fixture {
 }
 
 /**
- * An entity which uses the [TransactionalEntity.update] extension function in its [apply] method.
+ * An entity which uses the [TransactionalEntity.update] extension function in its [applyUpdate] method.
  */
 private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.Builder>() {
 
@@ -64,10 +74,19 @@ private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.B
         setId(randomString())
     }
 
-    fun apply(s: String) {
-        update {
+    fun applyUpdate(s: String) {
+        val builder = update {
             value = s
         }
+        setState(builder.vBuild())
+    }
+
+    fun applyAlteration(s: String): Unit = alter {
+        value = s
+    }
+
+    fun txApplyAlteration(s: String) {
+        applyAlteration(s)
         setState(builder().vBuild())
     }
 
