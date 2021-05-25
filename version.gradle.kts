@@ -40,12 +40,12 @@
 /**
  * Version of this library.
  */
-val coreJava = "2.0.0-SNAPSHOT.22"
+val coreJava = "2.0.0-SNAPSHOT.23"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "2.0.0-SNAPSHOT.29"
+val base = "2.0.0-SNAPSHOT.30"
 val time = "2.0.0-SNAPSHOT.21"
 
 project.extra.apply {
