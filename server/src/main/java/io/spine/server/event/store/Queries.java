@@ -26,15 +26,20 @@
 
 package io.spine.server.event.store;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.core.EventId;
+import io.spine.query.Either;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.server.event.store.EventColumn.created;
 
 /**
@@ -61,6 +66,7 @@ final class Queries {
         return result;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Configuring `builder` step-by-step. */
     private static void addTimeBounds(EventStreamQuery query,
                                       RecordQueryBuilder<EventId, Event> builder) {
         if (query.hasAfter()) {
@@ -75,22 +81,35 @@ final class Queries {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Configuring `builder` step-by-step. */
     private static void addTypeParams(EventStreamQuery query,
                                       RecordQueryBuilder<EventId, Event> builder) {
         if(query.getFilterCount() == 0) {
             return;
         }
-        builder.either((b) -> {
-            for (EventFilter eventFilter : query.getFilterList()) {
-                String type = eventFilter.getEventType()
-                                         .trim();
-                if (!type.isEmpty()) {
-                    b.where(EventColumn.type)
-                     .is(type);
-                }
-            }
-            return b;
-        });
+        List<EventFilter> filters = query.getFilterList();
+        ImmutableList<Either<RecordQueryBuilder<EventId, Event>>> eitherStatements =
+                filters
+                     .stream()
+                     .filter(Queries::hasEventType)
+                     .map(Queries::toEither)
+                     .collect(toImmutableList());
+        builder.either(eitherStatements);
+    }
+
+    private static boolean hasEventType(EventFilter f) {
+        return !f.getEventType().trim().isEmpty();
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Configuring `builder` step-by-step. */
+    private static Either<RecordQueryBuilder<EventId, Event>> toEither(EventFilter filter) {
+        return builder -> {
+            String type = filter.getEventType()
+                                .trim();
+            builder.where(EventColumn.type)
+                   .is(type);
+            return builder;
+        };
     }
 
     private static RecordQuery<EventId, Event>

@@ -28,7 +28,7 @@ package io.spine.server.storage.given;
 
 import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordStorageUnderTest;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -44,7 +44,7 @@ import io.spine.test.storage.StgProjectId;
  * @see RecordStorageDelegateTest
  * @see StgColumn
  */
-public class StgProjectStorage extends MessageStorage<StgProjectId, StgProject> {
+public class StgProjectStorage extends RecordStorageUnderTest<StgProjectId, StgProject> {
 
     public StgProjectStorage(ContextSpec context, StorageFactory factory) {
         super(context, factory.createRecordStorage(context, spec()));

@@ -26,6 +26,7 @@
 
 package io.spine.server.storage;
 
+import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
@@ -51,25 +52,31 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 @SPI
 public abstract class RecordSpec<I, R, S> {
 
-    private final Class<R> recordType;
+    private final Class<R> storedType;
     private final Class<I> idType;
 
     /**
      * Creates a new {@code RecordSpec} instance for the record of the passed type.
      *
      * @param idType the type of the record identifiers
-     * @param recordType the type of the record
+     * @param storedType the type of the record
      */
-    protected RecordSpec(Class<I> idType, Class<R> recordType) {
+    protected RecordSpec(Class<I> idType, Class<R> storedType) {
         this.idType = idType;
-        this.recordType = recordType;
+        this.storedType = storedType;
     }
+
+    /**
+     * Returns the type of object, serving as the original source for the stored record
+     * of type {@code R}.
+     */
+    public abstract Class<? extends Message> sourceType();
 
     /**
      * Returns the type of the stored record.
      */
-    public final Class<R> recordType() {
-        return recordType;
+    public final Class<R> storedType() {
+        return storedType;
     }
 
     /**
@@ -94,8 +101,21 @@ public abstract class RecordSpec<I, R, S> {
      * @param source
      *         the object providing the ID value
      * @return the value of the identifier
+     * @apiNote This method is made {@code public} in order to be accessible to storage
+     *         implementations provided outside of this module, such as Spine storage
+     *         factory on top of Google Datastore.
      */
-    protected abstract I idValueIn(S source);
+    public abstract I idValueIn(S source);
+
+    /**
+     * Extracts the identifier value from the record of a compatible type.
+     *
+     * @param record
+     *         the record containing the ID to extract
+     * @return the value of record identifier
+     */
+    @SuppressWarnings("unused")     //TODO:2021-02-07:alex.tymchenko: cover this method with tests.
+    public abstract I idFromRecord(R record);
 
     /**
      * Finds the column in this specification by the column name.
@@ -121,6 +141,6 @@ public abstract class RecordSpec<I, R, S> {
         return findColumn(name)
                 .orElseThrow(() -> newIllegalArgumentException(
                         "Cannot find the column `%s` in the record specification of type `%s`.",
-                        name, recordType));
+                        name, storedType));
     }
 }

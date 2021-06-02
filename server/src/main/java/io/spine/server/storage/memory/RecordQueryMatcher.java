@@ -56,7 +56,7 @@ public class RecordQueryMatcher<I, R extends Message>
         implements Predicate<@Nullable RecordWithColumns<I, R>> {
 
     private final ImmutableSet<I> acceptedIds;
-    private final ImmutableList<QueryPredicate<R>> predicates;
+    private final QueryPredicate<R> predicate;
 
     /**
      * Creates a new matcher for the given subject.
@@ -66,7 +66,7 @@ public class RecordQueryMatcher<I, R extends Message>
         // Pack IDs from the query for faster search using packed IDs from loaded records.
         this.acceptedIds = subject.id()
                                   .values();
-        this.predicates = subject.predicates();
+        this.predicate = subject.predicate();
     }
 
     @VisibleForTesting
@@ -92,46 +92,66 @@ public class RecordQueryMatcher<I, R extends Message>
     }
 
     private boolean columnValuesMatch(RecordWithColumns<I, R> record) {
+        return checkPredicate(record, predicate);
+    }
+
+    private static <I, R extends Message> boolean
+    checkPredicate(RecordWithColumns<I, R> record, QueryPredicate<R> predicate) {
         boolean match;
 
-        for (QueryPredicate<R> predicate : predicates) {
-            LogicalOperator operator = predicate.operator();
-            switch (operator) {
-                case AND:
-                    match = checkAnd(predicate.parameters(), record);
-                    break;
-                case OR:
-                    match = checkEither(predicate.parameters(), record);
-                    break;
-                default:
-                    throw newIllegalArgumentException("Logical operator `%s` is invalid.",
-                                                      operator);
-            }
-            if (!match) {
-                return false;
-            }
+        LogicalOperator operator = predicate.operator();
+        ImmutableList<SubjectParameter<R, ?, ?>> parameters = predicate.parameters();
+        ImmutableList<QueryPredicate<R>> children = predicate.children();
+        switch (operator) {
+            case AND:
+                match = checkAnd(record, parameters, children);
+                break;
+            case OR:
+                match = checkEither(record, parameters, children);
+                break;
+            default:
+                throw newIllegalArgumentException("Logical operator `%s` is invalid.",
+                                                  operator);
+        }
+        return match;
+    }
+
+    private static <I, R extends Message> boolean
+    checkAnd(RecordWithColumns<I, R> record, ImmutableList<SubjectParameter<R, ?, ?>> params,
+             ImmutableList<QueryPredicate<R>> predicates) {
+        if (params.isEmpty() && predicates.isEmpty()) {
+            return true;
+        }
+        boolean paramsMatch =
+                params.stream()
+                      .allMatch(param -> matches(record, param));
+        if (paramsMatch) {
+            boolean predicatesMatch =
+                    predicates.stream()
+                              .allMatch(predicate -> checkPredicate(record,
+                                                                    predicate));
+            return predicatesMatch;
+        }
+        return false;
+    }
+
+    private static <I, R extends Message> boolean
+    checkEither(RecordWithColumns<I, R> record,
+                ImmutableList<SubjectParameter<R, ?, ?>> params,
+                ImmutableList<QueryPredicate<R>> predicates) {
+        if (params.isEmpty() && predicates.isEmpty()) {
+            return true;
+        }
+        boolean paramsMatch =
+                params.stream()
+                      .anyMatch(param -> matches(record, param));
+        if (!paramsMatch) {
+            boolean predicatesMatch =
+                    predicates.stream()
+                              .anyMatch(predicate -> checkPredicate(record, predicate));
+            return predicatesMatch;
         }
         return true;
-    }
-
-    private static <I, R extends Message> boolean
-    checkAnd(ImmutableList<SubjectParameter<R, ?, ?>> params, RecordWithColumns<I, R> record) {
-        if (params.isEmpty()) {
-            return true;
-        }
-        boolean result = params.stream()
-                               .allMatch(param -> matches(record, param));
-        return result;
-    }
-
-    private static <I, R extends Message> boolean
-    checkEither(ImmutableList<SubjectParameter<R, ?, ?>> params, RecordWithColumns<I, R> record) {
-        if (params.isEmpty()) {
-            return true;
-        }
-        boolean result = params.stream()
-                               .anyMatch(param -> matches(record, param));
-        return result;
     }
 
     private static <I, R extends Message> boolean

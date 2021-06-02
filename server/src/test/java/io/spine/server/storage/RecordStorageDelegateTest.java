@@ -78,9 +78,25 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  *
  * <p>The aim of this test is to ensure that any storage implementations built on top of
  * the {@code RecordStorageDelegate} is able to utilize the API with the expected results.
+ *
+ * <p>This type is made {@code public}, so that it could be re-used in testing of
+ * Spine libraries sitting on top of real-world storage engines, such as Google Datastore.
+ *
+ * <p>In order to use this type in this manner, one should configure the desired
+ * {@code StorageFactory} implementation before this test suite:
+ *
+ * <pre>
+ *     ServerEnvironment.when(Tests.class)
+ *                      .useStorageFactory(myRealStorageFactory);
+ * </pre>
+ *
+ * {@code StgProjectStorage} used in these tests delegates all of its actions to the underlying
+ * {@code RecordStorage}, which in turn is produced by the pre-configured
+ * {@linkplain ServerEnvironment#storageFactory() current} {@code StorageFactory}.
+ * Therefore all tests will run against the desired storage engine.
  */
 @DisplayName("A `RecordStorageDelegate` descendant should")
-class RecordStorageDelegateTest
+public class RecordStorageDelegateTest
         extends AbstractStorageTest<StgProjectId, StgProject, StgProjectStorage> {
 
     @Override
@@ -351,9 +367,6 @@ class RecordStorageDelegateTest
             assertThat(deleted).isTrue();
             Optional<StgProject> anotherReadResult = storage().read(record.getId());
             assertThat(anotherReadResult).isEmpty();
-
-            boolean deletedAgain = storage().delete(record.getId());
-            assertThat(deletedAgain).isFalse();
         }
 
         @Test

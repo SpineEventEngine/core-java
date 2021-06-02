@@ -58,7 +58,7 @@ public interface TenantIndex extends AutoCloseable {
     /**
      * Creates default implementation of {@code TenantIndex} for a multi-tenant context.
      */
-    static TenantIndex createDefault() {
+    static TenantIndex defaultMultitenant() {
         StorageFactory factory = ServerEnvironment.instance()
                                                   .storageFactory();
         @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.

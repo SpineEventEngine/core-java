@@ -78,17 +78,23 @@ message TargetFilters {
     repeated CompositeFilter filter = 2 [(validate) = true];
 }
 
-// The filter grouping a number of simple filters with a specified logical operator.
+// A filter grouping a sub-tree of filters with a specified logical operator.
+//
+// May contain both simple filters (i.e. those aimed to match a single field value of the
+// target object) and composite filters.
+//
+// If an instance of `CompositeFilter` has no children, any target object is considered matching.
 message CompositeFilter {
     option (is).java_type = "CompositeFilterMixin";
 
-    // The list of filters.
-    //
-    // If empty, any record is considered matching this filter.
-    repeated Filter filter = 1 [(required) = true, (validate) = true];
+    // The list of simple filters.
+    repeated Filter filter = 1 [(validate) = true];
 
     // The value of the composite operator which determines the behavior of the filter matching.
     CompositeOperator operator = 2 [(required) = true];
+
+    // The list of child composite filters.
+    repeated CompositeFilter composite_filter = 3 [(validate) = true];;
 
     // An enumeration of all supported composite operators upon the filters.
     enum CompositeOperator {
@@ -104,7 +110,7 @@ message CompositeFilter {
     }
 }
 
-// A filter matching some value in the event message/entity state.
+// A simple filter matching some value in the event message/entity state.
 message Filter {
     option (is).java_type = "FilterMixin";
 

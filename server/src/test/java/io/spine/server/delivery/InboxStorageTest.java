@@ -27,7 +27,11 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.UnmodifiableIterator;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.server.ServerEnvironment;
@@ -47,11 +51,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static io.spine.server.delivery.InboxIds.newSignalId;
+import static io.spine.server.delivery.InboxMessageStatus.DELIVERED;
+import static io.spine.server.delivery.InboxMessageStatus.TO_DELIVER;
+import static io.spine.server.delivery.given.TestInboxMessages.toDeliver;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * An abstract base for tests of {@link InboxStorage} implementations.
@@ -134,6 +147,86 @@ public class InboxStorageTest
         }
     }
 
+    @Test
+    @DisplayName("remove selected `InboxMessage` instances")
+    void removeMessages() {
+        ShardIndex index = newIndex(6, 7);
+        ImmutableList<InboxMessage> messages = generate(20, index);
+        InboxStorage storage = storage();
+        storage.writeBatch(messages);
+
+        readAllAndCompare(storage, index, messages);
+
+        UnmodifiableIterator<InboxMessage> iterator = messages.iterator();
+        InboxMessage first = iterator.next();
+        InboxMessage second = iterator.next();
+
+        storage.removeBatch(ImmutableList.of(first, second));
+
+        // Make a `List` from the rest of the elements. Those deleted aren't included.
+        ImmutableList<InboxMessage> remainder = ImmutableList.copyOf(iterator);
+
+        readAllAndCompare(storage, index, remainder);
+
+        storage.removeBatch(remainder);
+        checkEmpty(storage, index);
+    }
+
+    @Test
+    @DisplayName("do nothing if removing inexistent `InboxMessage` instances")
+    void doNothingIfRemovingInexistentMessages() {
+
+        InboxStorage storage = storage();
+        ShardIndex index = newIndex(6, 7);
+        checkEmpty(storage, index);
+
+        ImmutableList<InboxMessage> messages = generate(40, index);
+        storage.removeBatch(messages);
+
+        checkEmpty(storage, index);
+    }
+
+    @Test
+    @DisplayName("mark messages delivered")
+    void markMessagedDelivered() {
+        ShardIndex index = newIndex(3, 71);
+        ImmutableList<InboxMessage> messages = generate(10, index);
+        InboxStorage storage = storage();
+        storage.writeBatch(messages);
+
+        ImmutableList<InboxMessage> nonDelivered = readAllAndCompare(storage, index, messages);
+        nonDelivered.iterator()
+                    .forEachRemaining((m) -> assertEquals(TO_DELIVER, m.getStatus()));
+
+        // Leave the first one in `TO_DELIVER` status and mark the rest as `DELIVERED`.
+        UnmodifiableIterator<InboxMessage> iterator = messages.iterator();
+        InboxMessage remainingNonDelivered = iterator.next();
+        ImmutableList<InboxMessage> toMarkDelivered = ImmutableList.copyOf(iterator);
+        List<InboxMessage> markedDelivered = markDelivered(toMarkDelivered);
+
+        storage.writeBatch(markedDelivered);
+        ImmutableList<InboxMessage> originalMarkedDelivered =
+                toMarkDelivered.stream()
+                               .map(m -> m.toBuilder()
+                                          .setStatus(DELIVERED)
+                                          .vBuild())
+                               .collect(toImmutableList());
+
+        // Check that both `TO_DELIVER` message and those marked `DELIVERED` are stored as expected.
+        ImmutableList<InboxMessage> readResult = storage.readAll(index, Integer.MAX_VALUE)
+                                                        .contents();
+        assertTrue(readResult.contains(remainingNonDelivered));
+        assertTrue(readResult.containsAll(originalMarkedDelivered));
+    }
+
+    private static List<InboxMessage> markDelivered(ImmutableList<InboxMessage> toMarkDelivered) {
+        return toMarkDelivered.stream()
+                              .map(m -> m.toBuilder()
+                                         .setStatus(DELIVERED)
+                                         .vBuild())
+                              .collect(toList());
+    }
+
     /*
      * Test environment and utilities.
      *
@@ -188,9 +281,73 @@ public class InboxStorageTest
                 .setSignalId(signalId)
                 .setInboxId(inboxId)
                 .setLabel(InboxLabel.HANDLE_COMMAND)
-                .setStatus(InboxMessageStatus.TO_DELIVER)
+                .setStatus(TO_DELIVER)
                 .setCommand(command)
                 .setWhenReceived(Time.currentTime())
                 .build();
+    }
+
+    @CanIgnoreReturnValue
+    private static ImmutableList<InboxMessage>
+    readAllAndCompare(InboxStorage storage, ShardIndex idx, ImmutableList<InboxMessage> expected) {
+        Page<InboxMessage> page = storage.readAll(idx, Integer.MAX_VALUE);
+        assertEquals(expected.size(), page.size());
+
+        ImmutableList<InboxMessage> contents = page.contents();
+        assertEquals(ImmutableSet.copyOf(expected), ImmutableSet.copyOf(contents));
+        return contents;
+    }
+
+    private static void checkEmpty(InboxStorage storage, ShardIndex index) {
+        Page<InboxMessage> emptyPage = storage.readAll(index, 10);
+        assertEquals(0, emptyPage.size());
+        assertThat(emptyPage.contents()).isEmpty();
+        assertThat(emptyPage.next()).isEmpty();
+    }
+
+    private static void readAndCompare(InboxStorage storage, InboxMessage msg) {
+        Optional<InboxMessage> optional = storage.read(msg.getId());
+        assertTrue(optional.isPresent());
+
+        InboxMessage readResult = optional.get();
+        assertEquals(msg, readResult);
+    }
+
+    /**
+     * Generates an {@link InboxMessage} with the specified values.
+     *
+     * The message values are set as if it was received at {@code whenReceived} time
+     * and its status was {@link InboxMessageStatus#TO_DELIVER TO_DELIVER}.
+     */
+    public static InboxMessage generate(int shardIndex, int totalShards, Timestamp whenReceived) {
+        checkNotNull(whenReceived);
+        InboxMessage message = toDeliver("target-entity-id", TypeUrl.of(Calc.class), whenReceived);
+
+        InboxMessageId modifiedId =
+                message.getId()
+                       .toBuilder()
+                       .setIndex(newIndex(shardIndex, totalShards))
+                       .vBuild();
+        InboxMessage result =
+                message.toBuilder()
+                       .setId(modifiedId)
+                       .vBuild();
+        return result;
+    }
+
+    /**
+     * Generates {@code totalMessages} in a selected shard.
+     *
+     * <p>Each message is generated as received {@code now} and in
+     * {@link InboxMessageStatus#TO_DELIVER TO_DELIVER} status.
+     */
+    public static ImmutableList<InboxMessage> generate(int totalMessages, ShardIndex index) {
+        ImmutableList.Builder<InboxMessage> builder = ImmutableList.builder();
+        for (int msgCounter = 0; msgCounter < totalMessages; msgCounter++) {
+
+            InboxMessage msg = generate(index.getIndex(), index.getOfTotal(), currentTime());
+            builder.add(msg);
+        }
+        return builder.build();
     }
 }

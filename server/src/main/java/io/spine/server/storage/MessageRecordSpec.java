@@ -127,15 +127,25 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
     }
 
     @Override
-    protected I idValueIn(R source) {
+    public I idValueIn(R source) {
         checkNotNull(source);
         return extractId.apply(source);
+    }
+
+    @Override
+    public I idFromRecord(R record) {
+        return idValueIn(record);
     }
 
     @Override
     public Optional<Column<?, ?>> findColumn(ColumnName name) {
         RecordColumn<R, ?> result = columns.get(name);
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public Class<R> sourceType() {
+        return storedType();
     }
 
     /**
