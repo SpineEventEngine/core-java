@@ -119,7 +119,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
     private static Query toProtoQuery(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
         Subject<?, ?> subject = query.subject();
         addIds(builder, subject);
-        addPredicates(builder, subject.predicate());
+        addPredicate(builder, subject.predicate());
         addSorting(builder, query);
         addLimit(builder, query);
         addFieldMask(builder, query);
@@ -153,9 +153,8 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         }
     }
 
-    private static void
-    addPredicates(QueryBuilder builder, QueryPredicate<?> rootPredicate) {
-        CompositeFilter composite = toCompositeFilter(rootPredicate);
+    private static void addPredicate(QueryBuilder builder, QueryPredicate<?> predicate) {
+        CompositeFilter composite = toCompositeFilter(predicate);
         builder.where(composite);
     }
 
