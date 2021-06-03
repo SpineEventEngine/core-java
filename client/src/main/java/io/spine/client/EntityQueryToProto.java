@@ -164,19 +164,19 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         LogicalOperator operator = predicate.operator();
         CompositeFilter.Builder builder = CompositeFilter.newBuilder();
         builder.setOperator(operator == AND ? ALL
-                                             : EITHER);
+                                            : EITHER);
         ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
         ImmutableList<Filter> filters = toFilters(parameters);
         builder.addAllFilter(filters);
 
-            ImmutableList<CompositeFilter> childFilters =
-                    predicate.children()
-                             .stream()
-                             .map(EntityQueryToProto::toCompositeFilter)
-                             .collect(toImmutableList());
-            CompositeFilter childCompositeFilter =
-                    builder.addAllCompositeFilter(childFilters)
-                           .vBuild();
+        ImmutableList<CompositeFilter> childFilters =
+                predicate.children()
+                         .stream()
+                         .map(EntityQueryToProto::toCompositeFilter)
+                         .collect(toImmutableList());
+        CompositeFilter childCompositeFilter =
+                builder.addAllCompositeFilter(childFilters)
+                       .vBuild();
         return childCompositeFilter;
     }
 
