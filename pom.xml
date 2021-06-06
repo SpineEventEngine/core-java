@@ -64,7 +64,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -76,13 +76,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-base</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -142,19 +142,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mute-logging</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -182,22 +182,22 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
-    <version>3.15.7</version>
+    <version>3.17.0</version>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.35.1</version>
+    <version>1.38.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-javadoc-filter</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-protoc</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.34</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>

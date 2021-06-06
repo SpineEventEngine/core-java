@@ -47,7 +47,7 @@ import java.nio.file.StandardOpenOption;
 import static io.spine.tools.gradle.JavaTaskName.classes;
 import static io.spine.tools.gradle.JavaTaskName.compileJava;
 import static io.spine.tools.gradle.ModelVerifierTaskName.verifyModel;
-import static io.spine.tools.mc.java.gradle.Extension.getMainDescriptorSet;
+import static io.spine.tools.mc.java.gradle.Extension.getMainDescriptorSetFile;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
 
@@ -120,7 +120,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         private void extendKnownTypes(Project project) {
             String pluginExtensionName = ModelCompilerPlugin.extensionName();
             if (project.getExtensions().findByName(pluginExtensionName) != null) {
-                File descriptorFile = getMainDescriptorSet(project);
+                File descriptorFile = getMainDescriptorSetFile(project);
                 tryExtend(descriptorFile);
             } else {
                 _warn().log(
