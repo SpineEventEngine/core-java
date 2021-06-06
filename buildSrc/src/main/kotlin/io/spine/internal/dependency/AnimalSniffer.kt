@@ -26,14 +26,6 @@
 
 package io.spine.internal.dependency
 
-/**
- * Versions of one-line dependencies.
- *
- * For versions of other dependencies please see `version` properties of objects declared below.
- *
- * See also: https://github.com/SpineEventEngine/config/issues/171
- */
-
 // https://www.mojohaus.org/animal-sniffer/animal-sniffer-maven-plugin/
 object AnimalSniffer {
     private const val version = "1.19"

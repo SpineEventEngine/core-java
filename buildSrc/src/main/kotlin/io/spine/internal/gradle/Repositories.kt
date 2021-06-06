@@ -39,7 +39,7 @@ data class Repository(
     val releases: String,
     val snapshots: String,
     private val credentialsFile: String? = null,
-    private val credentials: Credentials? = null,
+    private val credentialValues: ((Project) -> Credentials?)? = null,
     val name: String = "Maven repository `$releases`"
 ) {
 
@@ -51,8 +51,8 @@ data class Repository(
      * the username and the password for the Maven repository auth.
      */
     fun credentials(project: Project): Credentials? {
-        if (credentials != null) {
-            return credentials
+        if (credentialValues != null) {
+            return credentialValues.invoke(project)
         }
         credentialsFile!!
         val log = project.logger
@@ -109,18 +109,46 @@ object PublishingRepos {
     )
 
     fun gitHub(repoName: String): Repository {
+        var githubActor: String? = System.getenv("GITHUB_ACTOR")
+        githubActor = if (githubActor.isNullOrEmpty()) {
+            "developers@spine.io"
+        } else {
+            githubActor
+        }
+
         return Repository(
             name = "GitHub Packages",
             releases = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
             snapshots = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
-            credentials = Credentials(
-                username = System.getenv("GITHUB_ACTOR"),
-                // This is a trick. Gradle only supports password or AWS credentials. Thus,
-                // we pass the GitHub token as a "password".
-                // https://docs.github.com/en/actions/guides/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
-                password = System.getenv("GITHUB_TOKEN")
-            )
+            credentialValues = { project ->
+                Credentials(
+                    username = githubActor,
+                    // This is a trick. Gradle only supports password or AWS credentials. Thus,
+                    // we pass the GitHub token as a "password".
+                    // https://docs.github.com/en/actions/guides/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
+                    password = readGitHubToken(project)
+                )
+            }
         )
+    }
+
+    private fun readGitHubToken(project: Project): String {
+        val githubToken: String? = System.getenv("GITHUB_TOKEN")
+        return if (githubToken.isNullOrEmpty()) {
+            // Use the personal access token for the `developers@spine.io` account.
+            // Only has the permission to read public GitHub packages.
+            val targetDir = "${project.buildDir}/token"
+            project.file(targetDir).mkdirs()
+            project.exec {
+                // Unzip with password "123", allow overriding, quietly,
+                // into the target dir, the given archive.
+                commandLine("unzip", "-P", "123", "-oq", "-d", targetDir, "${project.rootDir}/buildSrc/aus.weis")
+            }
+            val file = project.file("$targetDir/token.txt")
+            file.readText()
+        } else {
+            githubToken
+        }
     }
 }
 

@@ -58,3 +58,4 @@ pull text eol=lf
 # Encrypted files
 *.enc binary
 *.gpg binary
+*.weis binary
