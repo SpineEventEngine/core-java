@@ -35,6 +35,11 @@ import java.util.Iterator;
 /**
  * A record storage made suitable for testing the {@link MessageStorage} API by
  * exposing the methods originally designed as {@code protected} to {@code public}.
+ *
+ * @param <I>
+ *         the type of record identifiers
+ * @param <M>
+ *         the type of stored {@code Message} records
  */
 public abstract class RecordStorageUnderTest<I, M extends Message>
         extends MessageStorage<I, M> {
@@ -47,8 +52,7 @@ public abstract class RecordStorageUnderTest<I, M extends Message>
      * @param delegate
      *         the record storage to delegate the execution to
      */
-    protected RecordStorageUnderTest(ContextSpec context,
-                                     RecordStorage<I, M> delegate) {
+    protected RecordStorageUnderTest(ContextSpec context, RecordStorage<I, M> delegate) {
         super(context, delegate);
     }
 
