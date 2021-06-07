@@ -43,17 +43,19 @@ import io.spine.query.SubjectParameter;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
 import static io.spine.client.Filter.Operator.EQUAL;
 import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.Filter.Operator.GREATER_THAN;
 import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.Filter.Operator.LESS_THAN;
-import static io.spine.client.Filters.all;
 import static io.spine.client.Filters.createFilter;
-import static io.spine.client.Filters.either;
 import static io.spine.client.OrderBy.Direction.ASCENDING;
 import static io.spine.client.OrderBy.Direction.DESCENDING;
 import static io.spine.query.Direction.ASC;
+import static io.spine.query.LogicalOperator.AND;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -117,13 +119,14 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
     private static Query toProtoQuery(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
         Subject<?, ?> subject = query.subject();
         addIds(builder, subject);
-        addPredicates(builder, subject.predicates());
+        addPredicate(builder, subject.predicate());
         addSorting(builder, query);
         addLimit(builder, query);
         addFieldMask(builder, query);
         return builder.build();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addFieldMask(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
         FieldMask originMask = query.mask();
         if (!originMask.equals(FieldMask.getDefaultInstance())) {
@@ -131,6 +134,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addLimit(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
         Integer originLimit = query.limit();
         if (originLimit != null) {
@@ -138,6 +142,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addSorting(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
         for (io.spine.query.SortBy<?, ?> sortBy : query.sorting()) {
             String columnName = sortBy.column()
@@ -148,30 +153,41 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         }
     }
 
-    private static void
-    addPredicates(QueryBuilder builder, ImmutableList<? extends QueryPredicate<?>> predicates) {
-        ImmutableSet.Builder<CompositeFilter> filters = ImmutableSet.builder();
-        for (QueryPredicate<?> predicate : predicates) {
-            LogicalOperator logicalOp = predicate.operator();
-            ImmutableList<SubjectParameter<?, ?, ?>> params = predicate.allParams();
-            CompositeFilter aFilter = toFilter(params, logicalOp);
-            filters.add(aFilter);
-        }
-        builder.where(filters.build());
+    private static void addPredicate(QueryBuilder builder, QueryPredicate<?> predicate) {
+        CompositeFilter composite = toCompositeFilter(predicate);
+        builder.where(composite);
     }
 
-    private static CompositeFilter
-    toFilter(ImmutableList<SubjectParameter<?, ?, ?>> params, LogicalOperator logicalOp) {
+    @SuppressWarnings("ResultOfMethodCallIgnored")      /* Builder is using in step-by-step mode. */
+    private static CompositeFilter toCompositeFilter(QueryPredicate<?> predicate) {
+        LogicalOperator operator = predicate.operator();
+        CompositeFilter.Builder builder = CompositeFilter.newBuilder();
+        builder.setOperator(operator == AND ? ALL
+                                            : EITHER);
+        ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
+        ImmutableList<Filter> filters = toFilters(parameters);
+        builder.addAllFilter(filters);
+
+        ImmutableList<CompositeFilter> childFilters =
+                predicate.children()
+                         .stream()
+                         .map(EntityQueryToProto::toCompositeFilter)
+                         .collect(toImmutableList());
+        CompositeFilter childCompositeFilter =
+                builder.addAllCompositeFilter(childFilters)
+                       .vBuild();
+        return childCompositeFilter;
+    }
+
+    private static ImmutableList<Filter>
+    toFilters(ImmutableList<SubjectParameter<?, ?, ?>> params) {
         ImmutableList.Builder<Filter> filters = ImmutableList.builder();
         for (SubjectParameter<?, ?, ?> parameter : params) {
             Filter filter = asProtoFilter(parameter);
             filters.add(filter);
         }
         ImmutableList<Filter> filterList = filters.build();
-        CompositeFilter compositeFilter =
-                logicalOp == LogicalOperator.AND ? all(filterList)
-                                                 : either(filterList);
-        return compositeFilter;
+        return filterList;
     }
 
     private static Filter asProtoFilter(SubjectParameter<?, ?, ?> parameter) {
@@ -198,6 +214,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         return result;
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addIds(QueryBuilder builder, Subject<?, ?> subject) {
         ImmutableSet<?> ids = subject.id()
                                      .values();

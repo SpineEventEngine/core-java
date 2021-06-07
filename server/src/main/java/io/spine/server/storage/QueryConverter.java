@@ -26,6 +26,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
@@ -41,6 +42,7 @@ import io.spine.client.TargetFilters;
 import io.spine.protobuf.TypeConverter;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
+import io.spine.query.Either;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
@@ -50,6 +52,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.join;
@@ -86,7 +89,7 @@ public final class QueryConverter {
         checkNotNull(format);
 
         Class<I> idType = spec.idType();
-        Class<R> recordType = spec.recordType();
+        Class<R> recordType = spec.storedType();
         RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(idType, recordType);
 
         identifiers(builder, filters.getIdFilter());
@@ -119,7 +122,7 @@ public final class QueryConverter {
         checkNotNull(format);
 
         Class<I> idType = spec.idType();
-        Class<R> recordType = spec.recordType();
+        Class<R> recordType = spec.storedType();
         RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(idType, recordType);
         fieldMask(builder, format);
         orderByAndLimit(builder, spec, format);
@@ -129,36 +132,117 @@ public final class QueryConverter {
     private static <I, R extends Message> void
     filters(RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec, TargetFilters filters) {
         for (CompositeFilter composite : filters.getFilterList()) {
-            CompositeFilter.CompositeOperator compositeOperator = composite.getOperator();
+            convertComposite(composite, builder, spec);
+        }
+    }
 
-            switch (compositeOperator) {
-                case ALL:
-                    convert(composite, spec, builder);
-                    break;
-                case EITHER:
-                    builder.either((either) -> convert(composite, spec, either));
-                    break;
-                case UNRECOGNIZED:
-                case CCF_CO_UNDEFINED:
-                default:
-                    throw newIllegalArgumentException(
-                            "Unsupported composite operator `%s` encountered.",
-                            compositeOperator);
-            }
+    private static <I, R extends Message> void
+    convertComposite(CompositeFilter composite,
+                     RecordQueryBuilder<I, R> builder,
+                     RecordSpec<I, R, ?> spec) {
+        CompositeFilter.CompositeOperator compositeOperator = composite.getOperator();
+
+        switch (compositeOperator) {
+            case ALL:
+                doCompositeWithAnd(composite, builder, spec);
+                break;
+            case EITHER:
+                doCompositeWithOr(composite, builder, spec);
+                break;
+            case UNRECOGNIZED:
+            case CCF_CO_UNDEFINED:
+            default:
+                throw newIllegalArgumentException(
+                        "Unsupported composite operator `%s` encountered.",
+                        compositeOperator);
         }
     }
 
     /**
-     * Converts the passed composite filter into a set of conditions and adds them to the passed
-     * builder according to the record specification.
+     * Converts the parts of the passed composite filter (i.e. both its simple filters
+     * and child composite filters) into the conditions and applies them to the passed builder
+     * in accordance with the record specification.
+     *
+     * <p>This method works for conjunctive composite filters
+     */
+    @CanIgnoreReturnValue
+    @SuppressWarnings("MethodWithMultipleLoops")    /* To avoid a myriad of tiny static methods. */
+    private static <I, R extends Message> RecordQueryBuilder<I, R>
+    doCompositeWithAnd(CompositeFilter filter,
+                       RecordQueryBuilder<I, R> builder,
+                       RecordSpec<I, R, ?> spec) {
+        for (Filter childFilter : filter.getFilterList()) {
+            doSimpleFilter(childFilter, builder, spec);
+        }
+        List<CompositeFilter> childComposites = filter.getCompositeFilterList();
+        for (CompositeFilter child : childComposites) {
+            convertComposite(child, builder, spec);
+        }
+
+        return builder;
+    }
+
+    /**
+     * Converts the parts of the passed composite filter (i.e. both its simple filters
+     * and child composite filters) into the conditions and applies them to the passed builder
+     * in accordance with the record specification.
+     *
+     * <p>This method works for disjunctive composite filters
      */
     @CanIgnoreReturnValue
     private static <I, R extends Message> RecordQueryBuilder<I, R>
-    convert(CompositeFilter filter, RecordSpec<I, R, ?> spec, RecordQueryBuilder<I, R> builder) {
-        for (Filter childFilter : filter.getFilterList()) {
-            convertSingle(childFilter, builder, spec);
-        }
+    doCompositeWithOr(CompositeFilter filter,
+                       RecordQueryBuilder<I, R> builder,
+                       RecordSpec<I, R, ?> spec) {
+        ImmutableList.Builder<Either<RecordQueryBuilder<I, R>>> eithers =
+                ImmutableList.builder();
+
+        ImmutableList<Either<RecordQueryBuilder<I, R>>> simpleEithers =
+                simpleFiltersToEither(filter.getFilterList(), spec);
+        ImmutableList<Either<RecordQueryBuilder<I, R>>> compositeEithers =
+                compositesToEither(filter.getCompositeFilterList(), spec);
+
+        ImmutableList<Either<RecordQueryBuilder<I, R>>> result =
+                eithers.addAll(simpleEithers)
+                       .addAll(compositeEithers)
+                       .build();
+        builder.either(result);
+
         return builder;
+    }
+
+    /**
+     * Converts a bunch of simple {@code Filter}s to a distinct {@link Either} statements.
+     */
+    private static <I, R extends Message> ImmutableList<Either<RecordQueryBuilder<I, R>>>
+    simpleFiltersToEither(List<Filter> simpleFilters, RecordSpec<I, R, ?> spec) {
+        return simpleFilters
+                .stream()
+                .map((filter) ->
+                             (Either<RecordQueryBuilder<I, R>>) localBuilder -> {
+                                 doSimpleFilter(filter, localBuilder, spec);
+                                 return localBuilder;
+                             }
+                )
+                .collect(toImmutableList());
+    }
+
+    /**
+     * Converts a list of composite filters to a distinct {@link Either} statements.
+     *
+     * <p>The children of each composite are also processed.
+     */
+    private static <I, R extends Message> ImmutableList<Either<RecordQueryBuilder<I, R>>>
+    compositesToEither(List<CompositeFilter> composites, RecordSpec<I, R, ?> spec) {
+        return composites
+                .stream()
+                .map((composite) ->
+                             (Either<RecordQueryBuilder<I, R>>) localBuilder -> {
+                                 convertComposite(composite, localBuilder, spec);
+                                 return localBuilder;
+                             }
+                )
+                .collect(toImmutableList());
     }
 
     /**
@@ -166,7 +250,7 @@ public final class QueryConverter {
      * according to the record specification.
      */
     private static <I, R extends Message> void
-    convertSingle(Filter filter, RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec) {
+    doSimpleFilter(Filter filter, RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec) {
         ColumnName name = columnNameOf(filter);
         Column<?, ?> column = findColumn(spec, name);
         AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
@@ -251,7 +335,7 @@ public final class QueryConverter {
         Optional<Column<?, ?>> maybeColumn = spec.findColumn(columnName);
         checkArgument(maybeColumn.isPresent(),
                       "Cannot find the column `%s` for the type `%s`.",
-                      columnName, spec.recordType());
+                      columnName, spec.storedType());
         Column<?, ?> column = maybeColumn.get();
         return column;
     }

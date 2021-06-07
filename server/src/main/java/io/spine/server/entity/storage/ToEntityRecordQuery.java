@@ -34,6 +34,7 @@ import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ComparisonOperator;
 import io.spine.query.Direction;
+import io.spine.query.Either;
 import io.spine.query.EntityQuery;
 import io.spine.query.LogicalOperator;
 import io.spine.query.QueryPredicate;
@@ -81,8 +82,8 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
     }
 
     private ToEntityRecordQuery(EntityQuery<I, S, ?> source) {
-        super(source.subject().idType(), EntityRecord.class);
-
+        super(source.subject()
+                    .idType(), EntityRecord.class);
         Subject<I, S> subject = source.subject();
         this.setIdParameter(subject.id());
         copyPredicates(subject);
@@ -91,6 +92,10 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         copyMask(source);
     }
 
+    /**
+     * Copies the field masking setting from the passed {@code EntityQuery} to the current instance
+     * of {@code ToEntityRecordQuery}.
+     */
     private void copyMask(EntityQuery<I, S, ?> source) {
         FieldMask mask = source.mask();
         if (mask != null) {
@@ -98,6 +103,10 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         }
     }
 
+    /**
+     * Copies the limit setting from the passed {@code EntityQuery} to the current instance
+     * of {@code ToEntityRecordQuery}.
+     */
     private void copyLimit(EntityQuery<I, S, ?> source) {
         Integer limit = source.limit();
         if (limit != null) {
@@ -105,13 +114,17 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         }
     }
 
+    /**
+     * Copies the sorting directives from the passed {@code EntityQuery} to the current instance
+     * of {@code ToEntityRecordQuery}.
+     */
     private void copySorting(EntityQuery<I, S, ?> source) {
         ImmutableList<SortBy<?, S>> sorting = source.sorting();
         for (SortBy<?, S> sortByOrigin : sorting) {
             RecordColumn<EntityRecord, ?> thisColumn =
                     AsEntityRecordColumn.apply(sortByOrigin.column());
             Direction direction = sortByOrigin.direction();
-            if(ASC == direction) {
+            if (ASC == direction) {
                 this.sortAscendingBy(thisColumn);
             } else {
                 this.sortDescendingBy(thisColumn);
@@ -119,51 +132,120 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
         }
     }
 
+    /**
+     * Copies the predicates of the passed subject to this instance of {@code ToEntityRecordQuery}.
+     *
+     * @param subject
+     *         the subject which predicates to copy
+     */
     private void copyPredicates(Subject<I, S> subject) {
-        ImmutableList<QueryPredicate<S>> predicates = subject.predicates();
-        for (QueryPredicate<S> sourcePredicate : predicates) {
-            ImmutableList<SubjectParameter<?, ?, ?>> params = sourcePredicate.allParams();
-            LogicalOperator operator = sourcePredicate.operator();
-            if (operator == LogicalOperator.AND) {
-                copyParameters(this, params);
-            } else {
-                this.either((builder) -> copyParameters(builder, params));
-            }
+        QueryPredicate<S> root = subject.predicate();
+        copyDescendants(this, root);
 
+        ImmutableList<QueryPredicate<S>> children = root.children();
+        for (QueryPredicate<S> child : children) {
+            copyDescendants(this, child);
         }
     }
 
+    /**
+     * Copies both parameters and child predicates of the given {@code sourcePredicate}
+     * into the passed {@code builder}.
+     *
+     * @param builder
+     *         the builder to copy the descendants to
+     * @param sourcePredicate
+     *         query predicate to copy descendants from
+     * @return the same instance of {@code builder}, for call chaining
+     */
+    @CanIgnoreReturnValue
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chains after `either()`. */
+    private RecordQueryBuilder<I, EntityRecord>
+    copyDescendants(RecordQueryBuilder<I, EntityRecord> builder,
+                    QueryPredicate<S> sourcePredicate) {
+        ImmutableList<SubjectParameter<?, ?, ?>> params = sourcePredicate.allParams();
+        ImmutableList<QueryPredicate<S>> children = sourcePredicate.children();
+        LogicalOperator operator = sourcePredicate.operator();
+        if (operator == LogicalOperator.AND) {
+            copyParameters(this, params);
+            for (QueryPredicate<S> child : children) {
+                copyDescendants(builder, child);
+            }
+        } else {
+            ImmutableList<Either<RecordQueryBuilder<I, EntityRecord>>> eitherStatements =
+                    toEither(params, children);
+            builder.either(eitherStatements);
+        }
+        return builder;
+    }
+
+    /**
+     * Creates {@link Either} statements for each of the passed parameters and predicates
+     * and returns them all as a new {@code ImmutableList}.
+     */
+    @SuppressWarnings("MethodWithMultipleLoops")  /* Transforming params and predicates
+                                                     are very related to each other. */
+    private ImmutableList<Either<RecordQueryBuilder<I, EntityRecord>>>
+    toEither(Iterable<SubjectParameter<?, ?, ?>> params, Iterable<QueryPredicate<S>> predicates) {
+        ImmutableList.Builder<Either<RecordQueryBuilder<I, EntityRecord>>> result =
+                ImmutableList.builder();
+        for (SubjectParameter<?, ?, ?> param : params) {
+            result.add(builder -> addParameter(builder,
+                                               param.column(), param.operator(), param.value()));
+        }
+        for (QueryPredicate<S> predicate : predicates) {
+            result.add(builder -> copyDescendants(builder, predicate));
+        }
+        return result.build();
+    }
+
+    /**
+     * Copies the passed parameters to the specified {@code builder}.
+     */
     @CanIgnoreReturnValue
     private RecordQueryBuilder<I, EntityRecord>
     copyParameters(RecordQueryBuilder<I, EntityRecord> builder,
                    Iterable<SubjectParameter<?, ?, ?>> params) {
         for (SubjectParameter<?, ?, ?> parameter : params) {
-            addParameter(builder, parameter.column(), parameter.value(), parameter.operator());
+            addParameter(builder, parameter.column(), parameter.operator(), parameter.value());
         }
         return builder;
     }
 
-    private void addParameter(RecordQueryBuilder<I, EntityRecord> builder,
-                              Column<?, ?> sourceColumn,
-                              Object paramValue,
-                              ComparisonOperator paramOperator) {
-        RecordColumn<EntityRecord, Object> column = AsEntityRecordColumn.apply(sourceColumn);
+    /**
+     * Adds a single parameter to the specified {@code builder}.
+     *
+     * @param builder
+     *         the builder to add the parameter to
+     * @param source
+     *         source column for the parameter
+     * @param operator
+     *         an operator comparing the column values
+     * @param value
+     *         the value to match the actual column values to
+     * @return the same {@code builder} as passed, for call chaining
+     */
+    @CanIgnoreReturnValue
+    private RecordQueryBuilder<I, EntityRecord>
+    addParameter(RecordQueryBuilder<I, EntityRecord> builder, Column<?, ?> source,
+                 ComparisonOperator operator, Object value) {
+        RecordColumn<EntityRecord, Object> column = AsEntityRecordColumn.apply(source);
 
         RecordCriterion<I, EntityRecord, Object> where = builder.where(column);
-        switch (paramOperator) {
+        switch (operator) {
             case EQUALS:
-                where.is(paramValue); break;
+                return where.is(value);
             case GREATER_OR_EQUALS:
-                where.isGreaterOrEqualTo(paramValue); break;
+                return where.isGreaterOrEqualTo(value);
             case GREATER_THAN:
-                where.isGreaterThan(paramValue); break;
+                return where.isGreaterThan(value);
             case LESS_OR_EQUALS:
-                where.isLessOrEqualTo(paramValue); break;
+                return where.isLessOrEqualTo(value);
             case LESS_THAN:
-                where.isLessThan(paramValue); break;
+                return where.isLessThan(value);
             default:
                 throw newIllegalStateException("Unknown comparison operator `%s`.",
-                                               paramOperator);
+                                               operator);
         }
     }
 }

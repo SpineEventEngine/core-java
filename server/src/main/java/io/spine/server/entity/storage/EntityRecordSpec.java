@@ -28,8 +28,11 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.base.Identifier;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
@@ -144,8 +147,27 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     }
 
     @Override
-    protected I idValueIn(E source) {
+    public I idValueIn(E source) {
         return source.id();
+    }
+
+    /**
+     * Extracts the entity identifier value from the passed {@code EntityRecord}.
+     *
+     * <p>Callers are responsible for passing the {@code EntityRecord} instances compatible
+     * with the contract of this record specification. In case the type of the identifier
+     * packed into the passed entity record is not {@code I},
+     * a {@code ClassCastException} is thrown.
+     *
+     * @param record
+     *         the source for extraction
+     * @return the value of the entity identifier
+     */
+    @Override
+    @SuppressWarnings("unchecked")      /* See the documentation. */
+    public I idFromRecord(EntityRecord record) {
+        Any packed = record.getEntityId();
+        return (I) Identifier.unpack(packed);
     }
 
     @Override
@@ -164,6 +186,11 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      */
     public EntityClass<E> entityClass() {
         return entityClass;
+    }
+
+    @Override
+    public Class<? extends Message> sourceType() {
+        return entityClass.stateClass();
     }
 
     /**

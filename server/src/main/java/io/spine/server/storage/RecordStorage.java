@@ -277,7 +277,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * Creates a new query builder for the records stored in this storage.
      */
     public RecordQueryBuilder<I, R> queryBuilder() {
-        return RecordQuery.newBuilder(recordSpec.idType(), recordSpec().recordType());
+        return RecordQuery.newBuilder(recordSpec.idType(), recordSpec().storedType());
     }
 
     /**

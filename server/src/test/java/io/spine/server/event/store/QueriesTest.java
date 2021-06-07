@@ -62,7 +62,9 @@ class QueriesTest extends UtilityClassTest<Queries> {
         Subject<EventId, Event> subject = result.subject();
         assertThat(subject.id()
                           .values()).isEmpty();
-        assertThat(subject.predicates()).isEmpty();
+        QueryPredicate<Event> rootPredicate = subject.predicate();
+        assertThat(rootPredicate.allParams()).isEmpty();
+        assertThat(rootPredicate.children()).isEmpty();
     }
 
     @Test
@@ -75,12 +77,11 @@ class QueriesTest extends UtilityClassTest<Queries> {
                 .build();
         RecordQuery<EventId, Event> result = convert(query);
         Subject<EventId, Event> subject = result.subject();
-        assertThat(subject.predicates()).hasSize(1);
+        QueryPredicate<Event> rootPredicate = subject.predicate();
+        assertThat(rootPredicate.children()).isEmpty();
 
-        QueryPredicate<Event> predicate = subject.predicates()
-                                                 .get(0);
-        assertThat(predicate.operator()).isEqualTo(AND);
-        assertThat(predicate.parameters()).hasSize(2);
+        assertThat(rootPredicate.operator()).isEqualTo(AND);
+        assertThat(rootPredicate.parameters()).hasSize(2);
     }
 
     @Test
@@ -100,18 +101,19 @@ class QueriesTest extends UtilityClassTest<Queries> {
         RecordQuery<EventId, Event> result = convert(query);
 
         Subject<EventId, Event> subject = result.subject();
-        assertThat(subject.predicates()).hasSize(1);
-        QueryPredicate<Event> predicate = subject.predicates()
-                                                 .get(0);
-        assertThat(predicate.operator()).isEqualTo(OR);
+        QueryPredicate<Event> root = subject.predicate();
+        assertThat(root.operator()).isEqualTo(OR);
 
-        ImmutableList<SubjectParameter<Event, ?, ?>> parameters = predicate.parameters();
-        assertThat(parameters).hasSize(2);
+        ImmutableList<SubjectParameter<?, ?, ?>> params = root.allParams();
+        assertParamValue(params, 0, somethingHappened.trim());
+        assertParamValue(params, 1, somethingElseHappened);
+    }
 
-        assertThat(parameters.get(0)
-                             .value()).isEqualTo(somethingHappened.trim());
-        assertThat(parameters.get(1)
-                             .value()).isEqualTo(somethingElseHappened);
+    private static void
+    assertParamValue(ImmutableList<SubjectParameter<?, ?, ?>> params, int index, String expected) {
+        SubjectParameter<?, ?, ?> parameter = params.get(index);
+        assertThat(parameter.value())
+                .isEqualTo(expected);
     }
 
     private static EventFilter filterForType(String typeName) {

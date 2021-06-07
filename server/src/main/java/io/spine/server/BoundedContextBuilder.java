@@ -624,7 +624,7 @@ public final class BoundedContextBuilder implements Logging {
     private void initTenantIndex() {
         if (tenantIndex == null) {
             tenantIndex = isMultitenant()
-                          ? TenantIndex.createDefault()
+                          ? TenantIndex.defaultMultitenant()
                           : TenantIndex.singleTenant();
         }
     }

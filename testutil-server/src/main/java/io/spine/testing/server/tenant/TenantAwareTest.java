@@ -58,7 +58,7 @@ public abstract class TenantAwareTest {
      */
     public static TenantIndex createTenantIndex(boolean multitenant) {
         return multitenant
-               ? TenantIndex.createDefault()
+               ? TenantIndex.defaultMultitenant()
                : TenantIndex.singleTenant();
     }
 

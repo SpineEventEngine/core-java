@@ -30,12 +30,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.Identifier;
 import io.spine.query.EntityQuery;
 import io.spine.query.Query;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
 import io.spine.query.Subject;
+import io.spine.query.SubjectParameter;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -45,8 +45,6 @@ import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Streams.stream;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.entity.storage.EntityRecordColumn.isLifecycleColumn;
@@ -106,8 +104,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public Iterator<I> index() {
-        Iterator<EntityRecord> iterator = super.readAll(findActiveRecordsQuery);
-        return asIdStream(iterator);
+        return index(findActiveRecordsQuery);
     }
 
     /**
@@ -244,22 +241,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         return (EntityRecordSpec<I, S, ?>) super.recordSpec();
     }
 
-    /**
-     * Transforms the iterator over the entity records into the iterator over their identifiers.
-     *
-     * @param iterator
-     *         source iterator
-     * @return iterator over the identifiers of the passed {@code EntityRecord}s
-     */
-    @SuppressWarnings("unchecked")
-    private Iterator<I> asIdStream(Iterator<EntityRecord> iterator) {
-        ImmutableList<I> ids = stream(iterator)
-                .map(record -> Identifier.unpack(record.getEntityId()))
-                .map(id -> (I) id)
-                .collect(toImmutableList());
-        return ids.iterator();
-    }
-
     @SuppressWarnings("unchecked")  // ensured by the `Entity` declaration.
     private Class<I> idType() {
         return (Class<I>) recordSpec().entityClass().idClass();
@@ -275,27 +256,34 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     private RecordQuery<I, EntityRecord> onlyActive(RecordQuery<I, EntityRecord> query) {
         RecordQuery<I, EntityRecord> result = query;
         if (hasNoIds(query) && hasNoLifecycleCols(query)) {
-            result = query.toBuilder()
-                          .where(archived).is(false)
-                          .where(deleted).is(false)
-                          .build();
+            result = query.and((r) -> r.where(archived).is(false)
+                                       .where(deleted).is(false));
         }
         return result;
     }
 
     private static <I> boolean hasNoLifecycleCols(Query<I, EntityRecord> query) {
         Subject<I, ?> subject = query.subject();
-        ImmutableList<? extends QueryPredicate<?>> predicates = subject.predicates();
-        for (QueryPredicate<?> predicate : predicates) {
-            boolean hasColumn =
-                    predicate.parameters()
-                             .stream()
-                             .anyMatch((param) -> isLifecycleColumn(param.column()));
-            if (hasColumn) {
-                return false;
+        QueryPredicate<?> predicate = subject.predicate();
+        boolean result = !hasLifecycleColumn(predicate);
+        return result;
+    }
+
+    private static boolean hasLifecycleColumn(QueryPredicate<?> predicate) {
+        ImmutableList<SubjectParameter<?, ?, ?>> params = predicate.allParams();
+        boolean result =
+                params.stream()
+                      .anyMatch((param) -> isLifecycleColumn(param.column()));
+        if (!result) {
+            ImmutableList<? extends QueryPredicate<?>> children = predicate.children();
+            for (QueryPredicate<?> child : children) {
+                boolean childResult = hasLifecycleColumn(child);
+                if (childResult) {
+                    return childResult;
+                }
             }
         }
-        return true;
+        return result;
     }
 
     private RecordQuery<I, EntityRecord> findActiveRecords() {

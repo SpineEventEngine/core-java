@@ -41,8 +41,8 @@ import static io.spine.query.RecordColumn.create;
  */
 @RecordColumns(ofType = AggregateEventRecord.class)
 @SuppressWarnings(
-        {"DuplicateStringLiteralInspection",  // Column names may repeat across records.
-                "BadImport"})                 // `create` looks fine in this context.
+        {"DuplicateStringLiteralInspection",  /* Column names may repeat across records. */
+                "BadImport"})                 /* `create` looks fine in this context. */
 final class AggregateEventRecordColumn {
 
     /**
