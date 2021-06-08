@@ -541,7 +541,7 @@
     <inspection_tool class="NullableProblems" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="Production" level="WARNING" enabled="true">
         <option name="REPORT_NULLABLE_METHOD_OVERRIDES_NOTNULL" value="true" />
-        <option name="REPORT_NOT_ANNOTATED_METHOD_OVERRIDES_NOTNULL" value="true" />
+        <option name="REPORT_NOT_ANNOTATED_METHOD_OVERRIDES_NOTNULL" value="false" />
         <option name="REPORT_NOTNULL_PARAMETER_OVERRIDES_NULLABLE" value="true" />
         <option name="REPORT_NOT_ANNOTATED_PARAMETER_OVERRIDES_NOTNULL" value="true" />
         <option name="REPORT_NOT_ANNOTATED_GETTER" value="true" />
