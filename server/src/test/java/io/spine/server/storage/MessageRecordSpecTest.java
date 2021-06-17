@@ -53,13 +53,6 @@ class MessageRecordSpecTest {
                 .testAllPublicInstanceMethods(spec());
     }
 
-    private static MessageRecordSpec<StgProjectId, StgProject> spec() {
-        return new MessageRecordSpec<>(
-                StgProjectId.class, StgProject.class,
-                StgProject::getId,
-                StgColumn.definitions());
-    }
-
     @Test
     @DisplayName("obtain a column by name")
     void obtainByName() {
@@ -68,18 +61,23 @@ class MessageRecordSpecTest {
                  .forEach(column -> assertColumn(spec, column));
     }
 
+    @Test
+    @DisplayName("return all definitions of the columns")
+    void returnAllColumns() {
+        ImmutableSet<Column<?, ?>> actualColumns = spec().columns();
+        assertThat(actualColumns).containsExactlyElementsIn(StgColumn.definitions());
+    }
+
+    private static MessageRecordSpec<StgProjectId, StgProject> spec() {
+        return new MessageRecordSpec<>(StgProjectId.class, StgProject.class,
+                                       StgProject::getId, StgColumn.definitions());
+    }
+
     private static void assertColumn(
             MessageRecordSpec<StgProjectId, StgProject> spec, RecordColumn<StgProject, ?> column) {
         Optional<Column<?, ?>> found = spec.findColumn(column.name());
         assertThat(found).isPresent();
         assertThat(found.get()
                         .type()).isEqualTo(column.type());
-    }
-
-    @Test
-    @DisplayName("return all definitions of the columns")
-    void returnAllColumns() {
-        ImmutableSet<Column<?, ?>> actualColumns = spec().columns();
-        assertThat(actualColumns).containsExactlyElementsIn(StgColumn.definitions());
     }
 }

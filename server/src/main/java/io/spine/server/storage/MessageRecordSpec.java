@@ -139,6 +139,7 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
 
     @Override
     public Optional<Column<?, ?>> findColumn(ColumnName name) {
+        checkNotNull(name);
         RecordColumn<R, ?> result = columns.get(name);
         return Optional.ofNullable(result);
     }
