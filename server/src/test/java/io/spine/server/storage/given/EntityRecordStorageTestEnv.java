@@ -26,12 +26,14 @@
 
 package io.spine.server.storage.given;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.query.EntityColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.HasLifecycleColumns;
@@ -40,6 +42,7 @@ import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.test.entity.TaskView;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import io.spine.testing.core.given.GivenVersion;
@@ -53,6 +56,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.injectState;
+import static io.spine.test.entity.TaskView.Column.dueDate;
+import static io.spine.test.entity.TaskView.Column.estimateInDays;
+import static io.spine.test.entity.TaskView.Column.name;
+import static io.spine.test.entity.TaskView.Column.status;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -176,6 +183,10 @@ public final class EntityRecordStorageTestEnv {
             EntityRecordStorage<StgProjectId, StgProject> storage) {
         Iterator<EntityRecord> actual = storage.findAll(query);
         assertSingleRecord(expected, actual);
+    }
+
+    public static ImmutableSet<EntityColumn<TaskView, ?>> declaredColumns() {
+        return ImmutableSet.of(name(), estimateInDays(), status(), dueDate());
     }
 
     @SuppressWarnings("unused") // Reflective access
