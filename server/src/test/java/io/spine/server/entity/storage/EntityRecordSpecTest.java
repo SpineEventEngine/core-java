@@ -28,15 +28,20 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
+import io.spine.base.Identifier;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.client.VersionColumn;
+import io.spine.core.Versions;
+import io.spine.protobuf.AnyPacker;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.query.EntityColumn;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.test.entity.TaskView;
+import io.spine.test.entity.TaskViewId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +51,7 @@ import java.util.Optional;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.base.Time.currentTime;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.declaredColumns;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.spec;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -171,5 +177,24 @@ class EntityRecordSpecTest {
                 ColumnName.of("due_date"), projection.state()
                                                      .getDueDate()
         );
+    }
+
+    @Test
+    @DisplayName("extract ID value from `EntityRecord`")
+    void extractIdValue() {
+        TaskViewProjection projection = new TaskViewProjection();
+        TaskView state = projection.state();
+        TaskViewId id =
+                TaskViewId.newBuilder()
+                        .setId(93)
+                        .vBuild();
+        EntityRecord record = EntityRecord
+                .newBuilder()
+                .setEntityId(Identifier.pack(id))
+                .setState(AnyPacker.pack(state))
+                .setVersion(Versions.newVersion(3, currentTime()))
+                .vBuild();
+        TaskViewId actual = spec().idFromRecord(record);
+        assertThat(actual).isEqualTo(id);
     }
 }

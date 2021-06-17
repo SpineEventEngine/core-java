@@ -115,7 +115,6 @@ public abstract class RecordSpec<I, R, S> {
      *         the record containing the ID to extract
      * @return the value of record identifier
      */
-    @SuppressWarnings("unused")     //TODO:2021-02-07:alex.tymchenko: cover this method with tests.
     public abstract I idFromRecord(R record);
 
     /**

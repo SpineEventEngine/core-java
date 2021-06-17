@@ -68,6 +68,29 @@ class MessageRecordSpecTest {
         assertThat(actualColumns).containsExactlyElementsIn(StgColumn.definitions());
     }
 
+    @Test
+    @DisplayName("return ID value by the record")
+    void returnIdValue() {
+        StgProjectId id = projectId();
+        StgProject project = project(id);
+        StgProjectId actual = spec().idFromRecord(project);
+        assertThat(actual).isEqualTo(id);
+    }
+
+    private static StgProject project(StgProjectId id) {
+        return StgProject
+                .newBuilder()
+                .setId(id)
+                .vBuild();
+    }
+
+    private static StgProjectId projectId() {
+        return StgProjectId
+                .newBuilder()
+                .setId("storage-project")
+                .vBuild();
+    }
+
     private static MessageRecordSpec<StgProjectId, StgProject> spec() {
         return new MessageRecordSpec<>(StgProjectId.class, StgProject.class,
                                        StgProject::getId, StgColumn.definitions());
