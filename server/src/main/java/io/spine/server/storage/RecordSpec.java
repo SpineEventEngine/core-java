@@ -26,6 +26,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.query.Column;
@@ -120,11 +121,17 @@ public abstract class RecordSpec<I, R, S> {
     /**
      * Finds the column in this specification by the column name.
      *
-     * @param name the name of the column to search for
+     * @param name
+     *         the name of the column to search for
      * @return the column wrapped into {@code Optional},
-     * or {@code Optional.empty()} if no column is found
+     *         or {@code Optional.empty()} if no column is found
      */
     public abstract Optional<Column<?, ?>> findColumn(ColumnName name);
+
+    /**
+     * Returns the definitions of the record columns set by this specification.
+     */
+    public abstract ImmutableSet<Column<?, ?>> columns();
 
     /**
      * Finds the column in this specification by the column name.
