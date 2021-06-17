@@ -40,9 +40,12 @@ import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.test.entity.TaskView;
+import io.spine.test.entity.TaskViewId;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import io.spine.testing.core.given.GivenVersion;
@@ -187,6 +190,10 @@ public final class EntityRecordStorageTestEnv {
 
     public static ImmutableSet<EntityColumn<TaskView, ?>> declaredColumns() {
         return ImmutableSet.of(name(), estimateInDays(), status(), dueDate());
+    }
+
+    public static EntityRecordSpec<TaskViewId, TaskView, TaskViewProjection> spec() {
+        return EntityRecordSpec.of(TaskViewProjection.class);
     }
 
     @SuppressWarnings("unused") // Reflective access

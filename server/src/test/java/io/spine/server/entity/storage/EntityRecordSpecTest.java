@@ -37,7 +37,6 @@ import io.spine.query.EntityColumn;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.test.entity.TaskView;
-import io.spine.test.entity.TaskViewId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -48,16 +47,13 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.declaredColumns;
+import static io.spine.server.storage.given.EntityRecordStorageTestEnv.spec;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("`EntityRecordSpec` should")
 class EntityRecordSpecTest {
-
-    private static EntityRecordSpec<TaskViewId, TaskView, TaskViewProjection> spec() {
-        return EntityRecordSpec.of(TaskViewProjection.class);
-    }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
