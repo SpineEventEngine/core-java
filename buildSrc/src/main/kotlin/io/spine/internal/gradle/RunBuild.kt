@@ -51,6 +51,17 @@ open class RunBuild : DefaultTask() {
     @Internal
     lateinit var directory: String
 
+    /**
+     * Names of Gradle properties to copy into the launched build.
+     *
+     * The properties are looked up in the root project. If a property is not found, it is ignored.
+     *
+     * See [Gradle doc](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties)
+     * for more info about Gradle properties.
+     */
+    @Internal
+    var includeGradleProperties: MutableSet<String> = mutableSetOf()
+
     @TaskAction
     private fun execute() {
         val runsOnWindows = OperatingSystem.current().isWindows()
@@ -69,6 +80,9 @@ open class RunBuild : DefaultTask() {
 
         val process = buildProcess(command, errorOut, debugOut)
         if (process.waitFor() != 0) {
+            if (errorOut.exists()) {
+                logger.error(errorOut.readText())
+            }
             throw GradleException("Build FAILED. See $errorOut for details.")
         }
     }
@@ -86,6 +100,11 @@ open class RunBuild : DefaultTask() {
         command.add("--console=plain")
         command.add("--debug")
         command.add("--stacktrace")
+        val rootProject = project.rootProject
+        includeGradleProperties
+            .filter { rootProject.hasProperty(it) }
+            .map { name -> name to rootProject.property(name).toString() }
+            .forEach { (name, value) -> command.add("-P$name=$value") }
         return command
     }
 
