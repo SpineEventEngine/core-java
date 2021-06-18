@@ -27,6 +27,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -179,6 +180,16 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public ImmutableSet<Column<?, ?>> columns() {
+        ImmutableSet<Column<E, ?>> typed = columns.values();
+        ImmutableSet.Builder<Column<?, ?>> builder = ImmutableSet.builder();
+        ImmutableSet<Column<?, ?>> result =
+                builder.addAll(typed)
+                       .build();
+        return result;
     }
 
     /**

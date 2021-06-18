@@ -72,4 +72,11 @@ public final class Columns<E extends Entity<?, ?>> implements Iterable<Column<E,
     Stream<Column<E, ?>> stream() {
         return columns.stream();
     }
+
+    /**
+     * Returns the stored columns.
+     */
+    ImmutableSet<Column<E, ?>> values() {
+        return columns;
+    }
 }

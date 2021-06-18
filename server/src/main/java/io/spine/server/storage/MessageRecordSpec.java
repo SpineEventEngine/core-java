@@ -29,6 +29,7 @@ package io.spine.server.storage;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
@@ -139,8 +140,14 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
 
     @Override
     public Optional<Column<?, ?>> findColumn(ColumnName name) {
+        checkNotNull(name);
         RecordColumn<R, ?> result = columns.get(name);
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public ImmutableSet<Column<?, ?>> columns() {
+        return ImmutableSet.copyOf(columns.values());
     }
 
     @Override

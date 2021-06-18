@@ -38,8 +38,11 @@ import java.util.function.BiConsumer;
  *         the type of the messages consumed
  * @param <C>
  *         the type of the context of messages
+ * @apiNote This type is {@code public}, as it is a part of the {@code Client} API.
+ *         See {@link CommandRequest#onConsumingError(ConsumerErrorHandler)
+ *         CommandRequest.onConsumingError(..)} and {@link ConsumerErrorHandler} for usages.
  */
 @FunctionalInterface
-interface MessageConsumer<M extends Message, C extends MessageContext>
+public interface MessageConsumer<M extends Message, C extends MessageContext>
         extends BiConsumer<M, C> {
 }
