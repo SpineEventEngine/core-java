@@ -39,28 +39,34 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Specifies types of values a handler methods may return.
  */
+@SuppressWarnings("UnstableApiUsage") // `TypeToken` is marked as "beta".
 @Immutable
 public final class ReturnTypes {
 
     /** A return type of a {@code void} handler method. */
     private static final ReturnTypes VOID = new ReturnTypes(void.class);
 
-    private final ImmutableList<TypeToken<?>> types;
+    private final ImmutableList<TypeToken<?>> whitelist;
+    private final ImmutableList<TypeToken<?>> blacklist;
+
+    private ReturnTypes(ImmutableList<TypeToken<?>> whitelist,
+                        ImmutableList<TypeToken<?>> blacklist) {
+        this.whitelist = whitelist;
+        this.blacklist = blacklist;
+    }
 
     /**
      * Creates an instance for the passed type.
      */
     private ReturnTypes(Class<?> cls) {
-        checkNotNull(cls);
-        this.types = ImmutableList.of(TypeToken.of(cls));
+        this(ImmutableList.of(TypeToken.of(cls)), ImmutableList.of());
     }
 
     /**
      * Creates an instance containing the passed types.
      */
-    public ReturnTypes(TypeToken<?>... types) {
-        checkNotNull(types);
-        this.types = ImmutableList.copyOf(types);
+    public ReturnTypes(TypeToken<?>... whitelist) {
+        this(ImmutableList.copyOf(whitelist), ImmutableList.of());
     }
 
     /**
@@ -68,6 +74,17 @@ public final class ReturnTypes {
      */
     public static ReturnTypes onlyVoid() {
         return VOID;
+    }
+
+    /**
+     * Creates a new {@code ReturnTypes} but with the given black list of types.
+     *
+     * @param types types not to allow as the return types
+     * @return new {@code ReturnTypes} with a new black list
+     */
+    public ReturnTypes butNot(TypeToken<?>... types) {
+        checkNotNull(types);
+        return new ReturnTypes(whitelist, ImmutableList.copyOf(types));
     }
 
     /**
@@ -80,23 +97,30 @@ public final class ReturnTypes {
      */
     boolean matches(Method method, boolean mayReturnIgnored) {
         TypeToken<?> actualReturnType = Invokable.from(method).getReturnType();
-        boolean conforms =
-                types.stream()
-                     .anyMatch(type -> conforms(type, actualReturnType, mayReturnIgnored));
-        return conforms;
+        if (unrightfullyIgnored(actualReturnType, mayReturnIgnored)) {
+            return false;
+        }
+        boolean conformsWhitelist = whitelist.stream()
+                                             .anyMatch(t -> conforms(t, actualReturnType));
+        if (!conformsWhitelist) {
+            return false;
+        }
+        boolean conformsBlacklist = blacklist.stream()
+                                             .noneMatch(t -> conforms(t, actualReturnType));
+        return conformsBlacklist;
     }
 
     @SuppressWarnings("UnstableApiUsage") // Using Guava's `TypeToken`.
-    private static boolean conforms(TypeToken<?> returnType,
-                                    TypeToken<?> actualReturnType,
-                                    boolean mayReturnIgnored) {
-        boolean typeMatches = TypeMatcher.matches(returnType, actualReturnType);
-        boolean isNotIgnored =
-                mayReturnIgnored
-                        || TypeMatcher.messagesFitting(actualReturnType)
-                                      .stream()
-                                      .noneMatch(MethodResult::isIgnored);
-        return typeMatches && isNotIgnored;
+    private static boolean conforms(TypeToken<?> expectedType,
+                                    TypeToken<?> actualType) {
+        return TypeMatcher.matches(expectedType, actualType);
+    }
+
+    private static boolean unrightfullyIgnored(TypeToken<?> actualReturnType,
+                                               boolean mayReturnIgnored) {
+        return mayReturnIgnored || TypeMatcher.messagesFitting(actualReturnType)
+                                              .stream()
+                                              .noneMatch(MethodResult::isIgnored);
     }
 
     @Override
@@ -108,11 +132,11 @@ public final class ReturnTypes {
             return false;
         }
         ReturnTypes types1 = (ReturnTypes) o;
-        return types.equals(types1.types);
+        return whitelist.equals(types1.whitelist);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(types);
+        return Objects.hash(whitelist);
     }
 }

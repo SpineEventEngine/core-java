@@ -41,7 +41,12 @@ import java.util.Optional;
  */
 final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
+    @SuppressWarnings("UnstableApiUsage")
     private static final ReturnTypes TYPES = new ReturnTypes(
+            TypeToken.of(EventMessage.class),
+            new TypeToken<Iterable<EventMessage>>() {},
+            new TypeToken<Optional<EventMessage>>() {}
+    ).butNot(
             TypeToken.of(EventMessage.class),
             new TypeToken<Iterable<EventMessage>>() {},
             new TypeToken<Optional<EventMessage>>() {}
