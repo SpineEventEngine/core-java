@@ -129,8 +129,8 @@ fun ConfigurationContainer.excludeProtobufLite() {
         )
     }
 
-    excludeProtoLite("runtime")
-    excludeProtoLite("testRuntime")
+    excludeProtoLite("runtimeOnly")
+    excludeProtoLite("testRuntimeOnly")
 }
 
 @Suppress("unused")

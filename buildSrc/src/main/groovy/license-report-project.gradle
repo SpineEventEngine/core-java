@@ -74,7 +74,7 @@ class MarkdownReportRenderer implements ReportRenderer {
     }
 
     @Input
-    private String getFileNameCache() { return this.fileName }
+    String getFileNameCache() { return this.fileName }
 
     void render(final ProjectData data) {
         project = data.project

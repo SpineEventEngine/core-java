@@ -27,6 +27,7 @@
 package io.spine.internal.gradle
 
 import java.io.File
+import java.util.concurrent.TimeUnit
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Internal
@@ -78,8 +79,15 @@ open class RunBuild : DefaultTask() {
         val errorOut = File(buildDir, "error-out.txt")
         val debugOut = File(buildDir, "debug-out.txt")
 
-        val process = buildProcess(command, errorOut, debugOut)
-        if (process.waitFor() != 0) {
+        val process = startProcess(command, errorOut, debugOut)
+
+        if (!process.waitFor(10, TimeUnit.MINUTES)) {
+            /*  The timeout is set because of Gradle process execution under Windows.
+                See the following locations for details:
+                  https://github.com/gradle/gradle/pull/8467#issuecomment-498374289
+                  https://github.com/gradle/gradle/issues/3987
+                  https://discuss.gradle.org/t/weirdness-in-gradle-exec-on-windows/13660/6
+             */
             if (errorOut.exists()) {
                 logger.error(errorOut.readText())
             }
@@ -108,7 +116,7 @@ open class RunBuild : DefaultTask() {
         return command
     }
 
-    private fun buildProcess(command: List<String>, errorOut: File, debugOut: File) =
+    private fun startProcess(command: List<String>, errorOut: File, debugOut: File) =
         ProcessBuilder()
             .command(command)
             .directory(project.file(directory))
