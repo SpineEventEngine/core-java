@@ -63,7 +63,7 @@ final class EventReactorSignature extends EventAcceptingSignature<EventReactorMe
 
     /**
      * Tells that the method may state that a reaction isn't needed by returning
-     * {@link io.spine.server.model Nothing Nothing}.
+     * {@link io.spine.server.model.Nothing Nothing}.
      */
     @Override
     public boolean mayReturnIgnored() {
