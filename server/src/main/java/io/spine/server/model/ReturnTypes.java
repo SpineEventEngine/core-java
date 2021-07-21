@@ -97,7 +97,7 @@ public final class ReturnTypes {
      */
     boolean matches(Method method, boolean mayReturnIgnored) {
         TypeToken<?> actualReturnType = Invokable.from(method).getReturnType();
-        if (unrightfullyIgnored(actualReturnType, mayReturnIgnored)) {
+        if (!mayReturnIgnored && ignored(actualReturnType)) {
             return false;
         }
         boolean conformsWhitelist = whitelist.stream()
@@ -110,17 +110,15 @@ public final class ReturnTypes {
         return conformsBlacklist;
     }
 
-    @SuppressWarnings("UnstableApiUsage") // Using Guava's `TypeToken`.
     private static boolean conforms(TypeToken<?> expectedType,
                                     TypeToken<?> actualType) {
         return TypeMatcher.matches(expectedType, actualType);
     }
 
-    private static boolean unrightfullyIgnored(TypeToken<?> actualReturnType,
-                                               boolean mayReturnIgnored) {
-        return mayReturnIgnored || TypeMatcher.messagesFitting(actualReturnType)
-                                              .stream()
-                                              .noneMatch(MethodResult::isIgnored);
+    private static boolean ignored(TypeToken<?> actualReturnType) {
+        return TypeMatcher.messagesFitting(actualReturnType)
+                          .stream()
+                          .anyMatch(MethodResult::isIgnored);
     }
 
     @Override
