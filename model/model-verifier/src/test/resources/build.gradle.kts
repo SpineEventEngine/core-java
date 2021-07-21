@@ -77,7 +77,6 @@ apply {
     plugin("io.spine.mc-java")
     plugin("io.spine.tools.spine-model-verifier")
     from("$enclosingRootDir/version.gradle.kts")
-    from("$enclosingRootDir/${scriptsPath}/model-compiler.gradle")
 }
 
 repositories.applyStandard()

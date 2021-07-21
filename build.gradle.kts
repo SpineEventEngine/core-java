@@ -129,13 +129,8 @@ subprojects {
 
         with(Scripts) {
             from(javacArgs(project))
-            from(modelCompiler(project))
             from(projectLicenseReport(project))
         }
-    }
-
-    extensions["modelCompiler"].withGroovyBuilder {
-        setProperty("generateValidation", true)
     }
 
     java {

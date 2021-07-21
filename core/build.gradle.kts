@@ -36,14 +36,14 @@ dependencies {
 }
 
 modelCompiler {
-    fields {
 
-        // Describe the `Event` fields to allow non-reflective and strongly-typed access.
-        generateFor("spine.core.Event", markAs("io.spine.core.EventField"))
-
-        // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
-        // creation of typed event filters based on event context.
-        generateFor("spine.core.EventContext", markAs("io.spine.core.EventContextField"))
+    java {
+        forMessage("spine.core.Event") {
+            markFieldsAs("io.spine.core.EventField")
+        }
+        forMessage("spine.core.EventContext") {
+            markFieldsAs("io.spine.core.EventContextField")
+        }
     }
 }
 
