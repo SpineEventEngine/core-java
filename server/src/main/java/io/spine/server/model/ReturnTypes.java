@@ -64,6 +64,13 @@ public final class ReturnTypes {
     }
 
     /**
+     * Obtains the instance representing the {@code void} return type.
+     */
+    public static ReturnTypes onlyVoid() {
+        return VOID;
+    }
+
+    /**
      * Verifies if the return type of the passed method matches this instance.
      *
      * @param method
@@ -77,13 +84,6 @@ public final class ReturnTypes {
                 types.stream()
                      .anyMatch(type -> conforms(type, actualReturnType, mayReturnIgnored));
         return conforms;
-    }
-
-    /**
-     * Obtains the instance representing the {@code void} return type.
-     */
-    public static ReturnTypes onlyVoid() {
-        return VOID;
     }
 
     @SuppressWarnings("UnstableApiUsage") // Using Guava's `TypeToken`.
