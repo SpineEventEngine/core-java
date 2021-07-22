@@ -40,7 +40,6 @@ import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -148,7 +147,6 @@ class AbstractHandlerMethod<T,
      * @see #attributeSuppliers()
      */
     @Override
-    @PostConstruct
     public final void discoverAttributes() {
         ImmutableSet.Builder<Attribute<?>> builder = ImmutableSet.builder();
         for (Function<Method, Attribute<?>> fn : attributeSuppliers()) {

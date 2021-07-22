@@ -35,7 +35,6 @@ import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -62,7 +61,6 @@ public interface HandlerMethod<T,
      */
     C messageClass();
 
-    @PostConstruct
     void discoverAttributes();
 
     /**
