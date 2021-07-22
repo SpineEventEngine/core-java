@@ -33,7 +33,6 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.model.given.map.CompletionWatch;
 import io.spine.server.model.given.map.DupEventFilterValue;
-import io.spine.server.model.given.map.DupEventFilterValueWhere;
 import io.spine.server.model.given.map.DuplicateCommandHandlers;
 import io.spine.server.model.given.map.ProjectAgg;
 import io.spine.server.model.given.map.TwoFieldsInSubscription;
@@ -78,15 +77,9 @@ class HandlerMapTest {
         }
 
         @Test
-        @DisplayName("the same value of the filtered event field (ByField)")
-        void rejectFilterFieldDuplication() {
-            assertDuplicate(() -> asProjectionClass(DupEventFilterValue.class));
-        }
-
-        @Test
         @DisplayName("the same value of the filtered event field (Where)")
         void rejectFilterFieldDuplicationWhere() {
-            assertDuplicate(() -> asProjectionClass(DupEventFilterValueWhere.class));
+            assertDuplicate(() -> asProjectionClass(DupEventFilterValue.class));
         }
 
         @Test

@@ -117,17 +117,4 @@ public @interface Subscribe {
      */
     @Deprecated
     boolean external() default false;
-
-    /**
-     * Filter to apply to all the event messages.
-     *
-     * <p>If an event does not match this filter, it is not passed to the subscriber method.
-     *
-     * <p>If the {@link ByField#path() @ByField.path} if empty, the filter is not
-     * applied.
-     *
-     * @deprecated please use {@link Where @Where} annotation for the first method parameter.
-     */
-    @Deprecated
-    ByField filter() default @ByField(path = "", value = "");
 }

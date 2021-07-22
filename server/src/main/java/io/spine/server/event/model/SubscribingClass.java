@@ -79,7 +79,7 @@ public interface SubscribingClass extends Logging {
      * @param eventClass
      *         the class of the events
      * @param originClass
-     *         the class of the messages that resulted in the event, or
+     *         the class of the message that caused the event, or
      *         {@link io.spine.server.type.EmptyClass EmptyClass} for all origins
      * @return methods handling the requested class of the events
      */

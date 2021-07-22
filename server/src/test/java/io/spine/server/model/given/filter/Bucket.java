@@ -61,9 +61,8 @@ public class Bucket {
         peas = peas + e.getNumber();
     }
 
-    @SuppressWarnings("deprecation") // to be migrated during removal of `@ByField`.
-    @Subscribe(filter = @io.spine.core.ByField(path = "kind", value = "BEAN"))
-    void onlyBeans(BeanAdded e) {
+    @Subscribe
+    void onlyBeans(@Where(field = "kind", equals = "BEAN") BeanAdded e) {
         beans = beans + e.getNumber();
     }
 

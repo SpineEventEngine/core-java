@@ -37,8 +37,8 @@ import io.spine.type.MessageClass;
  * values to avoid if-elif branches (that filter by the value of the message in a bigger method).
  *
  * <p>It is possible to filter by the same field of the same message type.
- * 
- * @see io.spine.core.ByField
+ *
+ * @see io.spine.core.Where
  * @see HandlerFieldFilterClashError
  */
 @Immutable

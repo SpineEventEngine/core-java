@@ -45,7 +45,6 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
 import static io.spine.string.Stringifiers.fromString;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -92,40 +91,13 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         Subscribe annotation = method.getAnnotation(Subscribe.class);
         checkAnnotated(method, annotation);
         @Nullable Where where = filterAnnotationOf(method);
-        @SuppressWarnings("deprecation") // still need `ByField` when building older models.
-        io.spine.core.ByField byField = annotation.filter();
-        boolean byFieldEmpty = byField.path().isEmpty();
-        String fieldPath;
-        String value;
         if (where != null) {
-            fieldPath = where.field();
-            value = where.equals();
-            checkNoByFieldAnnotation(byFieldEmpty, method);
+            String fieldPath = where.field();
+            String value = where.equals();
+            return createFilter(method, fieldPath, value);
         } else {
-            if (byFieldEmpty) {
-                return acceptingAll();
-            }
-            fieldPath = byField.path();
-            value = byField.value();
+            return acceptingAll();
         }
-        return createFilter(method, fieldPath, value);
-    }
-
-    /**
-     * Ensures that the method does not have {@code ByField} annotation and {@code Where}
-     * parameter annotation at the same time.
-     */
-    private static void checkNoByFieldAnnotation(boolean byFieldEmpty, Method method) {
-        String where = Where.class.getName();
-        @SuppressWarnings("deprecation") // still need `ByField` when building older models.
-        String byField = io.spine.core.ByField.class.getName();
-        checkState(
-                byFieldEmpty,
-                "The subscriber method `%s()` has `@%s` and `@%s`" +
-                        " annotations at the same time." +
-                        " Please use only one, preferring `%s` because `%s` is deprecated.",
-                method.getName(), byField, where, where, byField
-        );
     }
 
     /**

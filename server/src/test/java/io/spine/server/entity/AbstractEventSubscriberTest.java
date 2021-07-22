@@ -35,7 +35,6 @@ import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.model.InsufficientVisibilityError;
 import io.spine.server.given.groups.FilteredStateSubscriber;
-import io.spine.server.given.groups.FilteredStateSubscriberWhere;
 import io.spine.server.given.groups.Group;
 import io.spine.server.given.groups.GroupId;
 import io.spine.server.given.groups.HiddenEntitySubscriber;
@@ -160,15 +159,9 @@ class AbstractEventSubscriberTest {
     }
 
     @Test
-    @DisplayName("fail to subscribe to entity states with filters (@ByField)")
+    @DisplayName("fail to subscribe to entity states with filters")
     void failToSubscribeToStateWithFilters() {
         assertThrows(IllegalStateException.class, FilteredStateSubscriber::new);
-    }
-
-    @Test
-    @DisplayName("fail to subscribe to entity states with filters (@Where)")
-    void failToSubscribeToStateWithFiltersWhere() {
-        assertThrows(IllegalStateException.class, FilteredStateSubscriberWhere::new);
     }
 
     @Test
