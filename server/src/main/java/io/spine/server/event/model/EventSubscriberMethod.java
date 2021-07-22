@@ -28,7 +28,6 @@ package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EmptyClass;
@@ -57,12 +56,6 @@ public final class EventSubscriberMethod extends SubscriberMethod
     public DispatchKey key() {
         DispatchKey dispatchKey = RejectionHandler.super.key();
         return applyFilter(dispatchKey);
-    }
-
-    @Override
-    public ArgumentFilter createFilter() {
-        ArgumentFilter result = ArgumentFilter.createFilter(rawMethod());
-        return result;
     }
 
     @Override

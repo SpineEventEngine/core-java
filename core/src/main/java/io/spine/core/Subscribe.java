@@ -105,7 +105,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target(METHOD)
 @Documented
-@AcceptsFilters
 @AcceptsExternal
 public @interface Subscribe {
 }

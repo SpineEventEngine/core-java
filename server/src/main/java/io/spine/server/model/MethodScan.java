@@ -49,7 +49,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private final MethodSignature<H, ?> signature;
     private final Multimap<DispatchKey, H> handlers;
     private final Map<DispatchKey, H> seenMethods;
-    private final Map<MessageClass<?>, SelectiveHandler<?, ?, ?, ?>> selectiveHandlers;
+    private final Map<MessageClass<?>, HandlerMethod<?, ?, ?, ?>> messageToHandler;
 
     /**
      * Finds handler methods in the scanned class by the given signature.
@@ -74,7 +74,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         this.signature = signature;
         this.handlers = HashMultimap.create();
         this.seenMethods = new HashMap<>();
-        this.selectiveHandlers = new HashMap<>();
+        this.messageToHandler = new HashMap<>();
     }
 
     /**
@@ -99,9 +99,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
 
     private void remember(H handler) {
         checkNotRemembered(handler);
-        if (handler instanceof SelectiveHandler) {
-            checkFilteringNotClashes((SelectiveHandler<?, ?, ?, ?>) handler);
-        }
+        checkForFilterClashes(handler);
         handlers.put(handler.key().withoutFilter(), handler);
     }
 
@@ -120,15 +118,14 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         }
     }
 
-    private void checkFilteringNotClashes(SelectiveHandler<?, ?, ?, ?> handler) {
+    private void checkForFilterClashes(HandlerMethod<?, ?, ?, ?> handler) {
         ArgumentFilter filter = handler.filter();
         if (filter.acceptsAll()) {
             return;
         }
         MessageClass<?> handledClass = handler.messageClass();
-        SelectiveHandler<?, ?, ?, ?> existingHandler = selectiveHandlers.put(handledClass, handler);
-        if (existingHandler != null
-                && !filter.sameField(existingHandler.filter())) {
+        HandlerMethod<?, ?, ?, ?> existingHandler = messageToHandler.put(handledClass, handler);
+        if (existingHandler != null && !filter.sameField(existingHandler.filter())) {
             // There is already a handler for this message class.
             // See that the field which is used as the condition for filtering is the same.
             // It is not allowed to have filtered handlers by various fields because it

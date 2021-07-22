@@ -79,6 +79,11 @@ public interface HandlerMethod<T,
     Method rawMethod();
 
     /**
+     * Obtains the filter to apply to the messages received by this method.
+     */
+    ArgumentFilter filter();
+
+    /**
      * Retrieves the message classes produced by this handler method.
      */
     Set<R> producedMessages();

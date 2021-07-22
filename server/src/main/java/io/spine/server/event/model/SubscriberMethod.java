@@ -35,16 +35,12 @@ import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
-import io.spine.server.model.SelectiveHandler;
 import io.spine.server.model.VoidMethod;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
-import java.util.function.Supplier;
-
-import static com.google.common.base.Suppliers.memoize;
 
 /**
  * A method annotated with the {@link io.spine.core.Subscribe @Subscribe} annotation.
@@ -60,11 +56,9 @@ public abstract class SubscriberMethod
                                       EventClass,
                                       EventEnvelope,
                                       EmptyClass>
-        implements VoidMethod<EventSubscriber, EventClass, EventEnvelope>,
-                   SelectiveHandler<EventSubscriber, EventClass, EventEnvelope, EmptyClass> {
+        implements VoidMethod<EventSubscriber, EventClass, EventEnvelope> {
 
-    @SuppressWarnings("Immutable") // because this `Supplier` is effectively immutable.
-    private final Supplier<ArgumentFilter> filter = memoize(this::createFilter);
+
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
@@ -91,16 +85,6 @@ public abstract class SubscriberMethod
     @Override
     public EventClass messageClass() {
         return EventClass.from(rawMessageClass());
-    }
-
-    /**
-     * Creates the filter for messages handled by this method.
-     */
-    protected abstract ArgumentFilter createFilter();
-
-    @Override
-    public final ArgumentFilter filter() {
-        return filter.get();
     }
 
     /**

@@ -34,7 +34,6 @@ import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.core.Subscribe;
 import io.spine.core.Where;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -60,12 +59,13 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
     private final @Nullable Object expectedValue;
 
     private ArgumentFilter(FieldPath path, Object expectedValue) {
-        this.field = path.getFieldNameCount() > 0
-                     ? Field.withPath(path)
-                     : null;
-        this.expectedValue = field != null
-                             ? expectedValue
-                             : null;
+        if (path.getFieldNameCount() > 0) {
+            this.field = Field.withPath(path);
+            this.expectedValue = expectedValue;
+        } else {
+            this.field = null;
+            this.expectedValue = null;
+        }
     }
 
     /**
@@ -88,8 +88,6 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
      * {@linkplain ArgumentFilter#acceptsAll() accepts all} arguments.
      */
     public static ArgumentFilter createFilter(Method method) {
-        Subscribe annotation = method.getAnnotation(Subscribe.class);
-        checkAnnotated(method, annotation);
         @Nullable Where where = filterAnnotationOf(method);
         if (where != null) {
             String fieldPath = where.field();
@@ -126,15 +124,6 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
                       "The method `%s.%s()` does not have parameters.",
                       method.getDeclaringClass().getName(), method.getName());
         return parameters[0];
-    }
-
-    private static void checkAnnotated(Method method, @Nullable Subscribe annotation) {
-        checkArgument(annotation != null,
-                      "The method `%s.%s()` must be annotated with `@%s`.",
-                      method.getDeclaringClass().getName(),
-                      method.getName(),
-                      Subscribe.class.getName()
-        );
     }
 
     @VisibleForTesting

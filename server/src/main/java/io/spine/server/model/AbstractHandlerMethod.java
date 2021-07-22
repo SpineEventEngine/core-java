@@ -121,6 +121,9 @@ class AbstractHandlerMethod<T,
     @SuppressWarnings("Immutable") // Memoizing supplier is effectively immutable.
     private final Supplier<ImmutableSet<R>> producedTypes;
 
+    @SuppressWarnings("Immutable") // because this `Supplier` is effectively immutable.
+    private final Supplier<ArgumentFilter> filter = memoize(this::createFilter);
+
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -154,6 +157,19 @@ class AbstractHandlerMethod<T,
             builder.add(attr);
         }
         attributes = builder.build();
+    }
+
+    /**
+     * Creates the filter for messages handled by this method.
+     */
+    protected ArgumentFilter createFilter() {
+        ArgumentFilter result = ArgumentFilter.createFilter(rawMethod());
+        return result;
+    }
+
+    @Override
+    public final ArgumentFilter filter() {
+        return filter.get();
     }
 
     /**
