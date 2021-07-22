@@ -28,6 +28,7 @@ package io.spine.server.event.model;
 
 import com.google.common.reflect.TypeToken;
 import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.server.event.React;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.ReturnTypes;
@@ -47,9 +48,9 @@ final class EventReactorSignature extends EventAcceptingSignature<EventReactorMe
             new TypeToken<Iterable<EventMessage>>() {},
             new TypeToken<Optional<EventMessage>>() {}
     ).butNot(
-            TypeToken.of(EventMessage.class),
-            new TypeToken<Iterable<EventMessage>>() {},
-            new TypeToken<Optional<EventMessage>>() {}
+            TypeToken.of(RejectionMessage.class),
+            new TypeToken<Iterable<RejectionMessage>>() {},
+            new TypeToken<Optional<RejectionMessage>>() {}
     );
 
     EventReactorSignature() {
