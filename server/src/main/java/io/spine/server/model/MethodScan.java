@@ -49,7 +49,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private final MethodSignature<H, ?> signature;
     private final Multimap<DispatchKey, H> handlers;
     private final Map<DispatchKey, H> seenMethods;
-    private final Map<MessageClass, SelectiveHandler> selectiveHandlers;
+    private final Map<MessageClass<?>, SelectiveHandler<?, ?, ?, ?>> selectiveHandlers;
 
     /**
      * Finds handler methods in the scanned class by the given signature.
@@ -100,7 +100,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     private void remember(H handler) {
         checkNotRemembered(handler);
         if (handler instanceof SelectiveHandler) {
-            checkFilteringNotClashes((SelectiveHandler) handler);
+            checkFilteringNotClashes((SelectiveHandler<?, ?, ?, ?>) handler);
         }
         handlers.put(handler.key().withoutFilter(), handler);
     }
@@ -121,13 +121,13 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     @SuppressWarnings("PMD.CollapsibleIfStatements")    // For clarity.
-    private void checkFilteringNotClashes(SelectiveHandler handler) {
+    private void checkFilteringNotClashes(SelectiveHandler<?, ?, ?, ?> handler) {
         ArgumentFilter filter = handler.filter();
         if (filter.acceptsAll()) {
             return;
         }
-        MessageClass handledClass = handler.messageClass();
-        SelectiveHandler existingHandler = selectiveHandlers.put(handledClass, handler);
+        MessageClass<?> handledClass = handler.messageClass();
+        SelectiveHandler<?, ?, ?, ?> existingHandler = selectiveHandlers.put(handledClass, handler);
         if (existingHandler != null
                 && !filter.sameField(existingHandler.filter())) {
             // There is already a handler for this message class.
