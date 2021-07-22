@@ -161,14 +161,4 @@ import java.lang.annotation.Target;
 @Documented
 @AcceptsExternal
 public @interface React {
-
-    /**
-     * When {@code true}, the annotated method of the entity reacts on the event generated from
-     * outside of the Bounded Context to which this entity belongs.
-     *
-     * @deprecated please use {@link io.spine.core.External @External} annotation for the first
-     *         method parameter.
-     */
-    @Deprecated
-    boolean external() default false;
 }
