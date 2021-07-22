@@ -71,8 +71,9 @@ public abstract class SubscriberMethod
     }
 
     /**
-     * Applies {@link #filter() filter} if a specific one is supplied. Otherwise returns the
-     * supplied {@code key}.
+     * Adds a {@link #filter() filter} to the given key.
+     *
+     * <p>If there is no field filter, returns the existing key.
      */
     @Internal
     DispatchKey applyFilter(DispatchKey key) {
