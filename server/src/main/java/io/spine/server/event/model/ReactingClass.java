@@ -28,7 +28,7 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * Provides message handling information on a class that reacts on messages.
@@ -38,12 +38,10 @@ public interface ReactingClass extends EventReceiverClass {
     /**
      * Obtains the method that reacts on the events of the passed class.
      *
-     * @param eventClass
-     *         the class of the events on which the method reacts
-     * @param originClass
-     *         the class of message from which the event originates
+     * @param event
+     *         the event on which the method reacts
      */
-    EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass);
+    EventReactorMethod reactorOf(EventEnvelope event);
 
     /**
      * Obtains the classes of events produced from the event reaction.

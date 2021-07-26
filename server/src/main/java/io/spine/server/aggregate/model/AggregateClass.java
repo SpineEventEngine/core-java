@@ -34,9 +34,10 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.model.HandlerMap;
+import io.spine.server.model.ModelError;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
@@ -149,8 +150,8 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
     }
 
     @Override
-    public final EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
-        return delegate.reactorOf(eventClass, originClass);
+    public final EventReactorMethod reactorOf(EventEnvelope event) {
+        return delegate.reactorOf(event);
     }
 
     @Override
@@ -161,7 +162,9 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
     /**
      * Obtains event applier method for the passed class of events.
      */
-    public final Applier applierOf(EventClass eventClass) {
-        return stateEvents.handlerOf(eventClass);
+    public final Applier applierOf(EventEnvelope event) {
+        return stateEvents.findHandlerFor(event).orElseThrow(() -> new ModelError(
+                "Aggregate `%s` does not handle event `%s`.", this, event.typeUrl()
+        ));
     }
 }

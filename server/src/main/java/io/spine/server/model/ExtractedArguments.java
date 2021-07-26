@@ -24,29 +24,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.method;
+package io.spine.server.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EventMessage;
-import io.spine.server.model.ExtractedArguments;
-import io.spine.server.model.MethodParams;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.EventEnvelope;
 
-import static io.spine.server.model.TypeMatcher.classImplementing;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Immutable
-public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
+public final class ExtractedArguments {
 
-    INSTANCE;
+    @SuppressWarnings("Immutable") // This array is never changed or exposed.
+    private final Object[] args;
 
-    @Override
-    public boolean matches(MethodParams params) {
-        return params.is(classImplementing(EventMessage.class));
+    private ExtractedArguments(Object[] args) {
+        this.args = args;
     }
 
-    @Override
-    public ExtractedArguments extractArguments(EventEnvelope envelope) {
-        return ExtractedArguments.ofOne(envelope.message());
+    public static ExtractedArguments ofOne(Object arg) {
+        checkNotNull(arg);
+        return new ExtractedArguments(new Object[]{arg});
+    }
+
+    public static ExtractedArguments ofTwo(Object first, Object second) {
+        checkNotNull(first);
+        checkNotNull(second);
+        return new ExtractedArguments(new Object[]{first, second});
+    }
+
+    public static ExtractedArguments ofTree(Object first, Object second, Object third) {
+        checkNotNull(first);
+        checkNotNull(second);
+        checkNotNull(third);
+        return new ExtractedArguments(new Object[]{first, second, third});
+    }
+
+    Object invokeMethod(Method method, Object receiver)
+            throws InvocationTargetException, IllegalAccessException {
+        return method.invoke(receiver, args);
     }
 }

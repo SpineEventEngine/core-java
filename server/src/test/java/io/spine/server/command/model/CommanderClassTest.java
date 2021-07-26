@@ -41,6 +41,8 @@ import io.spine.model.contexts.projects.event.SigTaskDeleted;
 import io.spine.model.contexts.projects.event.SigTaskMoved;
 import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.server.command.model.given.commander.SampleCommander;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -48,11 +50,22 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
 import static io.spine.testing.server.Assertions.assertEventClassesExactly;
+import static io.spine.testing.server.model.ModelTests.dropAllModels;
 
 @DisplayName("`CommanderClass` should")
 class CommanderClassTest {
 
-    private final CommanderClass<?> commanderClass = asCommanderClass(SampleCommander.class);
+    private CommanderClass<?> commanderClass;
+
+    @BeforeEach
+    void prepareCommander() {
+        commanderClass = asCommanderClass(SampleCommander.class);
+    }
+
+    @AfterEach
+    void clearModel() {
+        dropAllModels();
+    }
 
     @Nested
     @DisplayName("provide classes of")

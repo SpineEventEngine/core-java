@@ -43,6 +43,7 @@ import io.spine.server.given.groups.WronglyDomesticSubscriber;
 import io.spine.server.given.groups.WronglyExternalSubscriber;
 import io.spine.server.given.organizations.Organization;
 import io.spine.server.given.organizations.OrganizationId;
+import io.spine.server.model.ModelError;
 import io.spine.server.model.SignalOriginMismatchError;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.SystemBoundedContexts;
@@ -161,7 +162,7 @@ class AbstractEventSubscriberTest {
     @Test
     @DisplayName("fail to subscribe to entity states with filters")
     void failToSubscribeToStateWithFilters() {
-        assertThrows(IllegalStateException.class, FilteredStateSubscriber::new);
+        assertThrows(ModelError.class, FilteredStateSubscriber::new);
     }
 
     @Test

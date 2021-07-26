@@ -104,7 +104,7 @@ public abstract class AbstractEventReactor
     }
 
     private void reactAndPost(EventEnvelope event) {
-        EventReactorMethod method = thisClass.reactorOf(event.messageClass(), event.originClass());
+        EventReactorMethod method = thisClass.reactorOf(event);
         DispatchOutcomeHandler
                 .from(method.invoke(this, event))
                 .onEvents(eventBus::post)

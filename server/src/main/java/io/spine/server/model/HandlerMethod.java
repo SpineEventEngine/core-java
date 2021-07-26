@@ -153,6 +153,6 @@ public interface HandlerMethod<T,
      */
     default DispatchKey key() {
         Class<? extends Message> rawCls = messageClass().value();
-        return new DispatchKey(rawCls, null, null);
+        return new DispatchKey(rawCls, filter(), null);
     }
 }

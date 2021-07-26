@@ -31,9 +31,9 @@ import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
+import io.spine.base.SignalMessage;
 import io.spine.core.Where;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -46,13 +46,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
 import static io.spine.string.Stringifiers.fromString;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Allows to filter messages passed by a handler method by a value of the message field.
  */
 @Immutable
-public final class ArgumentFilter implements Predicate<EventMessage> {
+public final class ArgumentFilter implements Predicate<SignalMessage> {
+
+    private static final ArgumentFilter acceptingAll =
+            new ArgumentFilter(FieldPath.getDefaultInstance(), Empty.getDefaultInstance());
 
     private final @Nullable Field field;
     @SuppressWarnings("Immutable") // Values are primitives.
@@ -77,8 +79,11 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
         return new ArgumentFilter(field, fieldValue);
     }
 
-    private static ArgumentFilter acceptingAll() {
-        return new ArgumentFilter(FieldPath.getDefaultInstance(), Empty.getDefaultInstance());
+    /**
+     * Creates a filter which accepts all messages.
+     */
+    static ArgumentFilter acceptingAll() {
+        return acceptingAll;
     }
 
     /**
@@ -99,16 +104,26 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
     }
 
     /**
+     * Checks if the filter is defined on the given {@code method}.
+     *
+     * @return {@code true} if a filter is defined and {@code false} if the filter would accept
+     *         all arguments
+     */
+    public static boolean presentOn(Method method) {
+        @Nullable Where annotation = filterAnnotationOf(method);
+        return annotation != null;
+    }
+
+    /**
      * Creates a filter for the method using string values found in the annotation for the method.
      */
     private static ArgumentFilter createFilter(Method method, String fieldPath, String value) {
         Class<Message> paramType = firstParamType(method);
         Field field = Field.parse(fieldPath);
-        Class<?> fieldType = field.findType(paramType).orElseThrow(
-                () -> newIllegalStateException(
-                        "The message with the type `%s` does not have the field `%s`.",
-                        paramType.getName(), field)
-        );
+        Class<?> fieldType = field.findType(paramType).orElseThrow(() -> new ModelError(
+                "The message with the type `%s` does not have the field `%s`.",
+                paramType.getName(), field
+        ));
         Object expectedValue = fromString(value, fieldType);
         return acceptingOnly(field.path(), expectedValue);
     }
@@ -156,11 +171,11 @@ public final class ArgumentFilter implements Predicate<EventMessage> {
      * events, or if the field of the message matches the configured value.
      */
     @Override
-    public boolean test(EventMessage event) {
+    public boolean test(SignalMessage msg) {
         if (acceptsAll()) {
             return true;
         }
-        Object eventField = field.valueIn(event);
+        Object eventField = field.valueIn(msg);
         boolean result = eventField.equals(expectedValue);
         return result;
     }

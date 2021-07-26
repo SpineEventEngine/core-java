@@ -24,29 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.method;
+package io.spine.server.model.given.filter;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EventMessage;
-import io.spine.server.model.ExtractedArguments;
-import io.spine.server.model.MethodParams;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.EventEnvelope;
+import io.spine.core.Subscribe;
+import io.spine.core.Where;
+import io.spine.server.event.AbstractEventReactor;
+import io.spine.test.model.ModProjectCreated;
 
-import static io.spine.server.model.TypeMatcher.classImplementing;
+/**
+ * An valid subscriber.
+ */
+public final class ProjectCreatedSubscriber extends AbstractEventReactor {
 
-@Immutable
-public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
-
-    INSTANCE;
-
-    @Override
-    public boolean matches(MethodParams params) {
-        return params.is(classImplementing(EventMessage.class));
-    }
-
-    @Override
-    public ExtractedArguments extractArguments(EventEnvelope envelope) {
-        return ExtractedArguments.ofOne(envelope.message());
+    @Subscribe
+    void onInternalTeamProject(@Where(field = "id", equals = "0") ModProjectCreated e) {
+        // Do nothing.
     }
 }

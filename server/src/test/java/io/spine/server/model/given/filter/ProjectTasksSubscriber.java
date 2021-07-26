@@ -24,29 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.method;
+package io.spine.server.model.given.filter;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.base.EventMessage;
-import io.spine.server.model.ExtractedArguments;
-import io.spine.server.model.MethodParams;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.type.EventEnvelope;
+import io.spine.core.Subscribe;
+import io.spine.core.Where;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.test.model.filter.ModProjectTasks;
 
-import static io.spine.server.model.TypeMatcher.classImplementing;
+/**
+ * An invalid subscriber.
+ *
+ * <p>Entity state subscribers mustn't declare field filters.
+ */
+public final class ProjectTasksSubscriber extends AbstractEventSubscriber {
 
-@Immutable
-public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
-
-    INSTANCE;
-
-    @Override
-    public boolean matches(MethodParams params) {
-        return params.is(classImplementing(EventMessage.class));
-    }
-
-    @Override
-    public ExtractedArguments extractArguments(EventEnvelope envelope) {
-        return ExtractedArguments.ofOne(envelope.message());
+    @Subscribe
+    void onChanged(@Where(field = "id", equals = "0") ModProjectTasks e) {
+        // Do nothing.
     }
 }

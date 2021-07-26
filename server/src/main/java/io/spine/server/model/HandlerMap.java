@@ -26,7 +26,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -35,18 +34,21 @@ import com.google.common.collect.Multimaps;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.logging.Logging;
 import io.spine.server.type.EmptyClass;
+import io.spine.server.type.EnvelopeWithOrigin;
+import io.spine.server.type.SignalEnvelope;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static io.spine.server.model.MethodScan.findMethodsBy;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
+import static java.util.Comparator.comparing;
 
 /**
  * Provides mapping from a class of messages to methods which handle such messages.
@@ -64,7 +66,6 @@ public final class HandlerMap<M extends MessageClass<?>,
                               H extends HandlerMethod<?, M, ?, R>>
         implements Serializable, Logging {
 
-    private static final Joiner METHOD_LIST_JOINER = Joiner.on(System.lineSeparator() + ',');
     private static final long serialVersionUID = 0L;
 
     private final ImmutableSetMultimap<DispatchKey, H> map;
@@ -148,37 +149,61 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @param originClass
      *         the class of the message, from which the handled message is originate
      */
-    public ImmutableSet<H> handlersOf(M messageClass, MessageClass<?> originClass) {
+    private ImmutableSet<H> handlersOf(M messageClass, MessageClass<?> originClass) {
         DispatchKey key =
                 originClass.equals(EmptyClass.instance())
-                ? new DispatchKey(messageClass.value(), null, null)
-                : new DispatchKey(messageClass.value(), null, originClass.value());
+                ? new DispatchKey(messageClass.value(), null)
+                : new DispatchKey(messageClass.value(), originClass.value());
         // If we have a handler with origin type, use the key. Otherwise, find handlers only
         // by the first parameter.
         DispatchKey presentKey = map.containsKey(key)
                                  ? key
-                                 : new DispatchKey(messageClass.value(), null, null);
+                                 : new DispatchKey(messageClass.value(), null);
         ImmutableSet<H> handlers = map.get(presentKey);
         return handlers;
     }
 
     /**
-     * Obtains a single handler method for messages of the given class and with the given origin.
+     * Looks up a method for handling the given message.
      *
-     * <p>If there is no handler matching both the message and origin class, a handler will be
-     * searched by the message class only.
-     *
-     * @param messageClass
-     *         the message class of the handled message
-     * @return a handler method
-     * @throws IllegalStateException
-     *         if no handler methods were found
-     * @throws DuplicateHandlerMethodError
-     *         if multiple handler methods were found
+     * @param message
+     *         a signal message which must be handled
+     * @return a handler method for the given signal or {@code Optional.empty()}
      */
-    public H handlerOf(M messageClass, MessageClass<?> originClass) {
-        ImmutableSet<H> methods = handlersOf(messageClass, originClass);
-        return singleMethod(methods, messageClass);
+    public Optional<H> findHandlerFor(SignalEnvelope<?, ?, ?> message) {
+        MessageClass<?> messageClass = message.messageClass();
+        MessageClass<?> originClass;
+        if (message instanceof EnvelopeWithOrigin) {
+            originClass = ((EnvelopeWithOrigin<?, ?, ?>) message).originClass();
+        } else {
+            originClass = EmptyClass.instance();
+        }
+        @SuppressWarnings("unchecked")
+        ImmutableSet<H> handlers = handlersOf(((M) messageClass), originClass);
+        return handlers.stream()
+                       .sorted(comparing((H h) -> h.filter().pathLength()).reversed())
+                       .filter(h -> h.filter().test(message.message()))
+                       .findFirst();
+    }
+
+    /**
+     * Obtains a method for handling the given message.
+     *
+     * @param message
+     *         a signal message which must be handled
+     * @return a handler method for the given signal
+     * @throws ModelError
+     *         if the handler the the message was not found
+     */
+    public H getHandlerFor(SignalEnvelope<?, ?, ?> message) {
+        Optional<H> handler = findHandlerFor(message);
+        return handler.orElseThrow(() -> {
+            String msg = format(
+                    "No handler method found for the type `%s`.", message.messageClass()
+            );
+            _error().log(msg);
+            return new ModelError(msg);
+        });
     }
 
     /**
@@ -190,52 +215,6 @@ public final class HandlerMap<M extends MessageClass<?>,
      */
     public ImmutableSet<H> handlersOf(M messageClass) {
         return handlersOf(messageClass, EmptyClass.instance());
-    }
-
-    /**
-     * Obtains a single handler method for messages of the given class.
-     *
-     * <p>If there is no such method or several such methods, an {@link IllegalStateException}
-     * is thrown.
-     *
-     * @param messageClass
-     *         the message class of the handled message
-     * @return a handler method
-     * @throws IllegalStateException
-     *         if no handler methods were found
-     * @throws DuplicateHandlerMethodError
-     *         if multiple handler methods were found
-     */
-    public H handlerOf(M messageClass) {
-        ImmutableSet<H> methods = handlersOf(messageClass);
-        return singleMethod(methods, messageClass);
-    }
-
-    private H singleMethod(Collection<H> handlers, M targetType) {
-        checkSingle(handlers, targetType);
-        H handler = getOnlyElement(handlers);
-        return handler;
-    }
-
-    private void checkSingle(Collection<H> handlers, M targetType) {
-        int count = handlers.size();
-        if (count == 0) {
-            String error = String.format("No handler method found for the type `%s`.", targetType);
-            _error().log(error);
-            throw newIllegalStateException(error);
-        } else if (count > 1) {
-            /*
-              The map should have found all the duplicates during construction.
-              This is a fail-safe execution branch which ensures that no changes in the `HandlerMap`
-              implementation corrupt the model.
-            */
-            _error().log(
-                    "There are %d handler methods found for the type `%s`." +
-                            "Please remove all but one method:%n%s",
-                    count, targetType, METHOD_LIST_JOINER.join(handlers)
-            );
-            throw new DuplicateHandlerMethodError(handlers);
-        }
     }
 
     private static <M extends MessageClass<?>, H extends HandlerMethod<?, M, ?, ?>>

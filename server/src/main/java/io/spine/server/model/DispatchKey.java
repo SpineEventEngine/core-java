@@ -33,6 +33,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.ArgumentFilter.acceptingAll;
+
 /**
  * Provides information for dispatching a message to a handler method.
  */
@@ -44,10 +47,17 @@ public final class DispatchKey {
     private final @Nullable Class<? extends Message> originClass;
 
     public DispatchKey(Class<? extends Message> messageClass,
-                       @Nullable ArgumentFilter filter,
                        @Nullable Class<? extends Message> originClass) {
+        this(messageClass, acceptingAll(), originClass);
+    }
+
+    public DispatchKey(Class<? extends Message> messageClass,
+                       ArgumentFilter filter,
+                       @Nullable Class<? extends Message> originClass) {
+        checkNotNull(messageClass);
+        checkNotNull(filter);
         this.messageClass = messageClass;
-        this.filter = filter;
+        this.filter = filter.acceptsAll() ? null : filter;
         this.originClass = originClass;
     }
 
@@ -61,14 +71,7 @@ public final class DispatchKey {
         if (filter == null) {
             return this;
         }
-        return new DispatchKey(messageClass, null, originClass);
-    }
-
-    /**
-     * Creates a new key copying its data and taking the passed filter.
-     */
-    public DispatchKey withFilter(ArgumentFilter filter) {
-        return new DispatchKey(messageClass, filter, originClass);
+        return new DispatchKey(messageClass, originClass);
     }
 
     @Override

@@ -235,7 +235,7 @@ public abstract class Aggregate<I,
                     .vBuild();
             return outcome;
         } else {
-            CommandHandlerMethod method = thisClass().handlerOf(command.messageClass());
+            CommandHandlerMethod method = thisClass().handlerOf(command);
             DispatchOutcome outcome = method.invoke(this, command);
             return outcome;
         }
@@ -263,7 +263,7 @@ public abstract class Aggregate<I,
             return outcome;
         } else {
             EventReactorMethod method =
-                    thisClass().reactorOf(event.messageClass(), event.originClass());
+                    thisClass().reactorOf(event);
             return method.invoke(this, event);
         }
     }
@@ -275,7 +275,7 @@ public abstract class Aggregate<I,
      *         the event to apply
      */
     final DispatchOutcome invokeApplier(EventEnvelope event) {
-        Applier method = thisClass().applierOf(event.messageClass());
+        Applier method = thisClass().applierOf(event);
         return method.invoke(this, event);
     }
 

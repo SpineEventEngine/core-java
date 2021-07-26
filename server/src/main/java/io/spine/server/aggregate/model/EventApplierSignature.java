@@ -33,6 +33,7 @@ import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AccessModifier;
 import io.spine.server.model.AllowedParams;
+import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
@@ -95,8 +96,8 @@ final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope
             }
 
             @Override
-            public Object[] extractArguments(EventEnvelope event) {
-                return new Object[]{event.message()};
+            public ExtractedArguments extractArguments(EventEnvelope event) {
+                return ExtractedArguments.ofOne(event.message());
             }
         };
 

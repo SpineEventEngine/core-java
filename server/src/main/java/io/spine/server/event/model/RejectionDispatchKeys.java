@@ -70,6 +70,6 @@ final class RejectionDispatchKeys {
         Class<? extends CommandMessage> commandMessageClass =
                 (Class<? extends CommandMessage>) secondParameter;
         CommandClass commandClass = CommandClass.from(commandMessageClass);
-        return new DispatchKey(eventClass.value(), null, commandClass.value());
+        return new DispatchKey(eventClass.value(), commandClass.value());
     }
 }

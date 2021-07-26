@@ -309,8 +309,8 @@ class AbstractHandlerMethod<T,
 
     private Success doInvoke(T target, E envelope)
             throws IllegalAccessException, InvocationTargetException {
-        Object[] arguments = parameterSpec.extractArguments(envelope);
-        Object rawOutput = method.invoke(target, arguments);
+        ExtractedArguments arguments = parameterSpec.extractArguments(envelope);
+        Object rawOutput = arguments.invokeMethod(method, target);
         return toSuccessfulOutcome(rawOutput, target, envelope);
     }
 

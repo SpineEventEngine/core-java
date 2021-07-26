@@ -26,51 +26,13 @@
 
 package io.spine.server.type;
 
-import io.spine.base.MessageContext;
-import io.spine.base.SignalMessage;
-import io.spine.core.ActorContext;
-import io.spine.core.MessageId;
-import io.spine.core.Origin;
-import io.spine.core.Signal;
-import io.spine.core.SignalId;
-import io.spine.core.TenantId;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.type.MessageClass;
 
-/**
- * A common interface for envelopes of signal messages.
- *
- * @param <I> the type of the message ID
- * @param <T> the type of the object that wraps a message
- * @param <C> the type of the message context
- */
-public interface SignalEnvelope<I extends SignalId,
-                                T extends Signal<I, ?, C>,
-                                C extends MessageContext>
+@Internal
+public interface EnvelopeWithOrigin<I extends Message, T, C extends Message>
         extends MessageEnvelope<I, T, C> {
 
-    /**
-     * Obtains ID of the tenant in which context the actor works.
-     */
-    TenantId tenantId();
-
-    /**
-     * Obtains an actor context for the wrapped message.
-     */
-    default ActorContext actorContext() {
-        return outerObject().actorContext();
-    }
-
-    /**
-     * Obtains the message ID of the signal.
-     */
-    default MessageId messageId() {
-        return outerObject().messageId();
-    }
-
-    @Override
-    default Origin asMessageOrigin() {
-        return outerObject().asMessageOrigin();
-    }
-
-    @Override
-    SignalMessage message();
+    MessageClass<?> originClass();
 }

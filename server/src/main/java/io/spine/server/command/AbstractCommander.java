@@ -82,7 +82,7 @@ public abstract class AbstractCommander
     @CanIgnoreReturnValue
     @Override
     public void dispatch(CommandEnvelope command) {
-        CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
+        CommandSubstituteMethod method = thisClass.handlerOf(command);
         DispatchOutcomeHandler
                 .from(method.invoke(this, command))
                 .onCommands(this::postCommands)
@@ -107,7 +107,7 @@ public abstract class AbstractCommander
 
     @Override
     public void dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.commanderOn(event.messageClass());
+        CommandReactionMethod method = thisClass.commanderOn(event);
         DispatchOutcomeHandler
                 .from(method.invoke(this, event))
                 .onCommands(this::postCommands)

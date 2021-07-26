@@ -26,16 +26,10 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.logging.Logging;
-import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.MessageClass;
 
-import java.util.Comparator;
 import java.util.Optional;
-
-import static java.util.Comparator.comparing;
 
 /**
  * An interface common for model classes that subscribe to events.
@@ -48,41 +42,5 @@ public interface SubscribingClass extends Logging {
      * @param event
      *         the event to obtain a method for
      */
-    default Optional<SubscriberMethod> subscriberOf(EventEnvelope event) {
-        ImmutableSet<SubscriberMethod> subscribers =
-                subscribersOf(event.messageClass(), event.originClass());
-        Comparator<SubscriberMethod> methodOrder = comparing(
-                (SubscriberMethod subscriber) -> subscriber.filter().pathLength()
-        ).reversed();
-        Optional<SubscriberMethod> foundSubscriber = subscribers
-                .stream()
-                .sorted(methodOrder)
-                .filter(s -> s.canHandle(event))
-                .findFirst();
-        if (foundSubscriber.isPresent()) {
-            return foundSubscriber;
-        } else {
-            _debug().log("None of the subscriber methods could handle the `%s` event." +
-                                 "%n  Methods: %s" +
-                                 "%n  Event message: %s.",
-                         event.messageClass(), subscribers, event.message());
-            return Optional.empty();
-        }
-    }
-
-    /**
-     * Obtains all subscriber methods that handle the passed event class.
-     *
-     * <p>There can be more than one method, if the subscriptions used
-     * the {@linkplain io.spine.core.Where field filtering}.
-     *
-     * @param eventClass
-     *         the class of the events
-     * @param originClass
-     *         the class of the message that caused the event, or
-     *         {@link io.spine.server.type.EmptyClass EmptyClass} for all origins
-     * @return methods handling the requested class of the events
-     */
-    ImmutableSet<SubscriberMethod> subscribersOf(EventClass eventClass,
-                                                 MessageClass<?> originClass);
+    Optional<SubscriberMethod> subscriberOf(EventEnvelope event);
 }

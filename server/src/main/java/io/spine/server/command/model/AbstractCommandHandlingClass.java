@@ -31,6 +31,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.server.model.HandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
@@ -84,10 +85,14 @@ public abstract class AbstractCommandHandlingClass<C,
         return result;
     }
 
-    /** Obtains the handler method for the passed command class. */
+    /** Obtains the handler method for the passed command. */
     @Override
-    public H handlerOf(CommandClass commandClass) {
-        return commands.handlerOf(commandClass);
+    public H handlerOf(CommandEnvelope command) {
+        return commands.getHandlerFor(command);
+    }
+
+    ImmutableSet<H> handlersForType(CommandClass cls) {
+        return commands.handlersOf(cls);
     }
 
     boolean contains(CommandClass commandClass) {

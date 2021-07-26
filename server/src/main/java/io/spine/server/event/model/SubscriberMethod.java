@@ -27,12 +27,10 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.ArgumentFilter;
-import io.spine.server.model.DispatchKey;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.VoidMethod;
@@ -62,19 +60,6 @@ public abstract class SubscriberMethod
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
-    }
-
-    /**
-     * Adds a {@link #filter() filter} to the given key.
-     *
-     * <p>If there is no field filter, returns the existing key.
-     */
-    @Internal
-    DispatchKey applyFilter(DispatchKey key) {
-        ArgumentFilter filter = filter();
-        return filter.acceptsAll()
-               ? key
-               : key.withFilter(filter);
     }
 
     @Override

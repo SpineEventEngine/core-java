@@ -24,19 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.map;
+package io.spine.server.model.given.filter;
 
-import io.spine.server.event.React;
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectStarred;
+import io.spine.core.Where;
+import io.spine.server.command.AbstractCommander;
+import io.spine.server.command.Command;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.ModStartProject;
 
 /**
- * This class is not valid because it declares two event reactors which accept the same event type.
+ * A valid commander.
  */
-public class ProjectCreatedEventReactor {
+public final class CreateProjectEventCommander extends AbstractCommander {
 
-    @React
-    ProjectStarred on(ProjectCreated cmd) {
-        return ProjectStarred.getDefaultInstance();
+    @Command
+    ModStartProject onEvent(@Where(field = "id", equals = "42")
+                            ModProjectCreated e) {
+        return ModStartProject.newBuilder()
+                .setId(e.getId())
+                .build();
     }
 }

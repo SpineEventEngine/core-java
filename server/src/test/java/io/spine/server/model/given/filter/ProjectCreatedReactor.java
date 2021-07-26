@@ -24,53 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.type;
+package io.spine.server.model.given.filter;
 
-import io.spine.base.MessageContext;
-import io.spine.base.SignalMessage;
-import io.spine.core.ActorContext;
-import io.spine.core.MessageId;
-import io.spine.core.Origin;
-import io.spine.core.Signal;
-import io.spine.core.SignalId;
-import io.spine.core.TenantId;
+import io.spine.core.Where;
+import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.React;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.ModProjectStarted;
 
 /**
- * A common interface for envelopes of signal messages.
+ * A valid rector.
  *
- * @param <I> the type of the message ID
- * @param <T> the type of the object that wraps a message
- * @param <C> the type of the message context
+ * <p>Accepts {@code ProjectCreated}. If the team ID is the predefined {@link #INTERNAL_TEAM_ID},
+ * uses one handler method, otherwise uses another.
  */
-public interface SignalEnvelope<I extends SignalId,
-                                T extends Signal<I, ?, C>,
-                                C extends MessageContext>
-        extends MessageEnvelope<I, T, C> {
+public final class ProjectCreatedReactor extends AbstractEventReactor {
 
-    /**
-     * Obtains ID of the tenant in which context the actor works.
-     */
-    TenantId tenantId();
+    public static final String INTERNAL_TEAM_ID = "0000-000-000-0001";
 
-    /**
-     * Obtains an actor context for the wrapped message.
-     */
-    default ActorContext actorContext() {
-        return outerObject().actorContext();
+    @React
+    ModProjectStarted on(ProjectCreated e) {
+        return ModProjectStarted.getDefaultInstance();
     }
 
-    /**
-     * Obtains the message ID of the signal.
-     */
-    default MessageId messageId() {
-        return outerObject().messageId();
+    @React
+    ModProjectStarted onInternal(@Where(field = "id", equals = INTERNAL_TEAM_ID)
+                                 ModProjectCreated e) {
+        return ModProjectStarted.newBuilder()
+                .setId(e.getId())
+                .build();
     }
-
-    @Override
-    default Origin asMessageOrigin() {
-        return outerObject().asMessageOrigin();
-    }
-
-    @Override
-    SignalMessage message();
 }

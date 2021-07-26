@@ -36,6 +36,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.command.Command;
 import io.spine.server.model.AllowedParams;
+import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
@@ -116,8 +117,8 @@ public class CommandReactionSignature
         MESSAGE(classImplementing(EventMessage.class)) {
 
             @Override
-            public Object[] extractArguments(EventEnvelope event) {
-                return new Object[]{event.message()};
+            public ExtractedArguments extractArguments(EventEnvelope event) {
+                return ExtractedArguments.ofOne(event.message());
             }
         },
 
@@ -125,8 +126,8 @@ public class CommandReactionSignature
                                 exactly(EventContext.class)) {
 
             @Override
-            public Object[] extractArguments(EventEnvelope event) {
-                return new Object[]{event.message(), event.context()};
+            public ExtractedArguments extractArguments(EventEnvelope event) {
+                return  ExtractedArguments.ofTwo(event.message(), event.context());
             }
         },
 
@@ -134,13 +135,13 @@ public class CommandReactionSignature
                                       exactly(CommandContext.class)) {
 
             @Override
-            public Object[] extractArguments(EventEnvelope event) {
+            public ExtractedArguments extractArguments(EventEnvelope event) {
                 CommandContext originContext =
                         event.context()
                              .getRejection()
                              .getCommand()
                              .getContext();
-                return new Object[]{event.message(), originContext};
+                return ExtractedArguments.ofTwo(event.message(), originContext);
             }
         };
 

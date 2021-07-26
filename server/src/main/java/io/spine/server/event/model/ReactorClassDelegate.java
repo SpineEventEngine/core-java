@@ -29,7 +29,7 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import io.spine.server.type.EventEnvelope;
 
 /**
  * The helper class for holding messaging information on behalf of another model class.
@@ -48,8 +48,8 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
-        return handlerOf(eventClass, originClass);
+    public EventReactorMethod reactorOf(EventEnvelope event) {
+        return handlerOf(event);
     }
 
     @Override

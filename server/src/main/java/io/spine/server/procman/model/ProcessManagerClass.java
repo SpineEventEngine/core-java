@@ -38,8 +38,9 @@ import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import io.spine.server.type.EventEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
@@ -115,8 +116,8 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventClass eventClass, MessageClass<?> originClass) {
-        return reactorDelegate.reactorOf(eventClass, originClass);
+    public EventReactorMethod reactorOf(EventEnvelope event) {
+        return reactorDelegate.reactorOf(event);
     }
 
     @Override
@@ -133,16 +134,16 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
      * Obtains a method which handles the passed class of commands by producing
      * one or more other commands.
      */
-    public CommandSubstituteMethod commanderOf(CommandClass commandClass) {
-        return commanderDelegate.handlerOf(commandClass);
+    public CommandSubstituteMethod commanderOf(CommandEnvelope command) {
+        return commanderDelegate.handlerOf(command);
     }
 
     /**
      * Obtains a method which may generate one or more commands in response to incoming
      * event with the passed class.
      */
-    public CommandReactionMethod commanderOf(EventClass eventClass) {
-        return commanderDelegate.commanderOn(eventClass);
+    public CommandReactionMethod commanderOf(EventEnvelope event) {
+        return commanderDelegate.commanderOn(event);
     }
 
     /**

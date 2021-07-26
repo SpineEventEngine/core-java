@@ -28,6 +28,7 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
@@ -61,5 +62,5 @@ public interface CommandHandlingClass<R extends MessageClass<?>,
     /**
      * Obtains the handler method for the passed command class.
      */
-    H handlerOf(CommandClass commandClass);
+    H handlerOf(CommandEnvelope command);
 }

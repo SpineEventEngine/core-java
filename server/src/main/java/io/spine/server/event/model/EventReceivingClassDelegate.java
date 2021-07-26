@@ -35,7 +35,10 @@ import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
+
+import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
@@ -127,20 +130,24 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     /**
      * Obtains the method which handles the passed event class.
      *
-     * @throws IllegalStateException if there is no such method in the class
-     */
-    public ImmutableSet<M> handlersOf(EventClass eventClass, MessageClass<?> originClass) {
-        return handlers.handlersOf(eventClass, originClass);
-    }
-
-    /**
-     * Obtains the method which handles the passed event class.
-     *
+     * @param event
+     *         the event which must be handled
      * @throws IllegalStateException
      *         if there is no such method in the class
      */
-    public M handlerOf(EventClass eventClass, MessageClass<?> originClass) {
-        return handlers.handlerOf(eventClass, originClass);
+    public M handlerOf(EventEnvelope event) {
+        return handlers.getHandlerFor(event);
+    }
+
+    /**
+     * Looks up the method which handles the passed event class.
+     *
+     * @param event
+     *         the event which must be handled
+     * @return event handler method or {@code Optional.empty()} if there is no such method
+     */
+    public Optional<M> findHandlerOf(EventEnvelope event) {
+        return handlers.findHandlerFor(event);
     }
 
     /**
