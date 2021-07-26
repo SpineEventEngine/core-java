@@ -105,7 +105,7 @@ public final class CommanderClass<C extends Commander>
      * Tells if instances of this commander class substitute the commands of the passed class.
      */
     public boolean substitutesCommand(CommandClass commandClass) {
-        return contains(commandClass);
+        return hasHandler(commandClass);
     }
 
     /**

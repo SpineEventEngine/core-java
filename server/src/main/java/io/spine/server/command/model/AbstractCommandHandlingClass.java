@@ -91,11 +91,17 @@ public abstract class AbstractCommandHandlingClass<C,
         return commands.getHandlerFor(command);
     }
 
+    /**
+     * Obtains handler methods for the given class of commands.
+     */
     ImmutableSet<H> handlersForType(CommandClass cls) {
         return commands.handlersOf(cls);
     }
 
-    boolean contains(CommandClass commandClass) {
+    /**
+     * Checks if this command handler has a handler method for the given class of commands.
+     */
+    boolean hasHandler(CommandClass commandClass) {
         return commands.containsClass(commandClass);
     }
 }
