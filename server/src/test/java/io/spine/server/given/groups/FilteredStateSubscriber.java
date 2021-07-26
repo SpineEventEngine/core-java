@@ -39,8 +39,7 @@ import static io.spine.testing.Testing.halt;
 public class FilteredStateSubscriber extends AbstractEventSubscriber {
 
     @Subscribe
-    void on(
-            @Where(field = "head.value", equals = "42") // <-- Error here. Shouldn't have a filter.
+    void on(@Where(field = "head.value", equals = "42") // <-- Error here. Shouldn't have a filter.
             Organization organization) {
         halt();
     }

@@ -33,6 +33,7 @@ import io.spine.core.CommandId;
 import io.spine.core.Responses;
 import io.spine.core.Status;
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import io.spine.server.projection.Projection;
 import io.spine.system.server.Substituted.Sequence;
 import io.spine.system.server.event.CommandAcknowledged;
@@ -94,7 +95,8 @@ final class CommandLogProjection
     }
 
     @Subscribe
-    void on(
+    void on(@Where(field = "handled_signal.id.type_url",
+                   equals = "type.spine.io/spine.core.Command")
             HandlerFailedUnexpectedly event) {
         Status status = Status
                 .newBuilder()
