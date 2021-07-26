@@ -92,6 +92,16 @@ public interface EventDispatcherDelegate {
         return !externalEvents().isEmpty();
     }
 
+    /**
+     * Checks if this dispatcher can dispatch the given event.
+     *
+     * <p>By default, all events are permitted. Implementations may change this behaviour to reject
+     * certain events as early as possible.
+     *
+     * @param envelope
+     *         event to dispatch
+     * @return {@code true} if this dispatcher can dispatch the given event, {@code false} otherwise
+     */
     default boolean canDispatchEvent(EventEnvelope envelope) {
         return true;
     }
