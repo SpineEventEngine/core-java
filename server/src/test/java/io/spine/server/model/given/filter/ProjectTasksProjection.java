@@ -24,38 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.given.filter;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
+import io.spine.core.Subscribe;
+import io.spine.core.Where;
+import io.spine.server.projection.Projection;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.filter.ModProjectTasks;
 
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * The helper class for holding messaging information on behalf of another model class.
- *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
- */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
+public class ProjectTasksProjection
+        extends Projection<String, ModProjectTasks, ModProjectTasks.Builder> {
 
-    private static final long serialVersionUID = 0L;
-
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
-    }
-
-    @Override
-    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return handlerOf(event);
-    }
-
-    @Override
-    public ImmutableSet<EventClass> reactionOutput() {
-        return producedTypes();
+    @Subscribe
+    void on(@Where(field = "id", equals = "42") ModProjectCreated event) {
+        fail("Should never receive events.");
     }
 }

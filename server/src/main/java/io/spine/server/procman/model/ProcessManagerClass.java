@@ -42,6 +42,8 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
 
@@ -116,7 +118,7 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventEnvelope event) {
+    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
         return reactorDelegate.reactorOf(event);
     }
 
@@ -142,7 +144,7 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
      * Obtains a method which may generate one or more commands in response to incoming
      * event with the passed class.
      */
-    public CommandReactionMethod commanderOf(EventEnvelope event) {
+    public Optional<CommandReactionMethod> commanderOf(EventEnvelope event) {
         return commanderDelegate.commanderOn(event);
     }
 

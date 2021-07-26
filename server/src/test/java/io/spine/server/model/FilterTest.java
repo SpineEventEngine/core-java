@@ -26,6 +26,11 @@
 
 package io.spine.server.model;
 
+import io.spine.environment.Tests;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.Delivery;
+import io.spine.server.delivery.InboxStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.given.filter.CreateProjectCommander;
 import io.spine.server.model.given.filter.CreateProjectEventCommander;
@@ -33,14 +38,24 @@ import io.spine.server.model.given.filter.ModSplitCommandAggregate;
 import io.spine.server.model.given.filter.ModSplitEventAggregate;
 import io.spine.server.model.given.filter.ProjectCreatedReactor;
 import io.spine.server.model.given.filter.ProjectCreatedSubscriber;
+import io.spine.server.model.given.filter.ProjectTasksRepository;
 import io.spine.server.model.given.filter.ProjectTasksSubscriber;
-import io.spine.testing.server.model.ModelTests;
+import io.spine.server.model.given.storage.RiggedStorageFactory;
+import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.testing.server.model.ModelTests.dropAllModels;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("Handler methods with field filters should")
@@ -48,7 +63,7 @@ class FilterTest {
 
     @AfterEach
     void clearModel() {
-        ModelTests.dropAllModels();
+        dropAllModels();
     }
 
     @Nested
@@ -96,6 +111,48 @@ class FilterTest {
     @DisplayName("be not acceptable for a state `@Subscribe`-r method")
     void noState() {
         assertInvalid(ProjectTasksSubscriber.class);
+    }
+
+    @Nested
+    @DisplayName("filter out events before they hit inbox")
+    class DeliveryTest {
+
+        private StorageFactory storageFactory;
+        private InboxStorage inboxStorage;
+
+        @BeforeEach
+        void prepareEnv() {
+            storageFactory = new RiggedStorageFactory(InMemoryStorageFactory.newInstance());
+            inboxStorage = storageFactory.createInboxStorage(false);
+            Delivery delivery = Delivery
+                    .newBuilder()
+                    .setInboxStorage(inboxStorage)
+                    .build();
+            ServerEnvironment.when(Tests.class)
+                             .use(delivery);
+        }
+
+        @AfterEach
+        void closeEnv() throws Exception {
+            storageFactory.close();
+            ServerEnvironment.instance().reset();
+            dropAllModels();
+        }
+
+        @Test
+        void beforeDelivery() {
+            BoundedContextBuilder context = BoundedContextBuilder
+                    .assumingTests()
+                    .add(new ProjectTasksRepository());
+            ModProjectCreated event = ModProjectCreated
+                    .newBuilder()
+                    .setId(newUuid()) // Not the value expected in `ProjectTasksProjection`.
+                    .build();
+            BlackBox.from(context)
+                    .receivesEvent(event);
+            assertThat(newArrayList(inboxStorage.index()))
+                 .isEmpty();
+        }
     }
 
     @SuppressWarnings({

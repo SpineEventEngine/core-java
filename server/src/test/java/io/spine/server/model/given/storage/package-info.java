@@ -24,38 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
-
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
-
-import java.util.Optional;
-
 /**
- * The helper class for holding messaging information on behalf of another model class.
- *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
+ * Test fixtures that replace {@linkplain io.spine.server.storage.StorageFactory storage}
+ * in model tests.
  */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given.storage;
 
-    private static final long serialVersionUID = 0L;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
-    }
-
-    @Override
-    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return handlerOf(event);
-    }
-
-    @Override
-    public ImmutableSet<EventClass> reactionOutput() {
-        return producedTypes();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

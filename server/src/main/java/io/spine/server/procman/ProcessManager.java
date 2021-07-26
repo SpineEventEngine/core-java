@@ -48,6 +48,9 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
+import java.util.Optional;
+
+import static io.spine.server.Ignored.ignored;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -196,25 +199,18 @@ public abstract class ProcessManager<I,
     DispatchOutcome dispatchEvent(EventEnvelope event) {
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.messageClass();
-        if (thisClass.reactsOnEvent(eventClass)) {
-            EventReactorMethod method = thisClass.reactorOf(event);
-            DispatchOutcome outcome = method.invoke(this, event);
+        Optional<EventReactorMethod> reactorMethod = thisClass.reactorOf(event);
+        if (thisClass.reactsOnEvent(eventClass) && reactorMethod.isPresent()) {
+            DispatchOutcome outcome = reactorMethod.get().invoke(this, event);
             return outcome;
         }
 
-        if (thisClass.producesCommandsOn(eventClass)) {
-            CommandReactionMethod method = thisClass.commanderOf(event);
-            DispatchOutcome outcome = method.invoke(this, event);
+        Optional<CommandReactionMethod> commanderMethod = thisClass.commanderOf(event);
+        if (thisClass.producesCommandsOn(eventClass) && commanderMethod.isPresent()) {
+            DispatchOutcome outcome = commanderMethod.get().invoke(this, event);
             return outcome;
         }
-
-        // We could not normally get here since the dispatching table is a union of handled and
-        // substituted commands.
-        throw newIllegalStateException(
-                "ProcessManager `%s` neither reacted on the event (id: `%s` class: `%s`)," +
-                        " nor produced commands.",
-                this, event.id(), eventClass
-        );
+        return ignored(thisClass, event);
     }
 
     @Override

@@ -387,6 +387,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         return aggregateClass().outgoingEvents();
     }
 
+    @Override
+    public boolean canDispatchEvent(EventEnvelope envelope) {
+        return aggregateClass().reactorOf(envelope).isPresent();
+    }
+
     /**
      * Dispatches event to one or more aggregates reacting on the event.
      *

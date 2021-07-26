@@ -28,13 +28,13 @@ package io.spine.server.model.given.filter;
 
 import io.spine.core.Subscribe;
 import io.spine.core.Where;
-import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.model.ModProjectCreated;
 
 /**
  * An valid subscriber.
  */
-public final class ProjectCreatedSubscriber extends AbstractEventReactor {
+public final class ProjectCreatedSubscriber extends AbstractEventSubscriber {
 
     @Subscribe
     void onInternalTeamProject(@Where(field = "id", equals = "0") ModProjectCreated e) {

@@ -48,6 +48,7 @@ import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -107,11 +108,11 @@ public abstract class AbstractCommander
 
     @Override
     public void dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.commanderOn(event);
-        DispatchOutcomeHandler
-                .from(method.invoke(this, event))
+        Optional<CommandReactionMethod> method = thisClass.commanderOn(event);
+        method.ifPresent(m -> DispatchOutcomeHandler
+                .from(m.invoke(this, event))
                 .onCommands(this::postCommands)
-                .handle();
+                .handle());
     }
 
     /**

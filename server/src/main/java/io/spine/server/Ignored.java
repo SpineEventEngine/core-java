@@ -24,38 +24,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
+import io.spine.annotation.Internal;
+import io.spine.core.Where;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Ignore;
+import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventEnvelope;
 
-import java.util.Optional;
+import static java.lang.String.format;
 
 /**
- * The helper class for holding messaging information on behalf of another model class.
- *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
+ * A factory of {@code DispatchOutcome} with the {@code ignored} outcome.
  */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
+@Internal
+public final class Ignored {
 
-    private static final long serialVersionUID = 0L;
-
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private Ignored() {
     }
 
-    @Override
-    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return handlerOf(event);
-    }
-
-    @Override
-    public ImmutableSet<EventClass> reactionOutput() {
-        return producedTypes();
+    /**
+     * Creates a new {@code ignored} outcome.
+     *
+     * <p>The ignoring reason points towards the {@linkplain Where argument filters}.
+     *
+     * @param handler
+     *         the class of the event handler
+     * @param event
+     *         the dispatched event
+     * @return {@code ignored} outcome
+     */
+    public static DispatchOutcome ignored(ModelClass<?> handler, EventEnvelope event) {
+        String reason = format(
+                "`@%s` filters in `%s` rejected event %s[%s]",
+                Where.class.getSimpleName(), handler, event.messageTypeName(), event.id().value()
+        );
+        return DispatchOutcome
+                .newBuilder()
+                .setPropagatedSignal(event.messageId())
+                .setIgnored(Ignore.newBuilder().setReason(reason))
+                .vBuild();
     }
 }

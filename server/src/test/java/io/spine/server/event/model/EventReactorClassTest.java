@@ -37,6 +37,7 @@ import io.spine.test.event.model.TalkSubmissionRequested;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.LocalDates;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -98,7 +99,7 @@ class EventReactorClassTest {
                                                   .vBuild());
         EventReactorMethod method = reactorClass.reactorOf(
                 EventEnvelope.of(event)
-        );
+        ).orElseGet(Assertions::fail);
         assertThat(method.rawMethod())
             .isEqualTo(ModelTests.getMethod(ConferenceSetup.class, "invitationPolicy"));
     }

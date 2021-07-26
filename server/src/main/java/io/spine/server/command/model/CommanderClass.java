@@ -38,6 +38,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -96,7 +97,7 @@ public final class CommanderClass<C extends Commander>
     /**
      * Obtains the method which reacts on the passed event class.
      */
-    public CommandReactionMethod commanderOn(EventEnvelope event) {
+    public Optional<CommandReactionMethod> commanderOn(EventEnvelope event) {
         return delegate.handlerOf(event);
     }
 

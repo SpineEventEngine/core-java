@@ -39,6 +39,8 @@ import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
 
@@ -150,7 +152,7 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
     }
 
     @Override
-    public final EventReactorMethod reactorOf(EventEnvelope event) {
+    public final Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
         return delegate.reactorOf(event);
     }
 

@@ -34,6 +34,8 @@ import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -71,8 +73,8 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
     }
 
     @Override
-    public EventReactorMethod reactorOf(EventEnvelope event) {
-        return reactors.getHandlerFor(event);
+    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
+        return reactors.findHandlerFor(event);
     }
 
     @Override

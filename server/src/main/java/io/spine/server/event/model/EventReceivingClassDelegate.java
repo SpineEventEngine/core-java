@@ -135,8 +135,8 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * @throws IllegalStateException
      *         if there is no such method in the class
      */
-    public M handlerOf(EventEnvelope event) {
-        return handlers.getHandlerFor(event);
+    public Optional<M> handlerOf(EventEnvelope event) {
+        return handlers.findHandlerFor(event);
     }
 
     /**

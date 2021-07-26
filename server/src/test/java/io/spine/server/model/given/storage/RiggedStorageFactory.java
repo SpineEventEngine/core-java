@@ -24,38 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.given.storage;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
+import com.google.protobuf.Message;
+import io.spine.server.ContextSpec;
+import io.spine.server.delivery.InboxMessage;
+import io.spine.server.storage.RecordSpec;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.StorageFactory;
 
-import java.util.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-/**
- * The helper class for holding messaging information on behalf of another model class.
- *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
- */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
+public final class RiggedStorageFactory implements StorageFactory {
 
-    private static final long serialVersionUID = 0L;
+    private final StorageFactory delegate;
 
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
+    public RiggedStorageFactory(StorageFactory delegate) {
+        this.delegate = checkNotNull(delegate);
     }
 
     @Override
-    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return handlerOf(event);
+    public <I, R extends Message> RecordStorage<I, R> createRecordStorage(
+            ContextSpec context,
+            RecordSpec<I, R, ?> recordSpec
+    ) {
+        RecordStorage<I, R> storage = delegate.createRecordStorage(context, recordSpec);
+        if (recordSpec.storedType().equals(InboxMessage.class)) {
+            return new NeverForgettingStorage<>(context, storage);
+        }
+        return storage;
     }
 
     @Override
-    public ImmutableSet<EventClass> reactionOutput() {
-        return producedTypes();
+    public void close() throws Exception {
+        delegate.close();
     }
 }

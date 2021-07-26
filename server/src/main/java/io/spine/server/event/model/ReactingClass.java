@@ -30,6 +30,8 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
+import java.util.Optional;
+
 /**
  * Provides message handling information on a class that reacts on messages.
  */
@@ -41,7 +43,7 @@ public interface ReactingClass extends EventReceiverClass {
      * @param event
      *         the event on which the method reacts
      */
-    EventReactorMethod reactorOf(EventEnvelope event);
+    Optional<EventReactorMethod> reactorOf(EventEnvelope event);
 
     /**
      * Obtains the classes of events produced from the event reaction.

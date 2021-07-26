@@ -60,6 +60,7 @@ import static com.google.common.collect.Iterators.any;
 import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isNotDefault;
+import static io.spine.server.Ignored.ignored;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**
@@ -261,11 +262,13 @@ public abstract class Aggregate<I,
                     .setError(error.get())
                     .vBuild();
             return outcome;
-        } else {
-            EventReactorMethod method =
-                    thisClass().reactorOf(event);
-            return method.invoke(this, event);
         }
+        Optional<EventReactorMethod> method = thisClass().reactorOf(event);
+        if (!method.isPresent()) {
+            return ignored(thisClass(), event);
+        }
+        return method.get().invoke(this, event);
+
     }
 
     /**

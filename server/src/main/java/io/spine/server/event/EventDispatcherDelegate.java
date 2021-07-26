@@ -91,4 +91,8 @@ public interface EventDispatcherDelegate {
     default boolean dispatchesExternalEvents() {
         return !externalEvents().isEmpty();
     }
+
+    default boolean canDispatchEvent(EventEnvelope envelope) {
+        return true;
+    }
 }

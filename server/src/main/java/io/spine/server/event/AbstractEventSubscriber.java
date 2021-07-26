@@ -35,7 +35,6 @@ import io.spine.server.ContextAware;
 import io.spine.server.Identity;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.Ignore;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.type.EventClass;
@@ -50,9 +49,9 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.server.Ignored.ignored;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
-import static java.lang.String.format;
 
 /**
  * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
@@ -110,7 +109,7 @@ public abstract class AbstractEventSubscriber
         DispatchOutcome outcome =
                 thisClass.subscriberOf(event)
                          .map(method -> method.invoke(this, event))
-                         .orElseGet(() -> notSupported(event));
+                         .orElseGet(() -> ignored(thisClass, event));
         if (outcome.hasError()) {
             HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
                     .newBuilder()
@@ -124,21 +123,6 @@ public abstract class AbstractEventSubscriber
 
     private MessageId eventAnchor() {
         return eventAnchor.get();
-    }
-
-    private DispatchOutcome notSupported(EventEnvelope event) {
-        Ignore ignore = Ignore
-                .newBuilder()
-                .setReason(format("Event `%s[%s]` does not match subscriber filters in `%s`.",
-                                  event.messageClass(),
-                                  event.id().value(),
-                                  this.getClass().getCanonicalName()))
-                .buildPartial();
-        return DispatchOutcome
-                .newBuilder()
-                .setPropagatedSignal(event.messageId())
-                .setIgnored(ignore)
-                .vBuild();
     }
 
     @Override

@@ -48,6 +48,7 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
@@ -104,12 +105,12 @@ public abstract class AbstractEventReactor
     }
 
     private void reactAndPost(EventEnvelope event) {
-        EventReactorMethod method = thisClass.reactorOf(event);
-        DispatchOutcomeHandler
-                .from(method.invoke(this, event))
+        Optional<EventReactorMethod> method = thisClass.reactorOf(event);
+        method.ifPresent(m -> DispatchOutcomeHandler
+                .from(m.invoke(this, event))
                 .onEvents(eventBus::post)
                 .onError(error -> postFailure(error, event))
-                .handle();
+                .handle());
     }
 
     private MessageId eventAnchor() {

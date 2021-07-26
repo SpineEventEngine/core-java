@@ -24,38 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.given.filter;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRouting;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.filter.ModProjectTasks;
 
-import java.util.Optional;
+import static io.spine.server.route.EventRoute.withId;
 
-/**
- * The helper class for holding messaging information on behalf of another model class.
- *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
- */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
+public final class ProjectTasksRepository
+        extends ProjectionRepository<String, ProjectTasksProjection, ModProjectTasks> {
 
-    private static final long serialVersionUID = 0L;
-
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
-    }
-
+    @OverridingMethodsMustInvokeSuper
     @Override
-    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return handlerOf(event);
-    }
-
-    @Override
-    public ImmutableSet<EventClass> reactionOutput() {
-        return producedTypes();
+    protected void setupEventRouting(EventRouting<String> routing) {
+        super.setupEventRouting(routing);
+        routing.route(ModProjectCreated.class, (msg, ctx) -> withId(msg.getId()));
     }
 }

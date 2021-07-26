@@ -24,38 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.given.storage;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.event.EventReceiver;
-import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Message;
+import io.spine.server.ContextSpec;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.RecordStorageDelegate;
 
-import java.util.Optional;
+final class NeverForgettingStorage<I, R extends Message>
+        extends RecordStorageDelegate<I, R> {
 
-/**
- * The helper class for holding messaging information on behalf of another model class.
- *
- * @param <T>
- *         the type of the raw class for obtaining messaging information
- */
-public final class ReactorClassDelegate<T extends EventReceiver>
-        extends EventReceivingClassDelegate<T, EventClass, EventReactorMethod>
-        implements ReactingClass {
-
-    private static final long serialVersionUID = 0L;
-
-    public ReactorClassDelegate(Class<T> cls) {
-        super(cls, new EventReactorSignature());
+    NeverForgettingStorage(ContextSpec context, RecordStorage<I, R> delegate) {
+        super(context, delegate);
     }
 
+    @CanIgnoreReturnValue
     @Override
-    public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return handlerOf(event);
+    protected boolean deleteRecord(I id) {
+        // Never delete anything.
+        return true;
     }
 
+    @CanIgnoreReturnValue
     @Override
-    public ImmutableSet<EventClass> reactionOutput() {
-        return producedTypes();
+    protected boolean delete(I id) {
+        // Never delete anything.
+        return true;
     }
 }
