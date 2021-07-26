@@ -46,14 +46,20 @@ public final class DispatchKey {
     private final @Nullable ArgumentFilter filter;
     private final @Nullable Class<? extends Message> originClass;
 
+    /**
+     * Creates a new {@code DispatchKey} with the given message class and origin class.
+     */
     public DispatchKey(Class<? extends Message> messageClass,
                        @Nullable Class<? extends Message> originClass) {
         this(messageClass, acceptingAll(), originClass);
     }
 
-    public DispatchKey(Class<? extends Message> messageClass,
-                       ArgumentFilter filter,
-                       @Nullable Class<? extends Message> originClass) {
+    /**
+     * Creates a new {@code DispatchKey} with the given message class, origin class, and filter.
+     */
+    DispatchKey(Class<? extends Message> messageClass,
+                ArgumentFilter filter,
+                @Nullable Class<? extends Message> originClass) {
         checkNotNull(messageClass);
         checkNotNull(filter);
         this.messageClass = messageClass;

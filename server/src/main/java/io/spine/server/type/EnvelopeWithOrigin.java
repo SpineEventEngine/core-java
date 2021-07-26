@@ -30,9 +30,18 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.type.MessageClass;
 
+/**
+ * A {@link MessageEnvelope} that knows about its origin message class.
+ */
 @Internal
 public interface EnvelopeWithOrigin<I extends Message, T, C extends Message>
         extends MessageEnvelope<I, T, C> {
 
+    /**
+     * Obtains the class of the origin message of this message.
+     *
+     * @return the class of origin message or {@link EmptyClass} if the origin message type
+     *         is unknown
+     */
     MessageClass<?> originClass();
 }

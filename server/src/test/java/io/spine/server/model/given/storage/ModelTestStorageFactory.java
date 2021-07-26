@@ -35,11 +35,16 @@ import io.spine.server.storage.StorageFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class RiggedStorageFactory implements StorageFactory {
+/**
+ * A {@link StorageFactory} which configures the inbox storage
+ * to {@linkplain NeverForgettingStorage persist} every record even after
+ * {@code delete(..)} is called.
+ */
+public final class ModelTestStorageFactory implements StorageFactory {
 
     private final StorageFactory delegate;
 
-    public RiggedStorageFactory(StorageFactory delegate) {
+    public ModelTestStorageFactory(StorageFactory delegate) {
         this.delegate = checkNotNull(delegate);
     }
 

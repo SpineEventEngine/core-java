@@ -33,6 +33,9 @@ import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * Handler method arguments extracted from a signal.
+ */
 @Immutable
 public final class ExtractedArguments {
 
@@ -43,17 +46,26 @@ public final class ExtractedArguments {
         this.args = args;
     }
 
+    /**
+     * Creates {@code ExtractedArguments} with one argument.
+     */
     public static ExtractedArguments ofOne(Object arg) {
         checkNotNull(arg);
         return new ExtractedArguments(new Object[]{arg});
     }
 
+    /**
+     * Creates {@code ExtractedArguments} with two arguments.
+     */
     public static ExtractedArguments ofTwo(Object first, Object second) {
         checkNotNull(first);
         checkNotNull(second);
         return new ExtractedArguments(new Object[]{first, second});
     }
 
+    /**
+     * Creates {@code ExtractedArguments} with three arguments.
+     */
     public static ExtractedArguments ofTree(Object first, Object second, Object third) {
         checkNotNull(first);
         checkNotNull(second);
@@ -61,6 +73,9 @@ public final class ExtractedArguments {
         return new ExtractedArguments(new Object[]{first, second, third});
     }
 
+    /**
+     * Invokes the given method of the given receiver with these arguments.
+     */
     Object invokeMethod(Method method, Object receiver)
             throws InvocationTargetException, IllegalAccessException {
         return method.invoke(receiver, args);

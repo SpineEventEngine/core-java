@@ -32,6 +32,9 @@ import io.spine.server.ContextSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageDelegate;
 
+/**
+ * A storage which does not delete anything ever.
+ */
 final class NeverForgettingStorage<I, R extends Message>
         extends RecordStorageDelegate<I, R> {
 

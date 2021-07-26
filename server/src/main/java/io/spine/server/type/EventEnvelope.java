@@ -127,13 +127,10 @@ public final class EventEnvelope
     }
 
     /**
-     * Obtains the class of the origin message if available.
+     * {@inheritDoc}
      *
      * <p>If this envelope represents a {@linkplain Event#isRejection() rejection}, returns
-     * the type of rejected command.
-     *
-     * @return the class of origin message or {@link EmptyClass} if the origin message type is
-     *         unknown
+     * the type of rejected command. Otherwise — an {@link EmptyClass}.
      */
     @Override
     public MessageClass<?> originClass() {

@@ -40,7 +40,7 @@ import io.spine.server.model.given.filter.ProjectCreatedReactor;
 import io.spine.server.model.given.filter.ProjectCreatedSubscriber;
 import io.spine.server.model.given.filter.ProjectTasksRepository;
 import io.spine.server.model.given.filter.ProjectTasksSubscriber;
-import io.spine.server.model.given.storage.RiggedStorageFactory;
+import io.spine.server.model.given.storage.ModelTestStorageFactory;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.model.ModProjectCreated;
@@ -122,7 +122,7 @@ class FilterTest {
 
         @BeforeEach
         void prepareEnv() {
-            storageFactory = new RiggedStorageFactory(InMemoryStorageFactory.newInstance());
+            storageFactory = new ModelTestStorageFactory(InMemoryStorageFactory.newInstance());
             inboxStorage = storageFactory.createInboxStorage(false);
             Delivery delivery = Delivery
                     .newBuilder()
