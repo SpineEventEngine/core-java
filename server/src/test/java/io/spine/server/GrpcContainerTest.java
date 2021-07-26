@@ -42,6 +42,7 @@ import java.util.Set;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.TestValues.randomString;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("GrpcContainer should")
+@DisplayName("`GrpcContainer` should")
 class GrpcContainerTest {
 
     private GrpcContainer grpcContainer;
@@ -94,6 +95,15 @@ class GrpcContainerTest {
     @DisplayName("start server")
     void startServer() throws IOException {
         grpcContainer.start();
+
+        assertThat(grpcContainer.grpcServer())
+                .isNotNull();
+    }
+
+    @Test
+    @DisplayName("start server with the given `Executor`")
+    void startServerWithExecutor() throws IOException {
+        grpcContainer.start(newSingleThreadExecutor());
 
         assertThat(grpcContainer.grpcServer())
                 .isNotNull();
