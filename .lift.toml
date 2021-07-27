@@ -6,4 +6,6 @@
 ignoreFiles = """
 **/build/**
 **/generated/**
+
+**/test/**
 """
