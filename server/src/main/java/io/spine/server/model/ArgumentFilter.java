@@ -82,7 +82,7 @@ public final class ArgumentFilter implements Predicate<SignalMessage> {
     /**
      * Creates a filter which accepts all messages.
      */
-    static ArgumentFilter acceptingAll() {
+    public static ArgumentFilter acceptingAll() {
         return acceptingAll;
     }
 

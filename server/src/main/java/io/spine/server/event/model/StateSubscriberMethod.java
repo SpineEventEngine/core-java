@@ -39,7 +39,6 @@ import io.spine.logging.Logging;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.Model;
-import io.spine.server.model.ModelError;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
@@ -61,20 +60,10 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     private final Class<? extends EntityState<?>> stateType;
 
     StateSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(checkNotFiltered(method), parameterSpec);
+        super(checkNotFiltered(method, "state subscriber"), parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         this.stateType = firstParamType(rawMethod());
         checkExternal();
-    }
-
-    private static Method checkNotFiltered(Method method) {
-        if (ArgumentFilter.presentOn(method)) {
-            throw new ModelError(
-                    "A state subscriber method cannot declare filters but the method `%s` does.",
-                    method
-            );
-        }
-        return method;
     }
 
     private void checkExternal() {

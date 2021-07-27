@@ -35,6 +35,7 @@ import io.spine.core.Event;
 import io.spine.server.EventProducer;
 import io.spine.server.dispatch.Success;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -62,7 +63,7 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
         extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, R> {
 
     CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
-        super(method, params);
+        super(checkNotFiltered(method, "command accepting"), params);
     }
 
     @Override
@@ -96,5 +97,10 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
                                  .setRejection(rejection)
                                  .vBuild();
         return Optional.of(success);
+    }
+
+    @Override
+    protected final ArgumentFilter createFilter() {
+        return ArgumentFilter.acceptingAll();
     }
 }

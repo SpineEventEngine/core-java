@@ -347,6 +347,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
                                       .toHandler(id));
     }
 
+    @Override
+    public final boolean canDispatch(CommandEnvelope envelope) {
+        // Always dispatch commands with the correct type.
+        return true;
+    }
+
     private Optional<I> route(CommandEnvelope cmd) {
         Optional<I> target = route(commandRouting(), cmd);
         target.ifPresent(id -> onCommandTargetSet(id, cmd));

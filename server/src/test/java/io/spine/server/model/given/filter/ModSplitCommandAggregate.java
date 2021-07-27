@@ -34,6 +34,9 @@ import io.spine.test.model.ModCreateProject;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.filter.ModProject;
 
+/**
+ * An invalid aggregate declaration. Assign methods cannot have {@link Where} filers.
+ */
 public final class ModSplitCommandAggregate extends Aggregate<String, ModProject, ModProject.Builder> {
 
     private static final String FANCY_ID = "1";

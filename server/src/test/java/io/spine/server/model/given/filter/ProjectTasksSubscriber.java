@@ -32,9 +32,7 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.model.filter.ModProjectTasks;
 
 /**
- * An invalid subscriber.
- *
- * <p>Entity state subscribers mustn't declare field filters.
+ * An invalid subscriber. State subscriber methods cannot have {@link Where} filers.
  */
 public final class ProjectTasksSubscriber extends AbstractEventSubscriber {
 

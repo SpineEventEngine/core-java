@@ -161,15 +161,26 @@ class AbstractHandlerMethod<T,
 
     /**
      * Creates the filter for messages handled by this method.
+     *
+     * <p>If this method cannot have {@code @Where} filters but still defines one,
+     * a {@link ModelError} is thrown.
      */
     protected ArgumentFilter createFilter() {
-        ArgumentFilter result = ArgumentFilter.createFilter(rawMethod());
-        return result;
+        return ArgumentFilter.createFilter(method);
     }
 
     @Override
     public final ArgumentFilter filter() {
         return filter.get();
+    }
+
+    protected static Method checkNotFiltered(Method method, String label) {
+        if (ArgumentFilter.presentOn(method)) {
+            throw new ModelError(
+                    "A %s method cannot declare argument filters but `%s` does.", label, method
+            );
+        }
+        return method;
     }
 
     /**

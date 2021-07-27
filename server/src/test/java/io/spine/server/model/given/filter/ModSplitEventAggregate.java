@@ -34,7 +34,11 @@ import io.spine.test.model.ModCreateProject;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.filter.ModProject;
 
-public final class ModSplitEventAggregate extends Aggregate<String, ModProject, ModProject.Builder> {
+/**
+ * An invalid aggregate declaration. Appliers cannot have {@link Where} filers.
+ */
+public final class ModSplitEventAggregate
+        extends Aggregate<String, ModProject, ModProject.Builder> {
 
     private static final String FANCY_ID = "1";
     private static final String INTERNAL_FANCY_ID = "fancy project";

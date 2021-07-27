@@ -33,7 +33,7 @@ import io.spine.test.model.ModCreateProject;
 import io.spine.test.model.ModStartProject;
 
 /**
- * A valid commander.
+ * An invalid commander. Methods receiving commands cannot have {@link Where} filers.
  */
 public final class CreateProjectCommander extends AbstractCommander {
 

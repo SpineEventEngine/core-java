@@ -46,7 +46,6 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,6 +55,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.model.ModelTests.dropAllModels;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("Handler methods with field filters should")
@@ -87,31 +87,38 @@ class FilterTest {
         void eventCommand() {
             assertValid(CreateProjectEventCommander.class);
         }
+    }
 
-        @Test
-        @DisplayName("command accepting `@Command`-er")
-        void commandCommand() {
-            assertValid(CreateProjectCommander.class);
-        }
+    @Nested
+    @DisplayName("be rejected in a")
+    class Rejected {
 
         @Test
         @DisplayName("`@Assign`-ed command handler")
         void assign() {
-            assertValid(ModSplitCommandAggregate.class);
+            assertInvalid(ModSplitCommandAggregate.class);
+        }
+
+        @Test
+        @DisplayName("command accepting `@Command`-er")
+        void commandCommand() {
+            assertInvalid(CreateProjectCommander.class);
         }
 
         @Test
         @DisplayName("`@Apply`-er")
         void apply() {
-            assertValid(ModSplitEventAggregate.class);
+            assertInvalid(ModSplitEventAggregate.class);
+        }
+
+
+        @Test
+        @DisplayName("be not acceptable for a state `@Subscribe`-r method")
+        void state() {
+            assertInvalid(ProjectTasksSubscriber.class);
         }
     }
 
-    @Test
-    @DisplayName("be not acceptable for a state `@Subscribe`-r method")
-    void noState() {
-        assertInvalid(ProjectTasksSubscriber.class);
-    }
 
     @Nested
     @DisplayName("filter out events before they hit inbox")
@@ -155,22 +162,27 @@ class FilterTest {
         }
     }
 
-    @SuppressWarnings({
-            "ClassNewInstance", // We don't care about custom exceptions.
-            "ResultOfMethodCallIgnored" // Call for side effect.
-    })
     private static void assertValid(Class<?> classWithHandler) {
         try {
-            Object instance = classWithHandler.newInstance();
-            if (Entity.class.isAssignableFrom(classWithHandler)) {
-                ((Entity<?, ?>) instance).modelClass();
-            }
+            triggerModelConstruction(classWithHandler);
         } catch (Throwable e) {
             fail(e);
         }
     }
 
     private static void assertInvalid(Class<?> classWithHandler) {
-        Assertions.assertThrows(ModelError.class, classWithHandler::newInstance);
+        assertThrows(ModelError.class, () -> triggerModelConstruction(classWithHandler));
+    }
+
+    @SuppressWarnings({
+            "ClassNewInstance", // We don't care about custom exceptions.
+            "ResultOfMethodCallIgnored" // Call for side effect.
+    })
+    private static void triggerModelConstruction(Class<?> modelClass)
+            throws InstantiationException, IllegalAccessException {
+        Object instance = modelClass.newInstance();
+        if (Entity.class.isAssignableFrom(modelClass)) {
+            ((Entity<?, ?>) instance).modelClass();
+        }
     }
 }
