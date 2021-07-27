@@ -27,6 +27,7 @@
 package io.spine.server.aggregate.model;
 
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
+import io.spine.server.aggregate.given.klasse.IndecisiveEngineAggregate;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
 import io.spine.server.aggregate.given.klasse.command.StopEngine;
 import io.spine.server.aggregate.given.klasse.event.EmissionTestStarted;
@@ -36,6 +37,7 @@ import io.spine.server.aggregate.given.klasse.event.EngineStopped;
 import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
 import io.spine.server.aggregate.given.klasse.event.TankEmpty;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
+import io.spine.server.model.ModelError;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
 import static io.spine.testing.server.Assertions.assertEventClassesExactly;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Test obtaining dispatched message classes from {@link AggregateClass}.
@@ -110,5 +113,12 @@ class AggregateClassTest {
                                       Rejections.EngineAlreadyStarted.class,
                                       Rejections.EngineAlreadyStopped.class);
         }
+    }
+
+    @Test
+    @DisplayName("check that there is only one applier per event type")
+    void checkOneApplier() {
+        assertThrows(ModelError.class,
+                     () -> asAggregateClass(IndecisiveEngineAggregate.class));
     }
 }
