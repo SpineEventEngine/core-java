@@ -246,7 +246,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <pre>
  *
  * {@literal @}Command
- * {@literal Triplet<AssignTask, UpdateTaskDueDate, Optional<StartTask>>} on(TaskCreated command) { ... }
+ * {@literal Triplet<AssignTask, UpdateTaskDueDate, Optional<StartTask>>} on(CreateTask command) { ... }
  * </pre>
  * </ul>
  *
