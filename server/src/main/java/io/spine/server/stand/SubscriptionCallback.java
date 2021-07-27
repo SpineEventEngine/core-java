@@ -47,8 +47,10 @@ public interface SubscriptionCallback extends Consumer<SubscriptionUpdate> {
      */
     static SubscriptionCallback forwardingTo(StreamObserver<SubscriptionUpdate> observer) {
         return update -> {
-            checkNotNull(update);
-            observer.onNext(update);
+            synchronized (observer) {
+                checkNotNull(update);
+                observer.onNext(update);
+            }
         };
     }
 }
