@@ -33,6 +33,7 @@ import io.spine.server.dispatch.Ignore;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventEnvelope;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
@@ -59,6 +60,8 @@ public final class Ignored {
      * @return {@code ignored} outcome
      */
     public static DispatchOutcome ignored(ModelClass<?> handler, EventEnvelope event) {
+        checkNotNull(handler);
+        checkNotNull(event);
         String reason = format(
                 "`@%s` filters in `%s` rejected event %s[%s]",
                 Where.class.getSimpleName(), handler, event.messageTypeName(), event.id().value()
