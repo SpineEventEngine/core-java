@@ -31,26 +31,27 @@ import kotlin.annotation.AnnotationTarget.VALUE_PARAMETER
 /**
  * Filters events delivered to a handler method.
  *
- * To apply filtering to an signal handler method, annotate the first parameter of the method.
+ * To apply filtering to a handler method, annotate the first parameter of the method.
  *
- * For example, the following method would be invoked only if the owner of the created
- * project is `admin@ackme.net`:
+ * For example, the following method would be invoked only if the owner of
+ * the project is `admin@ackme.net`:
  * ```
- *   @Assign
+ *   @React
  *   ProjectDeletedForever on(@Where(field = "owner.email", equals = "admin@ackme.net")
- *                            DeleteProjectForever e) { 
+ *                            ProjectRanOutOfMoney e) {
  *       ...
  *   }
  * ```
  *
- * # Filtering Signals by a Field Value
+ * # Filtering Events by a Field Value
  *
- * If a field filter is defined, only the signals matching this filter are passed to the handler
+ * If a field filter is defined, only the events matching this filter are passed to the handler
  * method.
  *
- * Only methods which accept a signal may add filters. Entity subscribers cannot use this kind of
- * filtering. Declaring a `@Where` filter on a parameter of an entity state subscriber method will
- * cause a runtime error.
+ * Only methods which accept an event may add filters. Entity subscribers cannot use this kind of
+ * filtering, neither can methods that receive a command. Declaring a `@Where` filter on a parameter
+ * of such a method will cause a runtime error. See the annotation [AcceptsFilters] for more info
+ * on which methods can have a filer.
  *
  * A single class may define a number of handler methods with different field filters. Though,
  * all the field filters must target the same field. For example, this setup is valid:
