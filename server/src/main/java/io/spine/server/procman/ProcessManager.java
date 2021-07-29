@@ -41,6 +41,7 @@ import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.log.LoggingEntity;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -85,7 +86,11 @@ public abstract class ProcessManager<I,
                                      S extends EntityState<I>,
                                      B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventReactor, Commander, HasVersionColumn<I, S>, HasLifecycleColumns<I, S> {
+        implements EventReactor,
+                   Commander,
+                   HasVersionColumn<I, S>,
+                   HasLifecycleColumns<I, S>,
+                   LoggingEntity {
 
     /**
      * Creates a new instance.
@@ -210,6 +215,8 @@ public abstract class ProcessManager<I,
             DispatchOutcome outcome = commanderMethod.get().invoke(this, event);
             return outcome;
         }
+        _debug().log("Process manager %s filtered out and ignored event %s[ID: %s].",
+                     thisClass, event.messageClass(), event.id().value());
         return ignored(thisClass, event);
     }
 

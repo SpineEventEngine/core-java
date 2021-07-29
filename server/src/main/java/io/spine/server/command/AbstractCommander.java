@@ -34,6 +34,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
@@ -59,7 +60,7 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
  */
 public abstract class AbstractCommander
         extends AbstractCommandDispatcher
-        implements Commander, EventDispatcherDelegate {
+        implements Commander, EventDispatcherDelegate, Logging {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     @LazyInit
@@ -109,10 +110,15 @@ public abstract class AbstractCommander
     @Override
     public void dispatchEvent(EventEnvelope event) {
         Optional<CommandReactionMethod> method = thisClass.commanderOn(event);
-        method.ifPresent(m -> DispatchOutcomeHandler
-                .from(m.invoke(this, event))
-                .onCommands(this::postCommands)
-                .handle());
+        if (method.isPresent()) {
+            DispatchOutcomeHandler
+                    .from(method.get().invoke(this, event))
+                    .onCommands(this::postCommands)
+                    .handle();
+        } else {
+            _debug().log("Commander `%s` filtered out and ignored event %s[ID: %s].",
+                         this, event.messageClass(), event.id().value());
+        }
     }
 
     /**

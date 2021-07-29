@@ -152,6 +152,15 @@ public final class EventEnvelope
     }
 
     /**
+     * Returns {@code true} if the wrapped event is
+     * {@link io.spine.system.server.event.EntityStateChanged EntityStateChanged},
+     * {@code false} otherwise.
+     */
+    public boolean isEntityStateUpdate() {
+        return eventClass.isEntityStateChanged();
+    }
+
+    /**
      * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
      */
     public boolean isExternal() {
