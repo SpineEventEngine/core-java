@@ -134,16 +134,6 @@ public final class Server implements Logging {
     }
 
     /**
-     * Always returns zero.
-     *
-     * @deprecated please do not use
-     */
-    @Deprecated
-    public int port() {
-        return 0;
-    }
-
-    /**
      * The builder for the server.
      */
     public static final class Builder extends ConnectionBuilder {
@@ -162,17 +152,6 @@ public final class Server implements Logging {
         public Builder add(BoundedContextBuilder context) {
             checkNotNull(context);
             contextBuilders.add(context);
-            return this;
-        }
-
-        /**
-         * Does nothing.
-         *
-         * @deprecated please use {@link Server#atPort(int)}.
-         */
-        @CanIgnoreReturnValue
-        @Deprecated
-        public Builder setPort(@SuppressWarnings("unused") int port) {
             return this;
         }
 

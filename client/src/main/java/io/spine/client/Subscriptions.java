@@ -46,6 +46,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedSet;
 

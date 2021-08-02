@@ -101,21 +101,6 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
     protected abstract void processElement(Element element);
 
     /**
-     * States if the processing of the annotation is finished or not.
-     *
-     * @return {@code true} if the processing of the annotation is finished, {@code false} otherwise
-     * @deprecated "Claiming" annotations a bad practice. We should always allow other processors
-     * access to the annotation.
-     * See <a href="https://errorprone.info/bugpattern/DoNotClaimAnnotations">this ErrorProne check</a>
-     * for a more detailed description. The {@code SpineAnnotationProcessor.process(..)} method
-     * always returns {@code false}. This method will be removed in future releases.
-     */
-    @Deprecated
-    protected boolean isFinished() {
-        return false;
-    }
-
-    /**
      * A lifecycle method called when a processing round is started.
      *
      * <p>Does nothing by default. Override this method to change the processing flow.

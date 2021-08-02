@@ -215,7 +215,7 @@ class ModelVerifierTest {
                                                  .withType(JavaCompile.class)
                                                  .getByName(compileJava.name());
         File dest = TempDir.forClass(getClass());
-        compileTask.setDestinationDir(dest);
+        compileTask.getDestinationDirectory().set(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         URL destUrl = dest.toURI().toURL();
         assertEquals(destUrl, func.apply(compileTask));
@@ -227,7 +227,7 @@ class ModelVerifierTest {
         JavaCompile compileTask = actualProject().getTasks()
                                                  .withType(JavaCompile.class)
                                                  .getByName(compileJava.name());
-        compileTask.setDestinationDir((File) null);
+        compileTask.getDestinationDirectory().set((File) null);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));
     }

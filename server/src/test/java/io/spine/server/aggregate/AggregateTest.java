@@ -133,7 +133,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
 })
-@DisplayName("Aggregate should")
+@DisplayName("`Aggregate` should")
 public class AggregateTest {
 
     private static final ProjectId ID = ProjectId.newBuilder()

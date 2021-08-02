@@ -74,4 +74,5 @@ tasks.javadoc {
 val duplicatesStrategy = DuplicatesStrategy.INCLUDE
 tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
 tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
 

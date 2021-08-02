@@ -313,26 +313,6 @@ public final class GrpcContainer {
             super(port, serverName);
         }
 
-        /**
-         * Does nothing.
-         *
-         * @deprecated please use {@link GrpcContainer#atPort(int)}.
-         */
-        @Deprecated
-        public Builder setPort(@SuppressWarnings("unused") int ignored) {
-            return this;
-        }
-
-        /**
-         * Obtains the port to be used by the container.
-         *
-         * @deprecated please use {@link #port()}.
-         */
-        @Deprecated
-        public int getPort() {
-            return port().orElse(0);
-        }
-
         @CanIgnoreReturnValue
         public Builder addService(BindableService service) {
             services.add(service.bindService());
@@ -343,15 +323,6 @@ public final class GrpcContainer {
         public Builder removeService(ServerServiceDefinition service) {
             services.remove(service);
             return this;
-        }
-
-        /**
-         * Obtains the services already added to the builder.
-         * @deprecated please use {@link #services()}.
-         */
-        @Deprecated
-        public ImmutableSet<ServerServiceDefinition> getServices() {
-            return services();
         }
 
         /**
