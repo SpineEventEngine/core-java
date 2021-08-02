@@ -111,13 +111,13 @@ class Publish : Plugin<Project> {
         val extension = PublishExtension.create(project)
         project.extensions.add(PublishExtension::class.java, extensionName, extension)
 
-        val soloMode = extension.singleProject()
-        val rootPublish: Task? =
-            if (soloMode) null
-            else project.createPublishTask()
-        val checkCredentials: Task = project.createCheckTask(extension)
-
         project.afterEvaluate {
+            val soloMode = extension.singleProject()
+            val rootPublish: Task? =
+                if (soloMode) null
+                else project.createPublishTask()
+            val checkCredentials: Task = project.createCheckTask(extension)
+
             if (soloMode) {
                 project.applyMavenPublish(extension, null, checkCredentials)
             } else {
