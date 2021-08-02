@@ -59,6 +59,9 @@ apply {
     plugin(IncrementGuard::class)
 }
 
-//TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
+//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
 // see https://github.com/SpineEventEngine/base/issues/657
-tasks.processResources.get().duplicatesStrategy = DuplicatesStrategy.INCLUDE
+val duplicatesStrategy = DuplicatesStrategy.INCLUDE
+tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy

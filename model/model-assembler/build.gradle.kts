@@ -37,3 +37,10 @@ dependencies {
 
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
 }
+
+//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
+// see https://github.com/SpineEventEngine/base/issues/657
+val duplicatesStrategy = DuplicatesStrategy.INCLUDE
+tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
