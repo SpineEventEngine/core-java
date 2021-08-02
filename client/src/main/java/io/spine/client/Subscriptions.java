@@ -46,7 +46,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedSet;
 
@@ -131,20 +130,6 @@ public final class Subscriptions implements Logging {
                 .setTopic(topic)
                 .vBuild();
         return subscription;
-    }
-
-    /**
-     * Obtains a short printable form of subscription.
-     *
-     * <p>Standard {@link Subscription#toString()} includes all subscription data and thus its
-     * output is too huge to use in short log messages and stack traces.
-     *
-     * @return a printable {@code String} with core subscription data
-     * @deprecated please use {@link Subscription#toShortString()}
-     */
-    @Deprecated
-    public static String toShortString(Subscription s) {
-        return s.toShortString();
     }
 
     /**

@@ -126,16 +126,12 @@ subprojects {
         plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
+        plugin("pmd-settings")
 
         with(Scripts) {
             from(javacArgs(project))
-            from(modelCompiler(project))
             from(projectLicenseReport(project))
         }
-    }
-
-    extensions["modelCompiler"].withGroovyBuilder {
-        setProperty("generateValidation", true)
     }
 
     java {
@@ -300,8 +296,6 @@ subprojects {
             tasks.getByName("publish").dependsOn("updateGitHubPages")
         }
     }
-
-    apply(from = Scripts.pmd(project))
 }
 
 apply {

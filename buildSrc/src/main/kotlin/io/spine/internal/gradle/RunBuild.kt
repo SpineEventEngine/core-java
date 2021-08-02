@@ -26,93 +26,12 @@
 
 package io.spine.internal.gradle
 
-import java.io.File
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.TaskAction
-import org.gradle.internal.os.OperatingSystem
-
 /**
- * A Gradle task which runs another Gradle build.
- *
- * Launches Gradle wrapper under a given [directory] with the `build` task. The `clean` task is also
- * run if current build includes a `clean` task.
- *
- * The build writes verbose log into `$directory/build/debug-out.txt`. The error output is written
- * into `$directory/build/error-out.txt`.
+ * Runs the `build` task via Gradle Wrapper.
  */
-@Suppress("unused")
-open class RunBuild : DefaultTask() {
+open class RunBuild : RunGradle() {
 
-    /**
-     * Path to the directory which contains a Gradle wrapper script.
-     */
-    @Internal
-    lateinit var directory: String
-
-    /**
-     * Names of Gradle properties to copy into the launched build.
-     *
-     * The properties are looked up in the root project. If a property is not found, it is ignored.
-     *
-     * See [Gradle doc](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties)
-     * for more info about Gradle properties.
-     */
-    @Internal
-    var includeGradleProperties: MutableSet<String> = mutableSetOf()
-
-    @TaskAction
-    private fun execute() {
-        val runsOnWindows = OperatingSystem.current().isWindows()
-        val script = if (runsOnWindows) "gradlew.bat" else "gradlew"
-        val command = buildCommand(script)
-
-        // Ensure build error output log.
-        // Since we're executing this task in another process, we redirect error output to
-        // the file under the `build` directory.
-        val buildDir = File(directory, "build")
-        if (!buildDir.exists()) {
-            buildDir.mkdir()
-        }
-        val errorOut = File(buildDir, "error-out.txt")
-        val debugOut = File(buildDir, "debug-out.txt")
-
-        val process = buildProcess(command, errorOut, debugOut)
-        if (process.waitFor() != 0) {
-            if (errorOut.exists()) {
-                logger.error(errorOut.readText())
-            }
-            throw GradleException("Build FAILED. See $errorOut for details.")
-        }
+    init {
+        task("build")
     }
-
-    private fun buildCommand(script: String): List<String> {
-        val command = mutableListOf<String>()
-        command.add("${project.rootDir}/$script")
-        val shouldClean = project.gradle
-                                 .taskGraph
-                                 .hasTask(":clean")
-        if (shouldClean) {
-            command.add("clean")
-        }
-        command.add("build")
-        command.add("--console=plain")
-        command.add("--debug")
-        command.add("--stacktrace")
-        val rootProject = project.rootProject
-        includeGradleProperties
-            .filter { rootProject.hasProperty(it) }
-            .map { name -> name to rootProject.property(name).toString() }
-            .forEach { (name, value) -> command.add("-P$name=$value") }
-        return command
-    }
-
-    private fun buildProcess(command: List<String>, errorOut: File, debugOut: File) =
-        ProcessBuilder()
-            .command(command)
-            .directory(project.file(directory))
-            .redirectError(errorOut)
-            .redirectOutput(debugOut)
-            .start()
 }

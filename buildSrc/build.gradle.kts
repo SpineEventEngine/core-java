@@ -46,12 +46,9 @@ plugins {
     java
     groovy
     `kotlin-dsl`
+    pmd
     val licenseReportVersion = "1.16"
     id("com.github.jk1.dependency-license-report").version(licenseReportVersion)
-}
-
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
 }
 
 repositories {

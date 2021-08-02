@@ -24,20 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+import io.spine.internal.dependency.Pmd
 
-// https://github.com/forge/roaster
-object Roaster {
+plugins {
+    pmd
+}
 
-    /**
-     * Do not advance this version further because it would break compatibility with Java 8
-     * projects. Starting from the following version Roaster has a shaded version of Eclipse JFace
-     * built with Java 11.
-     *
-     * Please see [this issue][https://github.com/SpineEventEngine/config/issues/220] for details.
-     */
-    private const val version = "2.22.2.Final"
+pmd {
+    toolVersion = Pmd.version
+    isConsoleOutput = true
+    incrementalAnalysis.set(true)
 
-    const val api = "org.jboss.forge.roaster:roaster-api:${version}"
-    const val jdt = "org.jboss.forge.roaster:roaster-jdt:${version}"
+    // The build is going to fail in case of violations.
+    isIgnoreFailures = false
+
+    // Disable the default rule set to use the custom rules (see below).
+    ruleSets = listOf()
+
+    // Load PMD settings from a file in `buildSrc/resources/`.
+    val classLoader = Pmd.javaClass.classLoader
+    val settingsResource = classLoader.getResource("pmd.xml")!!
+    val pmdSettings: String = settingsResource.readText()
+    val textResource: TextResource = resources.text.fromString(pmdSettings)
+    ruleSetConfig = textResource
+
+    reportsDir = file("build/reports/pmd")
+
+    // Just analyze the main sources; do not analyze tests.
+    val javaExtension: JavaPluginExtension =
+        project.extensions.getByType(JavaPluginExtension::class.java)
+    val mainSourceSet = javaExtension.sourceSets.getByName("main")
+    sourceSets = listOf(mainSourceSet)
 }

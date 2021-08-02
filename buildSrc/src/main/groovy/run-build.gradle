@@ -39,7 +39,7 @@ configure(project.rootProject) {
          * 
          * @param directory the project root directory in which to execute the build
          */
-        runBuild = { final GString directory ->
+        runBuild = { final String directory ->
             final boolean shouldClean = gradle.getTaskGraph().hasTask(':clean')
             final def command = []
             final def runsOnWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
@@ -69,7 +69,13 @@ configure(project.rootProject) {
                     .redirectError(errorOut)
                     .redirectOutput(debugOut)
                     .start()
-            if (process.waitFor() != 0) {
+            if (!process.waitFor(10, TimeUnit.MINUTES)) {
+                /* The timeout is set because of Gradle process execution under Windows.
+                   See the following locations for details:
+                    https://github.com/gradle/gradle/pull/8467#issuecomment-498374289
+                    https://github.com/gradle/gradle/issues/3987
+                    https://discuss.gradle.org/t/weirdness-in-gradle-exec-on-windows/13660/6
+                 */
                 throw new GradleException("Build FAILED. See $errorOut for details.")
             }
         }

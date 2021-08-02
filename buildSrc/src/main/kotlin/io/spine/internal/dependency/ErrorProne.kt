@@ -29,7 +29,8 @@ package io.spine.internal.dependency
 // https://errorprone.info/
 @Suppress("unused")
 object ErrorProne {
-    private const val version = "2.6.0"
+    // https://github.com/google/error-prone
+    private const val version = "2.8.0"
     // https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
     private const val javacPluginVersion = "9+181-r4173-1"
 
@@ -42,9 +43,10 @@ object ErrorProne {
     const val testHelpers = "com.google.errorprone:error_prone_test_helpers:${version}"
     const val javacPlugin  = "com.google.errorprone:javac:${javacPluginVersion}"
 
+    // https://github.com/tbroyer/gradle-errorprone-plugin/releases
     object GradlePlugin {
         const val id = "net.ltgt.errorprone"
-        const val version = "1.3.0"
+        const val version = "2.0.2"
         const val lib = "net.ltgt.gradle:gradle-errorprone-plugin:${version}"
     }
 }

@@ -110,10 +110,9 @@ final class FilteringField {
     private Field fieldInContext() {
         FieldPath pathInEvent = field.path();
         ProtocolStringList fieldNames = pathInEvent.getFieldNameList();
-        FieldPath pathInEventContext = FieldPath
-                .newBuilder()
+        FieldPath pathInEventContext = FieldPath.newBuilder()
                 .addAllFieldName(fieldNames.subList(1, fieldNames.size()))
-                .vBuild();
+                .build();
         return Field.withPath(pathInEventContext);
     }
 

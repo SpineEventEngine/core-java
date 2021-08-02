@@ -31,19 +31,23 @@ val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
 dependencies {
+    implementation("io.spine:spine-base-types:$spineBaseVersion")
     testImplementation(project(":testutil-core"))
     testImplementation("io.spine.tools:spine-testutil-time:$spineTimeVersion")
 }
 
 modelCompiler {
-    fields {
-
-        // Describe the `Event` fields to allow non-reflective and strongly-typed access.
-        generateFor("spine.core.Event", markAs("io.spine.core.EventField"))
+    java {
+        forMessage("spine.core.Event") {
+            // Describe the `Event` fields to allow non-reflective and strongly-typed access.
+            markFieldsAs("io.spine.core.EventField")
+        }
 
         // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
         // creation of typed event filters based on event context.
-        generateFor("spine.core.EventContext", markAs("io.spine.core.EventContextField"))
+        forMessage("spine.core.EventContext") {
+            markFieldsAs("io.spine.core.EventContextField")
+        }
     }
 }
 
@@ -54,3 +58,7 @@ apply {
     }
     plugin(IncrementGuard::class)
 }
+
+//TODO:2021-07-22:alexander.yevsyukov: Turn to WARN and investigate duplicates.
+// see https://github.com/SpineEventEngine/base/issues/657
+tasks.processResources.get().duplicatesStrategy = DuplicatesStrategy.INCLUDE
