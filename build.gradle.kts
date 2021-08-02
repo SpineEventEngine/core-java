@@ -26,10 +26,10 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.DependencyResolution
 import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -146,7 +146,6 @@ subprojects {
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
             jvmTarget = JavaVersion.VERSION_1_8.toString()
-            useIR = true
             freeCompilerArgs = listOf("-Xskip-prerelease-check")
         }
     }
@@ -179,7 +178,7 @@ subprojects {
             }
         }
     }
-    DependencyResolution.excludeProtobufLite(configurations)
+    configurations.excludeProtobufLite()
 
     val srcDir = "$projectDir/src"
     val generatedDir = "$projectDir/generated"
