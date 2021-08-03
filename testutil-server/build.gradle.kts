@@ -42,3 +42,4 @@ apply(from = Scripts.testArtifacts(project))
 // see https://github.com/SpineEventEngine/base/issues/657
 val duplicatesStrategy = DuplicatesStrategy.INCLUDE
 tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
