@@ -77,7 +77,6 @@ apply {
     plugin("io.spine.mc-java")
     plugin("io.spine.tools.spine-model-verifier")
     from("$enclosingRootDir/version.gradle.kts")
-    from("$enclosingRootDir/${scriptsPath}/model-compiler.gradle")
 }
 
 repositories.applyStandard()
@@ -92,6 +91,7 @@ tasks.compileJava {
 
 dependencies {
     implementation("io.spine:spine-server:$versionToPublish")
+    implementation("io.spine:spine-base-types:$versionToPublish")
     annotationProcessor("io.spine.tools:spine-model-assembler:$versionToPublish")
 }
 
