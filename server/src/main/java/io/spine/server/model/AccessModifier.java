@@ -31,6 +31,7 @@ import kotlin.reflect.KCallable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -73,6 +74,11 @@ public final class AccessModifier implements Predicate<Method> {
         return kotlinMethod.get().getVisibility() == INTERNAL;
     }, "Kotlin internal");
 
+    public static final AccessModifier PROTECTED_WITH_OVERRIDE = new AccessModifier(
+            m -> PROTECTED.test(m) && isOverridden(m),
+            "protected with @Override"
+    );
+
     /**
      * The predicate which determines if the method has a matching modifier or not.
      */
@@ -95,6 +101,26 @@ public final class AccessModifier implements Predicate<Method> {
         return new AccessModifier(predicate, name);
     }
 
+    @SuppressWarnings("MethodWithMultipleLoops")
+    private static boolean isOverridden(Method method) {
+        Class<?> cls = method.getDeclaringClass().getSuperclass();
+        while (!cls.equals(Object.class)) {
+            Method[] methods = cls.getDeclaredMethods();
+            for (Method m : methods) {
+                if (sameMethod(method, m)) {
+                    return true;
+                }
+            }
+            cls = cls.getSuperclass();
+        }
+        return false;
+    }
+
+    private static boolean sameMethod(Method method, Method m) {
+        return m.getName().equals(method.getName())
+                && Arrays.equals(m.getParameterTypes(), method.getParameterTypes());
+    }
+
     /**
      * Obtains the access modifier of the given method.
      *
@@ -105,7 +131,12 @@ public final class AccessModifier implements Predicate<Method> {
     static AccessModifier fromMethod(Method method) {
         checkNotNull(method);
         AccessModifier matchedModifier = Stream
-                .of(PRIVATE, PACKAGE_PRIVATE, PROTECTED, KOTLIN_INTERNAL, PUBLIC)
+                .of(PRIVATE,
+                    PACKAGE_PRIVATE,
+                    PROTECTED_WITH_OVERRIDE,
+                    PROTECTED,
+                    KOTLIN_INTERNAL,
+                    PUBLIC)
                 .filter(modifier -> modifier.test(method))
                 .findFirst()
                 .orElseThrow(() -> newIllegalArgumentException(
