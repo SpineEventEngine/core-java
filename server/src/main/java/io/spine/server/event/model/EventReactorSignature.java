@@ -28,6 +28,7 @@ package io.spine.server.event.model;
 
 import com.google.common.reflect.TypeToken;
 import io.spine.base.EventMessage;
+import io.spine.base.RejectionMessage;
 import io.spine.server.event.React;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.ReturnTypes;
@@ -41,10 +42,15 @@ import java.util.Optional;
  */
 final class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
 
+    @SuppressWarnings("UnstableApiUsage")
     private static final ReturnTypes TYPES = new ReturnTypes(
             TypeToken.of(EventMessage.class),
             new TypeToken<Iterable<EventMessage>>() {},
             new TypeToken<Optional<EventMessage>>() {}
+    ).butNot(
+            TypeToken.of(RejectionMessage.class),
+            new TypeToken<Iterable<RejectionMessage>>() {},
+            new TypeToken<Optional<RejectionMessage>>() {}
     );
 
     EventReactorSignature() {
@@ -63,7 +69,7 @@ final class EventReactorSignature extends EventAcceptingSignature<EventReactorMe
 
     /**
      * Tells that the method may state that a reaction isn't needed by returning
-     * {@link io.spine.server.model Nothing Nothing}.
+     * {@link io.spine.server.model.Nothing Nothing}.
      */
     @Override
     public boolean mayReturnIgnored() {

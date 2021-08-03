@@ -27,6 +27,7 @@
 package io.spine.server.model.given.map;
 
 import io.spine.core.Subscribe;
+import io.spine.core.Where;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.given.SavedString;
 import io.spine.test.projection.event.Int32Imported;
@@ -37,7 +38,6 @@ import static io.spine.testing.Testing.halt;
  * This projection class is not valid because values used in the filtering subscriber
  * annotations evaluate to the same field value (even though that the string values are different).
  */
-@SuppressWarnings("deprecation")
 public final class DupEventFilterValue
         extends Projection<String, SavedString, SavedString.Builder> {
 
@@ -47,13 +47,13 @@ public final class DupEventFilterValue
         super(id);
     }
 
-    @Subscribe(filter = @io.spine.core.ByField(path = VALUE_FIELD_PATH, value = "1"))
-    void onString1(Int32Imported event) {
+    @Subscribe
+    void onString1(@Where(field = VALUE_FIELD_PATH, equals = "1") Int32Imported event) {
         halt();
     }
 
-    @Subscribe(filter = @io.spine.core.ByField(path = VALUE_FIELD_PATH, value = "+1"))
-    void onStringOne(Int32Imported event) {
+    @Subscribe
+    void onStringOne(@Where(field = VALUE_FIELD_PATH, equals = "+1") Int32Imported event) {
         halt();
     }
 }

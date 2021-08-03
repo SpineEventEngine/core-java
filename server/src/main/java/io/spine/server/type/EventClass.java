@@ -29,10 +29,12 @@ package io.spine.server.type;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Event;
+import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 
@@ -166,5 +168,13 @@ public final class EventClass extends MessageClass<EventMessage> {
      */
     public static ImmutableSet<EventClass> emptySet(){
         return ImmutableSet.of();
+    }
+
+    /**
+     * Checks if this entity class represents {@link EntityStateChanged}.
+     */
+    @Internal
+    public boolean isEntityStateChanged() {
+        return value().equals(EntityStateChanged.class);
     }
 }

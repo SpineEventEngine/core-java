@@ -32,7 +32,6 @@ import io.spine.server.model.given.external.TestReactor;
 import io.spine.server.model.given.external.TestSubscriber;
 import io.spine.server.type.EventClass;
 import io.spine.test.model.external.ExtProjectCreated;
-import io.spine.test.model.external.ExtProjectStarted;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -84,13 +83,6 @@ class ExternalAttributeTest {
         void annotation() {
             assertThat(externalEventClasses)
                     .contains(EventClass.from(ExtProjectCreated.class));
-        }
-
-        @Test
-        @DisplayName("via annotation attribute")
-        void attribute() {
-            assertThat(externalEventClasses)
-                    .contains(EventClass.from(ExtProjectStarted.class));
         }
     }
 }

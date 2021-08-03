@@ -27,6 +27,7 @@
 package io.spine.server.type;
 
 import io.spine.base.MessageContext;
+import io.spine.base.SignalMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
@@ -69,4 +70,7 @@ public interface SignalEnvelope<I extends SignalId,
     default Origin asMessageOrigin() {
         return outerObject().asMessageOrigin();
     }
+
+    @Override
+    SignalMessage message();
 }

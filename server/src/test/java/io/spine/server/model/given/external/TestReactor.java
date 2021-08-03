@@ -31,18 +31,11 @@ import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.test.model.external.ExtProjectCreated;
-import io.spine.test.model.external.ExtProjectStarted;
 
 public final class TestReactor extends AbstractEventReactor {
 
     @React
     Nothing on(@External ExtProjectCreated event) {
-        return nothing();
-    }
-
-    @SuppressWarnings("deprecation") // For testing legacy `external` attribute.
-    @React(external = true)
-    Nothing on(ExtProjectStarted event) {
         return nothing();
     }
 }

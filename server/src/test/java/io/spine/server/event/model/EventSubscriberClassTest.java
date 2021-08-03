@@ -26,19 +26,22 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
+import io.spine.core.Event;
+import io.spine.people.PersonName;
 import io.spine.server.event.model.given.classes.ConferenceProgram;
-import io.spine.server.type.EmptyClass;
-import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.model.ConferenceAnnounced;
 import io.spine.test.event.model.SpeakerJoined;
 import io.spine.test.event.model.TalkSubmitted;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.collect.Iterables.getFirst;
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 import static io.spine.testing.server.model.ModelTests.getMethod;
@@ -79,14 +82,20 @@ class EventSubscriberClassTest {
     }
 
     @Test
-    @DisplayName("obtain methods subscribed to events of the passed class and the class of origin")
+    @DisplayName("obtain methods subscribed to events")
     void subscribersOf() {
-        ImmutableSet<SubscriberMethod> methods = subscriberClass.subscribersOf(
-                EventClass.from(SpeakerJoined.class), EmptyClass.instance());
-
-        assertThat(methods).hasSize(1);
-        SubscriberMethod actual = getFirst(methods, null);
-        assertThat(actual.rawMethod())
+        TestEventFactory factory = TestEventFactory.newInstance(EventSubscriberClassTest.class);
+        Event event = factory.createEvent(SpeakerJoined
+                                                  .newBuilder()
+                                                  .setSpeaker(PersonName.newBuilder()
+                                                                      .setGivenName("Homer"))
+                                                  .vBuild());
+        Optional<SubscriberMethod> methods = subscriberClass.subscriberOf(
+                EventEnvelope.of(event)
+        );
+        assertThat(methods)
+              .isPresent();
+        assertThat(methods.get().rawMethod())
             .isEqualTo(getMethod(ConferenceProgram.class, "addSpeaker"));
     }
 }

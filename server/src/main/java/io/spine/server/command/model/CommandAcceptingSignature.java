@@ -32,6 +32,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.CommandContext;
 import io.spine.server.model.AllowedParams;
+import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
@@ -96,16 +97,16 @@ abstract class CommandAcceptingSignature
         MESSAGE(classImplementing(CommandMessage.class)) {
 
             @Override
-            public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.message()};
+            public ExtractedArguments extractArguments(CommandEnvelope envelope) {
+                return ExtractedArguments.ofOne(envelope.message());
             }
         },
 
         MESSAGE_AND_CONTEXT(classImplementing(CommandMessage.class),
                             exactly(CommandContext.class)) {
             @Override
-            public Object[] extractArguments(CommandEnvelope cmd) {
-                return new Object[]{cmd.message(), cmd.context()};
+            public ExtractedArguments extractArguments(CommandEnvelope cmd) {
+                return ExtractedArguments.ofTwo(cmd.message(), cmd.context());
             }
         };
 

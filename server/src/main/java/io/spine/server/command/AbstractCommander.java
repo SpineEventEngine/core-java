@@ -34,6 +34,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
@@ -48,6 +49,7 @@ import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -58,7 +60,7 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
  */
 public abstract class AbstractCommander
         extends AbstractCommandDispatcher
-        implements Commander, EventDispatcherDelegate {
+        implements Commander, EventDispatcherDelegate, Logging {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     @LazyInit
@@ -82,7 +84,7 @@ public abstract class AbstractCommander
     @CanIgnoreReturnValue
     @Override
     public void dispatch(CommandEnvelope command) {
-        CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
+        CommandSubstituteMethod method = thisClass.handlerOf(command);
         DispatchOutcomeHandler
                 .from(method.invoke(this, command))
                 .onCommands(this::postCommands)
@@ -107,11 +109,16 @@ public abstract class AbstractCommander
 
     @Override
     public void dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.commanderOn(event.messageClass());
-        DispatchOutcomeHandler
-                .from(method.invoke(this, event))
-                .onCommands(this::postCommands)
-                .handle();
+        Optional<CommandReactionMethod> method = thisClass.commanderOn(event);
+        if (method.isPresent()) {
+            DispatchOutcomeHandler
+                    .from(method.get().invoke(this, event))
+                    .onCommands(this::postCommands)
+                    .handle();
+        } else {
+            _debug().log("Commander `%s` filtered out and ignored event %s[ID: %s].",
+                         this, event.messageClass(), event.id().value());
+        }
     }
 
     /**

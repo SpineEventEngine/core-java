@@ -33,6 +33,7 @@ import io.spine.base.Error;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.logging.Logging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
@@ -48,6 +49,7 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
@@ -66,7 +68,7 @@ import static com.google.common.base.Suppliers.memoize;
  * @see React reactors
  */
 public abstract class AbstractEventReactor
-        implements EventReactor, EventDispatcher, ContextAware {
+        implements EventReactor, EventDispatcher, ContextAware, Logging {
 
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
     private final Supplier<MessageId> eventAnchor = memoize(() -> Identity.ofSingleton(getClass()));
@@ -104,12 +106,17 @@ public abstract class AbstractEventReactor
     }
 
     private void reactAndPost(EventEnvelope event) {
-        EventReactorMethod method = thisClass.reactorOf(event.messageClass(), event.originClass());
-        DispatchOutcomeHandler
-                .from(method.invoke(this, event))
-                .onEvents(eventBus::post)
-                .onError(error -> postFailure(error, event))
-                .handle();
+        Optional<EventReactorMethod> method = thisClass.reactorOf(event);
+        if (method.isPresent()) {
+            DispatchOutcomeHandler
+                    .from(method.get().invoke(this, event))
+                    .onEvents(eventBus::post)
+                    .onError(error -> postFailure(error, event))
+                    .handle();
+        } else {
+            _debug().log("Reactor `%s` filtered out and ignored event %s[ID: %s].",
+                         thisClass, event.messageClass(), event.id().value());
+        }
     }
 
     private MessageId eventAnchor() {

@@ -30,12 +30,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.base.RejectionMessage;
+import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.lang.String.format;
 
 /**
  * Result of a handler method processing a signal.
@@ -44,6 +47,10 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
  * a generic returned value into a required format.
  */
 final class MethodResult {
+
+    @SuppressWarnings("InlineFormatString") // Too long to inline.
+    private static final String RETURNED_REJECTION_ERROR_TEMPLATE =
+            "Rejection %s returned from a handler method. Rejections must be thrown instead.";
 
     /**
      * The ignored message types.
@@ -71,6 +78,7 @@ final class MethodResult {
 
     static MethodResult from(@Nullable Object rawMethodOutput) {
         List<Message> messages = toMessages(rawMethodOutput);
+        messages.forEach(MethodResult::checkNotRejection);
         ImmutableList<Message> filtered = filterIgnored(messages);
         return new MethodResult(filtered);
     }
@@ -132,5 +140,13 @@ final class MethodResult {
         @SuppressWarnings("unchecked")
         ImmutableList<T> castMessages = (ImmutableList<T>) this.messages;
         return castMessages;
+    }
+
+    private static void checkNotRejection(Message message) {
+        if (message instanceof RejectionMessage) {
+            throw new IllegalOutcomeException(format(
+                    RETURNED_REJECTION_ERROR_TEMPLATE, TypeName.of(message)
+            ));
+        }
     }
 }

@@ -108,8 +108,8 @@ public abstract class DispatcherRegistry<C extends MessageClass<? extends Messag
         Set<D> dispatchers = this.dispatchers
                 .get(messageClass)
                 .stream()
-                .filter(dispatcher -> dispatcher.canDispatch(envelope))
                 .filter(dispatcher -> attributeFilter().test(envelope, dispatcher))
+                .filter(dispatcher -> dispatcher.canDispatch(envelope))
                 .collect(toImmutableSet());
         return dispatchers;
     }

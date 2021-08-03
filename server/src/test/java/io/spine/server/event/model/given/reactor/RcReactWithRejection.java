@@ -24,26 +24,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.given.groups;
+package io.spine.server.event.model.given.reactor;
 
-import io.spine.core.Subscribe;
-import io.spine.core.Where;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.given.organizations.Organization;
-
-import static io.spine.testing.Testing.halt;
+import com.google.common.collect.ImmutableSet;
+import io.spine.base.EventMessage;
+import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.React;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.Rejections;
 
 /**
- * This class declares invalid subscriber because filtering of states is not allowed.
+ * An event reactor that returns a rejection.
  *
- * @see FilteredStateSubscriber
+ * <p>Such behaviour is not allowed and always leads to an error.
+ *
+ * <p>If a type-safe return type is used, e.g. a message, an iterable of concrete messages,
+ * or a tuple, the error occurs early, when the method is parsed and validated. However, when
+ * a non-type-safe type is used, e.g. an iterable of {@link EventMessage}s, the error cannot be
+ * detected until the method is invoked and returns a value.
  */
-public class FilteredStateSubscriberWhere extends AbstractEventSubscriber {
+public final class RcReactWithRejection extends AbstractEventReactor {
 
-    @Subscribe
-    void on(
-            @Where(field = "head.value", equals = "42") // <-- Error here. Shouldn't have a filter.
-            Organization organization) {
-        halt();
+    @React
+    Iterable<EventMessage> on(ModProjectCreated event) {
+        return ImmutableSet.of(
+                Rejections.ModProjectAlreadyExists
+                        .newBuilder()
+                        .setId(event.getId())
+                        .build()
+        );
     }
 }

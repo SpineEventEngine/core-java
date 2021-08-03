@@ -57,5 +57,5 @@ public interface ParameterSpec<E extends MessageEnvelope<?, ?, ?>> {
      * @param envelope the envelope to use as a source
      * @return the values to use during the method invocation
      */
-    Object[] extractArguments(E envelope);
+    ExtractedArguments extractArguments(E envelope);
 }

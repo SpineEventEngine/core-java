@@ -24,32 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.event.model.given.reactor;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
+import io.spine.server.event.React;
+import io.spine.test.reflect.ReflectRejections;
+import io.spine.test.reflect.event.RefProjectCreated;
+
+import java.util.Optional;
 
 /**
- * A handler method which accept only instances of messages that match the filtering conditions.
- *
- * <p>Having two or more methods that accept the same message type but instances of different
- * values to avoid if-elif branches (that filter by the value of the message in a bigger method).
- *
- * <p>It is possible to filter by the same field of the same message type.
- * 
- * @see io.spine.core.ByField
- * @see HandlerFieldFilterClashError
+ * Provides a method which accepts first parameter of wrong type.
  */
-@Immutable
-public interface SelectiveHandler<T,
-                                  C extends MessageClass<?>,
-                                  E extends MessageEnvelope<?, ?, ?>,
-                                  R extends MessageClass<?>>
-        extends HandlerMethod<T, C, E, R> {
+public class RcReturnOptionalRejection extends TestEventReactor {
 
-    /**
-     * Obtains the filter to apply to the messages received by this method.
-     */
-    ArgumentFilter filter();
+    @React
+    Optional<ReflectRejections.InvalidProjectName> react(RefProjectCreated event) {
+        return Optional.of(
+                ReflectRejections.InvalidProjectName
+                        .newBuilder()
+                        .setProjectId(event.getProjectId())
+                        .build()
+        );
+    }
 }

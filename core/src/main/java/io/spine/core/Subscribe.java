@@ -108,26 +108,4 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @AcceptsFilters
 @AcceptsExternal
 public @interface Subscribe {
-
-    /**
-     * When {@code true}, the annotated method receives an event generated from outside of the
-     * Bounded Context to which the annotated method's class belongs.
-     *
-     * @deprecated please use {@link External @External} annotation for the first method parameter.
-     */
-    @Deprecated
-    boolean external() default false;
-
-    /**
-     * Filter to apply to all the event messages.
-     *
-     * <p>If an event does not match this filter, it is not passed to the subscriber method.
-     *
-     * <p>If the {@link ByField#path() @ByField.path} if empty, the filter is not
-     * applied.
-     *
-     * @deprecated please use {@link Where @Where} annotation for the first method parameter.
-     */
-    @Deprecated
-    ByField filter() default @ByField(path = "", value = "");
 }

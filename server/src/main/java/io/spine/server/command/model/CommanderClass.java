@@ -35,9 +35,10 @@ import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.type.CommandClass;
-import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -96,15 +97,15 @@ public final class CommanderClass<C extends Commander>
     /**
      * Obtains the method which reacts on the passed event class.
      */
-    public CommandReactionMethod commanderOn(EventClass eventClass) {
-        return delegate.handlerOf(eventClass, EmptyClass.instance());
+    public Optional<CommandReactionMethod> commanderOn(EventEnvelope event) {
+        return delegate.handlerOf(event);
     }
 
     /**
      * Tells if instances of this commander class substitute the commands of the passed class.
      */
     public boolean substitutesCommand(CommandClass commandClass) {
-        return contains(commandClass);
+        return hasHandler(commandClass);
     }
 
     /**
@@ -135,7 +136,7 @@ public final class CommanderClass<C extends Commander>
     private void validateExternalMethods() {
         Set<CommandSubstituteMethod> methods = commands()
                          .stream()
-                         .map(this::handlerOf)
+                         .flatMap(type -> handlersForType(type).stream())
                          .filter(HandlerMethod::isExternal)
                          .collect(toSet());
         if (!methods.isEmpty()) {

@@ -31,6 +31,7 @@ import com.google.common.collect.Sets;
 import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.Attribute;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.VoidMethod;
@@ -62,7 +63,7 @@ public final class Applier
      *         {@link ParameterSpec} which describes the method
      */
     Applier(Method method, ParameterSpec<EventEnvelope> signature) {
-        super(method, signature);
+        super(checkNotFiltered(method, "applier"), signature);
     }
 
     /**
@@ -80,5 +81,10 @@ public final class Applier
 
     boolean allowsImport() {
         return attributes().contains(AllowImportAttribute.ALLOW);
+    }
+
+    @Override
+    protected ArgumentFilter createFilter() {
+        return ArgumentFilter.acceptingAll();
     }
 }

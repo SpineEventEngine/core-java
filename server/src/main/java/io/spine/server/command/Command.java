@@ -27,6 +27,7 @@
 package io.spine.server.command;
 
 import io.spine.core.AcceptsExternal;
+import io.spine.core.AcceptsFilters;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -246,7 +247,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <pre>
  *
  * {@literal @}Command
- * {@literal Triplet<AssignTask, UpdateTaskDueDate, Optional<StartTask>>} on(TaskCreated command) { ... }
+ * {@literal Triplet<AssignTask, UpdateTaskDueDate, Optional<StartTask>>} on(CreateTask command) { ... }
  * </pre>
  * </ul>
  *
@@ -261,21 +262,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target(METHOD)
 @AcceptsExternal
+@AcceptsFilters
 public @interface Command {
-
-    /**
-     * When {@code true}, the annotated method receives an event generated from outside of the
-     * Bounded Context to which the annotated method's class belongs.
-     *
-     * <p>Should only be applied to commanding methods that accept an event or rejection as a
-     * parameter.
-     *
-     * <p>If applied to a command receiving method, the Model
-     * {@linkplain io.spine.server.model.ExternalCommandReceiverMethodError error} is produced.
-     *
-     * @deprecated please use {@link io.spine.core.External @External} annotation for the first
-     *         method parameter.
-     */
-    @Deprecated
-    boolean external() default false;
 }

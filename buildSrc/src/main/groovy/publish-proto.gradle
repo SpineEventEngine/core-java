@@ -82,7 +82,7 @@ artifacts {
  * except those included into the returned {@code Collection}.
  */
 Collection<File> collectProto() {
-    final def dependencies = configurations.compile.files
+    final def dependencies = configurations.runtimeClasspath.files
     final def jarFiles = dependencies.collect { JarFileName.ofFile(it) }
     final def result = new HashSet<>()
     for (final File jarFile in dependencies) {

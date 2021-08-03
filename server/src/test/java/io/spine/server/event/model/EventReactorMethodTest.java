@@ -34,7 +34,10 @@ import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
 import io.spine.server.event.model.given.reactor.RcOneParam;
 import io.spine.server.event.model.given.reactor.RcReturnOptional;
+import io.spine.server.event.model.given.reactor.RcReturnOptionalRejection;
 import io.spine.server.event.model.given.reactor.RcReturnPair;
+import io.spine.server.event.model.given.reactor.RcReturnRejection;
+import io.spine.server.event.model.given.reactor.RcReturnRejectionIterable;
 import io.spine.server.event.model.given.reactor.RcTwoParams;
 import io.spine.server.event.model.given.reactor.RcWrongAnnotation;
 import io.spine.server.event.model.given.reactor.RcWrongFirstParam;
@@ -284,6 +287,27 @@ class EventReactorMethodTest {
         @DisplayName("the second parameter is not EventContext")
         void notContextParam() {
             Method method = new RcWrongSecondParam().getMethod();
+            assertInvalid(method);
+        }
+
+        @Test
+        @DisplayName("it returns a `RejectionMessage`")
+        void returnRejection() {
+            Method method = new RcReturnRejection().getMethod();
+            assertInvalid(method);
+        }
+
+        @Test
+        @DisplayName("it returns an Iterable of `RejectionMessage`s")
+        void returnRejectionIterable() {
+            Method method = new RcReturnRejectionIterable().getMethod();
+            assertInvalid(method);
+        }
+
+        @Test
+        @DisplayName("it returns an Optional `RejectionMessage`")
+        void returnOptionalRejection() {
+            Method method = new RcReturnOptionalRejection().getMethod();
             assertInvalid(method);
         }
     }
