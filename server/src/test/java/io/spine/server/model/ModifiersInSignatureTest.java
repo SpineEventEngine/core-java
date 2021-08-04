@@ -41,11 +41,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.model.AccessModifier.PROTECTED_WITH_OVERRIDE;
 
-@DisplayName("")
-class ProtectedHandlerSignatureTest {
+@DisplayName("`MethodSignature` access modifiers should")
+class ModifiersInSignatureTest {
 
     @Test
-    void validMethods() throws NoSuchMethodException {
+    @DisplayName("allow for protected methods which are overridden from a superclass")
+    void validProtected() throws NoSuchMethodException {
         Method method = ValidProtectedSubscriber.class
                 .getDeclaredMethod("overridingProtected", SigProjectCreated.class);
         AccessModifier foundModifier = new SubscriberSignature()
@@ -59,7 +60,8 @@ class ProtectedHandlerSignatureTest {
     }
 
     @Test
-    void invalidMethods() throws NoSuchMethodException {
+    @DisplayName("not allow for protected methods in general")
+    void invalidProtected() throws NoSuchMethodException {
         Method method = InvalidProtectedSubscriber.class
                 .getDeclaredMethod("justForTheLols", SigProjectCreated.class);
         Optional<AccessModifier> foundModifier = new SubscriberSignature()
