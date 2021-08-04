@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.AccessModifier.KOTLIN_INTERNAL;
 import static io.spine.server.model.AccessModifier.PACKAGE_PRIVATE;
-import static io.spine.server.model.AccessModifier.PROTECTED_WITH_OVERRIDE;
+import static io.spine.server.model.AccessModifier.PROTECTED_TEMPLATE;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -90,11 +90,11 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * <p>Override this method to change the allowed access modifiers.
      *
      * @return {@link AccessModifier#PACKAGE_PRIVATE},
-     *         {@link AccessModifier#PROTECTED_WITH_OVERRIDE}, and, additionally for Kotlin,
+     *         {@link AccessModifier#PROTECTED_TEMPLATE}, and, additionally for Kotlin,
      *         {@link AccessModifier#KOTLIN_INTERNAL}
      */
     protected ImmutableSet<AccessModifier> modifier() {
-        return ImmutableSet.of(PACKAGE_PRIVATE, KOTLIN_INTERNAL, PROTECTED_WITH_OVERRIDE);
+        return ImmutableSet.of(PACKAGE_PRIVATE, KOTLIN_INTERNAL, PROTECTED_TEMPLATE);
     }
 
     /**

@@ -26,9 +26,11 @@
 
 package io.spine.server.model;
 
+import io.spine.core.Template;
 import io.spine.reflect.J2Kt;
 import kotlin.reflect.KCallable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -82,8 +84,8 @@ public final class AccessModifier implements Predicate<Method> {
      * <p>The purpose of this modifier is to allow inheritance for abstract handlers without
      * discouraging users with warning logs.
      */
-    public static final AccessModifier PROTECTED_WITH_OVERRIDE = new AccessModifier(
-            m -> PROTECTED.test(m) && isOverridden(m),
+    public static final AccessModifier PROTECTED_TEMPLATE = new AccessModifier(
+            m -> PROTECTED.test(m) && isTemplate(m),
             "protected with @Override"
     );
 
@@ -110,18 +112,36 @@ public final class AccessModifier implements Predicate<Method> {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
-    private static boolean isOverridden(Method method) {
+    private static boolean isTemplate(Method method) {
         Class<?> cls = method.getDeclaringClass().getSuperclass();
         while (!cls.equals(Object.class)) {
             Method[] methods = cls.getDeclaredMethods();
             for (Method m : methods) {
                 if (sameMethod(method, m)) {
+                    validateTemplateMethod(m, method);
                     return true;
                 }
             }
             cls = cls.getSuperclass();
         }
         return false;
+    }
+
+    private static void validateTemplateMethod(Method template, Method implementation) {
+        Template annotation = template.getAnnotation(Template.class);
+        if (annotation == null) {
+            throw new ModelError(
+                    "Handler method `%s` overrides `%s` which is not marked as a @Template.",
+                    implementation, template
+            );
+        }
+        Class<? extends Annotation> target = annotation.type();
+        if (!implementation.isAnnotationPresent(target)) {
+            throw new ModelError(
+                    "Handler method `%s` overrides a template `%s` but is not marked with `@%s`.",
+                    implementation, template, target.getSimpleName()
+            );
+        }
     }
 
     private static boolean sameMethod(Method method, Method m) {
@@ -141,7 +161,7 @@ public final class AccessModifier implements Predicate<Method> {
         AccessModifier matchedModifier = Stream
                 .of(PRIVATE,
                     PACKAGE_PRIVATE,
-                    PROTECTED_WITH_OVERRIDE,
+                    PROTECTED_TEMPLATE,
                     PROTECTED,
                     KOTLIN_INTERNAL,
                     PUBLIC)

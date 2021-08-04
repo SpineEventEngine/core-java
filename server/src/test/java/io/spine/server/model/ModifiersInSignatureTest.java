@@ -39,7 +39,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.server.model.AccessModifier.PROTECTED_WITH_OVERRIDE;
+import static io.spine.server.model.AccessModifier.PROTECTED_TEMPLATE;
 
 @DisplayName("`MethodSignature` access modifiers should")
 class ModifiersInSignatureTest {
@@ -56,7 +56,7 @@ class ModifiersInSignatureTest {
                 .findFirst()
                 .orElseGet(Assertions::fail);
         assertThat(foundModifier)
-                .isSameInstanceAs(PROTECTED_WITH_OVERRIDE);
+                .isSameInstanceAs(PROTECTED_TEMPLATE);
     }
 
     @Test

@@ -24,15 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.handler.given;
+package io.spine.core;
 
-import io.spine.core.Subscribe;
-import io.spine.core.Template;
-import io.spine.model.contexts.projects.event.SigProjectCreated;
-import io.spine.server.event.AbstractEventSubscriber;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-abstract class CustomAbstractSubscriber extends AbstractEventSubscriber {
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    @Template(type = Subscribe.class)
-    protected abstract void overridingProtected(SigProjectCreated e);
+/**
+ * Marks an abstract handler method.
+ *
+ * <p>When there is a need to define an abstract base for a handler method, the base method must be
+ * marked with {@code @Template}. The {@code type} of the template must match the type of
+ * the handler method.
+ *
+ * <p>In cases when there is a limitation on the allowed access modifiers for a handler method,
+ * a method born from a template may be declared {@code protected}.
+ *
+ * @see AcceptsTemplate
+ */
+@Retention(RUNTIME)
+@Target(METHOD)
+public @interface Template {
+
+    Class<? extends Annotation> type();
 }

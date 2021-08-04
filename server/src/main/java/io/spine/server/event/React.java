@@ -28,6 +28,7 @@ package io.spine.server.event;
 
 import io.spine.core.AcceptsExternal;
 import io.spine.core.AcceptsFilters;
+import io.spine.core.AcceptsTemplate;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -165,5 +166,6 @@ import java.lang.annotation.Target;
 @Documented
 @AcceptsExternal
 @AcceptsFilters
+@AcceptsTemplate
 public @interface React {
 }
