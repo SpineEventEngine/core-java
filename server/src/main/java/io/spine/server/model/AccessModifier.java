@@ -74,6 +74,14 @@ public final class AccessModifier implements Predicate<Method> {
         return kotlinMethod.get().getVisibility() == INTERNAL;
     }, "Kotlin internal");
 
+    /**
+     * A protected method which overrides a method from a superclass.
+     *
+     * <p>The method must be declared in a parent class. Interfaces do not count.
+     *
+     * <p>The purpose of this modifier is to allow inheritance for abstract handlers without
+     * discouraging users with warning logs.
+     */
     public static final AccessModifier PROTECTED_WITH_OVERRIDE = new AccessModifier(
             m -> PROTECTED.test(m) && isOverridden(m),
             "protected with @Override"
