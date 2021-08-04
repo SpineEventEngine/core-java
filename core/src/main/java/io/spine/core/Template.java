@@ -49,5 +49,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target(METHOD)
 public @interface Template {
 
+    /**
+     * Type of the annotation marking methods which can implement the associated template method.
+     *
+     * <p>Such an annotation must be marked with {@link AcceptsTemplate}.
+     */
     Class<? extends Annotation> type();
 }
