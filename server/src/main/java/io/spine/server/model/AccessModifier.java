@@ -77,7 +77,7 @@ public final class AccessModifier implements Predicate<Method> {
     /**
      * A protected method which overrides a method from a superclass.
      *
-     * <p>The method must be declared in a parent class. Interfaces do not count.
+     * <p>The method must be declared in a parent class.
      *
      * <p>The purpose of this modifier is to allow inheritance for abstract handlers without
      * discouraging users with warning logs.
