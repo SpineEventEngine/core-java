@@ -131,7 +131,7 @@ public final class AccessModifier implements Predicate<Method> {
         Template annotation = template.getAnnotation(Template.class);
         if (annotation == null) {
             throw new ModelError(
-                    "Handler method `%s` overrides `%s` which is not marked as a @Template.",
+                    "Handler method `%s` overrides `%s` which is not marked as a `@Template`.",
                     implementation, template
             );
         }

@@ -29,6 +29,7 @@ package io.spine.server.model;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.model.SubscriberSignature;
 import io.spine.server.model.handler.given.InvalidProtectedSubscriber;
+import io.spine.server.model.handler.given.MismatchedProtectedSubscriber;
 import io.spine.server.model.handler.given.RougeProtectedSubscriber;
 import io.spine.server.model.handler.given.ValidProtectedSubscriber;
 import org.junit.jupiter.api.Assertions;
@@ -76,10 +77,24 @@ class ModifiersInSignatureTest {
     }
 
     @Test
-    @DisplayName("not allow for protected methods in general")
+    @DisplayName("not allow for protected methods in with an invalid template")
     void invalidTemplate() throws NoSuchMethodException {
         Method method = InvalidProtectedSubscriber.class
                 .getDeclaredMethod("plainWrong", SigProjectCreated.class);
-        assertThrows(ModelError.class, () -> PROTECTED_TEMPLATE.test(method));
+        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_TEMPLATE.test(method));
+        assertThat(error)
+                .hasMessageThat()
+                .endsWith("not marked as a `@Template`.");
+    }
+
+    @Test
+    @DisplayName("not allow for protected methods in with a mismatched template")
+    void mismatchedTemplate() throws NoSuchMethodException {
+        Method method = MismatchedProtectedSubscriber.class
+                .getDeclaredMethod("reactor", SigProjectCreated.class);
+        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_TEMPLATE.test(method));
+        assertThat(error)
+                .hasMessageThat()
+                .endsWith("not marked with `@React`.");
     }
 }
