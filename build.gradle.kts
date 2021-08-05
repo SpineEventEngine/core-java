@@ -28,6 +28,7 @@ import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.gradle.PublishingRepos
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
@@ -39,6 +40,7 @@ buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
     io.spine.internal.gradle.doApplyStandard(repositories)
+    io.spine.internal.gradle.doApplyGitHubPackages(repositories, rootProject)
     io.spine.internal.gradle.doForceVersions(configurations)
 
     val kotlinVersion: String by extra
@@ -61,6 +63,7 @@ buildscript {
     }
 }
 
+repositories.applyGitHubPackages(rootProject)
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
@@ -150,6 +153,7 @@ subprojects {
         }
     }
 
+    repositories.applyGitHubPackages(project)
     repositories.applyStandard()
 
     dependencies {

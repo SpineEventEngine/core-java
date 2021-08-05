@@ -26,11 +26,13 @@
 
 package io.spine.internal.gradle
 
+import io.spine.internal.gradle.PublishingRepos.gitHub
 import java.io.File
 import java.net.URI
 import java.util.*
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 
 /**
  * A Maven repository.
@@ -170,7 +172,9 @@ object Repos {
 }
 
 /**
- * The function to be used in `buildscript` clauses when fully-qualified call must be made.
+ * Registers the standard set of Maven repositories.
+ *
+ * To be used in `buildscript` clauses when a fully-qualified call must be made.
  */
 @Suppress("unused")
 fun doApplyStandard(repositories: RepositoryHandler) {
@@ -178,7 +182,39 @@ fun doApplyStandard(repositories: RepositoryHandler) {
 }
 
 /**
+ * Registers the selected GitHub Packages repos as Maven repositories.
+ *
+ * To be used in `buildscript` clauses when a fully-qualified call must be made.
+ *
+ * @see applyGitHubPackages
+ */
+@Suppress("unused")
+fun doApplyGitHubPackages(repositories: RepositoryHandler, project: Project) {
+    repositories.applyGitHubPackages(project)
+}
+
+/**
+ * Applies the repositories hosted at GitHub Packages, to which Spine artifacts were published.
+ *
+ * This method should be used by those wishing to have Spine artifacts published
+ * to GitHub Packages as dependencies.
+ */
+fun RepositoryHandler.applyGitHubPackages(project: Project) {
+    val baseTypes = gitHub("base-types")
+    val gprCreds = baseTypes.credentials(project)
+
+    gprCreds?.let {
+        spineMavenRepo(it, baseTypes.releases)
+        spineMavenRepo(it, baseTypes.snapshots)
+    }
+}
+
+/**
  * Applies repositories commonly used by Spine Event Engine projects.
+ *
+ * Does not include the repositories hosted at GitHub Packages.
+ *
+ * @see applyGitHubPackages
  */
 @Suppress("unused")
 fun RepositoryHandler.applyStandard() {
@@ -187,25 +223,13 @@ fun RepositoryHandler.applyStandard() {
         gradlePluginPortal()
         mavenLocal()
 
-        val libraryGroup = "io.spine"
-        val toolsGroup = "io.spine.tools"
-        val gcloudGroup = "io.spine.gcloud"
-
         maven {
             url = URI(Repos.spine)
-            content {
-                includeGroup(libraryGroup)
-                includeGroup(toolsGroup)
-                includeGroup(gcloudGroup)
-            }
+            includeSpineOnly()
         }
         maven {
             url = URI(Repos.spineSnapshots)
-            content {
-                includeGroup(libraryGroup)
-                includeGroup(toolsGroup)
-                includeGroup(gcloudGroup)
-            }
+            includeSpineOnly()
         }
         mavenCentral()
         maven {
@@ -214,5 +238,39 @@ fun RepositoryHandler.applyStandard() {
         maven {
             url = URI(Repos.sonatypeSnapshots)
         }
+    }
+}
+
+/**
+ * Registers the Maven repository with the passed [repoCredentials] for authorization.
+ *
+ * Only includes the Spine-related artifact groups.
+ */
+private fun RepositoryHandler.spineMavenRepo(
+    repoCredentials: Credentials,
+    repoUrl: String
+) {
+    maven {
+        url = URI(repoUrl)
+        includeSpineOnly()
+        credentials {
+            username = repoCredentials.username
+            password = repoCredentials.password
+        }
+    }
+}
+
+/**
+ * Narrows down the search for this repository to Spine-related artifact groups.
+ */
+private fun MavenArtifactRepository.includeSpineOnly() {
+    val libraryGroup = "io.spine"
+    val toolsGroup = "io.spine.tools"
+    val gcloudGroup = "io.spine.gcloud"
+
+    content {
+        includeGroup(libraryGroup)
+        includeGroup(toolsGroup)
+        includeGroup(gcloudGroup)
     }
 }
