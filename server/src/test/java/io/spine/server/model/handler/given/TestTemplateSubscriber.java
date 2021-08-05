@@ -31,7 +31,7 @@ import io.spine.core.Template;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.AbstractEventSubscriber;
 
-abstract class CustomAbstractSubscriber extends AbstractEventSubscriber {
+abstract class TestTemplateSubscriber extends AbstractEventSubscriber {
 
     @Template(type = Subscribe.class)
     protected abstract void overridingProtected(SigProjectCreated e);
