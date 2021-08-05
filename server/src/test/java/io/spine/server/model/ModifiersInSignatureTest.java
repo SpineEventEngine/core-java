@@ -29,6 +29,7 @@ package io.spine.server.model;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.model.SubscriberSignature;
 import io.spine.server.model.handler.given.InvalidProtectedSubscriber;
+import io.spine.server.model.handler.given.RougeProtectedSubscriber;
 import io.spine.server.model.handler.given.ValidProtectedSubscriber;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.model.AccessModifier.PROTECTED_TEMPLATE;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`MethodSignature` access modifiers should")
 class ModifiersInSignatureTest {
@@ -62,7 +64,7 @@ class ModifiersInSignatureTest {
     @Test
     @DisplayName("not allow for protected methods in general")
     void invalidProtected() throws NoSuchMethodException {
-        Method method = InvalidProtectedSubscriber.class
+        Method method = RougeProtectedSubscriber.class
                 .getDeclaredMethod("justForTheLols", SigProjectCreated.class);
         Optional<AccessModifier> foundModifier = new SubscriberSignature()
                 .modifier()
@@ -71,5 +73,13 @@ class ModifiersInSignatureTest {
                 .findFirst();
         assertThat(foundModifier)
                 .isEmpty();
+    }
+
+    @Test
+    @DisplayName("not allow for protected methods in general")
+    void invalidTemplate() throws NoSuchMethodException {
+        Method method = InvalidProtectedSubscriber.class
+                .getDeclaredMethod("plainWrong", SigProjectCreated.class);
+        assertThrows(ModelError.class, () -> PROTECTED_TEMPLATE.test(method));
     }
 }

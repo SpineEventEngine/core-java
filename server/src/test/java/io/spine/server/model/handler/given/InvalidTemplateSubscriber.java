@@ -26,17 +26,10 @@
 
 package io.spine.server.model.handler.given;
 
-import io.spine.core.Subscribe;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
+import io.spine.server.event.AbstractEventSubscriber;
 
-public class InvalidProtectedSubscriber extends InvalidTemplateSubscriber {
+public abstract class InvalidTemplateSubscriber extends AbstractEventSubscriber {
 
-    /**
-     * This subscriber method is invalid because it is {@code protected}.
-     */
-    @Override
-    @Subscribe
-    protected void plainWrong(SigProjectCreated e) {
-        // Do nothing.
-    }
+    protected abstract void plainWrong(SigProjectCreated e);
 }
