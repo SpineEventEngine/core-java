@@ -32,7 +32,7 @@ import io.spine.model.contexts.projects.event.SigProjectCreated;
 public class InvalidProtectedSubscriber extends InvalidTemplateSubscriber {
 
     /**
-     * This subscriber method is invalid because it is {@code protected}.
+     * This subscriber method is invalid because the superclass method is not a valid template.
      */
     @Override
     @Subscribe

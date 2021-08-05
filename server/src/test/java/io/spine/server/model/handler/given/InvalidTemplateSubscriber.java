@@ -31,5 +31,9 @@ import io.spine.server.event.AbstractEventSubscriber;
 
 public abstract class InvalidTemplateSubscriber extends AbstractEventSubscriber {
 
+    /**
+     * This template method is invalid because there is no {@link io.spine.core.Template}
+     * annotation on it.
+     */
     protected abstract void plainWrong(SigProjectCreated e);
 }
