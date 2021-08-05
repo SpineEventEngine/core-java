@@ -153,7 +153,7 @@ subprojects {
         }
     }
 
-    repositories.applyGitHubPackages(project)
+    repositories.applyGitHubPackages(rootProject)
     repositories.applyStandard()
 
     dependencies {
