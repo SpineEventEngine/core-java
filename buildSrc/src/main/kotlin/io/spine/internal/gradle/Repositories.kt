@@ -141,10 +141,14 @@ object PublishingRepos {
             // Only has the permission to read public GitHub packages.
             val targetDir = "${project.buildDir}/token"
             project.file(targetDir).mkdirs()
+            val fileToUnzip = "${project.rootDir}/buildSrc/aus.weis"
+
+            project.logger.info("GitHub Packages: reading token " +
+                    "by unzipping `$fileToUnzip` into `$targetDir`.")
             project.exec {
                 // Unzip with password "123", allow overriding, quietly,
                 // into the target dir, the given archive.
-                commandLine("unzip", "-P", "123", "-oq", "-d", targetDir, "${project.rootDir}/buildSrc/aus.weis")
+                commandLine("unzip", "-P", "123", "-oq", "-d", targetDir, fileToUnzip)
             }
             val file = project.file("$targetDir/token.txt")
             file.readText()
