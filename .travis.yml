@@ -28,6 +28,9 @@ before_install:
   - tar xvf credentials.tar
   - chmod 600 deploy_key_rsa
 
+install:
+  - ./gradlew assemble --info --stacktrace
+
 script:
   - ./gradlew check --info --stacktrace
 
