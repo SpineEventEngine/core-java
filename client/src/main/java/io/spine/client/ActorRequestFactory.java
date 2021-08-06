@@ -240,29 +240,6 @@ public class ActorRequestFactory {
         }
 
         /**
-         * Obtains the zone offset set in the builder.
-         *
-         * @return {@code null} always
-         * @deprecated please use {@link #getZoneId()} instead
-         */
-        @Deprecated
-        @SuppressWarnings("ReturnOfNull")
-        public io.spine.time.ZoneOffset getZoneOffset() {
-            return null;
-        }
-
-        /**
-         * Sets the offset of the time zone in which the user works.
-         *
-         * @deprecated please use {@link #setZoneId(ZoneId)} instead
-         */
-        @Deprecated
-        @CanIgnoreReturnValue
-        public Builder setZoneOffset(@SuppressWarnings("unused") io.spine.time.ZoneOffset ignored) {
-            return this;
-        }
-
-        /**
          * Obtains the zone ID set in the builder.
          *
          * @return the zone ID or {@code null} if the value was not set

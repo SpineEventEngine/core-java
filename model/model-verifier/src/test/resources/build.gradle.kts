@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
 import org.gradle.api.file.SourceDirectorySet
 
@@ -51,6 +52,7 @@ buildscript {
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
 
+    io.spine.internal.gradle.doApplyGitHubPackages(repositories, rootProject)
     io.spine.internal.gradle.doApplyStandard(repositories)
 
     dependencies {
@@ -79,6 +81,7 @@ apply {
     from("$enclosingRootDir/version.gradle.kts")
 }
 
+repositories.applyGitHubPackages(rootProject)
 repositories.applyStandard()
 
 tasks.compileJava {
@@ -91,6 +94,7 @@ tasks.compileJava {
 
 dependencies {
     implementation("io.spine:spine-server:$versionToPublish")
+    implementation("io.spine:spine-base-types:$versionToPublish")
     annotationProcessor("io.spine.tools:spine-model-assembler:$versionToPublish")
 }
 

@@ -24,23 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
+// TODO:2021-07-05:dmytro.dashenkov: https://github.com/SpineEventEngine/config/issues/214.
 
-group = "io.spine.tools"
-
-dependencies {
-    api(project(":server"))
-    api(project(":testutil-client"))
-    testImplementation(Grpc.netty)
-    testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            eachDependency {
+                if (requested.group == "org.jacoco") {
+                    useVersion("0.8.7")
+                }
+            }
+        }
+    }
 }
-
-apply(from = Scripts.testArtifacts(project))
-
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy

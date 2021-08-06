@@ -46,6 +46,7 @@ dependencies {
     }
     testImplementation(Grpc.nettyShaded)
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
+    testImplementation("io.spine:spine-base-types:$spineBaseVersion")
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
@@ -68,3 +69,11 @@ tasks.javadoc {
         }
     }
 }
+
+//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
+// see https://github.com/SpineEventEngine/base/issues/657
+val duplicatesStrategy = DuplicatesStrategy.INCLUDE
+tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
+tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
+
