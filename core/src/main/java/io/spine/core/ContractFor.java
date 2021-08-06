@@ -37,7 +37,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Marks an abstract handler method.
  *
  * <p>When there is a need to define an abstract base for a handler method, the base method must be
- * marked with {@code @Template}. The {@code type} of the template must match the type of
+ * marked with {@code @ContractFor}. The {@code handler} of the template must match the type of
  * the handler method.
  *
  * <p>In cases when there is a limitation on the allowed access modifiers for a handler method,
@@ -47,12 +47,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface Template {
+public @interface ContractFor {
 
     /**
      * Type of the annotation marking methods which can implement the associated template method.
      *
      * <p>Such an annotation must be marked with {@link AcceptsTemplate}.
      */
-    Class<? extends Annotation> type();
+    Class<? extends Annotation> handler();
 }

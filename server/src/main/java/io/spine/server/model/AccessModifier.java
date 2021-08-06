@@ -26,7 +26,7 @@
 
 package io.spine.server.model;
 
-import io.spine.core.Template;
+import io.spine.core.ContractFor;
 import io.spine.reflect.J2Kt;
 import kotlin.reflect.KCallable;
 
@@ -128,14 +128,14 @@ public final class AccessModifier implements Predicate<Method> {
     }
 
     private static void validateTemplateMethod(Method template, Method implementation) {
-        Template annotation = template.getAnnotation(Template.class);
+        ContractFor annotation = template.getAnnotation(ContractFor.class);
         if (annotation == null) {
             throw new ModelError(
-                    "Handler method `%s` overrides `%s` which is not marked as a `@Template`.",
+                    "Handler method `%s` overrides `%s` which is not marked as a `@ContractFor`.",
                     implementation, template
             );
         }
-        Class<? extends Annotation> target = annotation.type();
+        Class<? extends Annotation> target = annotation.handler();
         if (!implementation.isAnnotationPresent(target)) {
             throw new ModelError(
                     "Handler method `%s` overrides a template `%s` but is not marked with `@%s`.",

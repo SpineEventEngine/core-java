@@ -26,13 +26,13 @@
 
 package io.spine.server.model.handler.given;
 
-import io.spine.core.Template;
+import io.spine.core.ContractFor;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.React;
 
 abstract class TestTemplateReactor extends AbstractEventSubscriber {
 
-    @Template(type = React.class)
+    @ContractFor(handler = React.class)
     protected abstract void reactor(SigProjectCreated e);
 }

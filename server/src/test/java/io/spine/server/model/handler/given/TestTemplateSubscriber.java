@@ -26,13 +26,13 @@
 
 package io.spine.server.model.handler.given;
 
+import io.spine.core.ContractFor;
 import io.spine.core.Subscribe;
-import io.spine.core.Template;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.AbstractEventSubscriber;
 
 abstract class TestTemplateSubscriber extends AbstractEventSubscriber {
 
-    @Template(type = Subscribe.class)
+    @ContractFor(handler = Subscribe.class)
     protected abstract void overridingProtected(SigProjectCreated e);
 }

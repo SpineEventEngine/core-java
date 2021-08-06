@@ -84,7 +84,7 @@ class ModifiersInSignatureTest {
         ModelError error = assertThrows(ModelError.class, () -> PROTECTED_TEMPLATE.test(method));
         assertThat(error)
                 .hasMessageThat()
-                .endsWith("not marked as a `@Template`.");
+                .endsWith("not marked as a `@ContractFor`.");
     }
 
     @Test

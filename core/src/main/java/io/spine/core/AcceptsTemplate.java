@@ -34,7 +34,7 @@ import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marks a handler method annotation which supports abstract {@link Template} methods.
+ * Marks a handler method annotation which supports abstract {@link ContractFor} methods.
  */
 @Retention(SOURCE)
 @Target(ANNOTATION_TYPE)
