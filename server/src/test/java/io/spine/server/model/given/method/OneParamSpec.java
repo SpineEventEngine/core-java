@@ -28,6 +28,7 @@ package io.spine.server.model.given.method;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
+import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
@@ -45,7 +46,7 @@ public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
     }
 
     @Override
-    public Object[] extractArguments(EventEnvelope envelope) {
-        return new Object[]{envelope.message()};
+    public ExtractedArguments extractArguments(EventEnvelope envelope) {
+        return ExtractedArguments.ofOne(envelope.message());
     }
 }

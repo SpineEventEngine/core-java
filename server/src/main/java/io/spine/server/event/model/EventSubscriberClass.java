@@ -31,7 +31,9 @@ import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import io.spine.server.type.EventEnvelope;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -81,8 +83,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     }
 
     @Override
-    public ImmutableSet<SubscriberMethod>
-    subscribersOf(EventClass eventClass, MessageClass<?> originClass) {
-        return delegate.handlersOf(eventClass, originClass);
+    public Optional<SubscriberMethod> subscriberOf(EventEnvelope event) {
+        return delegate.findHandlerOf(event);
     }
 }

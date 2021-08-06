@@ -31,18 +31,11 @@ import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
 import io.spine.server.model.DoNothing;
 import io.spine.test.model.external.ExtProjectCreated;
-import io.spine.test.model.external.ExtProjectStarted;
 
 public final class TestCommander extends AbstractCommander {
 
     @Command
     DoNothing on(@External ExtProjectCreated event) {
-        return doNothing();
-    }
-
-    @SuppressWarnings("deprecation") // For testing legacy `external` attribute.
-    @Command(external = true)
-    DoNothing on(ExtProjectStarted event) {
         return doNothing();
     }
 }

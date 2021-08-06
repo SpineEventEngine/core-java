@@ -32,6 +32,7 @@ import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EntityVisibility;
+import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.TypeMatcher;
@@ -54,15 +55,15 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     MESSAGE(classImplementing(EntityState.class)) {
         @Override
-        protected Object[] arrangeArguments(EntityState<?> state, EventEnvelope event) {
-            return new Object[]{state};
+        protected ExtractedArguments arrangeArguments(EntityState<?> state, EventEnvelope event) {
+            return ExtractedArguments.ofOne(state);
         }
     },
 
     MESSAGE_AND_EVENT_CONTEXT(classImplementing(EntityState.class), exactly(EventContext.class)) {
         @Override
-        protected Object[] arrangeArguments(EntityState<?> state, EventEnvelope event) {
-            return new Object[]{state, event.context()};
+        protected ExtractedArguments arrangeArguments(EntityState<?> state, EventEnvelope event) {
+            return ExtractedArguments.ofTwo(state, event.context());
         }
     };
 
@@ -93,7 +94,7 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
     }
 
     @Override
-    public Object[] extractArguments(EventEnvelope event) {
+    public ExtractedArguments extractArguments(EventEnvelope event) {
         EventMessage eventMessage = event.message();
         checkArgument(eventMessage instanceof EntityStateChanged,
                       "Must be an `%s` event.", EntityStateChanged.class.getSimpleName());
@@ -102,5 +103,5 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
         return arrangeArguments(state, event);
     }
 
-    protected abstract Object[] arrangeArguments(EntityState<?> state, EventEnvelope event);
+    protected abstract ExtractedArguments arrangeArguments(EntityState<?> state, EventEnvelope event);
 }

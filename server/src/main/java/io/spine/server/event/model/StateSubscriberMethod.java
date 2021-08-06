@@ -38,7 +38,6 @@ import io.spine.environment.Tests;
 import io.spine.logging.Logging;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.model.ArgumentFilter;
-import io.spine.server.model.DispatchKey;
 import io.spine.server.model.Model;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.EventEnvelope;
@@ -47,7 +46,6 @@ import io.spine.type.TypeUrl;
 
 import java.lang.reflect.Method;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.BoundedContextNames.assumingTests;
 
 /**
@@ -62,24 +60,10 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     private final Class<? extends EntityState<?>> stateType;
 
     StateSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        super(checkNotFiltered(method), parameterSpec);
+        super(checkNotFiltered(method, "state subscriber"), parameterSpec);
         this.contextOfSubscriber = contextOf(method.getDeclaringClass());
         this.stateType = firstParamType(rawMethod());
         checkExternal();
-    }
-
-    @Override
-    public DispatchKey key() {
-        DispatchKey typeBasedKey = super.key();
-        return applyFilter(typeBasedKey);
-    }
-
-    private static Method checkNotFiltered(Method method) {
-        ArgumentFilter filter = ArgumentFilter.createFilter(method);
-        checkState(filter.acceptsAll(),
-                   "A state subscriber method cannot declare filters but the method `%s` does.",
-                   method);
-        return method;
     }
 
     private void checkExternal() {

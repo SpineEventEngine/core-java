@@ -330,6 +330,12 @@ public abstract class ProcessManagerRepository<I,
         postIfCommandRejected(envelope, cause);
     }
 
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        return processManagerClass().reactorOf(envelope).isPresent()
+                || processManagerClass().commanderOf(envelope).isPresent();
+    }
+
     /**
      * {@inheritDoc}
      *

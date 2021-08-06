@@ -34,11 +34,15 @@ import io.spine.base.RejectionMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.server.model.AllowedParams;
+import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
 
+import static io.spine.server.model.ExtractedArguments.ofOne;
+import static io.spine.server.model.ExtractedArguments.ofTree;
+import static io.spine.server.model.ExtractedArguments.ofTwo;
 import static io.spine.server.model.TypeMatcher.classImplementing;
 import static io.spine.server.model.TypeMatcher.exactly;
 
@@ -52,8 +56,8 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             classImplementing(EventMessage.class)
     ) {
         @Override
-        public Object[] extractArguments(EventEnvelope event) {
-            return new Object[]{event.message()};
+        public ExtractedArguments extractArguments(EventEnvelope event) {
+            return ofOne(event.message());
         }
     },
 
@@ -62,8 +66,8 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             exactly(EventContext.class)
     ) {
         @Override
-        public Object[] extractArguments(EventEnvelope event) {
-            return new Object[]{event.message(), event.context()};
+        public ExtractedArguments extractArguments(EventEnvelope event) {
+            return ofTwo(event.message(), event.context());
         }
     },
 
@@ -72,9 +76,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
             exactly(CommandContext.class)
     ) {
         @Override
-        public Object[] extractArguments(EventEnvelope event) {
+        public ExtractedArguments extractArguments(EventEnvelope event) {
             RejectionEnvelope re = new RejectionEnvelope(event);
-            return new Object[]{re.rejectionMessage(), re.commandContext()};
+            return ofTwo(re.rejectionMessage(), re.commandContext());
         }
     },
 
@@ -88,9 +92,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
 
         @Override
-        public Object[] extractArguments(EventEnvelope event) {
+        public ExtractedArguments extractArguments(EventEnvelope event) {
             RejectionEnvelope re = new RejectionEnvelope(event);
-            return new Object[]{re.rejectionMessage(), re.commandMessage()};
+            return ofTwo(re.rejectionMessage(), re.commandMessage());
         }
     },
 
@@ -105,9 +109,9 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
         }
 
         @Override
-        public Object[] extractArguments(EventEnvelope event) {
+        public ExtractedArguments extractArguments(EventEnvelope event) {
             RejectionEnvelope re = new RejectionEnvelope(event);
-            return new Object[]{re.rejectionMessage(), re.commandMessage(), re.commandContext()};
+            return ofTree(re.rejectionMessage(), re.commandMessage(), re.commandContext());
         }
     };
 

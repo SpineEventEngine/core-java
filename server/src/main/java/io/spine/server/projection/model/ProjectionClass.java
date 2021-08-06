@@ -38,7 +38,9 @@ import io.spine.server.event.model.SubscribingClass;
 import io.spine.server.projection.Projection;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
-import io.spine.type.MessageClass;
+import io.spine.server.type.EventEnvelope;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -98,8 +100,7 @@ public final class ProjectionClass<P extends Projection<?, ?, ?>>
     }
 
     @Override
-    public final ImmutableSet<SubscriberMethod>
-    subscribersOf(EventClass eventClass, MessageClass<?> originClass) {
-        return delegate.handlersOf(eventClass, originClass);
+    public Optional<SubscriberMethod> subscriberOf(EventEnvelope event) {
+        return delegate.findHandlerOf(event);
     }
 }

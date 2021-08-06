@@ -24,36 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given.map;
+package io.spine.server.model.given.filter;
 
-import io.spine.core.Subscribe;
-import io.spine.core.Where;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.given.SavedString;
-import io.spine.test.projection.event.Int32Imported;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRouting;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.filter.ModProjectTasks;
 
-import static io.spine.testing.Testing.halt;
+import static io.spine.server.route.EventRoute.withId;
 
-/**
- * This projection class is not valid because values used in the filtering subscriber
- * annotations evaluate to the same field value (even though that the string values are different).
- */
-public final class DupEventFilterValueWhere
-        extends Projection<String, SavedString, SavedString.Builder> {
+public final class ProjectTasksRepository
+        extends ProjectionRepository<String, ProjectTasksProjection, ModProjectTasks> {
 
-    private static final String VALUE_FIELD_PATH = "value";
-
-    private DupEventFilterValueWhere(String id) {
-        super(id);
-    }
-
-    @Subscribe
-    void onString1(@Where(field = VALUE_FIELD_PATH, equals = "1") Int32Imported event) {
-        halt();
-    }
-
-    @Subscribe
-    void onStringOne(@Where(field = VALUE_FIELD_PATH, equals = "+1") Int32Imported event) {
-        halt();
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    protected void setupEventRouting(EventRouting<String> routing) {
+        super.setupEventRouting(routing);
+        routing.route(ModProjectCreated.class, (msg, ctx) -> withId(msg.getId()));
     }
 }

@@ -27,9 +27,6 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.command.Command;
-import io.spine.server.event.React;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -76,19 +73,7 @@ enum ExternalAttribute implements Attribute<Boolean> {
      */
     public static ExternalAttribute of(Method method) {
         checkNotNull(method);
-        if (isExternal(method)) {
-            return EXTERNAL;
-        } else {
-            return isLegacyExternal(method);
-        }
-    }
-
-    private static ExternalAttribute isLegacyExternal(Method method) {
-        boolean isExternal =
-                isExternalReactor(method)
-                        || isExternalSubscriber(method)
-                        || isExternalCommander(method);
-        return isExternal ? EXTERNAL : DOMESTIC;
+        return isExternal(method) ? EXTERNAL : DOMESTIC;
     }
 
     private static boolean isExternal(Method method) {
@@ -99,26 +84,5 @@ enum ExternalAttribute implements Attribute<Boolean> {
         Parameter firstParam = params[0];
         boolean hasAnnotation = firstParam.getAnnotation(External.class) != null;
         return hasAnnotation;
-    }
-
-    private static boolean isExternalReactor(Method method) {
-        React reactAnnotation = method.getAnnotation(React.class);
-        @SuppressWarnings("deprecation") // To be deleted when `external` is deleted.
-        boolean result = (reactAnnotation != null && reactAnnotation.external());
-        return result;
-    }
-
-    private static boolean isExternalSubscriber(Method method) {
-        Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
-        @SuppressWarnings("deprecation") // To be deleted when `external` is deleted.
-        boolean result = (subscribeAnnotation != null && subscribeAnnotation.external());
-        return result;
-    }
-
-    private static boolean isExternalCommander(Method method) {
-        Command commandAnnotation = method.getAnnotation(Command.class);
-        @SuppressWarnings("deprecation") // To be deleted when `external` is deleted.
-        boolean result = (commandAnnotation != null && commandAnnotation.external());
-        return result;
     }
 }

@@ -46,7 +46,7 @@ internal class RejectionEnvelope(delegate: EventEnvelope) :
 
     /** Ensures the passed delegate contains a rejection. */
     init {
-        require(delegate.isRejection)
+        require(delegate.isRejection) { "`EventEnvelope` must contain a rejection." }
         this.delegate = delegate
     }
 

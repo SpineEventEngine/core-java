@@ -30,14 +30,9 @@ import io.spine.core.External;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.model.external.ExtProjectCreated;
-import io.spine.test.model.external.ExtProjectStarted;
 
 public final class TestSubscriber extends AbstractEventSubscriber {
 
     @Subscribe
     void on(@External ExtProjectCreated event) {}
-
-    @SuppressWarnings("deprecation") // For testing legacy `external` attribute.
-    @Subscribe(external = true)
-    void on(ExtProjectStarted event) {}
 }

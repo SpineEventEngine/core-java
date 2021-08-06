@@ -60,6 +60,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.model.ModelError;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -367,7 +368,7 @@ public class AggregateTest {
             AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
 
             // Pass a command for which the target aggregate does not have a handling method.
-            assertThrows(IllegalStateException.class,
+            assertThrows(ModelError.class,
                          () -> dispatchCommand(aggregate, command(addTask)));
         }
 
@@ -383,7 +384,7 @@ public class AggregateTest {
             assertTrue(outcome.hasError());
             Error error = outcome.getError();
             assertThat(error.getType())
-                    .isEqualTo(IllegalStateException.class.getCanonicalName());
+                    .isEqualTo(ModelError.class.getCanonicalName());
         }
     }
 

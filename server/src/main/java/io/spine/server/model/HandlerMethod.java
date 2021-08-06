@@ -35,7 +35,6 @@ import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -62,7 +61,6 @@ public interface HandlerMethod<T,
      */
     C messageClass();
 
-    @PostConstruct
     void discoverAttributes();
 
     /**
@@ -79,6 +77,11 @@ public interface HandlerMethod<T,
      * Obtains the handling method.
      */
     Method rawMethod();
+
+    /**
+     * Obtains the filter to apply to the messages received by this method.
+     */
+    ArgumentFilter filter();
 
     /**
      * Retrieves the message classes produced by this handler method.
@@ -150,6 +153,6 @@ public interface HandlerMethod<T,
      */
     default DispatchKey key() {
         Class<? extends Message> rawCls = messageClass().value();
-        return new DispatchKey(rawCls, null, null);
+        return new DispatchKey(rawCls, filter(), null);
     }
 }

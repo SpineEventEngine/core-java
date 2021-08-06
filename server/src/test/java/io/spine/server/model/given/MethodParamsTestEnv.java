@@ -33,6 +33,7 @@ import com.google.protobuf.Int32Value;
 import io.spine.base.CommandMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.UserId;
+import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandEnvelope;
@@ -101,8 +102,8 @@ public class MethodParamsTestEnv {
             }
 
             @Override
-            public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[]{envelope.message(), envelope.context()};
+            public ExtractedArguments extractArguments(CommandEnvelope envelope) {
+                return ExtractedArguments.ofTwo(envelope.message(), envelope.context());
             }
         }
     }

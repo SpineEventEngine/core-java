@@ -41,6 +41,7 @@ import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.log.LoggingEntity;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -48,6 +49,9 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
 
+import java.util.Optional;
+
+import static io.spine.server.Ignored.ignored;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -82,7 +86,11 @@ public abstract class ProcessManager<I,
                                      S extends EntityState<I>,
                                      B extends ValidatingBuilder<S>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventReactor, Commander, HasVersionColumn<I, S>, HasLifecycleColumns<I, S> {
+        implements EventReactor,
+                   Commander,
+                   HasVersionColumn<I, S>,
+                   HasLifecycleColumns<I, S>,
+                   LoggingEntity {
 
     /**
      * Creates a new instance.
@@ -158,13 +166,13 @@ public abstract class ProcessManager<I,
         CommandClass commandClass = command.messageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
-            CommandHandlerMethod method = thisClass.handlerOf(commandClass);
+            CommandHandlerMethod method = thisClass.handlerOf(command);
             DispatchOutcome outcome = method.invoke(this, command);
             return outcome;
         }
 
         if (thisClass.substitutesCommand(commandClass)) {
-            CommandSubstituteMethod method = thisClass.commanderOf(commandClass);
+            CommandSubstituteMethod method = thisClass.commanderOf(command);
             DispatchOutcome outcome = method.invoke(this, command);
             return outcome;
         }
@@ -196,25 +204,20 @@ public abstract class ProcessManager<I,
     DispatchOutcome dispatchEvent(EventEnvelope event) {
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.messageClass();
-        if (thisClass.reactsOnEvent(eventClass)) {
-            EventReactorMethod method = thisClass.reactorOf(eventClass, event.originClass());
-            DispatchOutcome outcome = method.invoke(this, event);
+        Optional<EventReactorMethod> reactorMethod = thisClass.reactorOf(event);
+        if (thisClass.reactsOnEvent(eventClass) && reactorMethod.isPresent()) {
+            DispatchOutcome outcome = reactorMethod.get().invoke(this, event);
             return outcome;
         }
 
-        if (thisClass.producesCommandsOn(eventClass)) {
-            CommandReactionMethod method = thisClass.commanderOf(eventClass);
-            DispatchOutcome outcome = method.invoke(this, event);
+        Optional<CommandReactionMethod> commanderMethod = thisClass.commanderOf(event);
+        if (thisClass.producesCommandsOn(eventClass) && commanderMethod.isPresent()) {
+            DispatchOutcome outcome = commanderMethod.get().invoke(this, event);
             return outcome;
         }
-
-        // We could not normally get here since the dispatching table is a union of handled and
-        // substituted commands.
-        throw newIllegalStateException(
-                "ProcessManager `%s` neither reacted on the event (id: `%s` class: `%s`)," +
-                        " nor produced commands.",
-                this, event.id(), eventClass
-        );
+        _debug().log("Process manager %s filtered out and ignored event %s[ID: %s].",
+                     thisClass, event.messageClass(), event.id().value());
+        return ignored(thisClass, event);
     }
 
     @Override

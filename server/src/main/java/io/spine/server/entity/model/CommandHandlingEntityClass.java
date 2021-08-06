@@ -33,6 +33,7 @@ import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.HandlerMap;
 import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
@@ -77,7 +78,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity<?, ?>>
     }
 
     @Override
-    public CommandHandlerMethod handlerOf(CommandClass commandClass) {
-        return commands.handlerOf(commandClass);
+    public CommandHandlerMethod handlerOf(CommandEnvelope cmd) {
+        return commands.getHandlerFor(cmd);
     }
 }

@@ -27,24 +27,17 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
-import io.spine.annotation.Internal;
 import io.spine.base.EventMessage;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.ArgumentFilter;
-import io.spine.server.model.DispatchKey;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
-import io.spine.server.model.SelectiveHandler;
 import io.spine.server.model.VoidMethod;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.lang.reflect.Method;
-import java.util.function.Supplier;
-
-import static com.google.common.base.Suppliers.memoize;
 
 /**
  * A method annotated with the {@link io.spine.core.Subscribe @Subscribe} annotation.
@@ -60,26 +53,12 @@ public abstract class SubscriberMethod
                                       EventClass,
                                       EventEnvelope,
                                       EmptyClass>
-        implements VoidMethod<EventSubscriber, EventClass, EventEnvelope>,
-                   SelectiveHandler<EventSubscriber, EventClass, EventEnvelope, EmptyClass> {
+        implements VoidMethod<EventSubscriber, EventClass, EventEnvelope> {
 
-    @SuppressWarnings("Immutable") // because this `Supplier` is effectively immutable.
-    private final Supplier<ArgumentFilter> filter = memoize(this::createFilter);
+
 
     protected SubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
-    }
-
-    /**
-     * Applies {@link #filter() filter} if a specific one is supplied. Otherwise returns the
-     * supplied {@code key}.
-     */
-    @Internal
-    DispatchKey applyFilter(DispatchKey key) {
-        ArgumentFilter filter = filter();
-        return filter.acceptsAll()
-               ? key
-               : key.withFilter(filter);
     }
 
     @Override
@@ -90,31 +69,5 @@ public abstract class SubscriberMethod
     @Override
     public EventClass messageClass() {
         return EventClass.from(rawMessageClass());
-    }
-
-    /**
-     * Creates the filter for messages handled by this method.
-     */
-    protected abstract ArgumentFilter createFilter();
-
-    @Override
-    public final ArgumentFilter filter() {
-        return filter.get();
-    }
-
-    /**
-     * Checks if this method can handle the given event.
-     *
-     * <p>It is assumed that the type of the event is correct and only the field filter should be
-     * checked.
-     *
-     * @param event
-     *         the event to check
-     * @return {@code true} if this method can handle the given event, {@code false} otherwise
-     */
-    final boolean canHandle(EventEnvelope event) {
-        ArgumentFilter filter = filter();
-        boolean result = filter.test(event.message());
-        return result;
     }
 }
