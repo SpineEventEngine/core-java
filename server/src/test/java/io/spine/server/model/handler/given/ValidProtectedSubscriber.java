@@ -29,7 +29,7 @@ package io.spine.server.model.handler.given;
 import io.spine.core.Subscribe;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 
-public final class ValidProtectedSubscriber extends TestTemplateSubscriber {
+public final class ValidProtectedSubscriber extends TestContractSubscriber {
 
     /**
      * This subscriber method is valid, despite being {@code protected}, since it overrides a method

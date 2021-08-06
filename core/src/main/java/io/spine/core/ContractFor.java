@@ -37,22 +37,23 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * Marks an abstract handler method.
  *
  * <p>When there is a need to define an abstract base for a handler method, the base method must be
- * marked with {@code @ContractFor}. The {@code handler} of the template must match the type of
+ * marked with {@code @ContractFor}. Such a base method is called a "contract method",
+ * or simply a "contract". The {@code handler} type of the contract must match the type of
  * the handler method.
  *
  * <p>In cases when there is a limitation on the allowed access modifiers for a handler method,
- * a method born from a template may be declared {@code protected}.
+ * a method that inherits a contract may be declared {@code protected}.
  *
- * @see AcceptsTemplate
+ * @see AcceptsContracts
  */
 @Retention(RUNTIME)
 @Target(METHOD)
 public @interface ContractFor {
 
     /**
-     * Type of the annotation marking methods which can implement the associated template method.
+     * Type of the annotation marking methods which can implement the associated contract method.
      *
-     * <p>Such an annotation must be marked with {@link AcceptsTemplate}.
+     * <p>Such an annotation must be marked with {@link AcceptsContracts}.
      */
     Class<? extends Annotation> handler();
 }

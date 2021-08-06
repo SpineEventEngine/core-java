@@ -24,20 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.model.handler.given;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import io.spine.core.ContractFor;
+import io.spine.model.contexts.projects.event.SigProjectCreated;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.React;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+abstract class TestContractReactor extends AbstractEventSubscriber {
 
-/**
- * Marks a handler method annotation which supports abstract {@link ContractFor} methods.
- */
-@Retention(SOURCE)
-@Target(ANNOTATION_TYPE)
-@Documented
-public @interface AcceptsTemplate {
+    @ContractFor(handler = React.class)
+    protected abstract void reactor(SigProjectCreated e);
 }

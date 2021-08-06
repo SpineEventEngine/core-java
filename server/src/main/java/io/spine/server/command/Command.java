@@ -26,9 +26,9 @@
 
 package io.spine.server.command;
 
+import io.spine.core.AcceptsContracts;
 import io.spine.core.AcceptsExternal;
 import io.spine.core.AcceptsFilters;
-import io.spine.core.AcceptsTemplate;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -266,6 +266,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target(METHOD)
 @AcceptsExternal
 @AcceptsFilters
-@AcceptsTemplate
+@AcceptsContracts
 public @interface Command {
 }

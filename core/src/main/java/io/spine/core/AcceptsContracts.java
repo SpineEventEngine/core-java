@@ -24,15 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.handler.given;
+package io.spine.core;
 
-import io.spine.core.ContractFor;
-import io.spine.core.Subscribe;
-import io.spine.model.contexts.projects.event.SigProjectCreated;
-import io.spine.server.event.AbstractEventSubscriber;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-abstract class TestTemplateSubscriber extends AbstractEventSubscriber {
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-    @ContractFor(handler = Subscribe.class)
-    protected abstract void overridingProtected(SigProjectCreated e);
+/**
+ * Marks a handler method annotation which supports abstract {@link ContractFor} methods.
+ */
+@Retention(SOURCE)
+@Target(ANNOTATION_TYPE)
+@Documented
+public @interface AcceptsContracts {
 }

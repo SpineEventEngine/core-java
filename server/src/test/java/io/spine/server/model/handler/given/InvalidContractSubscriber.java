@@ -26,13 +26,14 @@
 
 package io.spine.server.model.handler.given;
 
-import io.spine.core.ContractFor;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.event.React;
 
-abstract class TestTemplateReactor extends AbstractEventSubscriber {
+public abstract class InvalidContractSubscriber extends AbstractEventSubscriber {
 
-    @ContractFor(handler = React.class)
-    protected abstract void reactor(SigProjectCreated e);
+    /**
+     * This contract method is invalid because there is no {@link io.spine.core.ContractFor}
+     * annotation on it.
+     */
+    protected abstract void plainWrong(SigProjectCreated e);
 }

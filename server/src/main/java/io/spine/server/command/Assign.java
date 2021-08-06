@@ -26,7 +26,7 @@
 
 package io.spine.server.command;
 
-import io.spine.core.AcceptsTemplate;
+import io.spine.core.AcceptsContracts;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -145,6 +145,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@AcceptsTemplate
+@AcceptsContracts
 public @interface Assign {
 }

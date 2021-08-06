@@ -41,7 +41,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.server.model.AccessModifier.PROTECTED_TEMPLATE;
+import static io.spine.server.model.AccessModifier.PROTECTED_CONTRACT;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`MethodSignature` access modifiers should")
@@ -59,7 +59,7 @@ class ModifiersInSignatureTest {
                 .findFirst()
                 .orElseGet(Assertions::fail);
         assertThat(foundModifier)
-                .isSameInstanceAs(PROTECTED_TEMPLATE);
+                .isSameInstanceAs(PROTECTED_CONTRACT);
     }
 
     @Test
@@ -77,22 +77,22 @@ class ModifiersInSignatureTest {
     }
 
     @Test
-    @DisplayName("not allow for protected methods in with an invalid template")
-    void invalidTemplate() throws NoSuchMethodException {
+    @DisplayName("not allow for protected methods in with an invalid contract")
+    void invalid() throws NoSuchMethodException {
         Method method = InvalidProtectedSubscriber.class
                 .getDeclaredMethod("plainWrong", SigProjectCreated.class);
-        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_TEMPLATE.test(method));
+        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_CONTRACT.test(method));
         assertThat(error)
                 .hasMessageThat()
                 .endsWith("not marked as a `@ContractFor`.");
     }
 
     @Test
-    @DisplayName("not allow for protected methods in with a mismatched template")
-    void mismatchedTemplate() throws NoSuchMethodException {
+    @DisplayName("not allow for protected contract methods in with a mismatched handler type")
+    void mismatched() throws NoSuchMethodException {
         Method method = MismatchedProtectedSubscriber.class
                 .getDeclaredMethod("reactor", SigProjectCreated.class);
-        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_TEMPLATE.test(method));
+        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_CONTRACT.test(method));
         assertThat(error)
                 .hasMessageThat()
                 .endsWith("not marked with `@React`.");

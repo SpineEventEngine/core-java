@@ -81,11 +81,11 @@ public final class AccessModifier implements Predicate<Method> {
      *
      * <p>The method must be declared in a parent class.
      *
-     * <p>The purpose of this modifier is to allow inheritance for abstract handlers without
-     * discouraging users with warning logs.
+     * <p>The purpose of this modifier is to allow inheritance for
+     * {@linkplain ContractFor contract methods} without discouraging users with warning logs.
      */
-    public static final AccessModifier PROTECTED_TEMPLATE = new AccessModifier(
-            m -> PROTECTED.test(m) && isTemplate(m),
+    public static final AccessModifier PROTECTED_CONTRACT = new AccessModifier(
+            m -> PROTECTED.test(m) && derivedFromContract(m),
             "protected with @Override"
     );
 
@@ -112,13 +112,13 @@ public final class AccessModifier implements Predicate<Method> {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
-    private static boolean isTemplate(Method method) {
+    private static boolean derivedFromContract(Method method) {
         Class<?> cls = method.getDeclaringClass().getSuperclass();
         while (!cls.equals(Object.class)) {
             Method[] methods = cls.getDeclaredMethods();
             for (Method m : methods) {
                 if (sameMethod(method, m)) {
-                    validateTemplateMethod(m, method);
+                    validateContract(m, method);
                     return true;
                 }
             }
@@ -127,19 +127,19 @@ public final class AccessModifier implements Predicate<Method> {
         return false;
     }
 
-    private static void validateTemplateMethod(Method template, Method implementation) {
-        ContractFor annotation = template.getAnnotation(ContractFor.class);
+    private static void validateContract(Method contract, Method implementation) {
+        ContractFor annotation = contract.getAnnotation(ContractFor.class);
         if (annotation == null) {
             throw new ModelError(
-                    "Handler method `%s` overrides `%s` which is not marked as a `@ContractFor`.",
-                    implementation, template
+                    "Handler method `%s` overrides `%s` which is not marked with `@ContractFor`.",
+                    implementation, contract
             );
         }
         Class<? extends Annotation> target = annotation.handler();
         if (!implementation.isAnnotationPresent(target)) {
             throw new ModelError(
-                    "Handler method `%s` overrides a template `%s` but is not marked with `@%s`.",
-                    implementation, template, target.getSimpleName()
+                    "Handler method `%s` overrides the contract `%s` but is not marked with `@%s`.",
+                    implementation, contract, target.getSimpleName()
             );
         }
     }
@@ -161,7 +161,7 @@ public final class AccessModifier implements Predicate<Method> {
         AccessModifier matchedModifier = Stream
                 .of(PRIVATE,
                     PACKAGE_PRIVATE,
-                    PROTECTED_TEMPLATE,
+                    PROTECTED_CONTRACT,
                     PROTECTED,
                     KOTLIN_INTERNAL,
                     PUBLIC)

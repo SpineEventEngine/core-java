@@ -29,10 +29,10 @@ package io.spine.server.model.handler.given;
 import io.spine.core.Subscribe;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 
-public class MismatchedProtectedSubscriber extends TestTemplateReactor {
+public class MismatchedProtectedSubscriber extends TestContractReactor {
 
     /**
-     * This subscriber method is invalid because the template type is mismatched.
+     * This subscriber method is invalid because the contract handler type is mismatched.
      */
     @Override
     @Subscribe

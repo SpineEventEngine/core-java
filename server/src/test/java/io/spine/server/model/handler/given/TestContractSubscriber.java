@@ -26,14 +26,13 @@
 
 package io.spine.server.model.handler.given;
 
+import io.spine.core.ContractFor;
+import io.spine.core.Subscribe;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.AbstractEventSubscriber;
 
-public abstract class InvalidTemplateSubscriber extends AbstractEventSubscriber {
+abstract class TestContractSubscriber extends AbstractEventSubscriber {
 
-    /**
-     * This template method is invalid because there is no {@link io.spine.core.ContractFor}
-     * annotation on it.
-     */
-    protected abstract void plainWrong(SigProjectCreated e);
+    @ContractFor(handler = Subscribe.class)
+    protected abstract void overridingProtected(SigProjectCreated e);
 }

@@ -29,10 +29,10 @@ package io.spine.server.model.handler.given;
 import io.spine.core.Subscribe;
 import io.spine.model.contexts.projects.event.SigProjectCreated;
 
-public class InvalidProtectedSubscriber extends InvalidTemplateSubscriber {
+public class InvalidProtectedSubscriber extends InvalidContractSubscriber {
 
     /**
-     * This subscriber method is invalid because the superclass method is not a valid template.
+     * This subscriber method is invalid because the superclass method is not a valid contract.
      */
     @Override
     @Subscribe
