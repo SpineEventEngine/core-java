@@ -47,4 +47,3 @@ dependencies {
 // see https://github.com/SpineEventEngine/base/issues/657
 val duplicatesStrategy = DuplicatesStrategy.INCLUDE
 tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
-
