@@ -67,7 +67,7 @@ import kotlin.reflect.KClass
  * Note that the contract method serves only for convenience. It has no effect on signal processing.
  * For example, commands can only have one handler method. Adding a contract method does not change
  * that. Yet, command handler methods can have contracts. For example, if the contract
- * is generalized, i.e. the method accepts a generic type parameter, not a concrete type, then
+ * is generalized, i.e. the method accepts an argument of a generic type, then
  * the contract implementations may accept different types of commands, while still maintaining
  * a shared portion of the contract. Consider the following example.
  * Here is an abstract commander definition:
