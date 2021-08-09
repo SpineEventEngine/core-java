@@ -26,6 +26,8 @@
 
 package io.spine.server.command;
 
+import io.spine.core.AcceptsContracts;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,10 +48,12 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p>Like other message-handling methods, command handlers are designed to be called by
- * the framework only. Therefore, it is recommended to declare a them as package-private.
- * It discourages a developer from calling these methods directly from anywhere.
+ * the framework only. Therefore, it is recommended to declare them package-private
+ * (or {@code internal} in Kotlin). It discourages developers from calling these methods directly
+ * from anywhere. It is also acceptable to use {@code protected} if the declaring class inherits
+ * the method from a superclass.
  *
- * <p>Package-private access level still declares that a command handler method is a part
+ * <p>This level of access declares that a command handler method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
  * BoundedContext} description on how the packages and Bounded Contexts relate.
  *
@@ -141,5 +145,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@AcceptsContracts
 public @interface Assign {
 }

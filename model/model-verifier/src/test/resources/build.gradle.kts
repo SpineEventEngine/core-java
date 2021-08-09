@@ -70,7 +70,7 @@ apply(from = "$rootDir/test-env.gradle")
 val enclosingRootDir: String by extra
 
 apply(from = "$enclosingRootDir/version.gradle.kts")
-val spineBaseVersion: String by extra
+val spineBaseTypesVersion: String by extra
 val versionToPublish: String by extra
 
 val scriptsPath = io.spine.internal.gradle.Scripts.commonPath
@@ -94,7 +94,7 @@ tasks.compileJava {
 
 dependencies {
     implementation("io.spine:spine-server:$versionToPublish")
-    implementation("io.spine:spine-base-types:$versionToPublish")
+    implementation("io.spine:spine-base-types:$spineBaseTypesVersion")
     annotationProcessor("io.spine.tools:spine-model-assembler:$versionToPublish")
 }
 

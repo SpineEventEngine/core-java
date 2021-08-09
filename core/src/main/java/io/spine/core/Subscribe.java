@@ -93,10 +93,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * this method is not considered a subscriber and is not registered for the command output delivery.
  *
  * <p>Event subscriber methods are designed to be called by the framework only.
- * Therefore, it is recommended to declare a them as package-private.
- * It discourages a developer from calling these methods directly from anywhere.
+ * Therefore, it is recommended to declare them package-private (or {@code internal} in Kotlin).
+ * It discourages developers from calling these methods directly from anywhere.
+ * It is also acceptable to use {@code protected} if the declaring class inherits the method from
+ * a superclass.
  *
- * <p>Package-private access level still declares that an event reactor method is a part
+ * <p>This level of access declares that an event reactor method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
  * BoundedContext} description on how the packages and Bounded Contexts relate.
  *
@@ -107,5 +109,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @AcceptsFilters
 @AcceptsExternal
+@AcceptsContracts
 public @interface Subscribe {
 }

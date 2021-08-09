@@ -24,34 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+package io.spine.server.model.handler.given;
 
-/**
- * Version of this library.
- */
-val coreJava = "2.0.0-SNAPSHOT.41"
+import io.spine.core.Subscribe;
+import io.spine.model.contexts.projects.event.SigProjectCreated;
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "2.0.0-SNAPSHOT.40"
-val time = "2.0.0-SNAPSHOT.40"
+public class InvalidProtectedSubscriber extends InvalidContractSubscriber {
 
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineBaseTypesVersion"] = base
-    this["spineTimeVersion"] = time
-    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
+    /**
+     * This subscriber method is invalid because the superclass method is not a valid contract.
+     */
+    @Override
+    @Subscribe
+    protected void plainWrong(SigProjectCreated e) {
+        // Do nothing.
+    }
 }
