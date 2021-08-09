@@ -30,6 +30,7 @@ import io.spine.internal.dependency.Kotlin
 import io.spine.internal.gradle.Scripts
 
 val spineBaseVersion: String by extra
+val spineBaseTypesVersion: String by extra
 
 dependencies {
     api(project(":client"))
@@ -46,7 +47,7 @@ dependencies {
     }
     testImplementation(Grpc.nettyShaded)
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine:spine-base-types:$spineBaseVersion")
+    testImplementation("io.spine:spine-base-types:$spineBaseTypesVersion")
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
