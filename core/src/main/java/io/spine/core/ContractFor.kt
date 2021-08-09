@@ -79,7 +79,7 @@ import kotlin.reflect.KClass
  *   }
  * ```
  * And here are the implementations:
- * ```java
+ * ```
  *   class PaymentSafety : SplittingCommander<InvalidatePaymentMethod> {
  *
  *       @Command
