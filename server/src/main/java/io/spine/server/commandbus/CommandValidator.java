@@ -142,10 +142,9 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             if (id.getUuid().isEmpty()) {
                 return ImmutableList.<ConstraintViolation>builder()
                         .addAll(violations)
-                        .add(ConstraintViolation
-                                     .newBuilder()
+                        .add(ConstraintViolation.newBuilder()
                                      .setMsgFormat(COMMAND_ID_CANNOT_BE_EMPTY)
-                                     .vBuild())
+                                     .build())
                         .build();
             }
             return violations;
@@ -182,8 +181,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
 
         private void addViolation(String message) {
             result.add(ConstraintViolation.newBuilder()
-                                          .setMsgFormat(message)
-                                          .vBuild());
+                               .setMsgFormat(message)
+                               .build());
         }
     }
 }

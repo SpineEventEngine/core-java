@@ -45,6 +45,7 @@ public final class StorageSpec<I> implements Serializable {
 
     private static final long serialVersionUID = 0L;
     
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Such a popular noun!
     private static final String FLD_BOUNDED_CONTEXT_NAME = "context";
     private static final String FLD_ENTITY_STATE_URL = "entityStateUrl";
     private static final String FLD_ID_CLASS = "idClass";
@@ -68,15 +69,6 @@ public final class StorageSpec<I> implements Serializable {
     }
 
     /**
-     * Obtains the name of the context.
-     * @deprecated please use {@link #context()}
-     */
-    @Deprecated
-    public BoundedContextName getBoundedContextName() {
-        return context();
-    }
-
-    /**
      * Obtains the name of the context served by the storage.
      */
     public BoundedContextName context() {
@@ -85,27 +77,9 @@ public final class StorageSpec<I> implements Serializable {
 
     /**
      * Obtains the URL of the entity state type.
-     * @deprecated please use {@link #entityStateUrl()}
-     */
-    @Deprecated
-    public TypeUrl getEntityStateUrl() {
-        return entityStateUrl();
-    }
-
-    /**
-     * Obtains the URL of the entity state type.
      */
     public TypeUrl entityStateUrl() {
         return entityStateUrl;
-    }
-
-    /**
-     * Obtains the class of identifiers used by the storage.
-     * @deprecated please use {@link #idClass()}
-     */
-    @Deprecated
-    public Class<I> getIdClass() {
-        return idClass();
     }
 
     /**
@@ -128,7 +102,7 @@ public final class StorageSpec<I> implements Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        StorageSpec other = (StorageSpec) obj;
+        StorageSpec<?> other = (StorageSpec<?>) obj;
         return Objects.equals(this.context, other.context)
                 && Objects.equals(this.entityStateUrl, other.entityStateUrl);
     }

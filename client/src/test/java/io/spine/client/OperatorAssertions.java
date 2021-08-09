@@ -38,7 +38,8 @@ import static io.spine.client.Filter.Operator.LESS_THAN;
 import static io.spine.client.OperatorEvaluator.eval;
 
 /**
- * Provides custom assertions for tests related to {@link OperatorEvaluator.eval()}.
+ * Provides custom assertions for tests related
+ * to {@link OperatorEvaluator#eval(Object, Operator, Object)}.
  */
 final class OperatorAssertions {
 

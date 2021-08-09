@@ -24,23 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
+import io.spine.internal.dependency.Pmd
 
-group = "io.spine.tools"
-
-dependencies {
-    api(project(":server"))
-    api(project(":testutil-client"))
-    testImplementation(Grpc.netty)
-    testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
+plugins {
+    pmd
 }
 
-apply(from = Scripts.testArtifacts(project))
+pmd {
+    toolVersion = Pmd.version
+    isConsoleOutput = true
+    incrementalAnalysis.set(true)
 
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
+    // The build is going to fail in case of violations.
+    isIgnoreFailures = false
+
+    // Disable the default rule set to use the custom rules (see below).
+    ruleSets = listOf()
+
+    // Load PMD settings from a file in `buildSrc/resources/`.
+    val classLoader = Pmd.javaClass.classLoader
+    val settingsResource = classLoader.getResource("pmd.xml")!!
+    val pmdSettings: String = settingsResource.readText()
+    val textResource: TextResource = resources.text.fromString(pmdSettings)
+    ruleSetConfig = textResource
+
+    reportsDir = file("build/reports/pmd")
+
+    // Just analyze the main sources; do not analyze tests.
+    val javaExtension: JavaPluginExtension =
+        project.extensions.getByType(JavaPluginExtension::class.java)
+    val mainSourceSet = javaExtension.sourceSets.getByName("main")
+    sourceSets = listOf(mainSourceSet)
+}

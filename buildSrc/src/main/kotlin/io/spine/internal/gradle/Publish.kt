@@ -35,7 +35,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.file.FileCollection
-import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.publish.PublishingExtension
@@ -46,15 +46,29 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 
 /**
- * This plugin allows to publish artifacts to remote Maven repositories.
+ * This plugin allows publishing artifacts to remote Maven repositories.
  *
- * Apply this plugin to the root project. Specify the projects which produce publishable artifacts
- * and the target Maven repositories via the `publishing` DSL:
+ * The plugin can be used with single- and multi-module projects.
+ *
+ * When applied to a single-module project, the reference to the project is passed to the plugin:
+ * ```
+ * import io.spine.gradle.internal.PublishingRepos
+ * import io.spine.gradle.internal.spinePublishing
+ *
+ * spinePublishing {
+ *     publish(project)
+ *     targetRepositories.addAll(
+ *         PublishingRepos.cloudRepo,
+ *         PublishingRepos.gitHub("LibraryName")
+ *     )
+ * }
+ * ```
+ * When applied to a multi-module project, the plugin should be applied to the root project.
+ * The sub-projects to be published are specified by their names:
  * ```
  * import io.spine.gradle.internal.PublishingRepos
  * import io.spine.gradle.internal.spinePublishing
@@ -89,168 +103,196 @@ import org.gradle.kotlin.dsl.setProperty
 class Publish : Plugin<Project> {
 
     companion object {
-
         const val taskName = "publish"
         const val extensionName = "spinePublishing"
-
-        private const val ARCHIVES = "archives"
     }
 
     override fun apply(project: Project) {
         val extension = PublishExtension.create(project)
         project.extensions.add(PublishExtension::class.java, extensionName, extension)
 
-        val publish = project.createPublishTask()
-        val checkCredentials = project.createCheckTask(extension)
-
         project.afterEvaluate {
-            extension.projectsToPublish
-                .get()
-                .map { project.project(it) }
-                .forEach { p ->
-                    p.logger.debug("Applying `maven-publish` plugin to ${name}.")
+            val soloMode = extension.singleProject()
+            val rootPublish: Task? =
+                if (soloMode) null
+                else project.createPublishTask()
+            val checkCredentials: Task = project.createCheckTask(extension)
 
-                    p.apply(plugin = "maven-publish")
-
-                    p.setUpDefaultArtifacts()
-
-                    val action = {
-                        val publishingExtension = p.extensions.getByType(PublishingExtension::class)
-                        publishingExtension.createMavenPublication(p, extension)
-                        publishingExtension.setUpRepositories(p, extension)
-                        p.prepareTasks(publish, checkCredentials)
-                    }
-                    if (p.state.executed) {
-                        action()
-                    } else {
-                        p.afterEvaluate { action() }
-                    }
-                }
-        }
-    }
-
-    private fun Project.createPublishTask(): Task =
-        rootProject.tasks.create(taskName)
-
-    private fun Project.createCheckTask(extension: PublishExtension): Task {
-        val checkCredentials = tasks.create("checkCredentials")
-        checkCredentials.doLast {
-            extension.targetRepositories
-                .get()
-                .forEach {
-                    it.credentials(this@createCheckTask)
-                        ?: throw InvalidUserDataException(
-                            "No valid credentials for repository `${it}`. Please make sure " +
-                                    "to pass username/password or a valid `.properties` file."
-                        )
-                }
-        }
-        return checkCredentials
-    }
-
-    private fun Project.prepareTasks(publish: Task, checkCredentials: Task) {
-        val publishTasks = getTasksByName(taskName, false)
-        publish.dependsOn(publishTasks)
-        publishTasks.forEach { it.dependsOn(checkCredentials) }
-    }
-
-    private fun Project.setUpDefaultArtifacts() {
-        val javaConvention = project.convention.getPlugin(JavaPluginConvention::class)
-        val sourceSets = javaConvention.sourceSets
-
-        val sourceJar = tasks.createIfAbsent(
-            artifactTask = sourceJar,
-            from = sourceSets["main"].allSource,
-            classifier = "sources"
-        )
-        val testOutputJar = tasks.createIfAbsent(
-            artifactTask = testOutputJar,
-            from = sourceSets["test"].output,
-            classifier = "test"
-        )
-        val javadocJar = tasks.createIfAbsent(
-            artifactTask = javadocJar,
-            from = files("$buildDir/docs/javadoc"),
-            classifier = "javadoc",
-            dependencies = setOf("javadoc")
-        )
-
-        artifacts {
-            add(ARCHIVES, sourceJar)
-            add(ARCHIVES, testOutputJar)
-            add(ARCHIVES, javadocJar)
-        }
-    }
-
-    private fun TaskContainer.createIfAbsent(artifactTask: DefaultArtifact,
-                                             from: FileCollection,
-                                             classifier: String,
-                                             dependencies: Set<Any> = setOf()): Task {
-        val existing = findByName(artifactTask.name)
-        if (existing != null) {
-            return existing
-        }
-        return create(artifactTask.name, Jar::class) {
-            this.from(from)
-            archiveClassifier.set(classifier)
-            dependencies.forEach { dependsOn(it) }
-        }
-    }
-
-    private fun PublishingExtension.createMavenPublication(project: Project,
-                                                           extension: PublishExtension
-    ) {
-        val artifactIdForPublishing = if (extension.spinePrefix.get()) {
-            "spine-${project.name}"
-        } else {
-            project.name
-        }
-        publications {
-            create("mavenJava", MavenPublication::class.java) {
-                groupId = project.group.toString()
-                artifactId = artifactIdForPublishing
-                version = project.version.toString()
-
-                from(project.components.getAt("java"))
-
-                setArtifacts(project.configurations.getAt(ARCHIVES).allArtifacts)
+            if (soloMode) {
+                project.applyMavenPublish(extension, null, checkCredentials)
+            } else {
+                extension.projectsToPublish
+                    .get()
+                    .map { project.project(it) }
+                    .forEach { it.applyMavenPublish(extension, rootPublish, checkCredentials) }
             }
         }
     }
+}
 
-    private fun PublishingExtension.setUpRepositories(
-        project: Project,
-        extension: PublishExtension
-    ) {
-        val snapshots = project.version
-            .toString()
-            .matches(Regex(".+[-.]SNAPSHOT([+.]\\d+)?"))
-        repositories {
-            extension.targetRepositories.get().forEach { repo ->
-                maven {
-                    initialize(repo, project, snapshots)
-                }
+private object ConfigurationName {
+    const val archives = "archives"
+}
+
+private fun Project.applyMavenPublish(
+    extension: PublishExtension,
+    rootPublish: Task?,
+    checkCredentials: Task
+) {
+    logger.debug("Applying `maven-publish` plugin to ${name}.")
+
+    apply(plugin = "maven-publish")
+
+    setUpDefaultArtifacts()
+
+    val action = {
+        val publishingExtension = extensions.getByType(PublishingExtension::class)
+        with(publishingExtension) {
+            val project = this@applyMavenPublish
+            createMavenPublication(project, extension)
+            setUpRepositories(project, extension)
+        }
+
+        if (rootPublish != null) {
+            prepareTasks(rootPublish, checkCredentials)
+        } else {
+            tasks.getByPath(Publish.taskName).dependsOn(checkCredentials)
+        }
+    }
+    if (state.executed) {
+        action()
+    } else {
+        afterEvaluate { action() }
+    }
+}
+
+private fun Project.createPublishTask(): Task =
+    rootProject.tasks.create(Publish.taskName)
+
+private fun Project.createCheckTask(extension: PublishExtension): Task {
+    val checkCredentials = tasks.create("checkCredentials")
+    checkCredentials.doLast {
+        extension.targetRepositories
+            .get()
+            .forEach {
+                it.credentials(this@createCheckTask)
+                    ?: throw InvalidUserDataException(
+                        "No valid credentials for repository `${it}`. Please make sure " +
+                                "to pass username/password or a valid `.properties` file."
+                    )
+            }
+    }
+    return checkCredentials
+}
+
+private fun Project.prepareTasks(publish: Task, checkCredentials: Task) {
+    val publishTasks = getTasksByName(Publish.taskName, false)
+    publish.dependsOn(publishTasks)
+    publishTasks.forEach { it.dependsOn(checkCredentials) }
+}
+
+private fun Project.setUpDefaultArtifacts() {
+    val javaExtension: JavaPluginExtension =
+        project.extensions.getByType(JavaPluginExtension::class.java)
+    val sourceSets = javaExtension.sourceSets
+
+    val sourceJar = tasks.createIfAbsent(
+        artifactTask = sourceJar,
+        from = sourceSets["main"].allSource,
+        classifier = "sources"
+    )
+    val testOutputJar = tasks.createIfAbsent(
+        artifactTask = testOutputJar,
+        from = sourceSets["test"].output,
+        classifier = "test"
+    )
+    val javadocJar = tasks.createIfAbsent(
+        artifactTask = javadocJar,
+        from = files("$buildDir/docs/javadoc"),
+        classifier = "javadoc",
+        dependencies = setOf("javadoc")
+    )
+
+    artifacts {
+        add(ConfigurationName.archives, sourceJar)
+        add(ConfigurationName.archives, testOutputJar)
+        add(ConfigurationName.archives, javadocJar)
+    }
+}
+
+private fun TaskContainer.createIfAbsent(
+    artifactTask: DefaultArtifact,
+    from: FileCollection,
+    classifier: String,
+    dependencies: Set<Any> = setOf()
+): Task {
+    val existing = findByName(artifactTask.name)
+    if (existing != null) {
+        return existing
+    }
+    return create(artifactTask.name, Jar::class) {
+        this.from(from)
+        archiveClassifier.set(classifier)
+        dependencies.forEach { dependsOn(it) }
+    }
+}
+
+private fun PublishingExtension.createMavenPublication(
+    project: Project,
+    extension: PublishExtension
+) {
+    val artifactIdForPublishing = if (extension.spinePrefix.get()) {
+        "spine-${project.name}"
+    } else {
+        project.name
+    }
+    publications {
+        create("mavenJava", MavenPublication::class.java) {
+            groupId = project.group.toString()
+            artifactId = artifactIdForPublishing
+            version = project.version.toString()
+
+            from(project.components.getAt("java"))
+
+            setArtifacts(project.configurations.getAt(ConfigurationName.archives).allArtifacts)
+        }
+    }
+}
+
+private fun PublishingExtension.setUpRepositories(
+    project: Project,
+    extension: PublishExtension
+) {
+    val snapshots = project.version
+        .toString()
+        .matches(Regex(".+[-.]SNAPSHOT([+.]\\d+)?"))
+    repositories {
+        extension.targetRepositories.get().forEach { repo ->
+            maven {
+                initialize(repo, project, snapshots)
             }
         }
     }
+}
 
-    private fun MavenArtifactRepository.initialize(repo: Repository,
-                                                   project: Project,
-                                                   snapshots: Boolean) {
-        val publicRepo = if(snapshots) {
-            repo.snapshots
-        } else {
-            repo.releases
-        }
-        // Special treatment for CloudRepo URL.
-        // Reading is performed via public repositories, and publishing via
-        // private ones that differ in the `/public` infix.
-        url = project.uri(publicRepo.replace("/public", ""))
-        val creds = repo.credentials(project.rootProject)
-        credentials {
-            username = creds?.username
-            password = creds?.password
-        }
+private fun MavenArtifactRepository.initialize(
+    repo: Repository,
+    project: Project,
+    snapshots: Boolean
+) {
+    val publicRepo = if (snapshots) {
+        repo.snapshots
+    } else {
+        repo.releases
+    }
+    // Special treatment for CloudRepo URL.
+    // Reading is performed via public repositories, and publishing via
+    // private ones that differ in the `/public` infix.
+    url = project.uri(publicRepo.replace("/public", ""))
+    val creds = repo.credentials(project.rootProject)
+    credentials {
+        username = creds?.username
+        password = creds?.password
     }
 }
 
@@ -275,16 +317,32 @@ private constructor(
         }
     }
 
+    /**
+     * The project to be published _instead_ of [projectsToPublish].
+     *
+     * If set, [projectsToPublish] will be ignored.
+     */
+    private var soloProject: Project? = null
+
     init {
         spinePrefix.convention(true)
     }
+
+    /**
+     * Instructs to publish the passed project _instead_ of [projectsToPublish].
+     */
+    fun publish(project: Project) {
+        soloProject = project
+    }
+
+    fun singleProject(): Boolean = soloProject != null
 }
 
 /**
  * Configures the `spinePublishing` extension.
  *
  * As `Publish` is a class-plugin in `buildSrc`, we don't get strongly typed generated helper
- * methods for the `spinePublishing` configuration. Thus, we proviude this helper function for use
+ * methods for the `spinePublishing` configuration. Thus, we provide this helper function for use
  * in Kotlin build scripts.
  */
 @Suppress("unused")
@@ -302,7 +360,6 @@ fun Project.spinePublishing(action: PublishExtension.() -> Unit) {
  * output is published as project's artifacts.
  */
 private enum class DefaultArtifact {
-
     sourceJar,
     testOutputJar,
     javadocJar;

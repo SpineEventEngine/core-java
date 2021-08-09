@@ -81,7 +81,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("CommandHandlerMethod should")
+@DisplayName("`CommandHandlerMethod` should")
 class CommandHandlerMethodTest {
 
     private static final TestActorRequestFactory requestFactory =
@@ -118,7 +118,7 @@ class CommandHandlerMethodTest {
     class InvokeHandlerMethod {
 
         @Test
-        @DisplayName("one Message")
+        @DisplayName("one `Message`")
         void returningMessage() {
             ValidHandlerTwoParams handlerObject = new ValidHandlerTwoParams();
 
@@ -140,7 +140,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("Message list")
+        @DisplayName("`Message` list")
         void returningMessageList() {
             ValidHandlerOneParamReturnsList handlerObject =
                     new ValidHandlerOneParamReturnsList();
@@ -163,7 +163,7 @@ class CommandHandlerMethodTest {
     }
 
     @Nested
-    @DisplayName("throw ISE when invoked method produces")
+    @DisplayName("throw `ISE` when invoked method produces")
     class ThrowWhenProduces {
 
         @Test

@@ -54,7 +54,7 @@ internal class MessageIdExtensionsTest {
         val error = with(Error.newBuilder()) {
             type = MessageIdExtensionsTest::class.java.canonicalName
             message = "A test error."
-            vBuild()
+            build()
         }
         val ack = ID.causedError(error)
         assertIdEquals(ack)

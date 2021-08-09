@@ -68,12 +68,11 @@ final class IdempotencyGuard {
                     command.messageClass(),
                     command.id().value()
             );
-            Error error = Error
-                    .newBuilder()
+            Error error = Error.newBuilder()
                     .setType(CommandValidationError.class.getSimpleName())
                     .setCode(DUPLICATE_COMMAND_VALUE)
                     .setMessage(errorMessage)
-                    .vBuild();
+                    .build();
             return Optional.of(error);
         } else {
             return Optional.empty();
@@ -95,12 +94,11 @@ final class IdempotencyGuard {
                     event.messageClass(),
                     event.id().value()
             );
-            Error error = Error
-                    .newBuilder()
+            Error error = Error.newBuilder()
                     .setType(EventValidationError.class.getSimpleName())
                     .setCode(DUPLICATE_EVENT_VALUE)
                     .setMessage(errorMessage)
-                    .vBuild();
+                    .build();
             return Optional.of(error);
         } else {
             return Optional.empty();

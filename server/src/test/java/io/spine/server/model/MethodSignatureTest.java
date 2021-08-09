@@ -40,7 +40,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -58,6 +57,8 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
     @DisplayName("create handlers from valid methods")
     @ParameterizedTest
     @MethodSource("validMethods")
+    @SuppressWarnings("ReturnValueIgnored")
+        // we ignore the result of `orElseGet()` because it throws `AssertionFailedError`.
     protected final void testValid(Method method) {
         wrap(method).orElseGet(Assertions::fail);
     }
@@ -77,6 +78,7 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
     @DisplayName("not create handlers from invalid methods")
     @ParameterizedTest
     @MethodSource("invalidMethods")
+    @SuppressWarnings("rawtypes") // save on generic params of `HandlerMethod`.
     protected final void testInvalid(Method method) {
         try {
             Optional<? extends HandlerMethod> result = wrap(method);
@@ -90,31 +92,9 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
         }
     }
 
+    @SuppressWarnings("rawtypes") // save on generic params of `HandlerMethod`.
     private Optional<? extends HandlerMethod> wrap(Method method) {
         Optional<? extends HandlerMethod> result = signature().classify(method);
-        return result;
-    }
-
-    /**
-     * Finds the method by its name.
-     *
-     * <p>Throws {@link org.opentest4j.AssertionFailedError assertion error} if no such method
-     * found.
-     *
-     * @param declaringClass
-     *         the class in which to search for the method
-     * @param name
-     *         the name of the method;
-     *         expected to be without the class name, visibility level or parameters
-     * @return the method
-     */
-    public static Method findMethod(Class<?> declaringClass, String name) {
-
-        Method result = Stream.of(declaringClass.getDeclaredMethods())
-                              .filter(method -> method.getName()
-                                                      .equals(name))
-                              .findAny()
-                              .orElseGet(() -> fail(format("Method %s not found.", name)));
         return result;
     }
 

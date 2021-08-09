@@ -36,6 +36,7 @@ import io.spine.server.model.Model;
 import io.spine.tools.gradle.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.compile.JavaCompile;
 
 import java.io.File;
@@ -46,11 +47,11 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static java.lang.String.format;
 import static java.util.Arrays.deepToString;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -151,11 +152,12 @@ final class ModelVerifier implements Logging {
 
         @Override
         public @Nullable URL apply(@Nullable JavaCompile task) {
-            checkNotNull(task);
-            File dir = task.getDestinationDir();
-            if (dir == null) {
+            requireNonNull(task);
+            DirectoryProperty directory = task.getDestinationDirectory();
+            if (!directory.isPresent()) {
                 return null;
             }
+            File dir = directory.getAsFile().get();
             URI uri = dir.toURI();
             try {
                 URL url = uri.toURL();
