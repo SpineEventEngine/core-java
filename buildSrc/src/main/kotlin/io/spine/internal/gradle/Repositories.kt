@@ -26,8 +26,11 @@
 
 package io.spine.internal.gradle
 
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.cloud.artifactregistry.auth.DefaultCredentialProvider
 import io.spine.internal.gradle.PublishingRepos.gitHub
 import java.io.File
+import java.io.IOException
 import java.net.URI
 import java.util.*
 import org.gradle.api.Project
@@ -96,6 +99,8 @@ data class Credentials(
  */
 object PublishingRepos {
 
+    private const val CLOUD_ARTIFACT_REGISTRY = "https://europe-maven.pkg.dev/spine-event-engine"
+
     @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
     val mavenTeamDev = Repository(
         name = "maven.teamdev.com",
@@ -109,6 +114,44 @@ object PublishingRepos {
         snapshots = "https://spine.mycloudrepo.io/public/repositories/snapshots",
         credentialsFile = "cloudrepo.properties"
     )
+
+    /**
+     * The experimental Google Cloud Artifact Registry repository.
+     *
+     * In order to successfully publish into this repository, a service account key is needed.
+     * The published must create a service account, grant it the permission to write into
+     * Artifact Registry, and generate a JSON key.
+     * Then, the key must be placed somewhere on the file system and the environment variable
+     * `GOOGLE_APPLICATION_CREDENTIALS` must be set to point at the key file.
+     * Once these preconditions are met, publishing becomes possible.
+     *
+     * ## Implementation note
+     * Google provides [tools](https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools)
+     * for configuring authentication for the Maven repositories, including a Gradle plugin.
+     * However, the plugin is incompatible with Gradle 7.x at the moment.
+     * For now, we reproduce what the plugin does manually. This makes the whole `buildSrc`
+     * depend on the `artifactregistry-auth-common` artifact. Track [this issue](https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools/issues/52)
+     * for the progress on Gradle 7.x support.
+     */
+    val cloudArtifactRegistry = Repository(
+        releases = "$CLOUD_ARTIFACT_REGISTRY/releases",
+        snapshots = "$CLOUD_ARTIFACT_REGISTRY/snapshots",
+        credentialValues = this::fetchGoogleCreds
+    )
+
+    private fun fetchGoogleCreds(p: Project): Credentials? {
+        return try {
+            val googleCreds = DefaultCredentialProvider()
+            val creds = googleCreds.credential as GoogleCredentials
+            creds.refreshIfExpired()
+            Credentials("oauth2accesstoken", creds.accessToken.tokenValue)
+        } catch (e: IOException) {
+            p.logger.info("Unable to fetch credentials for Google Cloud Artifact Registry." +
+                    " Reason: '${e.message}'." +
+                    " See debug output for details.")
+            null
+        }
+    }
 
     fun gitHub(repoName: String): Repository {
         var githubActor: String? = System.getenv("GITHUB_ACTOR")
@@ -165,14 +208,22 @@ object PublishingRepos {
  */
 @Suppress("unused")
 object Repos {
-    val oldSpine: String = PublishingRepos.mavenTeamDev.releases
-    val oldSpineSnapshots: String = PublishingRepos.mavenTeamDev.snapshots
+    val oldSpine = PublishingRepos.mavenTeamDev.releases
+    val oldSpineSnapshots = PublishingRepos.mavenTeamDev.snapshots
 
-    val spine: String = PublishingRepos.cloudRepo.releases
-    val spineSnapshots: String = PublishingRepos.cloudRepo.snapshots
+    val spine = PublishingRepos.cloudRepo.releases
+    val spineSnapshots = PublishingRepos.cloudRepo.snapshots
 
-    const val sonatypeReleases: String = "https://oss.sonatype.org/content/repositories/snapshots"
-    const val sonatypeSnapshots: String = "https://oss.sonatype.org/content/repositories/snapshots"
+    val cloudArchive = PublishingRepos.cloudArtifactRegistry.releases
+    val cloudArchiveSnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
+
+    @Deprecated(
+        message = "Sonatype release repository redirects to the Maven Central",
+        replaceWith = ReplaceWith("sonatypeSnapshots"),
+        level = DeprecationLevel.ERROR
+    )
+    const val sonatypeReleases = "https://oss.sonatype.org/content/repositories/snapshots"
+    const val sonatypeSnapshots = "https://oss.sonatype.org/content/repositories/snapshots"
 }
 
 /**
@@ -223,25 +274,28 @@ fun RepositoryHandler.applyGitHubPackages(project: Project) {
 @Suppress("unused")
 fun RepositoryHandler.applyStandard() {
 
-    apply {
-        gradlePluginPortal()
-        mavenLocal()
+    gradlePluginPortal()
+    mavenLocal()
 
-        maven {
-            url = URI(Repos.spine)
-            includeSpineOnly()
+    val spineRepos = listOf(
+        Repos.spine,
+        Repos.spineSnapshots,
+        Repos.cloudArchive,
+        Repos.cloudArchiveSnapshots
+    )
+
+    spineRepos
+        .map { URI(it) }
+        .forEach {
+            maven {
+                url = it
+                includeSpineOnly()
+            }
         }
-        maven {
-            url = URI(Repos.spineSnapshots)
-            includeSpineOnly()
-        }
-        mavenCentral()
-        maven {
-            url = URI(Repos.sonatypeReleases)
-        }
-        maven {
-            url = URI(Repos.sonatypeSnapshots)
-        }
+
+    mavenCentral()
+    maven {
+        url = URI(Repos.sonatypeSnapshots)
     }
 }
 
@@ -268,13 +322,7 @@ private fun RepositoryHandler.spineMavenRepo(
  * Narrows down the search for this repository to Spine-related artifact groups.
  */
 private fun MavenArtifactRepository.includeSpineOnly() {
-    val libraryGroup = "io.spine"
-    val toolsGroup = "io.spine.tools"
-    val gcloudGroup = "io.spine.gcloud"
-
     content {
-        includeGroup(libraryGroup)
-        includeGroup(toolsGroup)
-        includeGroup(gcloudGroup)
+        includeGroupByRegex("io\\.spine.*")
     }
 }

@@ -41,7 +41,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -53,6 +55,7 @@ import static java.util.Objects.requireNonNull;
  *
  * <p>Uses {@link ServerServiceDefinition}s of each service.
  */
+@SuppressWarnings("ClassWithTooManyMethods")    /* Extensive configuration. */
 public final class GrpcContainer {
 
     private static final String SERVER_NOT_STARTED_MSG =
@@ -117,13 +120,43 @@ public final class GrpcContainer {
     /**
      * Starts the service.
      *
+     * <p>A gRPC-default executor is used for the server routines:
+     *
+     * <ul>
+     *     <li>for an in-process gRPC server, a {@linkplain ServerBuilder#directExecutor()
+     *     direct executor} is used;
+     *     <li>for a server exposed at a port, a shared cached thread pool is used.
+     * </ul>
+     *
+     * <p>See the {@link ServerBuilder} Javadocs corresponding to the current gRPC version
+     * for more details.
+     *
      * @throws IOException
      *         if unable to bind
      */
     public void start() throws IOException {
-        checkState(grpcServer == null, "gRPC server is started already.");
-        grpcServer = createGrpcServer();
+        checkNotStarted();
+        grpcServer = createGrpcServer(/* ...with a gRPC-default executor. */ null);
         grpcServer.start();
+    }
+
+    /**
+     * Starts the service on top of the given {@code Executor}.
+     *
+     * @param executor
+     *         an executor to use for gRPC server
+     * @throws IOException
+     *         if unable to bind
+     */
+    public void start(Executor executor) throws IOException {
+        checkNotStarted();
+        checkNotNull(executor, "Executor must not be `null`.");
+        grpcServer = createGrpcServer(executor);
+        grpcServer.start();
+    }
+
+    private void checkNotStarted() {
+        checkState(grpcServer == null, "gRPC server is started already.");
     }
 
     /**
@@ -227,32 +260,66 @@ public final class GrpcContainer {
                .addShutdownHook(new Thread(shutdownCallback()));
     }
 
-    private Server createGrpcServer() {
+    /**
+     * Creates a gRPC server which uses a specified executor.
+     *
+     * <p>If {@code null} is passed, a default behavior of the gRPC {@link ServerBuilder}
+     * is applied.
+     *
+     * @param executor
+     *         executor to use for the gRPC server
+     */
+    private Server createGrpcServer(@Nullable Executor executor) {
         if (injectedServer != null) {
             return injectedServer;
         }
-        ServerBuilder<?> builder = createServerBuilder();
+        ServerBuilder<?> builder = createServerBuilder(executor);
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
         }
         return builder.build();
     }
 
-    private ServerBuilder<?> createServerBuilder() {
+    /**
+     * Creates a builder of the gRPC server with the provided executor.
+     *
+     * <p>If {@code null} is passed, a default behavior of the gRPC {@link ServerBuilder}
+     * is applied.
+     *
+     * @param executor
+     *         executor to configure for the created builder
+     */
+    private ServerBuilder<?> createServerBuilder(@Nullable Executor executor) {
         boolean serverNameGiven = serverName != null;
         @Nullable Integer port = serverNameGiven ? null : requireNonNull(this.port);
         ServerBuilder<?> result =
                 serverNameGiven
-                ? InProcessServerBuilder.forName(serverName)
-                                        .directExecutor()
-                : ServerBuilder.forPort(port);
+                ? inProcessBuilder(serverName, executor)
+                : builderAtPort(requireNonNull(port), executor);
         return result;
+    }
+
+    private static ServerBuilder<?> inProcessBuilder(String name, @Nullable Executor executor) {
+        InProcessServerBuilder builder = InProcessServerBuilder.forName(name);
+        builder = executor == null
+                  ? builder.directExecutor()
+                  : builder.executor(executor);
+        return builder;
+    }
+
+    private static ServerBuilder<?> builderAtPort(Integer port, @Nullable Executor executor) {
+        ServerBuilder<?> builder = ServerBuilder.forPort(port);
+        builder = executor == null
+                  ? builder
+                  : builder.executor(executor);
+        return builder;
     }
 
     /**
      * Injects a server to this container.
      *
-     * <p>All calls to {@link #createGrpcServer()} will resolve to the given server instance.
+     * <p>All calls to {@link #createGrpcServer(Executor)} will resolve to the given server
+     * instance.
      *
      * <p>A test-only method.
      */

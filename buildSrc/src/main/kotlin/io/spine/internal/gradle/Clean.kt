@@ -24,18 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.internal.gradle
+
+import java.io.File
+import java.lang.IllegalArgumentException
+import java.nio.file.Files
+import java.nio.file.Path
 
 /**
- * The dependencies for Guava.
- *
- * When changing the version, also change the version used in the `build.gradle.kts`. We need
- * to synchronize the version used in `buildSrc` and in Spine modules. Otherwise, when testing
- * Gradle plugins, errors may occur due to version clashes.
+ * Cleans the folder and all of its content.
  */
-// https://github.com/google/guava
-object Guava {
-    private const val version = "30.1.1-jre"
-    const val lib     = "com.google.guava:guava:${version}"
-    const val testLib = "com.google.guava:guava-testlib:${version}"
+fun cleanFolder(folder: File) {
+    if(!folder.exists()) {
+        return
+    }
+    if(!folder.isDirectory) {
+        throw IllegalArgumentException("A folder to clean " +
+                "must be supplied: `${folder.absolutePath}`.")
+    }
+    Files.walk(folder.toPath())
+        .sorted(Comparator.reverseOrder())
+        .map(Path::toFile)
+        .forEach(File::delete);
 }

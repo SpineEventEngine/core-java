@@ -24,18 +24,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.client;
+
+import io.grpc.stub.StreamObserver;
+
+import javax.annotation.concurrent.ThreadSafe;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The dependencies for Guava.
+ * A thread-safe {@code StreamObserver}.
  *
- * When changing the version, also change the version used in the `build.gradle.kts`. We need
- * to synchronize the version used in `buildSrc` and in Spine modules. Otherwise, when testing
- * Gradle plugins, errors may occur due to version clashes.
+ * <p>Wraps another {@code StreamObserver}, delegating all calls to it in a thread-safe way.
+ *
+ * @param <V>
+ *         the type of the observed values
  */
-// https://github.com/google/guava
-object Guava {
-    private const val version = "30.1.1-jre"
-    const val lib     = "com.google.guava:guava:${version}"
-    const val testLib = "com.google.guava:guava-testlib:${version}"
+@ThreadSafe
+public final class ThreadSafeObserver<V> implements StreamObserver<V> {
+
+    private final StreamObserver<V> wrapped;
+
+    /**
+     * Creates a new instance of {@code ThreadSafeObserver} by wrapping the passed instance
+     * and delegating all of calls to it.
+     *
+     * @param observer
+     *         the observer to wrap into a thread-safe shell
+     */
+    public ThreadSafeObserver(StreamObserver<V> observer) {
+        this.wrapped = checkNotNull(observer);
+    }
+
+    @Override
+    public synchronized void onNext(V value) {
+        wrapped.onNext(value);
+    }
+
+    @Override
+    public synchronized void onError(Throwable t) {
+        wrapped.onError(t);
+    }
+
+    @Override
+    public synchronized void onCompleted() {
+        wrapped.onCompleted();
+    }
 }

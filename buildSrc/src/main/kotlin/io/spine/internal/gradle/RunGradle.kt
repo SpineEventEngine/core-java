@@ -58,6 +58,12 @@ open class RunGradle : DefaultTask() {
     private lateinit var taskNames: List<String>
 
     /**
+     * For how many minutes to wait for the Gradle build to complete.
+     */
+    @Internal
+    var maxDurationMins: Long = 10
+
+    /**
      * Names of Gradle properties to copy into the launched build.
      *
      * The properties are looked up in the root project. If a property is not found, it is ignored.
@@ -73,6 +79,15 @@ open class RunGradle : DefaultTask() {
      */
     fun task(vararg tasks: String) {
         taskNames = tasks.asList()
+    }
+
+    /**
+     * Sets the maximum time to wait until the build completion in minutes
+     * and specifies task names to be passed to the Gradle Wrapper script.
+     */
+    fun task(maxDurationMins: Long, vararg tasks: String) {
+        taskNames = tasks.asList()
+        this.maxDurationMins = maxDurationMins
     }
 
     @TaskAction
@@ -96,7 +111,7 @@ open class RunGradle : DefaultTask() {
               https://github.com/gradle/gradle/issues/3987
               https://discuss.gradle.org/t/weirdness-in-gradle-exec-on-windows/13660/6
          */
-        val completed = process.waitFor(10, TimeUnit.MINUTES)
+        val completed = process.waitFor(maxDurationMins, TimeUnit.MINUTES)
         val exitCode = process.exitValue()
         if (!completed || exitCode != 0) {
             val errorOutExists = errorOut.exists()
