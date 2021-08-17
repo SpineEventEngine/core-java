@@ -27,6 +27,7 @@
 package io.spine.internal.gradle
 
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.nio.file.Files
 import java.nio.file.Path
 
