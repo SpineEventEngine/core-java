@@ -120,9 +120,13 @@ public final class GrpcContainer {
     /**
      * Starts the service.
      *
-     * <p>A gRPC-default executor is used for the server routines. I.e., in-process gRPC server
-     * is going to run on top of a {@linkplain ServerBuilder#directExecutor() direct executor},
-     * and a server exposed at a port will run on top of a shared cached thread pool.
+     * <p>A gRPC-default executor is used for the server routines:
+     *
+     * <ul>
+     *     <li>for an in-process gRPC server, a {@linkplain ServerBuilder#directExecutor()
+     *     direct executor} is used;
+     *     <li>for a server exposed at a port, a shared cached thread pool is used.
+     * </ul>
      *
      * <p>See the {@link ServerBuilder} Javadocs corresponding to the current gRPC version
      * for more details.
