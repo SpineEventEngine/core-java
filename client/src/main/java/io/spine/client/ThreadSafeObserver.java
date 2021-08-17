@@ -24,31 +24,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.stand;
+package io.spine.client;
 
 import io.grpc.stub.StreamObserver;
-import io.spine.client.Subscription;
-import io.spine.client.SubscriptionUpdate;
 
-import java.util.function.Consumer;
+import javax.annotation.concurrent.ThreadSafe;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Delivers the given subscription update to the read-side.
+ * A thread-safe {@code StreamObserver}.
  *
- * @see Stand#activate(Subscription, SubscriptionCallback, StreamObserver)
- * @see Stand#cancel(Subscription, StreamObserver)
+ * <p>Wraps another {@code StreamObserver}, delegating all calls to it in a thread-safe way.
+ *
+ * @param <V>
+ *         the type of the observed values
  */
-public interface SubscriptionCallback extends Consumer<SubscriptionUpdate> {
+@ThreadSafe
+public final class ThreadSafeObserver<V> implements StreamObserver<V> {
+
+    private final StreamObserver<V> wrapped;
 
     /**
-     * Creates the callback which forwards to the passed observer.
+     * Creates a new instance of {@code ThreadSafeObserver} by wrapping the passed instance
+     * and delegating all of calls to it.
+     *
+     * @param observer
+     *         the observer to wrap into a thread-safe shell
      */
-    static SubscriptionCallback forwardingTo(StreamObserver<SubscriptionUpdate> observer) {
-        return update -> {
-            checkNotNull(update);
-            observer.onNext(update);
-        };
+    public ThreadSafeObserver(StreamObserver<V> observer) {
+        this.wrapped = checkNotNull(observer);
+    }
+
+    @Override
+    public synchronized void onNext(V value) {
+        wrapped.onNext(value);
+    }
+
+    @Override
+    public synchronized void onError(Throwable t) {
+        wrapped.onError(t);
+    }
+
+    @Override
+    public synchronized void onCompleted() {
+        wrapped.onCompleted();
     }
 }

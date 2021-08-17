@@ -35,6 +35,7 @@ import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
+import io.spine.client.ThreadSafeObserver;
 import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
@@ -79,7 +80,8 @@ public final class SubscriptionService
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
         _debug().log("Creating the subscription to the topic: `%s`.", topic);
         try {
-            subscribeTo(topic, responseObserver);
+            StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(responseObserver);
+            subscribeTo(topic, safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error processing subscription request.");
@@ -112,9 +114,10 @@ public final class SubscriptionService
     @Override
     public void activate(Subscription subscription, StreamObserver<SubscriptionUpdate> observer) {
         _debug().log("Activating the subscription: `%s`.", subscription);
+        StreamObserver<SubscriptionUpdate> safeObserver = new ThreadSafeObserver<>(observer);
         try {
-            SubscriptionCallback callback = forwardingTo(observer);
-            StreamObserver<Response> responseObserver = forwardErrorsOnly(observer);
+            SubscriptionCallback callback = forwardingTo(safeObserver);
+            StreamObserver<Response> responseObserver = forwardErrorsOnly(safeObserver);
             Optional<BoundedContext> foundContext = findContextOf(subscription);
             if (foundContext.isPresent()) {
                 Stand targetStand = foundContext.get().stand();
@@ -128,29 +131,29 @@ public final class SubscriptionService
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error activating the subscription.");
-            observer.onError(e);
+            safeObserver.onError(e);
         }
     }
 
     @Override
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
         _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
-
+        StreamObserver<Response> safeObserver = new ThreadSafeObserver<>(responseObserver);
         Optional<BoundedContext> selected = findContextOf(subscription);
         if (!selected.isPresent()) {
             _warn().log("Trying to cancel a subscription `%s` which could not be found.",
                         lazy(subscription::toShortString));
-            responseObserver.onCompleted();
+            safeObserver.onCompleted();
             return;
         }
         try {
             BoundedContext context = selected.get();
             Stand stand = context.stand();
-            stand.cancel(subscription, responseObserver);
+            stand.cancel(subscription, safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error processing cancel subscription request.");
-            responseObserver.onError(e);
+            safeObserver.onError(e);
         }
     }
 
