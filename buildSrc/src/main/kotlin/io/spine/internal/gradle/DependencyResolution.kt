@@ -79,6 +79,7 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         AutoService.annotations,
         CheckerFramework.annotations,
         ErrorProne.annotations,
+        ErrorProne.core,
         Guava.lib,
         FindBugs.annotations,
         Kotlin.reflect,

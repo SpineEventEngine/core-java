@@ -27,6 +27,7 @@
 
 import com.github.jk1.license.*
 import com.github.jk1.license.render.ReportRenderer
+import io.spine.internal.gradle.PublishExtension
 
 /**
  * This script plugin generates the license report for all dependencies used in a project.
@@ -80,8 +81,10 @@ class MarkdownReportRenderer implements ReportRenderer {
         project = data.project
         config = project.licenseReport
         output = new File(config.outputDir, fileName)
+        final publishExtension = project.rootProject.extensions.findByType(PublishExtension.class)
+        final prefix = (publishExtension?.spinePrefix?.getOrElse(false) ?: false) ? "spine-" : ""
         output.text = """
-    \n# Dependencies of `$project.group:spine-$project.name:$project.version`
+    \n# Dependencies of `${project.group}:$prefix${project.name}:${project.version}`
 """
         printDependencies(data)
         output << """

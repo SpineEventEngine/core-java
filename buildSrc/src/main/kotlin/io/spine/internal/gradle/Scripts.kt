@@ -49,7 +49,10 @@ object Scripts {
     fun updatePackageVersion(p: Project)   = p.script("js/update-package-version.gradle")
     fun dartBuildTasks(p: Project)         = p.script("dart/build-tasks.gradle")
     fun pubPublishTasks(p: Project)        = p.script("dart/pub-publish-tasks.gradle")
+
+    @Deprecated("Use `pmd-settings` script plugin instead")
     fun pmd(p: Project)                    = p.script("pmd.gradle")
+
     fun checkstyle(p: Project)             = p.script("checkstyle.gradle")
     fun runBuild(p: Project)               = p.script("run-build.gradle")
     fun modelCompiler(p: Project)          = p.script("model-compiler.gradle")
