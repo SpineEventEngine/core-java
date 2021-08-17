@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.model.ArgumentFilter.createFilter;
 import static io.spine.server.model.given.filter.Bucket.everythingElse;
-import static io.spine.server.model.given.filter.Bucket.onlyBeans;
 import static io.spine.server.model.given.filter.Bucket.onlyPeas;
 import static io.spine.server.model.given.filter.Legume.BEAN;
 import static io.spine.server.model.given.filter.Legume.PEA;
@@ -65,22 +64,6 @@ class ArgumentFilterTest {
         assertThat(filter.test(peasAdded()))
                 .isTrue();
         assertThat(filter.test(beansAdded()))
-                .isFalse();
-    }
-
-    @Test
-    @DisplayName("create instance for `@ByField` annotation")
-    void onByField() {
-        ArgumentFilter filter = createFilter(onlyBeans());
-        assertThat(filter.acceptsAll())
-                .isFalse();
-        assertThat(filter.pathLength())
-                .isEqualTo(1);
-        assertThat(filter.expectedValue())
-                .isEqualTo(BEAN);
-        assertThat(filter.test(beansAdded()))
-                .isTrue();
-        assertThat(filter.test(peasAdded()))
                 .isFalse();
     }
 

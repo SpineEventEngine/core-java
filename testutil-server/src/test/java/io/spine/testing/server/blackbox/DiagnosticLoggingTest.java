@@ -47,16 +47,16 @@ import static io.spine.base.Identifier.pack;
 abstract class DiagnosticLoggingTest {
 
     private ByteArrayOutputStream output;
-    private PrintStream saveErrorStream;
-    private PrintStream substErrorStream;
+    private PrintStream savedErrorStream;
+    private PrintStream substituteErrorStream;
 
     @BeforeEach
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     void setUpStderr() {
-        saveErrorStream = System.err;
+        savedErrorStream = System.err;
         output = new ByteArrayOutputStream();
-        substErrorStream = new PrintStream(output, true);
-        System.setErr(substErrorStream);
+        substituteErrorStream = new PrintStream(output, true);
+        System.setErr(substituteErrorStream);
         logger().setLevel(Level.OFF);
     }
 
@@ -64,7 +64,7 @@ abstract class DiagnosticLoggingTest {
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     void resetStderr() {
         System.err.close();
-        System.setErr(saveErrorStream);
+        System.setErr(savedErrorStream);
         logger().setLevel(Level.ALL);
     }
 
@@ -72,7 +72,7 @@ abstract class DiagnosticLoggingTest {
      * Ensures the {@code messagePart} has beed logged.
      */
     protected void assertLogged(String messagePart) {
-        substErrorStream.flush();
+        substituteErrorStream.flush();
         assertThat(output.toString())
                 .contains(messagePart);
     }

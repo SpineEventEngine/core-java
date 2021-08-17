@@ -347,6 +347,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
                                       .toHandler(id));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>An {@code AggregateRepository} always dispatches commands with the correct type.
+     */
+    @Override
+    public final boolean canDispatch(CommandEnvelope envelope) {
+        return true;
+    }
+
     private Optional<I> route(CommandEnvelope cmd) {
         Optional<I> target = route(commandRouting(), cmd);
         target.ifPresent(id -> onCommandTargetSet(id, cmd));
@@ -385,6 +395,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     @Override
     public ImmutableSet<EventClass> outgoingEvents() {
         return aggregateClass().outgoingEvents();
+    }
+
+    @Override
+    public boolean canDispatchEvent(EventEnvelope envelope) {
+        return aggregateClass().reactorOf(envelope).isPresent();
     }
 
     /**

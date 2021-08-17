@@ -532,17 +532,6 @@ public abstract class BlackBox implements Logging {
 
     /**
      * Obtains a Subject for an entity of the passed class with the given ID.
-     *
-     * @deprecated please use {@link #assertEntity(Object, Class)}
-     */
-    @Deprecated
-    public final <I, E extends Entity<I, ? extends EntityState<I>>>
-    EntitySubject assertEntity(Class<E> entityClass, I id) {
-        return assertEntity(id, entityClass);
-    }
-
-    /**
-     * Obtains a Subject for an entity of the passed class with the given ID.
      */
     public final <I, E extends Entity<I, ? extends EntityState<I>>>
     EntitySubject assertEntity(I id, Class<E> entityClass) {
@@ -554,17 +543,6 @@ public abstract class BlackBox implements Logging {
     findEntity(I id, Class<? extends Entity<I, ?>> entityClass) {
         Class<? extends EntityState<I>> stateClass = stateClassOf(entityClass);
         return findByState(id, stateClass);
-    }
-
-    /**
-     * Obtains a Subject for an entity which has the state of the passed class with the given ID.
-     *
-     * @deprecated please use {@link #assertEntityWithState(Object, Class)}
-     */
-    @Deprecated
-    public final <I, S extends EntityState<I>> EntitySubject
-    assertEntityWithState(Class<S> stateClass, I id) {
-        return assertEntityWithState(id, stateClass);
     }
 
     /**

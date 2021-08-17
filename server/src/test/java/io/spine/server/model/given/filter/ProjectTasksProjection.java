@@ -24,33 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.model.given.filter;
 
-import java.lang.annotation.Target;
+import io.spine.core.Subscribe;
+import io.spine.core.Where;
+import io.spine.server.projection.Projection;
+import io.spine.test.model.ModProjectCreated;
+import io.spine.test.model.filter.ModProjectTasks;
 
-/**
- * The by-field message filter.
- *
- * <p>This annotation should not be used directly to mark anything.
- * Instead, use the annotation instances as
- * a {@link io.spine.core.Subscribe#filter() @Subscribe.filter)} parameter.
- *
- * @deprecated Please use please use {@link Where @Where} annotation for the first method parameter.
- */
-@Deprecated
-@Target({})
-public @interface ByField {
+import static org.junit.jupiter.api.Assertions.fail;
 
-    /**
-     * The {@linkplain io.spine.base.FieldPath path to the field} to filter by.
-     */
-    String path();
+public class ProjectTasksProjection
+        extends Projection<String, ModProjectTasks, ModProjectTasks.Builder> {
 
-    /**
-     * The expected value of the field.
-     *
-     * <p>The value converted with help of {@link io.spine.string.Stringifier Stringifier}s into
-     * the type of the actual value of the message field.
-     */
-    String value();
+    @Subscribe
+    void on(@Where(field = "id", equals = "42") ModProjectCreated event) {
+        fail("Should never receive events.");
+    }
 }

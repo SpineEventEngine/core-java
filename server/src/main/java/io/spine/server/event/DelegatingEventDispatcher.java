@@ -84,6 +84,11 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
         delegate.dispatchEvent(event);
     }
 
+    @Override
+    public boolean canDispatch(EventEnvelope envelope) {
+        return delegate.canDispatchEvent(envelope);
+    }
+
     /**
      * Returns the string representation of this dispatcher.
      *

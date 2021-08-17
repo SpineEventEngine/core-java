@@ -40,7 +40,6 @@ import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -122,6 +121,9 @@ class AbstractHandlerMethod<T,
     @SuppressWarnings("Immutable") // Memoizing supplier is effectively immutable.
     private final Supplier<ImmutableSet<R>> producedTypes;
 
+    @SuppressWarnings("Immutable") // because this `Supplier` is effectively immutable.
+    private final Supplier<ArgumentFilter> filter = memoize(this::createFilter);
+
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -148,7 +150,6 @@ class AbstractHandlerMethod<T,
      * @see #attributeSuppliers()
      */
     @Override
-    @PostConstruct
     public final void discoverAttributes() {
         ImmutableSet.Builder<Attribute<?>> builder = ImmutableSet.builder();
         for (Function<Method, Attribute<?>> fn : attributeSuppliers()) {
@@ -156,6 +157,30 @@ class AbstractHandlerMethod<T,
             builder.add(attr);
         }
         attributes = builder.build();
+    }
+
+    /**
+     * Creates the filter for messages handled by this method.
+     *
+     * <p>If this method cannot have {@code @Where} filters but still defines one,
+     * a {@link ModelError} is thrown.
+     */
+    protected ArgumentFilter createFilter() {
+        return ArgumentFilter.createFilter(method);
+    }
+
+    @Override
+    public final ArgumentFilter filter() {
+        return filter.get();
+    }
+
+    protected static Method checkNotFiltered(Method method, String label) {
+        if (ArgumentFilter.presentOn(method)) {
+            throw new ModelError(
+                    "A %s method cannot declare argument filters but `%s` does.", label, method
+            );
+        }
+        return method;
     }
 
     /**
@@ -295,8 +320,8 @@ class AbstractHandlerMethod<T,
 
     private Success doInvoke(T target, E envelope)
             throws IllegalAccessException, InvocationTargetException {
-        Object[] arguments = parameterSpec.extractArguments(envelope);
-        Object rawOutput = method.invoke(target, arguments);
+        ExtractedArguments arguments = parameterSpec.extractArguments(envelope);
+        Object rawOutput = arguments.invokeMethod(method, target);
         return toSuccessfulOutcome(rawOutput, target, envelope);
     }
 

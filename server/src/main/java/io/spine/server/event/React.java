@@ -26,7 +26,9 @@
 
 package io.spine.server.event;
 
+import io.spine.core.AcceptsContracts;
 import io.spine.core.AcceptsExternal;
+import io.spine.core.AcceptsFilters;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -41,10 +43,13 @@ import java.lang.annotation.Target;
  * <p>A reacting method must be annotated {@link React @React}.
  *
  * <p>Like other message-handling methods, event reactors are designed to be called by
- * the framework only. Therefore, it is recommended to declare a them as package-private.
- * It discourages a developer from calling these methods directly from anywhere.
+ * the framework only. Therefore, it is recommended to declare them
+ * package-private (or {@code internal} in Kotlin).
+ * It discourages developers from calling these methods directly from anywhere.
+ * It is also acceptable to use {@code protected} if the declaring class inherits the method from
+ * a superclass.
  *
- * <p>Package-private access level still declares that an event reactor method is a part
+ * <p>This level of access still declares that an event reactor method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
  * BoundedContext} description on how the packages and Bounded Contexts relate.
  *
@@ -160,15 +165,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Documented
 @AcceptsExternal
+@AcceptsFilters
+@AcceptsContracts
 public @interface React {
-
-    /**
-     * When {@code true}, the annotated method of the entity reacts on the event generated from
-     * outside of the Bounded Context to which this entity belongs.
-     *
-     * @deprecated please use {@link io.spine.core.External @External} annotation for the first
-     *         method parameter.
-     */
-    @Deprecated
-    boolean external() default false;
 }

@@ -491,6 +491,11 @@ class ProcessManagerTest {
             assertThrows(IllegalStateException.class,
                          () -> processManager.dispatchCommand(envelope));
         }
+    }
+
+    @Nested
+    @DisplayName("ignore when dispatching unknown")
+    class IgnoresUnknown {
 
         @Test
         @DisplayName("event")
@@ -498,7 +503,7 @@ class ProcessManagerTest {
             EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
 
             DispatchOutcome outcome = dispatch(processManager, envelope);
-            assertTrue(outcome.hasError());
+            assertTrue(outcome.hasIgnored());
         }
     }
 

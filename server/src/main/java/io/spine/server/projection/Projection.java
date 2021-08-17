@@ -65,8 +65,10 @@ public abstract class Projection<I,
                                  M extends EntityState<I>,
                                  B extends ValidatingBuilder<M>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer, EventSubscriber,
-                   HasVersionColumn<I, M>, HasLifecycleColumns<I, M> {
+        implements EventPlayer,
+                   EventSubscriber,
+                   HasVersionColumn<I, M>,
+                   HasLifecycleColumns<I, M> {
 
     /**
      * Creates a new instance.

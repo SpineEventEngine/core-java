@@ -41,15 +41,10 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 public class Bucket {
 
     private long peas;
-    private long beans;
     private long other;
 
     public static Method onlyPeas() {
         return method("onlyPeas");
-    }
-
-    public static Method onlyBeans() {
-        return method("onlyBeans");
     }
 
     public static Method everythingElse() {
@@ -59,12 +54,6 @@ public class Bucket {
     @Subscribe
     void onlyPeas(@Where(field = "kind", equals = "PEA") BeanAdded e) {
         peas = peas + e.getNumber();
-    }
-
-    @SuppressWarnings("deprecation") // to be migrated during removal of `@ByField`.
-    @Subscribe(filter = @io.spine.core.ByField(path = "kind", value = "BEAN"))
-    void onlyBeans(BeanAdded e) {
-        beans = beans + e.getNumber();
     }
 
     @Subscribe

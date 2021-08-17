@@ -134,20 +134,6 @@ public final class Subscriptions implements Logging {
     }
 
     /**
-     * Obtains a short printable form of subscription.
-     *
-     * <p>Standard {@link Subscription#toString()} includes all subscription data and thus its
-     * output is too huge to use in short log messages and stack traces.
-     *
-     * @return a printable {@code String} with core subscription data
-     * @deprecated please use {@link Subscription#toShortString()}
-     */
-    @Deprecated
-    public static String toShortString(Subscription s) {
-        return s.toShortString();
-    }
-
-    /**
      * Subscribes the given {@link StreamObserver} to the given topic and activates
      * the subscription.
      *

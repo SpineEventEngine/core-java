@@ -51,6 +51,7 @@ import io.spine.server.command.model.given.handler.ValidHandlerOneParamReturnsLi
 import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.model.IllegalOutcomeException;
+import io.spine.server.model.ModelError;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.given.dispatch.PmDispatcher;
 import io.spine.server.type.CommandEnvelope;
@@ -80,7 +81,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("CommandHandlerMethod should")
+@DisplayName("`CommandHandlerMethod` should")
 class CommandHandlerMethodTest {
 
     private static final TestActorRequestFactory requestFactory =
@@ -117,7 +118,7 @@ class CommandHandlerMethodTest {
     class InvokeHandlerMethod {
 
         @Test
-        @DisplayName("one Message")
+        @DisplayName("one `Message`")
         void returningMessage() {
             ValidHandlerTwoParams handlerObject = new ValidHandlerTwoParams();
 
@@ -139,7 +140,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("Message list")
+        @DisplayName("`Message` list")
         void returningMessageList() {
             ValidHandlerOneParamReturnsList handlerObject =
                     new ValidHandlerOneParamReturnsList();
@@ -162,7 +163,7 @@ class CommandHandlerMethodTest {
     }
 
     @Nested
-    @DisplayName("throw ISE when invoked method produces")
+    @DisplayName("throw `ISE` when invoked method produces")
     class ThrowWhenProduces {
 
         @Test
@@ -280,12 +281,12 @@ class CommandHandlerMethodTest {
     }
 
     @Test
-    @DisplayName("throw ISE when dispatching command of non-handled type")
+    @DisplayName("throw `ModelError` when dispatching command of non-handled type")
     void notDispatchNonHandledCmd() {
         AbstractCommandHandler handler = new ValidHandlerOneParam();
         CommandEnvelope cmd = newCommand(startProject());
 
-        assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
+        assertThrows(ModelError.class, () -> handler.dispatch(cmd));
     }
 
     private static CommandEnvelope envelope(Message commandMessage) {

@@ -24,26 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.given.groups;
+package io.spine.server.model.handler.given;
 
-import io.spine.core.Subscribe;
-import io.spine.core.Where;
+import io.spine.model.contexts.projects.event.SigProjectCreated;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.given.organizations.Organization;
 
-import static io.spine.testing.Testing.halt;
+public abstract class InvalidContractSubscriber extends AbstractEventSubscriber {
 
-/**
- * This class declares invalid subscriber because filtering of states is not allowed.
- *
- * @see FilteredStateSubscriber
- */
-public class FilteredStateSubscriberWhere extends AbstractEventSubscriber {
-
-    @Subscribe
-    void on(
-            @Where(field = "head.value", equals = "42") // <-- Error here. Shouldn't have a filter.
-            Organization organization) {
-        halt();
-    }
+    /**
+     * This contract method is invalid because there is no {@link io.spine.core.ContractFor}
+     * annotation on it.
+     */
+    protected abstract void plainWrong(SigProjectCreated e);
 }

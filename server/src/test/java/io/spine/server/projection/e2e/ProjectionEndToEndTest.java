@@ -103,8 +103,7 @@ class ProjectionEndToEndTest {
 
         context.assertState(
                 producerId,
-                ProjectTaskNames
-                        .newBuilder()
+                ProjectTaskNames.newBuilder()
                         .setProjectId(producerId)
                         .setProjectName(created.getName())
                         .addTaskName(firstTaskAdded.getTask()
@@ -131,8 +130,7 @@ class ProjectionEndToEndTest {
 
         OrganizationId producerId = established.getId();
         sender.receivesEventsProducedBy(producerId, established);
-        GroupId groupId = GroupId
-                .newBuilder()
+        GroupId groupId = GroupId.newBuilder()
                 .setUuid(producerId.getUuid())
                 .build();
         receiver.assertEntityWithState(groupId, GroupName.class)
@@ -148,27 +146,22 @@ class ProjectionEndToEndTest {
     @SuppressWarnings("OverlyCoupledMethod")
     void receiveEntityStateUpdatesAndEventContext() throws Exception {
         GroupProjection.Repository repository = new GroupProjection.Repository();
-        BoundedContext groups = BoundedContextBuilder
-                .assumingTests()
-                .build();
+        BoundedContext groups = BoundedContextBuilder.assumingTests().build();
         groups.internalAccess()
               .register(repository);
         UserId organizationHead = GivenUserId.newUuid();
-        MessageId entityId = MessageId
-                .newBuilder()
+        MessageId entityId = MessageId.newBuilder()
                 .setTypeUrl(TypeUrl.of(Organization.class).value())
                 .setId(pack(organizationHead))
                 .vBuild();
         String organizationName = "Contributors";
-        Organization.Builder stateBuilder = Organization
-                .newBuilder()
+        Organization.Builder stateBuilder = Organization.newBuilder()
                 .setHead(organizationHead)
                 .setName(organizationName)
                 .addMember(UserId.getDefaultInstance());
         Organization newState = stateBuilder.build();
         Organization oldState = stateBuilder.setName("Old " + stateBuilder.getName()).build();
-        EntityStateChanged stateChanged = EntityStateChanged
-                .newBuilder()
+        EntityStateChanged stateChanged = EntityStateChanged.newBuilder()
                 .setEntity(entityId)
                 .setOldState(pack(oldState))
                 .setNewState(pack(newState))
@@ -176,14 +169,12 @@ class ProjectionEndToEndTest {
                 .addSignalId(dispatchedEventId())
                 .build();
         Timestamp producedAt = Time.currentTime();
-        EventContext eventContext = EventContext
-                .newBuilder()
+        EventContext eventContext = EventContext.newBuilder()
                 .setTimestamp(producedAt)
                 .setExternal(true)
                 .setImportContext(ActorContext.getDefaultInstance())
                 .build();
-        Event event = Event
-                .newBuilder()
+        Event event = Event.newBuilder()
                 .setId(Events.generateId())
                 .setMessage(pack(stateChanged))
                 .setContext(eventContext)

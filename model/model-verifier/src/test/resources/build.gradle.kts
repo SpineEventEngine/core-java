@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
 import org.gradle.api.file.SourceDirectorySet
 
@@ -51,6 +52,7 @@ buildscript {
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
 
+    io.spine.internal.gradle.doApplyGitHubPackages(repositories, rootProject)
     io.spine.internal.gradle.doApplyStandard(repositories)
 
     dependencies {
@@ -68,7 +70,7 @@ apply(from = "$rootDir/test-env.gradle")
 val enclosingRootDir: String by extra
 
 apply(from = "$enclosingRootDir/version.gradle.kts")
-val spineBaseVersion: String by extra
+val spineBaseTypesVersion: String by extra
 val versionToPublish: String by extra
 
 val scriptsPath = io.spine.internal.gradle.Scripts.commonPath
@@ -77,9 +79,9 @@ apply {
     plugin("io.spine.mc-java")
     plugin("io.spine.tools.spine-model-verifier")
     from("$enclosingRootDir/version.gradle.kts")
-    from("$enclosingRootDir/${scriptsPath}/model-compiler.gradle")
 }
 
+repositories.applyGitHubPackages(rootProject)
 repositories.applyStandard()
 
 tasks.compileJava {
@@ -92,6 +94,7 @@ tasks.compileJava {
 
 dependencies {
     implementation("io.spine:spine-server:$versionToPublish")
+    implementation("io.spine:spine-base-types:$spineBaseTypesVersion")
     annotationProcessor("io.spine.tools:spine-model-assembler:$versionToPublish")
 }
 

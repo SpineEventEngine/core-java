@@ -32,18 +32,18 @@ import static java.lang.String.format;
 
 /**
  * An error indicating that two message handlers have clashing
- * {@linkplain io.spine.core.ByField ByField filtering} signatures.
+ * {@linkplain io.spine.core.Where @Where filtering} signatures.
  *
  * <p>Two handlers clash if they handle the same type of message but filter messages by different
  * fields. For example:
  * <pre>
  *     {@code
- *     \@Subscribe(filter = @ByField(path = "member_count", value = "0"))
- *     public void onProject(ProjectStarted event) {
+ *     \@Subscribe
+ *     public void onProject(@Where(field = "member_count", equals = "0") ProjectStarted event) {
  *     }
  *
- *     \@Subscribe(filter = @ByField(path = "by.admin", value = "false"))
- *     public void onStarted(ProjectStarted event) {
+ *     \@Subscribe
+ *     public void onStarted(@Where(field = "by.admin", equals = "false") ProjectStarted event) {
  *     }
  *     }
  * </pre>

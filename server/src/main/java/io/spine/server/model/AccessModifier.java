@@ -26,11 +26,14 @@
 
 package io.spine.server.model;
 
+import io.spine.core.ContractFor;
 import io.spine.reflect.J2Kt;
 import kotlin.reflect.KCallable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -74,6 +77,19 @@ public final class AccessModifier implements Predicate<Method> {
     }, "Kotlin internal");
 
     /**
+     * A protected method which overrides a method from a superclass.
+     *
+     * <p>The method must be declared in a parent class.
+     *
+     * <p>The purpose of this modifier is to allow inheritance for
+     * {@linkplain ContractFor contract methods} without discouraging users with warning logs.
+     */
+    public static final AccessModifier PROTECTED_CONTRACT = new AccessModifier(
+            m -> PROTECTED.test(m) && derivedFromContract(m),
+            "protected with @Override"
+    );
+
+    /**
      * The predicate which determines if the method has a matching modifier or not.
      */
     private final Predicate<Method> delegate;
@@ -95,6 +111,44 @@ public final class AccessModifier implements Predicate<Method> {
         return new AccessModifier(predicate, name);
     }
 
+    @SuppressWarnings("MethodWithMultipleLoops")
+    private static boolean derivedFromContract(Method method) {
+        Class<?> cls = method.getDeclaringClass().getSuperclass();
+        while (!cls.equals(Object.class)) {
+            Method[] methods = cls.getDeclaredMethods();
+            for (Method m : methods) {
+                if (sameMethod(method, m)) {
+                    validateContract(m, method);
+                    return true;
+                }
+            }
+            cls = cls.getSuperclass();
+        }
+        return false;
+    }
+
+    private static void validateContract(Method contract, Method implementation) {
+        ContractFor annotation = contract.getAnnotation(ContractFor.class);
+        if (annotation == null) {
+            throw new ModelError(
+                    "Handler method `%s` overrides `%s` which is not marked with `@ContractFor`.",
+                    implementation, contract
+            );
+        }
+        Class<? extends Annotation> target = annotation.handler();
+        if (!implementation.isAnnotationPresent(target)) {
+            throw new ModelError(
+                    "Handler method `%s` overrides the contract `%s` but is not marked with `@%s`.",
+                    implementation, contract, target.getSimpleName()
+            );
+        }
+    }
+
+    private static boolean sameMethod(Method method, Method m) {
+        return m.getName().equals(method.getName())
+                && Arrays.equals(m.getParameterTypes(), method.getParameterTypes());
+    }
+
     /**
      * Obtains the access modifier of the given method.
      *
@@ -105,7 +159,12 @@ public final class AccessModifier implements Predicate<Method> {
     static AccessModifier fromMethod(Method method) {
         checkNotNull(method);
         AccessModifier matchedModifier = Stream
-                .of(PRIVATE, PACKAGE_PRIVATE, PROTECTED, KOTLIN_INTERNAL, PUBLIC)
+                .of(PRIVATE,
+                    PACKAGE_PRIVATE,
+                    PROTECTED_CONTRACT,
+                    PROTECTED,
+                    KOTLIN_INTERNAL,
+                    PUBLIC)
                 .filter(modifier -> modifier.test(method))
                 .findFirst()
                 .orElseThrow(() -> newIllegalArgumentException(

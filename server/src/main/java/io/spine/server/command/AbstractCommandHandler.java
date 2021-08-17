@@ -81,7 +81,7 @@ public abstract class AbstractCommandHandler
      */
     @Override
     public void dispatch(CommandEnvelope envelope) {
-        CommandHandlerMethod method = thisClass.handlerOf(envelope.messageClass());
+        CommandHandlerMethod method = thisClass.handlerOf(envelope);
         DispatchOutcomeHandler
                 .from(method.invoke(this, envelope))
                 .onEvents(this::postEvents)
