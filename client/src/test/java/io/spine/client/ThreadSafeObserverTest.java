@@ -27,6 +27,7 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
@@ -37,9 +38,8 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.IntStream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.testing.NullPointerTester.Visibility.PUBLIC;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.testing.TestValues.nullRef;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`ThreadSafeObserver` should")
 class ThreadSafeObserverTest {
@@ -47,7 +47,7 @@ class ThreadSafeObserverTest {
     @Test
     @DisplayName("not accept `null`s in its ctor")
     void notAcceptNullsInCtor() {
-        assertThrows(NullPointerException.class, () -> new ThreadSafeObserver<>(nullRef()));
+        new NullPointerTester().testConstructors(ThreadSafeObserver.class, PUBLIC);
     }
 
     @Test
