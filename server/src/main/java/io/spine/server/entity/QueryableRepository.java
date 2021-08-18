@@ -27,16 +27,26 @@
 package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
+import io.spine.base.EntityState;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
+import io.spine.query.EntityQuery;
 
 import java.util.Iterator;
 
+import static io.spine.protobuf.AnyPacker.unpack;
+
 /**
- * A repository which may be queried for {@linkplain EntityRecord entity records}.
+ * A repository which may be queried for {@linkplain EntityRecord entity records}
+ * or states of stored entities.
+ *
+ * @param <I>
+ *         the type of identifiers of stored entities
+ * @param <S>
+ *         the type of stored entity states
  */
 @Internal
-public interface QueryableRepository {
+public interface QueryableRepository<I, S extends EntityState<I>> {
 
     /**
      * Queries this repository for the records according to the specified filters and returns
@@ -58,4 +68,29 @@ public interface QueryableRepository {
      * @return an iterator over the results
      */
     Iterator<EntityRecord> findRecords(ResponseFormat format);
+
+    /**
+     * Queries this repository for the states of stored entities.
+     *
+     * @param query
+     *         the query to execute
+     * @return an iterator over the results
+     */
+    Iterator<S> findStates(EntityQuery<I, S, ?> query);
+
+    /**
+     * Unpacks the {@code Entity} state stored in the provided {@link EntityRecord} into
+     * a message of type {@code S}.
+     *
+     * <p>It is a responsibility of a caller to submit the {@code EntityRecord}s which
+     * store the states of a compatible type.
+     *
+     * @param record
+     *         record storing the packed state of type {@code S}
+     * @return unpacked {@code Entity} state
+     */
+    @SuppressWarnings("unchecked")  /* Ensured by the repository contract. */
+    default S stateFrom(EntityRecord record) {
+        return (S) unpack(record.getState());
+    }
 }

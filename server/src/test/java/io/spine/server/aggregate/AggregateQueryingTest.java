@@ -72,7 +72,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("`AggregateRepository` should allow to query for the aggregate states")
+@DisplayName("`AggregateRepository` should ")
 class AggregateQueryingTest {
 
     private QueryFactory queries;
@@ -96,8 +96,124 @@ class AggregateQueryingTest {
     }
 
     @Nested
-    @DisplayName("when the query asks for")
-    class ExecuteQueries {
+    @DisplayName("respond with results when the Protobuf `Query` asks for")
+    class ExecuteProtobufQueries extends ExecuteQueries<Query> {
+
+        @Override
+        void checkRead(Query query, MRPhoto... expected) {
+            List<? extends EntityState<?>> readMessages = execute(query);
+            assertThat(readMessages).containsExactlyElementsIn(expected);
+        }
+
+        @Override
+        void checkReadsNothing(Query query) {
+            List<? extends EntityState<?>> readMessages = execute(query);
+            assertThat(readMessages).isEmpty();
+        }
+
+        @Override
+        Query toQuery(MRPhoto.QueryBuilder builder) {
+            return builder.build(transformWith(queries));
+        }
+
+        @Override
+        List<? extends EntityState<?>> execute(Query query) {
+            Iterator<EntityRecord> records = repository.findRecords(query.filters(),
+                                                                    query.responseFormat());
+            ImmutableList<EntityRecord> asList = ImmutableList.copyOf(records);
+            List<? extends EntityState<?>> result =
+                    asList.stream()
+                          .map(EntityRecord::getState)
+                          .map(unpackFunc())
+                          .map((s) -> (EntityState<?>) s)
+                          .collect(toList());
+            return result;
+        }
+    }
+
+    @Nested
+    @DisplayName("respond with results when the `EntityQuery` asks for")
+    class ExecuteEntityQueries extends ExecuteQueries<MRPhoto.Query> {
+
+        @Override
+        void checkRead(MRPhoto.Query query, MRPhoto... expected) {
+            List<? extends EntityState<?>> readMessages = execute(query);
+            assertThat(readMessages).containsExactlyElementsIn(expected);
+        }
+
+        @Override
+        void checkReadsNothing(MRPhoto.Query query) {
+            List<? extends EntityState<?>> readMessages = execute(query);
+            assertThat(readMessages).isEmpty();
+        }
+
+        @Override
+        MRPhoto.Query toQuery(MRPhoto.QueryBuilder builder) {
+            return builder.build();
+        }
+
+        @Override
+        List<? extends EntityState<?>> execute(MRPhoto.Query query) {
+            Iterator<MRPhoto> records = repository.findStates(query);
+            ImmutableList<MRPhoto> result = ImmutableList.copyOf(records);
+            return result;
+        }
+    }
+
+    @Test
+    @DisplayName("throw `IllegalStateException` if an invisible Aggregate is queried" +
+            " via Proto `Query`")
+    void prohibitQueryingForInvisible() {
+        Query query = MRSoundRecord.query()
+                                   .build(transformWith(queries));
+        assertThrows(IllegalStateException.class,
+                     () -> InvisibleSound.repository()
+                                         .findRecords(query.filters(), query.responseFormat()));
+    }
+
+    @Test
+    @DisplayName("throw `IllegalStateException` if an invisible Aggregate " +
+            "is queried via `EntityQuery`")
+    void prohibitEntityQueryingForInvisible() {
+        MRSoundRecord.Query entityQuery = MRSoundRecord.query()
+                                                       .build();
+        assertThrows(IllegalStateException.class,
+                     () -> InvisibleSound.repository()
+                                         .findStates(entityQuery));
+    }
+
+    /**
+     * An abstract base which tests querying the {@link AggregateRepository} with a certain types
+     * of queries.
+     *
+     * @param <Q>
+     *         the type of queries to test with
+     */
+    @SuppressWarnings("unused")
+    abstract class ExecuteQueries<Q> {
+
+        /**
+         * Transforms the given {@code QueryBuilder} into the query of type {@code Q}.
+         */
+        abstract Q toQuery(MRPhoto.QueryBuilder builder);
+
+        /**
+         * Executes the query.
+         *
+         * @return a list of {@code Entity} states
+         */
+        abstract List<? extends EntityState<?>> execute(Q query);
+
+        /**
+         * Checks that the execution of the given {@code query}
+         * returns the {@code expected} results.
+         */
+        abstract void checkRead(Q query, MRPhoto... expected);
+
+        /**
+         * Checks that the execution of the given {@code query} returns no results.
+         */
+        abstract void checkReadsNothing(Q query);
 
         @Test
         @DisplayName("all instances")
@@ -121,11 +237,10 @@ class AggregateQueryingTest {
             MRPhoto target = onePhoto();
             archiveItem(target);
             MRPhotoId targetId = target.getId();
-            Query query =
+            Q query = toQuery(
                     MRPhoto.query()
                            .id().is(targetId)
-                           .where(ArchivedColumn.is(), true)
-                           .build(transformWith(queries));
+                           .where(ArchivedColumn.is(), true));
             checkRead(query, target);
         }
 
@@ -135,11 +250,10 @@ class AggregateQueryingTest {
             MRPhoto target = onePhoto();
             deleteItem(target);
             MRPhotoId targetId = target.getId();
-            Query query =
+            Q query = toQuery(
                     MRPhoto.query()
                            .id().is(targetId)
-                           .where(DeletedColumn.is(), true)
-                           .build(transformWith(queries));
+                           .where(DeletedColumn.is(), true));
             checkRead(query, target);
         }
 
@@ -150,11 +264,10 @@ class AggregateQueryingTest {
             MRPhoto secondPhoto = anotherPhoto();
             archiveItem(firstPhoto);
             archiveItem(secondPhoto);
-            Query query =
+            Q query = toQuery(
                     MRPhoto.query()
                            .where(ArchivedColumn.is(), true)
-                           .where(DeletedColumn.is(), false)
-                           .build(transformWith(queries));
+                           .where(DeletedColumn.is(), false));
             checkRead(query, firstPhoto, secondPhoto);
         }
 
@@ -165,48 +278,47 @@ class AggregateQueryingTest {
             MRPhoto secondPhoto = anotherPhoto();
             deleteItem(firstPhoto);
             deleteItem(secondPhoto);
-            Query query = MRPhoto.query()
-                                 .where(ArchivedColumn.is(), false)
-                                 .where(DeletedColumn.is(), true)
-                                 .build(transformWith(queries));
+            Q query = toQuery(
+                    MRPhoto.query()
+                           .where(ArchivedColumn.is(), false)
+                           .where(DeletedColumn.is(), true));
             checkRead(query, firstPhoto, secondPhoto);
         }
 
         @Test
         @DisplayName("instances matching them by the a single entity column")
         void bySingleEntityColumn() {
-            Query queryForNothing =
-                    MRPhoto.query()
-                           .height().isLessThan(20)
-                           .build(transformWith(queries));
+            Q queryForNothing =
+                    toQuery(MRPhoto.query()
+                                   .height().isLessThan(20));
             checkReadsNothing(queryForNothing);
 
-            Query queryForOneElement =
+            Q queryForOneElement = toQuery(
                     MRPhoto.query()
                            .height().isLessThan(201)
-                           .build(transformWith(queries));
+            );
             checkRead(queryForOneElement, spineLogo200by200());
         }
 
         @Test
         @DisplayName("instances matching them by the two entity columns joined with `AND`")
         void byTwoEntityColumnsWithAndOperator() {
-            Query query =
+            Q query = toQuery(
                     MRPhoto.query()
                            .height().isGreaterOrEqualTo(7000)
                            .width().isGreaterThan(6999)
-                           .build(transformWith(queries));
+            );
             checkRead(query, jxBrowserLogo7K());
         }
 
         @Test
         @DisplayName("instances matching them by the two entity columns joined with `OR`")
         void byTwoEntityColumnsWithOrOperator() {
-            Query query =
+            Q query = toQuery(
                     MRPhoto.query()
                            .either(q -> q.width().isLessOrEqualTo(200),
                                    q -> q.height().isGreaterThan(6999))
-                           .build(transformWith(queries));
+            );
             checkRead(query, spineLogo200by200(), jxBrowserLogo7K());
         }
 
@@ -215,12 +327,12 @@ class AggregateQueryingTest {
                 "by the two parameters for the same columns with `OR` " +
                 "and by one more column joined with `AND`")
         void byCombinationAndOr() {
-            Query query =
+            Q query = toQuery(
                     MRPhoto.query()
                            .either(q -> q.sourceType().is(CROP_FRAME),
                                    q -> q.sourceType().is(FULL_FRAME))
                            .height().isLessThan(7000)
-                           .build(transformWith(queries));
+            );
             checkRead(query, projectLogo1000by800());
         }
 
@@ -228,31 +340,21 @@ class AggregateQueryingTest {
         @DisplayName("instances matching them by both entity and lifecycle columns")
         void byEntityAndLifecycleCols() {
             archiveItem(projectLogo1000by800());
-            Query query =
+            Q query = toQuery(
                     MRPhoto.query()
                            .either(q -> q.where(ArchivedColumn.is(), true),
                                    q -> q.height().isGreaterThan(1000))
                            .width().isLessThan(7000)
-                           .build(transformWith(queries));
+            );
+
             checkRead(query, projectLogo1000by800());
         }
 
         private void readAndCheck(MRPhoto target) {
             MRPhotoId targetId = target.getId();
-            Query query = MRPhoto.query()
-                                 .id().is(targetId)
-                                 .build(transformWith(queries));
+            Q query = toQuery(MRPhoto.query()
+                                     .id().is(targetId));
             checkRead(query, target);
-        }
-
-        private void checkRead(Query query, MRPhoto... expected) {
-            List<? extends EntityState<?>> readMessages = execute(query);
-            assertThat(readMessages).containsExactlyElementsIn(expected);
-        }
-
-        private void checkReadsNothing(Query query) {
-            List<? extends EntityState<?>> readMessages = execute(query);
-            assertThat(readMessages).isEmpty();
         }
 
         private MRPhoto onePhoto() {
@@ -292,15 +394,6 @@ class AggregateQueryingTest {
                           .collect(toList());
             return result;
         }
-    }
-
-    @Test
-    @DisplayName("only for those Aggregate types which are not invisible")
-    void onlyForVisible() {
-        Query query = MRSoundRecord.query().build(transformWith(queries));
-        assertThrows(IllegalStateException.class,
-                     () -> InvisibleSound.repository()
-                                         .findRecords(query.filters(), query.responseFormat()));
     }
 
     private void prepareAggregates(Collection<MRPhoto> aggregateStates) {

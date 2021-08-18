@@ -36,11 +36,13 @@ import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.query.EntityQuery;
 import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.StorageFactory;
@@ -322,7 +324,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
         ensureStatesQueryable();
         RecordQuery<I, EntityRecord> query = convert(filters, format, stateStorage.recordSpec());
-        return stateStorage.readAll(query);
+        Iterator<EntityRecord> result = stateStorage.readAll(query);
+        return result;
     }
 
     /**
@@ -337,8 +340,24 @@ public class AggregateStorage<I, S extends EntityState<I>>
      */
     protected Iterator<EntityRecord> readStates(ResponseFormat format) {
         ensureStatesQueryable();
-        RecordQuery<I, EntityRecord> query = QueryConverter.newQuery(stateStorage.recordSpec(), format);
-        return stateStorage.readAll(query);
+        RecordQuery<I, EntityRecord> query =
+                QueryConverter.newQuery(stateStorage.recordSpec(), format);
+        Iterator<EntityRecord> result = stateStorage.readAll(query);
+        return result;
+    }
+
+    /**
+     * Reads the aggregate states from the storage according to the specified query.
+     *
+     * @param query
+     *         the query to execute
+     * @return an iterator over the records
+     */
+    protected Iterator<EntityRecord> readStates(EntityQuery<I, S, ?> query) {
+        ensureStatesQueryable();
+        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
+        Iterator<EntityRecord> result = stateStorage.readAll(recordQuery);
+        return result;
     }
 
     private void ensureStatesQueryable() {
