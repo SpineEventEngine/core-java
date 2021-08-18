@@ -118,10 +118,6 @@ public class EntityLifecycle {
 
     /**
      * The message ID of of the associated {@link Entity} state.
-     *
-     * <p>Most commands posted by the {@code EntityLifecycle} are handled by
-     * the {@code io.spine.system.server.EntityHistoryAggregate}.
-     * Thus, storing an ID as a field is convenient.
      */
     private final MessageId entityId;
 
