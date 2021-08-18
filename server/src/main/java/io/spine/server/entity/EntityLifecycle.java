@@ -406,15 +406,16 @@ public class EntityLifecycle {
     /**
      * Invoked when this entity has prepared itself for the catch-up.
      *
-     * @param catchUpId the ID of the catch-up process
+     * @param catchUpId
+     *         the ID of the catch-up process
      */
     public void onEntityPreparedForCatchUp(CatchUpId catchUpId) {
         Any packedId = Identifier.pack(entityId);
         EntityPreparedForCatchUp event =
                 EntityPreparedForCatchUp.newBuilder()
-                                      .setId(catchUpId)
-                                      .setInstanceId(packedId)
-                                      .vBuild();
+                        .setId(catchUpId)
+                        .setInstanceId(packedId)
+                        .vBuild();
         postEvent(event);
     }
 
