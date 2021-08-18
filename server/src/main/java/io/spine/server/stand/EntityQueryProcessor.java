@@ -43,9 +43,9 @@ import static com.google.common.collect.Streams.stream;
  */
 class EntityQueryProcessor implements QueryProcessor {
 
-    private final QueryableRepository repository;
+    private final QueryableRepository<?, ?> repository;
 
-    EntityQueryProcessor(QueryableRepository repository) {
+    EntityQueryProcessor(QueryableRepository<?, ?> repository) {
         this.repository = repository;
     }
 

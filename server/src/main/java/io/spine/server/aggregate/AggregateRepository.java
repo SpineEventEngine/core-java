@@ -37,6 +37,7 @@ import io.spine.client.TargetFilters;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.query.EntityQuery;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
@@ -74,6 +75,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
+import static com.google.common.collect.Iterators.transform;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -94,7 +96,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState<I>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository,
-                   EventDispatcherDelegate, QueryableRepository {
+                   EventDispatcherDelegate, QueryableRepository<I, S> {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -672,6 +674,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         return aggregateStorage().readStates(filters, format);
+    }
+
+    @Override
+    public Iterator<S> findStates(EntityQuery<I, S, ?> query) {
+        Iterator<EntityRecord> rawStates = aggregateStorage().readStates(query);
+        Iterator<S> result = transform(rawStates, this::stateFrom);
+        return result;
     }
 
     @Override

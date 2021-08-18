@@ -86,8 +86,9 @@ import static java.util.Objects.requireNonNull;
  * @param <S>
  *         the type of entity state messages
  */
+@SuppressWarnings("ClassWithTooManyMethods")    /* OK for this abstract type. */
 public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends EntityState<I>>
-        extends Repository<I, E> implements QueryableRepository {
+        extends Repository<I, E> implements QueryableRepository<I, S> {
 
     /** Creates a new instance. */
     protected RecordBasedRepository() {
@@ -423,12 +424,18 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> find(EntityQuery<I, S, ?> query) {
         checkNotNull(query);
-
-        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
-        Iterator<EntityRecord> records = recordStorage().readAll(recordQuery);
+        Iterator<EntityRecord> records = findRecords(query);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
+    }
+
+    @Override
+    public Iterator<S> findStates(EntityQuery<I, S, ?> query) {
+        checkNotNull(query);
+        Iterator<EntityRecord> records = findRecords(query);
+        Iterator<S> stateIterator = transform(records, this::stateFrom);
+        return stateIterator;
     }
 
     @Override
@@ -443,6 +450,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                 QueryConverter.convert(filters, format, storage.recordSpec());
         Iterator<EntityRecord> records = storage.readAll(query);
         return records;
+    }
+
+    private Iterator<EntityRecord> findRecords(EntityQuery<I, S, ?> query) {
+        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
+        return recordStorage().readAll(recordQuery);
     }
 
     private E findOrThrow(I id) {
