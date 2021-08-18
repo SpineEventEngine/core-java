@@ -77,6 +77,6 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
         repository.recordStorage()
                   .delete(entityId);
         repository.lifecycleOf(entityId)
-                  .onProjectionStateCleared(event.getId());
+                  .onEntityPreparedForCatchUp(event.getId());
     }
 }

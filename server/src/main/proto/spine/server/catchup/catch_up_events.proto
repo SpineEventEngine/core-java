@@ -56,12 +56,13 @@ message CatchUpStarted {
     CatchUpId id = 1;
 }
 
-// The state of the projection instance has been cleared at the start of the catch-up.
-message ProjectionStateCleared {
+// The entity included into the catch-up process has received the `CatchUp` start signal
+// is ready to receive the events.
+message EntityPreparedForCatchUp {
 
     CatchUpId id = 1;
 
-    // The identifier of the projection instance.
+    // The identifier of the instance to which the catch-up start has been propagated.
     google.protobuf.Any instance_id = 2;
 }
 
