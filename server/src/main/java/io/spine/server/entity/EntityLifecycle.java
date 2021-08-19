@@ -47,7 +47,7 @@ import io.spine.core.Version;
 import io.spine.option.EntityOption;
 import io.spine.server.Identity;
 import io.spine.server.delivery.CatchUpId;
-import io.spine.server.delivery.event.ProjectionStateCleared;
+import io.spine.server.delivery.event.EntityPreparedForCatchUp;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.model.EntityClass;
@@ -118,10 +118,6 @@ public class EntityLifecycle {
 
     /**
      * The message ID of of the associated {@link Entity} state.
-     *
-     * <p>Most commands posted by the {@code EntityLifecycle} are handled by
-     * the {@code io.spine.system.server.EntityHistoryAggregate}.
-     * Thus, storing an ID as a field is convenient.
      */
     private final MessageId entityId;
 
@@ -408,19 +404,18 @@ public class EntityLifecycle {
     }
 
     /**
-     * Invoked when this entity is a projection, which state has just been cleared
-     * as a part of a catch-up process with the given ID.
+     * Invoked when this entity has prepared itself for the catch-up.
      *
-     * @param catchUpId the ID of the catch-up process, in scope of which the state
-     *                  has been cleared
+     * @param catchUpId
+     *         the ID of the catch-up process
      */
-    public void onProjectionStateCleared(CatchUpId catchUpId) {
+    public void onEntityPreparedForCatchUp(CatchUpId catchUpId) {
         Any packedId = Identifier.pack(entityId);
-        ProjectionStateCleared event =
-                ProjectionStateCleared.newBuilder()
-                                      .setId(catchUpId)
-                                      .setInstanceId(packedId)
-                                      .vBuild();
+        EntityPreparedForCatchUp event =
+                EntityPreparedForCatchUp.newBuilder()
+                        .setId(catchUpId)
+                        .setInstanceId(packedId)
+                        .vBuild();
         postEvent(event);
     }
 

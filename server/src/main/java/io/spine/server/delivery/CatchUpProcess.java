@@ -44,10 +44,10 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.event.CatchUpCompleted;
 import io.spine.server.delivery.event.CatchUpRequested;
 import io.spine.server.delivery.event.CatchUpStarted;
+import io.spine.server.delivery.event.EntityPreparedForCatchUp;
 import io.spine.server.delivery.event.HistoryEventsRecalled;
 import io.spine.server.delivery.event.HistoryFullyRecalled;
 import io.spine.server.delivery.event.LiveEventsPickedUp;
-import io.spine.server.delivery.event.ProjectionStateCleared;
 import io.spine.server.delivery.event.ShardProcessed;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.event.AbstractStatefulReactor;
@@ -360,7 +360,7 @@ public final class CatchUpProcess<I>
      *      to default before the dispatching of the first historical event.
      *
      *      <li>The number of the projection instances to catch-up is remembered. The process
-     *      then waits for {@link ProjectionStateCleared} events to arrive for each of
+     *      then waits for {@link EntityPreparedForCatchUp} events to arrive for each of
      *      the instances before reading the events from the history.
      * </ol>
      *
@@ -393,8 +393,8 @@ public final class CatchUpProcess<I>
     }
 
     /**
-     * Waits until all the projection instances report their state has been cleared and they
-     * are ready for the historical events to be dispatched.
+     * Waits until all the projection instances report they are ready for the history events
+     * to be dispatched.
      *
      * <p>Once all the instances are ready, performs the first reading from the event history
      * and dispatches the results to the inboxes of respective projections.
@@ -405,7 +405,7 @@ public final class CatchUpProcess<I>
      */
     @React
     EitherOf3<HistoryEventsRecalled, HistoryFullyRecalled, Nothing>
-    handle(ProjectionStateCleared event) {
+    handle(EntityPreparedForCatchUp event) {
         int leftToClear = builder().getInstancesToClear() - 1;
         builder().setInstancesToClear(leftToClear);
         if (leftToClear > 0) {
