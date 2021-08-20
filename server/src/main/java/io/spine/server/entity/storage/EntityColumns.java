@@ -43,7 +43,7 @@ import java.util.stream.Stream;
  */
 @Immutable
 @SuppressWarnings("Immutable")  /* Effectively immutable. */
-public final class EntityColumns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
+final class EntityColumns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
 
     private final ImmutableSet<Column<E, ?>> columns;
 
