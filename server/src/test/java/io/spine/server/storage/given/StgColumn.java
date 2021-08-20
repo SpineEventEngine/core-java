@@ -26,8 +26,8 @@
 
 package io.spine.server.storage.given;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import io.spine.query.Columns;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 import io.spine.test.storage.StgProject;
@@ -64,7 +64,7 @@ public final class StgColumn {
     private StgColumn() {
     }
 
-    public static ImmutableList<RecordColumn<StgProject, ?>> definitions() {
-        return ImmutableList.of(project_version, due_date, status);
+    public static Columns<StgProject> definitions() {
+        return Columns.of(project_version, due_date, status);
     }
 }

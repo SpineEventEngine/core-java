@@ -26,11 +26,11 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.query.Column;
+import io.spine.query.Columns;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 
@@ -82,8 +82,8 @@ final class AggregateEventRecordColumn {
     /**
      * Returns all the column definitions.
      */
-    static ImmutableList<RecordColumn<AggregateEventRecord, ?>> definitions() {
-        return ImmutableList.of(aggregate_id, created, version, snapshot);
+    static Columns<AggregateEventRecord> definitions() {
+        return Columns.of(aggregate_id, created, version, snapshot);
     }
 
     /**

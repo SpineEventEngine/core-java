@@ -26,8 +26,8 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
+import io.spine.query.Columns;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 
@@ -74,7 +74,7 @@ public class CatchUpColumn {
     /**
      * Returns all the column definitions.
      */
-    public static ImmutableList<RecordColumn<CatchUp, ?>> definitions() {
-        return ImmutableList.of(status, when_last_read, projection_type);
+    public static Columns<CatchUp> definitions() {
+        return Columns.of(status, when_last_read, projection_type);
     }
 }

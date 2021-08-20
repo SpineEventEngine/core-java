@@ -26,9 +26,9 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
+import io.spine.query.Columns;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 
@@ -111,8 +111,8 @@ public final class InboxColumn {
     /**
      * Returns all the column definitions.
      */
-    public static ImmutableList<RecordColumn<InboxMessage, ?>> definitions() {
-        return ImmutableList.of(signal_id, inbox_id, inbox_shard, is_event,
+    public static Columns<InboxMessage> definitions() {
+        return Columns.of(signal_id, inbox_id, inbox_shard, is_event,
                                 is_command, label, status, received_at, version);
     }
 }

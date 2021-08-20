@@ -42,15 +42,15 @@ import java.util.stream.Stream;
  *         the type of {@code Entity} serving as a source for the column values
  */
 @Immutable
-@SuppressWarnings("Immutable")      /* Effectively immutable. */
-public final class Columns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
+@SuppressWarnings("Immutable")  /* Effectively immutable. */
+public final class EntityColumns<E extends Entity<?, ?>> implements Iterable<Column<E, ?>> {
 
     private final ImmutableSet<Column<E, ?>> columns;
 
     /**
      * Creates a new instance from the passed columns.
      */
-    Columns(Set<Column<E, ?>> columns) {
+    EntityColumns(Set<Column<E, ?>> columns) {
         this.columns = ImmutableSet.copyOf(columns);
     }
 
