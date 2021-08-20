@@ -113,6 +113,6 @@ public final class InboxColumn {
      */
     public static Columns<InboxMessage> definitions() {
         return Columns.of(signal_id, inbox_id, inbox_shard, is_event,
-                                is_command, label, status, received_at, version);
+                          is_command, label, status, received_at, version);
     }
 }
