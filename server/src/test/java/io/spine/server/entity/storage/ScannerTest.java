@@ -53,7 +53,7 @@ class ScannerTest {
     void extractSystemColumns() {
         EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
         Scanner<TaskView, TaskViewProjection> scanner = new Scanner<>(entityClass);
-        Columns<TaskViewProjection> columns = scanner.columns();
+        EntityColumns<TaskViewProjection> columns = scanner.columns();
 
         ImmutableSet<ColumnName> names =
                 columns.stream()

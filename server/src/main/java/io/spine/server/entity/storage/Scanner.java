@@ -101,7 +101,7 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
      * <p>The result includes both lifecycle columns and the columns declared
      * in the {@code Entity} state.
      */
-    Columns<E> columns() {
+    EntityColumns<E> columns() {
         Set<Column<E, ?>> accumulator = new HashSet<>();
 
         StateColumns<S> stateColumns = stateColumns();
@@ -114,7 +114,7 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
         accumulator.add(wrap(DeletedColumn.instance(), Entity::isDeleted));
         accumulator.add(wrap(VersionColumn.instance(), Entity::version));
 
-        Columns<E> columns = new Columns<>(accumulator);
+        EntityColumns<E> columns = new EntityColumns<>(accumulator);
         return columns;
     }
 

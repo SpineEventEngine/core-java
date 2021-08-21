@@ -26,9 +26,9 @@
 
 package io.spine.server.event.store;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
+import io.spine.query.Columns;
 import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 
@@ -74,7 +74,7 @@ final class EventColumn {
     /**
      * Returns all the column definitions.
      */
-    static ImmutableList<RecordColumn<Event, ?>> definitions() {
-        return ImmutableList.of(type, created);
+    static Columns<Event> definitions() {
+        return Columns.of(type, created);
     }
 }

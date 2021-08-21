@@ -70,9 +70,9 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      */
     private final EntityClass<E> entityClass;
 
-    private final Columns<E> columns;
+    private final EntityColumns<E> columns;
 
-    private EntityRecordSpec(EntityClass<E> entityClass, Columns<E> columns) {
+    private EntityRecordSpec(EntityClass<E> entityClass, EntityColumns<E> columns) {
         super(idClass(entityClass), EntityRecord.class);
         this.entityClass = entityClass;
         this.columns = columns;
