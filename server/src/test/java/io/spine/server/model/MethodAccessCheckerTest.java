@@ -28,7 +28,7 @@ package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.testing.logging.Interceptor;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

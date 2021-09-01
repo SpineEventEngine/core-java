@@ -36,7 +36,7 @@ import io.spine.system.server.test.InvalidText;
 import io.spine.system.server.test.StartVerification;
 import io.spine.system.server.test.ValidateAndSet;
 import io.spine.system.server.test.ValidatedId;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

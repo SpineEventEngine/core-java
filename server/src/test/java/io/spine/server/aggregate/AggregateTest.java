@@ -86,7 +86,7 @@ import io.spine.test.aggregate.event.AggTaskAssigned;
 import io.spine.test.aggregate.event.AggTaskCreated;
 import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.ContextAwareTest;
 import io.spine.testing.server.model.ModelTests;

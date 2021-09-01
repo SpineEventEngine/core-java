@@ -35,7 +35,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
