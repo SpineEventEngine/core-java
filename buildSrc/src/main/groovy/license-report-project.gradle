@@ -25,6 +25,7 @@
  */
 //file:noinspection UnnecessaryQualifiedReference
 
+import com.github.jk1.license.*
 import com.github.jk1.license.render.ReportRenderer
 import io.spine.internal.gradle.PublishExtension
 
