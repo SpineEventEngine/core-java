@@ -55,9 +55,6 @@ repositories {
     mavenLocal()
     gradlePluginPortal()
     mavenCentral()
-    maven {
-        url = uri("https://repo.spring.io/libs-release")
-    }
 }
 
 val jacksonVersion = "2.11.0"
