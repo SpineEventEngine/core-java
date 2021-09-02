@@ -12,7 +12,18 @@ coverage:
   - test/*
   status:
     # https://docs.codecov.com/docs/github-checks#yaml-configuration-for-github-checks-and-codecov
-    patch: true
+    patch: false
+    # https://docs.codecov.com/docs/commit-status
+    project:
+      default:
+        target: auto
+        threshold: 0.05%
+        base: auto
+        paths:
+          - "src"
+        if_ci_failed: error
+        informational: false
+        only_pulls: true
 
 comment:
   layout: "header, diff, changes, uncovered"
