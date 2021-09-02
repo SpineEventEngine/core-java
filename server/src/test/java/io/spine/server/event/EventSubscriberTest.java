@@ -36,7 +36,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.test.event.FailRequested;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

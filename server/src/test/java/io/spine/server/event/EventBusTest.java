@@ -54,7 +54,7 @@ import io.spine.test.event.Task;
 import io.spine.test.event.TaskId;
 import io.spine.testdata.Sample;
 import io.spine.testing.SlowTest;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.Validated;
 import org.checkerframework.checker.nullness.qual.Nullable;

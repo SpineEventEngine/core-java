@@ -43,7 +43,7 @@ import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

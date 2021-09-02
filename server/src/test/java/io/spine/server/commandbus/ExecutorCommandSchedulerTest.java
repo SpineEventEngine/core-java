@@ -40,7 +40,7 @@ import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
 import io.spine.server.commandbus.given.ThrowingScheduledExecutor;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -35,7 +35,7 @@ import io.spine.test.client.tasks.TaskCreated;
 import io.spine.test.client.tasks.TaskId;
 import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

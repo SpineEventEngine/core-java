@@ -54,7 +54,7 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.command.BbAssignSelf;
