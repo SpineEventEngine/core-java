@@ -39,7 +39,7 @@ import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.test.commandservice.CmdServDontHandle;
 import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

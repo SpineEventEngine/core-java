@@ -50,7 +50,7 @@ import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.time.ZoneIds;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;

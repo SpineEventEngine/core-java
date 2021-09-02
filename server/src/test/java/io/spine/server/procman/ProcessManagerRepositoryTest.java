@@ -85,7 +85,7 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;

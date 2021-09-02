@@ -40,12 +40,12 @@
 /**
  * Version of this library.
  */
-val coreJava = "2.0.0-SNAPSHOT.47"
+val coreJava = "2.0.0-SNAPSHOT.52"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "2.0.0-SNAPSHOT.47"
+val base = "2.0.0-SNAPSHOT.52"
 val baseTypes = "2.0.0-SNAPSHOT.40"
 val time = "2.0.0-SNAPSHOT.40"
 

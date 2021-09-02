@@ -47,7 +47,7 @@ import io.spine.test.user.ChooseDayOfBirth;
 import io.spine.test.user.SignUpUser;
 import io.spine.test.user.User;
 import io.spine.testdata.Sample;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.time.LocalDates;
 import io.spine.time.testing.TimeTests;

@@ -32,7 +32,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.memory.given.ThrowingObserver;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

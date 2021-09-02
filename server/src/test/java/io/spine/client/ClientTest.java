@@ -36,7 +36,7 @@ import io.spine.test.client.users.command.LogInUser;
 import io.spine.test.client.users.event.UserLoggedIn;
 import io.spine.test.client.users.event.UserLoggedOut;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

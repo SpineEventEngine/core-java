@@ -68,7 +68,7 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeLong;
 import io.spine.testdata.Sample;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;

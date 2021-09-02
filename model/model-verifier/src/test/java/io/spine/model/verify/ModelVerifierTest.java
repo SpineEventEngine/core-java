@@ -43,7 +43,7 @@ import io.spine.server.model.SignatureMismatchException;
 import io.spine.testing.TempDir;
 import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.testfixtures.ProjectBuilder;

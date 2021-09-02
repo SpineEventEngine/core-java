@@ -66,7 +66,7 @@ import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;

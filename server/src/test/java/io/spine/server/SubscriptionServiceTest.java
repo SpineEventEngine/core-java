@@ -56,7 +56,7 @@ import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.LoggingTest;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
