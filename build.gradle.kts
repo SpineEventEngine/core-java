@@ -167,7 +167,6 @@ subprojects {
 
         testImplementation(JUnit.runner)
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-        testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
     }
 
     configurations.forceVersions()

@@ -33,7 +33,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.server.Given.ProjectDetailsRepository;
 import io.spine.server.Given.ThrowingProjectDetailsRepository;
 import io.spine.server.model.UnknownEntityTypeException;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

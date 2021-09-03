@@ -27,7 +27,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestInstance;

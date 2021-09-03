@@ -35,7 +35,7 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Server;
 import io.spine.testing.client.grpc.command.Ping;
 import io.spine.testing.client.grpc.given.GameRepository;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

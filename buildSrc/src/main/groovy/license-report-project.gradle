@@ -81,8 +81,7 @@ class MarkdownReportRenderer implements ReportRenderer {
         project = data.project
         config = project.licenseReport
         output = new File(config.outputDir, fileName)
-        final publishExtension = project.rootProject.extensions.findByType(PublishExtension.class)
-        final prefix = (publishExtension?.spinePrefix?.getOrElse(false) ?: false) ? "spine-" : ""
+        final String prefix = prefixFor(project)
         output.text = """
     \n# Dependencies of `${project.group}:$prefix${project.name}:${project.version}`
 """
@@ -92,7 +91,23 @@ class MarkdownReportRenderer implements ReportRenderer {
         \n The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 """
         output << "\n\nThis report was generated on **${new Date()}**"
-        output << " using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE)."
+        output << " using [Gradle-License-Report plugin]" +
+                "(https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under" +
+                " [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE)."
+    }
+
+    /**
+     * Obtains the artifact prefix for the passed project.
+     *
+     * <p>If the {@code PublishExtension} has the property {@code spinePrefix} set to {@code true}
+     * returns {@code "spine-"}, otherwise an empty string.
+     */
+    private String prefixFor(final Project project) {
+        final publishExtension = project.rootProject.extensions.findByType(PublishExtension.class)
+        final prefix = (publishExtension?.spinePrefix?.getOrElse(false) ?: false)
+                ? "spine-"
+                : ""
+        prefix
     }
 
     private void printDependencies(final ProjectData data) {
