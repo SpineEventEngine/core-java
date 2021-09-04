@@ -35,7 +35,7 @@ the [Spine Examples][spine-examples] GitHub organization.
 
 Building Spine modules and libraries requires JDK 8. 
 
-The support of JDK 11 is planned for the [version 2.0][v2] of the framework.
+The migration of the codebase to JDK 11 is planned for the [version 2.0][v2] of the framework.
 
 Gradle is used as a build and dependency management system.
 
