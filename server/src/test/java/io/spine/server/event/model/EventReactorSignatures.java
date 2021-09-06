@@ -26,6 +26,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.model.MethodSignature;
 
 /**
@@ -34,6 +35,7 @@ import io.spine.server.model.MethodSignature;
  * <p>As the type is package-private, we expose its instance to related test suites via
  * this factory.
  */
+@VisibleForTesting
 public final class EventReactorSignatures {
 
     /**
