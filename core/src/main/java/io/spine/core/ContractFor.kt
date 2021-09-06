@@ -105,10 +105,10 @@ import kotlin.reflect.KClass
  * We need contract methods to enable creating small isolated "frameworks" based on Spine.
  * Such "frameworks" limit the possible usage of the general signal handling mechanism to
  * a predefined set of actions. For example, we would like to define a custom event reactor, which
- * only accepts one type of events (per reactor class) and produces some events as an output. We
- * create such a class, inheriting the standard framework reactor class and define a contract method
- * with the desired API. The users of the new class will quickly identify the need to implement
- * a method, without diving into the framework details.
+ * only accepts one type of events (per reactor class) and produces some events as the output.
+ * We create such a class, inheriting the standard framework reactor class, and define
+ * a contract method with the desired API. The users of the new class will quickly identify
+ * the need to implement a method, without diving into the framework details.
  *
  * However, in order to support such hierarchies, we need to give some (but not all) handler
  * methods a higher degree of freedom. For instance, such methods need to be `protected`, which is
