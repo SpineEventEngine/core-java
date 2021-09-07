@@ -33,7 +33,6 @@ import kotlin.reflect.KCallable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -117,7 +116,7 @@ public final class AccessModifier implements Predicate<Method> {
         while (!cls.equals(Object.class)) {
             Method[] methods = cls.getDeclaredMethods();
             for (Method m : methods) {
-                if (sameMethod(method, m)) {
+                if (inheritedMethod(method, m)) {
                     validateContract(m, method);
                     return true;
                 }
@@ -144,9 +143,23 @@ public final class AccessModifier implements Predicate<Method> {
         }
     }
 
-    private static boolean sameMethod(Method method, Method m) {
-        return m.getName().equals(method.getName())
-                && Arrays.equals(m.getParameterTypes(), method.getParameterTypes());
+    private static boolean inheritedMethod(Method child, Method parent) {
+        if (!parent.getName().equals(child.getName())) {
+            return false;
+        }
+        Class<?>[] parentParams = parent.getParameterTypes();
+        Class<?>[] childParams = child.getParameterTypes();
+        if (parentParams.length != childParams.length) {
+            return false;
+        }
+        for (int i = 0; i < parentParams.length; i++) {
+            Class<?> parentParam = parentParams[i];
+            Class<?> childParam = childParams[i];
+            if (!parentParam.isAssignableFrom(childParam)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

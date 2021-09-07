@@ -24,35 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+package io.spine.server.event.model;
+
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.server.model.MethodSignature;
 
 /**
- * Version of this library.
+ * A factory of {@link EventReactorSignature}s for test purposes.
+ *
+ * <p>As the type is package-private, we expose its instance to related test suites via
+ * this factory.
  */
-val coreJava = "2.0.0-SNAPSHOT.54"
+@VisibleForTesting
+public final class EventReactorSignatures {
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "2.0.0-SNAPSHOT.53"
-val baseTypes = "2.0.0-SNAPSHOT.53"
-val time = "2.0.0-SNAPSHOT.53"
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private EventReactorSignatures() {
+    }
 
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineBaseTypesVersion"] = baseTypes
-    this["spineTimeVersion"] = time
-    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
+    public static MethodSignature<?, ?> createForTest() {
+        return new EventReactorSignature();
+    }
 }

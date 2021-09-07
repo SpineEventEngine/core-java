@@ -27,7 +27,10 @@
 package io.spine.server.model;
 
 import io.spine.model.contexts.projects.event.SigProjectCreated;
+import io.spine.model.contexts.projects.event.SigTaskStarted;
+import io.spine.server.event.model.EventReactorSignatures;
 import io.spine.server.event.model.SubscriberSignature;
+import io.spine.server.model.handler.given.CovariantReactor;
 import io.spine.server.model.handler.given.InvalidProtectedSubscriber;
 import io.spine.server.model.handler.given.MismatchedProtectedSubscriber;
 import io.spine.server.model.handler.given.RougeProtectedSubscriber;
@@ -96,5 +99,20 @@ class ModifiersInSignatureTest {
         assertThat(error)
                 .hasMessageThat()
                 .endsWith("not marked with `@React`.");
+    }
+
+    @Test
+    @DisplayName("allow parameter type covariance")
+    void covariance() throws NoSuchMethodException {
+        Method method = CovariantReactor.class
+                .getDeclaredMethod("covariantReactor", SigTaskStarted.class);
+        AccessModifier foundModifier = EventReactorSignatures.createForTest()
+                .modifier()
+                .stream()
+                .filter(m -> m.test(method))
+                .findFirst()
+                .orElseGet(Assertions::fail);
+        assertThat(foundModifier)
+                .isSameInstanceAs(PROTECTED_CONTRACT);
     }
 }

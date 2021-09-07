@@ -65,6 +65,7 @@ import kotlin.reflect.KClass
  * ```
  *
  * Note that the contract method serves only for convenience. It has no effect on signal processing.
+ * There are no changes to the default signal dispatching either.
  * For example, commands can only have one handler method. Adding a contract method does not change
  * that. Yet, command handler methods can have contracts. For example, if the contract
  * is generalized, i.e. the method accepts an argument of a generic type, then
@@ -98,6 +99,22 @@ import kotlin.reflect.KClass
  *       }
  *   }
  * ```
+ *
+ * ## Motivation
+ *
+ * We need contract methods to enable creating small isolated "frameworks" based on Spine.
+ * Such "frameworks" limit the possible usage of the general signal handling mechanism to
+ * a predefined set of actions. For example, we would like to define a custom event reactor, which
+ * only accepts one type of events (per reactor class) and produces some events as the output.
+ * We create such a class, inheriting the standard framework reactor class, and define
+ * a contract method with the desired API. The users of the new class will quickly identify
+ * the need to implement a method, without diving into the framework details.
+ *
+ * However, in order to support such hierarchies, we need to give some (but not all) handler
+ * methods a higher degree of freedom. For instance, such methods need to be `protected`, which is
+ * prohibited for most signal handlers. So, in order to discriminate contracts from general signal
+ * handlers at runtime, we mark contracts with this annotation.
+ *
  * @see AcceptsContracts
  */
 @Retention(RUNTIME)
