@@ -45,9 +45,9 @@ val coreJava = "2.0.0-SNAPSHOT.54"
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "2.0.0-SNAPSHOT.52"
-val baseTypes = "2.0.0-SNAPSHOT.52"
-val time = "2.0.0-SNAPSHOT.40"
+val base = "2.0.0-SNAPSHOT.53"
+val baseTypes = "2.0.0-SNAPSHOT.53"
+val time = "2.0.0-SNAPSHOT.53"
 
 project.extra.apply {
     this["versionToPublish"] = coreJava
