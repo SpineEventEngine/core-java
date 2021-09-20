@@ -1,0 +1,46 @@
+name: Publish
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: zulu
+          cache: gradle
+
+      - run: git submodule update --init --recursive
+
+      - name: Decrypt Git SSH credentials
+        run: ./config/scripts/decrypt.sh "$GIT_CREDENTIALS_KEY" ./deploy_key_rsa.gpg ./deploy_key_rsa
+        env:
+          GIT_CREDENTIALS_KEY: ${{ secrets.GIT_CREDENTIALS_KEY }}
+
+        # Make sure the SSH key is not "too visible". SSH agent will not accept it otherwise.
+      - name: Set file system permissions
+        run: chmod 400 ./deploy_key_rsa && chmod +x ./config/scripts/register-ssh-key.sh
+
+      - name: Decrypt GCS credentials
+        run: ./config/scripts/decrypt.sh "$GCS_CREDENTIALS_KEY" ./gcs-auth-key.json.gpg ./gcs-auth-key.json
+        env:
+          GCS_CREDENTIALS_KEY: ${{ secrets.GCS_CREDENTIALS_KEY }}
+
+      - name: Decrypt GCAR credentials
+        run: ./config/scripts/decrypt.sh "$MAVEN_PUBLISHER_KEY" ./maven-publisher.json.gpg ./maven-publisher.json
+        env:
+          MAVEN_PUBLISHER_KEY: ${{ secrets.MAVEN_PUBLISHER_KEY }}
+
+      - name: Publish artifacts to Maven
+        run: ./gradlew build publish --stacktrace
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
+          REPO_SLUG: SpineEventEngine/base-types
+          GOOGLE_APPLICATION_CREDENTIALS: ./maven-publisher.json

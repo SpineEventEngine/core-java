@@ -1,0 +1,23 @@
+name: Build under Windows
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: zulu
+          cache: gradle
+
+      - name: Pull config
+        run: git submodule update --init --recursive
+
+      - name: Build project and run tests
+        shell: cmd
+        run: gradlew.bat build --stacktrace

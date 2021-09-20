@@ -29,7 +29,7 @@ package io.spine.internal.dependency
 // https://github.com/protocolbuffers/protobuf
 @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
 object Protobuf {
-    const val version    = "3.17.3"
+    const val version    = "3.18.0"
     val libs = listOf(
         "com.google.protobuf:protobuf-java:${version}",
         "com.google.protobuf:protobuf-java-util:${version}"
