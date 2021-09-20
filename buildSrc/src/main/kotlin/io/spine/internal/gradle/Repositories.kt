@@ -125,21 +125,21 @@ object PublishingRepos {
      * `GOOGLE_APPLICATION_CREDENTIALS` must be set to point at the key file.
      * Once these preconditions are met, publishing becomes possible.
      *
-     * ## Implementation note
-     * Google provides [tools](https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools)
-     * for configuring authentication for the Maven repositories, including a Gradle plugin.
-     * However, the plugin is incompatible with Gradle 7.x at the moment.
-     * For now, we reproduce what the plugin does manually. This makes the whole `buildSrc`
-     * depend on the `artifactregistry-auth-common` artifact. Track [this issue](https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools/issues/52)
-     * for the progress on Gradle 7.x support.
+     * Google provides a Gradle plugin for configuring the publishing repository credentials
+     * automatically. We achieve the same goal by assembling the credentials manually. We do so
+     * in order to fit the Google Cloud Artifact Registry repository into the standard frame of
+     * the Maven [Repository]-s. Applying the plugin would take a substantial effort due to the fact
+     * that both our publishing scripts and the Google's plugin use `afterEvaluate { }` hooks.
+     * Ordering said hooks is a non-trivial operation and the result is usually quite fragile.
+     * Thus, we choose to do this small piece of configuration manually.
      */
     val cloudArtifactRegistry = Repository(
         releases = "$CLOUD_ARTIFACT_REGISTRY/releases",
         snapshots = "$CLOUD_ARTIFACT_REGISTRY/snapshots",
-        credentialValues = this::fetchGoogleCreds
+        credentialValues = this::fetchGoogleCredentials
     )
 
-    private fun fetchGoogleCreds(p: Project): Credentials? {
+    private fun fetchGoogleCredentials(p: Project): Credentials? {
         return try {
             val googleCreds = DefaultCredentialProvider()
             val creds = googleCreds.credential as GoogleCredentials
@@ -148,7 +148,7 @@ object PublishingRepos {
         } catch (e: IOException) {
             p.logger.info("Unable to fetch credentials for Google Cloud Artifact Registry." +
                     " Reason: '${e.message}'." +
-                    " See debug output for details.")
+                    " The debug output may contain more details.")
             null
         }
     }
@@ -214,8 +214,8 @@ object Repos {
     val spine = PublishingRepos.cloudRepo.releases
     val spineSnapshots = PublishingRepos.cloudRepo.snapshots
 
-    val cloudArchive = PublishingRepos.cloudArtifactRegistry.releases
-    val cloudArchiveSnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
+    val artifactRegistry = PublishingRepos.cloudArtifactRegistry.releases
+    val artifactRegistrySnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
 
     @Deprecated(
         message = "Sonatype release repository redirects to the Maven Central",
@@ -280,8 +280,8 @@ fun RepositoryHandler.applyStandard() {
     val spineRepos = listOf(
         Repos.spine,
         Repos.spineSnapshots,
-        Repos.cloudArchive,
-        Repos.cloudArchiveSnapshots
+        Repos.artifactRegistry,
+        Repos.artifactRegistrySnapshots
     )
 
     spineRepos
