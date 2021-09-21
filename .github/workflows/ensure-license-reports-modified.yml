@@ -15,6 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Check version is not yet published
+      - name: Check that `pom.xml` and `license-report.md` are modified
         shell: bash
-        run: ./scripts/ensure-required-files-modified-in-PR.sh
+        run: chmod +x ./scripts/ensure-required-files-modified-in-PR.sh && ./scripts/ensure-required-files-modified-in-PR.sh
