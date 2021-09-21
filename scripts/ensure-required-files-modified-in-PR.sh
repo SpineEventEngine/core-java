@@ -39,7 +39,7 @@
 # Exists with the code 1, if such a file has NOT been modified.
 # Does nothing, if such a modification was found.
 function ensureChanged() {
-	modificationCount=$(git diff --name-only origin/$GITHUB_BASE_REF...$GITHUB_HEAD_REF | grep $1 | wc -l)
+	modificationCount=$(git diff --name-only origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF | grep $1 | wc -l)
 	if [ "$modificationCount" -eq "0" ];
 	then
 	   echo "ERROR: '$1' file has not been modified in this PR. Please re-check the changeset.";
