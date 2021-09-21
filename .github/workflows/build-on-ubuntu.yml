@@ -1,4 +1,4 @@
-name: Build under Unbuntu
+name: Build under Ubuntu
 
 on: pull_request
 
