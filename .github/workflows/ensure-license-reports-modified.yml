@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: $GITHUB_HEAD_REF
 
       - name: Check that `pom.xml` and `license-report.md` are modified
         shell: bash
