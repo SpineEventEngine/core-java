@@ -1,0 +1,20 @@
+# Ensures that the current lib version is not yet published but executing the Gradle
+# `checkVersionIncrement` task.
+
+name: Ensure license reports updated
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check version is not yet published
+        shell: bash
+        run: ./scripts/ensure-required-files-modified-in-PR.sh
