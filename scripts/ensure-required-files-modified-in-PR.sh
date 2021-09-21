@@ -39,7 +39,7 @@
 # Exists with the code 1, if such a file has NOT been modified.
 # Does nothing, if such a modification was found.
 function ensureChanged() {
-	modificationCount=$(git diff --name-only $GITHUB_BASE_REF...$GITHUB_HEAD_REF | grep $1 | wc -l)
+	modificationCount=$(git diff --name-only remotes/origin/$GITHUB_BASE_REF...remotes/origin/$GITHUB_HEAD_REF | grep $1 | wc -l)
 	if [ "$modificationCount" -eq "0" ];
 	then
 	   echo "ERROR: '$1' file has not been modified in this PR. Please re-check the changeset.";
@@ -50,14 +50,11 @@ function ensureChanged() {
 }
 
 echo "Available branches:"
-
 git branch -a
 
 echo "Starting to check if all required files were modified within this PR..."
-echo "Comparing \"$GITHUB_HEAD_REF\" branch to \"$GITHUB_BASE_REF\" contents."
+echo "Comparing \"remotes/origin/$GITHUB_HEAD_REF\" branch to \"remotes/origin/$GITHUB_BASE_REF\" contents."
 
-git checkout --progress --force origin/$GITHUB_BASE_REF
-git checkout --progress --force origin/$GITHUB_HEAD_REF
 
 ensureChanged "pom.xml"
 ensureChanged "license-report.md"
