@@ -39,7 +39,6 @@
 # Exists with the code 1, if such a file has NOT been modified.
 # Does nothing, if such a modification was found.
 function ensureChanged() {
-
 	modificationCount=$(git diff --name-only $GITHUB_BASE_REF...$GITHUB_HEAD_REF | grep $1 | wc -l)
 	if [ "$modificationCount" -eq "0" ];
 	then
