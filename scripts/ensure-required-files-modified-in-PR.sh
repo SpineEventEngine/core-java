@@ -51,7 +51,7 @@ function ensureChanged() {
 }
 
 echo "Starting to check if all required files were modified within this PR..."
-echo "Comparing '$GITHUB_HEAD_REF' in relation to '$GITHUB_BASE_REF'."
+echo "Comparing \"$GITHUB_HEAD_REF\" branch to \"$GITHUB_BASE_REF\" contents."
 
 ensureChanged "pom.xml"
 ensureChanged "license-report.md"
