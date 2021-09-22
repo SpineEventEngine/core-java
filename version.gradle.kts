@@ -24,35 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+/** The version of this library. */
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.59")
 
-/**
- * Version of this library.
- */
-val coreJava = "2.0.0-SNAPSHOT.58"
+/** Versions of the Spine libraries that `core-java` depends on. */
+val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.59")
+val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.59")
+val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.59")
 
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "2.0.0-SNAPSHOT.57"
-val baseTypes = "2.0.0-SNAPSHOT.57"
-val time = "2.0.0-SNAPSHOT.57"
-
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineBaseTypesVersion"] = baseTypes
-    this["spineTimeVersion"] = time
-    this["kotlinVersion"] = io.spine.internal.dependency.Kotlin.version
-}
+val kotlinVersion: String by extra(io.spine.internal.dependency.Kotlin.version)

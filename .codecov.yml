@@ -7,9 +7,9 @@
 
 coverage:
   ignore:
-  - generated/*
-  - examples/*
-  - test/*
+    - "**/generated/**/*"
+    - "**/examples/**/*"
+    - "**/test/**/*"
   status:
     # https://docs.codecov.com/docs/github-checks#yaml-configuration-for-github-checks-and-codecov
     patch: false
