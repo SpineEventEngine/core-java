@@ -49,9 +49,6 @@ function ensureChanged() {
 	fi
 }
 
-echo "Available branches:"
-git branch -a
-
 echo "Starting to check if all required files were modified within this PR..."
 echo "Comparing \"remotes/origin/$GITHUB_HEAD_REF\" branch to \"remotes/origin/$GITHUB_BASE_REF\" contents."
 
