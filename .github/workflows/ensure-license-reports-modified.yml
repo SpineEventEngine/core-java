@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          # Configure the checkout of all branches, so that it is possible to run comparison.
+          # Configure the checkout of all branches, so that it is possible to run the comparison.
           fetch-depth: 0
 
       - name: Check that `pom.xml` and `license-report.md` are modified
