@@ -1,5 +1,4 @@
-# Ensures that the current lib version is not yet published but executing the Gradle
-# `checkVersionIncrement` task.
+# Ensures that the license report files were modified in this PR.
 
 name: Ensure license reports updated
 
