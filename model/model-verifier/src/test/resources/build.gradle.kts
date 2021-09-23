@@ -52,7 +52,7 @@ buildscript {
     val spineBaseVersion: String by extra
     val versionToPublish: String by extra
 
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, rootProject)
+    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "core-java", rootProject)
     io.spine.internal.gradle.doApplyStandard(repositories)
 
     dependencies {
@@ -81,7 +81,7 @@ apply {
     from("$enclosingRootDir/version.gradle.kts")
 }
 
-repositories.applyGitHubPackages(rootProject)
+repositories.applyGitHubPackages("core-java", rootProject)
 repositories.applyStandard()
 
 tasks.compileJava {

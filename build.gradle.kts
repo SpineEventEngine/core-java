@@ -33,6 +33,8 @@ import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.spinePublishing
+import org.gradle.internal.impldep.org.fusesource.jansi.AnsiRenderer.test
+import org.gradle.internal.impldep.org.junit.platform.launcher.EngineFilter.includeEngines
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -40,7 +42,7 @@ buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
     io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, rootProject)
+    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "core-java", rootProject)
     io.spine.internal.gradle.doForceVersions(configurations)
 
     val kotlinVersion: String by extra
@@ -63,7 +65,7 @@ buildscript {
     }
 }
 
-repositories.applyGitHubPackages(rootProject)
+repositories.applyGitHubPackages("core-java", rootProject)
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
@@ -157,7 +159,7 @@ subprojects {
         }
     }
 
-    repositories.applyGitHubPackages(rootProject)
+    repositories.applyGitHubPackages("core-java", rootProject)
     repositories.applyStandard()
 
     dependencies {
