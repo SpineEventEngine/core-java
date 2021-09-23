@@ -33,8 +33,6 @@ import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.spinePublishing
-import org.gradle.internal.impldep.org.fusesource.jansi.AnsiRenderer.test
-import org.gradle.internal.impldep.org.junit.platform.launcher.EngineFilter.includeEngines
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -42,8 +40,7 @@ buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
     io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "core-java", rootProject)
-    io.spine.internal.gradle.doForceVersions(configurations)
+    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
 
     val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
@@ -53,6 +50,7 @@ buildscript {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
     }
 
+    io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
             force(
@@ -65,7 +63,6 @@ buildscript {
     }
 }
 
-repositories.applyGitHubPackages("core-java", rootProject)
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
@@ -83,6 +80,9 @@ plugins {
     }
 }
 
+/** The name of the GitHub repository to which this project belongs. */
+val repositoryName: String = "core-java"
+
 val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
@@ -91,7 +91,7 @@ spinePublishing {
     with(PublishingRepos) {
         targetRepositories.addAll(setOf(
             cloudRepo,
-            gitHub("core-java"),
+            gitHub(repositoryName),
             cloudArtifactRegistry
         ))
     }
@@ -159,8 +159,11 @@ subprojects {
         }
     }
 
-    repositories.applyGitHubPackages("core-java", rootProject)
-    repositories.applyStandard()
+    with(repositories) {
+        applyGitHubPackages("base", rootProject)
+        applyGitHubPackages("time", rootProject)
+        applyStandard()
+    }
 
     dependencies {
         ErrorProne.apply {
