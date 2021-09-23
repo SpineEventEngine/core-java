@@ -40,8 +40,7 @@ buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
     io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, rootProject)
-    io.spine.internal.gradle.doForceVersions(configurations)
+    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
 
     val kotlinVersion: String by extra
     val spineBaseVersion: String by extra
@@ -51,6 +50,7 @@ buildscript {
         classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
     }
 
+    io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
             force(
@@ -63,7 +63,6 @@ buildscript {
     }
 }
 
-repositories.applyGitHubPackages(rootProject)
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
@@ -81,6 +80,9 @@ plugins {
     }
 }
 
+/** The name of the GitHub repository to which this project belongs. */
+val repositoryName: String = "core-java"
+
 val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
@@ -89,7 +91,7 @@ spinePublishing {
     with(PublishingRepos) {
         targetRepositories.addAll(setOf(
             cloudRepo,
-            gitHub("core-java"),
+            gitHub(repositoryName),
             cloudArtifactRegistry
         ))
     }
@@ -157,8 +159,11 @@ subprojects {
         }
     }
 
-    repositories.applyGitHubPackages(rootProject)
-    repositories.applyStandard()
+    with(repositories) {
+        applyGitHubPackages("base", rootProject)
+        applyGitHubPackages("time", rootProject)
+        applyStandard()
+    }
 
     dependencies {
         ErrorProne.apply {

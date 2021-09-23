@@ -154,46 +154,53 @@ object PublishingRepos {
     }
 
     fun gitHub(repoName: String): Repository {
+        val githubActor: String = gitHubActor()
+        return Repository(
+            name = "GitHub Packages",
+            releases = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
+            snapshots = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
+            credentialValues = { project -> project.credentialsWithToken(githubActor) }
+        )
+    }
+
+    private fun gitHubActor(): String {
         var githubActor: String? = System.getenv("GITHUB_ACTOR")
         githubActor = if (githubActor.isNullOrEmpty()) {
             "developers@spine.io"
         } else {
             githubActor
         }
-
-        return Repository(
-            name = "GitHub Packages",
-            releases = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
-            snapshots = "https://maven.pkg.github.com/SpineEventEngine/$repoName",
-            credentialValues = { project ->
-                Credentials(
-                    username = githubActor,
-                    // This is a trick. Gradle only supports password or AWS credentials. Thus,
-                    // we pass the GitHub token as a "password".
-                    // https://docs.github.com/en/actions/guides/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
-                    password = readGitHubToken(project)
-                )
-            }
-        )
+        return githubActor
     }
 
-    private fun readGitHubToken(project: Project): String {
+    /**
+     * This is a trick. Gradle only supports password or AWS credentials.
+     * Thus, we pass the GitHub token as a "password".
+     *
+     * See https://docs.github.com/en/actions/guides/publishing-java-packages-with-gradle#publishing-packages-to-github-packages
+     */
+    private fun Project.credentialsWithToken(githubActor: String) = Credentials(
+        username = githubActor,
+        password = readGitHubToken()
+    )
+
+    private fun Project.readGitHubToken(): String {
         val githubToken: String? = System.getenv("GITHUB_TOKEN")
         return if (githubToken.isNullOrEmpty()) {
             // Use the personal access token for the `developers@spine.io` account.
             // Only has the permission to read public GitHub packages.
-            val targetDir = "${project.buildDir}/token"
-            project.file(targetDir).mkdirs()
-            val fileToUnzip = "${project.rootDir}/buildSrc/aus.weis"
+            val targetDir = "${buildDir}/token"
+            file(targetDir).mkdirs()
+            val fileToUnzip = "${rootDir}/buildSrc/aus.weis"
 
-            project.logger.info("GitHub Packages: reading token " +
+            logger.info("GitHub Packages: reading token " +
                     "by unzipping `$fileToUnzip` into `$targetDir`.")
-            project.exec {
+            exec {
                 // Unzip with password "123", allow overriding, quietly,
                 // into the target dir, the given archive.
                 commandLine("unzip", "-P", "123", "-oq", "-d", targetDir, fileToUnzip)
             }
-            val file = project.file("$targetDir/token.txt")
+            val file = file("$targetDir/token.txt")
             file.readText()
         } else {
             githubToken
@@ -208,7 +215,18 @@ object PublishingRepos {
  */
 @Suppress("unused")
 object Repos {
+    @Deprecated(
+        message = "Please use another repository.",
+        replaceWith = ReplaceWith("artifactRegistry"),
+        level = DeprecationLevel.ERROR
+    )
     val oldSpine = PublishingRepos.mavenTeamDev.releases
+
+    @Deprecated(
+        message = "Please use another repository.",
+        replaceWith = ReplaceWith("artifactRegistrySnapshots"),
+        level = DeprecationLevel.ERROR
+    )
     val oldSpineSnapshots = PublishingRepos.mavenTeamDev.snapshots
 
     val spine = PublishingRepos.cloudRepo.releases
@@ -232,35 +250,48 @@ object Repos {
  * To be used in `buildscript` clauses when a fully-qualified call must be made.
  */
 @Suppress("unused")
-fun doApplyStandard(repositories: RepositoryHandler) {
-    repositories.applyStandard()
-}
+fun doApplyStandard(repositories: RepositoryHandler) = repositories.applyStandard()
 
 /**
  * Registers the selected GitHub Packages repos as Maven repositories.
  *
  * To be used in `buildscript` clauses when a fully-qualified call must be made.
  *
+ * @param repositories
+ *          the handler to accept registration of the GitHub Packages repository
+ * @param shortRepositoryName
+ *          the short name of the GitHub repository (e.g. "core-java")
+ * @param project
+ *          the project which is going to consume or publish artifacts from
+ *          the registered repository
  * @see applyGitHubPackages
  */
 @Suppress("unused")
-fun doApplyGitHubPackages(repositories: RepositoryHandler, project: Project) {
-    repositories.applyGitHubPackages(project)
-}
+fun doApplyGitHubPackages(
+    repositories: RepositoryHandler,
+    shortRepositoryName: String,
+    project: Project
+) = repositories.applyGitHubPackages(shortRepositoryName, project)
 
 /**
  * Applies the repositories hosted at GitHub Packages, to which Spine artifacts were published.
  *
  * This method should be used by those wishing to have Spine artifacts published
  * to GitHub Packages as dependencies.
+ *
+ * @param shortRepositoryName
+ *          the short name of the GitHub repository (e.g. "core-java")
+ * @param project
+ *          the project which is going to consume or publish artifacts from
+ *          the registered repository
  */
-fun RepositoryHandler.applyGitHubPackages(project: Project) {
-    val baseTypes = gitHub("base-types")
-    val gprCreds = baseTypes.credentials(project)
+fun RepositoryHandler.applyGitHubPackages(shortRepositoryName: String, project: Project) {
+    val repository = gitHub(shortRepositoryName)
+    val credentials = repository.credentials(project)
 
-    gprCreds?.let {
-        spineMavenRepo(it, baseTypes.releases)
-        spineMavenRepo(it, baseTypes.snapshots)
+    credentials?.let {
+        spineMavenRepo(it, repository.releases)
+        spineMavenRepo(it, repository.snapshots)
     }
 }
 
