@@ -55,6 +55,7 @@ import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 import java.util.Set;
@@ -515,13 +516,27 @@ public abstract class BoundedContext implements Closeable, Logging {
         }
 
         /**
-         * Obtains repositories of the context.
+         * Obtains the repository of the context by the type of the entity state.
          *
+         * @param stateClass
+         *         the state class of the entities managed by the repository
          * @throws IllegalStateException
-         *         if there is not repository entities of which have the passed state
+         *         if there is no repository entities of which have the passed state
          */
         public Repository<?, ?> getRepository(Class<? extends EntityState> stateClass) {
             return guard.get(stateClass);
+        }
+
+        /**
+         * Obtains the repository of the context by the type URL of the entity state..
+         *
+         * @param stateType
+         *         the state type URL of the entities managed by the repository
+         * @throws IllegalStateException
+         *         if there is no such repository
+         */
+        public Repository<?, ?> getRepository(TypeUrl stateType) {
+            return guard.get(stateType);
         }
 
         /**

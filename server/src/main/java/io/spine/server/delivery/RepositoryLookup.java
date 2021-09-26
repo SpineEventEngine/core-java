@@ -1,6 +1,12 @@
 /*
  * Copyright 2021, TeamDev. All rights reserved.
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
  * disclaimer.
@@ -18,32 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * The versions of the libraries used.
- *
- * This file is used in both module `build.gradle.kts` scripts and in the integration tests,
- * as we want to manage the versions in a single source.
- *
- * This version file adheres to the contract of the
- * [publishing application](https://github.com/SpineEventEngine/publishing).
- *
- * When changing the version declarations or adding new ones, make sure to change
- * the publishing application accordingly.
- */
+package io.spine.server.delivery;
+
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.type.TypeUrl;
+
+import java.util.function.Function;
 
 /**
- * Version of this library.
+ * A function that searches for the {@link ProjectionRepository} instance by the type URL
+ * of the state of the managed projection.
  */
-val coreJava = "1.7.6"
-
-/**
- * Versions of the Spine libraries that `core-java` depends on.
- */
-val base = "1.7.4"
-val time = "1.7.1"
-
-project.extra.apply {
-    this["versionToPublish"] = coreJava
-    this["spineBaseVersion"] = base
-    this["spineTimeVersion"] = time
+@FunctionalInterface
+public interface RepositoryLookup<I> extends Function<TypeUrl, ProjectionRepository<I, ?, ?>> {
 }

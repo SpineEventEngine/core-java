@@ -46,6 +46,7 @@ import io.spine.server.delivery.CatchUpSignal;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.delivery.RepositoryLookup;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
@@ -113,6 +114,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <S>
  *         the type of projection state messages
  */
+@SuppressWarnings("ClassWithTooManyMethods")    /* To improve the documentation. */
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends EntityState>
         extends EventDispatchingRepository<I, P, S> {
 
@@ -155,7 +157,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         initInbox(delivery);
-        initCatchUp(context, delivery);
+        if(isCatchUpEnabled()) {
+            initCatchUp(context, delivery);
+        }
     }
 
     /**
@@ -163,11 +167,33 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * as an event dispatcher in the same Bounded Context as the repository itself.
      */
     private void initCatchUp(BoundedContext context, Delivery delivery) {
+        RepositoryLookup<I> lookup = lookupIn(context);
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
-        catchUpProcess = builder.setDispatchOp(this::sendToCatchingUp)
+        catchUpProcess = builder.setDispatchOp(ProjectionRepository::sendToCatchingUp)
+                                .setLookup(lookup)
                                 .build();
+
         context.internalAccess()
                .registerEventDispatcher(catchUpProcess);
+    }
+
+    /**
+     * Tells whether the catch-up feature is enabled for this repository.
+     */
+    @Internal
+    protected boolean isCatchUpEnabled() {
+        return true;
+    }
+
+    /**
+     * Locates the instance of this repository in the bounded context.
+     */
+    @SuppressWarnings("unchecked")  /* Safe, as only instances of this type serve this `typeUrl`. */
+    private RepositoryLookup<I> lookupIn(BoundedContext context) {
+        RepositoryLookup<I> lookup =
+                (typeUrl -> (ProjectionRepository<I, ?, ?>)
+                                context.internalAccess().getRepository(typeUrl));
+        return lookup;
     }
 
     private void initCache(boolean multitenant) {
@@ -417,12 +443,21 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     public CatchUpId catchUp(Timestamp since, @Nullable Set<I> ids)
             throws CatchUpAlreadyStartedException {
+        ensureCatchUpEnabled();
         checkCatchUpTargets(ids);
         checkCatchUpStartTime(since);
 
         CatchUpId catchUpId = withCurrentTenant(context().isMultitenant())
                 .evaluate(() -> catchUpProcess.startCatchUp(since, ids));
         return catchUpId;
+    }
+
+    private void ensureCatchUpEnabled() {
+        if(!isCatchUpEnabled()) {
+            throw newIllegalStateException(
+                    "Catch-up is disabled for the instances managed by this `%s` repository.",
+                    getClass().getName());
+        }
     }
 
     private static void checkCatchUpStartTime(Timestamp since) {
@@ -478,6 +513,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * handling of {@code CatchUpSignal}s may affect the lifecycle state of the projection
      * instances. E.g. the callee must know to what targets he is sending the "delete state" signal.
      *
+     * @param repo
+     *         the repository managing the catching-up projection instances
      * @param event
      *         the event to dispatch
      * @param restrictToIds
@@ -487,20 +524,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @return the set of the entity identifiers, which actually received the dispatched event
      * @see CatchUpEndpoint
      */
-    private Set<I> sendToCatchingUp(Event event, @Nullable Set<I> restrictToIds) {
+    private static <I> Set<I> sendToCatchingUp(ProjectionRepository<I, ?, ?> repo,
+                                               Event event,
+                                               @Nullable Set<I> restrictToIds) {
         EventEnvelope envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
         if (envelope.message() instanceof CatchUpSignal) {
             catchUpTargets = restrictToIds == null
-                             ? ImmutableSet.copyOf(index())
+                             ? ImmutableSet.copyOf(repo.index())
                              : restrictToIds;
         } else {
-            Set<I> routedTargets = route(envelope);
+            Set<I> routedTargets = repo.route(envelope);
             catchUpTargets = restrictToIds == null
                              ? routedTargets
                              : intersection(routedTargets, restrictToIds).immutableCopy();
         }
-        Inbox<I> inbox = inbox();
+        Inbox<I> inbox = repo.inbox();
         for (I target : catchUpTargets) {
             inbox.send(envelope)
                  .toCatchUp(target);

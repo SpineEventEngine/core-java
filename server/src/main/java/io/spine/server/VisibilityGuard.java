@@ -34,11 +34,14 @@ import io.spine.server.entity.EntityVisibility;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -130,11 +133,36 @@ final class VisibilityGuard {
      * Obtains a repository by the type of the entity state.
      *
      * @throws IllegalStateException
-     *         if there is not repository entities of which have the passed state
+     *         if there is no repository entities of which have the passed state
      */
     Repository<?, ?> get(Class<? extends EntityState> stateClass) {
         RepositoryAccess access = findOrThrow(stateClass);
         return access.repository;
+    }
+
+    /**
+     * Obtains a repository by the type URL of the entity state.
+     *
+     * @throws IllegalStateException
+     *         if there is no such repository
+     */
+    Repository<?, ?> get(TypeUrl stateType) {
+        RepositoryAccess result =
+                repoAccess().filter(byTypeUrl(stateType))
+                            .findFirst()
+                            .orElseThrow(cannotFindByTypeUrl(stateType));
+        return result.repository;
+    }
+
+    private static Supplier<IllegalStateException> cannotFindByTypeUrl(TypeUrl repositoryState) {
+        return () ->
+                newIllegalStateException(
+                        "A repository for the type URL `%s` is not registered.",
+                        repositoryState);
+    }
+
+    private static Predicate<RepositoryAccess> byTypeUrl(TypeUrl repositoryState) {
+        return repo -> repositoryState.equals(repo.repository.entityStateType());
     }
 
     private Stream<RepositoryAccess> repoAccess() {

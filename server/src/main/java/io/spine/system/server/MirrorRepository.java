@@ -60,6 +60,8 @@ import static io.spine.system.server.MirrorProjection.buildFilters;
  * <p>The mirrored entity types are gathered at runtime and are usually
  * {@linkplain #registerMirroredType(Repository) registered} by the corresponding entity
  * repositories.
+ *
+ * <p>The catch-up is disabled for the instances of this repository.
  */
 @Internal
 public final class MirrorRepository
@@ -76,6 +78,12 @@ public final class MirrorRepository
         super.setupEventRouting(routing);
         routing.route(EntityLifecycleEvent.class,
                       (message, context) -> targetsFrom(message));
+    }
+
+    @Internal
+    @Override
+    protected boolean isCatchUpEnabled() {
+        return false;
     }
 
     private Set<MirrorId> targetsFrom(EntityLifecycleEvent event) {

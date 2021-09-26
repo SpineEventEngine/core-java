@@ -193,7 +193,7 @@ import static java.util.stream.Collectors.toSet;
  *         impossible to register the process managers with the same state in
  *         a multi-{@code BoundedContext} application.
  */
-@SuppressWarnings("OverlyCoupledClass")    // It does a lot.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})    // It does a lot.
 public final class CatchUpProcess<I>
         extends AbstractStatefulReactor<CatchUpId, CatchUp, CatchUp.Builder> {
 
@@ -209,7 +209,8 @@ public final class CatchUpProcess<I>
      */
     private static final Turbulence TURBULENCE = Turbulence.of(fromMillis(500));
 
-    private final ProjectionRepository<I, ?, ?> repository;
+    private final RepositoryLookup<I> lookup;
+    private final TypeUrl projectionType;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
@@ -220,11 +221,12 @@ public final class CatchUpProcess<I>
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
         super(TYPE);
-        this.repository = builder.getRepository();
+        this.lookup = builder.getLookup();
+        this.projectionType = builder.getProjectionType();
         this.dispatchOperation = builder.getDispatchOp();
         this.storage = builder.getStorage();
         this.queryLimit = limitOf(builder.getPageSize());
-        this.starterTemplate = CatchUpStarter.newBuilder(this.repository, this.storage);
+        this.starterTemplate = CatchUpStarter.newBuilder(builder.getRepository(), this.storage);
     }
 
     @Internal
@@ -437,7 +439,7 @@ public final class CatchUpProcess<I>
         Set<I> ids;
         List<Any> rawTargets = request.getTargetList();
         ids = rawTargets.isEmpty()
-              ? ImmutableSet.copyOf(repository.index())
+              ? ImmutableSet.copyOf(repository().index())
               : unpack(rawTargets);
         return ids;
     }
@@ -523,7 +525,9 @@ public final class CatchUpProcess<I>
                                               ? null
                                               : targets;
         for (Event event : events) {
-            Set<I> targetsOfThisDispatch = dispatchOperation.perform(event, targetsForDispatch);
+            Set<I> targetsOfThisDispatch = dispatchOperation.perform(repository(),
+                                                                     event,
+                                                                     targetsForDispatch);
             actualTargets.addAll(targetsOfThisDispatch);
         }
         if (!actualTargets.isEmpty()) {
@@ -548,7 +552,7 @@ public final class CatchUpProcess<I>
 
     private Set<I> unpack(List<Any> packedIds) {
         return packedIds.stream()
-                        .map((any) -> Identifier.unpack(any, repository.idClass()))
+                        .map((any) -> Identifier.unpack(any, repository().idClass()))
                         .collect(toSet());
     }
 
@@ -568,6 +572,10 @@ public final class CatchUpProcess<I>
             builder.setLimit(limit);
         }
         return builder.vBuild();
+    }
+
+    private ProjectionRepository<I, ?, ?> repository() {
+        return lookup.apply(projectionType);
     }
 
     /*
@@ -590,7 +598,7 @@ public final class CatchUpProcess<I>
         CatchUpSignal asSignal = (CatchUpSignal) raw;
         String actualType = asSignal.getId()
                                     .getProjectionType();
-        String expectedType = repository.entityStateType()
+        String expectedType = repository().entityStateType()
                                         .value();
         return expectedType.equals(actualType);
     }
@@ -639,6 +647,8 @@ public final class CatchUpProcess<I>
          *         optional set of identifiers of the targets to narrow down the event targets
          * @return the set of identifiers to which the event was actually dispatched
          */
-        Set<I> perform(Event event, @Nullable Set<I> narrowDownToIds);
+        Set<I> perform(ProjectionRepository<I, ?, ?> repo,
+                       Event event,
+                       @Nullable Set<I> narrowDownToIds);
     }
 }
