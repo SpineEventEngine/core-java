@@ -109,7 +109,7 @@ public final class CatchUpProcessBuilder<I> {
      * Obtains the pre-configured way to dispatch the events during the catch-up.
      *
      * @throws NullPointerException
-     *         if the storage has not been set
+     *         if the dispatch operation has not been set
      */
     DispatchCatchingUp<I> getDispatchOp() {
         return checkNotNull(dispatchOp);
