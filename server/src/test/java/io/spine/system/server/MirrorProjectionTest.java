@@ -26,7 +26,10 @@
 
 package io.spine.system.server;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
+import io.spine.base.Time;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.system.server.event.EntityStateChanged;
@@ -34,6 +37,7 @@ import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.AGGREGATE_TYPE_URL;
 import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.ID;
@@ -42,6 +46,8 @@ import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entity
 import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityExtracted;
 import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityRestored;
 import static io.spine.system.server.given.mirror.MirrorProjectionTestEnv.entityStateChanged;
+import static io.spine.testdata.Sample.messageOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`MirrorProjection` should")
 class MirrorProjectionTest {
@@ -127,6 +133,21 @@ class MirrorProjectionTest {
                     .isFalse();
         assertMirror.hasStateThat()
                     .isNotEqualToDefaultInstance();
+    }
+
+    @Test
+    @DisplayName("not allow to start the catch-up")
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting an exception. */
+    void haveNoCatchUp() {
+        MirrorRepository repo = new MirrorRepository();
+        Timestamp time = Time.currentTime();
+        assertIse(() -> repo.catchUp(time, ImmutableSet.of(messageOfType(MirrorId.class))));
+        assertIse(() -> repo.catchUpAll(time));
+    }
+
+    private static void assertIse(Executable action) {
+        assertThrows(IllegalStateException.class,
+                     action);
     }
 
     private static BlackBoxContext context() {
