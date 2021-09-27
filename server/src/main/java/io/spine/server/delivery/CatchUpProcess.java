@@ -607,9 +607,9 @@ public final class CatchUpProcess<I>
     /**
      * {@inheritDoc}
      *
-     * <p>Tells if the passed envelope can be dispatched to this instance of the process
-     * by verifying that the projection type URL passed with the event matches the one of the
-     * projection repository configured for this instance.
+     * <p>Ensures that the passed signal is an instance of {@link CatchUpSignal} and hence
+     * is suitable for the upcoming {@linkplain #route(EventEnvelope) ID extraction
+     * at the routing stage}.
      */
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
