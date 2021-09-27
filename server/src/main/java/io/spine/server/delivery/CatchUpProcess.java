@@ -61,8 +61,10 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -210,11 +212,11 @@ public final class CatchUpProcess<I>
     private static final Turbulence TURBULENCE = Turbulence.of(fromMillis(500));
 
     private final RepositoryLookup<I> lookup;
-    private final TypeUrl projectionType;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
     private final Limit queryLimit;
+    private final Map<String, ProjectionRepository<I, ?, ?>> repos = new HashMap<>();
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
     private @MonotonicNonNull Supplier<EventStore> eventStore;
@@ -222,7 +224,6 @@ public final class CatchUpProcess<I>
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
         super(TYPE);
         this.lookup = builder.getLookup();
-        this.projectionType = builder.getProjectionType();
         this.dispatchOperation = builder.getDispatchOp();
         this.storage = builder.getStorage();
         this.queryLimit = limitOf(builder.getPageSize());
@@ -438,9 +439,10 @@ public final class CatchUpProcess<I>
     private Set<I> targetsForCatchUpSignals(CatchUp.Request request) {
         Set<I> ids;
         List<Any> rawTargets = request.getTargetList();
+        ProjectionRepository<I, ?, ?> repository = repository();
         ids = rawTargets.isEmpty()
-              ? ImmutableSet.copyOf(repository().index())
-              : unpack(rawTargets);
+              ? ImmutableSet.copyOf(repository.index())
+              : unpack(rawTargets, repository.idClass());
         return ids;
     }
 
@@ -511,7 +513,7 @@ public final class CatchUpProcess<I>
         if (packedIds.isEmpty()) {
             dispatchAll(events, new HashSet<>());
         } else {
-            Set<I> ids = unpack(packedIds);
+            Set<I> ids = unpack(packedIds, repository().idClass());
             dispatchAll(events, ids);
         }
     }
@@ -550,9 +552,9 @@ public final class CatchUpProcess<I>
         return allEvents;
     }
 
-    private Set<I> unpack(List<Any> packedIds) {
+    private Set<I> unpack(List<Any> packedIds, Class<I> idType) {
         return packedIds.stream()
-                        .map((any) -> Identifier.unpack(any, repository().idClass()))
+                        .map((any) -> Identifier.unpack(any, idType))
                         .collect(toSet());
     }
 
@@ -574,8 +576,28 @@ public final class CatchUpProcess<I>
         return builder.vBuild();
     }
 
+    /**
+     * Loads the instance of corresponding {@link ProjectionRepository} according
+     * to the type URL of the projection state held by
+     * the {@linkplain CatchUpId#getProjectionType() ID of this process}.
+     *
+     * <p>Such a mechanism ensures that this process always has its ID and underlying
+     * repository matching each other.
+     *
+     * <p>The result of execution is cached, so that next execution goes faster.
+     */
     private ProjectionRepository<I, ?, ?> repository() {
-        return lookup.apply(projectionType);
+        String type = builder().getId()
+                               .getProjectionType();
+        synchronized (repos) {
+            if(repos.containsKey(type)) {
+                return repos.get(type);
+            }
+            TypeUrl typeUrl = TypeUrl.parse(type);
+            ProjectionRepository<I, ?, ?> repo = lookup.apply(typeUrl);
+            repos.put(type, repo);
+            return repo;
+        }
     }
 
     /*
@@ -592,15 +614,7 @@ public final class CatchUpProcess<I>
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
         EventMessage raw = envelope.message();
-        if (!(raw instanceof CatchUpSignal)) {
-            return false;
-        }
-        CatchUpSignal asSignal = (CatchUpSignal) raw;
-        String actualType = asSignal.getId()
-                                    .getProjectionType();
-        String expectedType = repository().entityStateType()
-                                        .value();
-        return expectedType.equals(actualType);
+        return raw instanceof CatchUpSignal;
     }
 
     @Override

@@ -28,7 +28,6 @@ package io.spine.server.delivery;
 
 import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,7 +39,6 @@ import static io.spine.util.Preconditions2.checkPositive;
 public final class CatchUpProcessBuilder<I> {
 
     private final ProjectionRepository<I, ?, ?> repository;
-    private final TypeUrl projectionType;
     private @MonotonicNonNull RepositoryLookup<I> lookup;
     private @MonotonicNonNull CatchUpStorage storage;
     private @MonotonicNonNull DispatchCatchingUp<I> dispatchOp;
@@ -54,7 +52,6 @@ public final class CatchUpProcessBuilder<I> {
      */
     CatchUpProcessBuilder(ProjectionRepository<I, ?, ?> repository) {
         this.repository = repository;
-        this.projectionType = repository.entityStateType();
     }
 
     /**
@@ -134,13 +131,6 @@ public final class CatchUpProcessBuilder<I> {
      */
     RepositoryLookup<I> getLookup() {
         return checkNotNull(lookup);
-    }
-
-    /**
-     * Obtains the type URL of the state of the projection to catch up.
-     */
-    public TypeUrl getProjectionType() {
-        return projectionType;
     }
 
     /**
