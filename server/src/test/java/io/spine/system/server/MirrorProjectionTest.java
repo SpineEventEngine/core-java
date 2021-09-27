@@ -81,7 +81,8 @@ class MirrorProjectionTest {
         assertMirror.hasStateThat()
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(Mirror.newBuilder()
-                                     .setLifecycle(LifecycleFlags.newBuilder().setArchived(true))
+                                     .setLifecycle(LifecycleFlags.newBuilder()
+                                                                 .setArchived(true))
                                      .buildPartial());
     }
 
@@ -101,7 +102,8 @@ class MirrorProjectionTest {
         assertMirror.hasStateThat()
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(Mirror.newBuilder()
-                                     .setLifecycle(LifecycleFlags.newBuilder().setDeleted(true))
+                                     .setLifecycle(LifecycleFlags.newBuilder()
+                                                                 .setDeleted(true))
                                      .buildPartial());
     }
 
@@ -146,8 +148,7 @@ class MirrorProjectionTest {
     }
 
     private static void assertIse(Executable action) {
-        assertThrows(IllegalStateException.class,
-                     action);
+        assertThrows(IllegalStateException.class, action);
     }
 
     private static BlackBoxContext context() {
