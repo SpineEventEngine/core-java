@@ -157,7 +157,7 @@ final class VisibilityGuard {
     private static Supplier<IllegalStateException> cannotFindByTypeUrl(TypeUrl repositoryState) {
         return () ->
                 newIllegalStateException(
-                        "A repository for the type URL `%s` is not registered.",
+                        "Cannot find a registered repository by `%s` type URL of its entity state.",
                         repositoryState);
     }
 
