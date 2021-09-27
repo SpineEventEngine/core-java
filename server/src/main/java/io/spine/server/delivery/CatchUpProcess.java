@@ -257,9 +257,9 @@ public final class CatchUpProcess<I>
      * @param ids
      *         identifiers of the projections to catch up, or {@code null} if all of the
      *         instances should be caught up
+     * @return identifier of the catch-up operation
      * @throws CatchUpAlreadyStartedException
      *         if at least one of the selected instances is already catching up at the moment
-     * @return identifier of the catch-up operation
      */
     @Internal
     public CatchUpId startCatchUp(Timestamp since, @Nullable Set<I> ids)
@@ -590,7 +590,7 @@ public final class CatchUpProcess<I>
         String type = builder().getId()
                                .getProjectionType();
         synchronized (repos) {
-            if(repos.containsKey(type)) {
+            if (repos.containsKey(type)) {
                 return repos.get(type);
             }
             TypeUrl typeUrl = TypeUrl.parse(type);
@@ -655,6 +655,8 @@ public final class CatchUpProcess<I>
          * <p>If no particular IDs are specified, the event will be dispatched according to the
          * repository routing rules.
          *
+         * @param repo
+         *         the projection repository which manages the entities involved into the catch-up
          * @param event
          *         event to dispatch
          * @param narrowDownToIds
