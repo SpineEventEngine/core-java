@@ -27,7 +27,6 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.EntityState;
 import io.spine.core.Event;
@@ -104,7 +103,6 @@ public abstract class EventDispatchingRepository<I,
      * @param event the event to dispatch
      */
     @Override
-    @CanIgnoreReturnValue
     public final void dispatch(EventEnvelope event) {
         checkNotNull(event);
         doDispatch(event);
