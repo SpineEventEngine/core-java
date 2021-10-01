@@ -122,6 +122,7 @@ public abstract class Projection<I,
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
+    @SuppressWarnings("HandleMethodResult") /* Projection dispatching has no outcome. */
     static boolean playOn(Projection<?, ?, ?> projection, Iterable<Event> events) {
         ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
