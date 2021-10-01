@@ -27,7 +27,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
 import io.spine.server.event.EventDispatcher;
@@ -82,7 +81,6 @@ public final class EventImportDispatcher<I> implements EventDispatcher, Logging 
         return EventClass.emptySet();
     }
 
-    @CanIgnoreReturnValue
     @Override
     public void dispatch(EventEnvelope event) {
         repository.importEvent(event);
