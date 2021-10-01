@@ -80,7 +80,6 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
                       .build();
     }
 
-    @CanIgnoreReturnValue
     @Override
     public void dispatch(EventEnvelope event) {
         Set<I> targets = route(event);
