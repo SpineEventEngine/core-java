@@ -24,21 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+package io.spine.internal.gradle
 
-// https://github.com/grpc/grpc-java
-@Suppress("unused")
-object Grpc {
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.38.0"
-    const val api            = "io.grpc:grpc-api:${version}"
-    const val core           = "io.grpc:grpc-core:${version}"
-    const val context        = "io.grpc:grpc-context:${version}"
-    const val stub           = "io.grpc:grpc-stub:${version}"
-    const val okHttp         = "io.grpc:grpc-okhttp:${version}"
-    const val protobuf       = "io.grpc:grpc-protobuf:${version}"
-    const val protobufLite   = "io.grpc:grpc-protobuf-lite:${version}"
-    const val protobufPlugin = "io.grpc:protoc-gen-grpc-java:${version}"
-    const val netty          = "io.grpc:grpc-netty:${version}"
-    const val nettyShaded    = "io.grpc:grpc-netty-shaded:${version}"
-}
+import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.kotlin.dsl.getByType
+
+/**
+ * This file contains extension methods and properties for the Gradle `Project`.
+ */
+
+/**
+ * Obtains the Java plugin extension of the project.
+ */
+val Project.javaPluginExtension: JavaPluginExtension
+    get() = extensions.getByType()
+
+/**
+ * Obtains source set container of the Java project.
+ */
+val Project.sourceSets: SourceSetContainer
+    get() = javaPluginExtension.sourceSets

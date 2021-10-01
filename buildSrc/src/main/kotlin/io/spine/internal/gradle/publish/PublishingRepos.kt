@@ -24,17 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle
+package io.spine.internal.gradle.publish
 
-import io.spine.internal.dependency.AssertK
-import io.spine.internal.dependency.BouncyCastle
-import io.spine.internal.dependency.JavaJwt
-import io.spine.internal.dependency.Klaxon
+import io.spine.internal.gradle.Repository
 
-@Suppress("unused")
-object Publishing {
-    const val klaxon = Klaxon.lib
-    const val oauthJwt = JavaJwt.lib
-    const val bouncyCastlePkcs = BouncyCastle.libPkcsJdk15
-    const val assertK = AssertK.libJvm
+/**
+ * Repositories to which we may publish.
+ */
+object PublishingRepos {
+
+    @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
+    val mavenTeamDev = Repository(
+        name = "maven.teamdev.com",
+        releases = "http://maven.teamdev.com/repository/spine",
+        snapshots = "http://maven.teamdev.com/repository/spine-snapshots",
+        credentialsFile = "credentials.properties"
+    )
+
+    val cloudRepo = Repository(
+        name = "CloudRepo",
+        releases = "https://spine.mycloudrepo.io/public/repositories/releases",
+        snapshots = "https://spine.mycloudrepo.io/public/repositories/snapshots",
+        credentialsFile = "cloudrepo.properties"
+    )
+
+    val cloudArtifactRegistry = CloudArtifactRegistry.repository
+
+    /**
+     * Obtains a GitHub repository by the given name.
+     */
+    fun gitHub(repoName: String): Repository = GitHubPackages.repository(repoName)
 }
+

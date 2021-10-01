@@ -26,19 +26,9 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/grpc/grpc-java
+// https://github.com/Kotlin/dokka
 @Suppress("unused")
-object Grpc {
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.38.0"
-    const val api            = "io.grpc:grpc-api:${version}"
-    const val core           = "io.grpc:grpc-core:${version}"
-    const val context        = "io.grpc:grpc-context:${version}"
-    const val stub           = "io.grpc:grpc-stub:${version}"
-    const val okHttp         = "io.grpc:grpc-okhttp:${version}"
-    const val protobuf       = "io.grpc:grpc-protobuf:${version}"
-    const val protobufLite   = "io.grpc:grpc-protobuf-lite:${version}"
-    const val protobufPlugin = "io.grpc:protoc-gen-grpc-java:${version}"
-    const val netty          = "io.grpc:grpc-netty:${version}"
-    const val nettyShaded    = "io.grpc:grpc-netty-shaded:${version}"
+object Dokka {
+    const val version = "1.5.0"
+    const val pluginId = "org.jetbrains.dokka"
 }

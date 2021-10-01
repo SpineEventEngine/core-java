@@ -119,8 +119,6 @@ final def scripts = [
         testArtifacts          : "$dir/test-artifacts.gradle",
         testOutput             : "$dir/test-output.gradle",
         slowTests              : "$dir/slow-tests.gradle",
-        javadocOptions         : "$dir/javadoc-options.gradle",
-        filterInternalJavadocs : "$dir/filter-internal-javadoc.gradle",
         jacoco                 : "$dir/jacoco.gradle",
         publish                : "$dir/publish.gradle",
         publishProto           : "$dir/publish-proto.gradle",
@@ -139,8 +137,7 @@ final def scripts = [
         licenseReportCommon    : "$dir/license-report-common.gradle",
         projectLicenseReport   : "$dir/license-report-project.gradle",
         repoLicenseReport      : "$dir/license-report-repo.gradle",
-        generatePom            : "$dir/generate-pom.gradle",
-        updateGitHubPages      : "$dir/update-gh-pages.gradle"
+        generatePom            : "$dir/generate-pom.gradle"
 ]
 
 ext.deps = [

@@ -24,21 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+import org.gradle.api.Project
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.external.javadoc.CoreJavadocOptions
+import org.gradle.kotlin.dsl.named
 
-// https://github.com/grpc/grpc-java
 @Suppress("unused")
-object Grpc {
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.38.0"
-    const val api            = "io.grpc:grpc-api:${version}"
-    const val core           = "io.grpc:grpc-core:${version}"
-    const val context        = "io.grpc:grpc-context:${version}"
-    const val stub           = "io.grpc:grpc-stub:${version}"
-    const val okHttp         = "io.grpc:grpc-okhttp:${version}"
-    const val protobuf       = "io.grpc:grpc-protobuf:${version}"
-    const val protobufLite   = "io.grpc:grpc-protobuf-lite:${version}"
-    const val protobufPlugin = "io.grpc:protoc-gen-grpc-java:${version}"
-    const val netty          = "io.grpc:grpc-netty:${version}"
-    const val nettyShaded    = "io.grpc:grpc-netty-shaded:${version}"
+object TravisLogs {
+
+    /**
+     * Specific setup for a Travis build, which prevents warning messages related to
+     * `javadoc` tasks in build logs.
+     *
+     * It is expected that warnings are viewed and analyzed during local builds.
+     */
+    fun hideJavadocWarnings(p: Project) {
+        //
+        val isTravis = System.getenv("TRAVIS") == "true"
+        if (isTravis) {
+            // Set the maximum number of Javadoc warnings to print.
+            // If the parameter value is zero, all warnings will be printed.
+            p.tasks.named<Javadoc>("javadoc") {
+                val opt = options
+                if (opt is CoreJavadocOptions) {
+                    opt.addStringOption("Xmaxwarns", "1")
+                }
+            }
+        }
+    }
 }

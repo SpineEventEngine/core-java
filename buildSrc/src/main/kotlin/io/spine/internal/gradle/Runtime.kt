@@ -26,9 +26,71 @@
 
 package io.spine.internal.gradle
 
+import com.google.common.base.Joiner
 import io.spine.internal.dependency.Flogger
+import java.io.File
+import java.io.InputStream
+import java.io.StringWriter
+import java.util.*
 
 object Runtime {
     @Suppress("unused")
     val flogger = Flogger.Runtime
+}
+
+/**
+ * Executor of CLI commands.
+ *
+ * Uses the passed [workingFolder] as the directory in which the commands are executed.
+ */
+class Cli(private val workingFolder: File) {
+
+    /**
+     * Executes the given terminal command and retrieves the command output.
+     *
+     * <p>{@link Runtime#exec(String[], String[], File) Executes} the given {@code String} array as
+     * a CLI command. If the execution is successful, returns the command output. Throws
+     * an {@link IllegalStateException} otherwise.
+     *
+     * @param command the command to execute
+     * @return the command line output
+     * @throws IllegalStateException upon an execution error
+     */
+    fun execute(vararg command: String): String {
+        val outWriter = StringWriter()
+        val errWriter = StringWriter()
+
+        val process = ProcessBuilder(*command)
+            .directory(workingFolder)
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectError(ProcessBuilder.Redirect.PIPE)
+            .start()
+
+        process.inputStream!!.pourTo(outWriter)
+        process.errorStream!!.pourTo(errWriter)
+        val exitCode = process.waitFor()
+
+        if (exitCode == 0) {
+            return outWriter.toString()
+        } else {
+            val cmdAsString = Joiner.on(" ").join(command.iterator())
+            val errorMsg = "Command `$cmdAsString` finished with exit code $exitCode:" +
+                    " ${System.lineSeparator()}$errWriter" +
+                    " ${System.lineSeparator()}$outWriter."
+            throw IllegalStateException(errorMsg)
+        }
+    }
+}
+
+/**
+ * Asynchronously reads all lines from this [InputStream] and appends them
+ * to the passed [StringWriter].
+ */
+fun InputStream.pourTo(dest: StringWriter) {
+    Thread {
+        val sc = Scanner(this)
+        while (sc.hasNextLine()) {
+            dest.append(sc.nextLine())
+        }
+    }.start()
 }

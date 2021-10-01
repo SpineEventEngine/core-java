@@ -35,11 +35,4 @@ object Kotlin {
     const val stdLib       = "org.jetbrains.kotlin:kotlin-stdlib:${version}"
     const val stdLibCommon = "org.jetbrains.kotlin:kotlin-stdlib-common:${version}"
     const val stdLibJdk8   = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${version}"
-
-    // https://github.com/Kotlin/dokka
-    object Dokka {
-
-        const val version = "1.5.0"
-        const val pluginId = "org.jetbrains.dokka"
-    }
 }
