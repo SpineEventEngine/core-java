@@ -28,6 +28,7 @@ package io.spine.server.delivery;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.Internal;
@@ -424,6 +425,7 @@ public final class Delivery implements Logging {
      * @return the statistics on the performed delivery, or {@code Optional.empty()} if there
      *         were no delivery performed
      */
+    @CanIgnoreReturnValue
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
