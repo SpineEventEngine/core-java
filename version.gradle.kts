@@ -25,11 +25,11 @@
  */
 
 /** The version of this library. */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.61")
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.65")
 
 /** Versions of the Spine libraries that `core-java` depends on. */
-val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.59")
-val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.59")
-val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.59")
+val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.65")
+val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.64")
+val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.64")
 
 val kotlinVersion: String by extra(io.spine.internal.dependency.Kotlin.version)
