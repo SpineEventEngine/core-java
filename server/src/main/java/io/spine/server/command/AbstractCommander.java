@@ -28,7 +28,6 @@ package io.spine.server.command;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -81,7 +80,6 @@ public abstract class AbstractCommander
         return thisClass.commands();
     }
 
-    @CanIgnoreReturnValue
     @Override
     public void dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command);

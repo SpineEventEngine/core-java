@@ -27,7 +27,6 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Delivery;
@@ -80,7 +79,6 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
                       .build();
     }
 
-    @CanIgnoreReturnValue
     @Override
     public void dispatch(EventEnvelope event) {
         Set<I> targets = route(event);

@@ -27,6 +27,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
@@ -225,6 +226,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * <p>Overrides to expose as a part of the public API.
      */
     @Override
+    @CanIgnoreReturnValue
     public boolean delete(I id) {
         return super.delete(id);
     }

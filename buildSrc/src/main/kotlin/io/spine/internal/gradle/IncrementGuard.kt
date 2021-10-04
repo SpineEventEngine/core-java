@@ -28,6 +28,7 @@
 
 package io.spine.internal.gradle
 
+import io.spine.internal.gradle.publish.PublishingRepos
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

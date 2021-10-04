@@ -104,6 +104,7 @@ public final class SystemSettings implements SystemFeatures {
      *
      * @return self for method chaining
      */
+    @CanIgnoreReturnValue
     public SystemSettings persistEvents() {
         this.storeEvents = true;
         return this;
@@ -116,6 +117,7 @@ public final class SystemSettings implements SystemFeatures {
      *
      * @return self for method chaining
      */
+    @CanIgnoreReturnValue
     public SystemSettings forgetEvents() {
         this.storeEvents = false;
         return this;

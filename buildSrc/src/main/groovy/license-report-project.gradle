@@ -27,7 +27,7 @@
 
 import com.github.jk1.license.*
 import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.gradle.PublishExtension
+import io.spine.internal.gradle.publish.PublishExtension
 
 /**
  * This script plugin generates the license report for all dependencies used in a project.

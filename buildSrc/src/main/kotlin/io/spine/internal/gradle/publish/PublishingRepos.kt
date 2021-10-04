@@ -24,33 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-configurations {
-    excludeInternalDoclet
+package io.spine.internal.gradle.publish
+
+import io.spine.internal.gradle.Repository
+
+/**
+ * Repositories to which we may publish.
+ */
+object PublishingRepos {
+
+    @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
+    val mavenTeamDev = Repository(
+        name = "maven.teamdev.com",
+        releases = "http://maven.teamdev.com/repository/spine",
+        snapshots = "http://maven.teamdev.com/repository/spine-snapshots",
+        credentialsFile = "credentials.properties"
+    )
+
+    val cloudRepo = Repository(
+        name = "CloudRepo",
+        releases = "https://spine.mycloudrepo.io/public/repositories/releases",
+        snapshots = "https://spine.mycloudrepo.io/public/repositories/snapshots",
+        credentialsFile = "cloudrepo.properties"
+    )
+
+    val cloudArtifactRegistry = CloudArtifactRegistry.repository
+
+    /**
+     * Obtains a GitHub repository by the given name.
+     */
+    fun gitHub(repoName: String): Repository = GitHubPackages.repository(repoName)
 }
 
-dependencies {
-    /*
-       The variable spineBaseVersion must be defined in the `ext` section of the `version.gradle`
-       file of the project which imports `config` as a sub-module.
-      */
-    excludeInternalDoclet "io.spine.tools:spine-javadoc-filter:$spineBaseVersion"
-}
-
-// This task uses constants defined in `javadoc-options.gradle`.
-task noInternalJavadoc(type: Javadoc) {
-    source = sourceSets.main.allJava.filter {
-        !it.absolutePath.contains('generated')
-    }
-    classpath = javadoc.getClasspath()
-
-    options {
-        tags = javadocOptions.tags
-        encoding = javadocOptions.encoding
-
-        // Doclet fully qualified name.
-        doclet = 'io.spine.tools.javadoc.ExcludeInternalDoclet'
-
-        // Path to the JAR containing the doclet.
-        docletpath = configurations.excludeInternalDoclet.files.asType(List)
-    }
-}

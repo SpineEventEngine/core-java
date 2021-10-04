@@ -29,36 +29,41 @@ import io.spine.internal.gradle.applyStandard
 import org.gradle.api.file.SourceDirectorySet
 
 buildscript {
-
     // Apply the script created by `io.spine.tools.gradle.testing.TestEnvGradle`.
     //
     // The script defines `enclosingRootDir` variable that we use below.
     //
     apply(from = "$rootDir/test-env.gradle")
 
-    val enclosingRootDir: String by extra
-    val scriptsPath = io.spine.internal.gradle.Scripts.commonPath
-
-    // Apply shared dependencies.
-    apply(from = "${enclosingRootDir}/${scriptsPath}/dependencies.gradle")
-
     // Applying from `version.gradle.kts` inside the `buildscript` section to reuse the properties.
     //
     // As long as `buildscript` section is always evaluated first, we need to apply
     // `version.gradle.kts` explicitly here.
     //
+    val enclosingRootDir: String by extra
     apply(from = "${enclosingRootDir}/version.gradle.kts")
-
-    val spineBaseVersion: String by extra
-    val versionToPublish: String by extra
 
     io.spine.internal.gradle.doApplyGitHubPackages(repositories, "core-java", rootProject)
     io.spine.internal.gradle.doApplyStandard(repositories)
 
+    val spineBaseVersion: String by extra
+    val spineTimeVersion: String by extra
+    val versionToPublish: String by extra
+
+    io.spine.internal.gradle.doForceVersions(configurations)
     dependencies {
         classpath(io.spine.internal.dependency.Protobuf.GradlePlugin.lib)
         classpath("io.spine.tools:spine-mc-java:${spineBaseVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force(
+                "io.spine:spine-base:$spineBaseVersion",
+                "io.spine:spine-time:$spineTimeVersion"
+            )
+        }
     }
 }
 

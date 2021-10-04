@@ -23,7 +23,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package js
 
 import io.spine.internal.dependency.Protobuf
 import io.spine.internal.gradle.Scripts
@@ -50,7 +49,7 @@ ext {
     genProtoTest = "$genProtoBaseDir/test/js"
 }
 
-apply from: Scripts.npmPublishTasks
+apply from: "$rootDir" + io.spine.internal.gradle.Scripts.commonPath + "js/npm-publish-tasks.gradle"
 
 /**
  * Configures the JS code generation.
@@ -82,8 +81,8 @@ protobuf {
 }
 
 /**
- * Configures the generation of additional features for the Proto messages via Spine Proto JS
- * plugin.
+ * Configures the generation of additional features for the Proto messages via
+ * Spine Proto JS plugin.
  */
 protoJs {
     mainGenProtoDir = genProtoMain

@@ -134,6 +134,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      *         the values of the IDs to look up
      * @return self for method chaining
      */
+    @CanIgnoreReturnValue
     public B byId(Iterable<?> ids) {
         checkNotNull(ids);
         this.ids = ImmutableSet.copyOf(ids);
@@ -148,6 +149,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      * @return self for method chaining
      * @see #byId(Iterable)
      */
+    @CanIgnoreReturnValue
     public B byId(Message... ids) {
         this.ids = ImmutableSet.copyOf(ids);
         return self();
@@ -161,6 +163,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      * @return self for method chaining
      * @see #byId(Iterable)
      */
+    @CanIgnoreReturnValue
     public B byId(String... ids) {
         this.ids = ImmutableSet.copyOf(ids);
         return self();
@@ -174,6 +177,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      * @return self for method chaining
      * @see #byId(Iterable)
      */
+    @CanIgnoreReturnValue
     public B byId(Integer... ids) {
         this.ids = ImmutableSet.copyOf(ids);
         return self();
@@ -187,6 +191,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      * @return self for method chaining
      * @see #byId(Iterable)
      */
+    @CanIgnoreReturnValue
     public B byId(Long... ids) {
         this.ids = ImmutableSet.copyOf(ids);
         return self();
@@ -208,6 +213,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      * @see Filters for a convenient way to create {@link io.spine.client.Filter} instances
      * @see #where(io.spine.client.CompositeFilter...)
      */
+    @CanIgnoreReturnValue
     public B where(Filter... predicate) {
         CompositeFilter aggregatingFilter = all(asList(predicate));
         filters = singleton(aggregatingFilter);
@@ -297,6 +303,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      *         the fields to query
      * @return self for method chaining
      */
+    @CanIgnoreReturnValue
     public B withMask(Iterable<String> fieldNames) {
         checkNotNull(fieldNames);
         this.fieldMask = ImmutableSet.copyOf(fieldNames);
@@ -316,6 +323,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      *         the fields to query
      * @return self for method chaining
      */
+    @CanIgnoreReturnValue
     public B withMask(String... fieldNames) {
         this.fieldMask = ImmutableSet.<String>builder()
                 .add(fieldNames)

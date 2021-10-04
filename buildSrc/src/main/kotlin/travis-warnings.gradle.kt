@@ -24,19 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.dependency
+import org.gradle.api.Project
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.external.javadoc.CoreJavadocOptions
+import org.gradle.kotlin.dsl.named
 
 @Suppress("unused")
-object Jackson {
-    private const val version = "2.12.4"
-    // https://github.com/FasterXML/jackson-core
-    const val core = "com.fasterxml.jackson.core:jackson-core:${version}"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
-    // https://github.com/FasterXML/jackson-dataformats-text/releases
-    const val dataformatYaml = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${version}"
-    // https://github.com/FasterXML/jackson-module-kotlin/releases
-    const val moduleKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:${version}"
+object TravisLogs {
+
+    /**
+     * Specific setup for a Travis build, which prevents warning messages related to
+     * `javadoc` tasks in build logs.
+     *
+     * It is expected that warnings are viewed and analyzed during local builds.
+     */
+    fun hideJavadocWarnings(p: Project) {
+        //
+        val isTravis = System.getenv("TRAVIS") == "true"
+        if (isTravis) {
+            // Set the maximum number of Javadoc warnings to print.
+            // If the parameter value is zero, all warnings will be printed.
+            p.tasks.named<Javadoc>("javadoc") {
+                val opt = options
+                if (opt is CoreJavadocOptions) {
+                    opt.addStringOption("Xmaxwarns", "1")
+                }
+            }
+        }
+    }
 }

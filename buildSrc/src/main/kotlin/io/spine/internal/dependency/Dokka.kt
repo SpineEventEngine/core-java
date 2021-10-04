@@ -26,17 +26,9 @@
 
 package io.spine.internal.dependency
 
+// https://github.com/Kotlin/dokka
 @Suppress("unused")
-object Jackson {
-    private const val version = "2.12.4"
-    // https://github.com/FasterXML/jackson-core
-    const val core = "com.fasterxml.jackson.core:jackson-core:${version}"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
-    // https://github.com/FasterXML/jackson-dataformats-text/releases
-    const val dataformatYaml = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${version}"
-    // https://github.com/FasterXML/jackson-module-kotlin/releases
-    const val moduleKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:${version}"
+object Dokka {
+    const val version = "1.5.0"
+    const val pluginId = "org.jetbrains.dokka"
 }

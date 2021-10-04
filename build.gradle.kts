@@ -26,13 +26,15 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.PublishingRepos
+import io.spine.internal.gradle.JavadocConfig
+import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
-import io.spine.internal.gradle.spinePublishing
+import io.spine.internal.gradle.github.pages.updateGitHubPages
+import io.spine.internal.gradle.publish.spinePublishing
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -127,6 +129,12 @@ allprojects {
 
 subprojects {
 
+    with(repositories) {
+        applyGitHubPackages("base", rootProject)
+        applyGitHubPackages("time", rootProject)
+        applyStandard()
+    }
+
     apply {
         plugin("java-library")
         plugin("com.google.protobuf")
@@ -157,12 +165,6 @@ subprojects {
             jvmTarget = JavaVersion.VERSION_1_8.toString()
             freeCompilerArgs = listOf("-Xskip-prerelease-check")
         }
-    }
-
-    with(repositories) {
-        applyGitHubPackages("base", rootProject)
-        applyGitHubPackages("time", rootProject)
-        applyStandard()
     }
 
     dependencies {
@@ -244,9 +246,10 @@ subprojects {
         with(Scripts) {
             from(slowTests(project))
             from(testOutput(project))
-            from(javadocOptions(project))
         }
     }
+
+    JavadocConfig.applyTo(project)
 
     tasks.register("sourceJar", Jar::class) {
         from(sourceSets.main.get().allJava)
@@ -298,15 +301,11 @@ subprojects {
         !project.name.startsWith("testutil") &&
         !project.name.startsWith("model")
 
-    // Apply the Javadoc publishing plugin.
-    // This plugin *must* be applied here, not in the module `build.gradle` files.
-    //
-    if (shouldPublishJavadoc()) {
-        apply(from = Scripts.updateGitHubPages(project))
-        afterEvaluate {
-            tasks.getByName("publish").dependsOn("updateGitHubPages")
-        }
+    updateGitHubPages {
+        allowInternalJavadoc.set(true)
+        rootFolder.set(rootDir)
     }
+    project.tasks["publish"].dependsOn("${project.path}:updateGitHubPages")
 }
 
 apply {

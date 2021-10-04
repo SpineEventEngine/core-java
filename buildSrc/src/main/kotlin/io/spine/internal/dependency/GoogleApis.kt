@@ -26,17 +26,33 @@
 
 package io.spine.internal.dependency
 
-@Suppress("unused")
-object Jackson {
-    private const val version = "2.12.4"
-    // https://github.com/FasterXML/jackson-core
-    const val core = "com.fasterxml.jackson.core:jackson-core:${version}"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
-    // https://github.com/FasterXML/jackson-dataformats-text/releases
-    const val dataformatYaml = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${version}"
-    // https://github.com/FasterXML/jackson-module-kotlin/releases
-    const val moduleKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:${version}"
+/**
+ * Provides dependencies on [GoogleApis projects](https://github.com/googleapis/).
+ */
+object GoogleApis {
+
+    // https://github.com/googleapis/google-api-java-client
+    const val client = "com.google.api-client:google-api-client:1.32.1"
+
+    // https://github.com/googleapis/api-common-java
+    const val common = "com.google.api:api-common:2.0.2"
+
+    // https://github.com/googleapis/java-common-protos
+    const val commonProtos = "com.google.api.grpc:proto-google-common-protos:2.5.1"
+
+    // https://github.com/googleapis/gax-java
+    const val gax = "com.google.api:gax:2.5.0"
+
+    // https://github.com/googleapis/java-iam
+    const val protoAim = "com.google.api.grpc:proto-google-iam-v1:1.1.3"
+
+    // https://github.com/googleapis/google-oauth-java-client
+    const val oAuthClient = "com.google.oauth-client:google-oauth-client:1.32.1"
+
+    // https://github.com/googleapis/google-auth-library-java
+    object AuthLibrary {
+        const val version = "1.1.0"
+        const val credentials = "com.google.auth:google-auth-library-credentials:${version}"
+        const val oAuth2Http = "com.google.auth:google-auth-library-oauth2-http:${version}"
+    }
 }

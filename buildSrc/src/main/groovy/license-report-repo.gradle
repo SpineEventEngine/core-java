@@ -28,6 +28,9 @@
  * This script launches the per-project license report generation, concatenates the results
  * and puts the resulting file into a repository root folder.
  *
+ * If the repository consists just of a single root project, the generation is configured
+ * just for it alone.
+ *
  * The script also configures the `build` task to be finalized by the license report routines.
  *
  * See `license-report-project.gradle` for a per-project license report generation.
@@ -37,20 +40,27 @@ final def commonPath = io.spine.internal.gradle.Scripts.commonPath
 apply from: "${rootDir}/${commonPath}/license-report-common.gradle"
 
 task reportLicensesInRepo { final Task task ->
-    subprojects.each {
-        subprojects.each {
-            final def generateLicenseReport = it.tasks.findByName('generateLicenseReport')
-            task.dependsOn(generateLicenseReport)
-            generateLicenseReport.dependsOn(it.tasks.findByName('assemble'))
-        }
+    def targetProjects;
+    if (subprojects.isEmpty()) {
+        println "Configuring the license report for a single root project."
+        targetProjects = [task.project]
+    } else {
+        println "Configuring the license report for all subprojects of a root project."
+        targetProjects = subprojects
+    }
+
+    targetProjects.forEach {
+        final def generateLicenseReport = it.tasks.findByName('generateLicenseReport')
+        task.dependsOn(generateLicenseReport)
+        generateLicenseReport.dependsOn(it.tasks.findByName('assemble'))
     }
 
     doLast {
-        final paths = subprojects.collect {
+        final paths = targetProjects.stream().collect {
             "${it.buildDir}${licenseReportConfig.relativePath}/${licenseReportConfig.outputFilename}"
         }
 
-        println "Aggregating the reports from the subprojects."
+        println "Aggregating the reports from the target projects."
         final aggregatedContent = paths.collect { (new File(it)).getText() }.join("\n\n\n")
 
         (new File("$rootDir/$licenseReportConfig.outputFilename")).text = aggregatedContent

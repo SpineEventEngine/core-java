@@ -32,8 +32,9 @@ val spineBaseVersion: String by extra
 dependencies {
     api(project(":core"))
 
-    Grpc.apply {
-        api(stub)
+    val deps = this
+    with(Grpc) {
+        deps.api(stub)
         implementation(protobuf)
         implementation(core)
     }

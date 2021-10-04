@@ -26,6 +26,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.type.CommandEnvelope;
@@ -160,6 +161,7 @@ public final class Inbox<I> {
          * Adds an endpoint for events which will be delivered through the {@code Inbox} and
          * marks it with the certain label.
          */
+        @CanIgnoreReturnValue
         public Builder<I> addEventEndpoint(InboxLabel label,
                                            LazyEndpoint<I, EventEnvelope> lazyEndpoint) {
             checkNotNull(label);
@@ -172,6 +174,7 @@ public final class Inbox<I> {
          * Adds an endpoint for commands which will be delivered through the {@code Inbox} and
          * marks it with the certain label.
          */
+        @CanIgnoreReturnValue
         public Builder<I> addCommandEndpoint(InboxLabel label,
                                              LazyEndpoint<I, CommandEnvelope> lazyEndpoint) {
             checkNotNull(label);
@@ -183,6 +186,7 @@ public final class Inbox<I> {
         /**
          * Allows to specify the listener of the starting and ending batch dispatching operations.
          */
+        @CanIgnoreReturnValue
         public Builder<I> withBatchListener(BatchDeliveryListener<I> dispatcher) {
             this.batchDispatcher = checkNotNull(dispatcher);
             return this;
