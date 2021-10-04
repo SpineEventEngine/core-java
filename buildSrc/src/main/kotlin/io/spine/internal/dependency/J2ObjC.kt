@@ -27,12 +27,11 @@
 package io.spine.internal.dependency
 
 /**
- * J2ObjC is a transitive dependency which we don't use directly.
- * We `force` it in [DependencyResolution.forceConfiguration()].
- *
- * [J2ObjC](https://developers.google.com/j2objc)
+ * [J2ObjC](https://developers.google.com/j2objc) is a transitive dependency
+ * which we don't use directly. This object is used for forcing the version.
  */
 object J2ObjC {
+    // https://github.com/google/j2objc/releases
     private const val version = "1.3"
     const val lib = "com.google.j2objc:j2objc-annotations:${version}"
 }

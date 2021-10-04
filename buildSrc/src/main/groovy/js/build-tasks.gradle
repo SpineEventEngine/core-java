@@ -23,7 +23,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package js
 
 /**
  * This script declares common Gradle tasks required for JavaScript modules.
@@ -47,8 +46,8 @@ ext {
 }
 
 apply plugin: 'base'
-apply from: deps.scripts.npmCli
-apply from: deps.scripts.updatePackageVersion
+apply from: "$rootDir" + io.spine.internal.gradle.Scripts.commonPath + "js/npm-cli.gradle"
+apply from: "$rootDir" + io.spine.internal.gradle.Scripts.commonPath + "js/update-package-version.gradle"
 
 /**
  * Compiles Protobuf sources into JavaScript.

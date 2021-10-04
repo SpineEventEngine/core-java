@@ -27,16 +27,12 @@
 package io.spine.internal.dependency
 
 @Suppress("unused")
-object Jackson {
-    private const val version = "2.12.4"
-    // https://github.com/FasterXML/jackson-core
-    const val core = "com.fasterxml.jackson.core:jackson-core:${version}"
-    // https://github.com/FasterXML/jackson-databind
-    const val databind = "com.fasterxml.jackson.core:jackson-databind:${version}"
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${version}"
-    // https://github.com/FasterXML/jackson-dataformats-text/releases
-    const val dataformatYaml = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${version}"
-    // https://github.com/FasterXML/jackson-module-kotlin/releases
-    const val moduleKotlin = "com.fasterxml.jackson.module:jackson-module-kotlin:${version}"
+object Netty {
+    // https://github.com/netty/netty/releases
+    private const val version = "4.1.68.Final"
+    const val common = "io.netty:netty-common:${version}"
+    const val buffer = "io.netty:netty-buffer:${version}"
+    const val transport = "io.netty:netty-transport:${version}"
+    const val handler = "io.netty:netty-handler:${version}"
+    const val codecHttp = "io.netty:netty-codec-http:${version}"
 }
