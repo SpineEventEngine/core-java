@@ -1,6 +1,6 @@
 
     
-# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -197,6 +197,10 @@
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
+     * **POM License: Apache License 2.0** - [http://opensource.org/licenses/Apache-2.0](http://opensource.org/licenses/Apache-2.0)
+
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -214,6 +218,10 @@
 1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** com.google.protobuf **Name:** protobuf-gradle-plugin **Version:** 0.8.17
+     * **POM Project URL:** [https://github.com/google/protobuf-gradle-plugin](https://github.com/google/protobuf-gradle-plugin)
+     * **POM License: BSD 3-Clause** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.protobuf **Name:** protobuf-java **Version:** 3.18.0
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
@@ -240,9 +248,17 @@
 1. **Group:** com.google.truth.extensions **Name:** truth-proto-extension **Version:** 1.1.3
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.13.0
+     * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
+     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
+     * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.github.java-diff-utils **Name:** java-diff-utils **Version:** 4.0
      * **POM Project URL:** [https://github.com/java-diff-utils/java-diff-utils](https://github.com/java-diff-utils/java-diff-utils)
@@ -288,6 +304,10 @@
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
+
+1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
+     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.36.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
@@ -476,12 +496,12 @@
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:41 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:56:51 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.code.findbugs **Name:** jsr305 **Version:** 3.0.2
@@ -638,6 +658,10 @@ This report was generated on **Thu Sep 23 19:59:41 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
+     * **POM License: Apache License 2.0** - [http://opensource.org/licenses/Apache-2.0](http://opensource.org/licenses/Apache-2.0)
+
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -655,6 +679,10 @@ This report was generated on **Thu Sep 23 19:59:41 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** com.google.protobuf **Name:** protobuf-gradle-plugin **Version:** 0.8.17
+     * **POM Project URL:** [https://github.com/google/protobuf-gradle-plugin](https://github.com/google/protobuf-gradle-plugin)
+     * **POM License: BSD 3-Clause** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.protobuf **Name:** protobuf-java **Version:** 3.18.0
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
@@ -681,9 +709,17 @@ This report was generated on **Thu Sep 23 19:59:41 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.truth.extensions **Name:** truth-proto-extension **Version:** 1.1.3
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.13.0
+     * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
+     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
+     * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.github.java-diff-utils **Name:** java-diff-utils **Version:** 4.0
      * **POM Project URL:** [https://github.com/java-diff-utils/java-diff-utils](https://github.com/java-diff-utils/java-diff-utils)
@@ -729,6 +765,10 @@ This report was generated on **Thu Sep 23 19:59:41 EEST 2021** using [Gradle-Lic
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
+
+1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
+     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.36.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
@@ -917,12 +957,12 @@ This report was generated on **Thu Sep 23 19:59:41 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:42 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:57:00 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1119,6 +1159,10 @@ This report was generated on **Thu Sep 23 19:59:42 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
+     * **POM License: Apache License 2.0** - [http://opensource.org/licenses/Apache-2.0](http://opensource.org/licenses/Apache-2.0)
+
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1136,6 +1180,10 @@ This report was generated on **Thu Sep 23 19:59:42 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** com.google.protobuf **Name:** protobuf-gradle-plugin **Version:** 0.8.17
+     * **POM Project URL:** [https://github.com/google/protobuf-gradle-plugin](https://github.com/google/protobuf-gradle-plugin)
+     * **POM License: BSD 3-Clause** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.protobuf **Name:** protobuf-java **Version:** 3.18.0
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
@@ -1162,9 +1210,17 @@ This report was generated on **Thu Sep 23 19:59:42 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.truth.extensions **Name:** truth-proto-extension **Version:** 1.1.3
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.13.0
+     * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
+     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
+     * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.github.java-diff-utils **Name:** java-diff-utils **Version:** 4.0
      * **POM Project URL:** [https://github.com/java-diff-utils/java-diff-utils](https://github.com/java-diff-utils/java-diff-utils)
@@ -1210,6 +1266,10 @@ This report was generated on **Thu Sep 23 19:59:42 EEST 2021** using [Gradle-Lic
 1. **Group:** junit **Name:** junit **Version:** 4.13.1
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
+
+1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
+     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.36.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
@@ -1398,12 +1458,12 @@ This report was generated on **Thu Sep 23 19:59:42 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:57:04 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -1935,12 +1995,12 @@ This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:57:12 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2141,6 +2201,10 @@ This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
+     * **POM License: Apache License 2.0** - [http://opensource.org/licenses/Apache-2.0](http://opensource.org/licenses/Apache-2.0)
+
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2158,6 +2222,10 @@ This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** com.google.protobuf **Name:** protobuf-gradle-plugin **Version:** 0.8.17
+     * **POM Project URL:** [https://github.com/google/protobuf-gradle-plugin](https://github.com/google/protobuf-gradle-plugin)
+     * **POM License: BSD 3-Clause** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.protobuf **Name:** protobuf-java **Version:** 3.18.0
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
@@ -2184,9 +2252,17 @@ This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.truth.extensions **Name:** truth-proto-extension **Version:** 1.1.3
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.13.0
+     * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
+     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
+     * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.github.java-diff-utils **Name:** java-diff-utils **Version:** 4.0
      * **POM Project URL:** [https://github.com/java-diff-utils/java-diff-utils](https://github.com/java-diff-utils/java-diff-utils)
@@ -2237,6 +2313,10 @@ This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
+     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
 1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.36.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
@@ -2424,12 +2504,12 @@ This report was generated on **Thu Sep 23 19:59:43 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:44 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:58:27 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -2681,6 +2761,10 @@ This report was generated on **Thu Sep 23 19:59:44 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
+     * **POM License: Apache License 2.0** - [http://opensource.org/licenses/Apache-2.0](http://opensource.org/licenses/Apache-2.0)
+
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2698,6 +2782,10 @@ This report was generated on **Thu Sep 23 19:59:44 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** com.google.protobuf **Name:** protobuf-gradle-plugin **Version:** 0.8.17
+     * **POM Project URL:** [https://github.com/google/protobuf-gradle-plugin](https://github.com/google/protobuf-gradle-plugin)
+     * **POM License: BSD 3-Clause** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.protobuf **Name:** protobuf-java **Version:** 3.18.0
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
@@ -2724,9 +2812,17 @@ This report was generated on **Thu Sep 23 19:59:44 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.truth.extensions **Name:** truth-proto-extension **Version:** 1.1.3
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.13.0
+     * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
+     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
+     * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.github.java-diff-utils **Name:** java-diff-utils **Version:** 4.0
      * **POM Project URL:** [https://github.com/java-diff-utils/java-diff-utils](https://github.com/java-diff-utils/java-diff-utils)
@@ -2773,6 +2869,10 @@ This report was generated on **Thu Sep 23 19:59:44 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
+     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
 1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.36.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
@@ -2960,12 +3060,12 @@ This report was generated on **Thu Sep 23 19:59:44 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:45 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:58:32 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -3217,6 +3317,10 @@ This report was generated on **Thu Sep 23 19:59:45 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
+     * **POM License: Apache License 2.0** - [http://opensource.org/licenses/Apache-2.0](http://opensource.org/licenses/Apache-2.0)
+
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3234,6 +3338,10 @@ This report was generated on **Thu Sep 23 19:59:45 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** com.google.protobuf **Name:** protobuf-gradle-plugin **Version:** 0.8.17
+     * **POM Project URL:** [https://github.com/google/protobuf-gradle-plugin](https://github.com/google/protobuf-gradle-plugin)
+     * **POM License: BSD 3-Clause** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.protobuf **Name:** protobuf-java **Version:** 3.18.0
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
@@ -3260,9 +3368,17 @@ This report was generated on **Thu Sep 23 19:59:45 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.truth.extensions **Name:** truth-proto-extension **Version:** 1.1.3
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.13.0
+     * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
+     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
+     * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.github.java-diff-utils **Name:** java-diff-utils **Version:** 4.0
      * **POM Project URL:** [https://github.com/java-diff-utils/java-diff-utils](https://github.com/java-diff-utils/java-diff-utils)
@@ -3309,6 +3425,10 @@ This report was generated on **Thu Sep 23 19:59:45 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
+     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
 1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.36.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
@@ -3496,12 +3616,12 @@ This report was generated on **Thu Sep 23 19:59:45 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:47 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:58:35 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
     
-# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.61`
+# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.67`
 
 ## Runtime
 1. **Group:** com.google.android **Name:** annotations **Version:** 4.1.1.4
@@ -3753,6 +3873,10 @@ This report was generated on **Thu Sep 23 19:59:47 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **POM License: Apache 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.google.gradle **Name:** osdetector-gradle-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/google/osdetector-gradle-plugin](https://github.com/google/osdetector-gradle-plugin)
+     * **POM License: Apache License 2.0** - [http://opensource.org/licenses/Apache-2.0](http://opensource.org/licenses/Apache-2.0)
+
 1. **Group:** com.google.guava **Name:** failureaccess **Version:** 1.0.1
      * **Manifest Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3770,6 +3894,10 @@ This report was generated on **Thu Sep 23 19:59:47 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.j2objc **Name:** j2objc-annotations **Version:** 1.3
      * **POM Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** com.google.protobuf **Name:** protobuf-gradle-plugin **Version:** 0.8.17
+     * **POM Project URL:** [https://github.com/google/protobuf-gradle-plugin](https://github.com/google/protobuf-gradle-plugin)
+     * **POM License: BSD 3-Clause** - [http://opensource.org/licenses/BSD-3-Clause](http://opensource.org/licenses/BSD-3-Clause)
 
 1. **Group:** com.google.protobuf **Name:** protobuf-java **Version:** 3.18.0
      * **Manifest Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
@@ -3796,9 +3924,17 @@ This report was generated on **Thu Sep 23 19:59:47 EEST 2021** using [Gradle-Lic
 1. **Group:** com.google.truth.extensions **Name:** truth-proto-extension **Version:** 1.1.3
      * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1. **Group:** com.squareup **Name:** javapoet **Version:** 1.13.0
+     * **POM Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
+     * **POM License: Apache 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1. **Group:** commons-io **Name:** commons-io **Version:** 2.6
      * **Project URL:** [http://commons.apache.org/proper/commons-io/](http://commons.apache.org/proper/commons-io/)
      * **POM License: Apache License, Version 2.0** - [https://www.apache.org/licenses/LICENSE-2.0.txt](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1. **Group:** commons-lang **Name:** commons-lang **Version:** 2.6
+     * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
+     * **POM License: The Apache Software License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0.txt](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1. **Group:** io.github.java-diff-utils **Name:** java-diff-utils **Version:** 4.0
      * **POM Project URL:** [https://github.com/java-diff-utils/java-diff-utils](https://github.com/java-diff-utils/java-diff-utils)
@@ -3889,6 +4025,10 @@ This report was generated on **Thu Sep 23 19:59:47 EEST 2021** using [Gradle-Lic
      * **POM Project URL:** [http://junit.org](http://junit.org)
      * **POM License: Eclipse Public License 1.0** - [http://www.eclipse.org/legal/epl-v10.html](http://www.eclipse.org/legal/epl-v10.html)
 
+1. **Group:** kr.motd.maven **Name:** os-maven-plugin **Version:** 1.7.0
+     * **POM Project URL:** [https://github.com/trustin/os-maven-plugin/](https://github.com/trustin/os-maven-plugin/)
+     * **POM License: Apache License, Version 2.0** - [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
 1. **Group:** net.sourceforge.pmd **Name:** pmd-core **Version:** 6.36.0
      * **POM License: BSD-style** - [http://pmd.sourceforge.net/license.html](http://pmd.sourceforge.net/license.html)
 
@@ -4076,4 +4216,4 @@ This report was generated on **Thu Sep 23 19:59:47 EEST 2021** using [Gradle-Lic
  The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
 
-This report was generated on **Thu Sep 23 19:59:49 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 04 14:58:44 EEST 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
