@@ -40,6 +40,14 @@ import io.spine.validate.ValidatingBuilder;
  * <p>When applied to an entity, it will modify the {@code deleted} flag of a corresponding
  * storage record to be {@code true}.
  *
+ * @param <I>
+ *         the type of the identifiers of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection's state
+ * @param <B>
+ *         the type of the validating builders for the projection's state
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental

@@ -37,6 +37,13 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 /**
  * Implementation of {@link RecordBasedRepository} that manages entities
  * derived from {@link AbstractEntity}.
+ *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <E>
+ *         the type of managed entities
+ * @param <S>
+ *         the type of the entity state
  */
 public abstract class DefaultRecordBasedRepository<I,
                                                    E extends AbstractEntity<I, S>,

@@ -40,10 +40,13 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * Abstract base for entity classes that handle commands.
+ *
+ * @param <E>
+ *         the type of entity
  */
 public abstract class CommandHandlingEntityClass<E extends Entity<?, ?>>
         extends EntityClass<E>
-        implements CommandHandlingClass {
+        implements CommandHandlingClass<EventClass, CommandHandlerMethod> {
 
     private static final long serialVersionUID = 0L;
     private final HandlerMap<CommandClass, EventClass, CommandHandlerMethod> commands;

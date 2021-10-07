@@ -41,8 +41,8 @@ import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
  * A composite query filter which targets one or more entity
  * {@link io.spine.query.EntityColumn columns}.
  *
- * <p>This type is deprecated. Use {@linkplain io.spine.query.EntityQuery entity queries} instead.
- * See {@code io.spine.query} package documentation for more details on usage.
+ * @deprecated This type is deprecated. Use {@linkplain io.spine.query.EntityQuery entity queries}
+ *         instead. See {@code io.spine.query} package documentation for more details on usage.
  */
 @Deprecated
 public final class CompositeQueryFilter extends TypedCompositeFilter<EntityState<?>> {

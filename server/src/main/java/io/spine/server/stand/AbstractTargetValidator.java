@@ -36,6 +36,9 @@ import java.util.Optional;
 /**
  * An abstract base for {@code RequestValidator}s, that check
  * whether the {@link Target target} is supported.
+ *
+ * @param <M>
+ *         the type of request
  */
 abstract class AbstractTargetValidator<M extends Message> extends RequestValidator<M> {
 

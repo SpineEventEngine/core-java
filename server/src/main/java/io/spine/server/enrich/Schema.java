@@ -41,6 +41,11 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * Contains enrichment functions.
+ *
+ * @param <M>
+ *         the type of enriched messages
+ * @param <C>
+ *         the type of contexts along which the enriched messages exist
  */
 final class Schema<M extends Message, C extends EnrichableMessageContext> implements Logging {
 

@@ -32,6 +32,9 @@ import java.util.function.Predicate;
 
 /**
  * Tells whether or not a message satisfies the specified criteria.
+ *
+ * @param <M>
+ *         the type of the filtered messages
  */
 interface MessageFilter<M extends Message> extends Predicate<M> {
 }

@@ -38,6 +38,9 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * A message filter which is an {@linkplain #operator() operation} on other
  * message {@linkplain #filters() filters}.
+ *
+ * @param <M>
+ *         the type of the filtered messages
  */
 interface CompositeMessageFilter<M extends Message> extends MessageFilter<M> {
 

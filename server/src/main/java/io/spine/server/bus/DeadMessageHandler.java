@@ -33,9 +33,12 @@ import io.spine.server.type.MessageEnvelope;
  * A definition of a handler for a dead message.
  *
  * <p> If no target dispatchers are found for a message passed to the bus, it will result in a call
- * to {@link DeadMessageHandler#handle DeadMessageHandler.handle(MessageEnvelope)}. The method 
- * produces {@link MessageUnhandled} instance describing the dead message. It may also process the 
+ * to {@link DeadMessageHandler#handle DeadMessageHandler.handle(MessageEnvelope)}. The method
+ * produces {@link MessageUnhandled} instance describing the dead message. It may also process the
  * given message (e.g. store it into the bus store).
+ *
+ * @param <E>
+ *         the type of the envelopes used to pack the dead message into
  */
 @Internal
 public interface DeadMessageHandler<E extends MessageEnvelope<?, ?, ?>> {

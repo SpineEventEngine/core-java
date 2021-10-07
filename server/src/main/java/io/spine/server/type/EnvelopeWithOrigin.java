@@ -32,6 +32,13 @@ import io.spine.type.MessageClass;
 
 /**
  * A {@link MessageEnvelope} that knows about its origin message class.
+ *
+ * @param <I>
+ *         the type of the envelope identifiers
+ * @param <T>
+ *         the type of the objects wrapping the original message
+ * @param <C>
+ *         the type of the message contexts
  */
 @Internal
 public interface EnvelopeWithOrigin<I extends Message, T, C extends Message>

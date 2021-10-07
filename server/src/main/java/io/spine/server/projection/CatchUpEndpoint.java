@@ -37,6 +37,13 @@ import io.spine.type.TypeName;
  *
  * <p>Handles the special {@link CatchUpStarted} event by deleting the state of the target
  * projection instance.
+ *
+ * @param <I>
+ *         the type of IDs of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection states
  */
 final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntityState<I>>
         extends ProjectionEndpoint<I, P, S> {

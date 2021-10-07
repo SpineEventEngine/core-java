@@ -48,6 +48,9 @@ import static java.util.Collections.emptyMap;
 /**
  * A value of {@link EntityRecord} associated with the values
  * of its {@linkplain io.spine.query.Column columns}.
+ *
+ * @param <I>
+ *         the type of entity identifiers
  */
 @SPI
 public final class EntityRecordWithColumns<I>

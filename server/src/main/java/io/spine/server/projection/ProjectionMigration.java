@@ -30,11 +30,19 @@ import io.spine.annotation.Experimental;
 import io.spine.base.EntityState;
 import io.spine.server.entity.Migration;
 import io.spine.server.entity.Transaction;
-import io.spine.server.procman.ProcessManager;
 import io.spine.validate.ValidatingBuilder;
 
 /**
- * A {@link Migration} applied to a {@link ProcessManager} instance.
+ * A {@link Migration} applied to a {@link Projection} instance.
+ *
+ * @param <I>
+ *         the type of the identifiers of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection's state
+ * @param <B>
+ *         the type of the validating builders for the projection's state
  */
 @Experimental
 public abstract class ProjectionMigration<I,

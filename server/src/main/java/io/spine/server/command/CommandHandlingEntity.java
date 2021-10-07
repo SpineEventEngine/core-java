@@ -43,6 +43,12 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 /**
  * An entity that {@linkplain Assign handles} commands.
  *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <S>
+ *         the type of the entity state
+ * @param <B>
+ *         the type of the builders for the entity state
  * @see io.spine.server.command.Assign @Assign
  */
 public abstract

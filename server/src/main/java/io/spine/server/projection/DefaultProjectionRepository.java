@@ -36,6 +36,12 @@ import static io.spine.server.projection.model.ProjectionClass.asProjectionClass
 /**
  * Default implementation of {@code ProjectionRepository}.
  *
+ * @param <I>
+ *         the type of IDs of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection state messages
  * @see io.spine.server.DefaultRepository
  */
 @Internal

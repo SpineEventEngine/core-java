@@ -40,6 +40,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * The {@link BusFilter} preventing the messages that have no dispatchers from being posted to
  * the bus.
+ *
+ * @param <T>
+ *         the type of objects wrapping a passed message
+ * @param <E>
+ *         the type of envelopes of the passed messages
+ * @param <C>
+ *         the message class corresponding to the passed messages
+ * @param <D>
+ *         the type of dispatchers that were expected for the message
  */
 final class DeadMessageFilter<T extends Message,
                               E extends MessageEnvelope<?, T, ?>,

@@ -39,6 +39,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Abstract base for entity factories.
+ *
+ * @param <E>
+ *         the type of produced entities
  */
 public abstract class AbstractEntityFactory<E extends Entity<?, ?>> implements EntityFactory<E>  {
 

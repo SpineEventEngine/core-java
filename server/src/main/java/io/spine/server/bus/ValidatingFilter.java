@@ -39,6 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A filter validating the {@linkplain MessageEnvelope envelopes} with the given
  * {@link EnvelopeValidator}.
+ *
+ * @param <E>
+ *         the type of the validated envelopes
+ * @param <T>
+ *         the type of the messages packed into the validated envelopes
  */
 final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Message>
         implements BusFilter<E> {

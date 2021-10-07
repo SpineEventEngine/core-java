@@ -42,6 +42,13 @@ import static io.spine.type.MessageClass.interfacesOf;
 
 /**
  * Allows to register enrichment functions used by the {@link Enricher}.
+ *
+ * @param <M>
+ *         the type of the enriched messages
+ * @param <C>
+ *         the type of the contexts of the enriched messages
+ * @param <B>
+ *         the type of an enricher builder implementation, a descendant of this type, for covariance
  */
 public abstract class EnricherBuilder<M extends Message,
                                       C extends EnrichableMessageContext,

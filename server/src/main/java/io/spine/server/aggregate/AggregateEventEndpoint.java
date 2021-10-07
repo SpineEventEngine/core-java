@@ -35,8 +35,10 @@ import io.spine.server.type.EventEnvelope;
  * <p>An aggregate may receive an event if it {@linkplain io.spine.server.event.React reacts} on it,
  * or if it {@linkplain io.spine.server.aggregate.Apply#allowImport() imports} it.
  *
- * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates
+ * @param <I>
+ *         the type of the aggregate IDs
+ * @param <A>
+ *         the type of the aggregates
  */
 abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, EventEnvelope>

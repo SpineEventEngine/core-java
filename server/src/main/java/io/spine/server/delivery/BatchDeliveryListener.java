@@ -34,6 +34,9 @@ package io.spine.server.delivery;
  * operations while the batch is delivered.
  *
  * <p>The implementing classes may define their own behavior and react upon such use cases.
+ *
+ * @param <I>
+ *         the type of delivery targets
  */
 public interface BatchDeliveryListener<I> {
 

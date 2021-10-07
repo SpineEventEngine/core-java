@@ -58,6 +58,8 @@ import static com.google.common.collect.Streams.stream;
  * from both the entity state and {@code Entity} instance attributes.
  * See {@link io.spine.server.entity.storage.EntityRecordSpec EntityRecordSpec} for more details.
  *
+ * @param <I>
+ *         the type of record identifiers
  * @param <R>
  *         the type of the record
  * @see io.spine.server.entity.storage.EntityRecordSpec

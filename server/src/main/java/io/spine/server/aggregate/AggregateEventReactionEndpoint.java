@@ -33,6 +33,10 @@ import io.spine.server.type.EventEnvelope;
 /**
  * Dispatches an event to aggregates of the associated {@code AggregateRepository}.
  *
+ * @param <I>
+ *         the type of the aggregate IDs
+ * @param <A>
+ *         the type of the aggregates
  * @see React
  */
 final class AggregateEventReactionEndpoint<I, A extends Aggregate<I, ?, ?>>

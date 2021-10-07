@@ -38,6 +38,10 @@ import io.spine.server.type.EventEnvelope;
  * aggregates. But unlike for event reaction, only one aggregate can be a target for event
  * being imported.
  *
+ * @param <I>
+ *         the type of the aggregate IDs
+ * @param <A>
+ *         the type of the aggregates
  * @see io.spine.server.aggregate.Apply#allowImport()
  */
 final class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>

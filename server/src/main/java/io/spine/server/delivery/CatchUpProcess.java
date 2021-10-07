@@ -264,6 +264,8 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>After that, a normal delivery flow is resumed. The catch-up process stops its execution.
  *
+ * @param <I>
+ *         the type of identifiers of the processed projections
  * @implNote Technically, the instances of this class are not
  *         {@linkplain io.spine.server.procman.ProcessManager process managers}, since it is
  *         impossible to register the process managers with the same state in

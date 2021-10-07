@@ -40,8 +40,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Abstract base for functions that produce {@link Enrichment} by applying aggregated enrichment
  * functions.
  *
- * @param <M> the type of the enrichable message
- * @param <C> the type of the message context
+ * @param <M>
+ *         the type of the enrichable message
+ * @param <C>
+ *         the type of the message context
  */
 abstract class SchemaFn<M extends Message, C extends EnrichableMessageContext>
         implements EnrichmentFn<M, C, Enrichment> {

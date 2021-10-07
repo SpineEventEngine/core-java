@@ -47,6 +47,9 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>Some of the types are expected to be mapped in a way so they support the ordering comparison
  * operators ("greater than", "less than or equals", etc.). For details, see
  * {@link io.spine.client.Filters}.
+ *
+ * @param <R>
+ *         the type of stored records
  */
 public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 

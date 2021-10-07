@@ -59,6 +59,13 @@ import static java.util.Collections.unmodifiableMap;
  *
  * <p>In order to describe the specification of a plain Protobuf message stored,
  * see {@link io.spine.server.storage.MessageRecordSpec MessageRecordSpec}.
+ *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <E>
+ *         the type of entities
+ * @param <S>
+ *         the type of the entity states
  */
 @Immutable
 @Internal

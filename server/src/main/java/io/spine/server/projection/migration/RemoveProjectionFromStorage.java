@@ -34,12 +34,20 @@ import io.spine.server.projection.ProjectionMigration;
 import io.spine.validate.ValidatingBuilder;
 
 /**
- * A migration operation that physically deletes the entity record from the
+ * A migration operation that physically deletes the projection's entity record from the
  * {@linkplain io.spine.server.storage.RecordStorage storage}.
  *
  * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
  * should be used in the client code with care.
  *
+ * @param <I>
+ *         the type of the identifiers of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection's state
+ * @param <B>
+ *         the type of the validating builders for the projection's state
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental

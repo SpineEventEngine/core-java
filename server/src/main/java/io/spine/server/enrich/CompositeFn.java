@@ -36,6 +36,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A schema function which contains two or more functions on the same enrichable message type.
+ *
+ * @param <M>
+ *         the type of the enrichable message
+ * @param <C>
+ *         the type of the message context
  */
 final class CompositeFn<M extends Message, C extends EnrichableMessageContext>
         extends SchemaFn<M, C> {

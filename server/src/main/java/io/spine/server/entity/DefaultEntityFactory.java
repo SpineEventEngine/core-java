@@ -44,6 +44,9 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * Default implementation of entity factory which creates entities by invoking constructor
  * which accepts entity ID.
+ *
+ * @param <E>
+ *         the type of produced entities
  */
 public final class DefaultEntityFactory<E extends Entity<?, ?>> extends AbstractEntityFactory<E> {
 

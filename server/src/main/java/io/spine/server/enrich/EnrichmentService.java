@@ -34,6 +34,11 @@ import java.util.Optional;
 
 /**
  * Creates enrichments for messages.
+ *
+ * @param <M>
+ *         the type of the enrichable message
+ * @param <C>
+ *         the type of the message context
  */
 public interface EnrichmentService<M extends Message, C extends EnrichableMessageContext> {
 

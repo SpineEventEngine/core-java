@@ -47,10 +47,15 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
 /**
  * A registry of message dispatchers.
  *
- * @param <C> the type of the class of dispatched messages
- * @param <D> the type of the message dispatchers
+ * @param <C>
+ *         the type of the class of dispatched messages
+ * @param <E>
+ *         the type of message envelopes
+ * @param <D>
+ *         the type of the message dispatchers
  */
-public abstract class DispatcherRegistry<C extends MessageClass<? extends Message>,
+public abstract class
+DispatcherRegistry<C extends MessageClass<? extends Message>,
                                          E extends MessageEnvelope<?, ?, ?>,
                                          D extends MessageDispatcher<C, E>> {
     /**

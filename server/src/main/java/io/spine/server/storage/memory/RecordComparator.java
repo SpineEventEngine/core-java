@@ -47,6 +47,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A comparator for sorting the contents of {@link TenantRecords}
  * in a provided {@linkplain SortBy sorting order}.
  *
+ * @param <I>
+ *         the type of record identifiers
+ * @param <R>
+ *         the type of records
  * @implNote More sophisticated storage implementations can sort records by
  *         non-{@link Comparable} fields like {@link com.google.protobuf.Message message}-type
  *         fields, depending on their storage method (e.g. comparing the string content of

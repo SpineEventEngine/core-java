@@ -35,6 +35,11 @@ import io.spine.type.MessageClass;
 
 /**
  * A handler method that may handle rejections.
+ *
+ * @param <T>
+ *         the type of the object to which the handler method belongs
+ * @param <R>
+ *         the type of the produced message classes
  */
 @Immutable
 interface RejectionHandler<T, R extends MessageClass<?>>

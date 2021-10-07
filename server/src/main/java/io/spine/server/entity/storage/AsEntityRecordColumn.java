@@ -116,8 +116,12 @@ final class AsEntityRecordColumn {
         return original.name()
                        .value();
     }
+
     /**
      * Returns the getter which always throws an {@link IllegalStateException} upon invocation.
+     *
+     * @param <V>
+     *         the type of the column values
      */
     @Immutable
     private static final class NoGetter<V> implements Column.Getter<EntityRecord, V> {

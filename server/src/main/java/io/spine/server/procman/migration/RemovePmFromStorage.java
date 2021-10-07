@@ -40,6 +40,14 @@ import io.spine.validate.ValidatingBuilder;
  * <p>Depending on the actual storage implementation, this operation may be irreversible, so it
  * should be used in the client code with care.
  *
+ * @param <I>
+ *         the type of the process manager identifiers
+ * @param <P>
+ *         the type of the process managers
+ * @param <S>
+ *         the type of process manager's state
+ * @param <B>
+ *         the type of the validating builders for the state
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental

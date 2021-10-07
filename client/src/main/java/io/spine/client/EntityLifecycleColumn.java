@@ -39,6 +39,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A common type for the lifecycle column definitions which are declared as a part of a client-side
  * query language.
  *
+ * @param <V>
+ *         the type of column values
  * @apiNote Unlike other types of {@link io.spine.query.Column Column}s, the descendants of
  *         this type are intended just to introduce the definitions of columns into the query DSL.
  *         Therefore, the API for obtaining the column values from entities and entity records

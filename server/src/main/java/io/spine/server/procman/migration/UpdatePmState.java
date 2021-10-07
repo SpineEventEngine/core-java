@@ -46,6 +46,14 @@ import io.spine.validate.ValidatingBuilder;
  * to invoke the {@code onBeforeCommit()} method within a separate transaction and save the changes
  * made by it to the states of process managers.
  *
+ * @param <I>
+ *         the type of the process manager identifiers
+ * @param <P>
+ *         the type of the process managers
+ * @param <S>
+ *         the type of process manager's state
+ * @param <B>
+ *         the type of the validating builders for the state
  * @see io.spine.server.entity.RecordBasedRepository#applyMigration(Object, Migration)
  */
 @Experimental

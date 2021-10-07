@@ -33,6 +33,9 @@ import io.spine.validate.NonValidated;
 /**
  * An implementation of a {@code TransactionListener} which does not set any behavior for its
  * callbacks.
+ *
+ * @param <I>
+ *         ID type of the entity under transaction
  */
 final class SilentWitness<I> implements TransactionListener<I> {
 
