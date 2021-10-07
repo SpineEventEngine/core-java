@@ -49,7 +49,7 @@ import java.util.function.Function;
  * per batch.
  *
  * @param <I>
- *         the type of identifier or inbox target entities
+ *         the type of identifier of the inbox target entities
  */
 final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
@@ -118,6 +118,9 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
     /**
      * The batch of messages headed to the same target.
+     *
+     * @param <I>
+     *         the type of identifier of the inbox target entities
      */
     private static class Batch<I> {
 

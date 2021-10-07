@@ -80,6 +80,11 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
      *
      * <p>Transforms functions obtained from {@link EnricherBuilder} into functions
      * used by {@code Schema}, and then creates the instance.
+     *
+     * @param <M>
+     *         the type of enriched messages
+     * @param <C>
+     *         the type of contexts along which the enriched messages exist
      */
     private static class Factory<M extends Message, C extends EnrichableMessageContext> {
 
