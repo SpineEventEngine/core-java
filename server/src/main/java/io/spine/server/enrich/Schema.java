@@ -110,7 +110,7 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
                              .collect(toImmutableSet());
         }
 
-        Schema<M, C> create() {
+        private Schema<M, C> create() {
             for (Class<? extends M> sourceType : sourceTypes) {
                 SchemaFn<? extends M, C> fn = createFn(sourceType);
                 schemaMap.put(sourceType, fn);
@@ -120,7 +120,7 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
         }
 
         @SuppressWarnings("unchecked")
-        SchemaFn<? extends M, C> createFn(Class<? extends M> sourceType) {
+        private SchemaFn<? extends M, C> createFn(Class<? extends M> sourceType) {
             ImmutableSet<EnrichmentFn<M, C, ?>> fns =
                     functions.entrySet()
                              .stream()
