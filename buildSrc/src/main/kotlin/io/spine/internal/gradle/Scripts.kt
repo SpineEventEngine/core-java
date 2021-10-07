@@ -51,7 +51,6 @@ object Scripts {
     @Deprecated("Use `pmd-settings` script plugin instead")
     fun pmd(p: Project)                    = p.script("pmd.gradle")
 
-    fun checkstyle(p: Project)             = p.script("checkstyle.gradle")
     fun runBuild(p: Project)               = p.script("run-build.gradle")
     fun licenseReportCommon(p: Project)    = p.script("license-report-common.gradle")
     fun projectLicenseReport(p: Project)   = p.script("license-report-project.gradle")
