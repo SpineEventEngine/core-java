@@ -26,15 +26,17 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.JavadocConfig
+import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.publish.spinePublishing
+import io.spine.internal.gradle.report.pom.PomGenerator
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -149,6 +151,8 @@ subprojects {
             from(javacArgs(project))
             from(projectLicenseReport(project))
         }
+
+        CheckStyleConfig.applyTo(project)
     }
 
     java {
@@ -301,7 +305,7 @@ subprojects {
         !project.name.startsWith("testutil") &&
         !project.name.startsWith("model")
 
-    updateGitHubPages {
+    updateGitHubPages(project.version.toString()) {
         allowInternalJavadoc.set(true)
         rootFolder.set(rootDir)
     }
@@ -316,8 +320,10 @@ apply {
         // Generate a repository-wide report of 3rd-party dependencies and their licenses.
         from(repoLicenseReport(project))
 
-        // Generate a `pom.xml` file containing first-level dependency of all projects
-        // in the repository.
-        from(generatePom(project))
+
     }
 }
+
+// Generate a `pom.xml` file containing first-level dependency of all projects
+// in the repository.
+PomGenerator.applyTo(project)
