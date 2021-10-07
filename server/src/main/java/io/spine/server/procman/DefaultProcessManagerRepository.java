@@ -36,6 +36,12 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 /**
  * Default implementation of {@code ProcessManagerRepository}.
  *
+ * @param <I>
+ *         the type of IDs of process managers
+ * @param <P>
+ *         the type of process managers
+ * @param <S>
+ *         the type of process manager state messages
  * @see io.spine.server.DefaultRepository
  */
 @Internal
