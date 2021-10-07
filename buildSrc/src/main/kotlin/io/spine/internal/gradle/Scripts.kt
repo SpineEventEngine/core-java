@@ -55,7 +55,6 @@ object Scripts {
     fun licenseReportCommon(p: Project)    = p.script("license-report-common.gradle")
     fun projectLicenseReport(p: Project)   = p.script("license-report-project.gradle")
     fun repoLicenseReport(p: Project)      = p.script("license-report-repo.gradle")
-    fun generatePom(p: Project)            = p.script("generate-pom.gradle")
 
     private fun Project.script(name: String) = "${rootDir}$commonPath${name}"
 }

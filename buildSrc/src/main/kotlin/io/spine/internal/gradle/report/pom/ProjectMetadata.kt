@@ -28,8 +28,11 @@ package io.spine.internal.gradle.report.pom
 
 import groovy.xml.MarkupBuilder
 import java.io.StringWriter
+import kotlin.reflect.KProperty
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.kotlin.dsl.PropertyDelegate
+import org.gradle.kotlin.dsl.extra
+import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withGroovyBuilder
 
 /**
@@ -37,65 +40,14 @@ import org.gradle.kotlin.dsl.withGroovyBuilder
  *
  * Includes group ID, artifact name, and the version.
  */
+@Suppress("MemberVisibilityCanBePrivate") /* Property values accessed via `KProperty`. */
 internal class ProjectMetadata
-private constructor(
+internal constructor(
     internal val project: Project,
-    private val groupId: String,
-    private val artifactId: String,
+    internal val groupId: String,
+    internal val artifactId: String,
     internal val version: String
 ) {
-
-    internal companion object {
-
-        /**
-         * Creates a new instance of `RootProjectData`.
-         *
-         * The required information is first retrieved from the passed [project]. And if
-         * a property is missing from the `project`, it is taken from the passed [extension].
-         */
-        fun fromEither(
-            project: Project, /* or */
-            extension: ExtraPropertiesExtension
-        ): ProjectMetadata {
-            val groupId: String = groupId(project, extension)
-            val name: String = name(project, extension)
-            val version: String = version(project, extension)
-            return ProjectMetadata(project, groupId, name, version)
-        }
-
-        private fun version(project: Project, extension: ExtraPropertiesExtension): String {
-            val projectVersion = project.version.toString()
-            val versionMissingFromProject = projectVersion.isEmpty()
-            val version: String = if (versionMissingFromProject) {
-                extension.get("version").toString()
-            } else {
-                projectVersion
-            }
-            return version
-        }
-
-        private fun name(project: Project, extension: ExtraPropertiesExtension): String {
-            val projectName = project.name
-            val nameMissingFromProject = projectName.isEmpty()
-            val name: String = if (nameMissingFromProject) {
-                extension.get("artifactId").toString()
-            } else {
-                projectName
-            }
-            return name
-        }
-
-        private fun groupId(project: Project, extension: ExtraPropertiesExtension): String {
-            val projectGroup = project.group.toString()
-            val groupMissingFromProject = projectGroup.isEmpty()
-            val groupId: String = if (groupMissingFromProject) {
-                extension.get("groupId").toString()
-            } else {
-                projectGroup
-            }
-            return groupId
-        }
-    }
 
     /**
      * Returns an XML string containing the project metadata.
@@ -104,12 +56,48 @@ private constructor(
      */
     override fun toString(): String {
         val writer = StringWriter()
-        val xmlBuilder = MarkupBuilder(writer)
-        xmlBuilder.withGroovyBuilder {
-            "groupId" to groupId
-            "artifactId" to artifactId
-            "version" to version
-        }
+        MarkupBuilder(writer).tagsFor(::groupId, ::artifactId, ::version)
         return writer.toString()
+    }
+
+    private fun MarkupBuilder.tagsFor(vararg property: KProperty<*>) {
+        property.forEach {
+            this.withGroovyBuilder {
+                it.name { this@tagsFor.text(it.call()) }
+            }
+        }
+    }
+}
+
+/**
+ * Creates a new instance of [ProjectMetadata].
+ *
+ * The required information is first retrieved from the project.
+ * And if a property is missing from the `project`, it is taken from the `extra` extension
+ * of project's root project.
+ */
+internal fun Project.metadata(): ProjectMetadata {
+    val groupId: String by nonEmptyValue(group)
+    val artifactId: String by nonEmptyValue(name)
+    val version: String by project.nonEmptyValue(this.version)
+    return ProjectMetadata(project, groupId, artifactId, version)
+}
+
+private fun Project.nonEmptyValue(prop: Any): NonEmptyValue {
+    return NonEmptyValue(prop.toString(), this)
+}
+
+private class NonEmptyValue(
+    private val defaultValue: String,
+    private val project: Project
+) : PropertyDelegate {
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> getValue(receiver: Any?, property: KProperty<*>): T {
+        if (defaultValue.isNotEmpty()) {
+            return defaultValue as T
+        }
+        val result = project.rootProject.extra[property.name]
+        return result as T
     }
 }

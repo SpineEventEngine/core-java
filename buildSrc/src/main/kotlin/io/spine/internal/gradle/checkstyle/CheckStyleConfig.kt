@@ -34,15 +34,23 @@ import org.gradle.api.plugins.quality.CheckstylePlugin
 import org.gradle.kotlin.dsl.the
 
 /**
- * Configures the CheckStyle plugin.
+ * Configures the Checkstyle plugin.
+ *
+ * Usage:
+ * ```
+ *      CheckStyleConfig.applyTo(project)
+ * ```
+ *
+ * Please note, the checks of the `test` sources are disabled.
+ *
+ * Also, this type is named in double-camel-case to avoid re-declaration due to a clash
+ * with some Gradle-provided types.
  */
 @Suppress("unused")
 object CheckStyleConfig {
 
     /**
      * Applies the configuration to the passed [project].
-     *
-     * The checks for the `test` sources are disabled within this configuration.
      */
     fun applyTo(project: Project) {
         project.apply {

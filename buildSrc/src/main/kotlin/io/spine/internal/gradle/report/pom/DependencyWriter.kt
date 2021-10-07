@@ -50,6 +50,8 @@ import org.gradle.kotlin.dsl.withGroovyBuilder
  *      ...
  *  </dependencies>
  * ```
+ *
+ * @see PomGenerator
  */
 internal class DependencyWriter
 private constructor(
@@ -71,17 +73,17 @@ private constructor(
      * <p>Used writer will not be closed.
      */
     fun writeXmlTo(out: Writer) {
-        val xmlBuilder = MarkupBuilder(out)
-        xmlBuilder.withGroovyBuilder {
+        val xml = MarkupBuilder(out)
+        xml.withGroovyBuilder {
             "dependencies" {
-                dependencies.forEach { projectDep ->
-                    val dependency = projectDep.dependency()
+                dependencies.forEach { scopedDep ->
+                    val dependency = scopedDep.dependency()
                     "dependency" {
-                        "groupId" to dependency.group
-                        "artifactId" to dependency.name
-                        "version" to dependency.version
-                        if (projectDep.hasDefinedScope()) {
-                            "scope" to projectDep.scopeName()
+                        "groupId" { xml.text(dependency.group) }
+                        "artifactId" { xml.text(dependency.name) }
+                        "version" { xml.text(dependency.version) }
+                        if (scopedDep.hasDefinedScope()) {
+                            "scope" { xml.text(scopedDep.scopeName()) }
                         }
                     }
                 }
@@ -128,5 +130,5 @@ private fun Project.depsFromAllConfigurations(): Set<ScopedDependency> {
  * Tells whether the dependency is an external module dependency.
  */
 private fun Dependency.isExternal(): Boolean {
-    return AbstractExternalModuleDependency::class.isSubclassOf(this.javaClass.kotlin)
+    return this.javaClass.kotlin.isSubclassOf(AbstractExternalModuleDependency::class)
 }

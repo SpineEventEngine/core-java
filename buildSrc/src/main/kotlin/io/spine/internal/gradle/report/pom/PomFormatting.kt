@@ -54,7 +54,9 @@ internal object PomFormatting {
         dest.write(NL)
         dest.write(MODEL_VERSION)
         dest.write(NL)
+        dest.write(NL)
         dest.write(describingComment())
+        dest.write(NL)
         dest.write(NL)
     }
 
@@ -84,7 +86,6 @@ internal object PomFormatting {
      * Writes the closing segment of `pom.xml`.
      */
     internal fun writeEnd(dest: StringWriter) {
-        dest.write(NL)
         dest.write(CLOSING_PROJECT_TAG)
     }
 
@@ -95,12 +96,10 @@ internal object PomFormatting {
      * The written lines are also padded with platform's line separator from both sides
      */
     internal fun writeBlocks(destination: StringWriter, vararg lines: String) {
-        destination.write(NL)
         lines.iterator().forEach {
             destination.write(it)
             destination.write(NL)
             destination.write(NL)
         }
-        destination.write(NL)
     }
 }

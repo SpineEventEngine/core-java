@@ -29,7 +29,7 @@ package io.spine.internal.gradle.report.pom
 /**
  * A Maven dependency scope.
  */
-@Suppress("EnumEntryName")  /* The names correspond to the actual values in Gradle. */
+@Suppress("EnumEntryName", "EnumNaming") /* Dubbing the actual values in Gradle. */
 enum class DependencyScope {
     undefined,
     compile,

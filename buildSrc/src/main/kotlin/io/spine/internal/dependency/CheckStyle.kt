@@ -27,7 +27,7 @@
 package io.spine.internal.dependency
 
 // https://checkstyle.sourceforge.io/
-// See `config/gradle.checkstyle.gradle`.
+// See `io.spine.internal.gradle.checkstyle.CheckStyleConfig`.
 @Suppress("unused")
 object CheckStyle {
     const val version = "8.29"

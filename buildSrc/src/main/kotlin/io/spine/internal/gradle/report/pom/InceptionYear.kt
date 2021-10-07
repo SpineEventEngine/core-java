@@ -42,9 +42,9 @@ internal object InceptionYear {
      */
     override fun toString(): String {
         val writer = StringWriter()
-        val xmlBuilder = MarkupBuilder(writer)
-        xmlBuilder.withGroovyBuilder {
-            "inceptionYear" to SPINE_INCEPTION_YEAR
+        val xml = MarkupBuilder(writer)
+        xml.withGroovyBuilder {
+            "inceptionYear" { xml.text(SPINE_INCEPTION_YEAR) }
         }
         return writer.toString()
     }
