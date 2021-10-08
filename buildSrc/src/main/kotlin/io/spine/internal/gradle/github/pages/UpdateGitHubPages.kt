@@ -130,14 +130,14 @@ class UpdateGitHubPages : Plugin<Project> {
     }
 
     private fun Project.registerTasks(extension: UpdateGitHubPagesExtension) {
-        val includeInternal = extension.allowInternalJavadoc()
+        val allowInternalJavadoc = extension.allowInternalJavadoc()
         rootFolder = extension.rootFolder()
         includedInputs = extension.includedInputs()
-        if (!includeInternal) {
+        if (!allowInternalJavadoc) {
             val doclet = ExcludeInternalDoclet(extension.excludeInternalDocletVersion)
             doclet.registerTaskIn(this)
         }
-        tasks.registerCopyJavadoc(includeInternal)
+        tasks.registerCopyJavadoc(allowInternalJavadoc)
         val updatePagesTask = tasks.registerUpdateTask()
         updatePagesTask.configure {
             dependsOn(copyJavadoc)
@@ -157,9 +157,9 @@ class UpdateGitHubPages : Plugin<Project> {
     private fun TaskContainer.composeInputs(allowInternalJavadoc: Boolean): MutableList<Any> {
         val inputs = mutableListOf<Any>()
         if (allowInternalJavadoc) {
-            inputs.add(javadocTask(ExcludeInternalDoclet.taskName))
-        } else {
             inputs.add(javadocTask())
+        } else {
+            inputs.add(javadocTask(ExcludeInternalDoclet.taskName))
         }
         inputs.addAll(includedInputs)
         return inputs
@@ -200,4 +200,3 @@ private fun Project.registerNoOpTask() {
         }
     }
 }
-

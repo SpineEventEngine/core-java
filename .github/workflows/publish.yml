@@ -42,6 +42,14 @@ jobs:
         env:
           MAVEN_PUBLISHER_KEY: ${{ secrets.MAVEN_PUBLISHER_KEY }}
 
+      - name: Decrypt Git SSH credentials
+        run: ./config/scripts/decrypt.sh "$GRADLE_PORTAL_CREDENTIALS_KEY" ./.github/keys/gradle-plugin-portal.secret.properties.gpg ./gradle-plugin-portal.secret.properties
+        env:
+          GRADLE_PORTAL_CREDENTIALS_KEY: ${{ secrets.GRADLE_PORTAL_CREDENTIALS_KEY }}
+
+      - name: Append Gradle properties
+        run: cat ./gradle-plugin-portal.secret.properties >> ./gradle.properties
+
       - name: Publish artifacts to Maven
         run: ./gradlew build publish --stacktrace
         env:
@@ -50,3 +58,4 @@ jobs:
           # https://docs.github.com/en/actions/reference/environment-variables
           REPO_SLUG: $GITHUB_REPOSITORY    # e.g. SpineEventEngine/core-java
           GOOGLE_APPLICATION_CREDENTIALS: ./maven-publisher.json
+          NPM_TOKEN: ${{ secrets.NPM_SECRET }}

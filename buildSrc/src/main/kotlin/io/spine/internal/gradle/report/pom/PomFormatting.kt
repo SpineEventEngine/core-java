@@ -48,37 +48,34 @@ internal object PomFormatting {
      * Writes the starting segment of `pom.xml`.
      */
     internal fun writeStart(dest: StringWriter) {
-        dest.write(XML_METADATA)
-        dest.write(NL)
-        dest.write(PROJECT_SCHEMA_LOCATION)
-        dest.write(NL)
-        dest.write(MODEL_VERSION)
-        dest.write(NL)
-        dest.write(NL)
-        dest.write(describingComment())
-        dest.write(NL)
-        dest.write(NL)
+        dest.write(
+            XML_METADATA,
+            NL,
+            PROJECT_SCHEMA_LOCATION,
+            NL,
+            MODEL_VERSION,
+            NL,
+            describingComment(),
+            NL
+        )
     }
 
     /**
      * Obtains a description comment that describes the nature of the generated `pom.xml` file.
      */
     private fun describingComment(): String {
-        val description =
-            lineSeparator() +
+        val description = NL +
                     "This file was generated using the Gradle `generatePom` task. " +
-                    lineSeparator() +
+                    NL +
                     "This file is not suitable for `maven` build tasks. It only describes the " +
                     "first-level dependencies of " +
-                    lineSeparator() +
+                    NL +
                     "all modules and does not describe the project " +
                     "structure per-subproject." +
-                    lineSeparator()
+                    NL
         return String.format(
             "<!-- %s %s %s -->",
-            lineSeparator(),
-            description,
-            lineSeparator()
+            NL, description, NL
         )
     }
 
@@ -97,9 +94,16 @@ internal object PomFormatting {
      */
     internal fun writeBlocks(destination: StringWriter, vararg lines: String) {
         lines.iterator().forEach {
-            destination.write(it)
-            destination.write(NL)
-            destination.write(NL)
+            destination.write(it, NL, NL)
+        }
+    }
+
+    /**
+     * Writes each of the passed sequences.
+     */
+    private fun StringWriter.write(vararg content: String) {
+        content.forEach {
+            this.write(it)
         }
     }
 }
