@@ -56,8 +56,8 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  */
 public abstract class
 DispatcherRegistry<C extends MessageClass<? extends Message>,
-                                         E extends MessageEnvelope<?, ?, ?>,
-                                         D extends MessageDispatcher<C, E>> {
+                   E extends MessageEnvelope<?, ?, ?>,
+                   D extends MessageDispatcher<C, E>> {
     /**
      * The map from a message class to one or more dispatchers of
      * messages of this class.
