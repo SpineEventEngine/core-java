@@ -34,6 +34,7 @@ import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.BlackBoxContext;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
@@ -50,23 +51,23 @@ public class IntegrationBrokerTestEnv {
 
     @CanIgnoreReturnValue
     public static BoundedContext
-    contextWithExtEntitySubscribers() {
+    contextWithExternalEntitySubscribers() {
         BoundedContext context = newContext();
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
-        contextAccess.register(DefaultRepository.of(ProjectCountAggregate.class));
-        contextAccess.register(DefaultRepository.of(ProjectWizard.class));
-        contextAccess.register(DefaultRepository.of(ProjectDetails.class));
+        context.internalAccess()
+               .register(DefaultRepository.of(ProjectCountAggregate.class))
+               .register(DefaultRepository.of(ProjectWizard.class))
+               .register(DefaultRepository.of(ProjectDetails.class));
         return context;
     }
 
     @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers() {
         BoundedContext context = newContext();
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
-        contextAccess.registerEventDispatcher(new ProjectEventsSubscriber());
-        contextAccess.register(DefaultRepository.of(ProjectCountAggregate.class));
-        contextAccess.register(DefaultRepository.of(ProjectWizard.class));
-        contextAccess.registerCommandDispatcher(new ProjectCommander());
+        context.internalAccess()
+               .register(DefaultRepository.of(ProjectCountAggregate.class))
+               .register(DefaultRepository.of(ProjectWizard.class))
+               .registerEventDispatcher(new ProjectEventsSubscriber())
+               .registerCommandDispatcher(new ProjectCommander());
         return context;
     }
 
@@ -94,13 +95,17 @@ public class IntegrationBrokerTestEnv {
     }
 
     public static Event projectCreated() {
-        ProjectId projectId =
-                ProjectId.newBuilder()
-                         .setId(Throwables.getStackTraceAsString(
-                                 new RuntimeException("Project ID")))
-                         .build();
-        TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                    IntegrationBrokerTestEnv.class);
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(Throwables.getStackTraceAsString(
+                                               new RuntimeException("Project ID")
+                                       ))
+                                       .build();
+
+        TestEventFactory eventFactory = newInstance(
+                pack(projectId),
+                IntegrationBrokerTestEnv.class
+        );
+
         return eventFactory.createEvent(
                 ItgProjectCreated.newBuilder()
                                  .setProjectId(projectId)
@@ -119,9 +124,67 @@ public class IntegrationBrokerTestEnv {
         );
     }
 
-    private static ProjectId projectId() {
+    public static ProjectId projectId() {
         return ProjectId.newBuilder()
                         .setId(newUuid())
                         .build();
     }
+
+    // proof of concepts #1
+
+    public static ItgProjectCreated _projectCreated() {
+        return ItgProjectCreated.newBuilder()
+                                .setProjectId(projectId())
+                                .build();
+    }
+
+    public static BlackBoxContext createProjectsBcWithSubscribers() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("Projects-" + newUuid())
+                              .add(DefaultRepository.of(ProjectCountAggregate.class))
+                              .add(DefaultRepository.of(ProjectWizard.class))
+                              .add(DefaultRepository.of(ProjectDetails.class))
+                              .addEventDispatcher(new ProjectEventsSubscriber())
+                              .addCommandDispatcher(new ProjectCommander())
+        );
+    }
+
+    public static BlackBoxContext createEmptyBc() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("Empty-" + newUuid())
+        );
+    }
+
+    public static BlackBoxContext createBillingBcWithSubscribers() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("Billing-" + newUuid())
+                              .add(BillingAggregate.class)
+        );
+    }
+
+    public static BlackBoxContext createPhotosBcWithSubscribers() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("Photos-" + newUuid())
+                              .add(PhotosProcMan.class)
+        );
+    }
+
+    // proof of concept #2
+
+    public static BlackBoxContext createUsersBc() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant(
+                        "UsersBc-" + IntegrationBrokerTestEnv.class.getSimpleName()
+                )
+        );
+    }
+
+    public static BlackBoxContext createProjectsBc() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant(
+                        "ProjectsBc-" + IntegrationBrokerTestEnv.class.getSimpleName()
+                )
+        );
+    }
+
 }
