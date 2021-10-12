@@ -640,6 +640,7 @@ public abstract class BlackBoxContext implements Logging {
      *         the type of the event to assert
      * @return the subject for further assertions
      */
+    @CanIgnoreReturnValue
     public final ProtoFluentAssertion assertEvent(Class<? extends EventMessage> eventClass) {
         EventSubject assertEvents =
                 assertEvents().withType(eventClass);
