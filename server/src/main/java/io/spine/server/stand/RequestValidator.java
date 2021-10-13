@@ -42,7 +42,8 @@ import static java.lang.String.format;
 /**
  * An abstract base of validators for the incoming requests to {@linkplain Stand}.
  *
- * @param <M> the type of request
+ * @param <M>
+ *         the type of request
  */
 abstract class RequestValidator<M extends Message> {
 

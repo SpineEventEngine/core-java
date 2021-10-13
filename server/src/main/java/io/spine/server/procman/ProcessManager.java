@@ -81,6 +81,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the process manager IDs
  * @param <S>
  *         the type of the process manager state
+ * @param <B>
+ *         the type of the builders for the process manager state
  */
 public abstract class ProcessManager<I,
                                      S extends EntityState<I>,

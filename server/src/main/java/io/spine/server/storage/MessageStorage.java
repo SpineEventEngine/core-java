@@ -47,6 +47,10 @@ import static java.util.stream.Collectors.toList;
  * uses not only the {@code Entity} state, but the {@code Entity} lifecycle attributes to prepare
  * the storage record.
  *
+ * @param <I>
+ *         the type of the record identifiers
+ * @param <M>
+ *         the type of the message records
  * @implNote This storage delegates all the operations to the underlying
  *         {@link RecordStorage}, which is configured according to the record specification
  *         for the persisted {@code Message}s

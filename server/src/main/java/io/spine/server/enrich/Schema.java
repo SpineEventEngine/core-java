@@ -41,6 +41,11 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
  * Contains enrichment functions.
+ *
+ * @param <M>
+ *         the type of enriched messages
+ * @param <C>
+ *         the type of contexts along which the enriched messages exist
  */
 final class Schema<M extends Message, C extends EnrichableMessageContext> implements Logging {
 
@@ -75,6 +80,11 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
      *
      * <p>Transforms functions obtained from {@link EnricherBuilder} into functions
      * used by {@code Schema}, and then creates the instance.
+     *
+     * @param <M>
+     *         the type of enriched messages
+     * @param <C>
+     *         the type of contexts along which the enriched messages exist
      */
     private static class Factory<M extends Message, C extends EnrichableMessageContext> {
 
@@ -100,7 +110,7 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
                              .collect(toImmutableSet());
         }
 
-        Schema<M, C> create() {
+        private Schema<M, C> create() {
             for (Class<? extends M> sourceType : sourceTypes) {
                 SchemaFn<? extends M, C> fn = createFn(sourceType);
                 schemaMap.put(sourceType, fn);
@@ -110,7 +120,7 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
         }
 
         @SuppressWarnings("unchecked")
-        SchemaFn<? extends M, C> createFn(Class<? extends M> sourceType) {
+        private SchemaFn<? extends M, C> createFn(Class<? extends M> sourceType) {
             ImmutableSet<EnrichmentFn<M, C, ?>> fns =
                     functions.entrySet()
                              .stream()

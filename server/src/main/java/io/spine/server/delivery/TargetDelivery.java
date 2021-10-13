@@ -47,6 +47,9 @@ import java.util.function.Function;
  * of the supplied {@linkplain BatchDeliveryListener listener}. Underlying listener implementations
  * may then optimize loading of their targets, e.g. use a single read and single write operation
  * per batch.
+ *
+ * @param <I>
+ *         the type of identifier of the inbox target entities
  */
 final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
@@ -115,6 +118,9 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
     /**
      * The batch of messages headed to the same target.
+     *
+     * @param <I>
+     *         the type of identifier of the inbox target entities
      */
     private static class Batch<I> {
 

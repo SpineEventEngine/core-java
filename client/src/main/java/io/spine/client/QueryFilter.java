@@ -42,8 +42,8 @@ import static io.spine.client.Filters.createFilter;
 /**
  * A query filter which targets a {@linkplain EntityColumn column} of an entity.
  *
- * <p>This type is deprecated. Use {@linkplain io.spine.query.EntityQuery entity queries} instead.
- * See {@code io.spine.query} package documentation for more details on usage.
+ * @deprecated This type is deprecated. Use {@linkplain io.spine.query.EntityQuery entity queries}
+ *         instead. See {@code io.spine.query} package documentation for more details on usage.
  */
 @Deprecated
 public final class QueryFilter extends TypedFilter<EntityState<?>> {

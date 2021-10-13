@@ -41,6 +41,9 @@ import static io.spine.server.bus.MessageIdExtensions.causedError;
  * The filter for the messages posted to a bus.
  *
  * <p>A bus may have several filters which can prevent a message from being posted.
+ *
+ * @param <E>
+ *         the type of the envelopes into which the messages posted to the bus are packed
  */
 @SPI
 @FunctionalInterface

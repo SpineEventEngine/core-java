@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <modelVersion>4.0.0</modelVersion>
-
 <!-- 
  
 This file was generated using the Gradle `generatePom` task. 
@@ -9,10 +8,9 @@ This file is not suitable for `maven` build tasks. It only describes the first-l
 all modules and does not describe the project structure per-subproject.
  
  -->
-
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.67</version>
+<version>2.0.0-SNAPSHOT.68</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -185,6 +183,11 @@ all modules and does not describe the project structure per-subproject.
     <version>3.18.0</version>
   </dependency>
   <dependency>
+    <groupId>com.puppycrawl.tools</groupId>
+    <artifactId>checkstyle</artifactId>
+    <version>8.29</version>
+  </dependency>
+  <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
     <version>1.38.0</version>
@@ -231,6 +234,5 @@ all modules and does not describe the project structure per-subproject.
     <version>1.5.30</version>
   </dependency>
 </dependencies>
+
 </project>
-
-

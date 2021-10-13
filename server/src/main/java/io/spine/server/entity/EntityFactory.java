@@ -31,8 +31,11 @@ import java.lang.reflect.Constructor;
 
 /**
  * Base interface for objects that can create entities.
+ *
+ * @param <E>
+ *         the type of produced entities
  */
-public interface EntityFactory<E extends Entity> extends Serializable {
+public interface EntityFactory<E extends Entity<?, ?>> extends Serializable {
 
     /**
      * Creates a new entity with the passed construction argument.

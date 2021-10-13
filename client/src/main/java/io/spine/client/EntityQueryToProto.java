@@ -199,15 +199,20 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
         Filter result;
         switch (comparison) {
             case EQUALS:
-                result = createFilter(colName, value, EQUAL); break;
+                result = createFilter(colName, value, EQUAL);
+                break;
             case GREATER_THAN:
-                result = createFilter(colName, value, GREATER_THAN); break;
+                result = createFilter(colName, value, GREATER_THAN);
+                break;
             case GREATER_OR_EQUALS:
-                result = createFilter(colName, value, GREATER_OR_EQUAL); break;
+                result = createFilter(colName, value, GREATER_OR_EQUAL);
+                break;
             case LESS_THAN:
-                result = createFilter(colName, value, LESS_THAN); break;
+                result = createFilter(colName, value, LESS_THAN);
+                break;
             case LESS_OR_EQUALS:
-                result = createFilter(colName, value, LESS_OR_EQUAL); break;
+                result = createFilter(colName, value, LESS_OR_EQUAL);
+                break;
             default:
                 throw newIllegalStateException("Unsupported comparison operator `%s`.", comparison);
         }

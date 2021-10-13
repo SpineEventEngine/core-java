@@ -63,6 +63,8 @@ import static java.util.stream.Collectors.toSet
  * e.g. {@code <groupId></groupId>}
  */
 
+println("`generate-pom.gradle` script is deprecated. Please use the `PomGenerator` utility instead.")
+
 // In some cases, the `base` plugin, which is by default is added by e.g. `java`, is not yet added.
 // `base` plugin defines the `build` task. This script needs it.
 apply plugin: 'base'

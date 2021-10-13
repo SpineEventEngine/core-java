@@ -31,6 +31,11 @@ import io.spine.base.EntityState;
 
 /**
  * Marks an {@link Entity} that declares columns for lifecycle flags.
+ *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <S>
+ *         the type of the entity states
  */
 @Internal
 public interface HasLifecycleColumns<I, S extends EntityState<I>> extends Entity<I, S> {

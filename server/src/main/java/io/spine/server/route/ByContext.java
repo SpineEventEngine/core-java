@@ -33,6 +33,9 @@ import java.util.Set;
 
 /**
  * Obtains an event producer ID from the context of the event.
+ *
+ * @param <I>
+ *         the type of obtained IDs
  */
 final class ByContext<I> implements EventRoute<I, EventMessage> {
 

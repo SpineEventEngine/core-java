@@ -42,6 +42,13 @@ import static io.spine.server.projection.ProjectionTransaction.start;
 
 /**
  * Dispatches an event to projections.
+ *
+ * @param <I>
+ *         the type of IDs of projections
+ * @param <P>
+ *         the type of projections
+ * @param <S>
+ *         the type of projection states
  */
 @Internal
 public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends EntityState<I>>

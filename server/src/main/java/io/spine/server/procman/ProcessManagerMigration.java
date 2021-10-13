@@ -34,6 +34,15 @@ import io.spine.validate.ValidatingBuilder;
 
 /**
  * A {@link Migration} applied to a {@link ProcessManager} instance.
+ *
+ * @param <I>
+ *         the type of process manager identifiers
+ * @param <P>
+ *         the type of process managers
+ * @param <S>
+ *         the type of the state of the migrated process managers
+ * @param <B>
+ *         the type of validation builders for the process manager's state
  */
 @Experimental
 public abstract class ProcessManagerMigration<I,

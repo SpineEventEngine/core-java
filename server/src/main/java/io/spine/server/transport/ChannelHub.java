@@ -40,6 +40,9 @@ import static java.util.Collections.unmodifiableSet;
  *
  * <p>Serves for channel creation and storage-per-ID which in a way makes the hub similar to
  * an entity repository.
+ *
+ * @param <C>
+ *         the type of grouped channels
  */
 @SPI
 public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {

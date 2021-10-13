@@ -26,23 +26,19 @@
 
 package io.spine.internal.gradle.github.pages
 
-import io.spine.internal.gradle.Cli
-import io.spine.internal.gradle.InternalJavadocFilter
-import io.spine.internal.gradle.JavadocTask
 import io.spine.internal.gradle.fs.LazyTempPath
-import io.spine.internal.gradle.javadocTask
+import io.spine.internal.gradle.github.pages.TaskName.copyJavadoc
+import io.spine.internal.gradle.github.pages.TaskName.updateGitHubPages
+import io.spine.internal.gradle.isSnapshot
+import io.spine.internal.gradle.javadoc.ExcludeInternalDoclet
+import io.spine.internal.gradle.javadoc.javadocTask
 import java.io.File
-import java.lang.System.lineSeparator
-import java.nio.file.Path
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.kotlin.dsl.add
 
 /**
  * Registers the `updateGitHubPages` task which performs the update of the GitHub Pages
@@ -92,7 +88,7 @@ class UpdateGitHubPages : Plugin<Project> {
     /**
      * Root folder of the repository, to which this `Project` belongs.
      */
-    private lateinit var rootFolder: File
+    internal lateinit var rootFolder: File
 
     /**
      * The external inputs to include into the publishing.
@@ -105,97 +101,75 @@ class UpdateGitHubPages : Plugin<Project> {
      * Path to the temp folder used to gather the Javadoc output
      * before submitting it to the GitHub Pages update.
      */
-    private val javadocOutputPath = LazyTempPath("javadoc")
+    internal val javadocOutputPath = LazyTempPath("javadoc")
 
     /**
      * Path to the temp folder used checkout the original GitHub Pages branch.
      */
-    private val checkoutTempFolder = LazyTempPath("repoTemp")
-
-    companion object {
-        /**
-         * The name of the task which updates the GitHub Pages.
-         */
-        const val taskName = "updateGitHubPages"
-
-        /**
-         * The name of the helper task to gather the generated Javadoc before updating GitHub Pages.
-         */
-        const val copyJavadoc = "copyJavadoc"
-
-        /**
-         * The name of the environment variable that contains the email to use for authoring
-         * the commits to the GitHub Pages branch.
-         */
-        const val formalGitHubPagesAuthorVar = "FORMAL_GIT_HUB_PAGES_AUTHOR"
-
-        /**
-         * The name of the environment variable containing the repository slug, for which
-         * the Gradle build is performed.
-         */
-        const val repoSlugVar = "REPO_SLUG"
-
-        /**
-         * The branch to use when pushing the updates to the documentation.
-         */
-        const val gitHubPagesBranch = "gh-pages"
-    }
+    internal val checkoutTempFolder = LazyTempPath("repoTemp")
 
     /**
      * Applies the plugin to the specified [project].
      *
-     * If the project version says it is a snapshot, the plugin is not applied.
+     * If the project version says it is a snapshot, the plugin registers a no-op task.
+     *
+     * Even in such a case, the extension object is still created in the given project, to allow
+     * customization of the parameters in its build script, for later usage when the project
+     * version changes to non-snapshot.
      */
     override fun apply(project: Project) {
-        val extension = UpdateGitHubPagesExtension.create(project)
-        project.extensions.add(UpdateGitHubPagesExtension::class, "updateGitHubPages", extension)
+        val extension = UpdateGitHubPagesExtension.createIn(project)
         project.afterEvaluate {
             val projectVersion = project.version.toString()
-            val isSnapshot = isSnapshot(projectVersion)
-            if (isSnapshot) {
+            if (projectVersion.isSnapshot()) {
                 registerNoOpTask()
             } else {
-                registerTasks(extension, project)
+                registerTasks(extension)
             }
         }
     }
 
-    /**
-     * Registers `updateGitHubPages` task which performs no actual update, but prints the message
-     * telling the update is skipped, since the project is in its `SNAPSHOT` version.
-     */
-    private fun Project.registerNoOpTask() {
-        tasks.register(taskName) {
-            doLast {
-                val project = this@registerNoOpTask
-                println(
-                    "GitHub Pages update will be skipped since this project is a snapshot: " +
-                            "`${project.name}-${project.version}`."
-                )
-            }
-        }
-    }
-
-    private fun registerTasks(extension: UpdateGitHubPagesExtension, project: Project) {
-        val includeInternal = extension.allowInternalJavadoc()
+    private fun Project.registerTasks(extension: UpdateGitHubPagesExtension) {
+        val allowInternalJavadoc = extension.allowInternalJavadoc()
         rootFolder = extension.rootFolder()
         includedInputs = extension.includedInputs()
-        val tasks = project.tasks
-        if (!includeInternal) {
-            InternalJavadocFilter.registerTask(project)
+        if (!allowInternalJavadoc) {
+            val doclet = ExcludeInternalDoclet(extension.excludeInternalDocletVersion)
+            doclet.registerTaskIn(this)
         }
-        registerCopyJavadoc(includeInternal, copyJavadoc, tasks)
-        val updatePagesTask = registerUpdateTask(project)
+        tasks.registerCopyJavadoc(allowInternalJavadoc)
+        val updatePagesTask = tasks.registerUpdateTask()
         updatePagesTask.configure {
             dependsOn(copyJavadoc)
         }
     }
 
-    private fun registerUpdateTask(project: Project): TaskProvider<Task> {
-        return project.tasks.register(taskName) {
+    private fun TaskContainer.registerCopyJavadoc(allowInternalJavadoc: Boolean) {
+        val inputs = composeInputs(allowInternalJavadoc)
+        register(copyJavadoc, Copy::class.java) {
+            doLast {
+                from(*inputs.toTypedArray())
+                into(javadocOutputPath)
+            }
+        }
+    }
+
+    private fun TaskContainer.composeInputs(allowInternalJavadoc: Boolean): MutableList<Any> {
+        val inputs = mutableListOf<Any>()
+        if (allowInternalJavadoc) {
+            inputs.add(javadocTask())
+        } else {
+            inputs.add(javadocTask(ExcludeInternalDoclet.taskName))
+        }
+        inputs.addAll(includedInputs)
+        return inputs
+    }
+
+    private fun TaskContainer.registerUpdateTask(): TaskProvider<Task> {
+        return register(updateGitHubPages) {
             doLast {
                 try {
-                    updateGhPages(checkoutTempFolder, project, javadocOutputPath)
+                    updateGhPages(project)
                 } finally {
                     cleanup()
                 }
@@ -209,169 +183,20 @@ class UpdateGitHubPages : Plugin<Project> {
             it.toFile().deleteRecursively()
         }
     }
+}
 
-    private fun Task.updateGhPages(
-        checkoutTempFolder: Path,
-        project: Project,
-        javadocOutputPath: Path
-    ) {
-        val gitHubAccessKey = gitHubKey(rootFolder)
-        val repoSlug = repoSlug()
-        val gitHost = gitHost(repoSlug)
-        val ghRepoFolder = File("$checkoutTempFolder/$gitHubPagesBranch")
-        val docDirPostfix = "reference/$project.name"
-        val mostRecentDocDir = File("$ghRepoFolder/$docDirPostfix")
-        val versionedDocDir = File("$mostRecentDocDir/v/$project.version")
-        val generatedDocs = project.files(javadocOutputPath)
-
-        // Create SSH config file to allow pushing commits to the repository.
-        registerSshKey(gitHubAccessKey)
-        checkoutDocs(gitHost, ghRepoFolder)
-
-        logger.debug("Replacing the most recent docs in `$mostRecentDocDir`.")
-        copyDocs(project, generatedDocs, mostRecentDocDir)
-
-        logger.debug("Storing the new version of docs in the directory `$versionedDocDir`.")
-        copyDocs(project, generatedDocs, versionedDocDir)
-
-        Cli(ghRepoFolder).execute("git", "add", docDirPostfix)
-        configureCommitter(ghRepoFolder)
-        commitAndPush(ghRepoFolder, project)
-        logger.debug("The GitHub Pages contents were successfully updated.")
-    }
-
-    private fun registerCopyJavadoc(
-        allowInternalJavadoc: Boolean,
-        taskName: String,
-        tasks: TaskContainer
-    ) {
-        val inputs = composeInputs(tasks, allowInternalJavadoc)
-        tasks.register(taskName, Copy::class.java) {
-            doLast {
-                from(*inputs.toTypedArray())
-                into(javadocOutputPath)
-            }
-        }
-    }
-
-    private fun composeInputs(
-        tasks: TaskContainer,
-        allowInternalJavadoc: Boolean
-    ): MutableList<Any> {
-        val inputs = mutableListOf<Any>()
-        if (allowInternalJavadoc) {
-            inputs.add(tasks.javadocTask(InternalJavadocFilter.taskName))
-        } else {
-            inputs.add(tasks.javadocTask(JavadocTask.name))
-        }
-        inputs.addAll(includedInputs)
-        return inputs
-    }
-
-    private fun commitAndPush(repoBaseDir: File, project: Project) {
-        val cli = Cli(repoBaseDir)
-        cli.execute(
-            "git",
-            "commit",
-            "--allow-empty",
-            "--message=\"Update Javadoc for module ${project.name} as for version ${project.version}\""
-        )
-        cli.execute("git", "push")
-    }
-
-    private fun copyDocs(project: Project, source: FileCollection, destination: File) {
-        destination.mkdir()
-        project.copy {
-            from(source)
-            into(destination)
-        }
-    }
-
-    /**
-     * Configures Git to publish the changes under "UpdateGitHubPages Plugin" Git user name
-     * and email stored in "FORMAL_GIT_HUB_PAGES_AUTHOR" env variable.
-     */
-    private fun configureCommitter(repoBaseDir: File) {
-        val cli = Cli(repoBaseDir)
-        cli.execute("git", "config", "user.name", "\"UpdateGitHubPages Plugin\"")
-        val authorEmail = System.getenv(formalGitHubPagesAuthorVar)
-        cli.execute("git", "config", "user.email", authorEmail!!)
-    }
-
-    private fun checkoutDocs(gitHost: String, repoBaseDir: File) {
-        Cli(rootFolder).execute("git", "clone", gitHost, repoBaseDir.absolutePath)
-        Cli(repoBaseDir).execute("git", "checkout", gitHubPagesBranch)
-    }
-
-    /**
-     * Creates an SSH key with the credentials from [gitHubAccessKey]
-     * and registers it by invoking the `register-ssh-key.sh` script.
-     */
-    private fun registerSshKey(gitHubAccessKey: File) {
-        val sshConfigFile = File("${System.getProperty("user.home")}/.ssh/config")
-        if (!sshConfigFile.exists()) {
-            val parentDir = sshConfigFile.canonicalFile.parentFile
-            parentDir.mkdirs()
-            sshConfigFile.createNewFile()
-        }
-        sshConfigFile.appendText(
-            lineSeparator() +
-                    "Host github.com-publish" + lineSeparator() +
-                    "User git" + lineSeparator() +
-                    "IdentityFile ${gitHubAccessKey.absolutePath}" + lineSeparator()
-        )
-
-        Cli(rootFolder).execute(
-            "${rootFolder.absolutePath}/config/scripts/register-ssh-key.sh",
-            gitHubAccessKey.absolutePath
-        )
-    }
-
-    /**
-     * Reads `REPO_SLUG` environment variable and returns its value.
-     *
-     * In case it is not set, a [GradleException] is thrown.
-     */
-    private fun repoSlug(): String {
-        val repoSlug = System.getenv(repoSlugVar)
-        if (repoSlug == null || repoSlug.isEmpty()) {
-            throw GradleException("`REPO_SLUG` environment variable is not set.")
-        }
-        return repoSlug
-    }
-
-    /**
-     * Returns the GitHub URL to the project repository.
-     *
-     * <p>A CI instance comes with an RSA key. However, of course, the default key has no
-     * privileges in Spine repositories. Thus, we add our own RSA key — `deploy_rsa_key`.
-     * It must have write rights in the associated repository. Also, we don't want that key
-     * to be used for anything else but GitHub Pages publishing.
-     * Thus, we configure the SSH agent to use the `deploy_rsa_key`
-     * only for specific references, namely in `github.com-publish`.
-     */
-    private fun gitHost(repoSlug: String): String {
-        return "git@github.com-publish:${repoSlug}.git"
-    }
-
-    /**
-     * Locates `deploy_key_rsa` in the passed [rootFolder] and returns it as a [File].
-     *
-     * If it is not found, a [GradleException] is thrown.
-     */
-    private fun gitHubKey(rootFolder: File): File {
-        val gitHubAccessKey = File("${rootFolder.absolutePath}/deploy_key_rsa")
-
-        if (!gitHubAccessKey.exists()) {
-            throw GradleException(
-                "File $gitHubAccessKey does not exist. It should be encrypted" +
-                        " in the repository and decrypted on CI."
+/**
+ * Registers `updateGitHubPages` task which performs no actual update, but prints the message
+ * telling the update is skipped, since the project is in its `SNAPSHOT` version.
+ */
+private fun Project.registerNoOpTask() {
+    tasks.register(updateGitHubPages) {
+        doLast {
+            val project = this@registerNoOpTask
+            println(
+                "GitHub Pages update will be skipped since this project is a snapshot: " +
+                        "`${project.name}-${project.version}`."
             )
         }
-        return gitHubAccessKey
-    }
-
-    private fun isSnapshot(version: String): Boolean {
-        return version.contains("snapshot", true)
     }
 }

@@ -47,6 +47,13 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * An abstract base for {@link AbstractEventReactor}s which have state and require
  * {@linkplain io.spine.server.delivery.Delivery delivering} the messages through an
  * {@link io.spine.server.delivery.Inbox Inbox}.
+ *
+ * @param <I>
+ *         the type of the reactor identifiers
+ * @param <S>
+ *         the type of reactor states
+ * @param <B>>
+ *         the type of the builders for the reactor states
  */
 public abstract class AbstractStatefulReactor<I, S extends Message, B extends ValidatingBuilder<S>>
         extends AbstractEventReactor {

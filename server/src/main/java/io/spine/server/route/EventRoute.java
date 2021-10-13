@@ -37,8 +37,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Obtains a set of entity IDs for which to deliver an event.
  *
- * @param <I> the type of entity IDs
- * @param <M> the type of event messages to get IDs from
+ * @param <I>
+ *         the type of entity IDs
+ * @param <M>
+ *         the type of event messages to get IDs from
  */
 @FunctionalInterface
 public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, EventContext> {

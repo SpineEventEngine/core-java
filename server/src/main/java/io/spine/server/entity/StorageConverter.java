@@ -44,6 +44,13 @@ import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * An abstract base for converters of entities into {@link EntityRecord}.
+ *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <E>
+ *         the type of managed entities
+ * @param <S>
+ *         the type of the entity state
  */
 public abstract class StorageConverter<I, E extends Entity<I, S>, S extends EntityState<I>>
         extends Converter<E, EntityRecord> implements Serializable {

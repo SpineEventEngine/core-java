@@ -41,6 +41,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
+ *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <E>
+ *         the type of managed entities
+ * @param <S>
+ *         the type of the entity state
  */
 public abstract class EventDispatchingRepository<I,
                                                  E extends AbstractEntity<I, S>,

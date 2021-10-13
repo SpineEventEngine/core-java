@@ -68,6 +68,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base class for repositories.
+ *
+ * @param <I>
+ *         the type of entity identifiers
+ * @param <E>
+ *         the type of managed entities
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>
@@ -510,6 +515,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * An iterator of all entities from the storage.
      *
      * <p>This iterator does not allow removal.
+     *
+     * @param <I>
+     *         the type of entity identifiers
+     * @param <E>
+     *         the type of entities
      */
     private static class EntityIterator<I, E extends Entity<I, ?>> implements Iterator<E> {
 

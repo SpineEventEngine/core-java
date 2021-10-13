@@ -72,6 +72,8 @@ import static io.spine.protobuf.Messages.isDefault;
  *         the entity type
  * @param <S>
  *         the entity state type
+ * @param <B>
+ *         the type of the validating builder for the entity state
  */
 @Experimental
 public abstract class Migration<I,
@@ -258,7 +260,14 @@ public abstract class Migration<I,
      *
      * <p>On a transaction commit, all changes are propagated to the actual entity passed to
      * {@link Migration#applyTo(TransactionalEntity, RecordBasedRepository)}, modifying it in-place.
-     * */
+     *
+     * @param <I>
+     *         the type of identifiers of the migrated entities
+     * @param <S>
+     *         the state type of the entity
+     * @param <E>
+     *         the type of entity
+     */
     private static class Operation<I,
                                    S extends EntityState<I>,
                                    E extends TransactionalEntity<I, S, ?>> {

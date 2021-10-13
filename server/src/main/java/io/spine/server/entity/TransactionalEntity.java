@@ -43,6 +43,13 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>Exposes {@linkplain #builder()} validating builder} for the state as the only way
  * to modify the state from the descendants.
+ *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <S>
+ *         the type of the entity state
+ * @param <B>
+ *         the type of the builders for the entity state
  */
 public abstract
 class TransactionalEntity<I, S extends EntityState<I>, B extends ValidatingBuilder<S>>

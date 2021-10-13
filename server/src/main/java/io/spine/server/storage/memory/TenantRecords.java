@@ -59,6 +59,11 @@ import static java.util.stream.Collectors.toList;
  * The memory-based storage for message records.
  *
  * <p>Acts like a facade API for the operations available over the data of a single tenant.
+ *
+ * @param <I>
+ *         the type of the record identifiers
+ * @param <R>
+ *         the type of the records
  */
 final class TenantRecords<I, R extends Message>
         implements TenantDataStorage<I, RecordWithColumns<I, R>> {

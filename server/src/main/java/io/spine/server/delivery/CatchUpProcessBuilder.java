@@ -35,6 +35,9 @@ import static io.spine.util.Preconditions2.checkPositive;
 
 /**
  * A builder for {@link CatchUpProcess}.
+ *
+ * @param <I>
+ *         the type of identifiers of the processed projections
  */
 public final class CatchUpProcessBuilder<I> {
 

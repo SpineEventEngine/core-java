@@ -24,32 +24,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.gradle.api.Project
-import org.gradle.api.tasks.javadoc.Javadoc
-import org.gradle.external.javadoc.CoreJavadocOptions
-import org.gradle.kotlin.dsl.named
+package io.spine.internal.gradle.checkstyle
 
+import io.spine.internal.dependency.CheckStyle
+import org.gradle.api.Project
+import org.gradle.api.plugins.quality.Checkstyle
+import org.gradle.api.plugins.quality.CheckstyleExtension
+import org.gradle.api.plugins.quality.CheckstylePlugin
+import org.gradle.kotlin.dsl.the
+
+/**
+ * Configures the Checkstyle plugin.
+ *
+ * Usage:
+ * ```
+ *      CheckStyleConfig.applyTo(project)
+ * ```
+ *
+ * Please note, the checks of the `test` sources are disabled.
+ *
+ * Also, this type is named in double-camel-case to avoid re-declaration due to a clash
+ * with some Gradle-provided types.
+ */
 @Suppress("unused")
-object TravisLogs {
+object CheckStyleConfig {
 
     /**
-     * Specific setup for a Travis build, which prevents warning messages related to
-     * `javadoc` tasks in build logs.
-     *
-     * It is expected that warnings are viewed and analyzed during local builds.
+     * Applies the configuration to the passed [project].
      */
-    fun hideJavadocWarnings(p: Project) {
-        //
-        val isTravis = System.getenv("TRAVIS") == "true"
-        if (isTravis) {
-            // Set the maximum number of Javadoc warnings to print.
-            // If the parameter value is zero, all warnings will be printed.
-            p.tasks.named<Javadoc>("javadoc") {
-                val opt = options
-                if (opt is CoreJavadocOptions) {
-                    opt.addStringOption("Xmaxwarns", "1")
-                }
-            }
+    fun applyTo(project: Project) {
+        project.apply {
+            plugin(CheckstylePlugin::class.java)
+        }
+
+        with(project.the<CheckstyleExtension>()) {
+            toolVersion = CheckStyle.version
+            configFile = project.rootDir.resolve("config/quality/checkstyle.xml")
+        }
+
+        project.afterEvaluate {
+            // Disables checking the test sources.
+            val checkstyleTest = project.tasks.findByName("checkstyleTest") as Checkstyle
+            checkstyleTest.enabled = false
         }
     }
 }

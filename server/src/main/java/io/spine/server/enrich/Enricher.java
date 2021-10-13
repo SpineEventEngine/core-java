@@ -36,6 +36,11 @@ import java.util.Optional;
 
 /**
  * Enriches messages <em>after</em> they are stored, and <em>before</em> they are dispatched.
+ *
+ * @param <M>
+ *         the type of the enrichable message
+ * @param <C>
+ *         the type of the message context
  */
 public abstract class Enricher<M extends Message, C extends EnrichableMessageContext>
         implements EnrichmentService<M, C> {

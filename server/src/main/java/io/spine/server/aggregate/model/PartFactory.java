@@ -40,6 +40,9 @@ import static java.lang.String.format;
 
 /**
  * Creates aggregate parts passing the root class to the constructor.
+ *
+ * @param <A>
+ *         the type of the created aggregate parts
  */
 final class PartFactory<A extends AggregatePart<?, ?, ?, ?>> extends AbstractEntityFactory<A> {
 

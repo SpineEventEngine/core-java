@@ -39,6 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Adapts a consumer of an event message to the {@link EventConsumer} interface.
+ *
+ * @param <M>
+ *         the type of {@code Messages} which are consumed
+ * @param <C>
+ *         the type of message context for the consumed messages
  */
 abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
         implements MessageConsumer<M, C> {
@@ -85,6 +90,9 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
 
     /**
      * Adapts a consumer of an event message to the {@link EventConsumer} interface.
+     *
+     * @param <E>
+     *         the type of consumed events
      */
     private static final class DelegatingEventConsumer<E extends EventMessage>
             extends DelegatingConsumer<E, EventContext>
@@ -97,6 +105,9 @@ abstract class DelegatingConsumer<M extends Message, C extends MessageContext>
 
     /**
      * Adapts a {@code Consumer} of an {@code EntityState} to the {@link StateConsumer} interface.
+     *
+     * @param <S>
+     *         the type of consumed {@code Entity} states
      */
     private static final class DelegatingStateConsumer<S extends EntityState<?>>
             extends DelegatingConsumer<S, EmptyContext>

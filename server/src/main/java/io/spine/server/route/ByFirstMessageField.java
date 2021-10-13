@@ -33,6 +33,9 @@ import java.util.Set;
 
 /**
  * The route that obtains a producer ID from the first field of the event message.
+ *
+ * @param <I>
+ *         the type of obtained IDs
  */
 final class ByFirstMessageField<I> implements EventRoute<I, EventMessage> {
 

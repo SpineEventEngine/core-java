@@ -39,6 +39,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A bus which delivers a message to one dispatcher.
  *
+ * @param <T>
+ *         the type of the delivered signals
+ * @param <E>
+ *         the type of the envelopes of the delivered signals
+ * @param <C>
+ *         the message class corresponding to the delivered signal
+ * @param <D>
+ *         the type of dispatchers which receive the signals
  * @see MulticastBus
  */
 @Internal
@@ -57,7 +65,7 @@ public abstract class UnicastBus<T extends Signal<?, ?, ?>,
                          .orElseThrow(() -> noDispatcherFound(envelope));
     }
 
-    private static IllegalStateException noDispatcherFound(MessageEnvelope envelope) {
+    private static IllegalStateException noDispatcherFound(MessageEnvelope<?, ?, ?> envelope) {
         String id = Identifier.toString(envelope.id());
         throw newIllegalStateException(
                 "No dispatcher found for the command (class: `%s` id: `%s`).",

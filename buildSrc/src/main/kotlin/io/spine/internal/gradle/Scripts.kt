@@ -51,12 +51,10 @@ object Scripts {
     @Deprecated("Use `pmd-settings` script plugin instead")
     fun pmd(p: Project)                    = p.script("pmd.gradle")
 
-    fun checkstyle(p: Project)             = p.script("checkstyle.gradle")
     fun runBuild(p: Project)               = p.script("run-build.gradle")
     fun licenseReportCommon(p: Project)    = p.script("license-report-common.gradle")
     fun projectLicenseReport(p: Project)   = p.script("license-report-project.gradle")
     fun repoLicenseReport(p: Project)      = p.script("license-report-repo.gradle")
-    fun generatePom(p: Project)            = p.script("generate-pom.gradle")
 
     private fun Project.script(name: String) = "${rootDir}$commonPath${name}"
 }

@@ -35,6 +35,11 @@ import java.util.Optional;
 /**
  * The {@linkplain LazyEndpoint endpoints} configured as destinations for
  * a certain {@linkplain io.spine.server.delivery.InboxLabel label}.
+ *
+ * @param <I>
+ *         the type of identifier of the endpoint targets
+ * @param <M>
+ *         the type of the message envelope served by the endpoint
  */
 final class Endpoints<I, M extends SignalEnvelope<?, ?, ?>> {
 

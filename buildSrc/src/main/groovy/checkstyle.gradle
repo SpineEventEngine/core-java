@@ -30,6 +30,8 @@
 
 import io.spine.internal.dependency.CheckStyle
 
+println("`checkstyle.gradle` script is deprecated. Please use the `CheckStyleConfig` utility instead.")
+
 apply plugin: 'checkstyle'
 
 checkstyle {

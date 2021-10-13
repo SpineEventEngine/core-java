@@ -60,6 +60,8 @@ import static java.lang.String.format;
  *         the type of the IDs
  * @param <M>
  *         the type of the state objects holding projection data
+ * @param <B>
+ *         the type of the builders for the projection state
  */
 public abstract class Projection<I,
                                  M extends EntityState<I>,

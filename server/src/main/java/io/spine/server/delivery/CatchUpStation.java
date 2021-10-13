@@ -123,7 +123,7 @@ final class CatchUpStation extends Station {
      * Filters the messages in {@link InboxMessageStatus#TO_CATCH_UP TO_CATCH_UP} status,
      * by matching them to the ongoing {@code CatchUp} jobs.
      *
-     * <p>Depending on the {@linkplain CatchUp#getStatus() status of each job and the status
+     * <p>Depending on the {@linkplain CatchUp#getStatus() status} of each job and the status
      * of the message, the latter may be accepted for dispatching.
      *
      * <p>Duplicated messages are removed from the passed conveyor.
@@ -298,17 +298,17 @@ final class CatchUpStation extends Station {
 
                 switch (jobStatus) {
                     case STARTED:
-                        started(message); break;
-
+                        started(message);
+                        break;
                     case IN_PROGRESS:
-                        inProgress(message); break;
-
+                        inProgress(message);
+                        break;
                     case FINALIZING:
-                        finalizingWith(message); break;
-
+                        finalizingWith(message);
+                        break;
                     case COMPLETED:
-                        completedWith(message); break;
-
+                        completedWith(message);
+                        break;
                     case CUS_UNDEFINED:
                     case UNRECOGNIZED:
                         throw newIllegalStateException(

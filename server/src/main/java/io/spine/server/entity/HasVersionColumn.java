@@ -32,6 +32,11 @@ import io.spine.core.Version;
 
 /**
  * Marks an {@link Entity} that declares a {@link Version} column.
+ *
+ * @param <I>
+ *         the type of the entity identifiers
+ * @param <S>
+ *         the type of the entity states
  */
 @Internal
 public interface HasVersionColumn<I, S extends EntityState<I>> extends Entity<I, S> {

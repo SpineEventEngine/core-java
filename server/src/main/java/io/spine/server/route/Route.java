@@ -34,9 +34,12 @@ import java.util.function.BiFunction;
 /**
  * Obtains one or more entity identifiers based on a message and its context.
  *
- * @param <M> the type of messages to get IDs from
- * @param <C> the type of message context
- * @param <R> the type of the route function result
+ * @param <M>
+ *         the type of messages to get IDs from
+ * @param <C>
+ *         the type of message context
+ * @param <R>
+ *         the type of the route function result
  */
 @FunctionalInterface
 public interface Route<M extends Message, C extends Message, R>

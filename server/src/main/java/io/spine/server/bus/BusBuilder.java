@@ -56,9 +56,16 @@ import static java.util.Optional.ofNullable;
 /**
  * The implementation base for the bus builders.
  *
- * @param <E> the type of {@link SignalEnvelope} posted by the bus
- * @param <T> the type of {@link Signal} posted by the bus
- * @param <B> the own type of the builder
+ * @param <E>
+ *         the type of {@link SignalEnvelope} posted by the bus
+ * @param <T>
+ *         the type of {@link Signal} posted by the bus
+ * @param <B>
+ *         the own type of the builder
+ * @param <C>
+ *         the type of the messages transmitted by the bus
+ * @param <D>
+ *         the type of the dispatchers expected for the bus
  */
 @Internal
 @CanIgnoreReturnValue

@@ -43,6 +43,9 @@ import static com.google.common.collect.Lists.newLinkedList;
 /**
  * An implementation of {@link TransactionListener} which memoizes all arguments received in the
  * callbacks.
+ *
+ * @param <I>
+ *         ID type of the entity under transaction
  */
 public final class MemoizingTransactionListener<I> implements TransactionListener<I> {
 
