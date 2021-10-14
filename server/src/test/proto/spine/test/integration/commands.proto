@@ -36,15 +36,6 @@ option java_multiple_files = true;
 
 import "spine/test/integration/project.proto";
 
-message ItgCreateProject {
-    ProjectId project_id = 1;
-}
-
-message ItgAddTask {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
-
 message ItgStartProject {
     ProjectId project_id = 1;
 }
