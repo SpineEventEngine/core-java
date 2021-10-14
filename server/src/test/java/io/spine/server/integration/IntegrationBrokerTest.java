@@ -25,8 +25,6 @@
  */
 package io.spine.server.integration;
 
-import io.spine.core.Event;
-import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.integration.broker.ArchivePhotos;
 import io.spine.server.integration.broker.CreditsHeld;
@@ -36,31 +34,21 @@ import io.spine.server.integration.broker.PhotosMarkedArchived;
 import io.spine.server.integration.broker.PhotosProcessed;
 import io.spine.server.integration.broker.PhotosUploaded;
 import io.spine.server.integration.broker.UploadPhotos;
-import io.spine.server.integration.given.ProjectCommander;
-import io.spine.server.integration.given.ProjectDetails;
-import io.spine.server.integration.given.ProjectEventsSubscriber;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.contextWithExternalEntitySubscribers;
-import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.contextWithExternalSubscribers;
-import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.newContext;
-import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.projectCreated;
-import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.projectStarted;
-import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.publishingPhotosBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.billingBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.photosBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedBillingBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.photosBcAndSubscribedBillingBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedPhotosBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedStatisticsBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedWarehouseBc;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @DisplayName("IntegrationBroker should")
 class IntegrationBrokerTest {
@@ -90,10 +78,9 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("another BC")
             void toAnotherBc() {
-                try (BlackBoxContext publishingPhotosBc = publishingPhotosBc();
+                try (BlackBoxContext publishingPhotosBc = photosBc();
                      BlackBoxContext subscribedBillingBc = subscribedBillingBc()
                 ) {
-
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
 
@@ -104,11 +91,10 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("multiple other BCs")
             void toMultipleOtherBc() {
-                try (BlackBoxContext publishingPhotosBc = publishingPhotosBc();
+                try (BlackBoxContext publishingPhotosBc = photosBc();
                      BlackBoxContext subscribedBillingBc = subscribedBillingBc();
                      BlackBoxContext subscribedStatisticsBc = subscribedStatisticsBc()
                 ) {
-
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
 
@@ -120,11 +106,10 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("multiple other BCs with different needs")
             void toMultipleOtherBcWithDifferentNeeds() {
-                try (BlackBoxContext publishingPhotosBc = publishingPhotosBc();
+                try (BlackBoxContext publishingPhotosBc = photosBc();
                      BlackBoxContext subscribedBillingBc = subscribedBillingBc();
                      BlackBoxContext subscribedWarehouseBc = subscribedWarehouseBc()
                 ) {
-
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
                     subscribedBillingBc.assertEvent(CreditsHeld.class);
@@ -144,9 +129,8 @@ class IntegrationBrokerTest {
             @DisplayName("the subscribing BC is registered before the publishing one")
             void subscribingBcRegisteredBeforePublishing() {
                 try (BlackBoxContext subscribedBillingBc = subscribedBillingBc();
-                     BlackBoxContext publishingPhotosBc = publishingPhotosBc()
+                     BlackBoxContext publishingPhotosBc = photosBc()
                 ) {
-
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
 
@@ -157,15 +141,14 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("they are subscribed to each other")
             void subscribedToEachOther() {
-                try (BlackBoxContext photosBc = subscribedPhotosBc();
-                     BlackBoxContext billingBc = subscribedBillingBc()
+                try (BlackBoxContext subscribedPhotosBc = subscribedPhotosBc();
+                     BlackBoxContext subscribedBillingBc = subscribedBillingBc()
                 ) {
+                    subscribedPhotosBc.receivesCommand(UploadPhotos.generate());
+                    subscribedPhotosBc.assertEvent(PhotosUploaded.class);
 
-                    photosBc.receivesCommand(UploadPhotos.generate());
-                    photosBc.assertEvent(PhotosUploaded.class);
-
-                    billingBc.assertEvent(CreditsHeld.class);
-                    photosBc.assertEvent(PhotosProcessed.class);
+                    subscribedBillingBc.assertEvent(CreditsHeld.class);
+                    subscribedPhotosBc.assertEvent(PhotosProcessed.class);
                 }
             }
         }
@@ -175,45 +158,33 @@ class IntegrationBrokerTest {
     @DisplayName("avoid dispatching events from a BC to")
     class AvoidDispatchingEvents {
 
-        @Disabled
         @Test
-        @DisplayName("subscribers of domestic events in another BC")
-        void toSubscribersOfDomesticEventsInAnotherBc() throws Exception {
-            BoundedContext sourceContext = newContext();
-            BoundedContext destContext = contextWithExternalEntitySubscribers();
+        @DisplayName("subscribers of internal events in another BC")
+        void toSubscribersOfInternalEventsInAnotherBc() {
+            try (BlackBoxContext projectsBc = photosBc();
+                 BlackBoxContext billingBc = billingBc()
+            ) {
+                projectsBc.receivesCommand(UploadPhotos.generate());
 
-            assertNull(ProjectDetails.domesticEvent());
+                projectsBc.assertEvent(PhotosUploaded.class);
+                billingBc.assertEvents()
+                         .isEmpty();
+            }
 
-            Event event = projectStarted();
-            sourceContext.eventBus()
-                         .post(event);
-            assertThat(ProjectDetails.domesticEvent()).isNull();
-
-            destContext.eventBus()
-                       .post(event);
-            assertThat(ProjectDetails.domesticEvent()).isEqualTo(unpack(event.getMessage()));
-
-            sourceContext.close();
-            destContext.close();
         }
 
-        @Disabled
         @Test
         @DisplayName("its own subscribers of external events")
-        void toItsOwnSubscribersOfExternalEvents() throws Exception {
-            BoundedContext destContext = contextWithExternalSubscribers();
+        void toItsOwnSubscribersOfExternalEvents() {
+            try (BlackBoxContext photosBcAndBillingBc = photosBcAndSubscribedBillingBc()) {
 
-            assertThat(ProjectEventsSubscriber.externalEvent()).isNull();
-            assertThat(ProjectCommander.externalEvent()).isNull();
+                photosBcAndBillingBc.receivesCommand(UploadPhotos.generate());
+                photosBcAndBillingBc.assertEvent(PhotosUploaded.class);
 
-            Event projectCreated = projectCreated();
-            destContext.eventBus()
-                       .post(projectCreated);
-
-            assertThat(ProjectEventsSubscriber.externalEvent()).isNull();
-            assertThat(ProjectCommander.externalEvent()).isNull();
-
-            destContext.close();
+                photosBcAndBillingBc.assertEvents()
+                                     .withType(CreditsHeld.class)
+                                     .isEmpty();
+            }
         }
     }
 }

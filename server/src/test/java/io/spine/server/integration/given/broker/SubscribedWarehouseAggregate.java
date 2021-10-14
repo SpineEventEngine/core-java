@@ -34,7 +34,7 @@ import io.spine.server.integration.broker.PhotosArchived;
 import io.spine.server.integration.broker.PhotosMarkedArchived;
 import io.spine.server.integration.broker.WarehouseAgg;
 
-class WarehouseAggregate extends Aggregate<String, WarehouseAgg, WarehouseAgg.Builder> {
+class SubscribedWarehouseAggregate extends Aggregate<String, WarehouseAgg, WarehouseAgg.Builder> {
 
     @React
     PhotosArchived on(@External PhotosMarkedArchived event) {
@@ -45,5 +45,4 @@ class WarehouseAggregate extends Aggregate<String, WarehouseAgg, WarehouseAgg.Bu
     private void on(PhotosArchived event) {
         builder().setId(event.getUuid());
     }
-
 }

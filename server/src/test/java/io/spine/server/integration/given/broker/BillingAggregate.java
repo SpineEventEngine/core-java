@@ -26,7 +26,6 @@
 
 package io.spine.server.integration.given.broker;
 
-import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
@@ -37,7 +36,7 @@ import io.spine.server.integration.broker.PhotosUploaded;
 final class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
     @React
-    CreditsHeld on(@External PhotosUploaded event) {
+    CreditsHeld on(PhotosUploaded event) {
         return CreditsHeld.of(event.getUuid());
     }
 
@@ -45,5 +44,4 @@ final class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Bu
     private void on(CreditsHeld event) {
         builder().setId(event.getUuid());
     }
-
 }

@@ -30,20 +30,19 @@ import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
-import io.spine.server.integration.broker.IncreasedTotalPhotosUploaded;
+import io.spine.server.integration.broker.BillingAgg;
+import io.spine.server.integration.broker.CreditsHeld;
 import io.spine.server.integration.broker.PhotosUploaded;
-import io.spine.server.integration.broker.StatisticsAgg;
 
-final class StatisticsAggregate extends Aggregate<String, StatisticsAgg, StatisticsAgg.Builder> {
+final class SubscribedBillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
     @React
-    IncreasedTotalPhotosUploaded on(@External PhotosUploaded event) {
-        return IncreasedTotalPhotosUploaded.of(event.getUuid());
+    CreditsHeld on(@External PhotosUploaded event) {
+        return CreditsHeld.of(event.getUuid());
     }
 
     @Apply
-    private void on(IncreasedTotalPhotosUploaded event) {
+    private void on(CreditsHeld event) {
         builder().setId(event.getUuid());
     }
-
 }

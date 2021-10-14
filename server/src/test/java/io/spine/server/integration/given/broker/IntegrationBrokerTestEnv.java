@@ -51,6 +51,8 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
  */
 public class IntegrationBrokerTestEnv {
 
+    private static final String testClassName = IntegrationBrokerTestEnv.class.getSimpleName();
+
     /** Prevents instantiation of this utility class. */
     private IntegrationBrokerTestEnv() {
     }
@@ -140,46 +142,53 @@ public class IntegrationBrokerTestEnv {
     // proof of concept #2
     // **********************
 
-    // @External PhotosUploaded => CreditsHeld
-    public static BlackBoxContext subscribedBillingBc() {
+    public static BlackBoxContext billingBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant("SubscribedBillingBc-" + newUuid())
+                BoundedContext.singleTenant("BillingBc-" + testClassName)
                               .add(BillingAggregate.class)
         );
     }
 
-    // @External PhotosUploaded => IncreaseTotalPhotosProcessed
-    public static BlackBoxContext subscribedStatisticsBc() {
+    public static BlackBoxContext subscribedBillingBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant("SubscribedStatisticsBc-" + newUuid())
-                        .add(StatisticsAggregate.class)
+                BoundedContext.singleTenant("SubscribedBillingBc-" + testClassName)
+                              .add(SubscribedBillingAggregate.class)
         );
     }
 
-    // UploadPhotos          => PhotosUploaded
-    // @External CreditsHeld => PhotosProcessed
+    public static BlackBoxContext photosBc() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("PhotosBc-" + testClassName)
+                              .add(PhotosAggregate.class)
+        );
+    }
+
     public static BlackBoxContext subscribedPhotosBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant("SubscribedPhotosBc-" + newUuid())
-                              .add(PhotosProcess.class)
+                BoundedContext.singleTenant("SubscribedPhotosBc-" + testClassName)
+                              .add(SubscribedPhotosAggregate.class)
         );
     }
 
-    // UploadPhotos => PhotosUploaded
-    // ArchivePhoto => PhotoArchived
-    public static BlackBoxContext publishingPhotosBc() {
-        return BlackBoxContext.from(
-                BoundedContext.singleTenant("PhotosBc-" + newUuid())
-                        .add(PhotosAggregate.class)
-        );
-    }
-
-    // PhotoArchived => void
     public static BlackBoxContext subscribedWarehouseBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant("WarehouseBc-" + newUuid())
-                        .add(WarehouseAggregate.class)
+                BoundedContext.singleTenant("SubscribedWarehouseBc-" + testClassName)
+                              .add(SubscribedWarehouseAggregate.class)
         );
     }
 
+    public static BlackBoxContext subscribedStatisticsBc() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("SubscribedStatisticsBc-" + testClassName)
+                              .add(SubscribedStatisticsAggregate.class)
+        );
+    }
+
+    public static BlackBoxContext photosBcAndSubscribedBillingBc() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("photosBcAndSubscribedBillingBc-" + testClassName)
+                              .add(PhotosAggregate.class)
+                              .add(SubscribedBillingAggregate.class)
+        );
+    }
 }

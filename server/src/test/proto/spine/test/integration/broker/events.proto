@@ -43,7 +43,6 @@ message PhotosProcessed {
 }
 
 message CreditsHeld {
-
     string uuid = 1;
 }
 

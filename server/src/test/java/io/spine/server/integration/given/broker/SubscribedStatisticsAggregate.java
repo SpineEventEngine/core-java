@@ -26,34 +26,23 @@
 
 package io.spine.server.integration.given.broker;
 
+import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
-import io.spine.server.integration.broker.ArchivePhotos;
-import io.spine.server.integration.broker.PhotosMarkedArchived;
-import io.spine.server.integration.broker.PhotosAgg;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.IncreasedTotalPhotosUploaded;
 import io.spine.server.integration.broker.PhotosUploaded;
-import io.spine.server.integration.broker.UploadPhotos;
+import io.spine.server.integration.broker.StatisticsAgg;
 
-final class PhotosAggregate extends Aggregate<String, PhotosAgg, PhotosAgg.Builder> {
+final class SubscribedStatisticsAggregate extends Aggregate<String, StatisticsAgg, StatisticsAgg.Builder> {
 
-    @Assign
-    PhotosUploaded handler(UploadPhotos command) {
-        return PhotosUploaded.generate();
+    @React
+    IncreasedTotalPhotosUploaded on(@External PhotosUploaded event) {
+        return IncreasedTotalPhotosUploaded.of(event.getUuid());
     }
 
     @Apply
-    private void on(PhotosUploaded event) {
-        builder().setId(event.getUuid());
-    }
-
-    @Assign
-    PhotosMarkedArchived handler(ArchivePhotos command) {
-        return PhotosMarkedArchived.generate();
-    }
-
-    @Apply
-    private void on(PhotosMarkedArchived event) {
+    private void on(IncreasedTotalPhotosUploaded event) {
         builder().setId(event.getUuid());
     }
 }

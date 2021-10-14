@@ -27,20 +27,26 @@
 package io.spine.server.integration.given.broker;
 
 import io.spine.core.External;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.React;
 import io.spine.server.integration.broker.CreditsHeld;
-import io.spine.server.integration.broker.PhotosPm;
+import io.spine.server.integration.broker.PhotosAgg;
 import io.spine.server.integration.broker.PhotosProcessed;
 import io.spine.server.integration.broker.PhotosUploaded;
 import io.spine.server.integration.broker.UploadPhotos;
-import io.spine.server.procman.ProcessManager;
 
-final class PhotosProcess extends ProcessManager<String, PhotosPm, PhotosPm.Builder> {
+final class SubscribedPhotosAggregate extends Aggregate<String, PhotosAgg, PhotosAgg.Builder> {
 
     @Assign
     PhotosUploaded handler(UploadPhotos command) {
         return PhotosUploaded.of(command.getUuid());
+    }
+
+    @Apply
+    private void on(PhotosUploaded event) {
+        builder().setId(event.getUuid());
     }
 
     @React
@@ -48,4 +54,8 @@ final class PhotosProcess extends ProcessManager<String, PhotosPm, PhotosPm.Buil
         return PhotosProcessed.of(event.getUuid());
     }
 
+    @Apply
+    private void on(PhotosProcessed event) {
+        builder().setId(event.getUuid());
+    }
 }
