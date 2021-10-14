@@ -24,33 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+/**
+ * Test environment classes for tests of the {@code io.spine.server.integration.IntegrationBroker}.
+ */
 
-import io.spine.core.External;
-import io.spine.server.command.Assign;
-import io.spine.server.event.React;
-import io.spine.server.integration.CreditsHeld;
-import io.spine.server.integration.PhotosPm;
-import io.spine.server.integration.PhotosProcessed;
-import io.spine.server.integration.PhotosUploaded;
-import io.spine.server.integration.UploadPhotos;
-import io.spine.server.procman.ProcessManager;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.integration.given.broker;
 
-public class PhotosProcMan extends ProcessManager<String, PhotosPm, PhotosPm.Builder> {
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Assign
-    PhotosUploaded handle(UploadPhotos command) {
-        return PhotosUploaded
-                .newBuilder()
-                .setUuid(command.getUuid())
-                .vBuild();
-    }
-
-    @React
-    PhotosProcessed on(@External CreditsHeld event) {
-        return PhotosProcessed
-                .newBuilder()
-                .setUuid(event.getUuid())
-                .vBuild();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -23,13 +23,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration.given;
+package io.spine.server.integration.given.broker;
 
 import com.google.common.base.Throwables;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
+import io.spine.server.integration.given.ProjectCommander;
+import io.spine.server.integration.given.ProjectCountAggregate;
+import io.spine.server.integration.given.ProjectDetails;
+import io.spine.server.integration.given.ProjectEventsSubscriber;
+import io.spine.server.integration.given.ProjectStartedExtSubscriber;
+import io.spine.server.integration.given.ProjectWizard;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
@@ -130,7 +136,9 @@ public class IntegrationBrokerTestEnv {
                         .build();
     }
 
-    // proof of concepts #1
+    // **********************
+    // proof of concept #1
+    // **********************
 
     public static ItgProjectCreated _projectCreated() {
         return ItgProjectCreated.newBuilder()
@@ -155,35 +163,49 @@ public class IntegrationBrokerTestEnv {
         );
     }
 
-    public static BlackBoxContext createBillingBcWithSubscribers() {
+    // **********************
+    // proof of concept #2
+    // **********************
+
+    // @External PhotosUploaded => CreditsHeld
+    public static BlackBoxContext subscribedBillingBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant("Billing-" + newUuid())
+                BoundedContext.singleTenant("SubscribedBillingBc-" + newUuid())
                               .add(BillingAggregate.class)
         );
     }
 
-    public static BlackBoxContext createPhotosBcWithSubscribers() {
+    // @External PhotosUploaded => IncreaseTotalPhotosProcessed
+    public static BlackBoxContext subscribedStatisticsBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant("Photos-" + newUuid())
-                              .add(PhotosProcMan.class)
+                BoundedContext.singleTenant("SubscribedStatisticsBc-" + newUuid())
+                        .add(StatisticsAggregate.class)
         );
     }
 
-    // proof of concept #2
-
-    public static BlackBoxContext createUsersBc() {
+    // UploadPhotos          => PhotosUploaded
+    // @External CreditsHeld => PhotosProcessed
+    public static BlackBoxContext subscribedPhotosBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant(
-                        "UsersBc-" + IntegrationBrokerTestEnv.class.getSimpleName()
-                )
+                BoundedContext.singleTenant("SubscribedPhotosBc-" + newUuid())
+                              .add(PhotosProcess.class)
         );
     }
 
-    public static BlackBoxContext createProjectsBc() {
+    // UploadPhotos => PhotosUploaded
+    // ArchivePhoto => PhotoArchived
+    public static BlackBoxContext publishingPhotosBc() {
         return BlackBoxContext.from(
-                BoundedContext.singleTenant(
-                        "ProjectsBc-" + IntegrationBrokerTestEnv.class.getSimpleName()
-                )
+                BoundedContext.singleTenant("PhotosBc-" + newUuid())
+                        .add(PhotosAggregate.class)
+        );
+    }
+
+    // PhotoArchived => void
+    public static BlackBoxContext subscribedWarehouseBc() {
+        return BlackBoxContext.from(
+                BoundedContext.singleTenant("WarehouseBc-" + newUuid())
+                        .add(WarehouseAggregate.class)
         );
     }
 

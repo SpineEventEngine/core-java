@@ -24,27 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.integration.given.broker;
 
 import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
-import io.spine.server.integration.BillingAgg;
-import io.spine.server.integration.CreditsHeld;
-import io.spine.server.integration.PhotosUploaded;
+import io.spine.server.integration.broker.BillingAgg;
+import io.spine.server.integration.broker.CreditsHeld;
+import io.spine.server.integration.broker.PhotosUploaded;
 
-public class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
+final class BillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
     @React
     CreditsHeld on(@External PhotosUploaded event) {
-        return CreditsHeld.newBuilder()
-                          .setUuid(event.getUuid())
-                          .vBuild();
+        return CreditsHeld.of(event.getUuid());
     }
 
     @Apply
     private void on(CreditsHeld event) {
         builder().setId(event.getUuid());
     }
+
 }
