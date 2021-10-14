@@ -38,6 +38,7 @@ import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -123,11 +124,11 @@ class IntegrationBrokerTest {
 
         @Nested
         @DisplayName("between two BCs when")
-        class BetweenTwoBcWhen {
+        class BetweenTwoBc {
 
             @Test
             @DisplayName("the subscribing BC is registered before the publishing one")
-            void subscribingBcRegisteredBeforePublishing() {
+            void whenSubscribingBcRegisteredBeforePublishing() {
                 try (BlackBoxContext subscribedBillingBc = subscribedBillingBc();
                      BlackBoxContext publishingPhotosBc = photosBc()
                 ) {
@@ -140,7 +141,7 @@ class IntegrationBrokerTest {
 
             @Test
             @DisplayName("they are subscribed to each other")
-            void subscribedToEachOther() {
+            void whenSubscribedToEachOther() {
                 try (BlackBoxContext subscribedPhotosBc = subscribedPhotosBc();
                      BlackBoxContext subscribedBillingBc = subscribedBillingBc()
                 ) {
@@ -155,12 +156,12 @@ class IntegrationBrokerTest {
     }
 
     @Nested
-    @DisplayName("avoid dispatching events from a BC to")
-    class AvoidDispatchingEvents {
+    @DisplayName("avoid dispatching events from a BC to subscribers of")
+    class AvoidDispatchingEventsToSubscribers {
 
         @Test
-        @DisplayName("subscribers of internal events in another BC")
-        void toSubscribersOfInternalEventsInAnotherBc() {
+        @DisplayName("internal events in another BC")
+        void ofInternalEventsInAnotherBc() {
             try (BlackBoxContext projectsBc = photosBc();
                  BlackBoxContext billingBc = billingBc()
             ) {
@@ -170,12 +171,11 @@ class IntegrationBrokerTest {
                 billingBc.assertEvents()
                          .isEmpty();
             }
-
         }
 
         @Test
-        @DisplayName("its own subscribers of external events")
-        void toItsOwnSubscribersOfExternalEvents() {
+        @DisplayName("external events in the same BC")
+        void ofExternalEventInTheSameBc() {
             try (BlackBoxContext photosBcAndBillingBc = photosBcAndSubscribedBillingBc()) {
 
                 photosBcAndBillingBc.receivesCommand(UploadPhotos.generate());

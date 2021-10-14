@@ -25,26 +25,8 @@
  */
 package io.spine.server.integration.given.broker;
 
-import com.google.common.base.Throwables;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.Event;
 import io.spine.server.BoundedContext;
-import io.spine.server.DefaultRepository;
-import io.spine.server.integration.given.ProjectCommander;
-import io.spine.server.integration.given.ProjectCountAggregate;
-import io.spine.server.integration.given.ProjectDetails;
-import io.spine.server.integration.given.ProjectEventsSubscriber;
-import io.spine.server.integration.given.ProjectStartedExtSubscriber;
-import io.spine.server.integration.given.ProjectWizard;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
-import io.spine.test.integration.event.ItgProjectStarted;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxContext;
-
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Identifier.pack;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 
 /**
  * Test environment for {@link io.spine.server.integration.IntegrationBrokerTest}.
@@ -53,94 +35,8 @@ public class IntegrationBrokerTestEnv {
 
     private static final String testClassName = IntegrationBrokerTestEnv.class.getSimpleName();
 
-    /** Prevents instantiation of this utility class. */
     private IntegrationBrokerTestEnv() {
     }
-
-    @CanIgnoreReturnValue
-    public static BoundedContext
-    contextWithExternalEntitySubscribers() {
-        BoundedContext context = newContext();
-        context.internalAccess()
-               .register(DefaultRepository.of(ProjectCountAggregate.class))
-               .register(DefaultRepository.of(ProjectWizard.class))
-               .register(DefaultRepository.of(ProjectDetails.class));
-        return context;
-    }
-
-    @CanIgnoreReturnValue
-    public static BoundedContext contextWithExternalSubscribers() {
-        BoundedContext context = newContext();
-        context.internalAccess()
-               .register(DefaultRepository.of(ProjectCountAggregate.class))
-               .register(DefaultRepository.of(ProjectWizard.class))
-               .registerEventDispatcher(new ProjectEventsSubscriber())
-               .registerCommandDispatcher(new ProjectCommander());
-        return context;
-    }
-
-    public static BoundedContext newContext() {
-        BoundedContext result = BoundedContext
-                .singleTenant(newUuid())
-                .build();
-        return result;
-    }
-
-    public static BoundedContext contextWithProjectCreatedNeeds() {
-        BoundedContext result = BoundedContext
-                .singleTenant(newUuid())
-                .addEventDispatcher(new ProjectEventsSubscriber())
-                .build();
-        return result;
-    }
-
-    public static BoundedContext contextWithProjectStartedNeeds() {
-        BoundedContext result = BoundedContext
-                .singleTenant(newUuid())
-                .addEventDispatcher(new ProjectStartedExtSubscriber())
-                .build();
-        return result;
-    }
-
-    public static Event projectCreated() {
-        ProjectId projectId = ProjectId.newBuilder()
-                                       .setId(Throwables.getStackTraceAsString(
-                                               new RuntimeException("Project ID")
-                                       ))
-                                       .build();
-
-        TestEventFactory eventFactory = newInstance(
-                pack(projectId),
-                IntegrationBrokerTestEnv.class
-        );
-
-        return eventFactory.createEvent(
-                ItgProjectCreated.newBuilder()
-                                 .setProjectId(projectId)
-                                 .build()
-        );
-    }
-
-    public static Event projectStarted() {
-        ProjectId projectId = projectId();
-        TestEventFactory eventFactory =
-                newInstance(pack(projectId), IntegrationBrokerTestEnv.class);
-        return eventFactory.createEvent(
-                ItgProjectStarted.newBuilder()
-                                 .setProjectId(projectId)
-                                 .build()
-        );
-    }
-
-    public static ProjectId projectId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
-    }
-
-    // **********************
-    // proof of concept #2
-    // **********************
 
     public static BlackBoxContext billingBc() {
         return BlackBoxContext.from(
