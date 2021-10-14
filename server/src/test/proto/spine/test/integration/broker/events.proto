@@ -25,16 +25,36 @@
  */
 syntax = "proto3";
 
-package spine.server.integration;
+package spine.server.integration.broker;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.integration";
-option java_outer_classname = "PhotosCmdsProto";
+option java_package = "io.spine.server.integration.broker";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
-message UploadPhotos {
+message PhotosUploaded {
+    string uuid = 1;
+}
 
+message PhotosProcessed {
+    string uuid = 1;
+}
+
+message CreditsHeld {
+
+    string uuid = 1;
+}
+
+message IncreasedTotalPhotosUploaded {
+    string uuid = 1;
+}
+
+message PhotosMarkedArchived {
+    string uuid = 1;
+}
+
+message PhotosArchived {
     string uuid = 1;
 }
