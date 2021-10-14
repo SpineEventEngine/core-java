@@ -38,7 +38,7 @@ final class SubscribedBillingAggregate extends Aggregate<String, BillingAgg, Bil
 
     @React
     CreditsHeld on(@External PhotosUploaded event) {
-        return CreditsHeld.of(event.getUuid());
+        return CreditsHeld.generate();
     }
 
     @Apply

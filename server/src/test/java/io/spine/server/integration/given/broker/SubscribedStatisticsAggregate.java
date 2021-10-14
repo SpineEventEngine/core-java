@@ -38,7 +38,7 @@ final class SubscribedStatisticsAggregate extends Aggregate<String, StatisticsAg
 
     @React
     IncreasedTotalPhotosUploaded on(@External PhotosUploaded event) {
-        return IncreasedTotalPhotosUploaded.of(event.getUuid());
+        return IncreasedTotalPhotosUploaded.generate();
     }
 
     @Apply

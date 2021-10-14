@@ -38,7 +38,7 @@ class SubscribedWarehouseAggregate extends Aggregate<String, WarehouseAgg, Wareh
 
     @React
     PhotosArchived on(@External PhotosMarkedArchived event) {
-        return PhotosArchived.of(event.getUuid());
+        return PhotosArchived.generate();
     }
 
     @Apply

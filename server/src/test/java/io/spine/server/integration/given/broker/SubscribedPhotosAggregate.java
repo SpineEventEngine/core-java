@@ -41,7 +41,7 @@ final class SubscribedPhotosAggregate extends Aggregate<String, PhotosAgg, Photo
 
     @Assign
     PhotosUploaded handler(UploadPhotos command) {
-        return PhotosUploaded.of(command.getUuid());
+        return PhotosUploaded.generate();
     }
 
     @Apply
@@ -51,7 +51,7 @@ final class SubscribedPhotosAggregate extends Aggregate<String, PhotosAgg, Photo
 
     @React
     PhotosProcessed on(@External CreditsHeld event) {
-        return PhotosProcessed.of(event.getUuid());
+        return PhotosProcessed.generate();
     }
 
     @Apply
