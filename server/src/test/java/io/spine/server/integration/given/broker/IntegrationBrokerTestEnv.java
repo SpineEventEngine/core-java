@@ -137,33 +137,6 @@ public class IntegrationBrokerTestEnv {
     }
 
     // **********************
-    // proof of concept #1
-    // **********************
-
-    public static ItgProjectCreated _projectCreated() {
-        return ItgProjectCreated.newBuilder()
-                                .setProjectId(projectId())
-                                .build();
-    }
-
-    public static BlackBoxContext createProjectsBcWithSubscribers() {
-        return BlackBoxContext.from(
-                BoundedContext.singleTenant("Projects-" + newUuid())
-                              .add(DefaultRepository.of(ProjectCountAggregate.class))
-                              .add(DefaultRepository.of(ProjectWizard.class))
-                              .add(DefaultRepository.of(ProjectDetails.class))
-                              .addEventDispatcher(new ProjectEventsSubscriber())
-                              .addCommandDispatcher(new ProjectCommander())
-        );
-    }
-
-    public static BlackBoxContext createEmptyBc() {
-        return BlackBoxContext.from(
-                BoundedContext.singleTenant("Empty-" + newUuid())
-        );
-    }
-
-    // **********************
     // proof of concept #2
     // **********************
 
