@@ -127,8 +127,8 @@ class IntegrationBrokerTest {
         class BetweenTwoBc {
 
             @Test
-            @DisplayName("the subscribing BC is registered before the publishing one")
-            void whenSubscribingBcRegisteredBeforePublishing() {
+            @DisplayName("the subscribed BC is registered before the publishing one")
+            void whenSubscribedBcRegisteredBeforePublishing() {
                 try (BlackBoxContext subscribedBillingBc = subscribedBillingBc();
                      BlackBoxContext publishingPhotosBc = photosBc()
                 ) {

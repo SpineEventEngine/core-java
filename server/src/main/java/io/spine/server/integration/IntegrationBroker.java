@@ -61,7 +61,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  *
  * <p>An {@code IntegrationBroker} is always based upon {@linkplain TransportFactory transport}
  * that delivers the messages from and to it. For several Bounded Contexts to communicate,
- * their brokers have to share the transport. Typically that would be a single message queue.
+ * their brokers have to share the transport. Typically, that would be a single message queue.
  *
  * <p>The messages from external components received by an {@code IntegrationBroker} via
  * the transport are propagated into the Bounded Context via the domestic {@code EventBus}.
