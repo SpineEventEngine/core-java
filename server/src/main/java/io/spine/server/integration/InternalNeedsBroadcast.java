@@ -39,14 +39,14 @@ import static io.spine.base.Identifier.pack;
  *
  * <p>Posts the updates on the requested messages.
  */
-final class ConfigurationBroadcast {
+final class InternalNeedsBroadcast {
 
     private final BoundedContextName contextName;
     private final Publisher needsPublisher;
 
     private ImmutableSet<ExternalMessageType> requestedTypes = ImmutableSet.of();
 
-    ConfigurationBroadcast(BoundedContextName contextName, Publisher publisher) {
+    InternalNeedsBroadcast(BoundedContextName contextName, Publisher publisher) {
         this.contextName = checkNotNull(contextName);
         this.needsPublisher = checkNotNull(publisher);
     }

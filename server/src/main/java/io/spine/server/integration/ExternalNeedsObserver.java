@@ -42,11 +42,10 @@ import static java.util.Collections.synchronizedSet;
  * An observer, which reacts to the configuration update messages sent by
  * external entities (such as {@code IntegrationBroker}s of other bounded contexts).
  */
-final class ConfigurationChangeObserver
+final class ExternalNeedsObserver
         extends AbstractChannelObserver
         implements AutoCloseable {
 
-    private final IntegrationBroker broker;
     private final BoundedContextName boundedContextName;
     private final BusAdapter adapter;
 
@@ -65,11 +64,11 @@ final class ConfigurationChangeObserver
     private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ConfigurationChangeObserver(IntegrationBroker broker,
-                                BoundedContextName boundedContextName,
-                                BusAdapter adapter) {
+    ExternalNeedsObserver(
+            BoundedContextName boundedContextName,
+            BusAdapter adapter
+    ) {
         super(boundedContextName, RequestForExternalMessages.class);
-        this.broker = broker;
         this.boundedContextName = boundedContextName;
         this.adapter = adapter;
         this.knownContexts.add(boundedContextName);
@@ -88,15 +87,16 @@ final class ConfigurationChangeObserver
      */
     @Override
     public void handle(ExternalMessage value) {
-        RequestForExternalMessages request = unpack(value.getOriginalMessage(),
-                                                    RequestForExternalMessages.class);
         BoundedContextName origin = value.getBoundedContextName();
+        RequestForExternalMessages request = unpack(
+                value.getOriginalMessage(),
+                RequestForExternalMessages.class
+        );
+
         addNewSubscriptions(request.getRequestedMessageTypeList(), origin);
         clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
-        if (!knownContexts.contains(origin)) {
-            knownContexts.add(origin);
-            broker.notifyOthers();
-        }
+
+        knownContexts.add(origin);
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,

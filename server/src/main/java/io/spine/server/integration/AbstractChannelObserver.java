@@ -41,7 +41,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Base routines for the {@linkplain Subscriber#addObserver(StreamObserver)}
- * subscriber observers}.
+ * subscriber observers.
  */
 @SPI
 public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage>, Logging {
