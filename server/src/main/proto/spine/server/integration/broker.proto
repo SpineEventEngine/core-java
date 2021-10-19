@@ -87,3 +87,10 @@ enum ExternalMessageValidationError {
     // The external message type is not supported by the server.
     UNSUPPORTED_EXTERNAL_MESSAGE = 1;
 }
+
+// A fact of a new potential messages publisher appearance in a multi-component environment.
+
+// Used to notify others in the environment so that they re-send their needs in a form of
+// `RequestForExternalMessages` which will let the newly joined source contribute.
+message MessagesSourceJoined {
+}

@@ -35,6 +35,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
@@ -48,6 +49,8 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Identifier.pack;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.transport.MessageChannel.channelIdFor;
 
@@ -114,42 +117,84 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
 @SuppressWarnings("OverlyCoupledClass")
 public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
-    private static final ChannelId CONFIG_EXCHANGE_CHANNEL_ID = channelIdFor(
+    private static final TypeUrl EVENT_TYPE_URL = TypeUrl.of(Event.class);
+    private static final ChannelId MESSAGES_SOURCE_JOINED_CHANNEL_ID = channelIdFor(
+            TypeUrl.of(MessagesSourceJoined.class)
+    );
+    private static final ChannelId NEEDS_EXCHANGE_CHANNEL_ID = channelIdFor(
             TypeUrl.of(RequestForExternalMessages.class)
     );
-    private static final TypeUrl EVENT = TypeUrl.of(Event.class);
 
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
+
+    private @MonotonicNonNull BoundedContextName contextName;
     private @MonotonicNonNull BusAdapter busAdapter;
-    private @MonotonicNonNull BoundedContextName context;
-    private @MonotonicNonNull ConfigurationChangeObserver configurationObserver;
-    private @MonotonicNonNull ConfigurationBroadcast broadcast;
+
+    private @MonotonicNonNull ExternalNeedsObserver externalNeedsObserver;
+    private @MonotonicNonNull InternalNeedsBroadcast internalNeedsBroadcast;
 
     public IntegrationBroker() {
         TransportFactory transportFactory = ServerEnvironment
                 .instance()
                 .transportFactory();
+
         this.subscriberHub = new SubscriberHub(transportFactory);
         this.publisherHub = new PublisherHub(transportFactory);
+    }
+
+    private static ChannelId toChannelId(EventClass cls) {
+        TypeUrl targetType = cls.typeUrl();
+        return channelIdFor(targetType);
     }
 
     @Override
     public void registerWith(BoundedContext context) {
         checkNotRegistered();
+
         BoundedContextName name = context.name();
-        this.busAdapter = new BusAdapter(this, context.eventBus());
-        this.context = name;
-        this.configurationObserver = new ConfigurationChangeObserver(this, name, busAdapter);
-        this.subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
-                          .addObserver(configurationObserver);
-        Publisher configurationPublisher = publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID);
-        this.broadcast = new ConfigurationBroadcast(name, configurationPublisher);
+        EventBus eventBus = context.eventBus();
+
+        this.contextName = name;
+        this.busAdapter = new BusAdapter(this, eventBus);
+
+        this.externalNeedsObserver = new ExternalNeedsObserver(name, busAdapter);
+        Publisher localNeedPublisher = publisherHub.get(NEEDS_EXCHANGE_CHANNEL_ID);
+        this.internalNeedsBroadcast = new InternalNeedsBroadcast(name, localNeedPublisher);
+
+        this.subscriberHub.get(NEEDS_EXCHANGE_CHANNEL_ID)
+                          .addObserver(externalNeedsObserver);
+
+        publishMessagesSourceJoined();
+        subscribeForMessagesSourceJoined();
     }
 
     @Override
     public boolean isRegistered() {
-        return context != null;
+        return contextName != null;
+    }
+
+    private void publishMessagesSourceJoined() {
+        MessagesSourceJoined messagesSourceJoined = MessagesSourceJoined.newBuilder().buildPartial();
+        ExternalMessage externalMessage = ExternalMessages.of(messagesSourceJoined, contextName);
+
+        publisherHub.get(MESSAGES_SOURCE_JOINED_CHANNEL_ID)
+                    .publish(pack(newUuid()), externalMessage);
+    }
+    
+    private void subscribeForMessagesSourceJoined() {
+        StreamObserver<ExternalMessage> sourceJoinedObserver = new AbstractChannelObserver(
+                contextName,
+                MessagesSourceJoined.class
+        ) {
+            @Override
+            protected void handle(ExternalMessage message) {
+                internalNeedsBroadcast.send();
+            }
+        };
+
+        subscriberHub.get(MESSAGES_SOURCE_JOINED_CHANNEL_ID)
+                .addObserver(sourceJoinedObserver);
     }
 
     /**
@@ -168,7 +213,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         boolean eventFromUpstream = subscriberHub.hasChannel(channelId);
         if (!eventFromUpstream) {
             Event outerObject = event.outerObject();
-            ExternalMessage msg = ExternalMessages.of(outerObject, context);
+            ExternalMessage msg = ExternalMessages.of(outerObject, contextName);
             Publisher channel = publisherHub.get(channelId);
             channel.publish(AnyPacker.pack(event.id()), msg);
         }
@@ -223,14 +268,9 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         subscriberHub.closeStaleChannels();
     }
 
-    private static ChannelId toChannelId(EventClass cls) {
-        TypeUrl targetType = cls.typeUrl();
-        return channelIdFor(targetType);
-    }
-
     private ExternalMessageObserver observerFor(EventClass externalClass) {
         ExternalMessageObserver observer =
-                new ExternalMessageObserver(context, externalClass.value(), this);
+                new ExternalMessageObserver(contextName, externalClass.value(), this);
         return observer;
     }
 
@@ -248,10 +288,10 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
                 .map(channelId -> ExternalMessageType
                         .newBuilder()
                         .setMessageTypeUrl(channelId.getTargetType())
-                        .setWrapperTypeUrl(EVENT.value())
+                        .setWrapperTypeUrl(EVENT_TYPE_URL.value())
                         .buildPartial())
                 .collect(toImmutableSet());
-        broadcast.onTypesChanged(needs);
+        internalNeedsBroadcast.onTypesChanged(needs);
     }
 
     /**
@@ -262,7 +302,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      * the needs of all the Contexts.
      */
     void notifyOthers() {
-        broadcast.send();
+        internalNeedsBroadcast.send();
     }
 
     /**
@@ -270,7 +310,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        configurationObserver.close();
+        externalNeedsObserver.close();
         notifyTypesChanged();
 
         subscriberHub.close();
@@ -279,6 +319,6 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
     @Override
     public String toString() {
-        return "IntegrationBroker of <" + context.getValue() + '>';
+        return "IntegrationBroker of <" + contextName.getValue() + '>';
     }
 }
