@@ -33,11 +33,9 @@ import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import static io.spine.protobuf.AnyPacker.unpack;
-import static java.util.Collections.synchronizedSet;
 
 /**
  * Reacts on {@code RequestForExternalMessages} sent by other parties (usually Bounded Contexts)
@@ -51,7 +49,6 @@ final class ExternalNeedsObserver
 
     private final BoundedContextName boundedContextName;
     private final BusAdapter busAdapter;
-    private final Set<BoundedContextName> knownContexts = synchronizedSet(new HashSet<>());
 
     /**
      * Current set of message type URLs, requested by other parties via sending the
@@ -68,7 +65,6 @@ final class ExternalNeedsObserver
         super(boundedContextName, RequestForExternalMessages.class);
         this.boundedContextName = boundedContextName;
         this.busAdapter = busAdapter;
-        this.knownContexts.add(boundedContextName);
     }
 
     /**
@@ -88,8 +84,6 @@ final class ExternalNeedsObserver
 
         addNewSubscriptions(request.getRequestedMessageTypeList(), origin);
         clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
-
-        knownContexts.add(origin);
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
