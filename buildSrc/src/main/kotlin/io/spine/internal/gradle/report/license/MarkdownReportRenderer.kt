@@ -24,19 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle.report.license
+
+import com.github.jk1.license.LicenseReportExtension
+import com.github.jk1.license.ProjectData
+import com.github.jk1.license.render.ReportRenderer
+import io.spine.internal.markup.MarkdownDocument
+import java.io.File
+import org.gradle.api.Project
+
 /**
- * This script defines the common configuration for license report scripts.
+ * Renders the dependency report for a single [project][ProjectData] in Markdown.
  */
+internal class MarkdownReportRenderer(
+    private val filename: String
+) : ReportRenderer {
 
-println("`license-report-common.gradle` script is deprecated. " +
-        "Please use the `LicenseReporter` utility instead.")
+    override fun render(data: ProjectData) {
+        val project = data.project
+        val outputFile = outputFile(project)
+        val document = MarkdownDocument()
+        val template = Template(project, document)
 
-apply plugin: 'base'
+        template.writeHeader()
+        ProjectDependencies.of(data).printTo(document)
+        template.writeFooter()
 
-ext.licenseReportConfig = [
-        // The output filename
-        outputFilename  : "license-report.md",
+        document.appendToFile(outputFile)
+    }
 
-        // The path to a directory, to which a per-project report is generated.
-        relativePath    : "/reports/dependency-license/dependency"
-]
+    private fun outputFile(project: Project): File {
+        val config =
+            project.extensions.findByName("licenseReport") as LicenseReportExtension
+        return File(config.outputDir).resolve(filename)
+    }
+}
+

@@ -29,9 +29,6 @@ package io.spine.internal.gradle.publish
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.PublishArtifact
-import org.gradle.api.artifacts.PublishArtifactSet
-import org.gradle.api.publish.PublishingExtension
 
 /**
  * This plugin allows publishing artifacts to remote Maven repositories.
@@ -71,10 +68,10 @@ import org.gradle.api.publish.PublishingExtension
  * ```
  *
  * By default, we publish artifacts produced by tasks `sourceJar`, `testOutputJar`,
- * and `javadocJar`, along with the default project compilation output. If any of these tasks is not
- * declared, it's created with sensible default settings by the plugin.
+ * and `javadocJar`, along with the default project compilation output.
+ * If any of these tasks is not declared, it's created with sensible default settings by the plugin.
  *
- * To publish more artifacts for a certain project, add them to the archives configuration:
+ * To publish more artifacts for a certain project, add them to the `archives` configuration:
  * ```
  * artifacts {
  *     archives(myCustomJarTask)
@@ -88,12 +85,10 @@ class Publish : Plugin<Project> {
 
     companion object {
         const val taskName = "publish"
-        const val extensionName = "spinePublishing"
     }
 
     override fun apply(project: Project) {
-        val extension = PublishExtension.create(project)
-        project.extensions.add(PublishExtension::class.java, extensionName, extension)
+        val extension = PublishExtension.createIn(project)
 
         project.afterEvaluate {
             val soloMode = extension.singleProject()

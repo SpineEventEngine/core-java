@@ -24,19 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle.report.coverage
+
 /**
- * This script defines the common configuration for license report scripts.
+ * The names of Gradle tasks involved into the JaCoCo reporting.
  */
+@Suppress("EnumEntryName", "EnumNaming") /* Dubbing the actual values in Gradle. */
+internal enum class TaskName {
+    jacocoRootReport,
+    copyReports,
 
-println("`license-report-common.gradle` script is deprecated. " +
-        "Please use the `LicenseReporter` utility instead.")
-
-apply plugin: 'base'
-
-ext.licenseReportConfig = [
-        // The output filename
-        outputFilename  : "license-report.md",
-
-        // The path to a directory, to which a per-project report is generated.
-        relativePath    : "/reports/dependency-license/dependency"
-]
+    check,
+    jacocoTestReport
+}

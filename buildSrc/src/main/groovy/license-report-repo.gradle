@@ -36,6 +36,10 @@
  * See `license-report-project.gradle` for a per-project license report generation.
  */
 
+println("`license-report-repo.gradle` script is deprecated. " +
+        "Please use the `LicenseReporter` utility instead.")
+
+
 final def commonPath = io.spine.internal.gradle.Scripts.commonPath
 apply from: "${rootDir}/${commonPath}/license-report-common.gradle"
 

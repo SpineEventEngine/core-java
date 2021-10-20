@@ -24,19 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle.report.coverage
+
+import java.io.File
+
 /**
- * This script defines the common configuration for license report scripts.
+ * Utilities for filtering the groups of `File`s.
  */
+internal object FileFilter {
 
-println("`license-report-common.gradle` script is deprecated. " +
-        "Please use the `LicenseReporter` utility instead.")
+    /**
+     * Excludes the generated files from this file collection, leaving only those which were
+     * created by human beings.
+     */
+    fun producedByHuman(files: Iterable<File>): Iterable<File> {
+        return files.filter { !it.isGenerated }
+    }
 
-apply plugin: 'base'
-
-ext.licenseReportConfig = [
-        // The output filename
-        outputFilename  : "license-report.md",
-
-        // The path to a directory, to which a per-project report is generated.
-        relativePath    : "/reports/dependency-license/dependency"
-]
+    /**
+     * Filters this file collection so that only generated files are present.
+     */
+    fun generatedOnly(files: Iterable<File>): Iterable<File> {
+        return files.filter { it.isGenerated }
+    }
+}

@@ -24,19 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle.report.coverage
+
 /**
- * This script defines the common configuration for license report scripts.
+ * File extensions.
  */
+internal enum class FileExtension(val value: String) {
 
-println("`license-report-common.gradle` script is deprecated. " +
-        "Please use the `LicenseReporter` utility instead.")
+    /**
+     * Extension of a Java source file.
+     */
+    JAVA_SOURCE(".java"),
 
-apply plugin: 'base'
+    /**
+     * Extension of a Java compiled file.
+     */
+    COMPILED_CLASS(".class");
 
-ext.licenseReportConfig = [
-        // The output filename
-        outputFilename  : "license-report.md",
-
-        // The path to a directory, to which a per-project report is generated.
-        relativePath    : "/reports/dependency-license/dependency"
-]
+    /**
+     * The number of symbols in the extension.
+     */
+    val length: Int
+        get() = this.value.length
+}
