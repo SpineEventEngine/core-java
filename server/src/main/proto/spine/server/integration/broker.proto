@@ -89,8 +89,8 @@ enum ExternalMessageValidationError {
 }
 
 // A fact of a new potential messages publisher appearance in a multi-component environment.
-
+//
 // Used to notify others in the environment so that they re-send their needs in a form of
 // `RequestForExternalMessages` which will let the newly joined source contribute.
-message MessagesSourceJoined {
+message ExternalMessagesSourceAvailable {
 }

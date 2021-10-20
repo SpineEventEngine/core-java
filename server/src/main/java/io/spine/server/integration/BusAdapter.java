@@ -73,7 +73,7 @@ final class BusAdapter {
      * the given class.
      *
      * <p>The created dispatcher is serving as a listener, notifying the {@code IntegrationBroker}
-     * of the messages, that are requested by the collaborators outside of this bounded context.
+     * of the messages, that are requested by the collaborators outside this bounded context.
      *
      * @param messageClass
      *         the class of message to be dispatched by the created dispatcher

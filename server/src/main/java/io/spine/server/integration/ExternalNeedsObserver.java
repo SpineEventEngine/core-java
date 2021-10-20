@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
 import com.google.common.collect.HashMultimap;
@@ -39,21 +40,17 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static java.util.Collections.synchronizedSet;
 
 /**
- * An observer, which reacts to the configuration update messages sent by
- * external entities (such as {@code IntegrationBroker}s of other bounded contexts).
+ * Reacts on {@code RequestForExternalMessages} sent by other parties (usually Bounded Contexts)
+ * in a multi-component environment.
+ *
+ * @see #handle(ExternalMessage)
  */
 final class ExternalNeedsObserver
         extends AbstractChannelObserver
         implements AutoCloseable {
 
     private final BoundedContextName boundedContextName;
-    private final BusAdapter adapter;
-
-    /**
-     * Names of Bounded Contexts already known to this observer.
-     *
-     * <p>If a context is unknown, the observer publishes a {@code RequestForExternalMessages}.
-     */
+    private final BusAdapter busAdapter;
     private final Set<BoundedContextName> knownContexts = synchronizedSet(new HashSet<>());
 
     /**
@@ -66,24 +63,20 @@ final class ExternalNeedsObserver
 
     ExternalNeedsObserver(
             BoundedContextName boundedContextName,
-            BusAdapter adapter
+            BusAdapter busAdapter
     ) {
         super(boundedContextName, RequestForExternalMessages.class);
         this.boundedContextName = boundedContextName;
-        this.adapter = adapter;
+        this.busAdapter = busAdapter;
         this.knownContexts.add(boundedContextName);
     }
 
     /**
      * Handles the {@code RequestForExternalMessages} by creating local publishers for the requested
-     * types.
-     *
-     * <p>If the request originates from a previously unknown Bounded Context,
-     * {@linkplain IntegrationBroker#notifyOthers() publishes} the types requested by the current
-     * Context, since they may be unknown to the new Context.
+     * types via {@code BusAdapter} and dismissing types that are no longer needed.
      *
      * @param value
-     *         {@link RequestForExternalMessages} form another Bounded Context
+     *         {@link RequestForExternalMessages}
      */
     @Override
     public void handle(ExternalMessage value) {
@@ -116,7 +109,7 @@ final class ExternalNeedsObserver
 
     private void registerInAdapter(ExternalMessageType newType) {
         Class<? extends Message> messageClass = newType.asMessageClass();
-        adapter.register(messageClass);
+        busAdapter.register(messageClass);
     }
 
     private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
@@ -139,7 +132,7 @@ final class ExternalNeedsObserver
 
     private void unregisterInAdapter(ExternalMessageType itemForRemoval) {
         Class<? extends Message> messageClass = itemForRemoval.asMessageClass();
-        adapter.unregister(messageClass);
+        busAdapter.unregister(messageClass);
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,

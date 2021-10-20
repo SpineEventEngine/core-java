@@ -91,13 +91,13 @@ public final class ExternalMessages {
     }
 
     /**
-     * Wraps the instance of {@link MessagesSourceJoined} into an {@code ExternalMessage}.
+     * Wraps the instance of {@link ExternalMessagesSourceAvailable} into an {@code ExternalMessage}.
      *
      * @param notification the notification to wrap
      * @param origin the name of a bounded context in which the notification was created
      * @return the external message wrapping the given notification
      */
-    static ExternalMessage of(MessagesSourceJoined notification, BoundedContextName origin) {
+    static ExternalMessage of(ExternalMessagesSourceAvailable notification, BoundedContextName origin) {
         checkNotNull(notification);
         checkNotNull(origin);
 

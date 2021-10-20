@@ -55,8 +55,8 @@ class ExternalMessagesTest {
                 .setDefault(Command.class, Command.getDefaultInstance())
                 .setDefault(RequestForExternalMessages.class,
                             RequestForExternalMessages.getDefaultInstance())
-                .setDefault(MessagesSourceJoined.class,
-                            MessagesSourceJoined.getDefaultInstance())
+                .setDefault(ExternalMessagesSourceAvailable.class,
+                            ExternalMessagesSourceAvailable.getDefaultInstance())
                 .testStaticMethods(ExternalMessages.class, PACKAGE);
     }
 }
