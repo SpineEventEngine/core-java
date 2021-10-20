@@ -453,7 +453,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     }
 
     /**
-     * Closes the bounded context so that it can shut down all of its repositories.
+     * Closes the bounded context, so it shuts down all of its repositories.
      *
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
      * that may occur while closing, into an {@link IllegalStateException}.

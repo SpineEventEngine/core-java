@@ -37,7 +37,7 @@ import static io.spine.base.Identifier.pack;
 /**
  * A client of the {@code RequestForExternalMessages} {@link Publisher}.
  *
- * <p>Posts the updates on the requested messages.
+ * <p>Posts the updates on the messages requested from outside.
  */
 final class InternalNeedsBroadcast {
 
@@ -52,12 +52,12 @@ final class InternalNeedsBroadcast {
     }
 
     /**
-     * Notifies other Bounded Contexts about a change in the needed messages.
+     * Notifies other Bounded Contexts about a change in the requested messages.
      *
      * <p>If the given {@code types} are the same as previous ones, the request is not sent.
      *
      * @param needs
-     *         the requested external types
+     *         types of external messages that are requested from outside
      */
     synchronized void onNeedsChange(ImmutableSet<ExternalMessageType> needs) {
         checkNotNull(needs);

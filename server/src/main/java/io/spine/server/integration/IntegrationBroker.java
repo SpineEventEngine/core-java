@@ -83,7 +83,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * the transport are propagated into the Bounded Context via the domestic {@code EventBus}.
  *
  * <p>Publishing. The messages requested by other parties are published from the domestic
- * {@code EventBus} with the help of {@linkplain DomesticEventPublisher} special dispatcher.
+ * {@code EventBus} with the help of {@linkplain DomesticEventPublisher special dispatcher}.
  *
  * <p><b>Sample Usage.</b>
  *
@@ -151,14 +151,8 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         TransportFactory transportFactory = ServerEnvironment
                 .instance()
                 .transportFactory();
-
         this.subscriberHub = new SubscriberHub(transportFactory);
         this.publisherHub = new PublisherHub(transportFactory);
-    }
-
-    private static ChannelId toChannelId(EventClass cls) {
-        TypeUrl targetType = cls.typeUrl();
-        return channelIdFor(targetType);
     }
 
     @Override
@@ -283,6 +277,11 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
             subscriber.removeObserver(observer);
         }
         subscriberHub.closeStaleChannels();
+    }
+
+    private static ChannelId toChannelId(EventClass cls) {
+        TypeUrl targetType = cls.typeUrl();
+        return channelIdFor(targetType);
     }
 
     private ExternalMessageObserver observerFor(EventClass externalClass) {
