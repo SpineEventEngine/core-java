@@ -36,6 +36,8 @@ import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.publish.spinePublishing
+import io.spine.internal.gradle.report.coverage.JacocoConfig
+import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -149,9 +151,9 @@ subprojects {
 
         with(Scripts) {
             from(javacArgs(project))
-            from(projectLicenseReport(project))
         }
 
+        LicenseReporter.generateReportIn(project)
         CheckStyleConfig.applyTo(project)
     }
 
@@ -312,17 +314,11 @@ subprojects {
     project.tasks["publish"].dependsOn("${project.path}:updateGitHubPages")
 }
 
-apply {
-    with(Scripts) {
-        // Aggregated coverage report across all subprojects.
-        from(jacoco(project))
+// Aggregated coverage report across all subprojects.
+JacocoConfig.applyTo(project)
 
-        // Generate a repository-wide report of 3rd-party dependencies and their licenses.
-        from(repoLicenseReport(project))
-
-
-    }
-}
+// Generate a repository-wide report of 3rd-party dependencies and their licenses.
+LicenseReporter.mergeAllReports(project)
 
 // Generate a `pom.xml` file containing first-level dependency of all projects
 // in the repository.
