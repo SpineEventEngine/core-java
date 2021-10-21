@@ -29,6 +29,9 @@ package io.spine.internal.gradle.publish
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.bundling.Jar
+import io.spine.internal.gradle.publish.proto.protoFiles
+import io.spine.internal.gradle.publish.proto.isProtoFileOrDir
 
 /**
  * This plugin allows publishing artifacts to remote Maven repositories.
@@ -85,6 +88,37 @@ class Publish : Plugin<Project> {
 
     companion object {
         const val taskName = "publish"
+
+        /**
+         * Enables the passed [project] to publish a JAR containing all the `.proto` definitions
+         * found in the project's classpath, which are the definitions from `sourceSets.main.proto`
+         * and the proto files extracted from the JAR dependencies of the project.
+         *
+         * The relative file paths are kept.
+         *
+         * To depend onto such artifact of e.g. the `spine-client` module, use:
+         *
+         * ```
+         *     dependencies {
+         *         compile "io.spine:spine-client:$version@proto"
+         *     }
+         * ```
+         */
+        fun publishProtoArtifact(project: Project) {
+            //TODO:2021-10-21:alex.tymchenko: move this task into the sub-package.
+            val task = project.tasks.register("assembleProto", Jar::class.java) {
+                description =
+                    "Assembles a JAR artifact with all Proto definitions from the classpath."
+                from(project.protoFiles())
+                include {
+                    it.file.isProtoFileOrDir()
+                }
+                archiveClassifier.set("proto")
+            }
+            project.artifacts {
+                add("archives", task)
+            }
+        }
     }
 
     override fun apply(project: Project) {

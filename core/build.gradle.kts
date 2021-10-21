@@ -26,6 +26,7 @@
 
 import io.spine.internal.gradle.IncrementGuard
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
 
 val spineBaseTypesVersion: String by extra
 val spineTimeVersion: String by extra
@@ -54,10 +55,11 @@ modelCompiler {
 apply {
     with(Scripts) {
         from(testArtifacts(project))
-        from(publishProto(project))
     }
     plugin(IncrementGuard::class)
 }
+
+publishProtoArtifact(project)
 
 //TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
 // see https://github.com/SpineEventEngine/base/issues/657
