@@ -34,7 +34,7 @@
 /**
  * Version of this library.
  */
-val coreJava = "1.7.7-SNAPSHOT.0"
+val coreJava = "1.7.7-SNAPSHOT.2"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.

@@ -23,32 +23,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.integration.given;
+package spine.server.integration.broker;
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.test.shared.Int64Projection;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
+import "spine/options.proto";
 
-public class MemoizingProjectDetails2
-        extends MemoizingProjection<ProjectId, Int64Projection, Int64Projection.Builder> {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration.broker";
+option java_outer_classname = "CommandsProto";
+option java_multiple_files = true;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param id
-     *         the ID for the new instance
-     * @throws IllegalArgumentException
-     *         if the ID is not of one of the supported types
-     */
-    protected MemoizingProjectDetails2(ProjectId id) {
-        super(id);
-    }
+message UploadPhotos {
+    string uuid = 1;
+}
 
-    @Subscribe
-    void on(@External ItgProjectCreated event) {
-        memoize(event);
-    }
+message ArchivePhotos {
+    string uuid = 1;
 }

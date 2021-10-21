@@ -39,42 +39,45 @@ import static io.spine.base.Identifier.pack;
  *
  * <p>Posts the updates on the requested messages.
  */
-final class ConfigurationBroadcast {
+final class InternalNeedsBroadcast {
 
     private final BoundedContextName contextName;
     private final Publisher needsPublisher;
 
-    private ImmutableSet<ExternalMessageType> requestedTypes = ImmutableSet.of();
+    private ImmutableSet<ExternalMessageType> currentNeeds = ImmutableSet.of();
 
-    ConfigurationBroadcast(BoundedContextName contextName, Publisher publisher) {
+    InternalNeedsBroadcast(BoundedContextName contextName, Publisher publisher) {
         this.contextName = checkNotNull(contextName);
         this.needsPublisher = checkNotNull(publisher);
     }
 
     /**
-     * Notifies other Bounded contexts about a change in the requested messages.
+     * Notifies other Bounded Contexts about a change in the requested messages.
      *
      * <p>If the given {@code types} are the same as previous ones, the request is not sent.
      *
-     * @param types
-     *         the types
+     * @param needs
+     *         types of external messages that are requested
      */
-    synchronized void onTypesChanged(ImmutableSet<ExternalMessageType> types) {
-        checkNotNull(types);
-        if (!requestedTypes.equals(types)) {
-            requestedTypes = types;
-            send();
+    synchronized void onNeedsChange(ImmutableSet<ExternalMessageType> needs) {
+        checkNotNull(needs);
+
+        if (currentNeeds.equals(needs)) {
+            return;
         }
+
+        currentNeeds = needs;
+        send();
     }
 
     /**
-     * Notifies other Bounded contexts about current requested messages.
+     * Notifies other Bounded contexts about current needs.
      */
     synchronized void send() {
         RequestForExternalMessages request = RequestForExternalMessages
                 .newBuilder()
-                .addAllRequestedMessageType(requestedTypes)
-                .buildPartial();
+                .addAllRequestedMessageType(currentNeeds)
+                .vBuild();
         ExternalMessage externalMessage = ExternalMessages.of(request, contextName);
         needsPublisher.publish(pack(newUuid()), externalMessage);
     }

@@ -39,12 +39,3 @@ import "spine/test/integration/project.proto";
 message ItgProjectCreated {
     ProjectId project_id = 1;
 }
-
-message ItgTaskAdded {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
-
-message ItgProjectStarted {
-    ProjectId project_id = 1;
-}

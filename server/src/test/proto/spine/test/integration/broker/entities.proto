@@ -23,14 +23,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.integration.given;
+package spine.server.integration.broker;
 
-import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.test.shared.Int64Projection;
-import io.spine.test.integration.ProjectId;
+import "spine/options.proto";
 
-public class MemoizingProjectDetails2Repository
-        extends ProjectionRepository<ProjectId, MemoizingProjectDetails2, Int64Projection> {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration.broker";
+option java_outer_classname = "EntitiesProto";
+option java_multiple_files = true;
 
+message BillingAgg {
+    option (entity).kind = AGGREGATE;
+    string id = 1;
+}
+
+message PhotosAgg {
+    option (entity).kind = AGGREGATE;
+    string id = 1;
+}
+
+message StatisticsAgg {
+    option (entity).kind = AGGREGATE;
+    string id = 1;
+}
+
+message WarehouseAgg {
+    option (entity).kind = AGGREGATE;
+    string id = 1;
 }

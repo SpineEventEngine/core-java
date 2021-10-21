@@ -24,41 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.integration.given.broker;
 
 import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.event.ItgProjectCreated;
-import io.spine.test.integration.event.ItgProjectStarted;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.PhotosUploaded;
+import io.spine.server.integration.broker.StatisticsAgg;
+import io.spine.server.integration.broker.TotalPhotosUploadedIncreased;
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectEventsSubscriber extends AbstractEventSubscriber {
+final class SubscribedStatisticsAggregate extends Aggregate<String, StatisticsAgg, StatisticsAgg.Builder> {
 
-    private static ItgProjectCreated externalEvent = null;
-
-    private static ItgProjectStarted domesticEvent = null;
-
-    @Subscribe
-    void on(@External ItgProjectCreated msg) {
-        externalEvent = msg;
+    @React
+    TotalPhotosUploadedIncreased on(@External PhotosUploaded event) {
+        return TotalPhotosUploadedIncreased.generate();
     }
 
-    @Subscribe
-    void on(ItgProjectStarted msg) {
-        domesticEvent = msg;
-    }
-
-    public static ItgProjectCreated externalEvent() {
-        return externalEvent;
-    }
-
-    public static ItgProjectStarted domesticEvent() {
-        return domesticEvent;
-    }
-
-    public static void clear() {
-        externalEvent = null;
-        domesticEvent = null;
+    @Apply
+    private void on(TotalPhotosUploadedIncreased event) {
+        builder().setId(event.getUuid());
     }
 }

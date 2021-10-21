@@ -24,33 +24,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.integration.given.broker;
 
-import io.spine.core.External;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.React;
-import io.spine.server.integration.CreditsHeld;
-import io.spine.server.integration.PhotosPm;
-import io.spine.server.integration.PhotosProcessed;
-import io.spine.server.integration.PhotosUploaded;
-import io.spine.server.integration.UploadPhotos;
-import io.spine.server.procman.ProcessManager;
+import io.spine.server.integration.broker.ArchivePhotos;
+import io.spine.server.integration.broker.PhotosAgg;
+import io.spine.server.integration.broker.PhotosPreparedForArchiving;
+import io.spine.server.integration.broker.PhotosUploaded;
+import io.spine.server.integration.broker.UploadPhotos;
 
-public class PhotosProcMan extends ProcessManager<String, PhotosPm, PhotosPm.Builder> {
+final class PhotosAggregate extends Aggregate<String, PhotosAgg, PhotosAgg.Builder> {
 
     @Assign
-    PhotosUploaded handle(UploadPhotos command) {
-        return PhotosUploaded
-                .newBuilder()
-                .setUuid(command.getUuid())
-                .vBuild();
+    PhotosUploaded handler(UploadPhotos command) {
+        return PhotosUploaded.generate();
     }
 
-    @React
-    PhotosProcessed on(@External CreditsHeld event) {
-        return PhotosProcessed
-                .newBuilder()
-                .setUuid(event.getUuid())
-                .vBuild();
+    @Apply
+    private void on(PhotosUploaded event) {
+        builder().setId(event.getUuid());
+    }
+
+    @Assign
+    PhotosPreparedForArchiving handler(ArchivePhotos command) {
+        return PhotosPreparedForArchiving.generate();
+    }
+
+    @Apply
+    private void on(PhotosPreparedForArchiving event) {
+        builder().setId(event.getUuid());
     }
 }

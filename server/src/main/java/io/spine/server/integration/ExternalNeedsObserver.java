@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
 import com.google.common.collect.HashMultimap;
@@ -32,30 +33,23 @@ import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static io.spine.protobuf.AnyPacker.unpack;
-import static java.util.Collections.synchronizedSet;
 
 /**
- * An observer, which reacts to the configuration update messages sent by
- * external entities (such as {@code IntegrationBroker}s of other bounded contexts).
+ * Reacts on {@code RequestForExternalMessages} sent by other parties (usually Bounded Contexts)
+ * in a multi-component environment.
+ *
+ * @see #handle(ExternalMessage)
  */
-final class ConfigurationChangeObserver
+final class ExternalNeedsObserver
         extends AbstractChannelObserver
         implements AutoCloseable {
 
-    private final IntegrationBroker broker;
     private final BoundedContextName boundedContextName;
-    private final BusAdapter adapter;
-
-    /**
-     * Names of Bounded Contexts already known to this observer.
-     *
-     * <p>If a context is unknown, the observer publishes a {@code RequestForExternalMessages}.
-     */
-    private final Set<BoundedContextName> knownContexts = synchronizedSet(new HashSet<>());
+    private final BusAdapter bus;
 
     /**
      * Current set of message type URLs, requested by other parties via sending the
@@ -65,38 +59,28 @@ final class ConfigurationChangeObserver
     private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ConfigurationChangeObserver(IntegrationBroker broker,
-                                BoundedContextName boundedContextName,
-                                BusAdapter adapter) {
-        super(boundedContextName, RequestForExternalMessages.class);
-        this.broker = broker;
-        this.boundedContextName = boundedContextName;
-        this.adapter = adapter;
-        this.knownContexts.add(boundedContextName);
+    ExternalNeedsObserver(BoundedContextName context, BusAdapter bus) {
+        super(context, RequestForExternalMessages.class);
+        this.boundedContextName = context;
+        this.bus = bus;
     }
 
     /**
-     * Handles the {@code RequestForExternalMessages} by creating local publishers for the requested
-     * types.
-     *
-     * <p>If the request originates from a previously unknown Bounded Context,
-     * {@linkplain IntegrationBroker#notifyOthers() publishes} the types requested by the current
-     * Context, since they may be unknown to the new Context.
-     *
-     * @param value
-     *         {@link RequestForExternalMessages} form another Bounded Context
+     * Unpacks {@code RequestForExternalMessages} from the passed {@code ExternalMessage} and
+     * handles it by creating local publishers for the requested types and dismissing types
+     * that are no longer needed.
      */
     @Override
-    public void handle(ExternalMessage value) {
-        RequestForExternalMessages request = unpack(value.getOriginalMessage(),
-                                                    RequestForExternalMessages.class);
-        BoundedContextName origin = value.getBoundedContextName();
-        addNewSubscriptions(request.getRequestedMessageTypeList(), origin);
-        clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
-        if (!knownContexts.contains(origin)) {
-            knownContexts.add(origin);
-            broker.notifyOthers();
-        }
+    public void handle(ExternalMessage message) {
+        BoundedContextName origin = message.getBoundedContextName();
+        RequestForExternalMessages request = unpack(
+                message.getOriginalMessage(),
+                RequestForExternalMessages.class
+        );
+
+        List<ExternalMessageType> externalTypes = request.getRequestedMessageTypeList();
+        addNewSubscriptions(externalTypes, origin);
+        clearStaleSubscriptions(externalTypes, origin);
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
@@ -116,7 +100,7 @@ final class ConfigurationChangeObserver
 
     private void registerInAdapter(ExternalMessageType newType) {
         Class<? extends Message> messageClass = newType.asMessageClass();
-        adapter.register(messageClass);
+        bus.register(messageClass);
     }
 
     private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
@@ -139,7 +123,7 @@ final class ConfigurationChangeObserver
 
     private void unregisterInAdapter(ExternalMessageType itemForRemoval) {
         Class<? extends Message> messageClass = itemForRemoval.asMessageClass();
-        adapter.unregister(messageClass);
+        bus.unregister(messageClass);
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,

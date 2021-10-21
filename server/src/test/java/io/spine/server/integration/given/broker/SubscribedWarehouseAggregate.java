@@ -23,25 +23,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.server.integration;
+package io.spine.server.integration.given.broker;
 
-import "spine/options.proto";
+import io.spine.core.External;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.PhotosMovedToWarehouse;
+import io.spine.server.integration.broker.PhotosPreparedForArchiving;
+import io.spine.server.integration.broker.WarehouseAgg;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.integration";
-option java_outer_classname = "ExperimentProto";
-option java_multiple_files = true;
+class SubscribedWarehouseAggregate extends Aggregate<String, WarehouseAgg, WarehouseAgg.Builder> {
 
-message BillingAgg {
-    option (entity) = {kind: AGGREGATE};
+    @React
+    PhotosMovedToWarehouse on(@External PhotosPreparedForArchiving event) {
+        return PhotosMovedToWarehouse.generate();
+    }
 
-    string id = 1;
-}
-
-message PhotosPm {
-    option (entity) = {kind: PROCESS_MANAGER};
-
-    string id = 1;
+    @Apply
+    private void on(PhotosMovedToWarehouse event) {
+        builder().setId(event.getUuid());
+    }
 }

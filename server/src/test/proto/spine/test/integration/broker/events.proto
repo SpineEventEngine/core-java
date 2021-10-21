@@ -23,29 +23,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.integration.given;
+package spine.server.integration.broker;
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.event.ItgProjectStarted;
+import "spine/options.proto";
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration.broker";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
 
-    private static ItgProjectStarted externalEvent = null;
+message PhotosUploaded {
+    string uuid = 1;
+}
 
-    @Subscribe
-    void on(@External ItgProjectStarted msg) {
-        externalEvent = msg;
-    }
+message PhotosProcessed {
+    string uuid = 1;
+}
 
-    public static ItgProjectStarted externalEvent() {
-        return externalEvent;
-    }
+message CreditsHeld {
+    string uuid = 1;
+}
 
-    public static void clear() {
-        externalEvent = null;
-    }
+message TotalPhotosUploadedIncreased {
+    string uuid = 1;
+}
+
+message PhotosPreparedForArchiving {
+    string uuid = 1;
+}
+
+message PhotosMovedToWarehouse {
+    string uuid = 1;
 }

@@ -23,31 +23,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.base.Error;
-import io.spine.base.EventMessage;
-import io.spine.core.Ack;
-import io.spine.core.Event;
-import io.spine.core.EventValidationError;
-import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
-import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.event.EventBus;
-import io.spine.server.integration.given.BillingAggregate;
-import io.spine.server.integration.given.MemoizingProjectDetails1Repository;
-import io.spine.server.integration.given.MemoizingProjectDetails2Repository;
-import io.spine.server.integration.given.MemoizingProjection;
-import io.spine.server.integration.given.PhotosProcMan;
-import io.spine.server.integration.given.ProjectCommander;
-import io.spine.server.integration.given.ProjectCountAggregate;
-import io.spine.server.integration.given.ProjectDetails;
-import io.spine.server.integration.given.ProjectEventsSubscriber;
-import io.spine.server.integration.given.ProjectStartedExtSubscriber;
-import io.spine.server.integration.given.ProjectWizard;
-import io.spine.testing.logging.MuteLogging;
+import io.spine.server.integration.broker.ArchivePhotos;
+import io.spine.server.integration.broker.CreditsHeld;
+import io.spine.server.integration.broker.PhotosMovedToWarehouse;
+import io.spine.server.integration.broker.PhotosPreparedForArchiving;
+import io.spine.server.integration.broker.PhotosProcessed;
+import io.spine.server.integration.broker.PhotosUploaded;
+import io.spine.server.integration.broker.TotalPhotosUploadedIncreased;
+import io.spine.server.integration.broker.UploadPhotos;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -56,23 +43,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Messages.isDefault;
-import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithExtEntitySubscribers;
-import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithExternalSubscribers;
-import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithProjectCreatedNeeds;
-import static io.spine.server.integration.given.IntegrationBrokerTestEnv.contextWithProjectStartedNeeds;
-import static io.spine.server.integration.given.IntegrationBrokerTestEnv.newContext;
-import static io.spine.server.integration.given.IntegrationBrokerTestEnv.projectCreated;
-import static io.spine.server.integration.given.IntegrationBrokerTestEnv.projectStarted;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.billingBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.photosBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.photosBcAndSubscribedBillingBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedBillingBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedPhotosBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedStatisticsBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedWarehouseBc;
 
-@DisplayName("IntegrationBroker should")
+@DisplayName("`IntegrationBroker` should")
 class IntegrationBrokerTest {
 
     @BeforeEach
@@ -80,259 +59,132 @@ class IntegrationBrokerTest {
         ModelTests.dropAllModels();
         ServerEnvironment.instance()
                          .reset();
-        ProjectDetails.clear();
-        ProjectWizard.clear();
-        ProjectCountAggregate.clear();
-        MemoizingProjection.clear();
-        ProjectEventsSubscriber.clear();
-        ProjectStartedExtSubscriber.clear();
     }
 
     @AfterEach
     void tearDown() {
+        ModelTests.dropAllModels();
         ServerEnvironment.instance()
                          .reset();
-        ModelTests.dropAllModels();
     }
 
     @Nested
-    @DisplayName("dispatch events from one BC")
+    @DisplayName("dispatch events")
     class DispatchEvents {
 
-        @Test
-        @DisplayName("to entities with external subscribers of another BC")
-        void toEntitiesOfBc() throws Exception {
-            BoundedContext sourceContext = newContext();
-            contextWithExtEntitySubscribers();
+        @Nested
+        @DisplayName("from a BC to subscribers of external events in")
+        class FromOneBc {
 
-            assertNull(ProjectDetails.externalEvent());
-            assertNull(ProjectWizard.externalEvent());
-            assertNull(ProjectCountAggregate.externalEvent());
+            @Test
+            @DisplayName("another BC")
+            void toAnotherBc() {
+                try (BlackBoxContext publishingPhotosBc = photosBc();
+                     BlackBoxContext subscribedBillingBc = subscribedBillingBc()
+                ) {
+                    publishingPhotosBc.receivesCommand(UploadPhotos.generate());
+                    publishingPhotosBc.assertEvent(PhotosUploaded.class);
 
-            Event event = projectCreated();
-            sourceContext.eventBus()
-                         .post(event);
+                    subscribedBillingBc.assertEvent(CreditsHeld.class);
+                }
+            }
 
-            Message expectedMessage = unpack(event.getMessage());
-            assertEquals(expectedMessage, ProjectDetails.externalEvent());
-            assertEquals(expectedMessage, ProjectWizard.externalEvent());
-            assertEquals(expectedMessage, ProjectCountAggregate.externalEvent());
+            @Test
+            @DisplayName("multiple other BCs")
+            void toMultipleOtherBc() {
+                try (BlackBoxContext publishingPhotosBc = photosBc();
+                     BlackBoxContext subscribedBillingBc = subscribedBillingBc();
+                     BlackBoxContext subscribedStatisticsBc = subscribedStatisticsBc()
+                ) {
+                    publishingPhotosBc.receivesCommand(UploadPhotos.generate());
+                    publishingPhotosBc.assertEvent(PhotosUploaded.class);
 
-            sourceContext.close();
+                    subscribedBillingBc.assertEvent(CreditsHeld.class);
+                    subscribedStatisticsBc.assertEvent(TotalPhotosUploadedIncreased.class);
+                }
+            }
+
+            @Test
+            @DisplayName("multiple other BCs with different needs")
+            void toMultipleOtherBcWithDifferentNeeds() {
+                try (BlackBoxContext publishingPhotosBc = photosBc();
+                     BlackBoxContext subscribedBillingBc = subscribedBillingBc();
+                     BlackBoxContext subscribedWarehouseBc = subscribedWarehouseBc()
+                ) {
+                    publishingPhotosBc.receivesCommand(UploadPhotos.generate());
+                    publishingPhotosBc.assertEvent(PhotosUploaded.class);
+                    subscribedBillingBc.assertEvent(CreditsHeld.class);
+
+                    publishingPhotosBc.receivesCommand(ArchivePhotos.generate());
+                    publishingPhotosBc.assertEvent(PhotosPreparedForArchiving.class);
+                    subscribedWarehouseBc.assertEvent(PhotosMovedToWarehouse.class);
+                }
+            }
         }
 
-        @Test
-        @DisplayName("to external subscribers of another BC")
-        void toBcSubscribers() throws Exception {
-            BoundedContext sourceContext = newContext();
-            contextWithExternalSubscribers();
+        @Nested
+        @DisplayName("between two BCs when")
+        class BetweenTwoBc {
 
-            assertNull(ProjectEventsSubscriber.externalEvent());
-            assertNull(ProjectCommander.externalEvent());
+            @Test
+            @DisplayName("the subscribed BC is registered before the publishing one")
+            void whenSubscribedBcRegisteredBeforePublishing() {
+                try (BlackBoxContext subscribedBillingBc = subscribedBillingBc();
+                     BlackBoxContext publishingPhotosBc = photosBc()
+                ) {
+                    publishingPhotosBc.receivesCommand(UploadPhotos.generate());
+                    publishingPhotosBc.assertEvent(PhotosUploaded.class);
 
-            Event event = projectCreated();
-            Message expectedMsg = unpack(event.getMessage());
+                    subscribedBillingBc.assertEvent(CreditsHeld.class);
+                }
+            }
 
-            sourceContext.eventBus()
-                         .post(event);
-            assertThat(ProjectEventsSubscriber.externalEvent()).isEqualTo(expectedMsg);
-            assertThat(ProjectCommander.externalEvent()).isEqualTo(expectedMsg);
+            @Test
+            @DisplayName("they are subscribed to each other")
+            void whenSubscribedToEachOther() {
+                try (BlackBoxContext subscribedPhotosBc = subscribedPhotosBc();
+                     BlackBoxContext subscribedBillingBc = subscribedBillingBc()
+                ) {
+                    subscribedPhotosBc.receivesCommand(UploadPhotos.generate());
+                    subscribedPhotosBc.assertEvent(PhotosUploaded.class);
 
-            sourceContext.close();
-        }
-
-        @Test
-        @DisplayName("to entities with external subscribers of multiple BCs")
-        void toEntitiesOfMultipleBcs() throws Exception {
-            BoundedContext sourceContext = newContext();
-
-            BoundedContext destination1 = newContext();
-            destination1.internalAccess()
-                        .register(new MemoizingProjectDetails1Repository());
-
-            BoundedContext destination2 = newContext();
-            destination2.internalAccess()
-                        .register(new MemoizingProjectDetails2Repository());
-
-            assertTrue(MemoizingProjection.events()
-                                          .isEmpty());
-            Event event = projectCreated();
-            sourceContext.eventBus()
-                         .post(event);
-            assertEquals(2, MemoizingProjection.events().size());
-            sourceContext.close();
-            destination1.close();
-            destination2.close();
-        }
-
-        @Test
-        @DisplayName("to two BCs with different needs")
-        void twoBcSubscribers() throws Exception {
-            BoundedContext sourceContext = newContext();
-            BoundedContext destA = contextWithProjectCreatedNeeds();
-            BoundedContext destB = contextWithProjectStartedNeeds();
-
-            assertNull(ProjectStartedExtSubscriber.externalEvent());
-            assertNull(ProjectEventsSubscriber.externalEvent());
-
-            EventBus sourceEventBus = sourceContext.eventBus();
-            Event created = projectCreated();
-            sourceEventBus.post(created);
-            Event started = projectStarted();
-            sourceEventBus.post(started);
-            assertThat(ProjectEventsSubscriber.externalEvent())
-                    .isEqualTo(created.enclosedMessage());
-            assertThat(ProjectStartedExtSubscriber.externalEvent())
-                    .isEqualTo(started.enclosedMessage());
-            sourceContext.close();
-            destA.close();
-            destB.close();
+                    subscribedBillingBc.assertEvent(CreditsHeld.class);
+                    subscribedPhotosBc.assertEvent(PhotosProcessed.class);
+                }
+            }
         }
     }
 
     @Nested
-    @DisplayName("avoid dispatching events from a BC")
-    class AvoidDispatching {
+    @DisplayName("avoid dispatching events from a BC to subscribers of")
+    class AvoidDispatchingEventsToSubscribers {
 
         @Test
-        @DisplayName("to domestic entities subscribers of another BC")
-        void toDomesticEntitySubscribers() throws Exception {
-            BoundedContext sourceContext = newContext();
-            BoundedContext destContext = contextWithExtEntitySubscribers();
+        @DisplayName("internal events in another BC")
+        void ofInternalEventsInAnotherBc() {
+            try (BlackBoxContext projectsBc = photosBc();
+                 BlackBoxContext billingBc = billingBc()
+            ) {
+                projectsBc.receivesCommand(UploadPhotos.generate());
 
-            assertNull(ProjectDetails.domesticEvent());
-
-            Event event = projectStarted();
-            sourceContext.eventBus()
-                         .post(event);
-            assertThat(ProjectDetails.domesticEvent()).isNull();
-
-            destContext.eventBus()
-                       .post(event);
-            assertThat(ProjectDetails.domesticEvent()).isEqualTo(unpack(event.getMessage()));
-
-            sourceContext.close();
-            destContext.close();
+                projectsBc.assertEvent(PhotosUploaded.class);
+                billingBc.assertEvents()
+                         .isEmpty();
+            }
         }
 
         @Test
-        @DisplayName("to domestic standalone subscribers of another BC")
-        void toDomesticStandaloneSubscribers() throws Exception {
-            BoundedContext sourceContext = newContext();
-            BoundedContext destContext = contextWithExternalSubscribers();
+        @DisplayName("external events in the same BC")
+        void ofExternalEventInTheSameBc() {
+            try (BlackBoxContext photosBcAndBillingBc = photosBcAndSubscribedBillingBc()) {
 
-            assertNull(ProjectEventsSubscriber.domesticEvent());
-            assertNull(ProjectCommander.domesticEvent());
+                photosBcAndBillingBc.receivesCommand(UploadPhotos.generate());
+                photosBcAndBillingBc.assertEvent(PhotosUploaded.class);
 
-            Event projectStarted = projectStarted();
-            sourceContext.eventBus()
-                         .post(projectStarted);
-
-            Message expectedEventMsg = unpack(projectStarted.getMessage());
-
-            assertThat(ProjectEventsSubscriber.domesticEvent()).isNull();
-            assertThat(ProjectCommander.domesticEvent()).isNull();
-
-            destContext.eventBus()
-                       .post(projectStarted);
-
-            assertThat(ProjectEventsSubscriber.domesticEvent()).isEqualTo(expectedEventMsg);
-            assertThat(ProjectCommander.domesticEvent()).isEqualTo(expectedEventMsg);
-
-            sourceContext.close();
-            destContext.close();
+                photosBcAndBillingBc.assertEvents()
+                                     .withType(CreditsHeld.class)
+                                     .isEmpty();
+            }
         }
-
-        @Test
-        @DisplayName("to own standalone subscribers if they expect external events")
-        void toOwnExternalStandaloneSubscribers() throws Exception {
-            BoundedContext destContext = contextWithExternalSubscribers();
-
-            assertThat(ProjectEventsSubscriber.externalEvent()).isNull();
-            assertThat(ProjectCommander.externalEvent()).isNull();
-
-            Event projectCreated = projectCreated();
-            destContext.eventBus()
-                       .post(projectCreated);
-
-            assertThat(ProjectEventsSubscriber.externalEvent()).isNull();
-            assertThat(ProjectCommander.externalEvent()).isNull();
-
-            destContext.close();
-        }
-    }
-
-    @Test
-    @DisplayName("send messages between two contexts regardless of registration order")
-    void mutual() {
-        String suffix = IntegrationBrokerTest.class.getSimpleName();
-        BlackBoxContext photos = BlackBoxContext.from(
-                BoundedContext.singleTenant("Photos-" + suffix)
-                              .add(PhotosProcMan.class)
-        );
-        BlackBoxContext billing = BlackBoxContext.from(
-                BoundedContext.singleTenant("Billing-" + suffix)
-                              .add(BillingAggregate.class)
-        );
-        photos.receivesCommand(UploadPhotos.generate());
-        assertReceived(photos, PhotosUploaded.class);
-        assertReceived(billing, CreditsHeld.class);
-        assertReceived(photos, PhotosProcessed.class);
-
-        photos.close();
-        billing.close();
-    }
-
-    private static void assertReceived(BlackBoxContext context,
-                                       Class<? extends EventMessage> eventClass) {
-        context.assertEvents()
-               .withType(eventClass)
-               .hasSize(1);
-    }
-
-    @MuteLogging
-    @Test
-    @DisplayName("not dispatch to domestic subscribers if they requested external events")
-    void notDispatchDomestic() throws Exception {
-        BoundedContext context = contextWithExtEntitySubscribers();
-        ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
-        EventBus eventBus = context.eventBus();
-        eventBus.register(eventSubscriber);
-
-        assertNull(ProjectEventsSubscriber.externalEvent());
-        assertNull(ProjectDetails.externalEvent());
-        assertNull(ProjectWizard.externalEvent());
-        assertNull(ProjectCountAggregate.externalEvent());
-
-        Event projectCreated = projectCreated();
-        eventBus.post(projectCreated);
-
-        assertNull(ProjectEventsSubscriber.externalEvent());
-        assertNull(ProjectDetails.externalEvent());
-        assertNull(ProjectWizard.externalEvent());
-        assertNull(ProjectCountAggregate.externalEvent());
-
-        context.close();
-    }
-
-    @Test
-    @DisplayName("emit unsupported external message exception if message type is unknown")
-    void throwOnUnknownMessage() throws Exception {
-        BoundedContext context = newContext();
-
-        Event event = projectCreated();
-        MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
-        context.internalAccess()
-               .broker()
-               .dispatchLocally(event, observer);
-        Error error = observer.firstResponse()
-                              .getStatus()
-                              .getError();
-        assertFalse(isDefault(error));
-        assertEquals(EventValidationError.getDescriptor().getFullName(),
-                     error.getType());
-        assertEquals(UNSUPPORTED_EVENT_VALUE, error.getCode());
-
-        context.close();
     }
 }

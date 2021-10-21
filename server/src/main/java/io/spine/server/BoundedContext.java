@@ -25,6 +25,7 @@
  */
 package io.spine.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.BoundedContextName;
@@ -482,7 +483,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      * Provides access to features of {@link BoundedContext} used internally by the framework.
      */
     @Internal
-    public class InternalAccess {
+    public final class InternalAccess {
 
         /** Prevents instantiation from outside. */
         private InternalAccess() {
@@ -491,28 +492,37 @@ public abstract class BoundedContext implements Closeable, Logging {
         /**
          * Registers the passed repository.
          *
+         * @return this instance of {@code InternalAccess} for call chaining
          * @see BoundedContext#register(Repository)
          */
-        public void register(Repository<?, ?> repository) {
+        @CanIgnoreReturnValue
+        public InternalAccess register(Repository<?, ?> repository) {
             self().register(checkNotNull(repository));
+            return this;
         }
 
         /**
          * Registers the passed command dispatcher.
          *
+         * @return this instance of {@code InternalAccess} for call chaining
          * @see BoundedContext#registerCommandDispatcher(CommandDispatcher)
          */
-        public void registerCommandDispatcher(CommandDispatcher dispatcher) {
+        @CanIgnoreReturnValue
+        public InternalAccess registerCommandDispatcher(CommandDispatcher dispatcher) {
             self().registerCommandDispatcher(checkNotNull(dispatcher));
+            return this;
         }
 
         /**
          * Registers the passed event dispatcher.
          *
+         * @return this instance of {@code InternalAccess} for call chaining
          * @see BoundedContext#registerEventDispatcher(EventDispatcher)
          */
-        public void registerEventDispatcher(EventDispatcher dispatcher) {
+        @CanIgnoreReturnValue
+        public InternalAccess registerEventDispatcher(EventDispatcher dispatcher) {
             self().registerEventDispatcher(dispatcher);
+            return this;
         }
 
         /**

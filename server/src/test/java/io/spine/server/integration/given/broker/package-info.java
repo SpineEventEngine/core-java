@@ -24,40 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+/**
+ * Test environment classes for {@code io.spine.server.integration.IntegrationBroker} tests.
+ */
 
-import io.spine.base.EventMessage;
-import io.spine.core.External;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.event.React;
-import io.spine.server.test.shared.Int32Aggregate;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.integration.given.broker;
 
-import java.util.Collections;
-import java.util.List;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectCountAggregate
-        extends Aggregate<ProjectId, Int32Aggregate, Int32Aggregate.Builder> {
-
-    private static ItgProjectCreated externalEvent = null;
-
-    protected ProjectCountAggregate(ProjectId id) {
-        super(id);
-    }
-
-    @React
-    List<EventMessage> on(@External ItgProjectCreated event) {
-        externalEvent = event;
-        return Collections.emptyList();
-    }
-
-    public static ItgProjectCreated externalEvent() {
-        return externalEvent;
-    }
-
-    public static void clear() {
-        externalEvent = null;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

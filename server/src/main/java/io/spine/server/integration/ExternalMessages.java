@@ -87,13 +87,27 @@ public final class ExternalMessages {
         checkNotNull(request);
         checkNotNull(origin);
 
-        String idString = Identifier.newUuid();
-        ExternalMessage result = of(StringValue.newBuilder()
-                                               .setValue(idString)
-                                               .build(),
-                                    request,
-                                    origin);
-        return result;
+        return of(generateMessageId(), request, origin);
+    }
+
+    /**
+     * Wraps the instance of {@link ExternalMessagesSourceAvailable} into an {@code ExternalMessage}.
+     *
+     * @param notification the notification to wrap
+     * @param origin the name of a bounded context in which the notification was created
+     * @return the external message wrapping the given notification
+     */
+    static ExternalMessage of(ExternalMessagesSourceAvailable notification, BoundedContextName origin) {
+        checkNotNull(notification);
+        checkNotNull(origin);
+
+        return of(generateMessageId(), notification, origin);
+    }
+
+    private static StringValue generateMessageId() {
+        return StringValue.newBuilder()
+                .setValue(Identifier.newUuid())
+                .build();
     }
 
     private static ExternalMessage of(Message messageId,

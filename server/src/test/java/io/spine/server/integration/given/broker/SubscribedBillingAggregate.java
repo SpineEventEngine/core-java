@@ -23,18 +23,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.server.integration;
+package io.spine.server.integration.given.broker;
 
-import "spine/options.proto";
+import io.spine.core.External;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.BillingAgg;
+import io.spine.server.integration.broker.CreditsHeld;
+import io.spine.server.integration.broker.PhotosUploaded;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.integration";
-option java_outer_classname = "PhotosCmdsProto";
-option java_multiple_files = true;
+final class SubscribedBillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
-message UploadPhotos {
+    @React
+    CreditsHeld on(@External PhotosUploaded event) {
+        return CreditsHeld.generate();
+    }
 
-    string uuid = 1;
+    @Apply
+    private void on(CreditsHeld event) {
+        builder().setId(event.getUuid());
+    }
 }
