@@ -492,6 +492,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         /**
          * Registers the passed repository.
          *
+         * @return this instance of {@code InternalAccess} for call chaining
          * @see BoundedContext#register(Repository)
          */
         @CanIgnoreReturnValue
@@ -503,6 +504,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         /**
          * Registers the passed command dispatcher.
          *
+         * @return this instance of {@code InternalAccess} for call chaining
          * @see BoundedContext#registerCommandDispatcher(CommandDispatcher)
          */
         @CanIgnoreReturnValue
@@ -514,6 +516,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         /**
          * Registers the passed event dispatcher.
          *
+         * @return this instance of {@code InternalAccess} for call chaining
          * @see BoundedContext#registerEventDispatcher(EventDispatcher)
          */
         @CanIgnoreReturnValue

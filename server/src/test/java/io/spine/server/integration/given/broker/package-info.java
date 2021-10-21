@@ -25,7 +25,7 @@
  */
 
 /**
- * Test environment classes for tests of the {@code io.spine.server.integration.IntegrationBroker}.
+ * Test environment classes for {@code io.spine.server.integration.IntegrationBroker} tests.
  */
 
 @CheckReturnValue

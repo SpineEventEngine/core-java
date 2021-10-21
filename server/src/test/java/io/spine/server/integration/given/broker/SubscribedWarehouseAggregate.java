@@ -30,19 +30,19 @@ import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
-import io.spine.server.integration.broker.PhotosArchived;
-import io.spine.server.integration.broker.PhotosMarkedArchived;
+import io.spine.server.integration.broker.PhotosMovedToWarehouse;
+import io.spine.server.integration.broker.PhotosPreparedForArchiving;
 import io.spine.server.integration.broker.WarehouseAgg;
 
 class SubscribedWarehouseAggregate extends Aggregate<String, WarehouseAgg, WarehouseAgg.Builder> {
 
     @React
-    PhotosArchived on(@External PhotosMarkedArchived event) {
-        return PhotosArchived.generate();
+    PhotosMovedToWarehouse on(@External PhotosPreparedForArchiving event) {
+        return PhotosMovedToWarehouse.generate();
     }
 
     @Apply
-    private void on(PhotosArchived event) {
+    private void on(PhotosMovedToWarehouse event) {
         builder().setId(event.getUuid());
     }
 }

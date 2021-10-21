@@ -46,14 +46,14 @@ message CreditsHeld {
     string uuid = 1;
 }
 
-message IncreasedTotalPhotosUploaded {
+message TotalPhotosUploadedIncreased {
     string uuid = 1;
 }
 
-message PhotosMarkedArchived {
+message PhotosPreparedForArchiving {
     string uuid = 1;
 }
 
-message PhotosArchived {
+message PhotosMovedToWarehouse {
     string uuid = 1;
 }

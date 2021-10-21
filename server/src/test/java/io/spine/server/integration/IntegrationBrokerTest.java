@@ -29,11 +29,11 @@ package io.spine.server.integration;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.integration.broker.ArchivePhotos;
 import io.spine.server.integration.broker.CreditsHeld;
-import io.spine.server.integration.broker.IncreasedTotalPhotosUploaded;
-import io.spine.server.integration.broker.PhotosArchived;
-import io.spine.server.integration.broker.PhotosMarkedArchived;
+import io.spine.server.integration.broker.PhotosMovedToWarehouse;
+import io.spine.server.integration.broker.PhotosPreparedForArchiving;
 import io.spine.server.integration.broker.PhotosProcessed;
 import io.spine.server.integration.broker.PhotosUploaded;
+import io.spine.server.integration.broker.TotalPhotosUploadedIncreased;
 import io.spine.server.integration.broker.UploadPhotos;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.model.ModelTests;
@@ -45,8 +45,8 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.billingBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.photosBc;
-import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedBillingBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.photosBcAndSubscribedBillingBc;
+import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedBillingBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedPhotosBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedStatisticsBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedWarehouseBc;
@@ -100,7 +100,7 @@ class IntegrationBrokerTest {
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
 
                     subscribedBillingBc.assertEvent(CreditsHeld.class);
-                    subscribedStatisticsBc.assertEvent(IncreasedTotalPhotosUploaded.class);
+                    subscribedStatisticsBc.assertEvent(TotalPhotosUploadedIncreased.class);
                 }
             }
 
@@ -116,8 +116,8 @@ class IntegrationBrokerTest {
                     subscribedBillingBc.assertEvent(CreditsHeld.class);
 
                     publishingPhotosBc.receivesCommand(ArchivePhotos.generate());
-                    publishingPhotosBc.assertEvent(PhotosMarkedArchived.class);
-                    subscribedWarehouseBc.assertEvent(PhotosArchived.class);
+                    publishingPhotosBc.assertEvent(PhotosPreparedForArchiving.class);
+                    subscribedWarehouseBc.assertEvent(PhotosMovedToWarehouse.class);
                 }
             }
         }

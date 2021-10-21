@@ -33,6 +33,7 @@ import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -48,7 +49,7 @@ final class ExternalNeedsObserver
         implements AutoCloseable {
 
     private final BoundedContextName boundedContextName;
-    private final BusAdapter busAdapter;
+    private final BusAdapter bus;
 
     /**
      * Current set of message type URLs, requested by other parties via sending the
@@ -58,32 +59,28 @@ final class ExternalNeedsObserver
     private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ExternalNeedsObserver(
-            BoundedContextName boundedContextName,
-            BusAdapter busAdapter
-    ) {
-        super(boundedContextName, RequestForExternalMessages.class);
-        this.boundedContextName = boundedContextName;
-        this.busAdapter = busAdapter;
+    ExternalNeedsObserver(BoundedContextName context, BusAdapter bus) {
+        super(context, RequestForExternalMessages.class);
+        this.boundedContextName = context;
+        this.bus = bus;
     }
 
     /**
-     * Handles the {@code RequestForExternalMessages} by creating local publishers for the requested
-     * types via {@code BusAdapter} and dismissing types that are no longer needed.
-     *
-     * @param value
-     *         {@link RequestForExternalMessages}
+     * Unpacks {@code RequestForExternalMessages} from the passed {@code ExternalMessage} and
+     * handles it by creating local publishers for the requested types and dismissing types
+     * that are no longer needed.
      */
     @Override
-    public void handle(ExternalMessage value) {
-        BoundedContextName origin = value.getBoundedContextName();
+    public void handle(ExternalMessage message) {
+        BoundedContextName origin = message.getBoundedContextName();
         RequestForExternalMessages request = unpack(
-                value.getOriginalMessage(),
+                message.getOriginalMessage(),
                 RequestForExternalMessages.class
         );
 
-        addNewSubscriptions(request.getRequestedMessageTypeList(), origin);
-        clearStaleSubscriptions(request.getRequestedMessageTypeList(), origin);
+        List<ExternalMessageType> externalTypes = request.getRequestedMessageTypeList();
+        addNewSubscriptions(externalTypes, origin);
+        clearStaleSubscriptions(externalTypes, origin);
     }
 
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
@@ -103,7 +100,7 @@ final class ExternalNeedsObserver
 
     private void registerInAdapter(ExternalMessageType newType) {
         Class<? extends Message> messageClass = newType.asMessageClass();
-        busAdapter.register(messageClass);
+        bus.register(messageClass);
     }
 
     private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
@@ -126,7 +123,7 @@ final class ExternalNeedsObserver
 
     private void unregisterInAdapter(ExternalMessageType itemForRemoval) {
         Class<? extends Message> messageClass = itemForRemoval.asMessageClass();
-        busAdapter.unregister(messageClass);
+        bus.unregister(messageClass);
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,

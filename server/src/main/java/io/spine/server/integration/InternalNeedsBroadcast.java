@@ -77,7 +77,7 @@ final class InternalNeedsBroadcast {
         RequestForExternalMessages request = RequestForExternalMessages
                 .newBuilder()
                 .addAllRequestedMessageType(currentNeeds)
-                .buildPartial();
+                .vBuild();
         ExternalMessage externalMessage = ExternalMessages.of(request, contextName);
         needsPublisher.publish(pack(newUuid()), externalMessage);
     }

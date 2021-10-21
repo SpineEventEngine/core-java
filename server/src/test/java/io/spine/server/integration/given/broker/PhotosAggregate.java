@@ -30,8 +30,8 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.integration.broker.ArchivePhotos;
-import io.spine.server.integration.broker.PhotosMarkedArchived;
 import io.spine.server.integration.broker.PhotosAgg;
+import io.spine.server.integration.broker.PhotosPreparedForArchiving;
 import io.spine.server.integration.broker.PhotosUploaded;
 import io.spine.server.integration.broker.UploadPhotos;
 
@@ -48,12 +48,12 @@ final class PhotosAggregate extends Aggregate<String, PhotosAgg, PhotosAgg.Build
     }
 
     @Assign
-    PhotosMarkedArchived handler(ArchivePhotos command) {
-        return PhotosMarkedArchived.generate();
+    PhotosPreparedForArchiving handler(ArchivePhotos command) {
+        return PhotosPreparedForArchiving.generate();
     }
 
     @Apply
-    private void on(PhotosMarkedArchived event) {
+    private void on(PhotosPreparedForArchiving event) {
         builder().setId(event.getUuid());
     }
 }

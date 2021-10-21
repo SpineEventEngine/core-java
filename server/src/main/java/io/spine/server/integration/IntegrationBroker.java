@@ -70,22 +70,26 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * requested messages (needs) and their potential sources (Bounded Contexts) up-to-date.
  * They use two special messages for this:
  * <ul>
- *     <li>{@linkplain ExternalMessagesSourceAvailable} is sent when a broker is registered
+ *     <li>{@link ExternalMessagesSourceAvailable} is sent when a broker is registered
  *     withing a Bounded Context;
- *     <li>{@linkplain RequestForExternalMessages} is sent
+ *     <li>{@link RequestForExternalMessages} is sent
  *     <ul>
- *         <li>in response to {@linkplain ExternalMessagesSourceAvailable} sent by other brokers;
+ *         <li>in response to {@link ExternalMessagesSourceAvailable} sent by other brokers;
  *         <li>when internal needs for external messages are changed.
  *     </ul>
  *</ul>
  *
- * <p>Receiving. The messages from external components received by an {@code IntegrationBroker} via
+ * <p><b>Receiving</b>
+ *
+ * <p>The messages from external components received by an {@code IntegrationBroker} via
  * the transport are propagated into the Bounded Context via the domestic {@code EventBus}.
  *
- * <p>Publishing. The messages requested by other parties are published from the domestic
+ * <p><b>Publishing</b>
+ *
+ * <p>The messages requested by other parties are published from the domestic
  * {@code EventBus} with the help of {@linkplain DomesticEventPublisher special dispatcher}.
  *
- * <p><b>Sample Usage.</b>
+ * <p><b>Sample Usage</b>
  *
  * <p>Bounded Context "Projects" has a projection with an event handler that is subscribed to an
  * external event as follows:
@@ -93,7 +97,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * {@code
  * public class ProjectListView extends Projection<...>  {
  *
- *      {@literal @}Subscribe
+ *     {@literal @}Subscribe
  *      public void on(@External UserDeleted event) {
  *          // Remove the projects that belong to this user.
  *          // ...
@@ -142,7 +146,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     private final PublisherHub publisherHub;
 
     private @MonotonicNonNull BoundedContextName contextName;
-    private @MonotonicNonNull BusAdapter busAdapter;
+    private @MonotonicNonNull BusAdapter bus;
 
     private @MonotonicNonNull ExternalNeedsObserver externalNeedsObserver;
     private @MonotonicNonNull InternalNeedsBroadcast internalNeedsBroadcast;
@@ -160,10 +164,10 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         checkNotRegistered();
 
         this.contextName = context.name();
-        this.busAdapter = new BusAdapter(this, context.eventBus());
+        this.bus = new BusAdapter(this, context.eventBus());
 
         setUpNeedsExchange();
-        notifyOthersAboutRegistration();
+        notifyOfRegistration();
         subscribeForFurtherRegistrations();
     }
 
@@ -171,16 +175,16 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         Publisher localNeedsPublisher = publisherHub.get(NEEDS_EXCHANGE_CHANNEL_ID);
 
         this.internalNeedsBroadcast = new InternalNeedsBroadcast(contextName, localNeedsPublisher);
-        this.externalNeedsObserver = new ExternalNeedsObserver(contextName, busAdapter);
+        this.externalNeedsObserver = new ExternalNeedsObserver(contextName, bus);
 
         this.subscriberHub.get(NEEDS_EXCHANGE_CHANNEL_ID)
                           .addObserver(externalNeedsObserver);
     }
 
-    private void notifyOthersAboutRegistration() {
+    private void notifyOfRegistration() {
         ExternalMessagesSourceAvailable messagesSourceAvailable = ExternalMessagesSourceAvailable
                 .newBuilder()
-                .buildPartial();
+                .vBuild();
 
         ExternalMessage externalMessage = ExternalMessages.of(messagesSourceAvailable, contextName);
 
@@ -241,7 +245,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      * Dispatches the given event via the local {@code EventBus} and observes the acknowledgement.
      */
     void dispatchLocally(Event event, StreamObserver<Ack> ackObserver) {
-        busAdapter.dispatch(event, ackObserver);
+        bus.dispatch(event, ackObserver);
     }
 
     /**
