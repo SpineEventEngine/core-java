@@ -31,8 +31,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.base.EntityState;
 import io.spine.base.Tests;
+import io.spine.client.Client;
+import io.spine.client.ClientRequest;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
@@ -42,8 +45,12 @@ import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.CommandService;
 import io.spine.server.DefaultRepository;
+import io.spine.server.GrpcContainer;
+import io.spine.server.QueryService;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.SubscriptionService;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -78,6 +85,7 @@ import io.spine.testing.server.blackbox.given.BbProjectFailerProcess;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
+import io.spine.testing.server.blackbox.given.Given;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
@@ -91,6 +99,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -114,6 +123,7 @@ import static io.spine.testing.server.blackbox.given.Given.projectFailed;
 import static io.spine.testing.server.blackbox.given.Given.startProject;
 import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static io.spine.testing.server.blackbox.given.Given.userDeleted;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -816,5 +826,61 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
                                        .setZoneOffset(expectedOffset)
                                        .buildPartial());
         }
+    }
+
+    @Test
+    @DisplayName("proof of concept")
+    void proofOfConcept() {
+        BoundedContextBuilder contextBuilder
+                = BoundedContextBuilder.assumingTests()
+                                       .add(new BbProjectRepository())
+                                       .add(BbProjectViewProjection.class);
+
+        BlackBoxContext bbContext = BlackBoxContext.from(contextBuilder);
+        BoundedContext context = bbContext.context();
+        String serverName = InProcessServerBuilder.generateName();
+
+        CommandService.Builder commandService = CommandService.newBuilder().add(context);
+        QueryService.Builder queryService = QueryService.newBuilder().add(context);
+        SubscriptionService.Builder subscriptionService = SubscriptionService.newBuilder().add(context);
+
+        GrpcContainer grpcContainer = GrpcContainer.inProcess(serverName)
+                .addService(commandService.build())
+                .addService(queryService.build())
+                .addService(subscriptionService.build())
+                .build();
+
+        try {
+
+            grpcContainer.start();
+            grpcContainer.addShutdownHook();
+
+        } catch (IOException e) {
+            illegalStateWithCauseOf(e);
+        }
+
+        ClientRequest clientRequest = Client.inProcess(serverName)
+              .build()
+              .asGuest();
+
+        bbContext.assertEvents()
+                 .withType(BbProjectCreated.class)
+                 .isEmpty();
+        assertThat(clientRequest.select(BbProjectView.class).run())
+                .hasSize(0);
+
+        clientRequest.command(Given.createProject()).postAndForget();
+        bbContext.receivesCommand(Given.createProject());
+
+        bbContext.assertEvents().withType(BbProjectCreated.class).hasSize(2);
+        assertThat(clientRequest.select(BbProjectView.class).run())
+                .hasSize(2);
+
+        bbContext.receivesCommand(Given.createProject());
+        clientRequest.command(Given.createProject()).postAndForget();
+
+        bbContext.assertEvents().withType(BbProjectCreated.class).hasSize(4);
+        assertThat(clientRequest.select(BbProjectView.class).run())
+                .hasSize(4);
     }
 }
