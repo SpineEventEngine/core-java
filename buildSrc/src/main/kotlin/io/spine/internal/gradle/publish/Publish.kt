@@ -94,10 +94,11 @@ class Publish : Plugin<Project> {
          *
          * The relative file paths are kept.
          *
-         * To depend onto such artifact of e.g. the `spine-client` module, use:
+         * To depend onto such an artifact, one should declare the dependency as follows:
          *
          * ```
          *     dependencies {
+         *         // Points to the `.proto` files of "spine-client" module.
          *         compile "io.spine:spine-client:$version@proto"
          *     }
          * ```
