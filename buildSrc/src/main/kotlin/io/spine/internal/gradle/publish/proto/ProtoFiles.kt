@@ -47,16 +47,12 @@ import org.gradle.api.file.SourceDirectorySet
  * It's guaranteed that there are no other Proto definitions in the current project classpath
  * except those included into the returned `Collection`.
  */
-fun Project.protoFiles(): Collection<File> {
-
+internal fun Project.protoFiles(): Collection<File> {
     val files = this.configurations.findByName("runtimeClasspath")!!.files
     val jarFiles = files.map { JarFileName(it.name) }
-
     val result = mutableListOf<File>()
-
     files.filter { it.name.endsWith(".jar") }.forEach { file ->
         val tree = zipTree(file)
-
         try {
             tree.filter { it.isProto() }.forEach {
                 val protoRoot = it.findProtoRoot(jarFiles)
@@ -64,7 +60,7 @@ fun Project.protoFiles(): Collection<File> {
             }
         } catch (e: GradleException) {
             /*
-             * As the :assembleProto task configuration is resolved first upon the project
+             * As the `:assembleProto` task configuration is resolved first upon the project
              * configuration (and we don't have the dependencies there yet) and then upon
              * the execution, the task should complete successfully.
              *
@@ -99,7 +95,7 @@ fun Project.protoFiles(): Collection<File> {
  *         a directory containing at least one Protobuf file,
  *         `false` otherwise
  */
-fun File.isProtoFileOrDir(): Boolean {
+internal fun File.isProtoFileOrDir(): Boolean {
     val filesToCheck = LinkedList<File>()
     filesToCheck.push(this)
     if (this.isDirectory && this.list()?.isEmpty() == true) {
@@ -117,19 +113,20 @@ fun File.isProtoFileOrDir(): Boolean {
     return false
 }
 
+/**
+ * Tells whether this file is a `.proto` file.
+ */
 private fun File.isProto(): Boolean {
     return this.isFile && this.name.endsWith(".proto")
 }
 
-private fun File.findProtoRoot(jarNames: Collection<JarFileName>): File {
+private fun File.findProtoRoot(archiveContents: Collection<JarFileName>): File {
     var pkg = this
-    while (!jarNames.contains(pkg.parentFile.jarName())) {
+    while (!archiveContents.contains(pkg.parentFile.jarName())) {
         pkg = pkg.parentFile
     }
     return pkg.parentFile
 }
-
-private data class JarFileName(val name: String)
 
 /**
  * Retrieves the name of the this folder trimmed by `.jar` suffix.
@@ -153,3 +150,8 @@ private fun File.jarName(): JarFileName? {
         JarFileName(name.substring(0, index + unpackedJarInfix.length))
     }
 }
+
+/**
+ * The filename of a JAR dependency of the project.
+ */
+private data class JarFileName(val name: String)

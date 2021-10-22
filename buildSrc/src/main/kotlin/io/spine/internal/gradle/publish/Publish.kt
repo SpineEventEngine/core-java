@@ -29,9 +29,7 @@ package io.spine.internal.gradle.publish
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.tasks.bundling.Jar
-import io.spine.internal.gradle.publish.proto.protoFiles
-import io.spine.internal.gradle.publish.proto.isProtoFileOrDir
+import io.spine.internal.gradle.publish.proto.AssembleProto
 
 /**
  * This plugin allows publishing artifacts to remote Maven repositories.
@@ -105,16 +103,7 @@ class Publish : Plugin<Project> {
          * ```
          */
         fun publishProtoArtifact(project: Project) {
-            //TODO:2021-10-21:alex.tymchenko: move this task into the sub-package.
-            val task = project.tasks.register("assembleProto", Jar::class.java) {
-                description =
-                    "Assembles a JAR artifact with all Proto definitions from the classpath."
-                from(project.protoFiles())
-                include {
-                    it.file.isProtoFileOrDir()
-                }
-                archiveClassifier.set("proto")
-            }
+            val task = AssembleProto.registerIn(project)
             project.artifacts {
                 add("archives", task)
             }
