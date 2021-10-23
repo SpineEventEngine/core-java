@@ -55,24 +55,28 @@ internal fun Project.protoFiles(): Collection<File> {
         val tree = zipTree(file)
         try {
             tree.filter { it.isProto() }.forEach {
-                val protoRoot = it.findProtoRoot(jarFiles)
+                val protoRoot = it.rootFolderIn(jarFiles)
                 result.add(protoRoot)
             }
         } catch (e: GradleException) {
             /*
-             * As the `:assembleProto` task configuration is resolved first upon the project
-             * configuration (and we don't have the dependencies there yet) and then upon
-             * the execution, the task should complete successfully.
+             * This code may be executed at the `configuration` phase of a Gradle project.
+             * If that's a very first configuration attempt (for instance, a newly created library
+             * version of the framework is being built), this exception is very likely to be
+             * thrown. It is so, as we don't have any dependencies fetched yet.
              *
-             * To make sure the configuration phase passes, we suppress the GradleException
-             * thrown by `zipTree()` indicating that the given file, which is a dependency JAR
-             * file does not exist.
-             *
-             * Though, if this error is thrown on the execution phase, this IS an error. Thus,
-             * we log an error message.
+             * However, we want the `configuration` phase to complete successfully. Therefore,
+             * here we suppress the `GradleException` throw by `zipTree()`. We believe that
+             * down the road, in the following stages of build execution the dependencies will
+             * be fetched, so that `zipTree()` won't fail anymore.
              *
              * As a side effect, the message is shown upon `./gradlew clean build` or upon
              * a newly created version of framework build etc.
+             *
+             * However, if this exception is thrown on the execution phase (very much after
+             * the initial configuration is completed), this IS an error.
+             * Thus, we log an error message. Framework users should pay attention
+             * to the circumstances under which this message is logged.
              */
             this@protoFiles.logger.debug(
                 "${e.message}${System.lineSeparator()}" +
@@ -87,7 +91,7 @@ internal fun Project.protoFiles(): Collection<File> {
 }
 
 /**
- * Tells whether this file represents either a `.proto` file, or a directory containing proto files.
+ * Tells whether this file represents either a `.proto` file, or a directory containing Proto files.
  *
  * If this file is a directory, scans its children recursively.
  *
@@ -120,7 +124,14 @@ private fun File.isProto(): Boolean {
     return this.isFile && this.name.endsWith(".proto")
 }
 
-private fun File.findProtoRoot(archiveContents: Collection<JarFileName>): File {
+/**
+ * Assuming this file is a part of examined JAR dependencies, returns the root folder
+ * to which this file belongs.
+ *
+ * In particular, this may be used to find the Proto root folder for a given `.proto` file,
+ * which originally was packed into one of Gradle project's dependencies.
+ */
+private fun File.rootFolderIn(archiveContents: Collection<JarFileName>): File {
     var pkg = this
     while (!archiveContents.contains(pkg.parentFile.jarName())) {
         pkg = pkg.parentFile
@@ -129,16 +140,12 @@ private fun File.findProtoRoot(archiveContents: Collection<JarFileName>): File {
 }
 
 /**
- * Retrieves the name of the this folder trimmed by `.jar` suffix.
+ * Retrieves the name of the `.jar` to which this file belongs, when examining the file through
+ * Gradle's `zipTree()` API.
  *
- * //TODO:2021-10-21:alex.tymchenko: this description does not seem right.
+ * The `.jar` suffix is included into the resulting value.
  *
- * More formally, returns the name of this `File` if the name does not contain
- * `.jar` substring or the substring of the name containing the characters from the start
- * to the `.jar` sequence (inclusively).
- *
- * This transformation corresponds to finding the name of a JAR file which was extracted to
- * the given directory with Gradle `zipTree()` API.
+ * If there is no `.jar` substring in the name of this file, returns `null`.
  */
 private fun File.jarName(): JarFileName? {
     val unpackedJarInfix = ".jar"
