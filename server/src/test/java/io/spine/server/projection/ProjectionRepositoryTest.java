@@ -639,8 +639,6 @@ class ProjectionRepositoryTest
                 .containsExactly(expectedState1, expectedState2);
     }
 
-
-
     @Test
     @DisplayName("replace the state of the migrated entity")
     void replaceState() {
