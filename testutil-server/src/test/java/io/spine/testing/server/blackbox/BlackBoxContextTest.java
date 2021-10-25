@@ -33,6 +33,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.base.Tests;
+import io.spine.client.Client;
 import io.spine.client.ClientRequest;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
@@ -695,7 +696,6 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
                .containsExactly(expected);
     }
 
-
     @Nested
     @DisplayName("allow to test subscription updates")
     class AssertingSubscriptionUpdates {
@@ -820,29 +820,42 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         }
     }
 
-    @Test
-    @DisplayName("provide a client connected to the context under the test")
-    void provideClient() {
-        ClientRequest clientRequest = context().client().asGuest();
+    @Nested
+    @DisplayName("provide a Client that should be")
+    class ProvideClient {
 
-        context().assertEvents()
-               .withType(BbProjectCreated.class)
-               .isEmpty();
-        assertThat(clientRequest.select(BbProjectView.class).run())
-                .hasSize(0);
+        @Test
+        @DisplayName("linked to the context under test")
+        void linkedToTheContextUnderTest() {
+            ClientRequest clientRequest = context().client().asGuest();
 
-        clientRequest.command(Given.createProject()).postAndForget();
-        context().receivesCommand(Given.createProject());
+            // Ensuring the context is empty by BlackBoxContext and Client APIs.
+            context().assertEvents()
+                     .withType(BbProjectCreated.class)
+                     .isEmpty();
+            assertThat(clientRequest.select(BbProjectView.class).run())
+                    .hasSize(0);
 
-        context().assertEvents().withType(BbProjectCreated.class).hasSize(2);
-        assertThat(clientRequest.select(BbProjectView.class).run())
-                .hasSize(2);
+            // Let's send a command with each of APIs.
+            clientRequest.command(Given.createProject()).postAndForget();
+            context().receivesCommand(Given.createProject());
 
-        context().receivesCommand(Given.createProject());
-        clientRequest.command(Given.createProject()).postAndForget();
+            // And assert that both commands were received.
+            context().assertEvents().withType(BbProjectCreated.class).hasSize(2);
+            assertThat(clientRequest.select(BbProjectView.class).run())
+                    .hasSize(2);
+        }
 
-        context().assertEvents().withType(BbProjectCreated.class).hasSize(4);
-        assertThat(clientRequest.select(BbProjectView.class).run())
-                .hasSize(4);
+        @Test
+        @DisplayName("closed as `BlackBoxContext` closes")
+        void closedAsBlackBoxContextCloses() {
+            Client client = context().client();
+            assertThat(client.isOpen()).isTrue();
+
+            context().close();
+
+            assertThat(client.isOpen()).isFalse();
+            assertThrows(IllegalStateException.class, () -> context().client());
+        }
     }
 }
