@@ -39,7 +39,6 @@ import static io.spine.util.Preconditions2.checkPositive;
 public final class CatchUpProcessBuilder<I> {
 
     private final ProjectionRepository<I, ?, ?> repository;
-    private @MonotonicNonNull RepositoryLookup<I> lookup;
     private @MonotonicNonNull CatchUpStorage storage;
     private @MonotonicNonNull DispatchCatchingUp<I> dispatchOp;
     private int pageSize;
@@ -113,24 +112,6 @@ public final class CatchUpProcessBuilder<I> {
      */
     DispatchCatchingUp<I> getDispatchOp() {
         return checkNotNull(dispatchOp);
-    }
-
-    /**
-     * Sets the way to find the repository at the catch-up run-time.
-     */
-    public CatchUpProcessBuilder<I> setLookup(RepositoryLookup<I> lookup) {
-        this.lookup = checkNotNull(lookup);
-        return this;
-    }
-
-    /**
-     * Obtains the pre-configured way to dispatch the events during the catch-up.
-     *
-     * @throws NullPointerException
-     *         if the lookup has not been set
-     */
-    RepositoryLookup<I> getLookup() {
-        return checkNotNull(lookup);
     }
 
     /**

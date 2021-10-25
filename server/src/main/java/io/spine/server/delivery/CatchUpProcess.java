@@ -61,10 +61,8 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -211,19 +209,16 @@ public final class CatchUpProcess<I>
      */
     private static final Turbulence TURBULENCE = Turbulence.of(fromMillis(500));
 
-    private final RepositoryLookup<I> lookup;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
     private final Limit queryLimit;
-    private final Map<String, ProjectionRepository<I, ?, ?>> repos = new HashMap<>();
 
     private @MonotonicNonNull CatchUpStarter<I> catchUpStarter;
     private @MonotonicNonNull Supplier<EventStore> eventStore;
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
         super(TYPE);
-        this.lookup = builder.getLookup();
         this.dispatchOperation = builder.getDispatchOp();
         this.storage = builder.getStorage();
         this.queryLimit = limitOf(builder.getPageSize());
@@ -577,27 +572,15 @@ public final class CatchUpProcess<I>
     }
 
     /**
-     * Loads the instance of corresponding {@link ProjectionRepository} according
-     * to the type URL of the projection state held by
-     * the {@linkplain CatchUpId#getProjectionType() ID of this process}.
+     * Loads the instance of corresponding {@link ProjectionRepository} from
+     * the {@link CatchUpRepositories} cache.
      *
-     * <p>Such a mechanism ensures that this process always has its ID and underlying
+     * <p>Such a mechanism ensures that this process always has both its ID and underlying
      * repository matching each other.
-     *
-     * <p>The result of execution is cached, so that next execution goes faster.
      */
     private ProjectionRepository<I, ?, ?> repository() {
-        String type = builder().getId()
-                               .getProjectionType();
-        synchronized (repos) {
-            if (repos.containsKey(type)) {
-                return repos.get(type);
-            }
-            TypeUrl typeUrl = TypeUrl.parse(type);
-            ProjectionRepository<I, ?, ?> repo = lookup.apply(typeUrl);
-            repos.put(type, repo);
-            return repo;
-        }
+        CatchUpId id = builder().getId();
+        return CatchUpRepositories.cache().get(id);
     }
 
     /*

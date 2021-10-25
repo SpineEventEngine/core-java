@@ -62,12 +62,14 @@ final class CatchUpStarter<I> {
     private final TypeUrl projectionStateType;
     private final CatchUpStorage storage;
     private final ImmutableSet<EventClass> eventClasses;
+    private final ProjectionRepository<I, ?, ?> repository;
 
     private CatchUpStarter(Builder<I> builder) {
         this.context = builder.context;
-        this.projectionStateType = builder.projectionStateType;
+        this.repository = builder.repository;
         this.storage = builder.storage;
-        this.eventClasses = builder.eventClasses;
+        this.projectionStateType = this.repository.entityStateType();
+        this.eventClasses = this.repository.messageClasses();
     }
 
     /**
@@ -82,11 +84,14 @@ final class CatchUpStarter<I> {
      * @return the new instance of the builder
      */
     static <I> Builder<I> newBuilder(ProjectionRepository<I, ?, ?> repo, CatchUpStorage storage) {
-        return new Builder<>(repo.entityStateType(), repo.messageClasses(), storage);
+        return new Builder<>(repo, storage);
     }
 
     /**
      * Starts the catch-up restricting it to the set of projection instances by certain identifiers.
+     *
+     * <p>{@linkplain CatchUpRepositories Caches} the {@code ProjectionRepository}
+     * by the ID of the catch-up to improve the performance of the catch-up.
      *
      * @param ids
      *         the IDs of the projection instances to catch-up, or {@code null} if all entities of
@@ -105,6 +110,7 @@ final class CatchUpStarter<I> {
                                 .setUuid(Identifier.newUuid())
                                 .setProjectionType(projectionStateType.value())
                                 .vBuild();
+        CatchUpRepositories.cache().associate(id, repository);
         CatchUpRequested eventMessage = CatchUpRequested
                 .newBuilder()
                 .setId(id)
@@ -182,18 +188,14 @@ final class CatchUpStarter<I> {
      */
     static final class Builder<I> {
 
-        private final TypeUrl projectionStateType;
+        private final ProjectionRepository<I, ?, ?> repository;
         private final CatchUpStorage storage;
-        private final ImmutableSet<EventClass> eventClasses;
-
         private BoundedContext context;
 
-        private Builder(TypeUrl stateType,
-                        ImmutableSet<EventClass> consumedEvents,
+        private Builder(ProjectionRepository<I, ?, ?> repository,
                         CatchUpStorage storage) {
-            this.projectionStateType = stateType;
+            this.repository = repository;
             this.storage = storage;
-            this.eventClasses = consumedEvents;
         }
 
         /**
