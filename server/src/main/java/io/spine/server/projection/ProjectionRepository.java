@@ -46,7 +46,6 @@ import io.spine.server.delivery.CatchUpSignal;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
-import io.spine.server.delivery.RepositoryLookup;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
@@ -167,12 +166,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * as an event dispatcher in the same Bounded Context as the repository itself.
      */
     private void initCatchUp(BoundedContext context, Delivery delivery) {
-        RepositoryLookup<I> lookup = lookupIn(context);
         CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
         catchUpProcess = builder.setDispatchOp(ProjectionRepository::sendToCatchingUp)
-                                .setLookup(lookup)
                                 .build();
-
         context.internalAccess()
                .registerEventDispatcher(catchUpProcess);
     }
@@ -183,17 +179,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Internal
     protected boolean isCatchUpEnabled() {
         return true;
-    }
-
-    /**
-     * Locates the instance of this repository in the bounded context.
-     */
-    @SuppressWarnings("unchecked")  /* Safe, as only instances of this type serve this `typeUrl`. */
-    private RepositoryLookup<I> lookupIn(BoundedContext context) {
-        RepositoryLookup<I> lookup =
-                (typeUrl -> (ProjectionRepository<I, ?, ?>)
-                                context.internalAccess().getRepository(typeUrl));
-        return lookup;
     }
 
     private void initCache(boolean multitenant) {
