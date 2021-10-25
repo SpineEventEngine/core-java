@@ -58,6 +58,7 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
 import io.spine.server.procman.given.repo.ProjectCompletion;
+import io.spine.server.procman.given.repo.RandomFillProcess;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.SetTestProcessId;
@@ -125,6 +126,7 @@ import static io.spine.server.procman.given.repo.GivenCommandMessage.projectCrea
 import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
+import static io.spine.server.procman.given.repo.SetTestProcessName.NEW_NAME;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -712,7 +714,7 @@ class ProcessManagerRepositoryTest
         repository.store(pm3);
 
         // Init filters by the `name` column.
-        TargetFilters filters = targetFilters(Project.Column.name(), SetTestProcessName.NEW_NAME);
+        TargetFilters filters = targetFilters(Project.Column.name(), NEW_NAME);
 
         // Check nothing is found as the entity states were not yet updated.
         Iterator<TestProcessManager> found =
@@ -727,22 +729,39 @@ class ProcessManagerRepositoryTest
                 repository.find(filters, ResponseFormat.getDefaultInstance());
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
-        Project expectedState1 = pm1
-                .state()
-                .toBuilder()
-                .setName(SetTestProcessName.NEW_NAME)
-                .setIdString(pm1.getIdString())
-                .build();
-        Project expectedState2 = pm2
-                .state()
-                .toBuilder()
-                .setName(SetTestProcessName.NEW_NAME)
-                .setIdString(pm2.getIdString())
-                .build();
+        Project expectedState1 = expectedState(pm1, NEW_NAME);
+        Project expectedState2 = expectedState(pm2, NEW_NAME);
         assertThat(results).hasSize(2);
         assertThat(results)
                 .comparingElementsUsing(entityState())
                 .containsExactly(expectedState1, expectedState2);
+    }
+
+    @Test
+    @DisplayName("replace the state of the migrated process")
+    void replaceState() {
+        ProjectId id = createId(42);
+        TestProcessManager entity = new TestProcessManager(id);
+        TestProcessManagerRepository repository = repository();
+        repository.store(entity);
+        repository.applyMigration(id, new RandomFillProcess());
+        TargetFilters byNewName = filterByName(NEW_NAME);
+
+        // Ensure nothing found.
+        Iterator<TestProcessManager> expectedEmpty =
+                repository.find(byNewName, ResponseFormat.getDefaultInstance());
+        assertThat(expectedEmpty.hasNext()).isFalse();
+
+        repository.applyMigration(id, new SetTestProcessName());
+
+        // Now we should have found a single instance.
+        Iterator<TestProcessManager> shouldHaveOne =
+                repository.find(byNewName, ResponseFormat.getDefaultInstance());
+        Project expectedState = expectedState(entity, NEW_NAME);
+        ImmutableList<TestProcessManager> actualList = ImmutableList.copyOf(shouldHaveOne);
+        assertThat(actualList)
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState);
     }
 
     @Test
@@ -879,6 +898,20 @@ class ProcessManagerRepositoryTest
         return TargetFilters
                 .newBuilder()
                 .addFilter(filterValue)
+                .build();
+    }
+
+    private static TargetFilters filterByName(String name) {
+        return targetFilters(Project.Column.name(), name);
+    }
+
+    private static Project expectedState(TestProcessManager entity, String newName) {
+        return entity
+                .state()
+                .toBuilder()
+                .setId(entity.id())
+                .setName(newName)
+                .setIdString(entity.getIdString())
                 .build();
     }
 

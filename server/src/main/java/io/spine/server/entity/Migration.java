@@ -269,7 +269,9 @@ public abstract class Migration<I, E extends TransactionalEntity<I, S, ?>, S ext
 
         private void updateState(S newState) {
             if (!entity.state().equals(newState)) {
-                tx.builder().mergeFrom(newState);
+                tx.builder()
+                  .clear()
+                  .mergeFrom(newState);
                 Version version = increment(entity.version());
                 tx.setVersion(version);
             }

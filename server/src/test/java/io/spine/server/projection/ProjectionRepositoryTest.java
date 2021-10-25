@@ -50,6 +50,7 @@ import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
 import io.spine.server.projection.given.EntitySubscriberProjection;
+import io.spine.server.projection.given.RandomFillProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
@@ -100,6 +101,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.server.projection.ProjectionRepository.nullToDefault;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage.projectCreated;
 import static io.spine.server.projection.given.ProjectionRepositoryTestEnv.dispatchedEventId;
+import static io.spine.server.projection.given.SetTestProjectionName.NEW_NAME;
 import static io.spine.server.projection.given.dispatch.ProjectionEventDispatcher.dispatch;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
@@ -614,8 +616,7 @@ class ProjectionRepositoryTest
         repository.store(projection3);
 
         // Init filters by the `name` column.
-        TargetFilters filters =
-                targetFilters(Project.Column.name(), SetTestProjectionName.NEW_NAME);
+        TargetFilters filters = filterByName(NEW_NAME);
 
         // Check nothing is found as the entity states were not yet updated.
         Iterator<TestProjection> found =
@@ -630,22 +631,39 @@ class ProjectionRepositoryTest
                 repository.find(filters, ResponseFormat.getDefaultInstance());
 
         ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
-        Project expectedState1 = projection1
-                .state()
-                .toBuilder()
-                .setName(SetTestProjectionName.NEW_NAME)
-                .setIdString(projection1.getIdString())
-                .build();
-        Project expectedState2 = projection2
-                .state()
-                .toBuilder()
-                .setName(SetTestProjectionName.NEW_NAME)
-                .setIdString(projection2.getIdString())
-                .build();
+        Project expectedState1 = expectedState(projection1, NEW_NAME);
+        Project expectedState2 = expectedState(projection2, NEW_NAME);
         assertThat(results).hasSize(2);
         assertThat(results)
                 .comparingElementsUsing(entityState())
                 .containsExactly(expectedState1, expectedState2);
+    }
+
+    @Test
+    @DisplayName("replace the state of the migrated entity")
+    void replaceState() {
+        ProjectId id = createId(42);
+        TestProjection entity = new TestProjection(id);
+        TestProjectionRepository repository = repository();
+        repository.store(entity);
+        repository.applyMigration(id, new RandomFillProjection());
+        TargetFilters byNewName = filterByName(NEW_NAME);
+
+        // Ensure nothing found.
+        Iterator<TestProjection> expectedEmpty =
+                repository.find(byNewName, ResponseFormat.getDefaultInstance());
+        assertThat(expectedEmpty.hasNext()).isFalse();
+
+        repository.applyMigration(id, new SetTestProjectionName());
+
+        // Now we should have found a single instance.
+        Iterator<TestProjection> shouldHaveOne =
+                repository.find(byNewName, ResponseFormat.getDefaultInstance());
+        Project expectedState = expectedState(entity, NEW_NAME);
+        ImmutableList<TestProjection> actualList = ImmutableList.copyOf(shouldHaveOne);
+        assertThat(actualList)
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState);
     }
 
     @Test
@@ -782,6 +800,20 @@ class ProjectionRepositoryTest
         return TargetFilters
                 .newBuilder()
                 .addFilter(filterValue)
+                .build();
+    }
+
+    private static TargetFilters filterByName(String name) {
+        return targetFilters(Project.Column.name(), name);
+    }
+
+    private static Project expectedState(TestProjection entity, String newName) {
+        return entity
+                .state()
+                .toBuilder()
+                .setId(entity.id())
+                .setName(newName)
+                .setIdString(entity.getIdString())
                 .build();
     }
 
