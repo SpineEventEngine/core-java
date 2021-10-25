@@ -62,14 +62,12 @@ final class CatchUpStarter<I> {
     private final TypeUrl projectionStateType;
     private final CatchUpStorage storage;
     private final ImmutableSet<EventClass> eventClasses;
-    private final ProjectionRepository<I, ?, ?> repository;
 
     private CatchUpStarter(Builder<I> builder) {
         this.context = builder.context;
-        this.repository = builder.repository;
         this.storage = builder.storage;
-        this.projectionStateType = this.repository.entityStateType();
-        this.eventClasses = this.repository.messageClasses();
+        this.projectionStateType = builder.repository.entityStateType();
+        this.eventClasses = builder.repository.messageClasses();
     }
 
     /**
@@ -98,19 +96,17 @@ final class CatchUpStarter<I> {
      *         this kind need to catch up.
      * @param since
      *         since when the catch-up is going to read the events
+     * @return identifier of the catch-up operation
      * @throws CatchUpAlreadyStartedException
      *         if the catch-up is already in progress for at least one of the requested entities
-     * @return identifier of the catch-up operation
      */
     CatchUpId start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
         checkNotActive(ids);
-
         CatchUp.Request request = buildRequest(ids, since);
         CatchUpId id = CatchUpId.newBuilder()
                                 .setUuid(Identifier.newUuid())
                                 .setProjectionType(projectionStateType.value())
                                 .vBuild();
-        CatchUpRepositories.cache().associate(id, repository);
         CatchUpRequested eventMessage = CatchUpRequested
                 .newBuilder()
                 .setId(id)

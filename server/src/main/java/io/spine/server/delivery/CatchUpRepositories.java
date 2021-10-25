@@ -27,6 +27,7 @@
 package io.spine.server.delivery;
 
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,7 @@ final class CatchUpRepositories {
 
     private static final CatchUpRepositories instance = new CatchUpRepositories();
 
-    private final Map<CatchUpId, ProjectionRepository<?, ?, ?>> repos =
+    private final Map<TypeUrl, ProjectionRepository<?, ?, ?>> repos =
             synchronizedMap(new HashMap<>());
 
     private CatchUpRepositories() {
@@ -58,40 +59,40 @@ final class CatchUpRepositories {
     }
 
     /**
-     * Registers the {@code ProjectionRepository} as one associated with the catch-up process.
+     * Registers the {@code ProjectionRepository} as such to be associated with
+     * the catch-up process that have already started, or may be started in the future.
      *
-     * @param id
-     *         ID of the catch-up process
      * @param repository
-     *         a repository to associate
+     *         a repository to cache
      */
-    void associate(CatchUpId id, ProjectionRepository<?, ?, ?> repository) {
-        repos.put(id, repository);
+    void put(ProjectionRepository<?, ?, ?> repository) {
+        repos.put(repository.entityStateType(), repository);
     }
 
     /**
-     * Obtains the previously registered {@code ProjectionRepository} by the ID
-     * of the catch-up process.
+     * Obtains the previously registered {@code ProjectionRepository} by the type URL of the
+     * projection under-catch-up.
      *
-     * <p>It is a responsibility of the caller to use a proper ID type when calling this method.
+     * <p>It is a responsibility of the caller to use a proper type when calling this method.
      *
-     * <p>In case no repository was previously registered for the passed ID,
-     * a {@link IllegalStateException} is thrown.
+     * <p>In case no repository was previously cached with the provided type URL,
+     * an {@link IllegalStateException} is thrown.
      *
-     * @param id
-     *         the ID of the catch-up process
+     * @param projectionType
+     *         the type of the projection under-catch-up
      * @param <I>
      *         the type of the identifiers of projections managed by the repository.
      * @return the instance of the repository
      * @throws IllegalStateException
-     *         if no repository is registered for the passed ID
+     *         if no repository is registered for the passed type URL
      */
     @SuppressWarnings("unchecked")
-    <I> ProjectionRepository<I, ?, ?> get(CatchUpId id) {
-        if (!repos.containsKey(id)) {
+    <I> ProjectionRepository<I, ?, ?> get(TypeUrl projectionType) {
+        if (!repos.containsKey(projectionType)) {
             throw newIllegalStateException("Cannot find a `ProjectionRepository` " +
-                                                   "for the catch-up process with ID `%s`.", id);
+                                                   "for the catch-up process with type URL `%s`.",
+                                           projectionType);
         }
-        return (ProjectionRepository<I, ?, ?>) repos.get(id);
+        return (ProjectionRepository<I, ?, ?>) repos.get(projectionType);
     }
 }

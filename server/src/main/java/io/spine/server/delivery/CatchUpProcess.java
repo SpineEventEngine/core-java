@@ -580,7 +580,8 @@ public final class CatchUpProcess<I>
      */
     private ProjectionRepository<I, ?, ?> repository() {
         CatchUpId id = builder().getId();
-        return CatchUpRepositories.cache().get(id);
+        TypeUrl projectionType = TypeUrl.parse(id.getProjectionType());
+        return CatchUpRepositories.cache().get(projectionType);
     }
 
     /*
