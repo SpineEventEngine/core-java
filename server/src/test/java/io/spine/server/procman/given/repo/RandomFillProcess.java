@@ -38,7 +38,7 @@ import static io.spine.test.procman.Project.Status.DONE;
 /**
  * Fills the state of the migrated {@code ProcessManager} with some random values.
  */
-public class RandomFillProcess
+public final class RandomFillProcess
         extends ProcessManagerMigration<ProjectId, TestProcessManager, Project, Project.Builder> {
 
     @Override
