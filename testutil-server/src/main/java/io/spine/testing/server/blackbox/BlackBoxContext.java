@@ -87,7 +87,6 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -105,6 +104,9 @@ public abstract class BlackBoxContext implements Logging, Closeable {
      */
     private final BoundedContext context;
 
+    /**
+     * A provider of {@link Client Clients} which are linked to this context.
+     */
     private final ClientProvider clientProvider;
 
     /**
@@ -474,6 +476,10 @@ public abstract class BlackBoxContext implements Logging, Closeable {
      */
     @Override
     public final void close() {
+        if(!isOpen()) {
+            return;
+        }
+
         try {
             context.close();
             clientProvider.close();
@@ -703,12 +709,22 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         return result;
     }
 
+    /**
+     * Instance of a {@link Client} linked to this context.
+     */
     public Client client() {
         TenantId tenantId = requestFactory().tenantId();
         return isNull(tenantId) ? clientProvider.get() : clientProvider.getFor(tenantId);
     }
 
-    private static class ClientProvider implements AutoCloseable {
+    /**
+     * The class is in a charge of creating and managing {@code Client}s that are linked to
+     * the passed context.
+     *
+     * <p>To provide operational {@code Client}s, {@link GrpcContainer a gRPC server} in-process
+     * would be lazily assembled and started.
+     */
+    private static class ClientProvider implements Closeable {
 
         private final BoundedContext context;
         private final List<Client> openClients;
@@ -716,13 +732,19 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         @MonotonicNonNull private GrpcContainer grpcContainer;
         @MonotonicNonNull private String serverName;
 
-        private ClientProvider(BoundedContext context) {
+        /**
+         * Creates a provider, {@code Client}s of which would be linked to the specified context.
+         */
+        ClientProvider(BoundedContext context) {
             this.context = context;
             this.openClients = new ArrayList<>();
         }
 
-        private Client get() {
-            enforceServerIsRunning();
+        /**
+         * Returns a {@code Client} to a single tenant {@code BoundedContext}.
+         */
+        Client get() {
+            enforceServerIsAvailable();
             return openClients
                     .stream()
                     .filter(client -> !client.tenant().isPresent())
@@ -731,16 +753,16 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         }
 
         private Client openClient() {
-            Client client = Client.inProcess(serverName)
-                                  .build();
-
+            Client client = Client.inProcess(serverName).build();
             openClients.add(client);
-
             return client;
         }
 
-        private Client getFor(TenantId tenantId) {
-            enforceServerIsRunning();
+        /**
+         * Returns a {@code Client} to a multitenant {@code BoundedContext} with a tenant specified.
+         */
+        Client getFor(TenantId tenantId) {
+            enforceServerIsAvailable();
             return openClients
                     .stream()
                     .filter(client -> {
@@ -755,17 +777,19 @@ public abstract class BlackBoxContext implements Logging, Closeable {
             Client client = Client.inProcess(serverName)
                                   .forTenant(tenantId)
                                   .build();
-
             openClients.add(client);
-
             return client;
         }
 
-        private void enforceServerIsRunning() {
-            if (nonNull(serverName)) {
-                return;
-            }
+        private void enforceServerIsAvailable() {
+            checkOpen();
 
+            if (isNull(serverName)) {
+                startServerInProcess();
+            }
+        }
+
+        private void startServerInProcess() {
             this.serverName = InProcessServerBuilder.generateName();
             this.grpcContainer = createServerInProcess(serverName, context);
 
@@ -796,12 +820,18 @@ public abstract class BlackBoxContext implements Logging, Closeable {
 
         @Override
         public void close() throws Exception {
-            if (isNull(grpcContainer)) {
+            if (!isOpen() || isNull(grpcContainer)) {
                 return;
             }
 
             grpcContainer.shutdownNowAndWait();
             openClients.forEach(Client::close);
+            openClients.clear();
+        }
+
+        @Override
+        public boolean isOpen() {
+            return isNull(grpcContainer) || !grpcContainer.isShutdown();
         }
     }
 }
