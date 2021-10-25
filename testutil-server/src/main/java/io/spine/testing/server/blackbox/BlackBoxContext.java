@@ -31,9 +31,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoFluentAssertion;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.client.Client;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
@@ -47,7 +49,10 @@ import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Closeable;
+import io.spine.server.CommandService;
+import io.spine.server.GrpcContainer;
 import io.spine.server.QueryService;
+import io.spine.server.SubscriptionService;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -59,11 +64,15 @@ import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -77,6 +86,8 @@ import static io.spine.testing.server.blackbox.Actor.defaultActor;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -93,6 +104,8 @@ public abstract class BlackBoxContext implements Logging, Closeable {
      * The context under the test.
      */
     private final BoundedContext context;
+
+    private final ClientProvider clientProvider;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -153,6 +166,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
+        this.clientProvider = new ClientProvider(context);
     }
 
     private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
@@ -462,6 +476,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     public final void close() {
         try {
             context.close();
+            clientProvider.close();
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }
@@ -686,5 +701,107 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         SubscriptionFixture result = new SubscriptionFixture(context, topic);
         result.activate();
         return result;
+    }
+
+    public Client client() {
+        TenantId tenantId = requestFactory().tenantId();
+        return isNull(tenantId) ? clientProvider.get() : clientProvider.getFor(tenantId);
+    }
+
+    private static class ClientProvider implements AutoCloseable {
+
+        private final BoundedContext context;
+        private final List<Client> openClients;
+
+        @MonotonicNonNull private GrpcContainer grpcContainer;
+        @MonotonicNonNull private String serverName;
+
+        private ClientProvider(BoundedContext context) {
+            this.context = context;
+            this.openClients = new ArrayList<>();
+        }
+
+        private Client get() {
+            enforceServerIsRunning();
+            return openClients
+                    .stream()
+                    .filter(client -> !client.tenant().isPresent())
+                    .findFirst()
+                    .orElseGet(this::openClient);
+        }
+
+        private Client openClient() {
+            Client client = Client.inProcess(serverName)
+                                  .build();
+
+            openClients.add(client);
+
+            return client;
+        }
+
+        private Client getFor(TenantId tenantId) {
+            enforceServerIsRunning();
+            return openClients
+                    .stream()
+                    .filter(client -> {
+                        Optional<TenantId> optionalTenant = client.tenant();
+                        return optionalTenant.isPresent() && optionalTenant.get().equals(tenantId);
+                    })
+                    .findFirst()
+                    .orElseGet(() -> openClient(tenantId));
+        }
+
+        private Client openClient(TenantId tenantId) {
+            Client client = Client.inProcess(serverName)
+                                  .forTenant(tenantId)
+                                  .build();
+
+            openClients.add(client);
+
+            return client;
+        }
+
+        private void enforceServerIsRunning() {
+            if (nonNull(serverName)) {
+                return;
+            }
+
+            this.serverName = InProcessServerBuilder.generateName();
+            this.grpcContainer = createServerInProcess(serverName, context);
+
+            try {
+                grpcContainer.start();
+            } catch (IOException e) {
+                illegalStateWithCauseOf(e);
+            }
+        }
+
+        private static GrpcContainer createServerInProcess(String name, BoundedContext context) {
+            CommandService.Builder commandService = CommandService.newBuilder();
+            QueryService.Builder queryService = QueryService.newBuilder();
+            SubscriptionService.Builder subscriptionService = SubscriptionService.newBuilder();
+
+            commandService.add(context);
+            queryService.add(context);
+            subscriptionService.add(context);
+
+            GrpcContainer grpcContainer = GrpcContainer.inProcess(name)
+                                                       .addService(commandService.build())
+                                                       .addService(queryService.build())
+                                                       .addService(subscriptionService.build())
+                                                       .build();
+
+            return grpcContainer;
+        }
+
+        @Override
+        public void close() throws Exception {
+            if (isNull(grpcContainer)) {
+                return;
+            }
+
+            grpcContainer.shutdownNowAndWait();
+            openClients.forEach(Client::close);
+        }
     }
 }
