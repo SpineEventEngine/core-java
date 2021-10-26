@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoFluentAssertion;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
@@ -49,10 +48,7 @@ import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Closeable;
-import io.spine.server.CommandService;
-import io.spine.server.GrpcContainer;
 import io.spine.server.QueryService;
-import io.spine.server.SubscriptionService;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
@@ -64,15 +60,11 @@ import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -105,7 +97,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     private final BoundedContext context;
 
     /**
-     * A provider of {@link Client Clients} which are linked to this context.
+     * A provider of {@link Client}s which are linked to this context.
      */
     private final ClientProvider clientProvider;
 
@@ -715,123 +707,5 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     public Client client() {
         TenantId tenantId = requestFactory().tenantId();
         return isNull(tenantId) ? clientProvider.get() : clientProvider.getFor(tenantId);
-    }
-
-    /**
-     * The class is in a charge of creating and managing {@code Client}s that are linked to
-     * the passed context.
-     *
-     * <p>To provide operational {@code Client}s, {@link GrpcContainer a gRPC server} in-process
-     * would be lazily assembled and started.
-     */
-    private static class ClientProvider implements Closeable {
-
-        private final BoundedContext context;
-        private final List<Client> openClients;
-
-        @MonotonicNonNull private GrpcContainer grpcContainer;
-        @MonotonicNonNull private String serverName;
-
-        /**
-         * Creates a provider, {@code Client}s of which would be linked to the specified context.
-         */
-        ClientProvider(BoundedContext context) {
-            this.context = context;
-            this.openClients = new ArrayList<>();
-        }
-
-        /**
-         * Returns a {@code Client} to a single tenant {@code BoundedContext}.
-         */
-        Client get() {
-            enforceServerIsAvailable();
-            return openClients
-                    .stream()
-                    .filter(client -> !client.tenant().isPresent())
-                    .findFirst()
-                    .orElseGet(this::openClient);
-        }
-
-        private Client openClient() {
-            Client client = Client.inProcess(serverName).build();
-            openClients.add(client);
-            return client;
-        }
-
-        /**
-         * Returns a {@code Client} to a multitenant {@code BoundedContext} with a tenant specified.
-         */
-        Client getFor(TenantId tenantId) {
-            enforceServerIsAvailable();
-            return openClients
-                    .stream()
-                    .filter(client -> {
-                        Optional<TenantId> optionalTenant = client.tenant();
-                        return optionalTenant.isPresent() && optionalTenant.get().equals(tenantId);
-                    })
-                    .findFirst()
-                    .orElseGet(() -> openClient(tenantId));
-        }
-
-        private Client openClient(TenantId tenantId) {
-            Client client = Client.inProcess(serverName)
-                                  .forTenant(tenantId)
-                                  .build();
-            openClients.add(client);
-            return client;
-        }
-
-        private void enforceServerIsAvailable() {
-            checkOpen();
-
-            if (isNull(serverName)) {
-                startServerInProcess();
-            }
-        }
-
-        private void startServerInProcess() {
-            this.serverName = InProcessServerBuilder.generateName();
-            this.grpcContainer = createServerInProcess(serverName, context);
-
-            try {
-                grpcContainer.start();
-            } catch (IOException e) {
-                illegalStateWithCauseOf(e);
-            }
-        }
-
-        private static GrpcContainer createServerInProcess(String name, BoundedContext context) {
-            CommandService.Builder commandService = CommandService.newBuilder();
-            QueryService.Builder queryService = QueryService.newBuilder();
-            SubscriptionService.Builder subscriptionService = SubscriptionService.newBuilder();
-
-            commandService.add(context);
-            queryService.add(context);
-            subscriptionService.add(context);
-
-            GrpcContainer grpcContainer = GrpcContainer.inProcess(name)
-                                                       .addService(commandService.build())
-                                                       .addService(queryService.build())
-                                                       .addService(subscriptionService.build())
-                                                       .build();
-
-            return grpcContainer;
-        }
-
-        @Override
-        public void close() throws Exception {
-            if (!isOpen() || isNull(grpcContainer)) {
-                return;
-            }
-
-            grpcContainer.shutdownNowAndWait();
-            openClients.forEach(Client::close);
-            openClients.clear();
-        }
-
-        @Override
-        public boolean isOpen() {
-            return isNull(grpcContainer) || !grpcContainer.isShutdown();
-        }
     }
 }
