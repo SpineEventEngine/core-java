@@ -821,15 +821,15 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
     }
 
     @Nested
-    @DisplayName("provide a Client that should be")
+    @DisplayName("provide a `Client` that should be")
     class ProvideClient {
 
         @Test
-        @DisplayName("linked to the context under test")
+        @DisplayName("linked to the context under the test")
         void linkedToTheContextUnderTest() {
             ClientRequest clientRequest = context().client().asGuest();
 
-            // Ensuring the context is empty by BlackBoxContext and Client APIs.
+            // Ensuring the context is empty by `BlackBoxContext` and `Client` APIs.
             context().assertEvents()
                      .withType(BbProjectCreated.class)
                      .isEmpty();
@@ -847,7 +847,7 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         }
 
         @Test
-        @DisplayName("closed as `BlackBoxContext` closes")
+        @DisplayName("closed as `BlackBoxContext` is closed")
         void closedAsBlackBoxContextCloses() {
             Client client = context().client();
             assertThat(client.isOpen()).isTrue();

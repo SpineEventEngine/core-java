@@ -115,7 +115,7 @@ class MultiTenantContextTest
     }
 
     @Test
-    @DisplayName("provide a `Client` with the expected TenantId")
+    @DisplayName("provide a `Client` with the expected tenant")
     void provideClientWithExpectedTenantId() {
         BlackBoxContext context = context();
         Optional<TenantId> currentTenant;

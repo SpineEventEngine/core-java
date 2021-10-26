@@ -56,8 +56,8 @@ class ClientProvider implements Closeable {
     private final BoundedContext context;
     private final List<Client> openClients;
 
-    @MonotonicNonNull private GrpcContainer grpcContainer;
-    @MonotonicNonNull private String serverName;
+    private @MonotonicNonNull GrpcContainer grpcContainer;
+    private @MonotonicNonNull String serverName;
 
     /**
      * Creates a provider, {@code Client}s of which would be linked to the specified context.
