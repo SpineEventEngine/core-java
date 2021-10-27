@@ -26,7 +26,6 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.grpc.inprocess.InProcessServerBuilder;
 import io.spine.client.Client;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -41,6 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Objects.isNull;
@@ -134,7 +134,7 @@ class ClientProvider implements Closeable {
         QueryService queryService = QueryService.fromSingle(context);
         SubscriptionService subscriptionService = SubscriptionService.fromSingle(context);
 
-        String serverName = InProcessServerBuilder.generateName();
+        String serverName = UUID.randomUUID().toString();
         GrpcContainer grpcContainer = GrpcContainer
                 .inProcess(serverName)
                 .addService(commandService)
