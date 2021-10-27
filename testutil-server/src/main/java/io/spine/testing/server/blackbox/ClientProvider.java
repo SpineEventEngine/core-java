@@ -48,8 +48,8 @@ import static java.util.Objects.isNull;
 /**
  * Upon request, creates {@code Client} instances for the passed Bounded Context.
  *
- * <p>As the produced {@code Client} requires an established gRPC connection to some server,
- * the provider assembles and starts a {@link GrpcContainer}.
+ * <p>As {@code Client} requires a gRPC server to be connected to, the provider assembles
+ * and starts a {@link GrpcContainer}.
  */
 class ClientProvider implements Closeable {
 
@@ -71,16 +71,20 @@ class ClientProvider implements Closeable {
      * Returns a {@code Client} to a single tenant {@code BoundedContext}.
      */
     Client get() {
-        enforceServerIsAvailable();
-        return openClients
+        ensureServer();
+
+        Client result = openClients
                 .stream()
                 .filter(client -> client.isOpen() && !client.tenant().isPresent())
                 .findFirst()
                 .orElseGet(this::openClient);
+
+        return result;
     }
 
     private Client openClient() {
-        Client client = Client.inProcess(serverName).build();
+        Client client = Client.inProcess(serverName)
+                              .build();
         openClients.add(client);
         return client;
     }
@@ -89,8 +93,9 @@ class ClientProvider implements Closeable {
      * Returns a {@code Client} to a multitenant {@code BoundedContext} with a tenant specified.
      */
     Client getFor(TenantId tenantId) {
-        enforceServerIsAvailable();
-        return openClients
+        ensureServer();
+
+        Client result = openClients
                 .stream()
                 .filter(client -> {
                     Optional<TenantId> optionalTenant = client.tenant();
@@ -100,6 +105,8 @@ class ClientProvider implements Closeable {
                 })
                 .findFirst()
                 .orElseGet(() -> openClient(tenantId));
+
+        return result;
     }
 
     private Client openClient(TenantId tenantId) {
@@ -110,41 +117,39 @@ class ClientProvider implements Closeable {
         return client;
     }
 
-    private void enforceServerIsAvailable() {
+    /**
+     * Every {@link Client} needs a gRPC server to be connected to. This method makes certain
+     * the provider has a gRPC server running and ready to establish connections with.
+     */
+    private void ensureServer() {
         checkOpen();
 
         if (isNull(serverName)) {
-            startServerInProcess();
+            initServer();
         }
     }
 
-    private void startServerInProcess() {
-        this.serverName = InProcessServerBuilder.generateName();
-        this.grpcContainer = createServerInProcess(serverName, context);
+    private void initServer() {
+        CommandService commandService = CommandService.fromSingle(context);
+        QueryService queryService = QueryService.fromSingle(context);
+        SubscriptionService subscriptionService = SubscriptionService.fromSingle(context);
+
+        String serverName = InProcessServerBuilder.generateName();
+        GrpcContainer grpcContainer = GrpcContainer
+                .inProcess(serverName)
+                .addService(commandService)
+                .addService(queryService)
+                .addService(subscriptionService)
+                .build();
 
         try {
             grpcContainer.start();
         } catch (IOException e) {
             illegalStateWithCauseOf(e);
         }
-    }
 
-    private static GrpcContainer createServerInProcess(String name, BoundedContext context) {
-        CommandService.Builder commandService = CommandService.newBuilder();
-        QueryService.Builder queryService = QueryService.newBuilder();
-        SubscriptionService.Builder subscriptionService = SubscriptionService.newBuilder();
-
-        commandService.add(context);
-        queryService.add(context);
-        subscriptionService.add(context);
-
-        GrpcContainer grpcContainer = GrpcContainer.inProcess(name)
-                                                   .addService(commandService.build())
-                                                   .addService(queryService.build())
-                                                   .addService(subscriptionService.build())
-                                                   .build();
-
-        return grpcContainer;
+        this.serverName = serverName;
+        this.grpcContainer = grpcContainer;
     }
 
     /**
