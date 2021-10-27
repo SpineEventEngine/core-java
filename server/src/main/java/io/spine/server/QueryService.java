@@ -68,6 +68,15 @@ public final class QueryService
         return new Builder();
     }
 
+    /** Composes the service with a single Bounded Context. **/
+    public static QueryService fromSingle(BoundedContext context) {
+        QueryService result = newBuilder()
+                .add(context)
+                .build();
+
+        return result;
+    }
+
     /**
      * Executes the passed query returning results to the passed observer.
      */

@@ -76,6 +76,15 @@ public final class SubscriptionService
         return new Builder();
     }
 
+    /** Composes the service with a single Bounded Context. **/
+    public static SubscriptionService fromSingle(BoundedContext context) {
+        SubscriptionService result = newBuilder()
+                .add(context)
+                .build();
+
+        return result;
+    }
+
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
         _debug().log("Creating the subscription to the topic: `%s`.", topic);

@@ -70,6 +70,15 @@ public final class CommandService
         return new Builder();
     }
 
+    /** Composes the service with a single Bounded Context. **/
+    public static CommandService fromSingle(BoundedContext context) {
+        CommandService result = newBuilder()
+                .add(context)
+                .build();
+
+        return result;
+    }
+
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
         CommandClass commandClass = CommandClass.of(request);
