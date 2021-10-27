@@ -70,8 +70,8 @@ public final class CommandService
         return new Builder();
     }
 
-    /** Composes the service with a single Bounded Context. **/
-    public static CommandService fromSingle(BoundedContext context) {
+    /** Builds the service with a single Bounded Context. **/
+    public static CommandService withSingle(BoundedContext context) {
         CommandService result = newBuilder()
                 .add(context)
                 .build();

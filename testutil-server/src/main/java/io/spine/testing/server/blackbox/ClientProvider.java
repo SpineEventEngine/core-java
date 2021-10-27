@@ -130,9 +130,9 @@ class ClientProvider implements Closeable {
     }
 
     private void initServer() {
-        CommandService commandService = CommandService.fromSingle(context);
-        QueryService queryService = QueryService.fromSingle(context);
-        SubscriptionService subscriptionService = SubscriptionService.fromSingle(context);
+        CommandService commandService = CommandService.withSingle(context);
+        QueryService queryService = QueryService.withSingle(context);
+        SubscriptionService subscriptionService = SubscriptionService.withSingle(context);
 
         String serverName = UUID.randomUUID().toString();
         GrpcContainer grpcContainer = GrpcContainer

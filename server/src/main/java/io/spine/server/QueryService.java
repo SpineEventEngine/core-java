@@ -68,8 +68,8 @@ public final class QueryService
         return new Builder();
     }
 
-    /** Composes the service with a single Bounded Context. **/
-    public static QueryService fromSingle(BoundedContext context) {
+    /** Builds the service with a single Bounded Context. **/
+    public static QueryService withSingle(BoundedContext context) {
         QueryService result = newBuilder()
                 .add(context)
                 .build();

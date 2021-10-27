@@ -76,8 +76,8 @@ public final class SubscriptionService
         return new Builder();
     }
 
-    /** Composes the service with a single Bounded Context. **/
-    public static SubscriptionService fromSingle(BoundedContext context) {
+    /** Builds the service with a single Bounded Context. **/
+    public static SubscriptionService withSingle(BoundedContext context) {
         SubscriptionService result = newBuilder()
                 .add(context)
                 .build();
