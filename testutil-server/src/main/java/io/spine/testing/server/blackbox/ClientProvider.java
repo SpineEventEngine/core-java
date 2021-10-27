@@ -74,7 +74,7 @@ class ClientProvider implements Closeable {
         enforceServerIsAvailable();
         return openClients
                 .stream()
-                .filter(client -> !client.tenant().isPresent())
+                .filter(client -> client.isOpen() && !client.tenant().isPresent())
                 .findFirst()
                 .orElseGet(this::openClient);
     }
@@ -94,7 +94,9 @@ class ClientProvider implements Closeable {
                 .stream()
                 .filter(client -> {
                     Optional<TenantId> optionalTenant = client.tenant();
-                    return optionalTenant.isPresent() && optionalTenant.get().equals(tenantId);
+                    return client.isOpen()
+                            && optionalTenant.isPresent()
+                            && optionalTenant.get().equals(tenantId);
                 })
                 .findFirst()
                 .orElseGet(() -> openClient(tenantId));
