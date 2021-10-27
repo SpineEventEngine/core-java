@@ -847,19 +847,6 @@ abstract class BlackBoxContextTest<T extends BlackBoxContext> {
         }
 
         @Test
-        @DisplayName("open")
-        void open() {
-            Client client1 = context().client();
-            assertThat(client1.isOpen()).isTrue();
-
-            client1.close();
-            assertThat(client1.isOpen()).isFalse();
-
-            Client client2 = context().client();
-            assertThat(client2.isOpen()).isTrue();
-        }
-
-        @Test
         @DisplayName("closed as `BlackBoxContext` is closed")
         void closedAsBlackBoxContextClosed() {
             Client client = context().client();

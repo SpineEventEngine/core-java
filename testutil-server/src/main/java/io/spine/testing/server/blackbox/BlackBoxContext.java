@@ -97,9 +97,9 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     private final BoundedContext context;
 
     /**
-     * A provider of {@link Client}s which are linked to this context.
+     * A supplier of {@link Client}s which are linked to this context.
      */
-    private final ClientProvider clientProvider;
+    private final ClientSupplier clientSupplier;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -160,7 +160,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
-        this.clientProvider = new ClientProvider(context);
+        this.clientSupplier = new ClientSupplier(context);
     }
 
     private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
@@ -466,7 +466,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
      * <p>This method performs the following:
      * <ol>
      *     <li>Closes tested {@link BoundedContext}.</li>
-     *     <li>Closes associated {@link ClientProvider}.</li>
+     *     <li>Closes associated {@link ClientSupplier}.</li>
      * </ol>
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
      * that may occur while closing, into an {@link IllegalStateException}.
@@ -479,7 +479,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
 
         try {
             context.close();
-            clientProvider.close();
+            clientSupplier.close();
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }
@@ -707,10 +707,10 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     }
 
     /**
-     * Instance of {@link Client} linked to this context.
+     * Creates a new instance of {@link Client} linked to this context.
      *
-     * <p>Provided client would inherit {@code TenantId} from {@code BlackBoxContext}, but would NOT
-     * inherit {@code UserId} and {@code ZoneId}.
+     * <p>Provided {@code Client} would inherit {@code TenantId} from {@code BlackBoxContext},
+     * but would NOT inherit {@code UserId} and {@code ZoneId}.
      *
      * @see #withTenant(TenantId)
      * @see #withActor(UserId) 
@@ -719,9 +719,9 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     public Client client() {
         @Nullable TenantId tenantId = requestFactory().tenantId();
 
-        Client result =  isNull(tenantId)
-               ? clientProvider.get()
-               : clientProvider.getFor(tenantId);
+        Client result = isNull(tenantId)
+               ? clientSupplier.create()
+               : clientSupplier.createFor(tenantId);
 
         return result;
     }

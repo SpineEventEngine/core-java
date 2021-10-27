@@ -39,87 +39,65 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Objects.isNull;
 
 /**
- * Upon request, creates {@code Client} instances for the passed Bounded Context.
+ * Creates {@code Client} instances for the passed Bounded Context.
  *
- * <p>As {@code Client} requires a gRPC server to be connected to, the provider assembles
+ * <p>As {@code Client} requires a gRPC server to be connected to, the supplier assembles
  * and starts a {@link GrpcContainer}.
  */
-class ClientProvider implements Closeable {
+class ClientSupplier implements Closeable {
 
     private final BoundedContext context;
-    private final List<Client> openClients;
+    private final List<Client> createdClient;
 
     private @MonotonicNonNull GrpcContainer grpcContainer;
     private @MonotonicNonNull String serverName;
 
     /**
-     * Creates a provider, {@code Client}s of which would be linked to the specified context.
+     * Creates a supplier, {@code Client}s of which would be linked to the specified context.
      */
-    ClientProvider(BoundedContext context) {
+    ClientSupplier(BoundedContext context) {
         this.context = context;
-        this.openClients = new ArrayList<>();
+        this.createdClient = new ArrayList<>();
     }
 
     /**
-     * Returns a {@code Client} to a single tenant {@code BoundedContext}.
+     * Opens a new {@code Client} to a single tenant {@code BoundedContext}.
      */
-    Client get() {
+    Client create() {
         ensureServer();
 
-        Client result = openClients
-                .stream()
-                .filter(client -> client.isOpen() && !client.tenant().isPresent())
-                .findFirst()
-                .orElseGet(this::openClient);
-
-        return result;
-    }
-
-    private Client openClient() {
         Client client = Client.inProcess(serverName)
                               .build();
-        openClients.add(client);
+
+        createdClient.add(client);
+
         return client;
     }
 
     /**
-     * Returns a {@code Client} to a multitenant {@code BoundedContext} with a tenant specified.
+     * Opens a new {@code Client} to a multitenant {@code BoundedContext} with a tenant specified.
      */
-    Client getFor(TenantId tenantId) {
+    Client createFor(TenantId tenantId) {
         ensureServer();
 
-        Client result = openClients
-                .stream()
-                .filter(client -> {
-                    Optional<TenantId> optionalTenant = client.tenant();
-                    return client.isOpen()
-                            && optionalTenant.isPresent()
-                            && optionalTenant.get().equals(tenantId);
-                })
-                .findFirst()
-                .orElseGet(() -> openClient(tenantId));
-
-        return result;
-    }
-
-    private Client openClient(TenantId tenantId) {
         Client client = Client.inProcess(serverName)
                               .forTenant(tenantId)
                               .build();
-        openClients.add(client);
+
+        createdClient.add(client);
+
         return client;
     }
 
     /**
      * Every {@link Client} needs a gRPC server to be connected to. This method makes certain
-     * the provider has a gRPC server running and ready to establish connections with.
+     * that this supplier has a gRPC server running and ready to establish connections with.
      */
     private void ensureServer() {
         checkOpen();
@@ -163,8 +141,8 @@ class ClientProvider implements Closeable {
         }
 
         grpcContainer.shutdownNowAndWait();
-        openClients.forEach(Client::close);
-        openClients.clear();
+        createdClient.forEach(Client::close);
+        createdClient.clear();
     }
 
     @Override

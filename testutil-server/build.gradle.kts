@@ -29,7 +29,6 @@ import io.spine.gradle.internal.Deps
 dependencies {
     api(project(":server"))
     api(project(":testutil-client"))
-
     testImplementation(Deps.grpc.netty)
     testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
 }
