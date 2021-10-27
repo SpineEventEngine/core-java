@@ -438,7 +438,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
      * @param first
      *         an event message or {@code Event} to be imported first
      * @param second
-     *         an event message or {@code Event} to be imported first second
+     *         an event message or {@code Event} to be imported second
      * @param rest
      *         optional event messages or instances of {@code Event} to be imported
      *         in the supplied order
@@ -461,8 +461,13 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     }
 
     /**
-     * Closes the bounded context, so it shuts down all of its repositories.
+     * Closes the {@code BlackBoxContext} performing all necessary clean-ups.
      *
+     * <p>This method performs the following:
+     * <ol>
+     *     <li>Closes tested {@link BoundedContext}.</li>
+     *     <li>Closes associated {@link ClientProvider}.</li>
+     * </ol>
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
      * that may occur while closing, into an {@link IllegalStateException}.
      */
@@ -702,10 +707,22 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     }
 
     /**
-     * Instance of a {@link Client} linked to this context.
+     * Instance of {@link Client} linked to this context.
+     *
+     * <p>Provided client would inherit {@code TenantId} from {@code BlackBoxContext}, but would NOT
+     * inherit {@code UserId} and {@code ZoneId}.
+     *
+     * @see #withTenant(TenantId)
+     * @see #withActor(UserId) 
+     * @see #in(ZoneId) 
      */
     public Client client() {
-        TenantId tenantId = requestFactory().tenantId();
-        return isNull(tenantId) ? clientProvider.get() : clientProvider.getFor(tenantId);
+        @Nullable TenantId tenantId = requestFactory().tenantId();
+
+        Client result =  isNull(tenantId)
+               ? clientProvider.get()
+               : clientProvider.getFor(tenantId);
+
+        return result;
     }
 }

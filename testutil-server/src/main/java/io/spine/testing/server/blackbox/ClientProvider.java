@@ -145,13 +145,16 @@ class ClientProvider implements Closeable {
         return grpcContainer;
     }
 
+    /**
+     * Closes all created clients and shuts down the associated {@code GrpcContainer}.
+     */
     @Override
+    @SuppressWarnings("TestOnlyProblems")
     public void close() throws Exception {
         if (!isOpen() || isNull(grpcContainer)) {
             return;
         }
 
-        //noinspection TestOnlyProblems
         grpcContainer.shutdownNowAndWait();
         openClients.forEach(Client::close);
         openClients.clear();
