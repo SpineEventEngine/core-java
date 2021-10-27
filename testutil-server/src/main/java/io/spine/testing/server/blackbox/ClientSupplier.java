@@ -134,7 +134,7 @@ class ClientSupplier implements Closeable {
      * Closes all created clients and shuts down the associated {@code GrpcContainer}.
      */
     @Override
-    @SuppressWarnings("TestOnlyProblems")
+    @SuppressWarnings("TestOnlyProblems" /* this code will actually be called from Tests */)
     public void close() throws Exception {
         if (!isOpen() || isNull(grpcContainer)) {
             return;
