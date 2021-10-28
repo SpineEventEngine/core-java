@@ -55,7 +55,7 @@ message EmptyProcess {
 // A rudimentary aggregate without state data.
 message EmptyAggregate {
 
-    option (entity).kind = PROCESS_MANAGER;
+    option (entity).kind = AGGREGATE;
 
     string id = 1 [(required) = false];
 }
