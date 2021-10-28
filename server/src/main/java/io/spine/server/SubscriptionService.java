@@ -81,7 +81,6 @@ public final class SubscriptionService
         SubscriptionService result = newBuilder()
                 .add(context)
                 .build();
-
         return result;
     }
 

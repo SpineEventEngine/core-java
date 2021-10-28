@@ -26,6 +26,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.base.Identifier;
 import io.spine.client.Client;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -39,7 +40,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Objects.isNull;
@@ -71,12 +71,9 @@ class ClientSupplier implements Closeable {
      */
     Client create() {
         ensureServer();
-
         Client client = Client.inProcess(serverName)
                               .build();
-
         createdClient.add(client);
-
         return client;
     }
 
@@ -85,13 +82,10 @@ class ClientSupplier implements Closeable {
      */
     Client createFor(TenantId tenantId) {
         ensureServer();
-
         Client client = Client.inProcess(serverName)
                               .forTenant(tenantId)
                               .build();
-
         createdClient.add(client);
-
         return client;
     }
 
@@ -101,7 +95,6 @@ class ClientSupplier implements Closeable {
      */
     private void ensureServer() {
         checkOpen();
-
         if (isNull(serverName)) {
             initServer();
         }
@@ -112,7 +105,7 @@ class ClientSupplier implements Closeable {
         QueryService queryService = QueryService.withSingle(context);
         SubscriptionService subscriptionService = SubscriptionService.withSingle(context);
 
-        String serverName = UUID.randomUUID().toString();
+        String serverName = Identifier.newUuid();
         GrpcContainer grpcContainer = GrpcContainer
                 .inProcess(serverName)
                 .addService(commandService)

@@ -73,7 +73,6 @@ public final class QueryService
         QueryService result = newBuilder()
                 .add(context)
                 .build();
-
         return result;
     }
 

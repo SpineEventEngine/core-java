@@ -75,7 +75,6 @@ public final class CommandService
         CommandService result = newBuilder()
                 .add(context)
                 .build();
-
         return result;
     }
 
