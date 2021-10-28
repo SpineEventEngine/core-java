@@ -24,31 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+/**
+ * Test environment classes for {@code io.spine.server.integration.IntegrationBrokerTest}.
+ */
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.test.integration.MemoizingView;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.integration.given.broker;
 
-public class MemoizingProjectDetails
-        extends MemoizingProjection<ProjectId, MemoizingView, MemoizingView.Builder> {
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    /**
-     * Creates a new instance.
-     *
-     * @param id
-     *         the ID for the new instance
-     * @throws IllegalArgumentException
-     *         if the ID is not of one of the supported types
-     */
-    protected MemoizingProjectDetails(ProjectId id) {
-        super(id);
-    }
-
-    @Subscribe
-    void on(@External ItgProjectCreated event) {
-        memoize(event);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

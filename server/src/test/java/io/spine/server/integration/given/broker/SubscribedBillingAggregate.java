@@ -24,41 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.integration.given.broker;
 
 import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.event.ItgProjectCreated;
-import io.spine.test.integration.event.ItgProjectStarted;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.BillingAgg;
+import io.spine.server.integration.broker.CreditsHeld;
+import io.spine.server.integration.broker.PhotosUploaded;
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectEventsSubscriber extends AbstractEventSubscriber {
+final class SubscribedBillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
-    private static ItgProjectCreated externalEvent = null;
-
-    private static ItgProjectStarted domesticEvent = null;
-
-    @Subscribe
-    void on(@External ItgProjectCreated msg) {
-        externalEvent = msg;
+    @React
+    CreditsHeld on(@External PhotosUploaded event) {
+        return CreditsHeld.generate();
     }
 
-    @Subscribe
-    void on(ItgProjectStarted msg) {
-        domesticEvent = msg;
-    }
-
-    public static ItgProjectCreated externalEvent() {
-        return externalEvent;
-    }
-
-    public static ItgProjectStarted domesticEvent() {
-        return domesticEvent;
-    }
-
-    public static void clear() {
-        externalEvent = null;
-        domesticEvent = null;
+    @Apply
+    private void on(CreditsHeld event) {
+        builder().setId(event.getUuid());
     }
 }
