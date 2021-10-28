@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -73,6 +74,14 @@ public final class SubscriptionService
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /** Builds the service with a single Bounded Context. **/
+    public static SubscriptionService withSingle(BoundedContext context) {
+        SubscriptionService result = newBuilder()
+                .add(context)
+                .build();
+        return result;
     }
 
     @Override
@@ -175,6 +184,7 @@ public final class SubscriptionService
         private final Set<BoundedContext> contexts = Sets.newHashSet();
 
         /** Adds the context to be handled by the subscription service. */
+        @CanIgnoreReturnValue
         public Builder add(BoundedContext context) {
             // Save it to a temporary set so that it is easy to remove it if needed.
             contexts.add(context);
@@ -182,6 +192,7 @@ public final class SubscriptionService
         }
 
         /** Removes the context from being handled by the subscription service. */
+        @CanIgnoreReturnValue
         public Builder remove(BoundedContext context) {
             contexts.remove(context);
             return this;

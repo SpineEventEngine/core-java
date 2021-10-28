@@ -34,6 +34,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.client.Client;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
@@ -77,6 +78,7 @@ import static io.spine.testing.server.blackbox.Actor.defaultActor;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
+import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -93,6 +95,11 @@ public abstract class BlackBoxContext implements Logging, Closeable {
      * The context under the test.
      */
     private final BoundedContext context;
+
+    /**
+     * A supplier of {@link Client}s which are linked to this context.
+     */
+    private final ClientSupplier clientSupplier;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -153,6 +160,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
+        this.clientSupplier = new ClientSupplier(context);
     }
 
     private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
@@ -430,7 +438,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
      * @param first
      *         an event message or {@code Event} to be imported first
      * @param second
-     *         an event message or {@code Event} to be imported first second
+     *         an event message or {@code Event} to be imported second
      * @param rest
      *         optional event messages or instances of {@code Event} to be imported
      *         in the supplied order
@@ -453,15 +461,25 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     }
 
     /**
-     * Closes the bounded context, so it shuts down all of its repositories.
+     * Closes the {@code BlackBoxContext} performing all necessary clean-ups.
      *
+     * <p>This method performs the following:
+     * <ol>
+     *     <li>Closes tested {@link BoundedContext}.</li>
+     *     <li>Closes associated {@link ClientSupplier}.</li>
+     * </ol>
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
      * that may occur while closing, into an {@link IllegalStateException}.
      */
     @Override
     public final void close() {
+        if(!isOpen()) {
+            return;
+        }
+
         try {
             context.close();
+            clientSupplier.close();
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }
@@ -685,6 +703,24 @@ public abstract class BlackBoxContext implements Logging, Closeable {
     public SubscriptionFixture subscribeTo(Topic topic) {
         SubscriptionFixture result = new SubscriptionFixture(context, topic);
         result.activate();
+        return result;
+    }
+
+    /**
+     * Creates a new instance of {@link Client} linked to this context.
+     *
+     * <p>Provided {@code Client} would inherit {@code TenantId} from {@code BlackBoxContext},
+     * but would NOT inherit {@code UserId} and {@code ZoneId}.
+     *
+     * @see #withTenant(TenantId)
+     * @see #withActor(UserId) 
+     * @see #in(ZoneId) 
+     */
+    public Client client() {
+        @Nullable TenantId tenantId = requestFactory().tenantId();
+        Client result = isNull(tenantId)
+               ? clientSupplier.create()
+               : clientSupplier.createFor(tenantId);
         return result;
     }
 }
