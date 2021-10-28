@@ -93,4 +93,3 @@ message ItgProjection {
 
     ProjectId id = 1;
 }
-
