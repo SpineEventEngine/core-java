@@ -46,6 +46,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.Closeable;
 import io.spine.server.QueryService;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
@@ -86,7 +87,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBox implements Logging {
+public abstract class BlackBox implements Logging, Closeable {
 
     /**
      * The context under the test.
@@ -281,18 +282,15 @@ public abstract class BlackBox implements Logging {
     /**
      * Sends off a provided event to the Bounded Context.
      *
-     * @param messageOrEvent
-     *         an event message or {@link io.spine.core.Event}. If an instance of {@code Event} is
-     *         passed, it will be posted to {@link EventBus} as is.
-     *         Otherwise, an instance of {@code Event} will be generated basing on the passed
-     *         event message and posted to the bus.
+     * @param domainEvent
+     *         a domain event to be dispatched to the Bounded Context.
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
     @CanIgnoreReturnValue
-    public final BlackBox receivesEvent(EventMessage messageOrEvent) {
-        checkNotNull(messageOrEvent);
-        return receivesEvents(singletonList(messageOrEvent));
+    public final BlackBox receivesEvent(EventMessage domainEvent) {
+        checkNotNull(domainEvent);
+        return receivesEvents(singletonList(domainEvent));
     }
 
     /**
@@ -456,17 +454,23 @@ public abstract class BlackBox implements Logging {
     }
 
     /**
-     * Closes the bounded context so that it shutting down all of its repositories.
+     * Closes the bounded context, so it shuts down all of its repositories.
      *
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
      * that may occur while closing, into an {@link IllegalStateException}.
      */
+    @Override
     public final void close() {
         try {
             context.close();
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }
+    }
+
+    @Override
+    public boolean isOpen() {
+        return context().isOpen();
     }
 
     /**
@@ -616,12 +620,13 @@ public abstract class BlackBox implements Logging {
     }
 
     /**
-     * Asserts that the context generated only one event of the passed type.
+     * Asserts that the context emitted only one event of the passed type.
      *
      * @param eventClass
      *         the type of the event to assert
      * @return the subject for further assertions
      */
+    @CanIgnoreReturnValue
     public final ProtoFluentAssertion assertEvent(Class<? extends EventMessage> eventClass) {
         EventSubject assertEvents =
                 assertEvents().withType(eventClass);
@@ -631,7 +636,7 @@ public abstract class BlackBox implements Logging {
     }
 
     /**
-     * Asserts that the context generated only one passed event.
+     * Asserts that the context emitted only one passed event.
      */
     public final void assertEvent(EventMessage event) {
         assertEvent(event.getClass()).isEqualTo(event);
