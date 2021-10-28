@@ -25,7 +25,7 @@
  */
 
 /** The version of this library. */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.69")
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.70")
 
 /** Versions of the Spine libraries that `core-java` depends on. */
 val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.67")
