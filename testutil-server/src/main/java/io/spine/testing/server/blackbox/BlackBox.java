@@ -78,6 +78,7 @@ import static io.spine.testing.server.blackbox.Actor.defaultActor;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
+import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -94,6 +95,11 @@ public abstract class BlackBox implements Logging, Closeable {
      * The context under the test.
      */
     private final BoundedContext context;
+
+    /**
+     * A supplier of {@link Client}s which are linked to this context.
+     */
+    private final ClientSupplier clientSupplier;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -154,6 +160,7 @@ public abstract class BlackBox implements Logging, Closeable {
         BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
+        this.clientSupplier = new ClientSupplier(context);
     }
 
     private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
@@ -432,7 +439,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * @param first
      *         an event message or {@code Event} to be imported first
      * @param second
-     *         an event message or {@code Event} to be imported first second
+     *         an event message or {@code Event} to be imported second
      * @param rest
      *         optional event messages or instances of {@code Event} to be imported
      *         in the supplied order
@@ -455,15 +462,26 @@ public abstract class BlackBox implements Logging, Closeable {
     }
 
     /**
-     * Closes the bounded context, so it shuts down all of its repositories.
+     * Closes the {@code BlackBox} performing all necessary clean-ups.
+     *
+     * <p>This method performs the following:
+     * <ol>
+     *     <li>Closes tested {@link BoundedContext}.</li>
+     *     <li>Closes associated {@link ClientSupplier}.</li>
+     * </ol>
      *
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
      * that may occur while closing, into an {@link IllegalStateException}.
      */
     @Override
     public final void close() {
+        if(!isOpen()) {
+            return;
+        }
+
         try {
             context.close();
+            clientSupplier.close();
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }
@@ -671,7 +689,21 @@ public abstract class BlackBox implements Logging, Closeable {
         return result;
     }
 
+    /**
+     * Creates a new instance of {@link Client} linked to this context.
+     *
+     * <p>Provided {@code Client} would inherit {@code TenantId} from {@code BlackBoxContext},
+     * but would NOT inherit {@code UserId} and {@code ZoneId}.
+     *
+     * @see #withTenant(TenantId)
+     * @see #withActor(UserId)
+     * @see #in(ZoneId)
+     */
     public Client client() {
-        return null;
+        @Nullable TenantId tenantId = requestFactory().tenantId();
+        Client result = isNull(tenantId)
+                        ? clientSupplier.create()
+                        : clientSupplier.createFor(tenantId);
+        return result;
     }
 }
