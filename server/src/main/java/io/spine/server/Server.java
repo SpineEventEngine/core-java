@@ -43,8 +43,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
- * Exposes one or more Bounded Contexts using {@link io.spine.server.CommandService CommandService}
- * and {@link io.spine.server.QueryService QueryService}.
+ * Exposes one or more Bounded Contexts using {@link CommandService}, {@link QueryService} and
+ * {@link SubscriptionService}.
  */
 public final class Server implements Logging {
 
