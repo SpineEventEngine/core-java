@@ -63,9 +63,21 @@ public final class QueryService
         this.typeToContextMap = ImmutableMap.copyOf(map);
     }
 
-    /** Creates a new builder for the service. */
+    /**
+     * Creates a new builder for the service.
+     */
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Builds the service with a single Bounded Context.
+     */
+    public static QueryService withSingle(BoundedContext context) {
+        QueryService result = newBuilder()
+                .add(context)
+                .build();
+        return result;
     }
 
     /**

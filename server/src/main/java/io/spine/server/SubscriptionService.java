@@ -73,8 +73,21 @@ public final class SubscriptionService
         this.typeToContextMap = checkNotNull(map);
     }
 
+    /**
+     * Creates a new builder for the service.
+     */
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Builds the service with a single Bounded Context.
+     */
+    public static SubscriptionService withSingle(BoundedContext context) {
+        SubscriptionService result = newBuilder()
+                .add(context)
+                .build();
+        return result;
     }
 
     @Override
@@ -178,7 +191,9 @@ public final class SubscriptionService
     public static class Builder {
         private final Set<BoundedContext> contexts = Sets.newHashSet();
 
-        /** Adds the context to be handled by the subscription service. */
+        /**
+         * Adds the context to be handled by the subscription service.
+         */
         @CanIgnoreReturnValue
         public Builder add(BoundedContext context) {
             // Save it to a temporary set so that it is easy to remove it if needed.
@@ -186,14 +201,18 @@ public final class SubscriptionService
             return this;
         }
 
-        /** Removes the context from being handled by the subscription service. */
+        /**
+         * Removes the context from being handled by the subscription service.
+         */
         @CanIgnoreReturnValue
         public Builder remove(BoundedContext context) {
             contexts.remove(context);
             return this;
         }
 
-        /** Obtains the context added to the subscription service by the time of the call. */
+        /**
+         * Obtains the context added to the subscription service by the time of the call.
+         */
         public ImmutableList<BoundedContext> contexts() {
             return ImmutableList.copyOf(contexts);
         }
