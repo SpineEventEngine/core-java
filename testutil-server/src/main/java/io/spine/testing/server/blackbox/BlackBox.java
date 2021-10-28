@@ -34,6 +34,7 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
+import io.spine.client.Client;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
@@ -668,5 +669,9 @@ public abstract class BlackBox implements Logging, Closeable {
         SubscriptionFixture result = new SubscriptionFixture(context, topic);
         result.activate();
         return result;
+    }
+
+    public Client client() {
+        return null;
     }
 }

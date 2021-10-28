@@ -35,6 +35,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
@@ -109,5 +112,24 @@ class MtBlackBoxTest
                 () -> BlackBox.from(BoundedContextBuilder.assumingTests(true))
                               .assertEntityWithState(BbProjectId.generate(), BbProject.class)
         );
+    }
+
+    @Test
+    @DisplayName("provide a `Client` with the expected tenant")
+    void provideClientWithExpectedTenantId() {
+        BlackBox context = context();
+        Optional<TenantId> currentTenant;
+
+        TenantId john = generate();
+        currentTenant = context.withTenant(john).client().tenant();
+        assertThat(currentTenant).hasValue(john);
+
+        TenantId carl = generate();
+        currentTenant = context.withTenant(carl).client().tenant();
+        assertThat(currentTenant).hasValue(carl);
+
+        TenantId bob = generate();
+        currentTenant = context.withTenant(bob).client().tenant();
+        assertThat(currentTenant).hasValue(bob);
     }
 }
