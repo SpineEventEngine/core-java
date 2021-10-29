@@ -35,6 +35,8 @@ import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
+import io.spine.internal.gradle.javacompile.ErrorProneConfig
+import io.spine.internal.gradle.javacompile.JavaCompileConfig
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.pom.PomGenerator
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -80,7 +82,7 @@ plugins {
         id(id) version version
     }
     io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
-        id(id) version version
+        id(id)
     }
 }
 
@@ -148,7 +150,6 @@ subprojects {
         plugin("pmd-settings")
 
         with(Scripts) {
-            from(javacArgs(project))
             from(projectLicenseReport(project))
         }
 
@@ -254,6 +255,8 @@ subprojects {
     }
 
     JavadocConfig.applyTo(project)
+    JavaCompileConfig.applyTo(project)
+    ErrorProneConfig.applyTo(project)
 
     tasks.register("sourceJar", Jar::class) {
         from(sourceSets.main.get().allJava)

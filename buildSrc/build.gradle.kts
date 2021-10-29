@@ -52,6 +52,7 @@ val jacksonVersion = "2.11.0"
 val googleAuthToolVersion = "2.1.2"
 val licenseReportVersion = "1.16"
 val grGitVersion = "3.1.1"
+val errorProneVersion = "2.0.2"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -69,4 +70,5 @@ dependencies {
     implementation("com.google.guava:guava:$guavaVersion")
     api("com.github.jk1:gradle-license-report:$licenseReportVersion")
     implementation("org.ajoberstar.grgit:grgit-core:${grGitVersion}")
+    implementation("net.ltgt.gradle:gradle-errorprone-plugin:${errorProneVersion}")
 }
