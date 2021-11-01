@@ -26,14 +26,24 @@
 
 package io.spine.internal.gradle.javacompile
 
+import io.spine.internal.gradle.javacompile.JavaCompileConfig.configureJavaCompile
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.withType
 
 /**
- * [JavaCompile] task configuration.
+ * Configures [JavaCompile] task.
+ *
+ * ```
+ * tasks {
+ *     withType<JavaCompile> {
+ *         configureJavaCompile()
+ *     }
+ * }
+ * ```
  */
 object JavaCompileConfig {
 
@@ -49,13 +59,14 @@ object JavaCompileConfig {
         "-Xlint:deprecation",
     )
 
-    fun applyTo(project: Project) {
+    /**
+     * Applies [JavaCompileConfig] to this [JavaCompile].
+     */
+    fun JavaCompile.configureJavaCompile() {
         checkJavaVersion()
-        project.tasks.withType<JavaCompile> {
-            with(options) {
-                encoding = SOURCE_FILES_ENCODING
-                compilerArgs.addAll(COMPILATION_FLAGS)
-            }
+        with(options) {
+            encoding = SOURCE_FILES_ENCODING
+            compilerArgs.addAll(COMPILATION_FLAGS)
         }
     }
 
@@ -67,5 +78,43 @@ object JavaCompileConfig {
                     " See https://github.com/SpineEventEngine/base/issues/457."
             )
         }
+    }
+}
+
+// Pick up the API that fits best to your code base.
+
+/**
+ * Applies [JavaCompileConfig] to all [JavaCompile] tasks in this container.
+ */
+fun TaskContainer.configureJavaCompile() {
+    withType<JavaCompile> {
+        configureJavaCompile()
+    }
+}
+
+/**
+ * Applies [JavaCompileConfig] to all [JavaCompile] tasks in the container.
+ */
+fun JavaCompileConfig.applyTo(tasks: TaskContainer) {
+    tasks.withType<JavaCompile> {
+        configureJavaCompile()
+    }
+}
+
+/**
+ * Applies [JavaCompileConfig] to all [JavaCompile] tasks in this project.
+ */
+fun Project.configureJavaCompile() {
+    tasks.withType<JavaCompile> {
+        configureJavaCompile()
+    }
+}
+
+/**
+ * Applies [JavaCompileConfig] to all [JavaCompile] tasks in the project.
+ */
+fun JavaCompileConfig.applyTo(project: Project) {
+    project.tasks.withType<JavaCompile> {
+        configureJavaCompile()
     }
 }

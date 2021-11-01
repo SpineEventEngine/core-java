@@ -26,13 +26,23 @@
 
 package io.spine.internal.gradle.javacompile
 
+import io.spine.internal.gradle.javacompile.ErrorProneConfig.configureErrorProne
 import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.api.Project
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.withType
 
 /**
- * `ErrorProne` plugin configuration.
+ * Configures `ErrorProne` plugin.
+ *
+ * ```
+ * tasks {
+ *     withType<JavaCompile> {
+ *         configureErrorProne()
+ *     }
+ * }
+ * ```
  */
 object ErrorProneConfig {
 
@@ -54,9 +64,51 @@ object ErrorProneConfig {
         "-Xep:FloggerSplitLogStatement:OFF",
     )
 
-    fun applyTo(project: Project) = project.tasks.withType<JavaCompile> {
+    /**
+     * Applies [ErrorProneConfig] to this [JavaCompile]. Although `ErrorProne` is a plugin,
+     * it is actually configured through the [JavaCompile] task.
+     */
+    fun JavaCompile.configureErrorProne() {
         options.errorprone
             .errorproneArgs
             .addAll(CODE_ANALYZING_FLAGS)
+    }
+}
+
+// Pick up the API that fits best to your code base.
+
+/**
+ * Applies [ErrorProneConfig] to all [JavaCompile] tasks in this container.
+ */
+fun TaskContainer.configureErrorProne() {
+    withType<JavaCompile> {
+        configureErrorProne()
+    }
+}
+
+/**
+ * Applies [ErrorProneConfig] to all [JavaCompile] tasks in the container.
+ */
+fun ErrorProneConfig.applyTo(tasks: TaskContainer) {
+    tasks.withType<JavaCompile> {
+        configureErrorProne()
+    }
+}
+
+/**
+ * Applies [ErrorProneConfig] to all [JavaCompile] tasks in this project.
+ */
+fun Project.configureErrorProne() {
+    tasks.withType<JavaCompile> {
+        configureErrorProne()
+    }
+}
+
+/**
+ * Applies [ErrorProneConfig] to all [JavaCompile] tasks in the project.
+ */
+fun ErrorProneConfig.applyTo(project: Project) {
+    project.tasks.withType<JavaCompile> {
+        configureErrorProne()
     }
 }
