@@ -24,19 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle.publish.proto
+
+import org.gradle.api.Project
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.bundling.Jar
+
 /**
- * This script defines the common configuration for license report scripts.
+ * Registers an `assembleProto` Gradle task which locates and assembles all `.proto` files
+ * in a Gradle project.
+ *
+ * The result of assembly is a [Jar] task with an archive output classified as "proto".
  */
+object AssembleProto {
 
-println("`license-report-common.gradle` script is deprecated. " +
-        "Please use the `LicenseReporter` utility instead.")
+    private const val taskName = "assembleProto"
 
-apply plugin: 'base'
-
-ext.licenseReportConfig = [
-        // The output filename
-        outputFilename  : "license-report.md",
-
-        // The path to a directory, to which a per-project report is generated.
-        relativePath    : "/reports/dependency-license/dependency"
-]
+    /**
+     * Performs the task registration for the passed [project].
+     */
+    fun registerIn(project: Project): TaskProvider<Jar> {
+        val task = project.tasks.register(taskName, Jar::class.java) {
+            description =
+                "Assembles a JAR artifact with all Proto definitions from the classpath."
+            from(project.protoFiles())
+            include {
+                it.file.isProtoFileOrDir()
+            }
+            archiveClassifier.set("proto")
+        }
+        return task
+    }
+}

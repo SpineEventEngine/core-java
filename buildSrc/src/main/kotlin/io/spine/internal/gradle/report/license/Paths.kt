@@ -24,19 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle.report.license
+
 /**
- * This script defines the common configuration for license report scripts.
+ * Filesystem paths used by [LicenseReporter].
  */
+internal object Paths {
 
-println("`license-report-common.gradle` script is deprecated. " +
-        "Please use the `LicenseReporter` utility instead.")
+    /**
+     * The output filename of the license report.
+     *
+     * The file with this name is placed to the root folder of the root Gradle project —
+     * as the result of the [LicenseReporter] work.
+     *
+     * Its contents describe the licensing information for each of the Java dependencies
+     * which are referenced by Gradle projects in the repository.
+     */
+    internal const val outputFilename = "license-report.md"
 
-apply plugin: 'base'
-
-ext.licenseReportConfig = [
-        // The output filename
-        outputFilename  : "license-report.md",
-
-        // The path to a directory, to which a per-project report is generated.
-        relativePath    : "/reports/dependency-license/dependency"
-]
+    /**
+     * The path to a directory, to which a per-project report is generated.
+     */
+    internal const val relativePath = "reports/dependency-license/dependency"
+}

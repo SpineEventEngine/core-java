@@ -24,19 +24,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.internal.gradle.report.license
+
+import com.github.jk1.license.ConfigurationData
+
 /**
- * This script defines the common configuration for license report scripts.
+ * The names of Gradle `Configuration`s.
  */
+@Suppress("EnumEntryName", "EnumNaming")
+/* Dubbing the actual values in Gradle. */
+internal enum class Configuration {
+    runtime,
+    runtimeClasspath
+}
 
-println("`license-report-common.gradle` script is deprecated. " +
-        "Please use the `LicenseReporter` utility instead.")
-
-apply plugin: 'base'
-
-ext.licenseReportConfig = [
-        // The output filename
-        outputFilename  : "license-report.md",
-
-        // The path to a directory, to which a per-project report is generated.
-        relativePath    : "/reports/dependency-license/dependency"
-]
+/**
+ * Tells whether this configuration data is one of the passed `Configuration` types.
+ */
+internal fun ConfigurationData.isOneOf(vararg configs: Configuration): Boolean {
+    configs.forEach {
+        if (it.name == this.name) {
+            return true
+        }
+    }
+    return false
+}

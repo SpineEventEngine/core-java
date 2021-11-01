@@ -47,6 +47,10 @@ buildscript {
     }
 }
 
+println("`license-report-project.gradle` script is deprecated. " +
+        "Please use the `LicenseReporter` utility instead.")
+
+
 apply plugin: io.spine.internal.dependency.LicenseReport.GradlePlugin.id
 
 final def commonPath = io.spine.internal.gradle.Scripts.commonPath
