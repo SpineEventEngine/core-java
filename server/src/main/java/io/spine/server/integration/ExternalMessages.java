@@ -107,9 +107,7 @@ public final class ExternalMessages {
     }
 
     private static StringValue generateMessageId() {
-        return StringValue.newBuilder()
-                .setValue(Identifier.newUuid())
-                .build();
+        return StringValue.of(Identifier.newUuid());
     }
 
     private static ExternalMessage of(Message messageId,
