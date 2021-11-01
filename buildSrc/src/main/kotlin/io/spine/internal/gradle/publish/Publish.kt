@@ -38,45 +38,65 @@ import io.spine.internal.gradle.publish.proto.AssembleProto
  *
  * When applied to a single-module project, the reference to the project is passed to the plugin:
  * ```
- * import io.spine.gradle.internal.PublishingRepos
- * import io.spine.gradle.internal.spinePublishing
+ *     import io.spine.gradle.internal.PublishingRepos
+ *     import io.spine.gradle.internal.spinePublishing
  *
- * spinePublishing {
- *     publish(project)
- *     targetRepositories.addAll(
- *         PublishingRepos.cloudRepo,
- *         PublishingRepos.gitHub("LibraryName")
- *     )
- * }
+ *     spinePublishing {
+ *         publish(project)
+ *         targetRepositories.addAll(
+ *             PublishingRepos.cloudRepo,
+ *             PublishingRepos.gitHub("LibraryName")
+ *         )
+ *     }
  * ```
  * When applied to a multi-module project, the plugin should be applied to the root project.
  * The sub-projects to be published are specified by their names:
  * ```
- * import io.spine.gradle.internal.PublishingRepos
- * import io.spine.gradle.internal.spinePublishing
+ *     import io.spine.gradle.internal.PublishingRepos
+ *     import io.spine.gradle.internal.spinePublishing
  *
- * spinePublishing {
- *     projectsToPublish.addAll(
- *         "submodule1",
- *         "submodule2",
- *         "nested:submodule3"
- *     )
- *     targetRepositories.addAll(
- *         PublishingRepos.cloudRepo,
- *         PublishingRepos.gitHub("LibraryName")
- *     )
- * }
+ *     spinePublishing {
+ *         projectsToPublish.addAll(
+ *             "submodule1",
+ *             "submodule2",
+ *             "nested:submodule3"
+ *         )
+ *         targetRepositories.addAll(
+ *             PublishingRepos.cloudRepo,
+ *             PublishingRepos.gitHub("LibraryName")
+ *         )
+ *     }
  * ```
  *
  * By default, we publish artifacts produced by tasks `sourceJar`, `testOutputJar`,
  * and `javadocJar`, along with the default project compilation output.
  * If any of these tasks is not declared, it's created with sensible default settings by the plugin.
  *
+ * To publish the Protobuf files for some Gradle project — and include the `.proto` files from its
+ * transitive dependencies, which may be referenced, — the following configuration should be used:
+ *
+ * ```
+ *     import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
+ *
+ *     //...
+ *
+ *     // Typically used with a sub-project, and NOT with a root project.
+ *     publishProtoArtifact(project)
+ * ```
+ *
+ * The resulting artifact is available under "proto" classifier. I.e., in Gradle 7, one could
+ * depend on it like this:
+ *
+ * ```
+ *     // Depend on the Proto files of `spine-client`.
+ *     implementation("io.spine:spine-client:$version@proto")
+ * ```
+ *
  * To publish more artifacts for a certain project, add them to the `archives` configuration:
  * ```
- * artifacts {
- *     archives(myCustomJarTask)
- * }
+ *     artifacts {
+ *         archives(myCustomJarTask)
+ *     }
  * ```
  *
  * If any plugins applied to the published project declare any other artifacts, those artifacts
@@ -93,16 +113,8 @@ class Publish : Plugin<Project> {
          * and the proto files extracted from the JAR dependencies of the project.
          *
          * The relative file paths are kept.
-         *
-         * To depend onto such an artifact, one should declare the dependency as follows:
-         *
-         * ```
-         *     dependencies {
-         *         // Points to the `.proto` files of "spine-client" module.
-         *         compile "io.spine:spine-client:$version@proto"
-         *     }
-         * ```
          */
+        @Suppress("unused")
         fun publishProtoArtifact(project: Project) {
             val task = AssembleProto.registerIn(project)
             project.artifacts {
