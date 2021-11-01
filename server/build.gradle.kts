@@ -28,6 +28,7 @@ import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Kotlin
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
 
 val spineBaseVersion: String by extra
 val spineBaseTypesVersion: String by extra
@@ -56,9 +57,9 @@ dependencies {
 apply {
     with(Scripts) {
         from(testArtifacts(project))
-        from(publishProto(project))
     }
 }
+publishProtoArtifact(project)
 
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673

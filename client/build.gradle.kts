@@ -26,6 +26,7 @@
 
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
 
 val spineBaseVersion: String by extra
 
@@ -46,8 +47,8 @@ dependencies {
 
 apply {
     from(Scripts.testArtifacts(project))
-    from(Scripts.publishProto(project))
 }
+publishProtoArtifact(project)
 
 //TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
 // see https://github.com/SpineEventEngine/base/issues/657

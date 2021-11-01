@@ -38,7 +38,6 @@ object Scripts {
     fun slowTests(p: Project)              = p.script("slow-tests.gradle")
     fun jacoco(p: Project)                 = p.script("jacoco.gradle")
     fun publish(p: Project)                = p.script("publish.gradle")
-    fun publishProto(p: Project)           = p.script("publish-proto.gradle")
     fun javacArgs(p: Project)              = p.script("javac-args.gradle")
     fun jsBuildTasks(p: Project)           = p.script("js/build-tasks.gradle")
     fun jsConfigureProto(p: Project)       = p.script("js/configure-proto.gradle")
