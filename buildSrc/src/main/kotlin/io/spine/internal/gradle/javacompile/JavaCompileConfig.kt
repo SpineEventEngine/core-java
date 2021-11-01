@@ -37,31 +37,35 @@ import org.gradle.kotlin.dsl.withType
  */
 object JavaCompileConfig {
 
-    private const val srcFilesEncoding = "UTF-8"
-    private val expectedJavaVersion = JavaVersion.VERSION_1_8
-    private val commandLineFlags = listOf(
+    private const val SOURCE_FILES_ENCODING = "UTF-8"
+    private val EXPECTED_JAVA_VERSION = JavaVersion.VERSION_1_8
+    private val COMPILATION_FLAGS = listOf(
+
+        // Protobuf Compiler generates the code, which uses the deprecated `PARSER` field.
+        // See issue: https://github.com/SpineEventEngine/config/issues/173
+        // "-Werror",
+
         "-Xlint:unchecked",
         "-Xlint:deprecation",
-
-        // Protobuf Compiler generates the code, which uses the deprecated PARSER field.
-        // See issue: https://github.com/SpineEventEngine/config/issues/173
-        // "-Werror"
     )
 
     fun applyTo(project: Project) {
-        ensureJavaVersion()
+        checkJavaVersion()
         project.tasks.withType<JavaCompile> {
-            options.encoding = srcFilesEncoding
-            options.compilerArgs.addAll(commandLineFlags)
+            with(options) {
+                encoding = SOURCE_FILES_ENCODING
+                compilerArgs.addAll(COMPILATION_FLAGS)
+            }
         }
     }
 
-    private fun ensureJavaVersion() {
-        if (JavaVersion.current() != expectedJavaVersion) {
+    private fun checkJavaVersion() {
+        if (JavaVersion.current() != EXPECTED_JAVA_VERSION) {
             throw GradleException("Spine Event Engine can be built with JDK 8 only." +
                     " Supporting JDK 11 and above at build-time is planned in 2.0 release." +
                     " Please use the pre-built binaries available in the Spine Maven repository." +
-                    " See https://github.com/SpineEventEngine/base/issues/457.")
+                    " See https://github.com/SpineEventEngine/base/issues/457."
+            )
         }
     }
 }

@@ -36,7 +36,7 @@ import org.gradle.kotlin.dsl.withType
  */
 object ErrorProneConfig {
 
-    private val commandLineFlags = listOf(
+    private val COMMAND_LINE_FLAGS = listOf(
 
         // Exclude generated sources from being analyzed by ErrorProne.
         "-XepExcludedPaths:.*/generated/.*",
@@ -51,12 +51,12 @@ object ErrorProneConfig {
         "-Xep:UnusedVariable:OFF",
 
         "-Xep:CheckReturnValue:OFF",
-        "-Xep:FloggerSplitLogStatement:OFF"
+        "-Xep:FloggerSplitLogStatement:OFF",
     )
 
-    fun applyTo(project: Project) {
-        project.tasks.withType<JavaCompile> {
-            options.errorprone.errorproneArgs.addAll(commandLineFlags)
-        }
+    fun applyTo(project: Project) = project.tasks.withType<JavaCompile> {
+        options.errorprone
+            .errorproneArgs
+            .addAll(COMMAND_LINE_FLAGS)
     }
 }
