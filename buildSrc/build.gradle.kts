@@ -52,6 +52,13 @@ val jacksonVersion = "2.11.0"
 val googleAuthToolVersion = "2.1.2"
 val licenseReportVersion = "1.16"
 val grGitVersion = "3.1.1"
+
+/**
+ * The version of ErrorProne Gradle plugin.
+ *
+ * Always use the same version as the one specified in `io.spine.internal.dependency.ErrorProne`.
+ * Otherwise, when testing Gradle plugins, clashes may occur.
+ */
 val errorProneVersion = "2.0.2"
 
 /**
