@@ -40,8 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Base routines for the {@linkplain Subscriber#addObserver(StreamObserver)}
- * subscriber observers.
+ * Base routines for the {@linkplain Subscriber#addObserver(StreamObserver) subscriber observers}.
  */
 @SPI
 public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage>, Logging {
