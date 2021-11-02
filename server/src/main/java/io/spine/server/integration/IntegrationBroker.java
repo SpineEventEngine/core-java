@@ -182,11 +182,12 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     }
 
     private void notifyOfRegistration() {
-        ExternalMessagesSourceAvailable messagesSourceAvailable = ExternalMessagesSourceAvailable
-                .newBuilder()
-                .vBuild();
+        ExternalMessagesSourceAvailable notification =
+                ExternalMessagesSourceAvailable
+                        .newBuilder()
+                        .vBuild();
 
-        ExternalMessage externalMessage = ExternalMessages.of(messagesSourceAvailable, contextName);
+        ExternalMessage externalMessage = ExternalMessages.of(notification, contextName);
 
         publisherHub.get(MESSAGE_SOURCES_CHANNEL_ID)
                     .publish(pack(newUuid()), externalMessage);
