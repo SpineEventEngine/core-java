@@ -194,16 +194,8 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     }
 
     private void subscribeForFurtherRegistrations() {
-        StreamObserver<ExternalMessage> newSourcesObserver = new AbstractChannelObserver(
-                contextName,
-                ExternalMessagesSourceAvailable.class
-        ) {
-            @Override
-            protected void handle(ExternalMessage message) {
-                internalNeedsBroadcast.send();
-            }
-        };
-
+        StreamObserver<ExternalMessage> newSourcesObserver =
+                new ObserveNewRegistrations(contextName, internalNeedsBroadcast);
         subscriberHub.get(MESSAGE_SOURCES_CHANNEL_ID)
                      .addObserver(newSourcesObserver);
     }
@@ -331,4 +323,5 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     public String toString() {
         return "IntegrationBroker of <" + contextName.getValue() + '>';
     }
+
 }
