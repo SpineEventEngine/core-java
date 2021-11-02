@@ -94,7 +94,7 @@ public final class ExternalMessages {
         checkNotNull(request);
         checkNotNull(origin);
 
-        ExternalMessage result = of(generateMessageId(), request, origin);
+        ExternalMessage result = of(generateId(), request, origin);
         return result;
     }
 
@@ -113,12 +113,13 @@ public final class ExternalMessages {
         checkNotNull(notification);
         checkNotNull(origin);
 
-        ExternalMessage result = of(generateMessageId(), notification, origin);
+        ExternalMessage result = of(generateId(), notification, origin);
         return result;
     }
 
-    private static StringValue generateMessageId() {
-        return StringValue.of(Identifier.newUuid());
+    private static StringValue generateId() {
+        StringValue result = StringValue.of(Identifier.newUuid());
+        return result;
     }
 
     private static ExternalMessage of(Message messageId,
