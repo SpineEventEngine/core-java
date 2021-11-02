@@ -35,8 +35,8 @@ import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
-import io.spine.internal.gradle.javacompile.configureErrorProne
-import io.spine.internal.gradle.javacompile.configureJavaCompile
+import io.spine.internal.gradle.javac.configureErrorProne
+import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.pom.PomGenerator
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -161,8 +161,10 @@ subprojects {
         targetCompatibility = JavaVersion.VERSION_1_8
 
         tasks {
-            configureErrorProne()
-            configureJavaCompile()
+            withType<JavaCompile> {
+                configureErrorProne()
+                configureJavac()
+            }
         }
     }
 
