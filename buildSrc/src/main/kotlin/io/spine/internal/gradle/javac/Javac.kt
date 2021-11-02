@@ -56,8 +56,8 @@ internal object JavacEnv {
 }
 
 /**
- * Tunes the default behavior of `javac` by passing [additional options][JavacArgs]
- * to its invocation and setting up its execution environment.
+ * Sets up an execution environment and tunes the default behavior of `javac`
+ * by passing [additional options][JavacArgs] to its invocation.
  *
  * Here's an example of how to use it:
  *
