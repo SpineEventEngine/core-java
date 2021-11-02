@@ -77,7 +77,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  *         <li>in response to {@link ExternalMessagesSourceAvailable} sent by other brokers;
  *         <li>when internal needs for external messages are changed.
  *     </ul>
- *</ul>
+ * </ul>
  *
  * <p><b>Receiving</b>
  *
