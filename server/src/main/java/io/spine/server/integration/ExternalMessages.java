@@ -44,13 +44,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class ExternalMessages {
 
     /** Prevents instantiation of this utility class. */
-    private ExternalMessages() {}
+    private ExternalMessages() {
+    }
 
     /**
      * Wraps the instance of {@link Event} into an {@code ExternalMessage}.
      *
-     * @param event  the event to wrap
-     * @param origin the name of the bounded context in which the event was created
+     * @param event
+     *         the event to wrap
+     * @param origin
+     *         the name of the bounded context in which the event was created
      * @return the external message wrapping the given event
      */
     public static ExternalMessage of(Event event, BoundedContextName origin) {
@@ -64,8 +67,10 @@ public final class ExternalMessages {
     /**
      * Wraps the instance of {@link Command} into an {@code ExternalMessage}.
      *
-     * @param command the command to wrap
-     * @param origin  the name of the bounded context in which the command was created
+     * @param command
+     *         the command to wrap
+     * @param origin
+     *         the name of the bounded context in which the command was created
      * @return the external message wrapping the given command
      */
     public static ExternalMessage of(Command command, BoundedContextName origin) {
@@ -79,8 +84,10 @@ public final class ExternalMessages {
     /**
      * Wraps the instance of {@link RequestForExternalMessages} into an {@code ExternalMessage}.
      *
-     * @param request the request to wrap
-     * @param origin  the name of bounded context in which the request was created
+     * @param request
+     *         the request to wrap
+     * @param origin
+     *         the name of bounded context in which the request was created
      * @return the external message wrapping the given request
      */
     static ExternalMessage of(RequestForExternalMessages request, BoundedContextName origin) {
@@ -92,13 +99,17 @@ public final class ExternalMessages {
     }
 
     /**
-     * Wraps the instance of {@link ExternalMessagesSourceAvailable} into an {@code ExternalMessage}.
+     * Wraps the instance of {@link ExternalMessagesSourceAvailable}
+     * into an {@code ExternalMessage}.
      *
-     * @param notification the notification to wrap
-     * @param origin the name of a bounded context in which the notification was created
+     * @param notification
+     *         the notification to wrap
+     * @param origin
+     *         the name of a bounded context in which the notification was created
      * @return the external message wrapping the given notification
      */
-    static ExternalMessage of(ExternalMessagesSourceAvailable notification, BoundedContextName origin) {
+    static ExternalMessage of(ExternalMessagesSourceAvailable notification,
+                              BoundedContextName origin) {
         checkNotNull(notification);
         checkNotNull(origin);
 
