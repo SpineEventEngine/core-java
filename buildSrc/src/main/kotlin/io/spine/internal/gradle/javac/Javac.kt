@@ -32,32 +32,26 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.process.CommandLineArgumentProvider
 
 /**
- * List of command line options for the Java compiler.
+ * The knowledge that is required to set up `javac`.
  */
-internal object JavacArgs : CommandLineArgumentProvider {
-
-    override fun asArguments(): List<String> = listOf(
-
-        // Protobuf Compiler generates the code, which uses the deprecated `PARSER` field.
-        // See issue: https://github.com/SpineEventEngine/config/issues/173
-        // "-Werror",
-
-        "-Xlint:unchecked",
-        "-Xlint:deprecation",
-    )
-}
-
-/**
- * Describes the environment in which `javac` is executed.
- */
-internal object JavacEnv {
+internal object JavacConfig {
     const val SOURCE_FILES_ENCODING = "UTF-8"
     val EXPECTED_JAVA_VERSION = JavaVersion.VERSION_1_8
+    val ARGUMENTS = CommandLineArgumentProvider {
+        listOf(
+
+            // Protobuf Compiler generates the code, which uses the deprecated `PARSER` field.
+            // See issue: https://github.com/SpineEventEngine/config/issues/173
+            // "-Werror",
+
+            "-Xlint:unchecked",
+            "-Xlint:deprecation",
+        )
+    }
 }
 
 /**
- * Sets up an execution environment and tunes the default behavior of `javac`
- * by passing [additional options][JavacArgs] to its invocation.
+ * Sets up `javac` by applying [JavacConfig].
  *
  * Here's an example of how to use it:
  *
@@ -71,7 +65,7 @@ internal object JavacEnv {
  */
 fun JavaCompile.configureJavac() {
 
-    if (JavaVersion.current() != JavacEnv.EXPECTED_JAVA_VERSION) {
+    if (JavaVersion.current() != JavacConfig.EXPECTED_JAVA_VERSION) {
         throw GradleException("Spine Event Engine can be built with JDK 8 only." +
                 " Supporting JDK 11 and above at build-time is planned in 2.0 release." +
                 " Please use the pre-built binaries available in the Spine Maven repository." +
@@ -80,7 +74,7 @@ fun JavaCompile.configureJavac() {
     }
 
     with(options) {
-        encoding = JavacEnv.SOURCE_FILES_ENCODING
-        compilerArgumentProviders.add(JavacArgs)
+        encoding = JavacConfig.SOURCE_FILES_ENCODING
+        compilerArgumentProviders.add(JavacConfig.ARGUMENTS)
     }
 }
