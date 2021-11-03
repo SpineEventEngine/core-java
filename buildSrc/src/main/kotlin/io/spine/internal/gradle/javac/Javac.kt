@@ -49,11 +49,13 @@ import org.gradle.process.CommandLineArgumentProvider
  *
  * Here's an example of how to use it:
  *
- *     tasks {
- *         withType<JavaCompile> {
- *             configureJavac()
- *         }
+ *```
+ * tasks {
+ *     withType<JavaCompile> {
+ *         configureJavac()
  *     }
+ * }
+ *```
  */
 fun JavaCompile.configureJavac() {
 

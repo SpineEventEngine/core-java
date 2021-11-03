@@ -40,11 +40,13 @@ import org.gradle.process.CommandLineArgumentProvider
  *
  * Here's an example of how to use it:
  *
- *     tasks {
- *         withType<JavaCompile> {
- *             configureErrorProne()
- *         }
+ * ```
+ * tasks {
+ *     withType<JavaCompile> {
+ *         configureErrorProne()
  *     }
+ * }
+ *```
  */
 fun JavaCompile.configureErrorProne() {
     options.errorprone
