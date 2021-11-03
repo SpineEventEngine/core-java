@@ -31,34 +31,38 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.process.CommandLineArgumentProvider
 
 /**
- * List of command line options for the Error Prone compiler.
+ * The knowledge that is required to set up `Error Prone`.
  */
-internal object ErrorProneArgs : CommandLineArgumentProvider {
+internal object ErrorProneConfig {
 
-    override fun asArguments(): List<String> = listOf(
+    /**
+     * Command line options for the `Error Prone` compiler.
+     */
+    val ARGUMENTS = CommandLineArgumentProvider {
+        listOf(
 
-        // Exclude generated sources from being analyzed by ErrorProne.
-        "-XepExcludedPaths:.*/generated/.*",
+            // Exclude generated sources from being analyzed by ErrorProne.
+            "-XepExcludedPaths:.*/generated/.*",
 
-        // Turn the check off until ErrorProne can handle `@Nested` JUnit classes.
-        // See issue: https://github.com/google/error-prone/issues/956
-        "-Xep:ClassCanBeStatic:OFF",
+            // Turn the check off until ErrorProne can handle `@Nested` JUnit classes.
+            // See issue: https://github.com/google/error-prone/issues/956
+            "-Xep:ClassCanBeStatic:OFF",
 
-        // Turn off checks that report unused methods and method parameters.
-        // See issue: https://github.com/SpineEventEngine/config/issues/61
-        "-Xep:UnusedMethod:OFF",
-        "-Xep:UnusedVariable:OFF",
+            // Turn off checks that report unused methods and method parameters.
+            // See issue: https://github.com/SpineEventEngine/config/issues/61
+            "-Xep:UnusedMethod:OFF",
+            "-Xep:UnusedVariable:OFF",
 
-        "-Xep:CheckReturnValue:OFF",
-        "-Xep:FloggerSplitLogStatement:OFF",
-    )
+            "-Xep:CheckReturnValue:OFF",
+            "-Xep:FloggerSplitLogStatement:OFF",
+        )
+    }
 }
 
 /**
- * Tunes the default behavior of Error Prone by passing [additional options][ErrorProneArgs]
- * to its compiler invocation.
+ * Sets up `Error Prone` by applying [ErrorProneConfig].
  *
- * Although `ErrorProne` is linked as a dedicated Gradle plugin, its configuration is actually
+ * Although `Error Prone` is linked as a dedicated `Gradle` plugin, its configuration is actually
  * performed through the [JavaCompile] task.
  *
  * Here's an example of how to use it:
@@ -74,5 +78,5 @@ internal object ErrorProneArgs : CommandLineArgumentProvider {
 fun JavaCompile.configureErrorProne() {
     options.errorprone
         .errorproneArgumentProviders
-        .add(ErrorProneArgs)
+        .add(ErrorProneConfig.ARGUMENTS)
 }
