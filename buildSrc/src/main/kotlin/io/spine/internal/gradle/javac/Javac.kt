@@ -40,7 +40,14 @@ import org.gradle.process.CommandLineArgumentProvider
  *  2. Specifying arguments for `javac` invocations;
  *  3. Specifying the `UTF-8` encoding to be used when reading source files.
  *
- * Here's an example of how to use it:
+ * ### Supporting other JDKs.
+ *
+ * `Spine Event Engine` can be built with JDK 8 only. Supporting JDK 11 and above
+ * at build-time is planned in 2.0 release.
+ *
+ * &nbsp;
+ *
+ * ### Here's an example of how to use it:
  *
  *     tasks {
  *         withType<JavaCompile> {
