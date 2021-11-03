@@ -28,8 +28,8 @@
  * This script configures Java Compiler.
  */
 
-println("`javac-args.gradle` script is deprecated. " +
-        "Please use `JavaCompileConfig` and `ErrorProneConfig` utilities instead.")
+println("`javac-args.gradle` script is deprecated. Please use `JavaCompile.configureJavac()` " +
+        "and `JavaCompile.configureErrorProne()` utilities instead.")
 
 tasks.withType(JavaCompile) {
 
