@@ -33,18 +33,18 @@ import org.gradle.process.CommandLineArgumentProvider
 /**
  * Sets up `Error Prone` by applying [ErrorProneConfig].
  *
+ * Which means specifying arguments for the `Error Prone` compiler invocation.
+ *
  * Although `Error Prone` is linked as a dedicated `Gradle` plugin, its configuration is actually
  * performed through the [JavaCompile] task.
  *
  * Here's an example of how to use it:
  *
- * ```
- * tasks {
- *     withType<JavaCompile> {
- *         configureErrorProne()
+ *     tasks {
+ *         withType<JavaCompile> {
+ *             configureErrorProne()
+ *         }
  *     }
- * }
- * ```
  */
 fun JavaCompile.configureErrorProne() {
     options.errorprone

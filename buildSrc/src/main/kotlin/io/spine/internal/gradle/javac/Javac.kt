@@ -34,15 +34,19 @@ import org.gradle.process.CommandLineArgumentProvider
 /**
  * Sets up `javac` by applying [JavacConfig].
  *
+ * Which means:
+ *
+ *  1. Ensuring JDK 8 would be used for compilation;
+ *  2. Specifying arguments for `javac` invocations;
+ *  3. Specifying the `UTF-8` encoding to be used when reading source files.
+ *
  * Here's an example of how to use it:
  *
- * ```
- * tasks {
- *     withType<JavaCompile> {
- *         configureJavac()
+ *     tasks {
+ *         withType<JavaCompile> {
+ *             configureJavac()
+ *         }
  *     }
- * }
- * ```
  */
 fun JavaCompile.configureJavac() {
 
