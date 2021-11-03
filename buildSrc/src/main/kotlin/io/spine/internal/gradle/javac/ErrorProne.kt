@@ -31,9 +31,31 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.process.CommandLineArgumentProvider
 
 /**
+ * Sets up `Error Prone` by applying [ErrorProneConfig].
+ *
+ * Although `Error Prone` is linked as a dedicated `Gradle` plugin, its configuration is actually
+ * performed through the [JavaCompile] task.
+ *
+ * Here's an example of how to use it:
+ *
+ * ```
+ * tasks {
+ *     withType<JavaCompile> {
+ *         configureErrorProne()
+ *     }
+ * }
+ * ```
+ */
+fun JavaCompile.configureErrorProne() {
+    options.errorprone
+        .errorproneArgumentProviders
+        .add(ErrorProneConfig.ARGUMENTS)
+}
+
+/**
  * The knowledge that is required to set up `Error Prone`.
  */
-internal object ErrorProneConfig {
+private object ErrorProneConfig {
 
     /**
      * Command line options for the `Error Prone` compiler.
@@ -57,26 +79,4 @@ internal object ErrorProneConfig {
             "-Xep:FloggerSplitLogStatement:OFF",
         )
     }
-}
-
-/**
- * Sets up `Error Prone` by applying [ErrorProneConfig].
- *
- * Although `Error Prone` is linked as a dedicated `Gradle` plugin, its configuration is actually
- * performed through the [JavaCompile] task.
- *
- * Here's an example of how to use it:
- *
- * ```
- * tasks {
- *     withType<JavaCompile> {
- *         configureErrorProne()
- *     }
- * }
- * ```
- */
-fun JavaCompile.configureErrorProne() {
-    options.errorprone
-        .errorproneArgumentProviders
-        .add(ErrorProneConfig.ARGUMENTS)
 }
