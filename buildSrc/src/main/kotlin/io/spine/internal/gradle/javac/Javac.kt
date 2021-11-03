@@ -32,25 +32,6 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.process.CommandLineArgumentProvider
 
 /**
- * The knowledge that is required to set up `javac`.
- */
-internal object JavacConfig {
-    const val SOURCE_FILES_ENCODING = "UTF-8"
-    val EXPECTED_JAVA_VERSION = JavaVersion.VERSION_1_8
-    val ARGUMENTS = CommandLineArgumentProvider {
-        listOf(
-
-            // Protobuf Compiler generates the code, which uses the deprecated `PARSER` field.
-            // See issue: https://github.com/SpineEventEngine/config/issues/173
-            // "-Werror",
-
-            "-Xlint:unchecked",
-            "-Xlint:deprecation",
-        )
-    }
-}
-
-/**
  * Sets up `javac` by applying [JavacConfig].
  *
  * Here's an example of how to use it:
@@ -76,5 +57,24 @@ fun JavaCompile.configureJavac() {
     with(options) {
         encoding = JavacConfig.SOURCE_FILES_ENCODING
         compilerArgumentProviders.add(JavacConfig.ARGUMENTS)
+    }
+}
+
+/**
+ * The knowledge that is required to set up `javac`.
+ */
+private object JavacConfig {
+    const val SOURCE_FILES_ENCODING = "UTF-8"
+    val EXPECTED_JAVA_VERSION = JavaVersion.VERSION_1_8
+    val ARGUMENTS = CommandLineArgumentProvider {
+        listOf(
+
+            // Protobuf Compiler generates the code, which uses the deprecated `PARSER` field.
+            // See issue: https://github.com/SpineEventEngine/config/issues/173
+            // "-Werror",
+
+            "-Xlint:unchecked",
+            "-Xlint:deprecation",
+        )
     }
 }
