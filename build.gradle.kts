@@ -37,7 +37,7 @@ import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.pom.PomGenerator
-import io.spine.internal.gradle.test.configureOutput
+import io.spine.internal.gradle.test.configureLogging
 import io.spine.internal.gradle.test.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -164,7 +164,7 @@ subprojects {
         tasks {
             registerTestTasks()
             withType<Test> {
-                configureOutput()
+                configureLogging()
             }
         }
     }

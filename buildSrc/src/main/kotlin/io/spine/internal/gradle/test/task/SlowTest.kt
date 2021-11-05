@@ -28,9 +28,14 @@ package io.spine.internal.gradle.test.task
 
 import org.gradle.api.tasks.testing.Test
 
+/**
+ * Executes JUnit tests tagged as `slow`.
+ *
+ * @see SLOW_TAG
+ */
 open class SlowTest : Test() {
     init {
-        description = "Executes JUnit tests tagged as 'slow'."
+        description = "Executes JUnit tests tagged as `slow`."
         group = "Verification"
 
         this.useJUnitPlatform {

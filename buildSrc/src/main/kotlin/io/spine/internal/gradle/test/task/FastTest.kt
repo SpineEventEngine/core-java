@@ -28,6 +28,11 @@ package io.spine.internal.gradle.test.task
 
 import org.gradle.api.tasks.testing.Test
 
+/**
+ * Executes all JUnit tests but the ones tagged as `slow`.
+ *
+ * @see SLOW_TAG
+ */
 open class FastTest : Test() {
     init {
         description = "Executes all JUnit tests but the ones tagged as `slow`."

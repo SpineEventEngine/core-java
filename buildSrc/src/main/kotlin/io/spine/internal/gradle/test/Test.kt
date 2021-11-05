@@ -28,15 +28,26 @@ package io.spine.internal.gradle.test
 
 import io.spine.internal.gradle.test.task.FastTest
 import io.spine.internal.gradle.test.task.SlowTest
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.KotlinClosure2
-import org.gradle.kotlin.dsl.TaskContainerScope
 import org.gradle.kotlin.dsl.register
 
-fun TaskContainerScope.registerTestTasks() {
+/**
+ * Registers [slowTest][SlowTest] and [fastTest][FastTest] tasks in this [TaskContainer].
+ *
+ * Usage example:
+ *
+ * ```
+ * tasks {
+ *     registerTestTasks()
+ * }
+ * ```
+ */
+fun TaskContainer.registerTestTasks() {
     register<FastTest>("fastTest").let {
         register<SlowTest>("slowTest") {
             shouldRunAfter(it)
@@ -44,16 +55,27 @@ fun TaskContainerScope.registerTestTasks() {
     }
 }
 
-fun Test.configureOutput() {
-    fun TestResult.summary(): String =
-        """
-        Test custom kotlin summary:
-        >> $testCount tests
-        >> $successfulTestCount succeeded
-        >> $failedTestCount failed
-        >> $skippedTestCount skipped
-        """
-
+/**
+ * Configures logging of this [Test] task.
+ *
+ * Turns on logging of:
+ *  1. Standard `out` and `err` streams;
+ *  2. Thrown exceptions.
+ *
+ *  Additionally, after all the tests are executed, a short summary would be logged. The summary
+ *  consists of the number of tests and their results.
+ *
+ * Usage example:
+ *
+ *```
+ * tasks {
+ *     withType<Test> {
+ *         configureLogging()
+ *     }
+ * }
+ *```
+ */
+fun Test.configureLogging() {
     testLogging {
         showExceptions = true
         exceptionFormat = TestExceptionFormat.FULL
@@ -61,6 +83,15 @@ fun Test.configureOutput() {
         showCauses = true
         showStandardStreams = true
     }
+
+    fun TestResult.summary(): String =
+        """
+        Test summary:
+        >> $testCount tests
+        >> $successfulTestCount succeeded
+        >> $failedTestCount failed
+        >> $skippedTestCount skipped
+        """
 
     afterSuite(
 
