@@ -60,8 +60,6 @@ private const val SLOW_TAG = "slow"
 
 /**
  * Executes JUnit tests filtering out the ones tagged as `slow`.
- *
- * @see SLOW_TAG
  */
 private open class FastTest : Test() {
     init {
@@ -76,8 +74,6 @@ private open class FastTest : Test() {
 
 /**
  * Executes JUnit tests tagged as `slow`.
- *
- * @see SLOW_TAG
  */
 private open class SlowTest : Test() {
     init {
