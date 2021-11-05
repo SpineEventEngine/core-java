@@ -24,16 +24,62 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.test.task
+package io.spine.internal.gradle.test
 
+import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.testing.Test
+import org.gradle.kotlin.dsl.register
+
+/**
+ * Registers [slowTest][SlowTest] and [fastTest][FastTest] tasks in this [TaskContainer].
+ *
+ * Usage example:
+ *
+ * ```
+ * tasks {
+ *     registerTestTasks()
+ * }
+ * ```
+ */
+fun TaskContainer.registerTestTasks() {
+    register<FastTest>("fastTest").let {
+        register<SlowTest>("slowTest") {
+            shouldRunAfter(it)
+        }
+    }
+}
+
+/**
+ * Name of a tag for annotating a test class or method that is known to be slow and
+ * should not normally be run together with the main test suite.
+ *
+ * @see io.spine.testing.SlowTest
+ * @see org.junit.jupiter.api.Tag
+ */
+private const val SLOW_TAG = "slow"
+
+/**
+ * Executes JUnit tests filtering out the ones tagged as `slow`.
+ *
+ * @see SLOW_TAG
+ */
+private open class FastTest : Test() {
+    init {
+        description = "Executes all JUnit tests but the ones tagged as `slow`."
+        group = "Verification"
+
+        this.useJUnitPlatform {
+            excludeTags(SLOW_TAG)
+        }
+    }
+}
 
 /**
  * Executes JUnit tests tagged as `slow`.
  *
  * @see SLOW_TAG
  */
-open class SlowTest : Test() {
+private open class SlowTest : Test() {
     init {
         description = "Executes JUnit tests tagged as `slow`."
         group = "Verification"

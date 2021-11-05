@@ -26,34 +26,11 @@
 
 package io.spine.internal.gradle.test
 
-import io.spine.internal.gradle.test.task.FastTest
-import io.spine.internal.gradle.test.task.SlowTest
-import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.KotlinClosure2
-import org.gradle.kotlin.dsl.register
-
-/**
- * Registers [slowTest][SlowTest] and [fastTest][FastTest] tasks in this [TaskContainer].
- *
- * Usage example:
- *
- * ```
- * tasks {
- *     registerTestTasks()
- * }
- * ```
- */
-fun TaskContainer.registerTestTasks() {
-    register<FastTest>("fastTest").let {
-        register<SlowTest>("slowTest") {
-            shouldRunAfter(it)
-        }
-    }
-}
 
 /**
  * Configures logging of this [Test] task.
