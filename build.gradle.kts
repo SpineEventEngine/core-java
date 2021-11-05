@@ -37,6 +37,8 @@ import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.pom.PomGenerator
+import io.spine.internal.gradle.test.configureOutput
+import io.spine.internal.gradle.test.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -158,6 +160,13 @@ subprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+
+        tasks {
+            registerTestTasks()
+            withType<Test> {
+                configureOutput()
+            }
+        }
     }
 
     kotlin {
@@ -243,13 +252,6 @@ subprojects {
             if (opt is CoreJavadocOptions) {
                 opt.addStringOption("Xmaxwarns", "1")
             }
-        }
-    }
-
-    apply {
-        with(Scripts) {
-            from(slowTests(project))
-            from(testOutput(project))
         }
     }
 
