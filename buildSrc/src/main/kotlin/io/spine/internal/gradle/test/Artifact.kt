@@ -24,30 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
-import io.spine.internal.gradle.test.exposeTestArtifacts
-import io.spine.tools.gradle.testArtifact
+package io.spine.internal.gradle.test
 
-val spineTimeVersion: String by extra
+import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.register
 
-group = "io.spine.tools"
+fun Project.exposeTestArtifacts() {
 
-dependencies {
-    api(project(":client"))
-    api(project(":testutil-core"))
-    api("io.spine.tools:spine-testutil-time:$spineTimeVersion")
+    with(extensions.getByType<JavaPluginExtension>()) {
 
-    implementation(Grpc.protobuf)
+        val testArtifacts = configurations.create("testArtifacts") {
+            extendsFrom(configurations.getAt("testRuntimeClasspath"))
+        }
+
+        val testJar = tasks.register<Jar>("testJar") {
+            archiveClassifier.set("test")
+            from(sourceSets.getAt("test").output)
+        }
+
+        artifacts.add(testArtifacts.name, testJar)
+    }
 }
-
-exposeTestArtifacts()
-
-//apply(from = Scripts.testArtifacts(project))
-
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
