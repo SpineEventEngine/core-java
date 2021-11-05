@@ -58,7 +58,7 @@ fun TaskContainer.registerTestTasks() {
 /**
  * Configures logging of this [Test] task.
  *
- * Turns on logging of:
+ * Enables logging of:
  *  1. Standard `out` and `err` streams;
  *  2. Thrown exceptions.
  *
@@ -77,11 +77,11 @@ fun TaskContainer.registerTestTasks() {
  */
 fun Test.configureLogging() {
     testLogging {
+        showStandardStreams = true
         showExceptions = true
         exceptionFormat = TestExceptionFormat.FULL
         showStackTraces = true
         showCauses = true
-        showStandardStreams = true
     }
 
     fun TestResult.summary(): String =
