@@ -34,17 +34,15 @@ import org.gradle.kotlin.dsl.register
 
 fun Project.exposeTestArtifacts() {
 
-    with(extensions.getByType<JavaPluginExtension>()) {
-
-        val testArtifacts = configurations.create("testArtifacts") {
-            extendsFrom(configurations.getAt("testRuntimeClasspath"))
-        }
-
-        val testJar = tasks.register<Jar>("testJar") {
-            archiveClassifier.set("test")
-            from(sourceSets.getAt("test").output)
-        }
-
-        artifacts.add(testArtifacts.name, testJar)
+    val testArtifacts = configurations.create("testArtifacts") {
+        extendsFrom(configurations.getAt("testRuntimeClasspath"))
     }
+
+    val sourceSets = extensions.getByType<JavaPluginExtension>().sourceSets
+    val testJar = tasks.register<Jar>("testJar") {
+        archiveClassifier.set("test")
+        from(sourceSets.getAt("test").output)
+    }
+
+    artifacts.add(testArtifacts.name, testJar)
 }
