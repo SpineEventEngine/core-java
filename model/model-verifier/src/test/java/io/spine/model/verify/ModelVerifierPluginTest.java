@@ -114,8 +114,7 @@ class ModelVerifierPluginTest {
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
-        return GradleProject
-                .newBuilder()
+        return GradleProject.newBuilder()
                 .setProjectName(PROJECT_NAME)
                 .setProjectFolder(tempDir)
                 .addJavaFiles(fileNames)
