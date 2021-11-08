@@ -24,41 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Kotlin
+package io.spine.internal.gradle.report.license
 
-val spineBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
+/**
+ * Filesystem paths used by [LicenseReporter].
+ */
+internal object Paths {
 
-dependencies {
-    api(project(":client"))
-    implementation(Kotlin.reflect)
+    /**
+     * The output filename of the license report.
+     *
+     * The file with this name is placed to the root folder of the root Gradle project —
+     * as the result of the [LicenseReporter] work.
+     *
+     * Its contents describe the licensing information for each of the Java dependencies
+     * which are referenced by Gradle projects in the repository.
+     */
+    internal const val outputFilename = "license-report.md"
 
-    Grpc.apply {
-        implementation(protobuf)
-        implementation(core)
-    }
-
-    AutoService.apply {
-        testAnnotationProcessor(processor)
-        testCompileOnly(annotations)
-    }
-    testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine:spine-base-types:$spineBaseTypesVersion")
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
-    testImplementation(project(":testutil-server"))
-}
-
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-tasks.javadoc {
-    doLast {
-        copy {
-            from("src/main/docs")
-            into("$buildDir/docs/javadoc")
-        }
-    }
+    /**
+     * The path to a directory, to which a per-project report is generated.
+     */
+    internal const val relativePath = "reports/dependency-license/dependency"
 }

@@ -26,17 +26,25 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.javadoc.JavadocConfig
-import io.spine.internal.gradle.publish.PublishingRepos
-import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
+import io.spine.internal.gradle.javac.configureErrorProne
+import io.spine.internal.gradle.javac.configureJavac
+import io.spine.internal.gradle.javadoc.JavadocConfig
+import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
+import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
+import io.spine.internal.gradle.report.coverage.JacocoConfig
+import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
+import io.spine.internal.gradle.test.configureLogging
+import io.spine.internal.gradle.test.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -46,7 +54,7 @@ buildscript {
     io.spine.internal.gradle.doApplyStandard(repositories)
     io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
 
-    val kotlinVersion: String by extra
+    val kotlinVersion = io.spine.internal.dependency.Kotlin.version
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
 
@@ -80,14 +88,13 @@ plugins {
         id(id) version version
     }
     io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
-        id(id) version version
+        id(id)
     }
 }
 
 /** The name of the GitHub repository to which this project belongs. */
 val repositoryName: String = "core-java"
 
-val kotlinVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 
@@ -139,6 +146,7 @@ subprojects {
 
     apply {
         plugin("java-library")
+        plugin("jacoco")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("io.spine.mc-java")
@@ -146,18 +154,16 @@ subprojects {
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
-
-        with(Scripts) {
-            from(javacArgs(project))
-            from(projectLicenseReport(project))
-        }
-
-        CheckStyleConfig.applyTo(project)
     }
 
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    tasks.withType<JavaCompile> {
+        configureJavac()
+        configureErrorProne()
     }
 
     kotlin {
@@ -209,14 +215,10 @@ subprojects {
 
     sourceSets {
         main {
-            java.srcDirs(generatedJavaDir, "$srcDir/main/java", generatedSpineDir)
-            resources.srcDirs("$srcDir/main/resources", "$generatedDir/main/resources")
-            proto.srcDirs("$srcDir/main/proto")
+            java.srcDirs(generatedSpineDir)
         }
         test {
-            java.srcDirs(generatedTestJavaDir, "$srcDir/test/java", generatedTestSpineDir)
-            resources.srcDirs("$srcDir/test/resources", "$generatedDir/test/resources")
-            proto.srcDirs("$srcDir/test/proto")
+            java.srcDirs(generatedTestSpineDir)
         }
     }
 
@@ -230,47 +232,22 @@ subprojects {
         dependsOn(generateTestRejections)
     }
 
-    tasks.test {
-        useJUnitPlatform {
-            includeEngines("junit-jupiter")
-        }
-    }
-
-    val isTravis = System.getenv("TRAVIS") == "true"
-    if (isTravis) {
-        tasks.javadoc {
-            val opt = options
-            if (opt is CoreJavadocOptions) {
-                opt.addStringOption("Xmaxwarns", "1")
+    tasks {
+        registerTestTasks()
+        test {
+            useJUnitPlatform {
+                includeEngines("junit-jupiter")
             }
+            configureLogging()
         }
     }
 
-    apply {
-        with(Scripts) {
-            from(slowTests(project))
-            from(testOutput(project))
-        }
-    }
-
+    apply<IncrementGuard>()
+    apply<VersionWriter>()
+    publishProtoArtifact(project)
+    LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
-
-    tasks.register("sourceJar", Jar::class) {
-        from(sourceSets.main.get().allJava)
-        archiveClassifier.set("sources")
-    }
-
-    tasks.register("testOutputJar", Jar::class) {
-        from(sourceSets.test.get().output)
-        archiveClassifier.set("test")
-    }
-
-    tasks.register("javadocJar", Jar::class) {
-        from("$projectDir/build/docs/javadoc")
-        archiveClassifier.set("javadoc")
-
-        dependsOn(tasks.javadoc)
-    }
+    CheckStyleConfig.applyTo(project)
 
     idea {
         module {
@@ -312,18 +289,6 @@ subprojects {
     project.tasks["publish"].dependsOn("${project.path}:updateGitHubPages")
 }
 
-apply {
-    with(Scripts) {
-        // Aggregated coverage report across all subprojects.
-        from(jacoco(project))
-
-        // Generate a repository-wide report of 3rd-party dependencies and their licenses.
-        from(repoLicenseReport(project))
-
-
-    }
-}
-
-// Generate a `pom.xml` file containing first-level dependency of all projects
-// in the repository.
+JacocoConfig.applyTo(project)
 PomGenerator.applyTo(project)
+LicenseReporter.mergeAllReports(project)

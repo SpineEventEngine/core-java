@@ -48,19 +48,32 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
+import io.spine.testing.server.model.ModelTests;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.testing.server.Assertions.assertCommandClassesExactly;
 import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 
 @DisplayName("`ProcessManagerClass` should")
 class ProcessManagerClassTest {
 
-    private final ProcessManagerClass<?> processManagerClass =
-            ProcessManagerClass.asProcessManagerClass(TestProcessManager.class);
+    private ProcessManagerClass<?> processManagerClass;
+
+    @BeforeAll
+    static void clearModel() {
+        ModelTests.dropAllModels();
+    }
+
+    @BeforeEach
+    void createClass() {
+        processManagerClass = asProcessManagerClass(TestProcessManager.class);
+    }
 
     @Nested
     @DisplayName("provide classes of")
@@ -69,59 +82,71 @@ class ProcessManagerClassTest {
         @Test
         @DisplayName("handled and transformed commands")
         void commands() {
-            assertCommandClassesExactly(processManagerClass.commands(),
-                                        // Handled commands
-                                        PmCreateProject.class,
-                                        PmAddTask.class,
-                                        PmReviewBacklog.class,
-                                        PmScheduleRetrospective.class,
-                                        PmPlanIteration.class,
-                                        PmStartIteration.class,
-                                        PmThrowEntityAlreadyArchived.class,
-                                        PmThrowRuntimeException.class,
-                                        // Transformed commands
-                                        PmStartProject.class,
-                                        PmCancelIteration.class);
+            assertCommandClassesExactly(
+                    processManagerClass.commands(),
+
+                    // Handled commands
+                    PmCreateProject.class,
+                    PmAddTask.class,
+                    PmReviewBacklog.class,
+                    PmScheduleRetrospective.class,
+                    PmPlanIteration.class,
+                    PmStartIteration.class,
+                    PmThrowEntityAlreadyArchived.class,
+                    PmThrowRuntimeException.class,
+                    // Transformed commands
+                    PmStartProject.class,
+                    PmCancelIteration.class
+            );
         }
 
         @Test
         @DisplayName("events (including rejections) on which the process manager reacts")
         void reactions() {
-            assertEventClassesExactly(processManagerClass.events(),
-                                      PmProjectCreated.class,
-                                      PmTaskAdded.class,
-                                      PmProjectStarted.class,
-                                      // External events
-                                      PmQuizStarted.class,
-                                      PmQuestionAnswered.class,
-                                      // Reactions with commands
-                                      PmOwnerChanged.class,
-                                      PmIterationPlanned.class,
-                                      PmIterationCompleted.class,
-                                      // Reactions on rejections.
-                                      StandardRejections.EntityAlreadyArchived.class);
+            assertEventClassesExactly(
+                    processManagerClass.events(),
+
+                    PmProjectCreated.class,
+                    PmTaskAdded.class,
+                    PmProjectStarted.class,
+                    // External events
+                    PmQuizStarted.class,
+                    PmQuestionAnswered.class,
+                    // Reactions with commands
+                    PmOwnerChanged.class,
+                    PmIterationPlanned.class,
+                    PmIterationCompleted.class,
+                    // Reactions on rejections.
+                    StandardRejections.EntityAlreadyArchived.class
+            );
         }
 
         @Test
         @DisplayName("external events on which the process manager reacts")
         void externalEvents() {
-            assertEventClassesExactly(processManagerClass.externalEvents(),
-                                      PmQuizStarted.class,
-                                      PmQuestionAnswered.class);
+            assertEventClassesExactly(
+                    processManagerClass.externalEvents(),
+
+                    PmQuizStarted.class,
+                    PmQuestionAnswered.class
+            );
         }
 
         @Test
         @DisplayName("commands produced by the process manager")
         void producedCommands() {
-            assertCommandClassesExactly(processManagerClass.outgoingCommands(),
-                                        PmAddTask.class,
-                                        PmReviewBacklog.class,
-                                        PmScheduleRetrospective.class,
-                                        PmPlanIteration.class,
-                                        PmScheduleRetrospective.class,
-                                        PmPlanIteration.class,
-                                        PmStartIteration.class,
-                                        PmCreateProject.class);
+            assertCommandClassesExactly(
+                    processManagerClass.outgoingCommands(),
+
+                    PmAddTask.class,
+                    PmReviewBacklog.class,
+                    PmScheduleRetrospective.class,
+                    PmPlanIteration.class,
+                    PmScheduleRetrospective.class,
+                    PmPlanIteration.class,
+                    PmStartIteration.class,
+                    PmCreateProject.class
+            );
         }
 
         @Test

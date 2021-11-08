@@ -30,18 +30,21 @@ buildscript {
 
 group = "io.spine.tools"
 
+val toolBaseVersion: String by extra
+val mcJavaVersion: String by extra
 val spineBaseVersion: String by extra
 
 dependencies {
     implementation(gradleApi())
-    implementation("io.spine.tools:spine-plugin-base:$spineBaseVersion")
-    implementation("io.spine.tools:spine-mc-java:$spineBaseVersion")
+    implementation("io.spine.tools:spine-plugin-base:$toolBaseVersion")
+    implementation("io.spine.tools:spine-mc-java:$mcJavaVersion")
+    implementation("io.spine.tools:spine-mc-java-base:$mcJavaVersion")
     implementation(project(":server"))
     implementation(project(":model-assembler"))
 
     testImplementation(gradleTestKit())
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine.tools:spine-plugin-testlib:$spineBaseVersion")
+    testImplementation("io.spine.tools:spine-plugin-testlib:$toolBaseVersion")
     testImplementation(project(":testutil-server"))
 }
 
@@ -52,10 +55,3 @@ tasks.test {
               ":server:publishToMavenLocal",
               ":model-assembler:publishToMavenLocal")
 }
-
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
