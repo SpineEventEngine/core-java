@@ -24,41 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Kotlin
+package io.spine.internal.gradle.report.coverage
 
-val spineBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
+/**
+ * The names of Gradle tasks involved into the JaCoCo reporting.
+ */
+@Suppress("EnumEntryName", "EnumNaming") /* Dubbing the actual values in Gradle. */
+internal enum class TaskName {
+    jacocoRootReport,
+    copyReports,
 
-dependencies {
-    api(project(":client"))
-    implementation(Kotlin.reflect)
-
-    Grpc.apply {
-        implementation(protobuf)
-        implementation(core)
-    }
-
-    AutoService.apply {
-        testAnnotationProcessor(processor)
-        testCompileOnly(annotations)
-    }
-    testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine:spine-base-types:$spineBaseTypesVersion")
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
-    testImplementation(project(":testutil-server"))
-}
-
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-tasks.javadoc {
-    doLast {
-        copy {
-            from("src/main/docs")
-            into("$buildDir/docs/javadoc")
-        }
-    }
+    check,
+    jacocoTestReport
 }

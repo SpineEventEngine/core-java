@@ -42,11 +42,7 @@ internal fun PublishingExtension.createMavenPublication(
     project: Project,
     extension: PublishExtension
 ) {
-    val artifactIdForPublishing = if (extension.spinePrefix.get()) {
-        "spine-${project.name}"
-    } else {
-        project.name
-    }
+    val artifactIdForPublishing = extension.artifactId(project)
     publications {
         create("mavenJava", MavenPublication::class.java) {
             groupId = project.group.toString()
@@ -123,4 +119,3 @@ private fun MavenArtifactRepository.initialize(
         password = creds?.password
     }
 }
-

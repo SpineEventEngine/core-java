@@ -24,41 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Kotlin
+package io.spine.internal.gradle.report.license
 
-val spineBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
+import com.github.jk1.license.LicenseReportExtension
+import com.github.jk1.license.ProjectData
+import com.github.jk1.license.render.ReportRenderer
+import io.spine.internal.markup.MarkdownDocument
+import java.io.File
+import org.gradle.api.Project
 
-dependencies {
-    api(project(":client"))
-    implementation(Kotlin.reflect)
+/**
+ * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ */
+internal class MarkdownReportRenderer(
+    private val filename: String
+) : ReportRenderer {
 
-    Grpc.apply {
-        implementation(protobuf)
-        implementation(core)
+    override fun render(data: ProjectData) {
+        val project = data.project
+        val outputFile = outputFile(project)
+        val document = MarkdownDocument()
+        val template = Template(project, document)
+
+        template.writeHeader()
+        ProjectDependencies.of(data).printTo(document)
+        template.writeFooter()
+
+        document.appendToFile(outputFile)
     }
 
-    AutoService.apply {
-        testAnnotationProcessor(processor)
-        testCompileOnly(annotations)
-    }
-    testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine:spine-base-types:$spineBaseTypesVersion")
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
-    testImplementation(project(":testutil-server"))
-}
-
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-tasks.javadoc {
-    doLast {
-        copy {
-            from("src/main/docs")
-            into("$buildDir/docs/javadoc")
-        }
+    private fun outputFile(project: Project): File {
+        val config =
+            project.extensions.findByName("licenseReport") as LicenseReportExtension
+        return File(config.outputDir).resolve(filename)
     }
 }
+

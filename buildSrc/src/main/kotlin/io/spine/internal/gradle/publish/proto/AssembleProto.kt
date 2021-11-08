@@ -24,41 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Kotlin
+package io.spine.internal.gradle.publish.proto
 
-val spineBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
+import org.gradle.api.Project
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.bundling.Jar
 
-dependencies {
-    api(project(":client"))
-    implementation(Kotlin.reflect)
+/**
+ * Registers an `assembleProto` Gradle task which locates and assembles all `.proto` files
+ * in a Gradle project.
+ *
+ * The result of assembly is a [Jar] task with an archive output classified as "proto".
+ */
+object AssembleProto {
 
-    Grpc.apply {
-        implementation(protobuf)
-        implementation(core)
-    }
+    private const val taskName = "assembleProto"
 
-    AutoService.apply {
-        testAnnotationProcessor(processor)
-        testCompileOnly(annotations)
-    }
-    testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine:spine-base-types:$spineBaseTypesVersion")
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
-    testImplementation(project(":testutil-server"))
-}
-
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-tasks.javadoc {
-    doLast {
-        copy {
-            from("src/main/docs")
-            into("$buildDir/docs/javadoc")
+    /**
+     * Performs the task registration for the passed [project].
+     */
+    fun registerIn(project: Project): TaskProvider<Jar> {
+        val task = project.tasks.register(taskName, Jar::class.java) {
+            description =
+                "Assembles a JAR artifact with all Proto definitions from the classpath."
+            from(project.protoFiles())
+            include {
+                it.file.isProtoFileOrDir()
+            }
+            archiveClassifier.set("proto")
         }
+        return task
     }
 }
