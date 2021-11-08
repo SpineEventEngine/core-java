@@ -51,7 +51,7 @@ public final class Assertions {
     }
 
     /**
-     * Asserts that each of the expected command class is available in the passed collection.
+     * Asserts that each of the expected command class is available in the given collection.
      */
     @SafeVarargs
     public static void assertCommandClasses(Collection<CommandClass> commandClasses,
@@ -60,7 +60,7 @@ public final class Assertions {
     }
 
     /**
-     * Asserts that each of the expected event class is available in the passed collection.
+     * Asserts that each of the expected event class is available in the given collection.
      */
     @SafeVarargs
     public static void assertEventClasses(Collection<EventClass> eventClasses,
