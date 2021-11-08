@@ -36,6 +36,9 @@ import org.gradle.kotlin.dsl.register
  * Creates a consumable `testArtifacts` configuration containing test classes
  * of the current project to be used in other projects.
  *
+ * Even though it is implemented as a `Project`'s extension, logically it belongs to Java Plugin.
+ * Hence, it is recommended to call this extension method from `java` scope.
+ *
  * Usage example.
  *
  * In a producing project:
