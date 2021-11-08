@@ -47,9 +47,9 @@ class ExternalMessagesTest extends UtilityClassTest<ExternalMessages> {
         tester.setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
               .setDefault(Event.class, Event.getDefaultInstance())
               .setDefault(Command.class, Command.getDefaultInstance())
-              .setDefault(RequestForExternalMessages.class,
-                          RequestForExternalMessages.getDefaultInstance())
-              .setDefault(ExternalMessagesSourceAvailable.class,
-                          ExternalMessagesSourceAvailable.getDefaultInstance());
+              .setDefault(ExternalEventsWanted.class,
+                          ExternalEventsWanted.getDefaultInstance())
+              .setDefault(ExternalEventsAvailable.class,
+                          ExternalEventsAvailable.getDefaultInstance());
     }
 }

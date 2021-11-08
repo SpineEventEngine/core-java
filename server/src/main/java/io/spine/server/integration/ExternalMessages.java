@@ -82,7 +82,7 @@ public final class ExternalMessages {
     }
 
     /**
-     * Wraps the instance of {@link RequestForExternalMessages} into an {@code ExternalMessage}.
+     * Wraps the instance of {@link ExternalEventsWanted} into an {@code ExternalMessage}.
      *
      * @param request
      *         the request to wrap
@@ -90,7 +90,7 @@ public final class ExternalMessages {
      *         the name of bounded context in which the request was created
      * @return the external message wrapping the given request
      */
-    static ExternalMessage of(RequestForExternalMessages request, BoundedContextName origin) {
+    static ExternalMessage of(ExternalEventsWanted request, BoundedContextName origin) {
         checkNotNull(request);
         checkNotNull(origin);
 
@@ -99,8 +99,7 @@ public final class ExternalMessages {
     }
 
     /**
-     * Wraps the instance of {@link ExternalMessagesSourceAvailable}
-     * into an {@code ExternalMessage}.
+     * Wraps the instance of {@link ExternalEventsAvailable} into an {@code ExternalMessage}.
      *
      * @param notification
      *         the notification to wrap
@@ -108,8 +107,7 @@ public final class ExternalMessages {
      *         the name of a bounded context in which the notification was created
      * @return the external message wrapping the given notification
      */
-    static ExternalMessage of(ExternalMessagesSourceAvailable notification,
-                              BoundedContextName origin) {
+    static ExternalMessage of(ExternalEventsAvailable notification, BoundedContextName origin) {
         checkNotNull(notification);
         checkNotNull(origin);
 

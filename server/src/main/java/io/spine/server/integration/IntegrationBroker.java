@@ -70,11 +70,11 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * requested messages (needs) and their potential sources (Bounded Contexts) up-to-date.
  * They use two special messages for this:
  * <ul>
- *     <li>{@link ExternalMessagesSourceAvailable} is sent when a broker is registered
+ *     <li>{@link ExternalEventsAvailable} is sent when a broker is registered
  *     withing a Bounded Context;
- *     <li>{@link RequestForExternalMessages} is sent
+ *     <li>{@link ExternalEventsWanted} is sent
  *     <ul>
- *         <li>in response to {@link ExternalMessagesSourceAvailable} sent by other brokers;
+ *         <li>in response to {@link ExternalEventsAvailable} sent by other brokers;
  *         <li>when internal needs for external messages are changed.
  *     </ul>
  * </ul>
@@ -134,12 +134,11 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
 @SuppressWarnings("OverlyCoupledClass")
 public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
-    private static final TypeUrl EVENT_TYPE_URL = TypeUrl.of(Event.class);
     private static final ChannelId MESSAGE_SOURCES_CHANNEL_ID = channelIdFor(
-            TypeUrl.of(ExternalMessagesSourceAvailable.class)
+            TypeUrl.of(ExternalEventsAvailable.class)
     );
     private static final ChannelId NEEDS_EXCHANGE_CHANNEL_ID = channelIdFor(
-            TypeUrl.of(RequestForExternalMessages.class)
+            TypeUrl.of(ExternalEventsWanted.class)
     );
 
     private final SubscriberHub subscriberHub;
@@ -149,7 +148,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     private @MonotonicNonNull BusAdapter bus;
 
     private @MonotonicNonNull ExternalNeedsObserver externalNeedsObserver;
-    private @MonotonicNonNull InternalNeedsBroadcast internalNeedsBroadcast;
+    private @MonotonicNonNull BroadcastWantedEvents broadcast;
 
     public IntegrationBroker() {
         TransportFactory transportFactory = ServerEnvironment
@@ -174,7 +173,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     private void setUpNeedsExchange() {
         Publisher localNeedsPublisher = publisherHub.get(NEEDS_EXCHANGE_CHANNEL_ID);
 
-        this.internalNeedsBroadcast = new InternalNeedsBroadcast(contextName, localNeedsPublisher);
+        this.broadcast = new BroadcastWantedEvents(contextName, localNeedsPublisher);
         this.externalNeedsObserver = new ExternalNeedsObserver(contextName, bus);
 
         this.subscriberHub.get(NEEDS_EXCHANGE_CHANNEL_ID)
@@ -182,10 +181,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     }
 
     private void notifyOfRegistration() {
-        ExternalMessagesSourceAvailable notification =
-                ExternalMessagesSourceAvailable
-                        .newBuilder()
-                        .vBuild();
+        ExternalEventsAvailable notification = ExternalEventsAvailable.getDefaultInstance();
 
         ExternalMessage externalMessage = ExternalMessages.of(notification, contextName);
 
@@ -195,7 +191,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
     private void subscribeForFurtherRegistrations() {
         StreamObserver<ExternalMessage> newSourcesObserver =
-                new ObserveNewRegistrations(contextName, internalNeedsBroadcast);
+                new ObserveNewRegistrations(contextName, broadcast);
         subscriberHub.get(MESSAGE_SOURCES_CHANNEL_ID)
                      .addObserver(newSourcesObserver);
     }
@@ -288,23 +284,25 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     }
 
     /**
-     * Notifies other Bounded Contexts that this integration bus instance now requests a different
-     * set of message types.
+     * Notifies other Bounded Contexts that this integration broker instance now requests
+     * a different set of event types.
      *
-     * <p>Sends out an instance of {@linkplain RequestForExternalMessages
-     * request for external messages} for that purpose.
+     * <p>Sends out an instance of {@link ExternalEventsWanted} for that purpose.
      */
     private void notifyTypesChanged() {
-        ImmutableSet<ExternalMessageType> needs = subscriberHub
+        ImmutableSet<ExternalEventType> needs = subscriberHub
                 .ids()
                 .stream()
-                .map(channelId -> ExternalMessageType
-                        .newBuilder()
-                        .setMessageTypeUrl(channelId.getTargetType())
-                        .setWrapperTypeUrl(EVENT_TYPE_URL.value())
-                        .buildPartial())
+                .map(channelId -> eventAsExternal(channelId.getTargetType()))
                 .collect(toImmutableSet());
-        internalNeedsBroadcast.onNeedsChange(needs);
+        broadcast.onNeedsChange(needs);
+    }
+
+    private static ExternalEventType eventAsExternal(String eventMsgType) {
+        return ExternalEventType
+                .newBuilder()
+                .setTypeUrl(eventMsgType)
+                .vBuild();
     }
 
     /**

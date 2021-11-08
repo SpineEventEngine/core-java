@@ -31,17 +31,17 @@ import io.spine.annotation.GeneratedMixin;
 import io.spine.type.TypeUrl;
 
 /**
- * A generated mixin interface for the {@code ExternalMessageType} type.
+ * A generated mixin interface for the {@code ExternalEventType} type.
  */
 @GeneratedMixin
-interface ExternalMessageTypeMixin extends ExternalMessageTypeOrBuilder {
+interface ExternalEventTypeMixin extends ExternalEventTypeOrBuilder {
 
     /**
      * Obtains the message type as a Java class.
      */
     default Class<? extends Message> asMessageClass() {
-        String url = getMessageTypeUrl();
-        TypeUrl typeUrl = TypeUrl.parse(url);
+        String rawValue = getTypeUrl();
+        TypeUrl typeUrl = TypeUrl.parse(rawValue);
         return typeUrl.getMessageClass();
     }
 }

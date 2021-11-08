@@ -29,14 +29,14 @@ package io.spine.server.integration;
 import io.spine.core.BoundedContextName;
 
 /**
- * Observes the registrations of the sources of the external messages by listening
+ * Observes the registrations of the sources of the domain events by listening
  * to {@code ExternalMessagesSourceAvailable} signals, and passes
  * this information on to those domestic routines, which might need to consume the messages
  * just made available.
  */
 final class ObserveNewRegistrations extends AbstractChannelObserver {
 
-    private final InternalNeedsBroadcast broadcast;
+    private final BroadcastWantedEvents broadcast;
 
     /**
      * Creates a new observer for the passed context name.
@@ -50,8 +50,8 @@ final class ObserveNewRegistrations extends AbstractChannelObserver {
      *         serves to reach out to those who want to know that some new sources
      *         of external messages became available
      */
-    ObserveNewRegistrations(BoundedContextName context, InternalNeedsBroadcast broadcast) {
-        super(context, ExternalMessagesSourceAvailable.class);
+    ObserveNewRegistrations(BoundedContextName context, BroadcastWantedEvents broadcast) {
+        super(context, ExternalEventsAvailable.class);
         this.broadcast = broadcast;
     }
 

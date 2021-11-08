@@ -56,26 +56,25 @@ message ExternalMessage {
     spine.core.BoundedContextName bounded_context_name = 4 [(required) = true];
 }
 
-// A document message, describing types of messages,
-// requested by some part of the system.
+// A document message, describing types of events,
+// that are required for consumption by some part of the system.
 //
 // One of the typical scenarios is a notification shout out from the current bounded context
 // to other bounded contexts of the application about its `external` subscription needs.
-message RequestForExternalMessages {
+//
+message ExternalEventsWanted {
 
     // Multiple types may be requested at a time.
-    repeated ExternalMessageType requested_message_type = 1;
+    repeated ExternalEventType type = 1;
 }
 
-// The type of message requested by some part of the system.
-message ExternalMessageType {
-    option (is).java_type = "ExternalMessageTypeMixin";
+// The type of a domain event which is emitted by one bounded context and consumed by
+// other bounded contexts as "external" event
+message ExternalEventType {
+    option (is).java_type = "ExternalEventTypeMixin";
 
-    // Type URL of the message (e.g. `io.spine.examples.TaskCreated`).
-    string message_type_url = 1 [(required) = true];
-
-    // Type URL of the wrapper, that is used to hold the message (e.g. `io.spine.core.Event`).
-    string wrapper_type_url = 2 [(required) = true];
+    // Type URL of the domain event (e.g. `io.spine.examples.TaskCreated`).
+    string type_url = 1 [(required) = true];
 }
 
 // The type of error, that may occur during the `ExternalMessage` validation.
@@ -92,5 +91,5 @@ enum ExternalMessageValidationError {
 //
 // Used to notify others in the environment so that they re-send their needs in a form of
 // `RequestForExternalMessages` which will let the newly joined source contribute.
-message ExternalMessagesSourceAvailable {
+message ExternalEventsAvailable {
 }
