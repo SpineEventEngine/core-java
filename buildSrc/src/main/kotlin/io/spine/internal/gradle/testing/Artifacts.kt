@@ -38,8 +38,8 @@ import org.gradle.kotlin.dsl.register
  * This allows other Gradle projects to depend on the test classes of some project. It is helpful
  * in case the dependant projects re-use abstract test suites of some "parent" project.
  *
- * Please note that this utility requires Gradle `java` plugin to be applied and
- * configured beforehand. Hence, it is recommended to call this extension method from `java` scope:
+ * Please note that this utility requires Gradle `java` plugin to be applied.
+ * Hence, it is recommended to call this extension method from `java` scope:
  *
  * ```
  * java {
