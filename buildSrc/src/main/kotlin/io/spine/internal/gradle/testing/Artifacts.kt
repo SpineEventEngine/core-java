@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.test
+package io.spine.internal.gradle.testing
 
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
@@ -33,22 +33,22 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 
 /**
- * Creates a consumable `testArtifacts` configuration containing test classes
- * of the current project to be used in other projects.
+ * Exposes the test classes of this project as a new `testArtifacts` configuration.
  *
- * Even though it is implemented as a `Project`'s extension, logically it belongs to Java Plugin.
- * Hence, it is recommended to call this extension method from `java` scope.
+ * This allows other Gradle projects to depend on the test classes of some project. It is helpful
+ * in case the dependant projects re-use abstract test suites of some "parent" project.
  *
- * Usage example.
+ * Please note that this utility requires Gradle `java` plugin to be applied and
+ * configured beforehand. Hence, it is recommended to call this extension method from `java` scope:
  *
- * In a producing project:
  * ```
  * java {
  *     exposeTestArtifacts()
  * }
  * ```
  *
- * In a consuming project:
+ * Here is a snippet which consumes the exposed test classes:
+ *
  * ```
  * dependencies {
  *     testImplementation(project(path = ":projectName", configuration = "testArtifacts"))

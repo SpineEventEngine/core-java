@@ -25,7 +25,7 @@
  */
 
 import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.test.exposeTestArtifacts
+import io.spine.internal.gradle.testing.exposeTestArtifacts
 
 val spineTimeVersion: String by extra
 
