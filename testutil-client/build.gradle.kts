@@ -25,9 +25,7 @@
  */
 
 import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.test.exposeTestArtifacts
-import io.spine.tools.gradle.testArtifact
 
 val spineTimeVersion: String by extra
 
@@ -41,7 +39,9 @@ dependencies {
     implementation(Grpc.protobuf)
 }
 
-exposeTestArtifacts()
+java {
+    exposeTestArtifacts()
+}
 
 //TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
 // see https://github.com/SpineEventEngine/base/issues/657

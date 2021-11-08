@@ -32,6 +32,26 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 
+/**
+ * Creates a consumable `testArtifacts` configuration containing test classes
+ * of the current project to be used in other projects.
+ *
+ * Usage example.
+ *
+ * In a producing project:
+ * ```
+ * java {
+ *     exposeTestArtifacts()
+ * }
+ * ```
+ *
+ * In a consuming project:
+ * ```
+ * dependencies {
+ *     testImplementation(project(path = ":projectName", configuration = "testArtifacts"))
+ * }
+ * ```
+ */
 fun Project.exposeTestArtifacts() {
 
     val testArtifacts = configurations.create("testArtifacts") {
