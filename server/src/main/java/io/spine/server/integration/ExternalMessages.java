@@ -31,7 +31,6 @@ import com.google.protobuf.StringValue;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 
@@ -61,23 +60,6 @@ public final class ExternalMessages {
         checkNotNull(origin);
 
         ExternalMessage result = of(event.getId(), event, origin);
-        return result;
-    }
-
-    /**
-     * Wraps the instance of {@link Command} into an {@code ExternalMessage}.
-     *
-     * @param command
-     *         the command to wrap
-     * @param origin
-     *         the name of the bounded context in which the command was created
-     * @return the external message wrapping the given command
-     */
-    public static ExternalMessage of(Command command, BoundedContextName origin) {
-        checkNotNull(command);
-        checkNotNull(origin);
-
-        ExternalMessage result = of(command.getId(), command, origin);
         return result;
     }
 
@@ -116,17 +98,15 @@ public final class ExternalMessages {
         return result;
     }
 
-    private static ExternalMessage of(Message messageId,
-                                      Message message,
-                                      BoundedContextName boundedContextName) {
-        Any packedId = Identifier.pack(messageId);
+    private static ExternalMessage of(Message id, Message message, BoundedContextName origin) {
+        Any packedId = Identifier.pack(id);
         Any packedMessage = AnyPacker.pack(message);
 
         ExternalMessage result = ExternalMessage
                 .newBuilder()
                 .setId(packedId)
                 .setOriginalMessage(packedMessage)
-                .setBoundedContextName(boundedContextName)
+                .setBoundedContextName(origin)
                 .build();
         return result;
     }
