@@ -59,7 +59,7 @@ message ExternalMessage {
 // A document message, describing types of events,
 // that are required for consumption by some part of the system.
 //
-// One of the typical scenarios is a notification shout out from the current bounded context
+// One of the typical scenarios is a notification shout-out from the current bounded context
 // to other bounded contexts of the application about its `external` subscription needs.
 //
 message ExternalEventsWanted {

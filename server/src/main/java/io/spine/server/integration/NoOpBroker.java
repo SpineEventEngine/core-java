@@ -23,33 +23,70 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
-import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContext;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.type.EventEnvelope;
 
 /**
- * An observer of the incoming external messages of the specified message class.
+ * An {@code IntegrationBroker} that does nothing.
  *
- * <p>Responsible of receiving those from the transport layer and posting those to the local
- * instance of {@code IntegrationBroker}.
+ * <p>This instance should be used in case the integration broker as-a-feature
+ * {@linkplain io.spine.server.ContextSpec#hasIntegrationBroker() is disabled}.
  */
-final class ExternalMessageObserver extends AbstractChannelObserver {
+public enum NoOpBroker implements IntegrationBroker {
+    INSTANCE;
 
-    private final IntegrationBroker broker;
-
-    ExternalMessageObserver(BoundedContextName context,
-                            Class<? extends Message> msgClass,
-                            IntegrationBroker broker) {
-        super(context, msgClass);
-        this.broker = broker;
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void registerWith(BoundedContext context) {
     }
 
+    /**
+     * Always returns {@code false}.
+     */
     @Override
-    protected void handle(ExternalMessage message) {
-        Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
-        broker.dispatchLocally(event);
+    public boolean isRegistered() {
+        return false;
+    }
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void publish(EventEnvelope event) {
+    }
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void dispatchLocally(Event event) {
+    }
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void register(EventDispatcher dispatcher) {
+    }
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void unregister(EventDispatcher dispatcher) {
+    }
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void close() throws Exception {
     }
 }

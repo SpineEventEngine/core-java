@@ -103,15 +103,11 @@ public final class ExternalMessages {
      *
      * @param notification
      *         the notification to wrap
-     * @param origin
-     *         the name of a bounded context in which the notification was created
      * @return the external message wrapping the given notification
      */
-    static ExternalMessage of(BoundedContextOnline notification, BoundedContextName origin) {
+    static ExternalMessage of(BoundedContextOnline notification) {
         checkNotNull(notification);
-        checkNotNull(origin);
-
-        ExternalMessage result = of(generateId(), notification, origin);
+        ExternalMessage result = of(generateId(), notification, notification.getContext());
         return result;
     }
 

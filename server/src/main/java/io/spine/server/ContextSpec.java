@@ -46,11 +46,16 @@ public final class ContextSpec {
     private final BoundedContextName name;
     private final boolean multitenant;
     private final boolean storeEvents;
+    private final boolean integrationBroker;
 
-    private ContextSpec(BoundedContextName name, boolean multitenant, boolean storeEvents) {
+    private ContextSpec(BoundedContextName name,
+                        boolean multitenant,
+                        boolean storeEvents,
+                        boolean integrationBroker) {
         this.name = checkNotNull(name);
         this.multitenant = multitenant;
         this.storeEvents = storeEvents;
+        this.integrationBroker = integrationBroker;
     }
 
     /**
@@ -72,7 +77,7 @@ public final class ContextSpec {
     private static ContextSpec createDomain(String name, boolean multitenant) {
         checkNotNull(name);
         BoundedContextName contextName = newName(name);
-        return new ContextSpec(contextName, multitenant, true);
+        return new ContextSpec(contextName, multitenant, true, true);
     }
 
     /**
@@ -103,10 +108,23 @@ public final class ContextSpec {
     }
 
     /**
+     * Tells if the integration broker is enabled for the context.
+     *
+     * <p>All domain-specific context have their integration broker enabled by default.
+     *
+     * <p>All system contexts do not use integration brokers, therefore it is always
+     * disabled for them.
+     */
+    @Internal
+    public boolean hasIntegrationBroker() {
+        return integrationBroker;
+    }
+
+    /**
      * Converts this spec into the System spec for the counterpart of this domain context.
      */
     ContextSpec toSystem() {
-        return new ContextSpec(name.toSystem(), multitenant, storeEvents);
+        return new ContextSpec(name.toSystem(), multitenant, storeEvents, false);
     }
 
     /**
@@ -114,7 +132,7 @@ public final class ContextSpec {
      * {@linkplain #storesEvents() store events}.
      */
     ContextSpec notStoringEvents() {
-        return new ContextSpec(name, multitenant, false);
+        return new ContextSpec(name, multitenant, false, integrationBroker);
     }
 
     /**

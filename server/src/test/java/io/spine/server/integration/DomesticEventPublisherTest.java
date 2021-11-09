@@ -75,8 +75,7 @@ class DomesticEventPublisherTest {
     @Test
     @DisplayName("dispatch only one event type")
     void dispatchSingleEvent() {
-        DomesticEventPublisher publisher =
-                new DomesticEventPublisher(broker, EVENT_CLASS);
+        DomesticEventPublisher publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
         Set<EventClass> classes = publisher.messageClasses();
         assertThat(classes).containsExactly(EVENT_CLASS);
     }
@@ -84,8 +83,7 @@ class DomesticEventPublisherTest {
     @Test
     @DisplayName("dispatch no external events")
     void dispatchNoExternalEvents() {
-        DomesticEventPublisher publisher =
-                new DomesticEventPublisher(broker, EVENT_CLASS);
+        DomesticEventPublisher publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
         Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
     }
