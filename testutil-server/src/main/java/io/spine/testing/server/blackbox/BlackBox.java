@@ -52,7 +52,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStore;
-import io.spine.server.integration.IntegrationBroker;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
@@ -324,9 +323,9 @@ public abstract class BlackBox implements Logging, Closeable {
      *
      * @param messageOrEvent
      *         an event message or {@link Event}. If an instance of {@code Event} is
-     *         passed, it will be posted to {@link IntegrationBroker} as is. Otherwise, an instance
-     *         of {@code Event} will be generated basing on the passed event message and posted to
-     *         the bus.
+     *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBroker}
+     *         as is. Otherwise, an instance of {@code Event} will be generated basing
+     *         on the passed event message and posted to the bus.
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
@@ -342,7 +341,7 @@ public abstract class BlackBox implements Logging, Closeable {
      *
      * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
      * If an instance of {@code Event} is passed, it will be posted to
-     * {@link IntegrationBroker} as is.
+     * {@link io.spine.server.integration.IntegrationBroker} as-is.
      * Otherwise, an instance of {@code Event} will be generated basing on the passed event
      * message and posted to the bus.
      *
