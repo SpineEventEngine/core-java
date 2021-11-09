@@ -59,6 +59,10 @@ final class ObserveFellowBoundedContexts extends AbstractChannelObserver {
 
     @Override
     protected void handle(ExternalMessage message) {
+        if (message.getBoundedContextName()
+                   .equals(contextName())) {
+            return;
+        }
         broadcast.send();
     }
 }

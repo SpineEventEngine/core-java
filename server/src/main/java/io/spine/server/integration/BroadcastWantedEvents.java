@@ -77,7 +77,8 @@ final class BroadcastWantedEvents {
     }
 
     /**
-     * Notifies other Bounded contexts about current needs.
+     * Notifies other Bounded Contexts about the domain events for which
+     * it has {@code external} subscribers.
      */
     synchronized void send() {
         ExternalEventsWanted request = ExternalEventsWanted

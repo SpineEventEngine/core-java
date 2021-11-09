@@ -27,7 +27,6 @@
 package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
@@ -53,7 +52,6 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.transport.MessageChannel.channelIdFor;
-import static java.lang.String.format;
 
 /**
  * Dispatches {@linkplain ExternalMessage external messages} from and to a Bounded Context with
@@ -158,28 +156,18 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
 
         this.contextName = context.name();
         this.bus = new BusAdapter(this, context.eventBus());
-
-        startTellingOfEvents();
-        declareOnlineStatus();
+        
+        runEventsExchange();
         observeFellowContexts();
+        declareOnlineStatus();
     }
 
-    private void startTellingOfEvents() {
+    private void runEventsExchange() {
         ChannelId channel = Channels.eventsWanted();
         broadcast = new BroadcastWantedEvents(contextName, publisherHub.get(channel));
         observeWantedEvents = new ObserveWantedEvents(contextName, bus);
-        Subscriber subscriber = subscriberHub.get(channel);
-        subscriber.addObserver(observeWantedEvents);
-        subscriber.addObserver(new NextValueObserver<ExternalMessage>() {
-            @Override
-            public void onNext(ExternalMessage value) {
-                Any msg = value.getOriginalMessage();
-                String log = format("`%s` received the wanted events from `%s`.",
-                                    contextName.value(), value.getBoundedContextName()
-                                                                     .value());
-                System.out.println(log);
-            }
-        });
+        subscriberHub.get(channel)
+                     .addObserver(observeWantedEvents);
     }
 
     private void declareOnlineStatus() {
@@ -193,22 +181,10 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
     }
 
     private void observeFellowContexts() {
-        StreamObserver<ExternalMessage> contextObserver =
+        StreamObserver<ExternalMessage> observer =
                 new ObserveFellowBoundedContexts(contextName, broadcast);
-        Subscriber subscriber = subscriberHub.get(Channels.statuses());
-        subscriber.addObserver(contextObserver);
-        subscriber.addObserver(new NextValueObserver<ExternalMessage>() {
-            @Override
-            public void onNext(ExternalMessage value) {
-                Any msg = value.getOriginalMessage();
-                BoundedContextOnline notification =
-                        AnyPacker.unpack(msg, BoundedContextOnline.class);
-                String log = format("`%s` received the 'online' notification from `%s`.",
-                                              contextName.value(), notification.getContext()
-                                                                               .value());
-                System.out.println(log);
-            }
-        });
+        subscriberHub.get(Channels.statuses())
+                     .addObserver(observer);
     }
 
     @Override
@@ -318,16 +294,5 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
     @Override
     public String toString() {
         return "IntegrationBroker of <" + contextName.getValue() + '>';
-    }
-
-    public abstract static class NextValueObserver<V> implements StreamObserver<V> {
-
-        @Override
-        public void onError(Throwable t) {
-        }
-
-        @Override
-        public void onCompleted() {
-        }
     }
 }

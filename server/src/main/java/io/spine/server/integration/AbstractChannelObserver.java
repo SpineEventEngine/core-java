@@ -49,9 +49,18 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
     private final Class<? extends Message> messageClass;
     private final AtomicBoolean completed = new AtomicBoolean(false);
 
-    protected AbstractChannelObserver(BoundedContextName boundedContextName,
+    /**
+     * Creates a new instance of the observer.
+     *
+     * @param context
+     *         the name of the Bounded Context in which the created observer exists
+     * @param messageClass
+     *         the type of the observed messages, which are transferred wrapped into {@code
+     *         ExternalMessage}
+     */
+    protected AbstractChannelObserver(BoundedContextName context,
                                       Class<? extends Message> messageClass) {
-        this.boundedContextName = boundedContextName;
+        this.boundedContextName = context;
         this.messageClass = messageClass;
     }
 
@@ -96,6 +105,13 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
         if (!sameContext) {
             handle(message);
         }
+    }
+
+    /**
+     * Returns the name of the Bounded Context in scope of which this observer exists.
+     */
+    protected final BoundedContextName contextName() {
+        return boundedContextName;
     }
 
     @Override

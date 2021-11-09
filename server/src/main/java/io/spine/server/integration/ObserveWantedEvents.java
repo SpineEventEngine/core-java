@@ -71,6 +71,9 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
     @Override
     public void handle(ExternalMessage message) {
         BoundedContextName origin = message.getBoundedContextName();
+        if (origin.equals(contextName())) {
+            return;
+        }
         ExternalEventsWanted request = unpack(
                 message.getOriginalMessage(),
                 ExternalEventsWanted.class
