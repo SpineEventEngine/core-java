@@ -26,37 +26,42 @@
 
 package io.spine.server.integration;
 
-import io.spine.core.BoundedContextName;
+import io.spine.server.transport.ChannelId;
+import io.spine.type.TypeUrl;
+
+import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
- * Observes the registrations of the sources of the domain events by listening
- * to {@code ExternalMessagesSourceAvailable} signals, and passes
- * this information on to those domestic routines, which might need to consume the messages
- * just made available.
+ * Utility for creation of predefined channels used by {@link IntegrationBroker}.
  */
-final class ObserveNewRegistrations extends AbstractChannelObserver {
+final class Channels {
 
-    private final BroadcastWantedEvents broadcast;
+    private static final ChannelId STATUS_CHANNEL = channelIdFor(
+            TypeUrl.of(BoundedContextOnline.class)
+    );
+    private static final ChannelId EVENT_NEEDS_CHANNEL = channelIdFor(
+            TypeUrl.of(ExternalEventsWanted.class)
+    );
 
     /**
-     * Creates a new observer for the passed context name.
-     *
-     * <p>Upon receiving the message via the observed channel,
-     * passes the shout to the specified {@code InternalNeedsBroadcast}.
-     *
-     * @param context
-     *         the name of the bounded context, in scope of which this observer acts
-     * @param broadcast
-     *         serves to reach out to those who want to know that some new sources
-     *         of external messages became available
+     * Prevents this utility from instantiation.
      */
-    ObserveNewRegistrations(BoundedContextName context, BroadcastWantedEvents broadcast) {
-        super(context, ExternalEventsAvailable.class);
-        this.broadcast = broadcast;
+    private Channels() {
     }
 
-    @Override
-    protected void handle(ExternalMessage message) {
-        broadcast.send();
+    /**
+     * Returns the ID of the channel used to exchange the "online" statuses
+     * of the Bounded Contexts connected.
+     */
+    static ChannelId statuses() {
+        return STATUS_CHANNEL;
+    }
+
+    /**
+     * Returns the ID of the channel used to exchange the types of the domain events
+     * each Bounded Context would like to receive as "external" events.
+     */
+    static ChannelId eventsWanted() {
+        return EVENT_NEEDS_CHANNEL;
     }
 }

@@ -23,33 +23,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
-import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
-import io.spine.core.Event;
-import io.spine.testing.UtilityClassTest;
-import org.junit.jupiter.api.DisplayName;
 
-import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+/**
+ * Observes the fact of other Bounded Contexts being connected to the same shared transport channel
+ * by listening to {@link BoundedContextOnline}.
+ *
+ * <p>When a {@code BoundedContextOnline} is received, this observer treats the newly available
+ * Bounded Context as a potential source of domain events. Therefore,
+ * a {@link BroadcastWantedEvents} shout-out is triggered.
+ */
+final class ObserveFellowBoundedContexts extends AbstractChannelObserver {
 
-@DisplayName("`ExternalMessages` utility should")
-class ExternalMessagesTest extends UtilityClassTest<ExternalMessages> {
+    private final BroadcastWantedEvents broadcast;
 
-    ExternalMessagesTest() {
-        super(ExternalMessages.class, PACKAGE);
+    /**
+     * Creates a new observer for the passed context name.
+     *
+     * <p>Upon receiving the message via the observed channel,
+     * passes the shout to the specified {@code InternalNeedsBroadcast}.
+     *
+     * @param context
+     *         the name of the bounded context, in scope of which this observer acts
+     * @param broadcast
+     *         serves to reach out to those who want to know that some new sources
+     *         of external messages became available
+     */
+    ObserveFellowBoundedContexts(BoundedContextName context, BroadcastWantedEvents broadcast) {
+        super(context, BoundedContextOnline.class);
+        this.broadcast = broadcast;
     }
 
     @Override
-    protected void configure(NullPointerTester tester) {
-        super.configure(tester);
-        tester.setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
-              .setDefault(Event.class, Event.getDefaultInstance())
-              .setDefault(Command.class, Command.getDefaultInstance())
-              .setDefault(ExternalEventsWanted.class,
-                          ExternalEventsWanted.getDefaultInstance())
-              .setDefault(BoundedContextOnline.class,
-                          BoundedContextOnline.getDefaultInstance());
+    protected void handle(ExternalMessage message) {
+        broadcast.send();
     }
 }

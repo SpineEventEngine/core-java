@@ -23,33 +23,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 
-@DisplayName("`ExternalMessages` utility should")
-class ExternalMessagesTest extends UtilityClassTest<ExternalMessages> {
+@DisplayName("`Channels` should")
+class ChannelsTest extends UtilityClassTest<Channels> {
 
-    ExternalMessagesTest() {
-        super(ExternalMessages.class, PACKAGE);
-    }
-
-    @Override
-    protected void configure(NullPointerTester tester) {
-        super.configure(tester);
-        tester.setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
-              .setDefault(Event.class, Event.getDefaultInstance())
-              .setDefault(Command.class, Command.getDefaultInstance())
-              .setDefault(ExternalEventsWanted.class,
-                          ExternalEventsWanted.getDefaultInstance())
-              .setDefault(BoundedContextOnline.class,
-                          BoundedContextOnline.getDefaultInstance());
+    ChannelsTest() {
+        super(Channels.class, PACKAGE);
     }
 }

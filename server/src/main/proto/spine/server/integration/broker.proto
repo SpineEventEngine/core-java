@@ -87,9 +87,22 @@ enum ExternalMessageValidationError {
     UNSUPPORTED_EXTERNAL_MESSAGE = 1;
 }
 
-// A fact of a new potential message publisher appearance in a multi-component environment.
+// Tells that some bounded context is connected to the shared transport.
 //
-// Used to notify others in the environment so that they re-send their needs in a form of
-// `RequestForExternalMessages` which will let the newly joined source contribute.
-message ExternalEventsAvailable {
+// Used to notify other parties connected to the same transport that the external events they
+// might need may be provided by the bounded context that is online.
+//
+// Typically, once others receive this message, they might want to send their
+// respective `ExternalEventsWanted` messages to see if the connected bounded context
+// is able to provide them.
+//
+// Please note this message does not signify that some context has _just_ connected
+// to the transport. It may be sent by some context which has been using the shared transport
+// for quite some time — in which case this message may serve to notify just-connected bounded
+// contexts of its existence.
+//
+message BoundedContextOnline {
+
+    // The name of the bounded context which is connected to the transport.
+    spine.core.BoundedContextName context = 1 [(required) = true];
 }

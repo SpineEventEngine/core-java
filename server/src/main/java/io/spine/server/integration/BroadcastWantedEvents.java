@@ -35,8 +35,8 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 
 /**
- * Notifies other bounded contexts that the configuration of the given bounded context has changed,
- * so that different types of external events are now requested by it for consumption.
+ * Notifies other Bounded Contexts that this Bounded Context now requests some set of external
+ * domain events for consumption.
  */
 final class BroadcastWantedEvents {
 
@@ -50,16 +50,16 @@ final class BroadcastWantedEvents {
      *
      * @param context
      *         the name of the Bounded Context from which the broadcast is performed
-     * @param publisher
-     *         the routine which publishes the messages during the broadcast
+     * @param channel
+     *         the channel for broadcasting
      */
-    BroadcastWantedEvents(BoundedContextName context, Publisher publisher) {
+    BroadcastWantedEvents(BoundedContextName context, Publisher channel) {
         this.context = checkNotNull(context);
-        this.publisher = checkNotNull(publisher);
+        this.publisher = checkNotNull(channel);
     }
 
     /**
-     * Notifies other Bounded Contexts about a change in the types of the requested events.
+     * Notifies other Bounded Contexts about a change in the types of wanted events.
      *
      * <p>If the given {@code newTypes} are the same as those known to this instance previously,
      * the notification is not sent.
@@ -67,7 +67,7 @@ final class BroadcastWantedEvents {
      * @param newTypes
      *         types of external events that are consumed by the bounded context
      */
-    synchronized void onNeedsChange(ImmutableSet<ExternalEventType> newTypes) {
+    synchronized void onEventsChanged(ImmutableSet<ExternalEventType> newTypes) {
         checkNotNull(newTypes);
         if (wantedEvents.equals(newTypes)) {
             return;

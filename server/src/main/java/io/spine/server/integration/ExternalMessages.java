@@ -99,7 +99,7 @@ public final class ExternalMessages {
     }
 
     /**
-     * Wraps the instance of {@link ExternalEventsAvailable} into an {@code ExternalMessage}.
+     * Wraps the instance of {@link BoundedContextOnline} into an {@code ExternalMessage}.
      *
      * @param notification
      *         the notification to wrap
@@ -107,7 +107,7 @@ public final class ExternalMessages {
      *         the name of a bounded context in which the notification was created
      * @return the external message wrapping the given notification
      */
-    static ExternalMessage of(ExternalEventsAvailable notification, BoundedContextName origin) {
+    static ExternalMessage of(BoundedContextOnline notification, BoundedContextName origin) {
         checkNotNull(notification);
         checkNotNull(origin);
 

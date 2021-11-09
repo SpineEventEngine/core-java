@@ -44,7 +44,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  *
  * @see #handle(ExternalMessage)
  */
-final class ExternalNeedsObserver extends AbstractChannelObserver implements AutoCloseable {
+final class ObserveWantedEvents extends AbstractChannelObserver implements AutoCloseable {
 
     private final BoundedContextName boundedContextName;
     private final BusAdapter bus;
@@ -57,7 +57,7 @@ final class ExternalNeedsObserver extends AbstractChannelObserver implements Aut
     private final Multimap<ExternalEventType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ExternalNeedsObserver(BoundedContextName context, BusAdapter bus) {
+    ObserveWantedEvents(BoundedContextName context, BusAdapter bus) {
         super(context, ExternalEventsWanted.class);
         this.boundedContextName = context;
         this.bus = bus;
