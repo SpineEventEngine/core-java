@@ -43,13 +43,12 @@ import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
-import static io.spine.server.transport.MessageChannel.channelIdFor;
+import static io.spine.server.integration.Channels.toChannelId;
 
 /**
  * Dispatches {@linkplain ExternalMessage external messages} from and to a Bounded Context with
@@ -237,11 +236,6 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
         subscriberHub.closeStaleChannels();
     }
 
-    private static ChannelId toChannelId(EventClass cls) {
-        TypeUrl targetType = cls.typeUrl();
-        return channelIdFor(targetType);
-    }
-
     private IncomingEventObserver observerFor(EventClass eventType) {
         IncomingEventObserver observer = new IncomingEventObserver(contextName, eventType, bus);
         return observer;
@@ -254,19 +248,12 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
      * <p>Sends out an instance of {@link ExternalEventsWanted} for that purpose.
      */
     private void notifyTypesChanged() {
-        ImmutableSet<ExternalEventType> needs = subscriberHub
+        ImmutableSet<ExternalEventType> eventTypes = subscriberHub
                 .ids()
                 .stream()
-                .map(channelId -> eventAsExternal(channelId.getTargetType()))
+                .map(Channels::typeOfTransmittedEvents)
                 .collect(toImmutableSet());
-        broadcast.onEventsChanged(needs);
-    }
-
-    private static ExternalEventType eventAsExternal(String eventMsgType) {
-        return ExternalEventType
-                .newBuilder()
-                .setTypeUrl(eventMsgType)
-                .vBuild();
+        broadcast.onEventsChanged(eventTypes);
     }
 
     /**

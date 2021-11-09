@@ -27,8 +27,10 @@
 package io.spine.server.integration;
 
 import io.spine.server.transport.ChannelId;
+import io.spine.server.type.EventClass;
 import io.spine.type.TypeUrl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
@@ -63,5 +65,26 @@ final class Channels {
      */
     static ChannelId eventsWanted() {
         return EVENT_NEEDS_CHANNEL;
+    }
+
+    /**
+     * Creates an ID of the channel that will transmit the events of the given class.
+     */
+    static ChannelId toChannelId(EventClass cls) {
+        checkNotNull(cls);
+        TypeUrl targetType = cls.typeUrl();
+        return channelIdFor(targetType);
+    }
+
+    /**
+     * Interprets the channel as the one transmitting external events, and extracts
+     * the external event type from the ID value.
+     */
+    static ExternalEventType typeOfTransmittedEvents(ChannelId channel) {
+        checkNotNull(channel);
+        return ExternalEventType
+                .newBuilder()
+                .setTypeUrl(channel.getTargetType())
+                .vBuild();
     }
 }
