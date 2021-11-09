@@ -26,7 +26,6 @@
 
 package io.spine.server.integration;
 
-import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventEnvelope;
@@ -60,13 +59,6 @@ public enum NoOpBroker implements IntegrationBroker {
      */
     @Override
     public void publish(EventEnvelope event) {
-    }
-
-    /**
-     * Does nothing.
-     */
-    @Override
-    public void dispatchLocally(Event event) {
     }
 
     /**

@@ -25,31 +25,42 @@
  */
 package io.spine.server.integration;
 
-import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.EventClass;
+
+import static io.spine.grpc.StreamObservers.noOpObserver;
 
 /**
- * An observer of the incoming external messages of the specified message class.
+ * An observer of the incoming external domain events of the specified type.
  *
- * <p>Responsible of receiving those from the transport layer and posting those to the local
- * instance of {@code IntegrationBroker}.
+ * <p>Responsible of receiving those from the transport and dispatching to the local Event bus.
  */
-final class ExternalMessageObserver extends AbstractChannelObserver {
+final class IncomingEventObserver extends AbstractChannelObserver {
 
-    private final IntegrationBroker broker;
+    private final BusAdapter bus;
 
-    ExternalMessageObserver(BoundedContextName context,
-                            Class<? extends Message> msgClass,
-                            IntegrationBroker broker) {
-        super(context, msgClass);
-        this.broker = broker;
+    /**
+     * Creates a new observer.
+     *
+     * @param context
+     *         the name of the Bounded Context which receives the events
+     * @param eventCls
+     *         the type of the observed events
+     * @param bus
+     *         the adapter over the event bus to which the observed events should be dispatched
+     */
+    IncomingEventObserver(BoundedContextName context,
+                          EventClass eventCls,
+                          BusAdapter bus) {
+        super(context, eventCls.value());
+        this.bus = bus;
     }
 
     @Override
     protected void handle(ExternalMessage message) {
         Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
-        broker.dispatchLocally(event);
+        bus.dispatch(event, noOpObserver());
     }
 }

@@ -44,19 +44,10 @@ public interface IntegrationBroker extends ContextAware, AutoCloseable {
     /**
      * Publishes the given event for other Bounded Contexts.
      *
-     * <p>If this event belongs to another context, does nothing. More formally, if there is
-     * a <b>subscriber</b> channel in this broker for events of such a type, those events are
-     * NOT <b>published</b> from this Context.
-     *
      * @param event
      *         the event to publish
      */
     void publish(EventEnvelope event);
-
-    /**
-     * Dispatches the given event via the local {@code EventBus}.
-     */
-    void dispatchLocally(Event event);
 
     /**
      * Registers a local dispatcher which is subscribed to {@code external} messages.

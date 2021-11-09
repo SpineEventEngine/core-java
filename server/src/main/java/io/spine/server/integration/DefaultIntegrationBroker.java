@@ -29,7 +29,6 @@ package io.spine.server.integration;
 import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
@@ -50,7 +49,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
@@ -107,11 +105,11 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  *
  * <p>Upon a registration of the corresponding repository for this projection in the context,
  * the broker associated with that context is informed that one more external event is needed.
- * It sends out an updated {@code RequestForExternalMessages} saying that {@code UserDeleted}
+ * It sends out an updated {@code ExternalEventsWanted} saying that {@code UserDeleted}
  * events are needed too.
  *
  * <p>Let's say the second Context is "Users". Its broker will receive
- * the {@code RequestForExternalMessages} sent by "Projects". To handle it, it will create a bridge
+ * the {@code ExternalEventsWanted} sent by "Projects". To handle it, it will create a bridge
  * between "Users"'s Event Bus (which may eventually be transmitting a {@code UserDeleted} event)
  * and the {@linkplain ServerEnvironment#transportFactory() transport}.
  *
@@ -156,7 +154,7 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
 
         this.contextName = context.name();
         this.bus = new BusAdapter(this, context.eventBus());
-        
+
         runEventsExchange();
         observeFellowContexts();
         declareOnlineStatus();
@@ -192,34 +190,27 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
         return contextName != null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>If the given event belongs to another context, does nothing. More formally, if there is
+     * a subscriber channel in this broker for events of such a type, those events are
+     * NOT published from this Context.
+     *
+     * @param event
+     *         event to publish
+     */
     @Internal
     @Override
     public void publish(EventEnvelope event) {
-        EventClass eventClass = event.messageClass();
-        ChannelId channelId = toChannelId(eventClass);
-        boolean eventFromUpstream = subscriberHub.hasChannel(channelId);
-        if (!eventFromUpstream) {
+        ChannelId channelId = toChannelId(event.messageClass());
+        boolean wantedByOthers = !subscriberHub.hasChannel(channelId);
+        if (wantedByOthers) {
             Event outerObject = event.outerObject();
             ExternalMessage msg = ExternalMessages.of(outerObject, contextName);
             Publisher channel = publisherHub.get(channelId);
             channel.publish(AnyPacker.pack(event.id()), msg);
         }
-    }
-
-    /**
-     * Dispatches the given event via the local {@code EventBus}.
-     */
-    @Internal
-    @Override
-    public void dispatchLocally(Event event) {
-        dispatchLocally(event, noOpObserver());
-    }
-
-    /**
-     * Dispatches the given event via the local {@code EventBus} and observes the acknowledgement.
-     */
-    private void dispatchLocally(Event event, StreamObserver<Ack> ackObserver) {
-        bus.dispatch(event, ackObserver);
     }
 
     @Override
@@ -228,7 +219,7 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
         for (EventClass cls : receivedTypes) {
             ChannelId channelId = toChannelId(cls);
             Subscriber subscriber = subscriberHub.get(channelId);
-            ExternalMessageObserver observer = observerFor(cls);
+            IncomingEventObserver observer = observerFor(cls);
             subscriber.addObserver(observer);
             notifyTypesChanged();
         }
@@ -236,11 +227,11 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
 
     @Override
     public void unregister(EventDispatcher dispatcher) {
-        Iterable<EventClass> transformed = dispatcher.externalEventClasses();
-        for (EventClass cls : transformed) {
+        Iterable<EventClass> externalEvents = dispatcher.externalEventClasses();
+        for (EventClass cls : externalEvents) {
             ChannelId channelId = toChannelId(cls);
             Subscriber subscriber = subscriberHub.get(channelId);
-            ExternalMessageObserver observer = observerFor(cls);
+            IncomingEventObserver observer = observerFor(cls);
             subscriber.removeObserver(observer);
         }
         subscriberHub.closeStaleChannels();
@@ -251,14 +242,13 @@ public final class DefaultIntegrationBroker implements IntegrationBroker {
         return channelIdFor(targetType);
     }
 
-    private ExternalMessageObserver observerFor(EventClass externalClass) {
-        ExternalMessageObserver observer =
-                new ExternalMessageObserver(contextName, externalClass.value(), this);
+    private IncomingEventObserver observerFor(EventClass eventType) {
+        IncomingEventObserver observer = new IncomingEventObserver(contextName, eventType, bus);
         return observer;
     }
 
     /**
-     * Notifies other Bounded Contexts that this integration broker instance now requests
+     * Notifies other Bounded Contexts that this Bounded Context now requests
      * a different set of event types.
      *
      * <p>Sends out an instance of {@link ExternalEventsWanted} for that purpose.
