@@ -46,9 +46,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.store.DefaultEventStore;
-import io.spine.server.integration.DefaultIntegrationBroker;
 import io.spine.server.integration.IntegrationBroker;
-import io.spine.server.integration.NoOpBroker;
 import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
@@ -138,7 +136,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         this.eventBus = builder.buildEventBus(this);
         this.stand = builder.stand();
         this.tenantIndex = builder.buildTenantIndex();
-        this.broker = newBroker(spec.hasIntegrationBroker());
+        this.broker = new IntegrationBroker();
         this.commandBus = builder.buildCommandBus();
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
@@ -476,17 +474,6 @@ public abstract class BoundedContext implements Closeable, Logging {
     public final InternalAccess internalAccess() {
         Security.allowOnlyFrameworkServer();
         return this.internalAccess;
-    }
-
-    /**
-     * If the broker is enabled, returns an operational {@code IntegrationBroker}.
-     *
-     * <p>Otherwise, returns an instance of broker, which does nothing.
-     */
-    private static IntegrationBroker newBroker(boolean enabled) {
-        IntegrationBroker result = enabled ? new DefaultIntegrationBroker()
-                                           : NoOpBroker.INSTANCE;
-        return result;
     }
 
     /**

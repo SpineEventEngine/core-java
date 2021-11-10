@@ -51,8 +51,8 @@ import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedStatisticsBc;
 import static io.spine.server.integration.given.broker.IntegrationBrokerTestEnv.subscribedWarehouseBc;
 
-@DisplayName("`DefaultIntegrationBroker` should")
-class DefaultIntegrationBrokerTest {
+@DisplayName("`IntegrationBroker` should")
+class IntegrationBrokerTest {
 
     @BeforeEach
     void setUp() {
