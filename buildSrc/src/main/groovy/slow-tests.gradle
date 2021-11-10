@@ -25,7 +25,7 @@
  */
 
 println("`slow-tests.gradle` script is deprecated. " +
-        "Please use `TestContainer.registerTestTasks()` instead.")
+        "Please use `TaskContainer.registerTestTasks()` instead.")
 
 final def slowTag = 'slow' // See io.spine.testing.SlowTest
 
