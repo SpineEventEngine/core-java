@@ -137,8 +137,8 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     private @MonotonicNonNull BoundedContextName contextName;
     private @MonotonicNonNull BusAdapter bus;
 
-    private @MonotonicNonNull ObserveWantedEvents observeWantedEvents;
-    private @MonotonicNonNull BroadcastWantedEvents broadcast;
+    private @MonotonicNonNull EventsExchange events;
+    private @MonotonicNonNull StatusExchange statuses;
 
     public IntegrationBroker() {
         TransportFactory transportFactory = ServerEnvironment
@@ -155,35 +155,39 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         this.contextName = context.name();
         this.bus = new BusAdapter(this, context.eventBus());
 
-        runEventsExchange();
-        observeFellowContexts();
-        declareOnlineStatus();
-    }
+        TransportLink link = new TransportLink(contextName, subscriberHub, publisherHub);
 
-    private void runEventsExchange() {
-        ChannelId channel = Channels.eventsWanted();
-        broadcast = new BroadcastWantedEvents(contextName, publisherHub.get(channel));
-        observeWantedEvents = new ObserveWantedEvents(contextName, bus);
-        subscriberHub.get(channel)
-                     .addObserver(observeWantedEvents);
+        this.events = new EventsExchange(link);
+        events.transmitRequestedEventsFrom(bus);
+        this.statuses = new StatusExchange(link);
+        statuses.onBoundedContextOnline((msg) -> events.requestWantedEvents());
+        statuses.declareOnlineStatus();
     }
-
-    private void declareOnlineStatus() {
-        BoundedContextOnline notification =
-                BoundedContextOnline.newBuilder()
-                        .setContext(contextName)
-                        .vBuild();
-        ExternalMessage externalMessage = ExternalMessages.of(notification);
-        publisherHub.get(Channels.statuses())
-                    .publish(pack(newUuid()), externalMessage);
-    }
-
-    private void observeFellowContexts() {
-        StreamObserver<ExternalMessage> observer =
-                new ObserveFellowBoundedContexts(contextName, broadcast);
-        subscriberHub.get(Channels.statuses())
-                     .addObserver(observer);
-    }
+//
+//    private void runEventsExchange() {
+//        ChannelId channel = Channels.eventsWanted();
+//        broadcast = new BroadcastWantedEvents(contextName, publisherHub.get(channel));
+//        observeWantedEvents = new ObserveWantedEvents(contextName, bus);
+//        subscriberHub.get(channel)
+//                     .addObserver(observeWantedEvents);
+//    }
+//
+//    private void declareOnlineStatus() {
+//        BoundedContextOnline notification =
+//                BoundedContextOnline.newBuilder()
+//                        .setContext(contextName)
+//                        .vBuild();
+//        ExternalMessage externalMessage = ExternalMessages.of(notification);
+//        publisherHub.get(Channels.statuses())
+//                    .publish(pack(newUuid()), externalMessage);
+//    }
+//
+//    private void observeFellowContexts() {
+//        StreamObserver<ExternalMessage> observer =
+//                new ObserveFellowBoundedContexts(contextName, broadcast);
+//        subscriberHub.get(Channels.statuses())
+//                     .addObserver(observer);
+//    }
 
     @Override
     public boolean isRegistered() {
@@ -225,7 +229,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
             Subscriber subscriber = subscriberHub.get(channelId);
             IncomingEventObserver observer = observerFor(cls);
             subscriber.addObserver(observer);
-            notifyTypesChanged();
+            events.notifyTypesChanged();
         }
     }
 
@@ -253,27 +257,11 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     }
 
     /**
-     * Notifies other Bounded Contexts that this Bounded Context now requests
-     * a different set of event types.
-     *
-     * <p>Sends out an instance of {@link ExternalEventsWanted} for that purpose.
-     */
-    private void notifyTypesChanged() {
-        ImmutableSet<ExternalEventType> eventTypes = subscriberHub
-                .ids()
-                .stream()
-                .map(Channels::typeOfTransmittedEvents)
-                .collect(toImmutableSet());
-        broadcast.onEventsChanged(eventTypes);
-    }
-
-    /**
      * Removes all subscriptions and closes all the underlying transport channels.
      */
     @Override
     public void close() throws Exception {
-        observeWantedEvents.close();
-        notifyTypesChanged();
+        events.close();
 
         subscriberHub.close();
         publisherHub.close();
