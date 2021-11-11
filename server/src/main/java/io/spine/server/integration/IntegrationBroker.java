@@ -26,18 +26,13 @@
 
 package io.spine.server.integration;
 
-import com.google.common.collect.ImmutableSet;
-import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Event;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.ChannelId;
-import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
@@ -46,9 +41,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Identifier.pack;
 import static io.spine.server.integration.Channels.toChannelId;
 
 /**
@@ -135,10 +127,9 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     private final PublisherHub publisherHub;
 
     private @MonotonicNonNull BoundedContextName contextName;
-    private @MonotonicNonNull BusAdapter bus;
 
+    private @MonotonicNonNull ConfigExchange config;
     private @MonotonicNonNull EventsExchange events;
-    private @MonotonicNonNull StatusExchange statuses;
 
     public IntegrationBroker() {
         TransportFactory transportFactory = ServerEnvironment
@@ -151,43 +142,21 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     @Override
     public void registerWith(BoundedContext context) {
         checkNotRegistered();
-
         this.contextName = context.name();
-        this.bus = new BusAdapter(this, context.eventBus());
 
+        BusAdapter bus = new BusAdapter(this, context.eventBus());
         TransportLink link = new TransportLink(contextName, subscriberHub, publisherHub);
+        config = new ConfigExchange(link);
+        events = new EventsExchange(link, bus);
+        config.transmitRequestedEventsFrom(bus);
+        runStatusExchange(link);
+    }
 
-        this.events = new EventsExchange(link);
-        events.transmitRequestedEventsFrom(bus);
-        this.statuses = new StatusExchange(link);
-        statuses.onBoundedContextOnline((msg) -> events.requestWantedEvents());
+    private void runStatusExchange(TransportLink link) {
+        StatusExchange statuses = new StatusExchange(link);
+        statuses.onBoundedContextOnline((msg) -> config.requestWantedEvents());
         statuses.declareOnlineStatus();
     }
-//
-//    private void runEventsExchange() {
-//        ChannelId channel = Channels.eventsWanted();
-//        broadcast = new BroadcastWantedEvents(contextName, publisherHub.get(channel));
-//        observeWantedEvents = new ObserveWantedEvents(contextName, bus);
-//        subscriberHub.get(channel)
-//                     .addObserver(observeWantedEvents);
-//    }
-//
-//    private void declareOnlineStatus() {
-//        BoundedContextOnline notification =
-//                BoundedContextOnline.newBuilder()
-//                        .setContext(contextName)
-//                        .vBuild();
-//        ExternalMessage externalMessage = ExternalMessages.of(notification);
-//        publisherHub.get(Channels.statuses())
-//                    .publish(pack(newUuid()), externalMessage);
-//    }
-//
-//    private void observeFellowContexts() {
-//        StreamObserver<ExternalMessage> observer =
-//                new ObserveFellowBoundedContexts(contextName, broadcast);
-//        subscriberHub.get(Channels.statuses())
-//                     .addObserver(observer);
-//    }
 
     @Override
     public boolean isRegistered() {
@@ -206,14 +175,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      */
     @Internal
     public void publish(EventEnvelope event) {
-        ChannelId channelId = toChannelId(event.messageClass());
-        boolean wantedByOthers = !subscriberHub.hasChannel(channelId);
-        if (wantedByOthers) {
-            Event outerObject = event.outerObject();
-            ExternalMessage msg = ExternalMessages.of(outerObject, contextName);
-            Publisher channel = publisherHub.get(channelId);
-            channel.publish(AnyPacker.pack(event.id()), msg);
-        }
+        events.publish(event);
     }
 
     /**
@@ -223,14 +185,8 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      *         the dispatcher to register
      */
     public void register(EventDispatcher dispatcher) {
-        Iterable<EventClass> receivedTypes = dispatcher.externalEventClasses();
-        for (EventClass cls : receivedTypes) {
-            ChannelId channelId = toChannelId(cls);
-            Subscriber subscriber = subscriberHub.get(channelId);
-            IncomingEventObserver observer = observerFor(cls);
-            subscriber.addObserver(observer);
-            events.notifyTypesChanged();
-        }
+        events.register(dispatcher);
+        config.notifyTypesChanged();
     }
 
     /**
@@ -241,19 +197,8 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      *         the dispatcher to unregister
      */
     public void unregister(EventDispatcher dispatcher) {
-        Iterable<EventClass> externalEvents = dispatcher.externalEventClasses();
-        for (EventClass cls : externalEvents) {
-            ChannelId channelId = toChannelId(cls);
-            Subscriber subscriber = subscriberHub.get(channelId);
-            IncomingEventObserver observer = observerFor(cls);
-            subscriber.removeObserver(observer);
-        }
+        events.unregister(dispatcher);
         subscriberHub.closeStaleChannels();
-    }
-
-    private IncomingEventObserver observerFor(EventClass eventType) {
-        IncomingEventObserver observer = new IncomingEventObserver(contextName, eventType, bus);
-        return observer;
     }
 
     /**
@@ -261,8 +206,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        events.close();
-
+        config.close();
         subscriberHub.close();
         publisherHub.close();
     }

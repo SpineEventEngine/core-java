@@ -26,54 +26,42 @@
 
 package io.spine.server.integration;
 
-import io.spine.core.BoundedContextName;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 
-import java.util.Set;
-
 /**
- * Two-way communication bridge established from some Bounded Context to the transport.
+ * An exchange which uses a single channel for inbound and outbound traffic.
  */
-abstract class AbstractExchange {
-
-    private final TransportLink link;
+abstract class SingleChannelExchange extends AbstractExchange {
 
     /**
      * Creates a new exchange which uses the passed link.
      */
-    AbstractExchange(TransportLink link) {
-        this.link = link;
+    SingleChannelExchange(TransportLink link) {
+        super(link);
     }
 
     /**
-     * Returns the name of the Bounded Context which uses this exchange.
+     * Returns the subscriber of this exchange.
      */
-    protected final BoundedContextName context() {
-        return link.context();
-    }
-
-    /**
-     * Returns the IDs of all channels used for subscription in the underlying link.
-     */
-    protected final Set<ChannelId> subscriptionChannels() {
-        return link.subscriptionChannels();
-    }
-
-    /**
-     * Returns the subscriber for the passed ID of the channel.
-     */
-    protected final Subscriber subscriber(ChannelId channel) {
-        Subscriber result = link.subscriber(channel);
+    protected final Subscriber subscriber() {
+        Subscriber result = subscriber(channel());
         return result;
     }
 
     /**
-     * Returns the publisher for the passed ID of the channel.
+     * Returns the publisher of this exchange.
      */
-    protected final Publisher publisher(ChannelId channel) {
-        Publisher result = link.publisher(channel);
+    protected final Publisher publisher() {
+        Publisher result = publisher(channel());
         return result;
     }
+
+    /**
+     * Returns the ID of the channel participating in the exchange.
+     *
+     * <p>Both publish and subscribe operations are performed via the channel with the returned ID.
+     */
+    abstract ChannelId channel();
 }

@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 /**
  * @author Alex Tymchenko
  */
-final class StatusExchange extends AbstractExchange {
+final class StatusExchange extends SingleChannelExchange {
 
     private static final Class<BoundedContextOnline> TYPE = BoundedContextOnline.class;
 

@@ -26,78 +26,91 @@
 
 package io.spine.server.integration;
 
-import com.google.common.collect.ImmutableSet;
+import io.spine.annotation.Internal;
+import io.spine.core.Event;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.ChannelId;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.Subscriber;
+import io.spine.server.type.EventClass;
+import io.spine.server.type.EventEnvelope;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.integration.Channels.toChannelId;
 
 /**
- * Tells other Bounded Contexts about the {@code external} domain events requested for subscription
- * in this Bounded Context, and listens to similar messages from other Bounded Contexts.
+ * Sends and receives the {@code external} domain events.
  */
-final class EventsExchange extends AbstractExchange implements AutoCloseable {
+class EventsExchange extends AbstractExchange {
 
-    private static final ChannelId configurationChannel = Channels.eventsWanted();
-
-    private final BroadcastWantedEvents broadcast;
-    private final Set<ObserveWantedEvents> observers = new HashSet<>();
+    private final BusAdapter bus;
 
     /**
-     * Creates a new exchange with the passed link.
+     * Creates a new exchange which uses the passed link.
      */
-    EventsExchange(TransportLink link) {
+    EventsExchange(TransportLink link, BusAdapter bus) {
         super(link);
-        this.broadcast = new BroadcastWantedEvents(link.context(), publisher());
+        this.bus = bus;
     }
 
     /**
-     * Starts observing the {@link ExternalEventsWanted} messages sent by other Bounded Contexts
-     * and, if applicable, creates the corresponding subscriptions in the passed {@code bus}.
+     * Publishes the given event for other Bounded Contexts.
      *
-     * <p>After such subscriptions are created, the matching events travelling through the bus
-     * will be transmitted to other Bounded Contexts via this exchange.
-     */
-    void transmitRequestedEventsFrom(BusAdapter bus) {
-        ObserveWantedEvents observer = new ObserveWantedEvents(context(), bus);
-        subscriber().addObserver(observer);
-        observers.add(observer);
-    }
-
-    @Override
-    ChannelId channel() {
-        return configurationChannel;
-    }
-
-    /**
-     * Sends out the collection of the domain events which this Bounded Context would like
-     * to receive as {@code external}.
-     */
-    void requestWantedEvents() {
-        broadcast.send();
-    }
-
-    /**
-     * Notifies other Bounded Contexts that this Bounded Context now requests
-     * a different set of event types.
+     * <p>If the given event belongs to another context, does nothing. More formally, if there is
+     * a subscriber channel in this broker for events of such a type, those events are
+     * NOT published from this Context.
      *
-     * <p>Sends out an instance of {@link ExternalEventsWanted} for that purpose.
+     * @param event
+     *         event to publish
      */
-    void notifyTypesChanged() {
-        ImmutableSet<ExternalEventType> eventTypes = subscriptionChannels()
-                .stream()
-                .map(Channels::typeOfTransmittedEvents)
-                .collect(toImmutableSet());
-        broadcast.onEventsChanged(eventTypes);
-    }
-
-    @Override
-    public void close() throws Exception {
-        for (ObserveWantedEvents observer : observers) {
-            observer.close();
+    @Internal
+    void publish(EventEnvelope event) {
+        ChannelId channelId = toChannelId(event.messageClass());
+        boolean wantedByOthers = !subscriptionChannels().contains(channelId);
+        if (wantedByOthers) {
+            Event outerObject = event.outerObject();
+            ExternalMessage msg = ExternalMessages.of(outerObject, context());
+            Publisher publisher = publisher(channelId);
+            publisher.publish(AnyPacker.pack(event.id()), msg);
         }
-        notifyTypesChanged();
+    }
+
+    /**
+     * Registers a local dispatcher which would like to receive the {@code external} events
+     * through this exchange.
+     *
+     * @param dispatcher
+     *         the dispatcher to register
+     */
+    void register(EventDispatcher dispatcher) {
+        Iterable<EventClass> receivedTypes = dispatcher.externalEventClasses();
+        for (EventClass cls : receivedTypes) {
+            ChannelId channelId = toChannelId(cls);
+            Subscriber subscriber = subscriber(channelId);
+            IncomingEventObserver observer = observerFor(cls);
+            subscriber.addObserver(observer);
+        }
+    }
+
+    /**
+     * Unregisters a local dispatcher which should no longer receive its {@code external} events
+     * through this exchange.
+     *
+     * @param dispatcher
+     *         the dispatcher to unregister
+     */
+    public void unregister(EventDispatcher dispatcher) {
+        Iterable<EventClass> externalEvents = dispatcher.externalEventClasses();
+        for (EventClass cls : externalEvents) {
+            ChannelId channelId = toChannelId(cls);
+            Subscriber subscriber = subscriber(channelId);
+            IncomingEventObserver observer = observerFor(cls);
+            subscriber.removeObserver(observer);
+        }
+    }
+
+    private IncomingEventObserver observerFor(EventClass eventType) {
+        IncomingEventObserver observer = new IncomingEventObserver(context(), eventType, bus);
+        return observer;
     }
 }
