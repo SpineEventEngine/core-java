@@ -26,6 +26,7 @@
 
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.testing.exposeTestArtifacts
 
 group = "io.spine.tools"
 
@@ -36,7 +37,9 @@ dependencies {
     testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
 }
 
-apply(from = Scripts.testArtifacts(project))
+java {
+    exposeTestArtifacts()
+}
 
 //TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
 // see https://github.com/SpineEventEngine/base/issues/657
