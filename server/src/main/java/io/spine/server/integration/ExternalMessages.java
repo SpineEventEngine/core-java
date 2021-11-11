@@ -52,7 +52,7 @@ public final class ExternalMessages {
      * @param event
      *         the event to wrap
      * @param origin
-     *         the name of the bounded context in which the event was created
+     *         the name of the Bounded Context in which the event was created
      * @return the external message wrapping the given event
      */
     public static ExternalMessage of(Event event, BoundedContextName origin) {
@@ -69,7 +69,7 @@ public final class ExternalMessages {
      * @param request
      *         the request to wrap
      * @param origin
-     *         the name of bounded context in which the request was created
+     *         the name of Bounded Context in which the request was created
      * @return the external message wrapping the given request
      */
     static ExternalMessage of(ExternalEventsWanted request, BoundedContextName origin) {
