@@ -48,12 +48,13 @@ buildscript {
 
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
+    val mcJavaVersion: String by extra
     val versionToPublish: String by extra
 
     io.spine.internal.gradle.doForceVersions(configurations)
     dependencies {
         classpath(io.spine.internal.dependency.Protobuf.GradlePlugin.lib)
-        classpath("io.spine.tools:spine-mc-java:${spineBaseVersion}")
+        classpath("io.spine.tools:spine-mc-java:${mcJavaVersion}")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
     }
 

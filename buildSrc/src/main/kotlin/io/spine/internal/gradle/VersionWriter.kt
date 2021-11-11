@@ -26,17 +26,16 @@
 
 package io.spine.internal.gradle
 
+import io.spine.internal.gradle.publish.PublishExtension
 import java.util.*
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.findByType
 
 /**
  * A task that generates a dependency versions `.properties` file.
@@ -83,11 +82,24 @@ abstract class WriteVersions : DefaultTask() {
      */
     fun includeOwnVersion() {
         val groupId = project.group.toString()
-        val name = project.name
+        val artifactId = project.artifactId
         val version = project.version.toString()
-        versions.put("${groupId}_${name}", version)
+        versions.put("${groupId}_${artifactId}", version)
     }
 
+    /**
+     * Creates a `.properties` file with versions named after the name of the project,
+     * taking in account the value of the [PublishExtension.spinePrefix] property.
+     *
+     * If the property is set to `true`, the name of the file would be:
+     * ```
+     *     versions-spine-<projectName>.properties
+     * ```
+     * If the property is set to `false`, the name of the file would be:
+     * ```
+     *     versions-spine-<projectName>.properties
+     * ```
+     */
     @TaskAction
     private fun writeFile() {
         versions.finalizeValue()
@@ -96,14 +108,19 @@ abstract class WriteVersions : DefaultTask() {
         val values = versions.get()
         val properties = Properties()
         properties.putAll(values)
-        val projectName = project.name
         val outputDir = versionsFileLocation.get().asFile
         outputDir.mkdirs()
-        val file = outputDir.resolve("versions-$projectName.properties")
+        val fileName = resourceFileName()
+        val file = outputDir.resolve(fileName)
         file.createNewFile()
         file.writer().use {
             properties.store(it, "Dependency versions supplied by the `$path` task.")
         }
+    }
+
+    private fun resourceFileName(): String {
+        val artifactId = project.artifactId
+        return "versions-${artifactId}.properties"
     }
 }
 

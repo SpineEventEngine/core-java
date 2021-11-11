@@ -40,6 +40,8 @@ repositories {
     mavenCentral()
 }
 
+println("`jacoco.gradle` script is deprecated. Please use the `JacocoConfig` instead.")
+
 // Adds the `:check` task.
 apply plugin: 'base'
 

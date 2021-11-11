@@ -27,7 +27,6 @@
 import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Kotlin
-import io.spine.internal.gradle.Scripts
 
 val spineBaseVersion: String by extra
 val spineBaseTypesVersion: String by extra
@@ -53,13 +52,6 @@ dependencies {
     testImplementation(project(":testutil-server"))
 }
 
-apply {
-    with(Scripts) {
-        from(testArtifacts(project))
-        from(publishProto(project))
-    }
-}
-
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
 tasks.javadoc {
@@ -70,11 +62,3 @@ tasks.javadoc {
         }
     }
 }
-
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy
-
