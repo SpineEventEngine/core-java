@@ -116,6 +116,11 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
                 .vBuild();
     }
 
+    /**
+     * Closes all the observers previously created within this exchange, and notifies other
+     * Bounded Contexts that no more {@code external} events are requested by the current
+     * Bounded Context.
+     */
     @Override
     public void close() throws Exception {
         for (ObserveWantedEvents observer : observers) {
