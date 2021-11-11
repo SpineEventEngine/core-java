@@ -40,7 +40,7 @@ import "spine/core/actor_context.proto";
 import "spine/core/bounded_context.proto";
 
 // A wrapper around a message, which is used to send/receive the original message
-// to/from external application components, such as other bounded contexts.
+// to/from external application components, such as other Bounded Contexts.
 message ExternalMessage {
 
     // An ID of the original message wrapped to `Any` (e.g. an event ID).
@@ -52,15 +52,15 @@ message ExternalMessage {
     // Information about the environment of the user who created the original message.
     spine.core.ActorContext actor_context = 3 [(required) = true];
 
-    // Name of the bounded context, within which an original message was created.
+    // Name of the Bounded Context, within which an original message was created.
     spine.core.BoundedContextName bounded_context_name = 4 [(required) = true];
 }
 
 // A document message, describing types of events,
 // that are required for consumption by some part of the system.
 //
-// One of the typical scenarios is a notification shout-out from the current bounded context
-// to other bounded contexts of the application about its `external` subscription needs.
+// One of the typical scenarios is a notification shout-out from the current Bounded Context
+// to other Bounded Contexts of the application about its `external` subscription needs.
 //
 message ExternalEventsWanted {
 
@@ -68,8 +68,8 @@ message ExternalEventsWanted {
     repeated ExternalEventType type = 1;
 }
 
-// The type of a domain event which is emitted by one bounded context and consumed by
-// other bounded contexts as "external" event
+// The type of a domain event which is emitted by one Bounded Context and consumed by
+// other Bounded Contexts as "external" event
 message ExternalEventType {
     option (is).java_type = "ExternalEventTypeMixin";
 
@@ -87,22 +87,22 @@ enum ExternalMessageValidationError {
     UNSUPPORTED_EXTERNAL_MESSAGE = 1;
 }
 
-// Tells that some bounded context is connected to the shared transport.
+// Tells that some Bounded Context is connected to the shared transport.
 //
 // Used to notify other parties connected to the same transport that the external events they
-// might need may be provided by the bounded context that is online.
+// might need may be provided by the Bounded Context that is online.
 //
 // Typically, once others receive this message, they might want to send their
-// respective `ExternalEventsWanted` messages to see if the connected bounded context
+// respective `ExternalEventsWanted` messages to see if the connected Bounded Context
 // is able to provide them.
 //
 // Please note this message does not signify that some context has _just_ connected
 // to the transport. It may be sent by some context which has been using the shared transport
-// for quite some time — in which case this message may serve to notify just-connected bounded
-// contexts of its existence.
+// for quite some time — in which case this message may serve to notify just-connected Bounded
+// Contexts of its existence.
 //
 message BoundedContextOnline {
 
-    // The name of the bounded context which is connected to the transport.
+    // The name of the Bounded Context which is connected to the transport.
     spine.core.BoundedContextName context = 1 [(required) = true];
 }
