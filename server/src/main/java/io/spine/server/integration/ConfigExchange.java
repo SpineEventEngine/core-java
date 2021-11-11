@@ -47,7 +47,14 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
      */
     private static final ChannelId CHANNEL = channelIdFor(TypeUrl.of(ExternalEventsWanted.class));
 
+    /**
+     * Routine that peforms the broadcast from this Context to other Bounded Contexts.
+     */
     private final BroadcastWantedEvents broadcast;
+
+    /**
+     * The observers which listen to {@code ExternalEventsWanted} sent by other contexts.
+     */
     private final Collection<ObserveWantedEvents> observers = new HashSet<>();
 
     /**
