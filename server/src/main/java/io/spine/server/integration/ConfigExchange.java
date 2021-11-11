@@ -43,7 +43,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
 final class ConfigExchange extends SingleChannelExchange implements AutoCloseable {
 
     /**
-     * Returns the ID of the channel used to exchange the {@code ExternalEventsWanted} messages.
+     * ID of the channel used to exchange the {@code ExternalEventsWanted} messages.
      */
     private static final ChannelId CHANNEL = channelIdFor(TypeUrl.of(ExternalEventsWanted.class));
 
