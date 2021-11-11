@@ -55,8 +55,8 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
      * @param context
      *         the name of the Bounded Context in which the created observer exists
      * @param messageClass
-     *         the type of the observed messages, which are transferred wrapped into {@code
-     *         ExternalMessage}
+     *         the type of the observed messages, which are transferred wrapped
+     *         into {@code ExternalMessage}
      */
     protected AbstractChannelObserver(BoundedContextName context,
                                       Class<? extends Message> messageClass) {
@@ -96,12 +96,14 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
         checkNotNull(message);
         checkState(!completed.get(),
                    "Channel %s received message (%s[%s]) despite being closed.",
-                   message.getClass().getName(),
-                   message.getOriginalMessage().getTypeUrl());
+                   message.getClass()
+                          .getName(),
+                   message.getOriginalMessage()
+                          .getTypeUrl());
         BoundedContextName source = message.getBoundedContextName();
         boolean sameContext = boundedContextName.equals(source)
-                           || boundedContextName.isSystemOf(source)
-                           || source.isSystemOf(boundedContextName);
+                || boundedContextName.isSystemOf(source)
+                || source.isSystemOf(boundedContextName);
         if (!sameContext) {
             handle(message);
         }
