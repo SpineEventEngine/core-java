@@ -33,9 +33,9 @@ import io.spine.server.type.EventClass;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 
 /**
- * An observer of the incoming external domain events of the specified type.
+ * An observer of the incoming {@code external} domain events of the specified type.
  *
- * <p>Responsible of receiving those from the transport and dispatching to the local Event bus.
+ * <p>Responsible of receiving those from the transport and dispatching to the local event bus.
  */
 final class IncomingEventObserver extends AbstractChannelObserver {
 
@@ -51,9 +51,7 @@ final class IncomingEventObserver extends AbstractChannelObserver {
      * @param bus
      *         the adapter over the event bus to which the observed events should be dispatched
      */
-    IncomingEventObserver(BoundedContextName context,
-                          EventClass eventCls,
-                          BusAdapter bus) {
+    IncomingEventObserver(BoundedContextName context, EventClass eventCls, BusAdapter bus) {
         super(context, eventCls.value());
         this.bus = bus;
     }
