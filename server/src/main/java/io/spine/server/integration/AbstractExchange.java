@@ -55,9 +55,9 @@ abstract class AbstractExchange {
     }
 
     /**
-     * Returns the IDs of all channels used for subscription in the underlying link.
+     * Returns the IDs of all channels used for subscribing through the underlying link.
      */
-    protected final Set<ChannelId> subscriptionChannels() {
+    final Set<ChannelId> subscriptionChannels() {
         return link.subscriptionChannels();
     }
 
