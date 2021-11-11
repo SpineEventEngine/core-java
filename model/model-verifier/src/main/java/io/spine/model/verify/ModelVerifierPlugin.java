@@ -32,7 +32,7 @@ import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.assemble.AssignLookup;
 import io.spine.tools.gradle.SpinePlugin;
-import io.spine.tools.mc.java.gradle.McJavaExtension;
+import io.spine.tools.mc.java.gradle.McJavaOptions;
 import io.spine.tools.type.MoreKnownTypes;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -46,7 +46,6 @@ import java.nio.file.StandardOpenOption;
 
 import static io.spine.tools.gradle.JavaTaskName.classes;
 import static io.spine.tools.gradle.JavaTaskName.compileJava;
-import static io.spine.tools.mc.java.gradle.McJavaExtension.getMainDescriptorSetFile;
 import static io.spine.tools.mc.java.gradle.plugins.ModelVerifierTaskName.verifyModel;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
@@ -118,9 +117,9 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         }
 
         private void extendKnownTypes(Project project) {
-            String pluginExtensionName = McJavaExtension.name();
+            String pluginExtensionName = McJavaOptions.name();
             if (project.getExtensions().findByName(pluginExtensionName) != null) {
-                File descriptorFile = getMainDescriptorSetFile(project);
+                File descriptorFile = McJavaOptions.descriptorSetFileOf(project, true);
                 tryExtend(descriptorFile);
             } else {
                 _warn().log(
