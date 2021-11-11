@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.IncrementGuard
 import io.spine.internal.gradle.Scripts
 
 val spineBaseTypesVersion: String by extra
@@ -38,15 +37,17 @@ dependencies {
 
 modelCompiler {
     java {
-        forMessage("spine.core.Event") {
-            // Describe the `Event` fields to allow non-reflective and strongly-typed access.
-            markFieldsAs("io.spine.core.EventField")
-        }
+        codegen {
+            forMessage("spine.core.Event") {
+                // Describe the `Event` fields to allow non-reflective and strongly-typed access.
+                markFieldsAs("io.spine.core.EventField")
+            }
 
-        // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
-        // creation of typed event filters based on event context.
-        forMessage("spine.core.EventContext") {
-            markFieldsAs("io.spine.core.EventContextField")
+            // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
+            // creation of typed event filters based on event context.
+            forMessage("spine.core.EventContext") {
+                markFieldsAs("io.spine.core.EventContextField")
+            }
         }
     }
 }
