@@ -39,8 +39,8 @@ import java.util.Set;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
- * Reacts on {@code ExternalEventsWanted} sent by other parties (usually Bounded Contexts)
- * in a multi-component environment.
+ * Reacts on {@code ExternalEventsWanted} sent by other Bounded Contexts
+ * and creates the corresponding subscriptions in the underlying bus.
  *
  * @see #handle(ExternalMessage)
  */
@@ -104,7 +104,6 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
     private void clearStaleSubscriptions(Collection<ExternalEventType> types,
                                          BoundedContextName origin) {
         Set<ExternalEventType> toRemove = findStale(types, origin);
-
         for (ExternalEventType itemForRemoval : toRemove) {
             boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
                                                   .isEmpty();
