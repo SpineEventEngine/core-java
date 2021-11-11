@@ -64,7 +64,7 @@ abstract class AbstractExchange {
     /**
      * Returns the subscriber for the passed ID of the channel.
      */
-    protected final Subscriber subscriber(ChannelId channel) {
+    final Subscriber subscriber(ChannelId channel) {
         Subscriber result = link.subscriber(channel);
         return result;
     }
@@ -72,7 +72,7 @@ abstract class AbstractExchange {
     /**
      * Returns the publisher for the passed ID of the channel.
      */
-    protected final Publisher publisher(ChannelId channel) {
+    final Publisher publisher(ChannelId channel) {
         Publisher result = link.publisher(channel);
         return result;
     }
