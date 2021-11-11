@@ -35,8 +35,10 @@ import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+import io.spine.type.TypeUrl;
 
-import static io.spine.server.integration.Channels.toChannelId;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
  * Sends and receives the {@code external} domain events.
@@ -112,5 +114,14 @@ class EventsExchange extends AbstractExchange {
     private IncomingEventObserver observerFor(EventClass eventType) {
         IncomingEventObserver observer = new IncomingEventObserver(context(), eventType, bus);
         return observer;
+    }
+
+    /**
+     * Creates an ID of the channel that will transmit the events of the given class.
+     */
+    private static ChannelId toChannelId(EventClass cls) {
+        checkNotNull(cls);
+        TypeUrl targetType = cls.typeUrl();
+        return channelIdFor(targetType);
     }
 }

@@ -28,11 +28,13 @@ package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.transport.ChannelId;
+import io.spine.type.TypeUrl;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
  * Tells other Bounded Contexts about the {@code external} domain events requested for subscription
@@ -40,10 +42,13 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 final class ConfigExchange extends SingleChannelExchange implements AutoCloseable {
 
-    private static final ChannelId configurationChannel = Channels.eventsWanted();
+    /**
+     * Returns the ID of the channel used to exchange the {@code ExternalEventsWanted} messages.
+     */
+    private static final ChannelId CHANNEL = channelIdFor(TypeUrl.of(ExternalEventsWanted.class));
 
     private final BroadcastWantedEvents broadcast;
-    private final Set<ObserveWantedEvents> observers = new HashSet<>();
+    private final Collection<ObserveWantedEvents> observers = new HashSet<>();
 
     /**
      * Creates a new exchange with the passed link.
@@ -68,7 +73,7 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
 
     @Override
     ChannelId channel() {
-        return configurationChannel;
+        return CHANNEL;
     }
 
     /**
@@ -88,9 +93,20 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
     void notifyTypesChanged() {
         ImmutableSet<ExternalEventType> eventTypes = subscriptionChannels()
                 .stream()
-                .map(Channels::typeOfTransmittedEvents)
+                .map(ConfigExchange::typeOfTransmittedEvents)
                 .collect(toImmutableSet());
         broadcast.onEventsChanged(eventTypes);
+    }
+
+    /**
+     * Interprets the channel as the one transmitting external events, and extracts
+     * the external event type from the ID value.
+     */
+    private static ExternalEventType typeOfTransmittedEvents(ChannelId channel) {
+        return ExternalEventType
+                .newBuilder()
+                .setTypeUrl(channel.getTargetType())
+                .vBuild();
     }
 
     @Override

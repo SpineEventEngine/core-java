@@ -27,25 +27,36 @@
 package io.spine.server.integration;
 
 import io.spine.core.BoundedContextName;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.ChannelId;
+import io.spine.type.TypeUrl;
 
 import java.util.function.Consumer;
 
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.transport.MessageChannel.channelIdFor;
+
 /**
- * @author Alex Tymchenko
+ * Sends and receives the {@link BoundedContextOnline} statuses.
  */
 final class StatusExchange extends SingleChannelExchange {
 
     private static final Class<BoundedContextOnline> TYPE = BoundedContextOnline.class;
 
+    /**
+     * The ID of the channel used to exchange {@code BoundedContextOnline} messages.
+     */
+    private static final ChannelId CHANNEL = channelIdFor(TypeUrl.of(TYPE));
+
+    /**
+     * Creates a new exchange over the passed transport link.
+     */
     StatusExchange(TransportLink link) {
         super(link);
     }
 
     @Override
     ChannelId channel() {
-        return Channels.statuses();
+        return CHANNEL;
     }
 
     /**
@@ -68,24 +79,26 @@ final class StatusExchange extends SingleChannelExchange {
         subscriber().addObserver(new Observer(context(), callback));
     }
 
+    /**
+     * Triggers the specified callback upon each received {@code BoundedContextOnline} message.
+     */
     private static final class Observer extends AbstractChannelObserver {
 
         private final Consumer<BoundedContextOnline> callback;
 
-        private Observer(BoundedContextName context,
-                         Consumer<BoundedContextOnline> callback) {
+        private Observer(BoundedContextName context, Consumer<BoundedContextOnline> callback) {
             super(context, TYPE);
             this.callback = callback;
         }
 
         @Override
         protected void handle(ExternalMessage message) {
-            BoundedContextOnline msg = unpack(message);
+            BoundedContextOnline msg = asOriginal(message);
             callback.accept(msg);
         }
 
-        private BoundedContextOnline unpack(ExternalMessage message) {
-            BoundedContextOnline msg = AnyPacker.unpack(message.getOriginalMessage(), TYPE);
+        private static BoundedContextOnline asOriginal(ExternalMessage message) {
+            BoundedContextOnline msg = unpack(message.getOriginalMessage(), TYPE);
             return msg;
         }
     }
