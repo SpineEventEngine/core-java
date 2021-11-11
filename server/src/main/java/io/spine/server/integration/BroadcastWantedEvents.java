@@ -85,7 +85,7 @@ final class BroadcastWantedEvents {
                 .newBuilder()
                 .addAllType(wantedEvents)
                 .vBuild();
-        ExternalMessage externalMessage = ExternalMessages.of(request, context);
-        publisher.publish(pack(newUuid()), externalMessage);
+        ExternalMessage wrapped = ExternalMessages.of(request, context);
+        publisher.publish(wrapped.getId(), wrapped);
     }
 }
