@@ -57,9 +57,10 @@ buildscript {
     val kotlinVersion = io.spine.internal.dependency.Kotlin.version
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
+    val mcJavaVersion: String by extra
 
     dependencies {
-        classpath("io.spine.tools:spine-mc-java:$spineBaseVersion")
+        classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
     }
 
     io.spine.internal.gradle.doForceVersions(configurations)
