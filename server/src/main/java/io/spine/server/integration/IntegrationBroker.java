@@ -32,16 +32,11 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.PublisherHub;
-import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
-import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
-import static io.spine.server.integration.Channels.toChannelId;
 
 /**
  * Dispatches {@linkplain ExternalMessage external messages} from and to a Bounded Context with
@@ -120,7 +115,6 @@ import static io.spine.server.integration.Channels.toChannelId;
  * between the Contexts.
  */
 @Internal
-@SuppressWarnings("OverlyCoupledClass")
 public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
     private final SubscriberHub subscriberHub;
@@ -206,7 +200,9 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        config.close();
+        if (config != null) {
+            config.close();
+        }
         subscriberHub.close();
         publisherHub.close();
     }
