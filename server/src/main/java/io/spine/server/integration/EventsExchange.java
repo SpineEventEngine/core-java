@@ -42,6 +42,12 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
  * Sends and receives the {@code external} domain events.
+ *
+ * <p>Publishes the domain events of the parent Bounded Context to those Bounded Contexts which
+ * requested them for their {@code external} subscribers.
+ *
+ * <p>Receives the domain events from other Bounded Contexts and posts them to the domestic
+ * bus treating them as {@code external}.
  */
 class EventsExchange extends AbstractExchange {
 
@@ -94,8 +100,8 @@ class EventsExchange extends AbstractExchange {
     }
 
     /**
-     * Unregisters a local dispatcher which should no longer receive its {@code external} events
-     * through this exchange.
+     * Unregisters a local dispatcher in case it should no longer receive its
+     * {@code external} events via this exchange.
      *
      * @param dispatcher
      *         the dispatcher to unregister
@@ -110,6 +116,9 @@ class EventsExchange extends AbstractExchange {
         }
     }
 
+    /**
+     * Creates a new observer for a particular type of events.
+     */
     private IncomingEventObserver observerFor(EventClass eventType) {
         IncomingEventObserver observer = new IncomingEventObserver(context(), eventType, bus);
         return observer;
