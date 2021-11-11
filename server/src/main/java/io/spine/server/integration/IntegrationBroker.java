@@ -205,6 +205,6 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
 
     @Override
     public String toString() {
-        return "IntegrationBroker of <" + contextName.getValue() + '>';
+        return "`IntegrationBroker` of <" + contextName.getValue() + '>';
     }
 }
