@@ -56,11 +56,10 @@ class EventsExchange extends AbstractExchange {
     }
 
     /**
-     * Publishes the given event for other Bounded Contexts.
+     * Publishes the given event via this exchange.
      *
-     * <p>If the given event belongs to another context, does nothing. More formally, if there is
-     * a subscriber channel in this broker for events of such a type, those events are
-     * NOT published from this Context.
+     * <p>Does nothing for events, which by chance, were passed into this method, being originated
+     * from other Bounded Contexts.
      *
      * @param event
      *         event to publish

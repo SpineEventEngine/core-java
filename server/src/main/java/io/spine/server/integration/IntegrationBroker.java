@@ -160,10 +160,6 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     /**
      * Publishes the given event for other Bounded Contexts.
      *
-     * <p>If the given event belongs to another context, does nothing. More formally, if there is
-     * a subscriber channel in this broker for events of such a type, those events are
-     * NOT published from this Context.
-     *
      * @param event
      *         event to publish
      */
