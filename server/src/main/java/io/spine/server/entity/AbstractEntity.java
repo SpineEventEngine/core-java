@@ -412,8 +412,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (lifecycleFlags().getDeleted()) {
             Any packedId = Identifier.pack(id());
-            throw CannotModifyDeletedEntity
-                    .newBuilder()
+            throw CannotModifyDeletedEntity.newBuilder()
                     .setEntityId(packedId)
                     .build();
         }

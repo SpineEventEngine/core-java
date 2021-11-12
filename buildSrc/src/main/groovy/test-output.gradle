@@ -33,6 +33,8 @@
  *    of tests and their results.
  */
 
+println("`test-output.gradle` script is deprecated. Please use `Test.configureLogging()` instead.")
+
 tasks.withType(Test).each {
     it.testLogging {
         showStandardStreams = true

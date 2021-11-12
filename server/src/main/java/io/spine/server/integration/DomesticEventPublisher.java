@@ -38,9 +38,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A subscriber to local {@code EventBus}, which publishes each matching domestic event to
  * a remote channel.
  *
- * <p>The events to subscribe are those that are required by external application components
- * at this moment; their set is determined by the {@linkplain RequestForExternalMessages
- * configuration messages}, received by this instance of {@code IntegrationBroker}.
+ * <p>The events to subscribe are those that are required by other Bounded Contexts.
+ * Their set is determined by the {@linkplain ExternalEventsWanted
+ * configuration messages}, received by the associated instance of {@code IntegrationBroker}.
  */
 final class DomesticEventPublisher implements EventDispatcher, Logging {
 

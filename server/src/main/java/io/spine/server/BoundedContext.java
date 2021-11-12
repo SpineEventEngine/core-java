@@ -136,7 +136,6 @@ public abstract class BoundedContext implements Closeable, Logging {
         this.eventBus = builder.buildEventBus(this);
         this.stand = builder.stand();
         this.tenantIndex = builder.buildTenantIndex();
-
         this.broker = new IntegrationBroker();
         this.commandBus = builder.buildCommandBus();
         this.importBus = buildImportBus(tenantIndex);

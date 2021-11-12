@@ -31,7 +31,6 @@ import com.google.protobuf.StringValue;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 
@@ -41,19 +40,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Utilities for working with {@linkplain ExternalMessage external messages}.
  */
 @Internal
-public final class ExternalMessages {
+final class ExternalMessages {
 
     /** Prevents instantiation of this utility class. */
-    private ExternalMessages() {}
+    private ExternalMessages() {
+    }
 
     /**
      * Wraps the instance of {@link Event} into an {@code ExternalMessage}.
      *
-     * @param event  the event to wrap
-     * @param origin the name of the bounded context in which the event was created
+     * @param event
+     *         the event to wrap
+     * @param origin
+     *         the name of the Bounded Context in which the event was created
      * @return the external message wrapping the given event
      */
-    public static ExternalMessage of(Event event, BoundedContextName origin) {
+    static ExternalMessage of(Event event, BoundedContextName origin) {
         checkNotNull(event);
         checkNotNull(origin);
 
@@ -62,67 +64,49 @@ public final class ExternalMessages {
     }
 
     /**
-     * Wraps the instance of {@link Command} into an {@code ExternalMessage}.
+     * Wraps the instance of {@link ExternalEventsWanted} into an {@code ExternalMessage}.
      *
-     * @param command the command to wrap
-     * @param origin  the name of the bounded context in which the command was created
-     * @return the external message wrapping the given command
-     */
-    public static ExternalMessage of(Command command, BoundedContextName origin) {
-        checkNotNull(command);
-        checkNotNull(origin);
-
-        ExternalMessage result = of(command.getId(), command, origin);
-        return result;
-    }
-
-    /**
-     * Wraps the instance of {@link RequestForExternalMessages} into an {@code ExternalMessage}.
-     *
-     * @param request the request to wrap
-     * @param origin  the name of bounded context in which the request was created
+     * @param request
+     *         the request to wrap
+     * @param origin
+     *         the name of Bounded Context in which the request was created
      * @return the external message wrapping the given request
      */
-    static ExternalMessage of(RequestForExternalMessages request, BoundedContextName origin) {
+    static ExternalMessage of(ExternalEventsWanted request, BoundedContextName origin) {
         checkNotNull(request);
         checkNotNull(origin);
 
-        ExternalMessage result = of(generateMessageId(), request, origin);
+        ExternalMessage result = of(generateId(), request, origin);
         return result;
     }
 
     /**
-     * Wraps the instance of {@link ExternalMessagesSourceAvailable} into an {@code ExternalMessage}.
+     * Wraps the instance of {@link BoundedContextOnline} into an {@code ExternalMessage}.
      *
-     * @param notification the notification to wrap
-     * @param origin the name of a bounded context in which the notification was created
+     * @param notification
+     *         the notification to wrap
      * @return the external message wrapping the given notification
      */
-    static ExternalMessage of(ExternalMessagesSourceAvailable notification, BoundedContextName origin) {
+    static ExternalMessage of(BoundedContextOnline notification) {
         checkNotNull(notification);
-        checkNotNull(origin);
-
-        ExternalMessage result = of(generateMessageId(), notification, origin);
+        ExternalMessage result = of(generateId(), notification, notification.getContext());
         return result;
     }
 
-    private static StringValue generateMessageId() {
-        return StringValue.newBuilder()
-                .setValue(Identifier.newUuid())
-                .build();
+    private static StringValue generateId() {
+        StringValue result = StringValue.of(Identifier.newUuid());
+        return result;
     }
 
-    private static ExternalMessage of(Message messageId,
-                                      Message message,
-                                      BoundedContextName boundedContextName) {
-        Any packedId = Identifier.pack(messageId);
+    private static ExternalMessage of(Message id, Message message, BoundedContextName origin) {
+        Any packedId = Identifier.pack(id);
         Any packedMessage = AnyPacker.pack(message);
 
         ExternalMessage result = ExternalMessage
                 .newBuilder()
                 .setId(packedId)
                 .setOriginalMessage(packedMessage)
-                .setBoundedContextName(boundedContextName)
+                .setBoundedContextName(origin)
                 .build();
         return result;
     }

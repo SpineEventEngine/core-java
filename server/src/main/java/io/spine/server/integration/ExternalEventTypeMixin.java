@@ -23,33 +23,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
-import io.spine.core.BoundedContextName;
-import io.spine.core.Event;
-import io.spine.protobuf.AnyPacker;
+import io.spine.annotation.GeneratedMixin;
+import io.spine.type.TypeUrl;
 
 /**
- * An observer of the incoming external messages of the specified message class.
- *
- * <p>Responsible of receiving those from the transport layer and posting those to the local
- * instance of {@code IntegrationBroker}.
+ * A generated mixin interface for the {@code ExternalEventType} type.
  */
-final class ExternalMessageObserver extends AbstractChannelObserver {
+@GeneratedMixin
+interface ExternalEventTypeMixin extends ExternalEventTypeOrBuilder {
 
-    private final IntegrationBroker broker;
-
-    ExternalMessageObserver(BoundedContextName boundedContextName,
-                            Class<? extends Message> messageClass,
-                            IntegrationBroker broker) {
-        super(boundedContextName, messageClass);
-        this.broker = broker;
-    }
-
-    @Override
-    protected void handle(ExternalMessage message) {
-        Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
-        broker.dispatchLocally(event);
+    /**
+     * Obtains the message type as a Java class.
+     */
+    default Class<? extends Message> asMessageClass() {
+        String rawValue = getTypeUrl();
+        TypeUrl typeUrl = TypeUrl.parse(rawValue);
+        return typeUrl.getMessageClass();
     }
 }

@@ -61,7 +61,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("ThirdPartyContext should")
+@DisplayName("`ThirdPartyContext` should")
 class ThirdPartyContextTest {
 
     private BoundedContext context;

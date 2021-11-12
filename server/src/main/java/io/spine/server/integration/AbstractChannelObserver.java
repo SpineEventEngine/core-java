@@ -40,8 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Base routines for the {@linkplain Subscriber#addObserver(StreamObserver)}
- * subscriber observers.
+ * Base routines for the {@linkplain Subscriber#addObserver(StreamObserver) subscriber observers}.
  */
 @SPI
 public abstract class AbstractChannelObserver implements StreamObserver<ExternalMessage>, Logging {
@@ -50,9 +49,18 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
     private final Class<? extends Message> messageClass;
     private final AtomicBoolean completed = new AtomicBoolean(false);
 
-    protected AbstractChannelObserver(BoundedContextName boundedContextName,
+    /**
+     * Creates a new instance of the observer.
+     *
+     * @param context
+     *         the name of the Bounded Context in which the created observer exists
+     * @param messageClass
+     *         the type of the observed messages, which are transferred wrapped
+     *         into {@code ExternalMessage}
+     */
+    protected AbstractChannelObserver(BoundedContextName context,
                                       Class<? extends Message> messageClass) {
-        this.boundedContextName = boundedContextName;
+        this.boundedContextName = context;
         this.messageClass = messageClass;
     }
 
@@ -88,15 +96,24 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
         checkNotNull(message);
         checkState(!completed.get(),
                    "Channel %s received message (%s[%s]) despite being closed.",
-                   message.getClass().getName(),
-                   message.getOriginalMessage().getTypeUrl());
+                   message.getClass()
+                          .getName(),
+                   message.getOriginalMessage()
+                          .getTypeUrl());
         BoundedContextName source = message.getBoundedContextName();
         boolean sameContext = boundedContextName.equals(source)
-                           || boundedContextName.isSystemOf(source)
-                           || source.isSystemOf(boundedContextName);
+                || boundedContextName.isSystemOf(source)
+                || source.isSystemOf(boundedContextName);
         if (!sameContext) {
             handle(message);
         }
+    }
+
+    /**
+     * Returns the name of the Bounded Context in scope of which this observer exists.
+     */
+    protected final BoundedContextName contextName() {
+        return boundedContextName;
     }
 
     @Override

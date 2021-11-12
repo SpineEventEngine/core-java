@@ -39,98 +39,93 @@ import java.util.Set;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
- * Reacts on {@code RequestForExternalMessages} sent by other parties (usually Bounded Contexts)
- * in a multi-component environment.
+ * Reacts on {@code ExternalEventsWanted} sent by other Bounded Contexts
+ * and creates the corresponding subscriptions in the underlying bus.
  *
  * @see #handle(ExternalMessage)
  */
-final class ExternalNeedsObserver
-        extends AbstractChannelObserver
-        implements AutoCloseable {
+final class ObserveWantedEvents extends AbstractChannelObserver implements AutoCloseable {
 
     private final BoundedContextName boundedContextName;
     private final BusAdapter bus;
 
     /**
      * Current set of message type URLs, requested by other parties via sending the
-     * {@linkplain RequestForExternalMessages configuration messages}, mapped to IDs of their origin
+     * {@linkplain ExternalEventsWanted configuration messages}, mapped to IDs of their origin
      * bounded contexts.
      */
-    private final Multimap<ExternalMessageType, BoundedContextName> requestedTypes =
+    private final Multimap<ExternalEventType, BoundedContextName> requestedTypes =
             HashMultimap.create();
 
-    ExternalNeedsObserver(BoundedContextName context, BusAdapter bus) {
-        super(context, RequestForExternalMessages.class);
+    ObserveWantedEvents(BoundedContextName context, BusAdapter bus) {
+        super(context, ExternalEventsWanted.class);
         this.boundedContextName = context;
         this.bus = bus;
     }
 
     /**
-     * Unpacks {@code RequestForExternalMessages} from the passed {@code ExternalMessage} and
+     * Unpacks {@code ExternalEventsWanted} from the passed {@code ExternalMessage} and
      * handles it by creating local publishers for the requested types and dismissing types
      * that are no longer needed.
      */
     @Override
     public void handle(ExternalMessage message) {
         BoundedContextName origin = message.getBoundedContextName();
-        RequestForExternalMessages request = unpack(
+        if (origin.equals(contextName())) {
+            return;
+        }
+        ExternalEventsWanted request = unpack(
                 message.getOriginalMessage(),
-                RequestForExternalMessages.class
+                ExternalEventsWanted.class
         );
-
-        List<ExternalMessageType> externalTypes = request.getRequestedMessageTypeList();
+        List<ExternalEventType> externalTypes = request.getTypeList();
         addNewSubscriptions(externalTypes, origin);
         clearStaleSubscriptions(externalTypes, origin);
     }
 
-    private void addNewSubscriptions(Iterable<ExternalMessageType> types,
+    private void addNewSubscriptions(Iterable<ExternalEventType> types,
                                      BoundedContextName origin) {
-        for (ExternalMessageType newType : types) {
+        for (ExternalEventType newType : types) {
             Collection<BoundedContextName> contextsWithSameRequest = requestedTypes.get(newType);
             if (contextsWithSameRequest.isEmpty()) {
-
                 // This item has not been requested by anyone yet.
                 // Let's create a subscription.
                 registerInAdapter(newType);
             }
-
             requestedTypes.put(newType, origin);
         }
     }
 
-    private void registerInAdapter(ExternalMessageType newType) {
-        Class<? extends Message> messageClass = newType.asMessageClass();
+    private void registerInAdapter(ExternalEventType type) {
+        Class<? extends Message> messageClass = type.asMessageClass();
         bus.register(messageClass);
     }
 
-    private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
+    private void clearStaleSubscriptions(Collection<ExternalEventType> types,
                                          BoundedContextName origin) {
-
-        Set<ExternalMessageType> toRemove = findStale(types, origin);
-
-        for (ExternalMessageType itemForRemoval : toRemove) {
+        Set<ExternalEventType> toRemove = findStale(types, origin);
+        for (ExternalEventType itemForRemoval : toRemove) {
             boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
                                                   .isEmpty();
             requestedTypes.remove(itemForRemoval, origin);
             boolean emptyNow = requestedTypes.get(itemForRemoval)
                                              .isEmpty();
-
             if (wereNonEmpty && emptyNow) {
                 unregisterInAdapter(itemForRemoval);
             }
         }
     }
 
-    private void unregisterInAdapter(ExternalMessageType itemForRemoval) {
-        Class<? extends Message> messageClass = itemForRemoval.asMessageClass();
+    private void unregisterInAdapter(ExternalEventType type) {
+        Class<? extends Message> messageClass = type.asMessageClass();
         bus.unregister(messageClass);
     }
 
-    private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,
-                                               BoundedContextName origin) {
-        ImmutableSet.Builder<ExternalMessageType> result = ImmutableSet.builder();
+    private Set<ExternalEventType> findStale(Collection<ExternalEventType> types,
+                                             BoundedContextName origin) {
+        ImmutableSet.Builder<ExternalEventType> result = ImmutableSet.builder();
 
-        for (ExternalMessageType previouslyRequestedType : requestedTypes.keySet()) {
+        for (ExternalEventType previouslyRequestedType : requestedTypes.keySet()) {
             Collection<BoundedContextName> contextsThatRequested =
                     requestedTypes.get(previouslyRequestedType);
 
@@ -139,7 +134,6 @@ final class ExternalNeedsObserver
 
                 // The `previouslyRequestedType` item is no longer requested
                 // by the bounded context with `origin` name.
-
                 result.add(previouslyRequestedType);
             }
         }
@@ -148,8 +142,9 @@ final class ExternalNeedsObserver
 
     @Override
     public String toString() {
-        return "Integration bus observer of `RequestedMessageTypes`. " +
-                "Bounded Context name = " + boundedContextName.getValue();
+        return String.format(
+                "Observer of `RequestedEventType`s. Bounded Context name = `%s`.",
+                boundedContextName.getValue());
     }
 
     /**
@@ -157,7 +152,7 @@ final class ExternalNeedsObserver
      */
     @Override
     public void close() {
-        for (ExternalMessageType currentlyRequestedMessage : requestedTypes.keySet()) {
+        for (ExternalEventType currentlyRequestedMessage : requestedTypes.keySet()) {
             unregisterInAdapter(currentlyRequestedMessage);
         }
         requestedTypes.clear();

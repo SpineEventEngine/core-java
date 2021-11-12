@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.IncrementGuard
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.testing.exposeTestArtifacts
 
 val spineBaseTypesVersion: String by extra
 val spineTimeVersion: String by extra
@@ -38,30 +38,20 @@ dependencies {
 
 modelCompiler {
     java {
-        forMessage("spine.core.Event") {
-            // Describe the `Event` fields to allow non-reflective and strongly-typed access.
-            markFieldsAs("io.spine.core.EventField")
-        }
+        codegen {
+            forMessage("spine.core.Event") {
+                // Describe the `Event` fields to allow non-reflective and strongly-typed access.
+                markFieldsAs("io.spine.core.EventField")
+            }
 
-        // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
-        // creation of typed event filters based on event context.
-        forMessage("spine.core.EventContext") {
-            markFieldsAs("io.spine.core.EventContextField")
+            // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
+            // creation of typed event filters based on event context.
+            forMessage("spine.core.EventContext") {
+                markFieldsAs("io.spine.core.EventContextField")
+            }
         }
     }
 }
-
-apply {
-    with(Scripts) {
-        from(testArtifacts(project))
-        from(publishProto(project))
-    }
-    plugin(IncrementGuard::class)
+java {
+    exposeTestArtifacts()
 }
-
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy

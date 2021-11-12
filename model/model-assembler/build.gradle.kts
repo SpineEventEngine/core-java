@@ -24,23 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
-}
-
 group = "io.spine.tools"
 
 val spineBaseVersion: String by extra
-
 dependencies {
     implementation(project(":server"))
-
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
 }
-
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy

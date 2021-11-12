@@ -23,24 +23,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.server.bus.DeadMessageHandler;
+package io.spine.internal.gradle.report.coverage
+
+import java.io.File
 
 /**
- * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
- * which has no targets to be dispatched to.
+ * Utilities for filtering the groups of `File`s.
  */
-enum DeadExternalMessageHandler implements DeadMessageHandler<ExternalMessageEnvelope> {
+internal object FileFilter {
 
-    INSTANCE;
+    /**
+     * Excludes the generated files from this file collection, leaving only those which were
+     * created by human beings.
+     */
+    fun producedByHuman(files: Iterable<File>): Iterable<File> {
+        return files.filter { !it.isGenerated }
+    }
 
-    @Override
-    public UnsupportedExternalMessageException handle(ExternalMessageEnvelope envelope) {
-        Message message = envelope.message();
-        UnsupportedExternalMessageException exception =
-                new UnsupportedExternalMessageException(message);
-        return exception;
+    /**
+     * Filters this file collection so that only generated files are present.
+     */
+    fun generatedOnly(files: Iterable<File>): Iterable<File> {
+        return files.filter { it.isGenerated }
     }
 }

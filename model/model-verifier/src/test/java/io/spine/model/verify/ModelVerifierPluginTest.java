@@ -43,7 +43,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 
-import static io.spine.tools.mc.java.gradle.ModelVerifierTaskName.verifyModel;
+import static io.spine.tools.mc.java.gradle.plugins.ModelVerifierTaskName.verifyModel;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -114,8 +114,7 @@ class ModelVerifierPluginTest {
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
-        return GradleProject
-                .newBuilder()
+        return GradleProject.newBuilder()
                 .setProjectName(PROJECT_NAME)
                 .setProjectFolder(tempDir)
                 .addJavaFiles(fileNames)
