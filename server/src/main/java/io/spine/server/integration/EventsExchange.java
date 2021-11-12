@@ -49,7 +49,7 @@ import static io.spine.server.transport.MessageChannel.channelIdFor;
  * <p>Receives the domain events from other Bounded Contexts and posts them to the domestic
  * bus treating them as {@code external}.
  */
-class EventsExchange extends AbstractExchange {
+final class EventsExchange extends AbstractExchange {
 
     private final BusAdapter bus;
 
