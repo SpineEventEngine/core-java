@@ -101,8 +101,7 @@ class ClientSupplier implements Closeable {
     }
 
     /**
-     * Every {@link Client} needs a gRPC server to be connected to. This method makes certain
-     * that this supplier has a gRPC server running and ready to establish connections with.
+     * Runs the gRPC server in case it has not been run previously.
      */
     private void ensureServer() {
         checkOpen();
