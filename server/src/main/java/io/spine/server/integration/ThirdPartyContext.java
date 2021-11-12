@@ -123,6 +123,7 @@ public final class ThirdPartyContext implements Closeable {
         checkTenant(actorContext, eventMessage);
 
         EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
+        @SuppressWarnings("ConstantConditions")     /* No explicit version to be set. */
         Event event = eventFactory.createEvent(eventMessage, null);
         context.internalAccess()
                .broker()
