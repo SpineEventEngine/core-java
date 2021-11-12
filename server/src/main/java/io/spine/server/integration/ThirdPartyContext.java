@@ -54,7 +54,7 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
  *         other contexts. The {@code ThirdPartyContext} never consumes external messages itself,
  *         but requires the other Bounded Contexts to send their requests, so that the publishing
  *         channels are open. Depending of the implementation of
- *         {@link io.spine.server.transport.TransportFactory transport}, creating
+ *         {@linkplain io.spine.server.transport.TransportFactory transport}, creating
  *         a {@code ThirdPartyContext} may be an expensive operation. Thus, it is recommended that
  *         the instances of this class are reused and {@linkplain #close() closed} when they are
  *         no longer needed.
