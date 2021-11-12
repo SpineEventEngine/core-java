@@ -36,11 +36,14 @@ import io.spine.server.GrpcContainer;
 import io.spine.server.QueryService;
 import io.spine.server.SubscriptionService;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Objects.isNull;
 
@@ -78,26 +81,38 @@ class ClientSupplier implements Closeable {
     }
 
     /**
-     * Opens a new {@code Client} to a single tenant {@code BoundedContext}.
+     * Opens a new {@code Client} to the Bounded Context.
+     *
+     * <p>It is a caller responsibility to match the tenancy setting of the Bounded Context.
+     * So if the context is single-tenant, this method expects {@code null}.
+     *
+     * <p>For the multi-tenant Context, the passed {@code tenant} value must be non-{@code null}.
      */
-    Client create() {
+    Client create(@Nullable TenantId tenant) {
+        ensureTenantMatch(tenant);
         ensureServer();
-        Client client = Client.inProcess(serverName)
-                              .build();
+        Client.Builder builder = Client.inProcess(serverName);
+        if(tenant != null) {
+            builder.forTenant(tenant);
+        }
+        Client client = builder.build();
         clients.add(client);
         return client;
     }
 
-    /**
-     * Opens a new {@code Client} to a multi-tenant {@code BoundedContext} with a tenant specified.
-     */
-    Client createFor(TenantId tenantId) {
-        ensureServer();
-        Client client = Client.inProcess(serverName)
-                              .forTenant(tenantId)
-                              .build();
-        clients.add(client);
-        return client;
+    private void ensureTenantMatch(@Nullable TenantId tenant) {
+        if(tenant == null) {
+            checkState(!context.isMultitenant(),
+                       "The context `%s` is multi-tenant, " +
+                               "it is not possible to create a `Client` with no tenant ID passed.",
+                       context.name()
+                              .value());
+        } else {
+            checkState(context.isMultitenant(),
+                       "The context `%s` is single-tenant, " +
+                               "it is not possible to create a `Client` for the tenant ID `%s`.",
+                       context.name().value(), shortDebugString(tenant));
+        }
     }
 
     /**

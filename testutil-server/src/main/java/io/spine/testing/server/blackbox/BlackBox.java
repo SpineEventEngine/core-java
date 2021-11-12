@@ -705,9 +705,7 @@ public abstract class BlackBox implements Logging, Closeable {
      */
     public Client client() {
         @Nullable TenantId tenantId = requestFactory().tenantId();
-        Client result = isNull(tenantId)
-                        ? clientSupplier.create()
-                        : clientSupplier.createFor(tenantId);
+        Client result = clientSupplier.create(tenantId);
         return result;
     }
 }
