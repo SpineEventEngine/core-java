@@ -105,8 +105,7 @@ class ClientSupplier implements Closeable {
             checkState(!context.isMultitenant(),
                        "The context `%s` is multi-tenant, " +
                                "it is not possible to create a `Client` with no tenant ID passed.",
-                       context.name()
-                              .value());
+                       context.name().value());
         } else {
             checkState(context.isMultitenant(),
                        "The context `%s` is single-tenant, " +
