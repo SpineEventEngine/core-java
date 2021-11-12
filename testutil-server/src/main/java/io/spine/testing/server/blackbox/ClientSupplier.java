@@ -52,8 +52,19 @@ import static java.util.Objects.isNull;
  */
 class ClientSupplier implements Closeable {
 
+    /**
+     * The context to which this supplier creates {@code Client} instances.
+     */
     private final BoundedContext context;
-    private final List<Client> createdClient;
+
+    /**
+     * Instances created so far.
+     *
+     * <p>Ultimately, they need to be closed.
+     *
+     * @see #close()
+     */
+    private final List<Client> clients;
 
     private @MonotonicNonNull GrpcContainer grpcContainer;
     private @MonotonicNonNull String serverName;
@@ -63,7 +74,7 @@ class ClientSupplier implements Closeable {
      */
     ClientSupplier(BoundedContext context) {
         this.context = context;
-        this.createdClient = new ArrayList<>();
+        this.clients = new ArrayList<>();
     }
 
     /**
@@ -73,19 +84,19 @@ class ClientSupplier implements Closeable {
         ensureServer();
         Client client = Client.inProcess(serverName)
                               .build();
-        createdClient.add(client);
+        clients.add(client);
         return client;
     }
 
     /**
-     * Opens a new {@code Client} to a multitenant {@code BoundedContext} with a tenant specified.
+     * Opens a new {@code Client} to a multi-tenant {@code BoundedContext} with a tenant specified.
      */
     Client createFor(TenantId tenantId) {
         ensureServer();
         Client client = Client.inProcess(serverName)
                               .forTenant(tenantId)
                               .build();
-        createdClient.add(client);
+        clients.add(client);
         return client;
     }
 
@@ -127,15 +138,14 @@ class ClientSupplier implements Closeable {
      * Closes all created clients and shuts down the associated {@code GrpcContainer}.
      */
     @Override
-    @SuppressWarnings("TestOnlyProblems" /* this code will actually be called from Tests */)
+    @SuppressWarnings("TestOnlyProblems" /* Calling the production-level method. */)
     public void close() throws Exception {
         if (!isOpen() || isNull(grpcContainer)) {
             return;
         }
-
         grpcContainer.shutdownNowAndWait();
-        createdClient.forEach(Client::close);
-        createdClient.clear();
+        clients.forEach(Client::close);
+        clients.clear();
     }
 
     @Override
