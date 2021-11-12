@@ -179,7 +179,7 @@ public class Client implements AutoCloseable {
     }
 
     /**
-     * Obtains the tenant of this client connection in a multitenant application,
+     * Obtains the tenant of this client connection in a multi-tenant application,
      * and empty {@code Optional} in a single-tenant one.
      *
      * @see Builder#forTenant(TenantId)
@@ -385,7 +385,7 @@ public class Client implements AutoCloseable {
         /**
          * Assigns the tenant for the client connection to be built.
          *
-         * <p>This method should be called only in multitenant applications.
+         * <p>This method should be called only in multi-tenant applications.
          *
          * @param tenant
          *          a non-null and non-default ID of the tenant
