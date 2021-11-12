@@ -159,7 +159,8 @@ public abstract class BlackBox implements Logging, Closeable {
         result.addCommandListener(commands)
               .addEventListener(events)
               .addEventDispatcher(failedHandlerGuard)
-              .addEventDispatcher(new UnsupportedCommandGuard(result.name().getValue()))
+              .addEventDispatcher(new UnsupportedCommandGuard(result.name()
+                                                                    .getValue()))
               .addEventDispatcher(DiagnosticLog.instance());
         return result;
     }
@@ -201,7 +202,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * Tells context to log signal handler failures over failing the test.
      */
     @CanIgnoreReturnValue
-    public final BlackBox tolerateFailures(){
+    public final BlackBox tolerateFailures() {
         failedHandlerGuard.tolerateFailures();
         return this;
     }
@@ -230,6 +231,7 @@ public abstract class BlackBox implements Logging, Closeable {
         eventStore.append(event);
         return this;
     }
+
     /**
      * Sends off a provided command to the Bounded Context.
      *
@@ -323,8 +325,9 @@ public abstract class BlackBox implements Logging, Closeable {
      *
      * @param messageOrEvent
      *         an event message or {@link Event}. If an instance of {@code Event} is
-     *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBroker}
-     *         as is. Otherwise, an instance of {@code Event} will be generated basing
+     *         passed, it will be posted to {@link io.spine.server.integration.IntegrationBroker
+     *         IntegrationBroker} as-is.
+     *         Otherwise, an instance of {@code Event} will be generated basing
      *         on the passed event message and posted to the bus.
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
@@ -341,7 +344,7 @@ public abstract class BlackBox implements Logging, Closeable {
      *
      * <p>The method accepts event messages or instances of {@link io.spine.core.Event}.
      * If an instance of {@code Event} is passed, it will be posted to
-     * {@link io.spine.server.integration.IntegrationBroker} as-is.
+     * {@link io.spine.server.integration.IntegrationBroker IntegrationBroker} as-is.
      * Otherwise, an instance of {@code Event} will be generated basing on the passed event
      * message and posted to the bus.
      *
@@ -562,7 +565,8 @@ public abstract class BlackBox implements Logging, Closeable {
         @SuppressWarnings("unchecked")
         Repository<I, ? extends Entity<I, S>> repo =
                 (Repository<I, ? extends Entity<I, S>>) repositoryOf(stateClass);
-        return readOperation(() -> (Entity<I, S>) repo.find(id).orElse(null));
+        return readOperation(() -> (Entity<I, S>) repo.find(id)
+                                                      .orElse(null));
     }
 
     @VisibleForTesting
@@ -584,8 +588,8 @@ public abstract class BlackBox implements Logging, Closeable {
         checkNotNull(stateClass);
         ProtoFluentAssertion stateAssertion =
                 assertEntityWithState(id, stateClass)
-                         .hasStateThat()
-                         .comparingExpectedFieldsOnly();
+                        .hasStateThat()
+                        .comparingExpectedFieldsOnly();
         return stateAssertion;
     }
 
@@ -659,8 +663,9 @@ public abstract class BlackBox implements Logging, Closeable {
 
     /**
      * Subscribes and activates the subscription to the passed topic.
+     *
      * @param topic
-     *          the topic of the subscription
+     *         the topic of the subscription
      * @return a fixture for testing subscription updates.
      */
     public SubscriptionFixture subscribeTo(Topic topic) {

@@ -89,7 +89,8 @@ public final class BoundedContextBuilder implements Logging {
 
     /**
      * Event dispatchers to be registered with the context {@link EventBus} and/or
-     * {@link io.spine.server.integration.IntegrationBroker} after the Bounded Context creation.
+     * {@link io.spine.server.integration.IntegrationBroker IntegrationBroker} after
+     * the Bounded Context creation.
      */
     private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
 
