@@ -117,7 +117,7 @@ class ClientSupplier implements Closeable {
 
         String serverName = Identifier.newUuid();
         GrpcContainer grpcContainer = GrpcContainer
-                .inProcess(serverName)
+                .inProcess("BlackBox-Server" + serverName)
                 .addService(commandService)
                 .addService(queryService)
                 .addService(subscriptionService)
