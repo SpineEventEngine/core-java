@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Utilities for working with {@linkplain ExternalMessage external messages}.
  */
 @Internal
-public final class ExternalMessages {
+final class ExternalMessages {
 
     /** Prevents instantiation of this utility class. */
     private ExternalMessages() {
@@ -55,7 +55,7 @@ public final class ExternalMessages {
      *         the name of the Bounded Context in which the event was created
      * @return the external message wrapping the given event
      */
-    public static ExternalMessage of(Event event, BoundedContextName origin) {
+    static ExternalMessage of(Event event, BoundedContextName origin) {
         checkNotNull(event);
         checkNotNull(origin);
 
