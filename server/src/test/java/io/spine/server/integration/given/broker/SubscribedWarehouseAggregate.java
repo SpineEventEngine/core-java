@@ -24,48 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.integration.given.broker;
 
-import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.External;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.event.React;
-import io.spine.server.procman.ProcessManager;
-import io.spine.test.integration.Project;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
-import io.spine.test.integration.rejection.IntegrationRejections;
+import io.spine.server.integration.broker.PhotosMovedToWarehouse;
+import io.spine.server.integration.broker.PhotosPreparedForArchiving;
+import io.spine.server.integration.broker.WarehouseAgg;
 
-import java.util.Collections;
-import java.util.List;
-
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectWizard
-        extends ProcessManager<ProjectId, Project, Project.Builder> {
-
-    protected ProjectWizard(ProjectId id) {
-        super(id);
-    }
-
-    private static Message externalEvent = null;
+class SubscribedWarehouseAggregate extends Aggregate<String, WarehouseAgg, WarehouseAgg.Builder> {
 
     @React
-    List<EventMessage> on(@External ItgProjectCreated event) {
-        externalEvent = event;
-        return Collections.emptyList();
+    PhotosMovedToWarehouse on(@External PhotosPreparedForArchiving event) {
+        return PhotosMovedToWarehouse.generate();
     }
 
-    @React
-    List<EventMessage> on(@External IntegrationRejections.ItgCannotStartArchivedProject rejection) {
-        externalEvent = rejection;
-        return Collections.emptyList();
-    }
-
-    public static Message externalEvent() {
-        return externalEvent;
-    }
-
-    public static void clear() {
-        externalEvent = null;
+    @Apply
+    private void on(PhotosMovedToWarehouse event) {
+        builder().setId(event.getUuid());
     }
 }

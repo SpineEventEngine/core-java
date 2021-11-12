@@ -26,6 +26,7 @@
 
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.testing.exposeTestArtifacts
 
 val spineBaseVersion: String by extra
 
@@ -43,9 +44,6 @@ dependencies {
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
 }
-
-apply {
-    with(Scripts) {
-        from(testArtifacts(project))
-    }
+java {
+    exposeTestArtifacts()
 }

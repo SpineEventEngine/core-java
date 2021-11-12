@@ -23,33 +23,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.core.BoundedContextName;
-import io.spine.core.Event;
-import io.spine.protobuf.AnyPacker;
+package io.spine.server.integration.given.broker;
 
-/**
- * An observer of the incoming external messages of the specified message class.
- *
- * <p>Responsible of receiving those from the transport layer and posting those to the local
- * instance of {@code IntegrationBroker}.
- */
-final class ExternalMessageObserver extends AbstractChannelObserver {
+import io.spine.core.External;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.BillingAgg;
+import io.spine.server.integration.broker.CreditsHeld;
+import io.spine.server.integration.broker.PhotosUploaded;
 
-    private final IntegrationBroker broker;
+final class SubscribedBillingAggregate extends Aggregate<String, BillingAgg, BillingAgg.Builder> {
 
-    ExternalMessageObserver(BoundedContextName boundedContextName,
-                            Class<? extends Message> messageClass,
-                            IntegrationBroker broker) {
-        super(boundedContextName, messageClass);
-        this.broker = broker;
+    @React
+    CreditsHeld on(@External PhotosUploaded event) {
+        return CreditsHeld.generate();
     }
 
-    @Override
-    protected void handle(ExternalMessage message) {
-        Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
-        broker.dispatchLocally(event);
+    @Apply
+    private void on(CreditsHeld event) {
+        builder().setId(event.getUuid());
     }
 }

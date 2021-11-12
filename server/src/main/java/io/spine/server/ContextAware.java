@@ -31,7 +31,7 @@ import io.spine.annotation.Internal;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * An structural part of a Bounded Context which is aware of the other parts.
+ * A structural part of a Bounded Context which is aware of the other parts.
  */
 @Internal
 public interface ContextAware {

@@ -23,47 +23,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.integration.given;
+package spine.server.integration.broker;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
-import io.spine.base.EntityState;
-import io.spine.server.projection.Projection;
-import io.spine.validate.ValidatingBuilder;
+import "spine/options.proto";
 
-import java.util.Collection;
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration.broker";
+option java_outer_classname = "EventsProto";
+option java_multiple_files = true;
 
-import static com.google.common.collect.Lists.newLinkedList;
+message PhotosUploaded {
+    string uuid = 1;
+}
 
-public abstract class MemoizingProjection<I,
-                                          M extends EntityState<I>,
-                                          B extends ValidatingBuilder<M>>
-        extends Projection<I, M, B> {
+message PhotosProcessed {
+    string uuid = 1;
+}
 
-    private static final Collection<Message> events = newLinkedList();
+message CreditsHeld {
+    string uuid = 1;
+}
 
-    /**
-     * Creates a new instance.
-     *
-     * @param id
-     *         the ID for the new instance
-     * @throws IllegalArgumentException
-     *         if the ID is not of one of the supported types
-     */
-    protected MemoizingProjection(I id) {
-        super(id);
-    }
+message TotalPhotosUploadedIncreased {
+    string uuid = 1;
+}
 
-    static void memoize(Message event) {
-        events.add(event);
-    }
+message PhotosPreparedForArchiving {
+    string uuid = 1;
+}
 
-    public static ImmutableList<Message> events() {
-        return ImmutableList.copyOf(events);
-    }
-
-    public static void clear() {
-        events.clear();
-    }
+message PhotosMovedToWarehouse {
+    string uuid = 1;
 }

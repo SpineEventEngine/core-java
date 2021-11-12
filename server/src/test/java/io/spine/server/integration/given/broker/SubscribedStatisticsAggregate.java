@@ -24,31 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+package io.spine.server.integration.given.broker;
 
 import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.test.integration.MemoizingView;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.PhotosUploaded;
+import io.spine.server.integration.broker.StatisticsAgg;
+import io.spine.server.integration.broker.TotalPhotosUploadedIncreased;
 
-public class MemoizingProjectDetails
-        extends MemoizingProjection<ProjectId, MemoizingView, MemoizingView.Builder> {
+final class SubscribedStatisticsAggregate extends Aggregate<String, StatisticsAgg, StatisticsAgg.Builder> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param id
-     *         the ID for the new instance
-     * @throws IllegalArgumentException
-     *         if the ID is not of one of the supported types
-     */
-    protected MemoizingProjectDetails(ProjectId id) {
-        super(id);
+    @React
+    TotalPhotosUploadedIncreased on(@External PhotosUploaded event) {
+        return TotalPhotosUploadedIncreased.generate();
     }
 
-    @Subscribe
-    void on(@External ItgProjectCreated event) {
-        memoize(event);
+    @Apply
+    private void on(TotalPhotosUploadedIncreased event) {
+        builder().setId(event.getUuid());
     }
 }

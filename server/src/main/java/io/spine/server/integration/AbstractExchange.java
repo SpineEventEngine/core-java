@@ -23,33 +23,57 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.integration;
 
-import com.google.common.testing.NullPointerTester;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
-import io.spine.core.Event;
-import io.spine.testing.UtilityClassTest;
-import org.junit.jupiter.api.DisplayName;
+import io.spine.server.transport.ChannelId;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.Subscriber;
 
-import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import java.util.Set;
 
-@DisplayName("`ExternalMessages` utility should")
-class ExternalMessagesTest extends UtilityClassTest<ExternalMessages> {
+/**
+ * Two-way communication bridge established from some Bounded Context to the transport.
+ */
+abstract class AbstractExchange {
 
-    ExternalMessagesTest() {
-        super(ExternalMessages.class, PACKAGE);
+    private final TransportLink link;
+
+    /**
+     * Creates a new exchange which uses the passed link.
+     */
+    AbstractExchange(TransportLink link) {
+        this.link = link;
     }
 
-    @Override
-    protected void configure(NullPointerTester tester) {
-        super.configure(tester);
-        tester.setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
-              .setDefault(Event.class, Event.getDefaultInstance())
-              .setDefault(Command.class, Command.getDefaultInstance())
-              .setDefault(ExternalEventsWanted.class,
-                          ExternalEventsWanted.getDefaultInstance())
-              .setDefault(BoundedContextOnline.class,
-                          BoundedContextOnline.getDefaultInstance());
+    /**
+     * Returns the name of the Bounded Context which uses this exchange.
+     */
+    protected final BoundedContextName context() {
+        return link.context();
+    }
+
+    /**
+     * Returns the IDs of all channels used for subscribing through the underlying link.
+     */
+    final Set<ChannelId> subscriptionChannels() {
+        return link.subscriptionChannels();
+    }
+
+    /**
+     * Returns the subscriber for the passed ID of the channel.
+     */
+    final Subscriber subscriber(ChannelId channel) {
+        Subscriber result = link.subscriber(channel);
+        return result;
+    }
+
+    /**
+     * Returns the publisher for the passed ID of the channel.
+     */
+    final Publisher publisher(ChannelId channel) {
+        Publisher result = link.publisher(channel);
+        return result;
     }
 }

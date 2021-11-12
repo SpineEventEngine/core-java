@@ -23,29 +23,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.integration;
 
-package io.spine.server.integration.given;
+import io.spine.core.BoundedContextName;
+import io.spine.core.Event;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.EventClass;
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.test.integration.event.ItgProjectStarted;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
+/**
+ * An observer of the incoming {@code external} domain events of the specified type.
+ *
+ * <p>Responsible of receiving those from the transport and dispatching to the local event bus.
+ */
+final class IncomingEventObserver extends AbstractChannelObserver {
 
-    private static ItgProjectStarted externalEvent = null;
+    private final BusAdapter bus;
 
-    @Subscribe
-    void on(@External ItgProjectStarted msg) {
-        externalEvent = msg;
+    /**
+     * Creates a new observer.
+     *
+     * @param context
+     *         the name of the Bounded Context which receives the events
+     * @param eventCls
+     *         the type of the observed events
+     * @param bus
+     *         the adapter over the event bus to which the observed events should be dispatched
+     */
+    IncomingEventObserver(BoundedContextName context, EventClass eventCls, BusAdapter bus) {
+        super(context, eventCls.value());
+        this.bus = bus;
     }
 
-    public static ItgProjectStarted externalEvent() {
-        return externalEvent;
-    }
-
-    public static void clear() {
-        externalEvent = null;
+    @Override
+    protected void handle(ExternalMessage message) {
+        Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
+        bus.dispatch(event, noOpObserver());
     }
 }

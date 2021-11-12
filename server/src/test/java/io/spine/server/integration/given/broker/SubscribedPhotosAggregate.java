@@ -23,24 +23,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.server.bus.DeadMessageHandler;
+package io.spine.server.integration.given.broker;
 
-/**
- * Produces an {@link UnsupportedExternalMessageException} upon capturing an external message,
- * which has no targets to be dispatched to.
- */
-enum DeadExternalMessageHandler implements DeadMessageHandler<ExternalMessageEnvelope> {
+import io.spine.core.External;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
+import io.spine.server.event.React;
+import io.spine.server.integration.broker.CreditsHeld;
+import io.spine.server.integration.broker.PhotosAgg;
+import io.spine.server.integration.broker.PhotosProcessed;
+import io.spine.server.integration.broker.PhotosUploaded;
+import io.spine.server.integration.broker.UploadPhotos;
 
-    INSTANCE;
+final class SubscribedPhotosAggregate extends Aggregate<String, PhotosAgg, PhotosAgg.Builder> {
 
-    @Override
-    public UnsupportedExternalMessageException handle(ExternalMessageEnvelope envelope) {
-        Message message = envelope.message();
-        UnsupportedExternalMessageException exception =
-                new UnsupportedExternalMessageException(message);
-        return exception;
+    @Assign
+    PhotosUploaded handler(UploadPhotos command) {
+        return PhotosUploaded.generate();
+    }
+
+    @Apply
+    private void on(PhotosUploaded event) {
+        builder().setId(event.getUuid());
+    }
+
+    @React
+    PhotosProcessed on(@External CreditsHeld event) {
+        return PhotosProcessed.generate();
+    }
+
+    @Apply
+    private void on(PhotosProcessed event) {
+        builder().setId(event.getUuid());
     }
 }

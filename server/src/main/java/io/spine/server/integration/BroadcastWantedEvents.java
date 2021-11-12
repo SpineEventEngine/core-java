@@ -35,47 +35,57 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 
 /**
- * A client of the {@code RequestForExternalMessages} {@link Publisher}.
- *
- * <p>Posts the updates on the requested messages.
+ * Notifies other Bounded Contexts that this Bounded Context now requests some set of external
+ * domain events for consumption.
  */
-final class ConfigurationBroadcast {
+final class BroadcastWantedEvents {
 
-    private final BoundedContextName contextName;
-    private final Publisher needsPublisher;
+    private final BoundedContextName context;
+    private final Publisher publisher;
 
-    private ImmutableSet<ExternalMessageType> requestedTypes = ImmutableSet.of();
-
-    ConfigurationBroadcast(BoundedContextName contextName, Publisher publisher) {
-        this.contextName = checkNotNull(contextName);
-        this.needsPublisher = checkNotNull(publisher);
-    }
+    private ImmutableSet<ExternalEventType> wantedEvents = ImmutableSet.of();
 
     /**
-     * Notifies other Bounded contexts about a change in the requested messages.
+     * Creates a new instance of this broadcast.
      *
-     * <p>If the given {@code types} are the same as previous ones, the request is not sent.
-     *
-     * @param types
-     *         the types
+     * @param context
+     *         the name of the Bounded Context from which the broadcast is performed
+     * @param channel
+     *         the channel for broadcasting
      */
-    synchronized void onTypesChanged(ImmutableSet<ExternalMessageType> types) {
-        checkNotNull(types);
-        if (!requestedTypes.equals(types)) {
-            requestedTypes = types;
-            send();
-        }
+    BroadcastWantedEvents(BoundedContextName context, Publisher channel) {
+        this.context = checkNotNull(context);
+        this.publisher = checkNotNull(channel);
     }
 
     /**
-     * Notifies other Bounded contexts about current requested messages.
+     * Notifies other Bounded Contexts about a change in the types of wanted events.
+     *
+     * <p>If the given {@code newTypes} are the same as those known to this instance previously,
+     * the notification is not sent.
+     *
+     * @param newTypes
+     *         types of external events that are consumed by the bounded context
+     */
+    synchronized void onEventsChanged(ImmutableSet<ExternalEventType> newTypes) {
+        checkNotNull(newTypes);
+        if (wantedEvents.equals(newTypes)) {
+            return;
+        }
+        wantedEvents = newTypes;
+        send();
+    }
+
+    /**
+     * Notifies other Bounded Contexts about the domain events for which
+     * it has {@code external} subscribers.
      */
     synchronized void send() {
-        RequestForExternalMessages request = RequestForExternalMessages
+        ExternalEventsWanted request = ExternalEventsWanted
                 .newBuilder()
-                .addAllRequestedMessageType(requestedTypes)
-                .buildPartial();
-        ExternalMessage externalMessage = ExternalMessages.of(request, contextName);
-        needsPublisher.publish(pack(newUuid()), externalMessage);
+                .addAllType(wantedEvents)
+                .vBuild();
+        ExternalMessage wrapped = ExternalMessages.of(request, context);
+        publisher.publish(wrapped.getId(), wrapped);
     }
 }

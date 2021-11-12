@@ -24,48 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.integration.given;
+/**
+ * Test environment classes for {@code io.spine.server.integration.IntegrationBrokerTest}.
+ */
 
-import io.spine.core.External;
-import io.spine.core.Subscribe;
-import io.spine.server.projection.Projection;
-import io.spine.test.integration.ItgProjection;
-import io.spine.test.integration.ProjectId;
-import io.spine.test.integration.event.ItgProjectCreated;
-import io.spine.test.integration.event.ItgProjectStarted;
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.integration.given.broker;
 
-@SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-public class ProjectDetails
-        extends Projection<ProjectId, ItgProjection, ItgProjection.Builder> {
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    private static ItgProjectCreated externalEvent = null;
-
-    private static ItgProjectStarted domesticEvent = null;
-
-    protected ProjectDetails(ProjectId id) {
-        super(id);
-    }
-
-    @Subscribe
-    void on(@External ItgProjectCreated event) {
-        externalEvent = event;
-    }
-
-    @Subscribe
-    void on(ItgProjectStarted event) {
-        domesticEvent = event;
-    }
-
-    public static ItgProjectCreated externalEvent() {
-        return externalEvent;
-    }
-
-    public static ItgProjectStarted domesticEvent() {
-        return domesticEvent;
-    }
-
-    public static void clear() {
-        externalEvent = null;
-        domesticEvent = null;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -25,6 +25,7 @@
  */
 
 import io.spine.internal.gradle.Scripts
+import io.spine.internal.gradle.testing.exposeTestArtifacts
 
 val spineBaseTypesVersion: String by extra
 val spineTimeVersion: String by extra
@@ -51,9 +52,6 @@ modelCompiler {
         }
     }
 }
-
-apply {
-    with(Scripts) {
-        from(testArtifacts(project))
-    }
+java {
+    exposeTestArtifacts()
 }

@@ -30,7 +30,7 @@ package io.spine.internal.dependency
 // https://github.com/Kotlin
 object Kotlin {
     @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version      = "1.5.30"
+    const val version      = "1.5.31"
     const val reflect      = "org.jetbrains.kotlin:kotlin-reflect:${version}"
     const val stdLib       = "org.jetbrains.kotlin:kotlin-stdlib:${version}"
     const val stdLibCommon = "org.jetbrains.kotlin:kotlin-stdlib-common:${version}"

@@ -26,22 +26,42 @@
 
 package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.annotation.GeneratedMixin;
-import io.spine.type.TypeUrl;
+import io.spine.server.transport.ChannelId;
+import io.spine.server.transport.Publisher;
+import io.spine.server.transport.Subscriber;
 
 /**
- * A generated mixin interface for the {@code ExternalMessageType} type.
+ * An exchange which uses a single channel for inbound and outbound traffic.
  */
-@GeneratedMixin
-interface ExternalMessageTypeMixin extends ExternalMessageTypeOrBuilder {
+abstract class SingleChannelExchange extends AbstractExchange {
 
     /**
-     * Obtains the message type as a Java class.
+     * Creates a new exchange which uses the passed link.
      */
-    default Class<? extends Message> asMessageClass() {
-        String url = getMessageTypeUrl();
-        TypeUrl typeUrl = TypeUrl.parse(url);
-        return typeUrl.getMessageClass();
+    SingleChannelExchange(TransportLink link) {
+        super(link);
     }
+
+    /**
+     * Returns the subscriber of this exchange.
+     */
+    final Subscriber subscriber() {
+        Subscriber result = subscriber(channel());
+        return result;
+    }
+
+    /**
+     * Returns the publisher of this exchange.
+     */
+    final Publisher publisher() {
+        Publisher result = publisher(channel());
+        return result;
+    }
+
+    /**
+     * Returns the ID of the channel participating in the exchange.
+     *
+     * <p>Both publish and subscribe operations are performed via the channel with the returned ID.
+     */
+    abstract ChannelId channel();
 }

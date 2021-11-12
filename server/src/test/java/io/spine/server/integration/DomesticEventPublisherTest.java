@@ -41,10 +41,10 @@ import java.util.Set;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("DomesticEventPublisher should")
+@DisplayName("`DomesticEventPublisher` should")
 class DomesticEventPublisherTest {
 
-    private static final EventClass TARGET_EVENT_CLASS = EventClass.from(ItgProjectCreated.class);
+    private static final EventClass EVENT_CLASS = EventClass.from(ItgProjectCreated.class);
 
     private IntegrationBroker broker;
     private BoundedContext context;
@@ -64,28 +64,26 @@ class DomesticEventPublisherTest {
     }
 
     @Test
-    @DisplayName("not accept nulls on construction")
+    @DisplayName("not accept `null`s on construction")
     void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(IntegrationBroker.class, broker)
-                .setDefault(EventClass.class, TARGET_EVENT_CLASS)
+                .setDefault(EventClass.class, EVENT_CLASS)
                 .testConstructors(DomesticEventPublisher.class, PACKAGE);
     }
 
     @Test
     @DisplayName("dispatch only one event type")
     void dispatchSingleEvent() {
-        DomesticEventPublisher publisher =
-                new DomesticEventPublisher(broker, TARGET_EVENT_CLASS);
+        DomesticEventPublisher publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
         Set<EventClass> classes = publisher.messageClasses();
-        assertThat(classes).containsExactly(TARGET_EVENT_CLASS);
+        assertThat(classes).containsExactly(EVENT_CLASS);
     }
 
     @Test
     @DisplayName("dispatch no external events")
     void dispatchNoExternalEvents() {
-        DomesticEventPublisher publisher =
-                new DomesticEventPublisher(broker, TARGET_EVENT_CLASS);
+        DomesticEventPublisher publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
         Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
     }
