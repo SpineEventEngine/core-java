@@ -45,14 +45,9 @@ final class TransportLink {
     private final PublisherHub publisherHub;
 
     /**
-     * Creates a new link.
+     * Creates a new link with the name of the Bounded Context which establishes it.
      *
-     * @param context
-     *         the name of the Bounded Context which has established the connection
-     * @param subscriberHub
-     *         the hub of {@code Subscriber}s
-     * @param publisherHub
-     *         the hub of {@code Publisher}s
+     * <p>Operates on top of the passed hubs of {@code Subscriber}s and {@code Publisher}s.
      */
     TransportLink(BoundedContextName context,
                   SubscriberHub subscriberHub,
