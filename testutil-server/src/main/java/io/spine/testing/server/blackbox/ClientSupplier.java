@@ -48,7 +48,7 @@ import static java.util.Objects.isNull;
  * Creates {@code Client} instances for the passed Bounded Context.
  *
  * <p>As {@code Client} requires a gRPC server to be connected to, the supplier assembles
- * and starts a {@link GrpcContainer}.
+ * and starts a {@link GrpcContainer}. The server and the created clients are working in-process.
  */
 class ClientSupplier implements Closeable {
 
