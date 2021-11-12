@@ -70,7 +70,6 @@ final class EventsExchange extends AbstractExchange {
      * @param event
      *         event to publish
      */
-    @Internal
     void publish(EventEnvelope event) {
         ChannelId channelId = toChannelId(event.messageClass());
         boolean wantedByOthers = !subscriptionChannels().contains(channelId);
