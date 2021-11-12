@@ -127,7 +127,6 @@ final class EventsExchange extends AbstractExchange {
      * Creates an ID of the channel that will transmit the events of the given class.
      */
     private static ChannelId toChannelId(EventClass cls) {
-        checkNotNull(cls);
         TypeUrl targetType = cls.typeUrl();
         return channelIdFor(targetType);
     }
