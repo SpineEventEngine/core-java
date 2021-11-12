@@ -44,6 +44,8 @@ import io.spine.server.type.CommandClass;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * The {@code CommandService} allows client applications to post commands and
  * receive updates from the application backend.
@@ -74,6 +76,7 @@ public final class CommandService
      * Builds the service with a single Bounded Context.
      */
     public static CommandService withSingle(BoundedContext context) {
+        checkNotNull(context);
         CommandService result = newBuilder()
                 .add(context)
                 .build();

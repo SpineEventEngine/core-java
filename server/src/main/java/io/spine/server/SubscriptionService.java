@@ -84,6 +84,7 @@ public final class SubscriptionService
      * Builds the service with a single Bounded Context.
      */
     public static SubscriptionService withSingle(BoundedContext context) {
+        checkNotNull(context);
         SubscriptionService result = newBuilder()
                 .add(context)
                 .build();

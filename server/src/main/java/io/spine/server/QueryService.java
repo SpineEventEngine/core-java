@@ -43,6 +43,7 @@ import io.spine.type.TypeUrl;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
@@ -74,6 +75,7 @@ public final class QueryService
      * Builds the service with a single Bounded Context.
      */
     public static QueryService withSingle(BoundedContext context) {
+        checkNotNull(context);
         QueryService result = newBuilder()
                 .add(context)
                 .build();
