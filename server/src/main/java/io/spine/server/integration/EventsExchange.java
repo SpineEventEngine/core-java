@@ -105,7 +105,7 @@ final class EventsExchange extends AbstractExchange {
      * @param dispatcher
      *         the dispatcher to unregister
      */
-    public void unregister(EventDispatcher dispatcher) {
+    void unregister(EventDispatcher dispatcher) {
         Iterable<EventClass> externalEvents = dispatcher.externalEventClasses();
         for (EventClass cls : externalEvents) {
             ChannelId channelId = toChannelId(cls);
