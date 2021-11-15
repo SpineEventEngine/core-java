@@ -27,6 +27,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
@@ -63,6 +64,7 @@ final class MtBlackBox extends BlackBox {
      * @return current instance
      */
     @Override
+    @CanIgnoreReturnValue
     public MtBlackBox withTenant(TenantId tenant) {
         this.tenantId = checkNotNull(tenant);
         return this;
