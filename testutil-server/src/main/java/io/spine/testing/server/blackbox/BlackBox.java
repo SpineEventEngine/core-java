@@ -497,6 +497,7 @@ public abstract class BlackBox implements Logging, Closeable {
     /**
      * Obtains the request factory to operate with.
      */
+    @SuppressWarnings("TestOnlyProblems")   /* `TestActorRequestFactory` is not test-only. */
     abstract TestActorRequestFactory requestFactory();
 
     /**
