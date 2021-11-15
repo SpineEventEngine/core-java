@@ -190,6 +190,7 @@ public abstract class BlackBox implements Logging, Closeable {
     /**
      * Sets the given {@link UserId} as the actor ID for the requests produced by this context.
      */
+    @CanIgnoreReturnValue
     public final BlackBox withActor(UserId user) {
         checkNotNull(user);
         actor = actor.withId(user);
@@ -199,6 +200,7 @@ public abstract class BlackBox implements Logging, Closeable {
     /**
      * Sets the given time zone parameters for the actor requests produced by this context.
      */
+    @CanIgnoreReturnValue
     public final BlackBox in(ZoneId zoneId) {
         checkNotNull(zoneId);
         actor = actor.in(zoneId);
