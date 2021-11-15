@@ -81,7 +81,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  *
  * <p>The client connection must be {@link #close() closed} when the application finishes its work.
  */
-public class Client implements AutoCloseable {
+public final class Client implements AutoCloseable {
 
     /** The default port number for a gRCP connection. */
     public static final int DEFAULT_CLIENT_SERVICE_PORT = 50051;
