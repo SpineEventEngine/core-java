@@ -77,7 +77,6 @@ import static io.spine.testing.server.blackbox.Actor.defaultActor;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
-import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -668,6 +667,7 @@ public abstract class BlackBox implements Logging, Closeable {
     /**
      * Obtains the subject for checking the {@code Query} execution result.
      */
+    @SuppressWarnings("TestOnlyProblems")   /* `QueryResultSubject` is not test-only. */
     public QueryResultSubject assertQueryResult(Query query) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
         QueryService service = QueryService
