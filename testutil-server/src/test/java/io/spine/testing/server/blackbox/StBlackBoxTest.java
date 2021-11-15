@@ -44,7 +44,6 @@ class StBlackBoxTest
 
     @Test
     @DisplayName("not allow setting a tenant ID")
-    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting the exception. */
     void prohibitTenantId() {
         assertThrows(IllegalStateException.class, () -> context().withTenant(generate()));
     }
