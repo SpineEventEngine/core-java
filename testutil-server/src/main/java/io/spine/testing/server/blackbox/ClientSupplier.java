@@ -90,7 +90,7 @@ class ClientSupplier implements Closeable {
      */
     Client create(@Nullable TenantId tenant) {
         ensureTenantMatch(tenant);
-        ensureServer();
+        String serverName = ensureServer();
         Client.Builder builder = Client.inProcess(serverName);
         if(tenant != null) {
             builder.forTenant(tenant);
@@ -116,12 +116,15 @@ class ClientSupplier implements Closeable {
 
     /**
      * Runs the gRPC server in case it has not been run previously.
+     *
+     * @return the name of the server
      */
-    private void ensureServer() {
+    private String ensureServer() {
         checkOpen();
         if (isNull(serverName)) {
             initServer();
         }
+        return serverName;
     }
 
     private void initServer() {
@@ -129,9 +132,9 @@ class ClientSupplier implements Closeable {
         QueryService queryService = QueryService.withSingle(context);
         SubscriptionService subscriptionService = SubscriptionService.withSingle(context);
 
-        String serverName = Identifier.newUuid();
+        String serverName = "BlackBox-Server-" + Identifier.newUuid();
         GrpcContainer grpcContainer = GrpcContainer
-                .inProcess("BlackBox-Server" + serverName)
+                .inProcess(serverName)
                 .addService(commandService)
                 .addService(queryService)
                 .addService(subscriptionService)

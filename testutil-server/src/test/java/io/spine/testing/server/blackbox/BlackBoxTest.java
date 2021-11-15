@@ -41,6 +41,7 @@ import io.spine.client.Topic;
 import io.spine.client.TopicFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
@@ -823,7 +824,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("linked to the context under the test")
         void linkedToTheContextUnderTest() {
-            ClientRequest clientRequest = context().client().asGuest();
+            ClientRequest clientRequest = context().clients().withMatchingTenant().asGuest();
 
             // Ensuring the context is empty by `BlackBoxContext` and `Client` APIs.
             context().assertEvents()
@@ -844,14 +845,18 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @Test
         @DisplayName("closed as `BlackBoxContext` is closed")
+        @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting an exception. */
         void closedAsBlackBoxContextClosed() {
-            Client client = context().client();
+            BlackBoxClients factory = context().clients();
+            Client client = factory.withMatchingTenant();
             assertThat(client.isOpen()).isTrue();
 
             context().close();
 
             assertThat(client.isOpen()).isFalse();
-            assertThrows(IllegalStateException.class, () -> context().client());
+            assertThrows(IllegalStateException.class, factory::withMatchingTenant);
+            assertThrows(IllegalStateException.class, () ->
+                    factory.create(TenantId.getDefaultInstance()));
         }
     }
 }

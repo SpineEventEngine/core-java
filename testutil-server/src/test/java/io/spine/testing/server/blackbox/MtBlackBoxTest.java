@@ -26,16 +26,21 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.client.Client;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.generate;
@@ -114,22 +119,35 @@ class MtBlackBoxTest
         );
     }
 
-    @Test
-    @DisplayName("provide a `Client` with the expected tenant")
-    void provideClientWithExpectedTenantId() {
-        BlackBox context = context();
-        Optional<TenantId> currentTenant;
+    @Nested
+    @DisplayName("create a `Client` with")
+    class CreateClientWith {
 
-        TenantId john = generate();
-        currentTenant = context.withTenant(john).client().tenant();
-        assertThat(currentTenant).hasValue(john);
+        @Test
+        @DisplayName("the tenant ID matching the `BlackBox` setting")
+        void matchingTenant() {
+            BlackBox context = context();
+            List<TenantId> threeTenants =  ImmutableList.of(generate(), generate(), generate());
+            for (TenantId tenant : threeTenants) {
+                assertTenant(tenant, (id) ->
+                        context.withTenant(id).clients().withMatchingTenant());
+            }
+        }
 
-        TenantId carl = generate();
-        currentTenant = context.withTenant(carl).client().tenant();
-        assertThat(currentTenant).hasValue(carl);
+        @Test
+        @DisplayName("the specific tenant ID")
+        void specificTenant() {
+            BlackBox context = context();
+            List<TenantId> threeTenants =  ImmutableList.of(generate(), generate(), generate());
+            for (TenantId tenant : threeTenants) {
+                assertTenant(tenant, (id) -> context.clients().create(id));
+            }
+        }
 
-        TenantId bob = generate();
-        currentTenant = context.withTenant(bob).client().tenant();
-        assertThat(currentTenant).hasValue(bob);
+        private void assertTenant(TenantId expected, Function<TenantId, Client> createClient) {
+            Client client = createClient.apply(expected);
+            Optional<TenantId> actual = client.tenant();
+            assertThat(actual).hasValue(expected);
+        }
     }
 }

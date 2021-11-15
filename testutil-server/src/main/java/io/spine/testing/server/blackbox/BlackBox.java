@@ -468,7 +468,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * <p>This method performs the following:
      * <ol>
      *     <li>Closes tested {@link BoundedContext}.</li>
-     *     <li>Closes associated {@link ClientSupplier}.</li>
+     *     <li>Closes the associated {@link io.spine.client.Client Client}s.</li>
      * </ol>
      *
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
@@ -695,18 +695,11 @@ public abstract class BlackBox implements Logging, Closeable {
     }
 
     /**
-     * Creates a new instance of {@link Client} linked to this context.
-     *
-     * <p>Provided {@code Client} would inherit {@code TenantId} from {@code BlackBoxContext},
-     * but would NOT inherit {@code UserId} and {@code ZoneId}.
-     *
-     * @see #withTenant(TenantId)
-     * @see #withActor(UserId)
-     * @see #in(ZoneId)
+     * Returns a factory of {@link io.spine.client.Client Client}s
+     * to this instance of {@code BlackBox}.
      */
-    public Client client() {
-        @Nullable TenantId tenantId = requestFactory().tenantId();
-        Client result = clientSupplier.create(tenantId);
+    public BlackBoxClients clients() {
+        BlackBoxClients result = new BlackBoxClients(this, clientSupplier);
         return result;
     }
 }
