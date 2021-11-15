@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Single tenant `BlackBox` context should")
+@DisplayName("Single-tenant `BlackBox` context should")
 class StBlackBoxTest
         extends BlackBoxTest<StBlackBox> {
 
