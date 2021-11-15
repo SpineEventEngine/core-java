@@ -27,6 +27,7 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
@@ -56,6 +57,7 @@ final class StBlackBox extends BlackBox {
     }
 
     @Override
+    @CanIgnoreReturnValue
     public BlackBox withTenant(TenantId tenant) {
         throw newIllegalStateException(
                 "The context `%s` is single-tenant and" +
