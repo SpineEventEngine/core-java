@@ -65,6 +65,7 @@ final class StBlackBox extends BlackBox {
     }
 
     @Override
+    @SuppressWarnings("TestOnlyProblems")   /* `TestActorRequestFactory` is not test-only. */
     TestActorRequestFactory requestFactory() {
         return actor().requests();
     }
