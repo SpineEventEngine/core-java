@@ -43,6 +43,7 @@ import io.spine.type.TypeUrl;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
@@ -63,9 +64,22 @@ public final class QueryService
         this.typeToContextMap = ImmutableMap.copyOf(map);
     }
 
-    /** Creates a new builder for the service. */
+    /**
+     * Creates a new builder for the service.
+     */
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Builds the service with a single Bounded Context.
+     */
+    public static QueryService withSingle(BoundedContext context) {
+        checkNotNull(context);
+        QueryService result = newBuilder()
+                .add(context)
+                .build();
+        return result;
     }
 
     /**

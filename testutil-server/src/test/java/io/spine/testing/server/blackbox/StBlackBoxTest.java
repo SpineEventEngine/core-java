@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Single tenant `BlackBox` context should")
+@DisplayName("Single-tenant `BlackBox` context should")
 class StBlackBoxTest
         extends BlackBoxTest<StBlackBox> {
 
@@ -46,5 +46,13 @@ class StBlackBoxTest
     @DisplayName("not allow setting a tenant ID")
     void prohibitTenantId() {
         assertThrows(IllegalStateException.class, () -> context().withTenant(generate()));
+    }
+
+    @Test
+    @DisplayName("not allow creating `Client`s with a tenant ID")
+    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting the exception. */
+    void prohibitClientsWithTenant() {
+        assertThrows(IllegalStateException.class,
+                     () -> context().clients().create(generate()));
     }
 }

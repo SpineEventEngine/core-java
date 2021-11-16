@@ -81,7 +81,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  *
  * <p>The client connection must be {@link #close() closed} when the application finishes its work.
  */
-public class Client implements AutoCloseable {
+public final class Client implements AutoCloseable {
 
     /** The default port number for a gRCP connection. */
     public static final int DEFAULT_CLIENT_SERVICE_PORT = 50051;
@@ -179,7 +179,7 @@ public class Client implements AutoCloseable {
     }
 
     /**
-     * Obtains the tenant of this client connection in a multitenant application,
+     * Obtains the tenant of this client connection in a multi-tenant application,
      * and empty {@code Optional} in a single-tenant one.
      *
      * @see Builder#forTenant(TenantId)
@@ -385,11 +385,12 @@ public class Client implements AutoCloseable {
         /**
          * Assigns the tenant for the client connection to be built.
          *
-         * <p>This method should be called only in multitenant applications.
+         * <p>This method should be called only in multi-tenant applications.
          *
          * @param tenant
          *          a non-null and non-default ID of the tenant
          */
+        @CanIgnoreReturnValue
         public Builder forTenant(TenantId tenant) {
             this.tenant = checkNotDefaultArg(tenant);
             return this;
@@ -403,6 +404,7 @@ public class Client implements AutoCloseable {
          * @param guestUser
          *         non-null and non-default value
          */
+        @CanIgnoreReturnValue
         public Builder withGuestId(UserId guestUser) {
            checkNotNull(guestUser);
            this.guestUser = checkNotDefaultArg(
@@ -418,6 +420,7 @@ public class Client implements AutoCloseable {
          * @param guestUser
          *         non-null and not empty or a blank value
          */
+        @CanIgnoreReturnValue
         public Builder withGuestId(String guestUser) {
             checkNotEmptyOrBlank(guestUser, "Guest user ID cannot be empty or blank.");
             return withGuestId(user(guestUser));
@@ -431,6 +434,7 @@ public class Client implements AutoCloseable {
          * @deprecated Use {@link #shutdownTimeout(long, TimeUnit)} instead.
          */
         @Deprecated
+        @CanIgnoreReturnValue
         public Builder shutdownTimout(long timeout, TimeUnit timeUnit) {
             checkNotNull(timeUnit);
             this.shutdownTimeout = Timeout.of(timeout, timeUnit);
@@ -442,6 +446,7 @@ public class Client implements AutoCloseable {
          *
          * <p>If not specified directly, {@link Client#DEFAULT_SHUTDOWN_TIMEOUT} will be used.
          */
+        @CanIgnoreReturnValue
         public Builder shutdownTimeout(long timeout, TimeUnit timeUnit) {
             checkNotNull(timeUnit);
             this.shutdownTimeout = Timeout.of(timeout, timeUnit);

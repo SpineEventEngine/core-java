@@ -26,15 +26,23 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import io.spine.client.Client;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
@@ -109,5 +117,37 @@ class MtBlackBoxTest
                 () -> BlackBox.from(BoundedContextBuilder.assumingTests(true))
                               .assertEntityWithState(BbProjectId.generate(), BbProject.class)
         );
+    }
+
+    @Nested
+    @DisplayName("create a `Client` with")
+    class CreateClientWith {
+
+        @Test
+        @DisplayName("the tenant ID matching the `BlackBox` setting")
+        void matchingTenant() {
+            BlackBox context = context();
+            List<TenantId> threeTenants =  ImmutableList.of(generate(), generate(), generate());
+            for (TenantId tenant : threeTenants) {
+                assertTenant(tenant, (id) ->
+                        context.withTenant(id).clients().withMatchingTenant());
+            }
+        }
+
+        @Test
+        @DisplayName("the specific tenant ID")
+        void specificTenant() {
+            BlackBox context = context();
+            List<TenantId> threeTenants =  ImmutableList.of(generate(), generate(), generate());
+            for (TenantId tenant : threeTenants) {
+                assertTenant(tenant, (id) -> context.clients().create(id));
+            }
+        }
+
+        private void assertTenant(TenantId expected, Function<TenantId, Client> createClient) {
+            Client client = createClient.apply(expected);
+            Optional<TenantId> actual = client.tenant();
+            assertThat(actual).hasValue(expected);
+        }
     }
 }

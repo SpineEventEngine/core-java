@@ -165,6 +165,9 @@ public final class BoundedContextBuilder implements Logging {
         return spec.name();
     }
 
+    /**
+     * Tells whether this builder is creating a multi-tenant Bounded Context.
+     */
     public boolean isMultitenant() {
         return spec.isMultitenant();
     }

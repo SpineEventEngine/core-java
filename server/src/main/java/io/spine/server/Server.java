@@ -43,8 +43,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
 
 /**
- * Exposes one or more Bounded Contexts using {@link io.spine.server.CommandService CommandService}
- * and {@link io.spine.server.QueryService QueryService}.
+ * Exposes one or more Bounded Contexts via gRPC.
+ *
+ * <p>The exposed services are
+ * <ul>
+ *     <li>{@link CommandService},
+ *     <li>{@link QueryService},
+ *     <li>{@link SubscriptionService}.
+ * </ul>
  */
 public final class Server implements Logging {
 

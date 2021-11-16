@@ -33,12 +33,15 @@ import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
+import io.spine.client.Client;
+import io.spine.client.ClientRequest;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.Topic;
 import io.spine.client.TopicFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
@@ -78,6 +81,7 @@ import io.spine.testing.server.blackbox.given.BbProjectFailerProcess;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
+import io.spine.testing.server.blackbox.given.Given;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
@@ -693,7 +697,6 @@ abstract class BlackBoxTest<T extends BlackBox> {
                .containsExactly(expected);
     }
 
-
     @Nested
     @DisplayName("allow to test subscription updates")
     class AssertingSubscriptionUpdates {
@@ -811,6 +814,49 @@ abstract class BlackBoxTest<T extends BlackBox> {
             assertThat(context)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(expected);
+        }
+    }
+
+    @Nested
+    @DisplayName("provide a `Client` that should be")
+    class ProvideClient {
+
+        @Test
+        @DisplayName("linked to the context under the test")
+        void linkedToTheContextUnderTest() {
+            ClientRequest clientRequest = context().clients().withMatchingTenant().asGuest();
+
+            // Ensuring the context is empty by `BlackBoxContext` and `Client` APIs.
+            context().assertEvents()
+                     .withType(BbProjectCreated.class)
+                     .isEmpty();
+            assertThat(clientRequest.run(BbProjectView.query().build()))
+                    .hasSize(0);
+
+            // Let's send a command with each of APIs.
+            clientRequest.command(Given.createProject()).postAndForget();
+            context().receivesCommand(Given.createProject());
+
+            // And assert that both commands were received.
+            context().assertEvents().withType(BbProjectCreated.class).hasSize(2);
+            assertThat(clientRequest.run(BbProjectView.query().build()))
+                    .hasSize(2);
+        }
+
+        @Test
+        @DisplayName("closed as `BlackBoxContext` is closed")
+        @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting an exception. */
+        void closedAsBlackBoxContextClosed() {
+            BlackBoxClients factory = context().clients();
+            Client client = factory.withMatchingTenant();
+            assertThat(client.isOpen()).isTrue();
+
+            context().close();
+
+            assertThat(client.isOpen()).isFalse();
+            assertThrows(IllegalStateException.class, factory::withMatchingTenant);
+            assertThrows(IllegalStateException.class, () ->
+                    factory.create(TenantId.getDefaultInstance()));
         }
     }
 }
