@@ -292,7 +292,8 @@ public abstract class Migration<I,
 
         private void updateState(S newState) {
             if (!entity.state().equals(newState)) {
-                tx.builder().mergeFrom(newState);
+                tx.builder().clear()
+                            .mergeFrom(newState);
                 Version version = increment(entity.version());
                 tx.setVersion(version);
             }
