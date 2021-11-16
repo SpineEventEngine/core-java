@@ -481,7 +481,6 @@ public abstract class BlackBox implements Logging, Closeable {
         if(!isOpen()) {
             return;
         }
-
         try {
             context.close();
             clientSupplier.close();
