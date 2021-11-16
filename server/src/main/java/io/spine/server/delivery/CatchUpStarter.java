@@ -89,9 +89,6 @@ final class CatchUpStarter<I> {
     /**
      * Starts the catch-up restricting it to the set of projection instances by certain identifiers.
      *
-     * <p>{@linkplain CatchUpRepositories Caches} the {@code ProjectionRepository}
-     * by the ID of the catch-up to improve the performance of the catch-up.
-     *
      * @param ids
      *         the IDs of the projection instances to catch-up, or {@code null} if all entities of
      *         this kind need to catch up.
