@@ -34,7 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Creates {@link Client}s to a particular {@link BlackBox} instance.
+ * Creates {@link Client}s for a particular {@link BlackBox} instance.
  */
 public final class BlackBoxClients {
 
