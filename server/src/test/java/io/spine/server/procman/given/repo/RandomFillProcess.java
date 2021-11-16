@@ -29,23 +29,41 @@ package io.spine.server.procman.given.repo;
 import io.spine.server.procman.ProcessManagerMigration;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
+import io.spine.test.procman.Task;
+import io.spine.test.procman.TaskId;
+
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.test.procman.Project.Status.DONE;
 
 /**
- * Sets the process {@code name} to a predefined {@linkplain #NEW_NAME value}.
+ * Fills the state of the migrated {@code ProcessManager} with some random values.
  */
-public final class SetTestProcessName
+public final class RandomFillProcess
         extends ProcessManagerMigration<ProjectId, TestProcessManager, Project, Project.Builder> {
-
-    public static final String NEW_NAME = "Migrated process";
 
     @Override
     public Project apply(Project project) {
         Project newState = project
                 .toBuilder()
-                .clear()
-                .setId(id())
-                .setName(NEW_NAME)
-                .build();
+                .setId(project.getId())
+                .setName(newUuid())
+                .setStatus(DONE)
+                .addTask(task())
+                .vBuild();
         return newState;
+    }
+
+    private static Task task() {
+        return Task.newBuilder()
+                .setTaskId(taskId())
+                .setTitle(newUuid())
+                .setDescription(newUuid())
+                .vBuild();
+    }
+
+    private static TaskId taskId() {
+        return TaskId.newBuilder()
+                .setId(newUuid().hashCode())
+                .build();
     }
 }

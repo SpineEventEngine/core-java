@@ -52,6 +52,7 @@ import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.procman.given.delivery.GivenMessage;
 import io.spine.server.procman.given.repo.EventDiscardingProcManRepository;
 import io.spine.server.procman.given.repo.ProjectCompletion;
+import io.spine.server.procman.given.repo.RandomFillProcess;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.SetTestProcessId;
@@ -703,7 +704,7 @@ class ProcessManagerRepositoryTest
         repository.store(pm2);
         repository.store(pm3);
 
-        // Init filters by the `name` column.
+        // Query by the `name` column.
         Project.Query query =
                 Project.query()
                        .name().is(NEW_NAME)
@@ -736,6 +737,35 @@ class ProcessManagerRepositoryTest
         assertThat(results)
                 .comparingElementsUsing(entityState())
                 .containsExactly(expectedState1, expectedState2);
+    }
+
+    @Test
+    @DisplayName("replace the state of the migrated process")
+    void replaceState() {
+        ProjectId id = createId(42);
+        TestProcessManager entity = new TestProcessManager(id);
+        TestProcessManagerRepository repository = repository();
+        repository.store(entity);
+        repository.applyMigration(id, new RandomFillProcess());
+
+        Project.Query byNewName =
+                Project.query()
+                       .name().is(NEW_NAME)
+                       .build();
+
+        // Ensure nothing found.
+        Iterator<TestProcessManager> expectedEmpty = repository.find(byNewName);
+        assertThat(expectedEmpty.hasNext()).isFalse();
+
+        repository.applyMigration(id, new SetTestProcessName());
+
+        // Now we should have found a single instance.
+        Iterator<TestProcessManager> shouldHaveOne = repository.find(byNewName);
+        Project expectedState = expectedState(entity, NEW_NAME);
+        ImmutableList<TestProcessManager> actualList = ImmutableList.copyOf(shouldHaveOne);
+        assertThat(actualList)
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState);
     }
 
     @Test
@@ -867,5 +897,15 @@ class ProcessManagerRepositoryTest
 
     private static boolean hasState(TestProcessManager actual, Project expected) {
         return actual.state().equals(expected);
+    }
+
+    private static Project expectedState(TestProcessManager entity, String expectedName) {
+        return entity
+                .state()
+                .toBuilder()
+                .setId(entity.id())
+                .setName(expectedName)
+                .setIdString(entity.getIdString())
+                .build();
     }
 }
