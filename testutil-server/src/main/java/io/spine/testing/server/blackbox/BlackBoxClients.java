@@ -48,8 +48,6 @@ public final class BlackBoxClients {
      *         the instance to connect to
      * @param supplier
      *         supplier of {@code Client} instances
-     * @throws IllegalStateException
-     *         if the method is called for a single-tenant context
      */
     BlackBoxClients(BlackBox blackBox, ClientSupplier supplier) {
         this.supplier = supplier;
