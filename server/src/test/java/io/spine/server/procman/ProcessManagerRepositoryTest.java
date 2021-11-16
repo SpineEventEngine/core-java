@@ -721,18 +721,8 @@ class ProcessManagerRepositoryTest
         Iterator<TestProcessManager> foundAfterMigration = repository.find(query);
 
         ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
-        Project expectedState1 = pm1
-                .state()
-                .toBuilder()
-                .setName(NEW_NAME)
-                .setIdString(pm1.getIdString())
-                .build();
-        Project expectedState2 = pm2
-                .state()
-                .toBuilder()
-                .setName(NEW_NAME)
-                .setIdString(pm2.getIdString())
-                .build();
+        Project expectedState1 = expectedState(pm1, NEW_NAME);
+        Project expectedState2 = expectedState(pm2, NEW_NAME);
         assertThat(results).hasSize(2);
         assertThat(results)
                 .comparingElementsUsing(entityState())
