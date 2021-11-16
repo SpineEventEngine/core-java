@@ -38,6 +38,7 @@ import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.Versions;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
@@ -611,10 +612,9 @@ public final class CatchUpProcess<I>
     }
 
     private Event wrapAsEvent(EventMessage event, EventContext context) {
-        Event firstEvent;
         EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
-        firstEvent = factory.createEvent(event, null);
-        return firstEvent;
+        Event result = factory.createEvent(event, Versions.zero());
+        return result;
     }
 
     private static List<Event> stripLastTimestamp(List<Event> events) {
