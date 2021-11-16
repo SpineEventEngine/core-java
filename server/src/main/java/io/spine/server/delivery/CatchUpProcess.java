@@ -287,7 +287,6 @@ public final class CatchUpProcess<I>
      */
     private static final Turbulence TURBULENCE = Turbulence.of(fromMillis(500));
 
-    private final ProjectionRepository<I, ?, ?> repository;
     private final DispatchCatchingUp<I> dispatchOperation;
     private final CatchUpStorage storage;
     private final CatchUpStarter.Builder<I> starterTemplate;
@@ -298,11 +297,10 @@ public final class CatchUpProcess<I>
 
     CatchUpProcess(CatchUpProcessBuilder<I> builder) {
         super(TYPE);
-        this.repository = builder.getRepository();
         this.dispatchOperation = builder.getDispatchOp();
         this.storage = builder.getStorage();
         this.queryLimit = limitOf(builder.getPageSize());
-        this.starterTemplate = CatchUpStarter.newBuilder(this.repository, this.storage);
+        this.starterTemplate = CatchUpStarter.newBuilder(builder.getRepository(), this.storage);
     }
 
     @Internal
@@ -607,7 +605,7 @@ public final class CatchUpProcess<I>
         Set<I> ids;
         List<Any> rawTargets = request.getTargetList();
         ids = rawTargets.isEmpty()
-              ? ImmutableSet.copyOf(repository.index())
+              ? ImmutableSet.copyOf(repository().index())
               : unpack(rawTargets);
         return ids;
     }
@@ -733,8 +731,23 @@ public final class CatchUpProcess<I>
 
     private Set<I> unpack(List<Any> packedIds) {
         return packedIds.stream()
-                        .map((any) -> Identifier.unpack(any, repository.idClass()))
+                        .map((any) -> Identifier.unpack(any, repository().idClass()))
                         .collect(toSet());
+    }
+
+    /**
+     * Loads the instance of corresponding {@link ProjectionRepository} from
+     * the {@link CatchUpRepositories} cache.
+     *
+     * <p>Such a mechanism ensures that this process always has both its ID and underlying
+     * repository matching each other.
+     */
+    private ProjectionRepository<I, ?, ?> repository() {
+        CatchUpId id = builder().getId();
+        TypeUrl projectionType = TypeUrl.parse(id.getProjectionType());
+        ProjectionRepository<I, ?, ?> result = CatchUpRepositories.cache()
+                                                                  .get(projectionType);
+        return result;
     }
 
     private EventStreamQuery toEventQuery(CatchUp.Request request,
@@ -762,22 +775,13 @@ public final class CatchUpProcess<I>
     /**
      * {@inheritDoc}
      *
-     * <p>If the passed envelope is a {@link CatchUpSignal}, it is verified that the projection type
-     * URL passed with the event matches the one of the projection repository configured
-     * for this instance.
+     * <p>Ensures that the passed signal is an instance of the supported types.
      */
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
-        EventMessage raw = envelope.message();
-        if (raw instanceof CatchUpSignal) {
-            CatchUpSignal asSignal = (CatchUpSignal) raw;
-            String actualType = asSignal.getId()
-                                        .getProjectionType();
-            String expectedType = repository.entityStateType()
-                                            .value();
-            return expectedType.equals(actualType);
-        }
-        return true;
+        EventMessage message = envelope.message();
+        return message instanceof CatchUpSignal
+                || message instanceof ShardProcessed;
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks")    // Handling two distinct cases.
