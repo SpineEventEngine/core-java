@@ -95,7 +95,7 @@ public abstract class BlackBox implements Logging, Closeable {
     private final BoundedContext context;
 
     /**
-     * A supplier of {@link Client}s which are linked to this context.
+     * A supplier of {@link Client}s which send requests to this context.
      */
     private final ClientSupplier clientSupplier;
 
