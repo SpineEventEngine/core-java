@@ -50,13 +50,13 @@ import static java.util.Objects.isNull;
 /**
  * Creates {@code Client} instances for the passed Bounded Context.
  *
- * <p>As {@code Client} requires a gRPC server to be connected to, the supplier assembles
+ * <p>As {@code Client} requires a gRPC server to be connected to, the factory assembles
  * and starts a {@link GrpcContainer}. The server and the created clients are working in-process.
  */
-class ClientSupplier implements Closeable {
+class ClientFactory implements Closeable {
 
     /**
-     * The context to which this supplier creates {@code Client} instances.
+     * The context to which this factory creates {@code Client} instances.
      */
     private final BoundedContext context;
 
@@ -73,9 +73,10 @@ class ClientSupplier implements Closeable {
     private @MonotonicNonNull String serverName;
 
     /**
-     * Creates a supplier, {@code Client}s of which would be linked to the specified context.
+     * Creates a factory producing {@code Client}s which would send their requests
+     * to the specified context.
      */
-    ClientSupplier(BoundedContext context) {
+    ClientFactory(BoundedContext context) {
         this.context = context;
         this.clients = new ArrayList<>();
     }

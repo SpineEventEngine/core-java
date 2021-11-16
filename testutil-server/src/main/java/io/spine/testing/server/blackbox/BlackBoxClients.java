@@ -34,12 +34,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Creates the {@link Client}s to a particular {@link BlackBox} instance.
+ * Creates {@link Client}s to a particular {@link BlackBox} instance.
  */
 public final class BlackBoxClients {
 
     private final BlackBox blackBox;
-    private final ClientSupplier supplier;
+    private final ClientFactory supplier;
 
     /**
      * Creates a new instance of this factory.
@@ -49,7 +49,7 @@ public final class BlackBoxClients {
      * @param supplier
      *         supplier of {@code Client} instances
      */
-    BlackBoxClients(BlackBox blackBox, ClientSupplier supplier) {
+    BlackBoxClients(BlackBox blackBox, ClientFactory supplier) {
         this.supplier = supplier;
         this.blackBox = blackBox;
     }

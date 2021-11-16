@@ -95,9 +95,9 @@ public abstract class BlackBox implements Logging, Closeable {
     private final BoundedContext context;
 
     /**
-     * A supplier of {@link Client}s which send requests to this context.
+     * A factory of {@link Client}s which send requests to this context.
      */
-    private final ClientSupplier clientSupplier;
+    private final ClientFactory clientFactory;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -158,7 +158,7 @@ public abstract class BlackBox implements Logging, Closeable {
         BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
-        this.clientSupplier = new ClientSupplier(context);
+        this.clientFactory = new ClientFactory(context);
     }
 
     private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
@@ -483,7 +483,7 @@ public abstract class BlackBox implements Logging, Closeable {
         }
         try {
             context.close();
-            clientSupplier.close();
+            clientFactory.close();
         } catch (Exception e) {
             throw illegalStateWithCauseOf(e);
         }
@@ -700,7 +700,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * to this instance of {@code BlackBox}.
      */
     public BlackBoxClients clients() {
-        BlackBoxClients result = new BlackBoxClients(this, clientSupplier);
+        BlackBoxClients result = new BlackBoxClients(this, clientFactory);
         return result;
     }
 }
