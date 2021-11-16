@@ -42,8 +42,10 @@ public final class SetTestProjectionName
     public Project apply(Project project) {
         Project result = project
                 .toBuilder()
+                .clear()
+                .setId(id())
                 .setName(NEW_NAME)
-                .build();
+                .vBuild();
         return result;
     }
 }

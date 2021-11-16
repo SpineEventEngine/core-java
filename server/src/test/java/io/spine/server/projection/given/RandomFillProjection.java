@@ -24,28 +24,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.repo;
+package io.spine.server.projection.given;
 
-import io.spine.server.procman.ProcessManagerMigration;
-import io.spine.test.procman.Project;
-import io.spine.test.procman.ProjectId;
+import io.spine.server.projection.ProjectionMigration;
+import io.spine.test.projection.Project;
+import io.spine.test.projection.ProjectId;
+import io.spine.test.projection.Task;
+import io.spine.test.projection.TaskId;
+
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.test.projection.Project.Status.CREATED;
 
 /**
- * Sets the process {@code name} to a predefined {@linkplain #NEW_NAME value}.
+ * Fills each field of the state of `TestProjection` with some random value.
  */
-public final class SetTestProcessName
-        extends ProcessManagerMigration<ProjectId, TestProcessManager, Project, Project.Builder> {
-
-    public static final String NEW_NAME = "Migrated process";
+public final class RandomFillProjection
+        extends ProjectionMigration<ProjectId, TestProjection, Project, Project.Builder> {
 
     @Override
     public Project apply(Project project) {
-        Project newState = project
+        Project result = project
                 .toBuilder()
-                .clear()
-                .setId(id())
-                .setName(NEW_NAME)
+                .setId(project.getId())
+                .setName(newUuid())
+                .setStatus(CREATED)
+                .addTask(task())
                 .vBuild();
-        return newState;
+        return result;
     }
+
+    private static Task task() {
+        return Task.newBuilder()
+                .setTaskId(taskId())
+                .setTitle(newUuid())
+                .setDescription(newUuid())
+                .vBuild();
+    }
+
+    private static TaskId taskId() {
+        return TaskId.newBuilder()
+                .setId(newUuid().hashCode())
+                .build();
+    }
+
 }

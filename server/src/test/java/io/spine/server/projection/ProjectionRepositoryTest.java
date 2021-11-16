@@ -50,6 +50,7 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMe
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.SensoryDeprivedProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
+import io.spine.server.projection.given.RandomFillProjection;
 import io.spine.server.projection.given.SetTestProjectionId;
 import io.spine.server.projection.given.SetTestProjectionName;
 import io.spine.server.projection.given.TestProjection;
@@ -610,11 +611,8 @@ class ProjectionRepositoryTest
         repository.store(projection2);
         repository.store(projection3);
 
-        // Init filters by the `name` column.
-        Project.Query query =
-                Project.query()
-                       .name().is(NEW_NAME)
-                       .build();
+        // Query by the `name` column.
+        Project.Query query = queryByName(NEW_NAME);
 
         // Check nothing is found as the entity states were not yet updated.
         Iterator<TestProjection> found = repository.find(query);
@@ -627,22 +625,38 @@ class ProjectionRepositoryTest
         Iterator<TestProjection> foundAfterMigration = repository.find(query);
 
         ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
-        Project expectedState1 = projection1
-                .state()
-                .toBuilder()
-                .setName(NEW_NAME)
-                .setIdString(projection1.getIdString())
-                .build();
-        Project expectedState2 = projection2
-                .state()
-                .toBuilder()
-                .setName(NEW_NAME)
-                .setIdString(projection2.getIdString())
-                .build();
+        Project expectedState1 = expectedState(projection1, NEW_NAME);
+        Project expectedState2 = expectedState(projection2, NEW_NAME);
         assertThat(results).hasSize(2);
         assertThat(results)
                 .comparingElementsUsing(entityState())
                 .containsExactly(expectedState1, expectedState2);
+    }
+
+    @Test
+    @DisplayName("replace the state of the migrated entity")
+    void replaceState() {
+        ProjectId id = createId(42);
+        TestProjection entity = new TestProjection(id);
+        TestProjectionRepository repository = repository();
+        repository.store(entity);
+        repository.applyMigration(id, new RandomFillProjection());
+        // Query by the `name` column.
+        Project.Query byNewName = queryByName(NEW_NAME);
+
+        // Ensure nothing found.
+        Iterator<TestProjection> expectedEmpty = repository.find(byNewName);
+        assertThat(expectedEmpty.hasNext()).isFalse();
+
+        repository.applyMigration(id, new SetTestProjectionName());
+
+        // Now we should have found a single instance.
+        Iterator<TestProjection> shouldHaveOne = repository.find(byNewName);
+        Project expectedState = expectedState(entity, NEW_NAME);
+        ImmutableList<TestProjection> actualList = ImmutableList.copyOf(shouldHaveOne);
+        assertThat(actualList)
+                .comparingElementsUsing(entityState())
+                .containsExactly(expectedState);
     }
 
     @Test
@@ -768,11 +782,27 @@ class ProjectionRepositoryTest
         assertThat(found).isEmpty();
     }
 
+    private static Project.Query queryByName(String value) {
+        return Project.query()
+                      .name().is(value)
+                      .build();
+    }
+
     private static Correspondence<TestProjection, Project> entityState() {
         return Correspondence.from(ProjectionRepositoryTest::hasState, "has state");
     }
 
     private static boolean hasState(TestProjection actual, Project expected) {
         return actual.state().equals(expected);
+    }
+
+    private static Project expectedState(TestProjection entity, String newName) {
+        return entity
+                .state()
+                .toBuilder()
+                .setId(entity.id())
+                .setName(newName)
+                .setIdString(entity.getIdString())
+                .build();
     }
 }
