@@ -478,7 +478,7 @@ public abstract class BlackBox implements Logging, Closeable {
      */
     @Override
     public final void close() {
-        if(!isOpen()) {
+        if (!isOpen()) {
             return;
         }
         try {
