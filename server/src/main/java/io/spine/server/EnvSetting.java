@@ -204,8 +204,8 @@ final class EnvSetting<V> {
      * Sets the value lazily provided via the passed {@code Supplier}
      * for the specified environment type.
      *
-     * <p>The supplier will not be invoked unless someone requests the value under the specified
-     * environment.
+     * <p>The supplier will not be invoked unless someone requests the value under
+     * the matching environment.
      *
      * @param value
      *         supplier of the value to assign to one of environments
