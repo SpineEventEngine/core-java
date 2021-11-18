@@ -28,6 +28,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.environment.EnvironmentType;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -93,7 +94,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 final class EnvSetting<V> {
 
-    private final Map<Class<? extends EnvironmentType>, V> environmentValues =
+    private final Map<Class<? extends EnvironmentType>, Value<V>> environmentValues =
             new HashMap<>();
 
     private final Map<Class<? extends EnvironmentType>, Supplier<V>> fallbacks =
@@ -152,8 +153,11 @@ final class EnvSetting<V> {
      *        unnecessary value instantiation.
      */
     void apply(SettingOperation<V> operation) throws Exception {
-        for (V v : environmentValues.values()) {
-            operation.accept(v);
+        for (Value<V> v : environmentValues.values()) {
+            if(v.isResolved()) {
+                V value = v.get();
+                operation.accept(value);
+            }
         }
     }
 
@@ -193,13 +197,31 @@ final class EnvSetting<V> {
     void use(V value, Class<? extends EnvironmentType> type) {
         checkNotNull(value);
         checkNotNull(type);
-        this.environmentValues.put(type, value);
+        this.environmentValues.put(type, new Value<>(value));
+    }
+
+    /**
+     * Sets the value lazily provided via the passed {@code Supplier}
+     * for the specified environment type.
+     *
+     * <p>The supplier will not be invoked unless someone requests the value under
+     * the matching environment.
+     *
+     * @param value
+     *         supplier of the value to assign to one of environments
+     * @param type
+     *         the type of the environment
+     */
+    void lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
+        checkNotNull(value);
+        checkNotNull(type);
+        this.environmentValues.put(type, new Value<>(value));
     }
 
     private Optional<V> valueFor(Class<? extends EnvironmentType> type) {
         checkNotNull(type);
-        V result = this.environmentValues.get(type);
-        if (result == null) {
+        Value<V> value = this.environmentValues.get(type);
+        if (value == null) {
             Supplier<V> resultSupplier = this.fallbacks.get(type);
             if (resultSupplier == null) {
                 return Optional.empty();
@@ -209,6 +231,7 @@ final class EnvSetting<V> {
             this.use(newValue, type);
             return Optional.of(newValue);
         }
+        V result = value.get();
         return Optional.of(result);
     }
 
@@ -222,5 +245,52 @@ final class EnvSetting<V> {
 
         /** Performs this operation on the specified value. */
         void accept(V value) throws Exception;
+    }
+
+    /**
+     * The value configured for the setting.
+     *
+     * <p>Supports lazy initialization via the {@code Supplier}. In this case, once the value
+     * is {@linkplain #get() requested}, the supplier is invoked. The returned value is remembered
+     * for all future requests.
+     *
+     * @param <V>
+     *         type of the value
+     */
+    private static class Value<V> {
+
+        private final Supplier<V> supplier;
+        private @MonotonicNonNull V value;
+
+        /**
+         * Creates a value with the lazily resolving supplier.
+         *
+         * <p>The supplier is only invoked upon {@linkplain #get() request}.
+         */
+        private Value(Supplier<V> supplier) {
+            this.supplier = supplier;
+        }
+
+        /**
+         * Creates a new instance with the actual value already resolved.
+         */
+        private Value(V resolved) {
+            this.supplier = () -> resolved;
+            this.value = resolved;
+        }
+
+        /**
+         * Tells whether this instance already has the value provided by the supplier.
+         */
+        private synchronized boolean isResolved() {
+            return value != null;
+        }
+
+        private synchronized V get() {
+            if (value == null) {
+                value = supplier.get();
+            }
+            return value;
+        }
     }
 }
