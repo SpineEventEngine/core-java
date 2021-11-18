@@ -471,7 +471,11 @@ public final class ServerEnvironment implements AutoCloseable {
         @CanIgnoreReturnValue
         public TypeConfigurator useStorageFactory(Fn<StorageFactory> fn) {
             checkNotNull(fn);
-            se.storageFactory.lazyUse(() -> fn.apply(type), type);
+            se.storageFactory.lazyUse(() -> {
+                StorageFactory factory = fn.apply(type);
+                SystemAwareStorageFactory wrapped = wrap(factory);
+                return wrapped;
+            }, type);
             return this;
         }
     }
