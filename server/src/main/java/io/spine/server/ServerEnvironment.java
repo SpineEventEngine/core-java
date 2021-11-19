@@ -370,6 +370,9 @@ public final class ServerEnvironment implements AutoCloseable {
         /**
          * Assigns a {@code Delivery} obtained from the passed function.
          *
+         * <p>In case the {@code Delivery} is never requested for the current server
+         * environment type, the passed function will be not invoked.
+         *
          * @param fn
          *         the function to provide the {@code Delivery} in response to
          *         the currently configured server environment type
@@ -378,8 +381,8 @@ public final class ServerEnvironment implements AutoCloseable {
         @CanIgnoreReturnValue
         public TypeConfigurator useDelivery(Fn<Delivery> fn) {
             checkNotNull(fn);
-            Delivery delivery = fn.apply(type);
-            return use(delivery);
+            se.delivery.lazyUse(() -> fn.apply(type), type);
+            return this;
         }
 
         /**
@@ -395,7 +398,10 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         /**
-         * Assigns a {@code TracerFactory} obtained from the passed function.
+         * Lazily uses the {@code TracerFactory} obtained from the passed function.
+         *
+         * <p>In case the {@code TracerFactory} is never requested for the current server
+         * environment type, the passed function will be not invoked.
          *
          * @param fn
          *         the function to provide the {@code TracerFactory} in response to
@@ -405,8 +411,8 @@ public final class ServerEnvironment implements AutoCloseable {
         @CanIgnoreReturnValue
         public TypeConfigurator useTracerFactory(Fn<TracerFactory> fn) {
             checkNotNull(fn);
-            TracerFactory factory = fn.apply(type);
-            return use(factory);
+            se.tracerFactory.lazyUse(() -> fn.apply(type), type);
+            return this;
         }
 
         /**
@@ -424,6 +430,9 @@ public final class ServerEnvironment implements AutoCloseable {
         /**
          * Assigns a {@code TransportFactory} obtained from the passed function.
          *
+         * <p>In case the {@code TransportFactory} is never requested for the current server
+         * environment type, the passed function will be not invoked.
+         *
          * @param fn
          *         the function to provide the {@code TransportFactory} in response to
          *         the currently configured server environment type
@@ -432,8 +441,8 @@ public final class ServerEnvironment implements AutoCloseable {
         @CanIgnoreReturnValue
         public TypeConfigurator useTransportFactory(Fn<TransportFactory> fn) {
             checkNotNull(fn);
-            TransportFactory factory = fn.apply(type);
-            return use(factory);
+            se.transportFactory.lazyUse(() -> fn.apply(type), type);
+            return this;
         }
 
         /**
@@ -451,6 +460,9 @@ public final class ServerEnvironment implements AutoCloseable {
         /**
          * Assigns a {@code StorageFactory} obtained from the passed function.
          *
+         * <p>In case the {@code StorageFactory} is never requested for the current server
+         * environment type, the passed function will be not invoked.
+         *
          * @param fn
          *         the function to provide the {@code StorageFactory} in response to
          *         the currently configured server environment type
@@ -459,8 +471,12 @@ public final class ServerEnvironment implements AutoCloseable {
         @CanIgnoreReturnValue
         public TypeConfigurator useStorageFactory(Fn<StorageFactory> fn) {
             checkNotNull(fn);
-            StorageFactory factory = fn.apply(type);
-            return use(factory);
+            se.storageFactory.lazyUse(() -> {
+                StorageFactory factory = fn.apply(type);
+                SystemAwareStorageFactory wrapped = wrap(factory);
+                return wrapped;
+            }, type);
+            return this;
         }
     }
 
