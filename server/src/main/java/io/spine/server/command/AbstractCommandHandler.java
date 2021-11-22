@@ -28,6 +28,7 @@ package io.spine.server.command;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.Version;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -35,6 +36,7 @@ import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
 
@@ -88,6 +90,17 @@ public abstract class AbstractCommandHandler
                 .onError(error -> onError(envelope, error))
                 .onRejection(rejection -> onRejection(envelope, rejection))
                 .handle();
+    }
+
+    @Override
+    public void registerWith(BoundedContext context) {
+        super.registerWith(context);
+        context.stand().registerTypeSupplier(this);
+    }
+
+    @Override
+    public ImmutableSet<EventClass> producedEvents() {
+        return thisClass.commandOutput();
     }
 
     @Override

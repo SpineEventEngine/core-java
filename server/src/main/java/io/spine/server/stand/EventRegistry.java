@@ -27,6 +27,7 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.EventProducer;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventClass;
 import io.spine.type.TypeUrl;
@@ -40,6 +41,11 @@ interface EventRegistry extends AutoCloseable {
      * Registers the repository as an event producer in this registry.
      */
     void register(Repository<?, ?> repository);
+
+    /**
+     * Registers the event producer in this registry.
+     */
+    void register(EventProducer handler);
 
     /**
      * Retrieves all event {@linkplain TypeUrl types} stored in the registry.

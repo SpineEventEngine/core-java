@@ -85,6 +85,7 @@ public abstract class AbstractEventReactor
         checkNotRegistered();
         eventBus = context.eventBus();
         system = context.systemClient().writeSide();
+        context.stand().registerTypeSupplier(this);
     }
 
     @Override
@@ -146,5 +147,10 @@ public abstract class AbstractEventReactor
     @Override
     public ImmutableSet<EventClass> domesticEventClasses() {
         return thisClass.domesticEvents();
+    }
+
+    @Override
+    public ImmutableSet<EventClass> producedEvents() {
+        return thisClass.reactionOutput();
     }
 }

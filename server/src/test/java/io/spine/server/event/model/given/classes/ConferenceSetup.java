@@ -26,6 +26,7 @@
 
 package io.spine.server.event.model.given.classes;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.EventContext;
@@ -34,6 +35,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.React;
+import io.spine.server.type.EventClass;
 import io.spine.test.event.model.ConferenceAnnounced;
 import io.spine.test.event.model.SpeakerJoined;
 import io.spine.test.event.model.SpeakersInvited;
@@ -87,5 +89,10 @@ public class ConferenceSetup implements EventReactor {
     @Override
     public Version version() {
         return Versions.zero();
+    }
+
+    @Override
+    public ImmutableSet<EventClass> producedEvents() {
+        return ImmutableSet.of();
     }
 }
