@@ -61,9 +61,9 @@ final class InMemoryEventRegistry implements EventRegistry {
     }
 
     @Override
-    public void register(EventProducer handler) {
-        handler.producedEvents()
-               .forEach(this::putIntoMap);
+    public void register(EventProducer producer) {
+        producer.producedEvents()
+                .forEach(this::putIntoMap);
     }
 
     @Override

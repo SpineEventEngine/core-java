@@ -45,7 +45,7 @@ interface EventRegistry extends AutoCloseable {
     /**
      * Registers the event producer in this registry.
      */
-    void register(EventProducer handler);
+    void register(EventProducer producer);
 
     /**
      * Retrieves all event {@linkplain TypeUrl types} stored in the registry.
