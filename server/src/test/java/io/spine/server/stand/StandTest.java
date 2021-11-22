@@ -479,10 +479,10 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("upon receiving the event of observed type, " +
                 "when event is produced by a standalone command handler")
-        void uponEventFromStandaloneAssignee() {
+        void uponEventFromStandaloneHandler() {
             AloneWaiter waiter = new AloneWaiter();
             BoundedContext context =
-                    BoundedContextBuilder.assumingTests()
+                    BoundedContextBuilder.assumingTests(isMultitenant())
                                          .addCommandDispatcher(waiter)
                                          .build();
             Stand stand = context.stand();
