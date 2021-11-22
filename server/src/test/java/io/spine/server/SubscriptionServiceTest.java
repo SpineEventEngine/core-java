@@ -122,7 +122,7 @@ class SubscriptionServiceTest {
 
     private static BoundedContext randomCtx() {
         return BoundedContext.singleTenant(Identifier.newUuid())
-                                    .build();
+                             .build();
     }
 
     @AfterEach
