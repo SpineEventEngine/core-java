@@ -35,7 +35,12 @@ option java_outer_classname = "IntegrationCommandsProto";
 option java_multiple_files = true;
 
 import "spine/test/integration/project.proto";
+import "spine/test/integration/identifiers.proto";
 
 message ItgStartProject {
     ProjectId project_id = 1;
+}
+
+message PlaceOrder {
+    OrderId id = 1;
 }

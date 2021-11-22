@@ -25,22 +25,17 @@
  */
 syntax = "proto3";
 
-package spine.test.integration.event;
+package spine.test.subscriptionservice;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.integration.event";
-option java_outer_classname = "IntegrationEventsProto";
+option java_package = "io.spine.test.subscriptionservice.event";
+option java_outer_classname = "ReportEventsProto";
 option java_multiple_files = true;
 
-import "spine/test/integration/project.proto";
-import "spine/test/integration/identifiers.proto";
+import "spine/test/subscriptionservice/report.proto";
 
-message ItgProjectCreated {
-    ProjectId project_id = 1;
-}
-
-message OrderPlaced {
-    OrderId id = 1;
+message ReportSent {
+    ReportId id = 1;
 }

@@ -36,6 +36,8 @@ import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregateRepository;
+import io.spine.server.command.CommandHandler;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.SubscriptionCallback;
@@ -57,10 +59,18 @@ public class StandTestEnv {
                         new CustomerAggregateRepository(), new StandTestProjectionRepository());
     }
 
-    public static Stand newStand(boolean multitenant, Repository... repositories) {
+    public static Stand newStand(boolean multitenant, Repository<?, ?>... repositories) {
         BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(multitenant);
         Arrays.stream(repositories)
               .forEach(builder::add);
+        BoundedContext context = builder.build();
+        return context.stand();
+    }
+
+    public static Stand newStand(CommandDispatcher... dispatchers) {
+        BoundedContextBuilder builder = BoundedContextBuilder.assumingTests();
+        Arrays.stream(dispatchers)
+              .forEach(builder::addCommandDispatcher);
         BoundedContext context = builder.build();
         return context.stand();
     }
