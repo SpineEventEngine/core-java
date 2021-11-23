@@ -25,6 +25,7 @@
  */
 package io.spine.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -170,7 +171,16 @@ public final class SubscriptionService
         return result;
     }
 
-    private Optional<BoundedContext> findContextOf(Target target) {
+    /**
+     * Searches for the Bounded Context which provides the messages of the target type.
+     *
+     * @param target
+     *         the type which may be available through this subscription service
+     * @return the context which exposes the target type,
+     *         or {@code Optional.empty} if no known context does so
+     */
+    @VisibleForTesting  /* Otherwise should have been `private`. */
+    Optional<BoundedContext> findContextOf(Target target) {
         TypeUrl type = target.type();
         BoundedContext selected = typeToContextMap.get(type);
         Optional<BoundedContext> result = Optional.ofNullable(selected);

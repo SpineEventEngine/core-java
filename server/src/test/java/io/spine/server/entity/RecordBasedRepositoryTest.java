@@ -135,6 +135,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     @AfterEach
     protected void tearDown() throws Exception {
         clearCurrentTenant();
+        ModelTests.dropAllModels();
     }
 
     /*

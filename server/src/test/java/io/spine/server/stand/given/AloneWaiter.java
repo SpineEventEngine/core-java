@@ -23,24 +23,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.integration.event;
+package io.spine.server.stand.given;
 
-import "spine/options.proto";
+import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.Assign;
+import io.spine.test.integration.OrderId;
+import io.spine.test.integration.command.PlaceOrder;
+import io.spine.test.integration.event.OrderPlaced;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.integration.event";
-option java_outer_classname = "IntegrationEventsProto";
-option java_multiple_files = true;
+/**
+ * A standalone command handler to use in {@link io.spine.server.stand.StandTest StandTest}s.
+ */
+public final class AloneWaiter extends AbstractCommandHandler {
 
-import "spine/test/integration/project.proto";
-import "spine/test/integration/identifiers.proto";
+    private int ordersPlaced = 0;
 
-message ItgProjectCreated {
-    ProjectId project_id = 1;
-}
+    @Assign
+    OrderPlaced handler(PlaceOrder command) {
+        OrderId id = command.getId();
+        OrderPlaced placed =
+                OrderPlaced.newBuilder()
+                           .setId(id)
+                           .vBuild();
+        ordersPlaced++;
+        return placed;
+    }
 
-message OrderPlaced {
-    OrderId id = 1;
+    /**
+     * Returns the number of orders placed by this waiter.
+     */
+    public int ordersPlaced() {
+        return ordersPlaced;
+    }
 }

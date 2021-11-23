@@ -48,6 +48,8 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
+import io.spine.testing.server.model.ModelTests;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -61,6 +63,11 @@ class ProcessManagerClassTest {
 
     private final ProcessManagerClass<?> processManagerClass =
             ProcessManagerClass.asProcessManagerClass(TestProcessManager.class);
+
+    @BeforeEach
+    void setUp() {
+        ModelTests.dropAllModels();
+    }
 
     @Nested
     @DisplayName("provide classes of")

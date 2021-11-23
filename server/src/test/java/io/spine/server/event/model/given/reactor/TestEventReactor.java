@@ -26,10 +26,12 @@
 
 package io.spine.server.event.model.given.reactor;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.server.event.EventReactor;
+import io.spine.server.type.EventClass;
 import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
@@ -56,6 +58,10 @@ public class TestEventReactor implements EventReactor {
         return Version.getDefaultInstance();
     }
 
+    @Override
+    public ImmutableSet<EventClass> producedEvents() {
+        return ImmutableSet.of();
+    }
 
     public Method getMethod() {
         return ModelTests.getMethod(getClass(), REACTOR_METHOD_NAME);

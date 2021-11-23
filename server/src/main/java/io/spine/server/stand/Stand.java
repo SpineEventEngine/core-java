@@ -43,6 +43,7 @@ import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.EventProducer;
 import io.spine.server.Identity;
 import io.spine.server.bus.Listener;
 import io.spine.server.entity.Entity;
@@ -377,6 +378,13 @@ public class Stand implements AutoCloseable {
     }
 
     /**
+     * Registers the passed {@code EventProducer} as the event type supplier.
+     */
+    public void registerTypeSupplier(EventProducer producer) {
+        eventRegistry.register(producer);
+    }
+
+    /**
      * Closes the {@code Stand} performing necessary cleanups.
      */
     @Override
@@ -504,9 +512,7 @@ public class Stand implements AutoCloseable {
         @Internal
         public Stand build() {
             checkState(systemReadSide != null, "SystemWriteSide is not set.");
-            boolean multitenant = this.multitenant == null
-                                  ? false
-                                  : this.multitenant;
+            boolean multitenant = this.multitenant != null && this.multitenant;
             if (subscriptionRegistry == null) {
                 subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
             }

@@ -27,6 +27,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.annotation.Internal;
@@ -47,6 +48,7 @@ import io.spine.server.entity.RecentHistory;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Iterator;
@@ -295,6 +297,12 @@ public abstract class Aggregate<I,
         return EventPlayer
                 .forTransactionOf(this)
                 .play(events);
+    }
+
+    @Override
+    @Internal
+    public ImmutableSet<EventClass> producedEvents() {
+        return modelClass().outgoingEvents();
     }
 
     /**
