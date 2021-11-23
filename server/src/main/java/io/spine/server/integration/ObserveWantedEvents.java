@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -53,9 +54,12 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
      * Current set of message type URLs, requested by other parties via sending the
      * {@linkplain ExternalEventsWanted configuration messages}, mapped to IDs of their origin
      * bounded contexts.
+     *
+     * <p>This instance is potentially accessed from different threads,
+     * therefore it's made concurrency-friendly.
      */
     private final Multimap<ExternalEventType, BoundedContextName> requestedTypes =
-            HashMultimap.create();
+            synchronizedSetMultimap(HashMultimap.create());
 
     ObserveWantedEvents(BoundedContextName context, BusAdapter bus) {
         super(context, ExternalEventsWanted.class);
