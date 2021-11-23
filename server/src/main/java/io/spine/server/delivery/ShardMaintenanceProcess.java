@@ -95,7 +95,7 @@ final class ShardMaintenanceProcess extends AbstractEventReactor {
     @Internal
     @Override
     protected void registerIn(Stand stand) {
-        // do nothing.
+        // Do nothing.
     }
 
     /**
