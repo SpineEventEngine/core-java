@@ -37,6 +37,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -71,14 +73,17 @@ class EnvSettingTest {
 
         @Test
         @DisplayName("using the `null` as the env value")
+        @SuppressWarnings("ThrowableNotThrown")
         void forEnv() {
             EnvSetting<StorageFactory> setting = new EnvSetting<>();
             assertNpe(() -> setting.use(InMemoryStorageFactory.newInstance(), null));
         }
 
+        @SuppressWarnings("ThrowableNotThrown")
         private void testNoNullsForEnv(Class<? extends EnvironmentType> envType) {
-            EnvSetting<?> config = new EnvSetting<Void>();
-            assertNpe(() -> config.use(null, envType));
+            EnvSetting<?> setting = new EnvSetting<Void>();
+            assertNpe(() -> setting.use(null, envType));
+            assertNpe(() -> setting.lazyUse(null, envType));
         }
     }
 
@@ -173,6 +178,46 @@ class EnvSettingTest {
 
                 assertThat(storageFactory.value(type)).isSameInstanceAs(actualFactory);
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("allow to configure the values lazily")
+    class Lazy {
+
+        @Test
+        @DisplayName("for the `Production` environment")
+        void forProduction() {
+            testLazyForEnv(Production.class);
+        }
+
+        @Test
+        @DisplayName("for the `Tests` environment")
+        void forTests() {
+            testLazyForEnv(Tests.class);
+        }
+
+        @Test
+        @DisplayName("for a user-defined environment type")
+        void forUserDefinedType() {
+            testLazyForEnv(Local.class);
+        }
+
+        private void testLazyForEnv(Class<? extends EnvironmentType> type) {
+            InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
+            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+            AtomicBoolean resolved = new AtomicBoolean(false);
+            storageFactory.lazyUse(() -> {
+                resolved.set(true);
+                return factory;
+            }, type);
+            assertThat(resolved.get()).isFalse();
+
+            Optional<StorageFactory> actual = storageFactory.optionalValue(type);
+            assertThat(actual)
+                    .isPresent();
+            assertThat(resolved.get()).isTrue();
+            assertThat(actual.get()).isSameInstanceAs(factory);
         }
     }
 
