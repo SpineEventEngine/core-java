@@ -31,6 +31,7 @@ import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
+import io.spine.base.Identifier;
 import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityUpdates;
 import io.spine.client.EventUpdates;
@@ -47,13 +48,16 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.AggProjectCreatedReactor;
 import io.spine.server.Given.ProjectAggregateRepository;
+import io.spine.server.Given.ReportSender;
 import io.spine.server.stand.InvalidSubscriptionException;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggOwnerNotified;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.commandservice.customer.Customer;
+import io.spine.test.subscriptionservice.event.ReportSent;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.mute.MuteLogging;
@@ -65,12 +69,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.Given.CommandMessage.createProject;
+import static io.spine.server.Given.CommandMessage.sendReport;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -99,14 +106,22 @@ class SubscriptionServiceTest {
                 .assumingTests()
                 .add(new ProjectAggregateRepository())
                 .addEventDispatcher(new AggProjectCreatedReactor())
+                .addCommandDispatcher(new ReportSender())
                 .build();
         subscriptionService = SubscriptionService
                 .newBuilder()
                 .add(context)
+                .add(randomCtx())
+                .add(randomCtx())
                 .build();
         observer = new MemoizingObserver<>();
         activationObserver = new MemoizingObserver<>();
         cancellationObserver = new MemoizingObserver<>();
+    }
+
+    private static BoundedContext randomCtx() {
+        return BoundedContext.singleTenant(Identifier.newUuid())
+                             .build();
     }
 
     @AfterEach
@@ -244,9 +259,9 @@ class SubscriptionServiceTest {
             checkSubscribesTo(AggProjectCreated.class);
         }
 
-        @MuteLogging
         @Test
         @DisplayName("events from abstract reactors")
+        @MuteLogging
         void eventsFromReactors() {
             Subscription subscription = checkSubscribesTo(AggOwnerNotified.class);
             MemoizingObserver<SubscriptionUpdate> observer = StreamObservers.memoizingObserver();
@@ -263,6 +278,26 @@ class SubscriptionServiceTest {
             Event event = events.getEvent(0);
             assertThat(event.enclosedMessage())
                     .isInstanceOf(AggOwnerNotified.class);
+        }
+
+        @Test
+        @DisplayName("events from standalone command handlers")
+        @MuteLogging
+        void eventsFromCommandHandlers() {
+            Subscription subscription = checkSubscribesTo(ReportSent.class);
+            MemoizingObserver<SubscriptionUpdate> observer = StreamObservers.memoizingObserver();
+            subscriptionService.activate(subscription, observer);
+            Command command = new TestActorRequestFactory(SubscriptionServiceTest.class)
+                    .createCommand(sendReport());
+            context.commandBus()
+                   .post(command, noOpObserver());
+            EventUpdates events = observer.firstResponse()
+                                          .getEventUpdates();
+            assertThat(events.getEventList())
+                    .hasSize(1);
+            Event event = events.getEvent(0);
+            assertThat(event.enclosedMessage())
+                    .isInstanceOf(ReportSent.class);
         }
 
         @CanIgnoreReturnValue
@@ -284,6 +319,42 @@ class SubscriptionServiceTest {
             assertThat(observer.isCompleted())
                     .isTrue();
             return response;
+        }
+    }
+
+    @Nested
+    @DisplayName("select proper `BoundedContext` by the type of the requested ")
+    class PickContextBy {
+
+        @Test
+        @DisplayName("events emitted by one of Context entities")
+        void eventsFromEntity() {
+            assertTargetFound(AggTaskAdded.class);
+        }
+
+        @Test
+        @DisplayName("events emitted by a standalone event reactor")
+        void eventsFromEventReactor() {
+            assertTargetFound(AggOwnerNotified.class);
+        }
+
+        @Test
+        @DisplayName("events emitted by a standalone command handler")
+        void eventsFromCommandHandler() {
+            assertTargetFound(ReportSent.class);
+        }
+
+        @Test
+        @DisplayName("state of entities that belong to Context")
+        void entityType() {
+            assertTargetFound(AggProject.class);
+        }
+
+        private void assertTargetFound(Class<? extends Message> targetType) {
+            Target target = Targets.allOf(targetType);
+            Optional<BoundedContext> result = subscriptionService.findContextOf(target);
+            assertThat(result).isPresent();
+            assertThat(result.get().name()).isEqualTo(context.name());
         }
     }
 

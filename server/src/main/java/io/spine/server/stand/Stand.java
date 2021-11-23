@@ -43,6 +43,7 @@ import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.EventProducer;
 import io.spine.server.Identity;
 import io.spine.server.bus.Listener;
 import io.spine.server.entity.Entity;
@@ -368,6 +369,13 @@ public class Stand implements AutoCloseable {
     public void registerTypeSupplier(Repository<?, ?> repository) {
         typeRegistry.register(repository);
         eventRegistry.register(repository);
+    }
+
+    /**
+     * Registers the passed {@code EventProducer} as the event type supplier.
+     */
+    public void registerTypeSupplier(EventProducer producer) {
+        eventRegistry.register(producer);
     }
 
     /**

@@ -26,11 +26,13 @@
 
 package io.spine.server.command.given;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.StringValue;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.test.shared.EmptyEntity;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventClass;
 
 import static io.spine.testing.TestValues.newUuidValue;
 
@@ -63,6 +65,11 @@ public class CommandHandlingEntityTestEnv {
         @Override
         protected DispatchOutcome dispatchCommand(CommandEnvelope cmd) {
             return DispatchOutcome.getDefaultInstance();
+        }
+
+        @Override
+        public ImmutableSet<EventClass> producedEvents() {
+            return ImmutableSet.of();
         }
     }
 }

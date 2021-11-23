@@ -29,6 +29,7 @@ package io.spine.server.event;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Any;
+import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
@@ -41,6 +42,7 @@ import io.spine.server.Identity;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -87,6 +89,19 @@ public abstract class AbstractEventReactor
         checkNotRegistered();
         eventBus = context.eventBus();
         system = context.systemClient().writeSide();
+        registerIn(context.stand());
+    }
+
+    /**
+     * Registers this reactor in {@code Stand} as an event producer.
+     *
+     * <p>The descendants which emit system events may choose not to expose their signals
+     * via {@code Stand}, or expose them partially. In which case this method should be
+     * overridden respectively.
+     */
+    @Internal
+    protected void registerIn(Stand stand) {
+        stand.registerTypeSupplier(this);
     }
 
     @Override
@@ -153,5 +168,10 @@ public abstract class AbstractEventReactor
     @Override
     public ImmutableSet<EventClass> domesticEventClasses() {
         return thisClass.domesticEvents();
+    }
+
+    @Override
+    public ImmutableSet<EventClass> producedEvents() {
+        return thisClass.reactionOutput();
     }
 }

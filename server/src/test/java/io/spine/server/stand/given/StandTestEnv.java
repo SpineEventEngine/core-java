@@ -88,6 +88,7 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.given.Given.projectionOfClass;
+import io.spine.server.commandbus.CommandDispatcher;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.Assertions.assertMatchesMask;
 import static java.util.stream.Collectors.toList;
@@ -119,6 +120,14 @@ public final class StandTestEnv {
         BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(multitenant);
         Arrays.stream(repositories)
               .forEach(builder::add);
+        BoundedContext context = builder.build();
+        return context.stand();
+    }
+
+    public static Stand newStand(CommandDispatcher... dispatchers) {
+        BoundedContextBuilder builder = BoundedContextBuilder.assumingTests();
+        Arrays.stream(dispatchers)
+              .forEach(builder::addCommandDispatcher);
         BoundedContext context = builder.build();
         return context.stand();
     }

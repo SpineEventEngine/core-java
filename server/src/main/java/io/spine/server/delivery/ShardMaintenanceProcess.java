@@ -27,12 +27,14 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.Time;
 import io.spine.server.delivery.event.ShardProcessed;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.React;
+import io.spine.server.stand.Stand;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
@@ -84,6 +86,16 @@ final class ShardMaintenanceProcess extends AbstractEventReactor {
         ShardEvent message = (ShardEvent) event.message();
         inbox.send(event)
              .toReactor(message.getIndex());
+    }
+
+    /**
+     * Does NOT register this process in {@code Stand}, as the emitted events should
+     * not be available for subscribing.
+     */
+    @Internal
+    @Override
+    protected void registerIn(Stand stand) {
+        // do nothing.
     }
 
     /**

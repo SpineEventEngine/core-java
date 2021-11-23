@@ -44,6 +44,7 @@ import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.event.AbstractEventReactor;
@@ -66,6 +67,9 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
+import io.spine.test.subscriptionservice.ReportId;
+import io.spine.test.subscriptionservice.command.SendReport;
+import io.spine.test.subscriptionservice.event.ReportSent;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
@@ -115,9 +119,17 @@ public class Given {
         }
 
         public static AggCreateProject createProject(ProjectId id) {
-            return AggCreateProject.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
+            return AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+        }
+
+        public static SendReport sendReport() {
+            return SendReport
+                    .newBuilder()
+                    .setId(ReportId.generate())
+                    .vBuild();
         }
     }
 
@@ -269,13 +281,24 @@ public class Given {
         }
     }
 
-    public static class AggProjectCreatedReactor extends AbstractEventReactor {
+    static class AggProjectCreatedReactor extends AbstractEventReactor {
 
         @React
         AggOwnerNotified on(AggProjectCreated event, EventContext context) {
             return AggOwnerNotified
                     .newBuilder()
                     .setOwner(context.actor())
+                    .vBuild();
+        }
+    }
+
+    static class ReportSender extends AbstractCommandHandler {
+
+        @Assign
+        ReportSent on(SendReport command) {
+            return ReportSent
+                    .newBuilder()
+                    .setId(command.getId())
                     .vBuild();
         }
     }

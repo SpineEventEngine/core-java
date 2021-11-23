@@ -27,6 +27,7 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.server.command.CommandHandlingEntity;
@@ -120,6 +121,11 @@ public abstract class ProcessManager<I,
     @Override
     protected ProcessManagerClass<?> thisClass() {
         return (ProcessManagerClass<?>) super.thisClass();
+    }
+
+    @Override
+    public ImmutableSet<EventClass> producedEvents() {
+        return thisClass().outgoingEvents();
     }
 
     /**
