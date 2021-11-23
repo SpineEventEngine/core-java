@@ -118,16 +118,18 @@ public final class StandTestEnv {
 
     public static Stand newStand(boolean multitenant, Repository<?, ?>... repositories) {
         BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(multitenant);
-        Arrays.stream(repositories)
-              .forEach(builder::add);
+        for (Repository<?, ?> repository : repositories) {
+            builder.add(repository);
+        }
         BoundedContext context = builder.build();
         return context.stand();
     }
 
     public static Stand newStand(CommandDispatcher... dispatchers) {
         BoundedContextBuilder builder = BoundedContextBuilder.assumingTests();
-        Arrays.stream(dispatchers)
-              .forEach(builder::addCommandDispatcher);
+        for (CommandDispatcher dispatcher : dispatchers) {
+            builder.addCommandDispatcher(dispatcher);
+        }
         BoundedContext context = builder.build();
         return context.stand();
     }
