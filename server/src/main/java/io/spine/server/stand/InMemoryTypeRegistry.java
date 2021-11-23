@@ -51,7 +51,7 @@ final class InMemoryTypeRegistry implements TypeRegistry {
      * The mapping between {@code TypeUrl} instances and repositories providing
      * the entities of this type.
      */
-    private final ConcurrentMap<TypeUrl, QueryableRepository> repositories =
+    private final ConcurrentMap<TypeUrl, QueryableRepository<?, ?>> repositories =
             new ConcurrentHashMap<>();
 
     private final Set<TypeUrl> aggregateTypes = synchronizedSet(new HashSet<>());
@@ -70,8 +70,9 @@ final class InMemoryTypeRegistry implements TypeRegistry {
         TypeUrl entityType = repository.entityStateType();
 
         if (repository instanceof QueryableRepository) {
-            QueryableRepository recordBasedRepository = (QueryableRepository) repository;
-            repositories.put(entityType, recordBasedRepository);
+            @SuppressWarnings("unchecked")  /* Guaranteed by the `QueryableRepository` contract. */
+            QueryableRepository<I, ?> recordRepo = (QueryableRepository<I, ?>) repository;
+            repositories.put(entityType, recordRepo);
         }
         if (repository instanceof AggregateRepository) {
             AggregateRepository<I, ?, ?> aggRepository = (AggregateRepository<I, ?, ?>) repository;
@@ -80,9 +81,9 @@ final class InMemoryTypeRegistry implements TypeRegistry {
     }
 
     @Override
-    public Optional<QueryableRepository> recordRepositoryOf(TypeUrl type) {
-        QueryableRepository repo = repositories.get(type);
-        Optional<QueryableRepository> result = ofNullable(repo);
+    public Optional<QueryableRepository<?, ?>> recordRepositoryOf(TypeUrl type) {
+        QueryableRepository<?, ?> repo = repositories.get(type);
+        Optional<QueryableRepository<?, ?>> result = ofNullable(repo);
         return result;
     }
 

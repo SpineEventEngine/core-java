@@ -60,6 +60,7 @@ import io.spine.server.event.EventStreamQuery.Limit;
 import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.stand.Stand;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.type.EventEnvelope;
@@ -821,6 +822,16 @@ public final class CatchUpProcess<I>
     protected CatchUp.Builder newStateBuilderWith(CatchUpId id) {
         return CatchUp.newBuilder()
                       .setId(id);
+    }
+
+    /**
+     * Does NOT register this process in {@code Stand}, as the emitted events should
+     * not be available for subscribing.
+     */
+    @Internal
+    @Override
+    protected void registerIn(Stand stand) {
+        // Do nothing.
     }
 
     /**

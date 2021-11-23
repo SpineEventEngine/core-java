@@ -43,6 +43,7 @@ import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.EventProducer;
 import io.spine.server.Identity;
 import io.spine.server.bus.Listener;
 import io.spine.server.entity.Entity;
@@ -371,6 +372,13 @@ public class Stand implements AutoCloseable {
     }
 
     /**
+     * Registers the passed {@code EventProducer} as the event type supplier.
+     */
+    public void registerTypeSupplier(EventProducer producer) {
+        eventRegistry.register(producer);
+    }
+
+    /**
      * Closes the {@code Stand} performing necessary cleanups.
      */
     @Override
@@ -393,9 +401,9 @@ public class Stand implements AutoCloseable {
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
-        Optional<QueryableRepository> maybeRepo = typeRegistry.recordRepositoryOf(type);
+        Optional<QueryableRepository<?, ?>> maybeRepo = typeRegistry.recordRepositoryOf(type);
         if (maybeRepo.isPresent()) {
-            QueryableRepository recordRepo = maybeRepo.get();
+            QueryableRepository<?, ?> recordRepo = maybeRepo.get();
             return new EntityQueryProcessor(recordRepo);
         }
         return NO_OP_PROCESSOR;

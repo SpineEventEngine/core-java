@@ -55,6 +55,7 @@ import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.stand.given.AloneWaiter;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.AssertProjectQueryResults;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
@@ -64,12 +65,16 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
+import io.spine.test.integration.OrderId;
+import io.spine.test.integration.command.PlaceOrder;
+import io.spine.test.integration.event.OrderPlaced;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -376,10 +381,10 @@ class StandTest extends TenantAwareTest {
             assertThat(packedState).isEqualTo(callback.newEntityState());
         }
 
-        @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.
         @Test
-        @DisplayName("upon event of observed type received")
-        void uponEvent() {
+        @DisplayName("upon receiving the event of observed type, when event is produced by Entity")
+        @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.
+        void uponEventFromEntity() {
             // Subscribe to Customer aggregate updates.
             CustomerAggregateRepository repository = new CustomerAggregateRepository();
             Stand stand = createStand(repository);
@@ -419,6 +424,43 @@ class StandTest extends TenantAwareTest {
                     .isEqualTo(customerId);
             assertThat(eventMessage.getCustomer())
                     .isEqualTo(customer);
+        }
+
+        @Test
+        @DisplayName("upon receiving the event of observed type, " +
+                "when event is produced by a standalone command handler")
+        void uponEventFromStandaloneHandler() {
+            AloneWaiter waiter = new AloneWaiter();
+            BoundedContext context =
+                    BoundedContextBuilder.assumingTests(isMultitenant())
+                                         .addCommandDispatcher(waiter)
+                                         .build();
+            Stand stand = context.stand();
+            Topic topic = requestFactory.topic()
+                                        .allOf(OrderPlaced.class);
+
+            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            subscribeAndActivate(stand, topic, callback);
+
+            OrderId orderId = OrderId.generate();
+            PlaceOrder placeOrder =
+                    PlaceOrder.newBuilder()
+                              .setId(orderId)
+                              .vBuild();
+            Command command = requestFactory.command()
+                                            .create(placeOrder);
+
+            assertThat(waiter.ordersPlaced()).isEqualTo(0);
+            context.commandBus().post(command, noOpObserver());
+            assertThat(waiter.ordersPlaced()).isEqualTo(1);
+
+            @Nullable Event observed = callback.newEvent();
+            assertThat(observed).isNotNull();
+            OrderPlaced expected =
+                    OrderPlaced.newBuilder()
+                               .setId(orderId)
+                               .vBuild();
+            assertThat(observed.enclosedMessage()).isEqualTo(expected);
         }
     }
 

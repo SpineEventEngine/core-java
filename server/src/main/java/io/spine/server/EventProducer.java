@@ -26,9 +26,11 @@
 
 package io.spine.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import io.spine.core.Version;
 import io.spine.server.model.Nothing;
+import io.spine.server.type.EventClass;
 
 /**
  * An object with identity which produces events.
@@ -47,6 +49,11 @@ public interface EventProducer {
      * the generated events.
      */
     Version version();
+
+    /**
+     * Obtains classes of the events produced by this object.
+     */
+    ImmutableSet<EventClass> producedEvents();
 
     /**
      * Obtains the {@link io.spine.server.model.Nothing} event message.
