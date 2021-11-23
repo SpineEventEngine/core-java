@@ -65,7 +65,7 @@ interface TypeRegistry extends AutoCloseable {
      * @return {@code RecordBasedRepository} managing the objects of the given {@code type},
      *         or {@code Optional.empty()} if no such repository has been registered
      */
-    Optional<QueryableRepository> recordRepositoryOf(TypeUrl type);
+    Optional<QueryableRepository<?, ?>> recordRepositoryOf(TypeUrl type);
 
     /**
      * Reads all {@link io.spine.server.aggregate.Aggregate Aggregate} entity state types

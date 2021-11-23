@@ -401,9 +401,9 @@ public class Stand implements AutoCloseable {
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
-        Optional<QueryableRepository> maybeRepo = typeRegistry.recordRepositoryOf(type);
+        Optional<QueryableRepository<?, ?>> maybeRepo = typeRegistry.recordRepositoryOf(type);
         if (maybeRepo.isPresent()) {
-            QueryableRepository recordRepo = maybeRepo.get();
+            QueryableRepository<?, ?> recordRepo = maybeRepo.get();
             return new EntityQueryProcessor(recordRepo);
         }
         return NO_OP_PROCESSOR;
