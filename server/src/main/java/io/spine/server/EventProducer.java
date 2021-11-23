@@ -51,6 +51,11 @@ public interface EventProducer {
     Version version();
 
     /**
+     * Obtains classes of the events produced by this object.
+     */
+    ImmutableSet<EventClass> producedEvents();
+
+    /**
      * Obtains the {@link io.spine.server.model.Nothing} event message.
      *
      * <p>This event should be returned if there is no value for the domain to produce an actual
@@ -62,9 +67,4 @@ public interface EventProducer {
     default Nothing nothing() {
         return Nothing.getDefaultInstance();
     }
-
-    /**
-     * Obtains classes of the events produced by this object.
-     */
-    ImmutableSet<EventClass> producedEvents();
 }
