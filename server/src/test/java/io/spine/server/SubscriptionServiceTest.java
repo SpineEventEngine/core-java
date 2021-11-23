@@ -354,7 +354,9 @@ class SubscriptionServiceTest {
             Target target = Targets.allOf(targetType);
             Optional<BoundedContext> result = subscriptionService.findContextOf(target);
             assertThat(result).isPresent();
-            assertThat(result.get().name()).isEqualTo(context.name());
+            BoundedContext actual = result.get();
+            assertThat(actual.name())
+                    .isEqualTo(context.name());
         }
     }
 
