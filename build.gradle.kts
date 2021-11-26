@@ -157,9 +157,11 @@ subprojects {
         plugin("pmd-settings")
     }
 
+    val javaVersion = JavaVersion.VERSION_11
+
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
 
     tasks.withType<JavaCompile> {
@@ -173,7 +175,7 @@ subprojects {
 
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_1_8.toString()
+            jvmTarget = javaVersion.toString()
             freeCompilerArgs = listOf("-Xskip-prerelease-check")
         }
     }
@@ -181,7 +183,6 @@ subprojects {
     dependencies {
         ErrorProne.apply {
             errorprone(core)
-            errorproneJavac(javacPlugin)
         }
 
         api("io.spine:spine-base:$spineBaseVersion")
@@ -205,7 +206,6 @@ subprojects {
     }
     configurations.excludeProtobufLite()
 
-    val srcDir = "$projectDir/src"
     val generatedDir = "$projectDir/generated"
     val generatedJavaDir = "$generatedDir/main/java"
     val generatedTestJavaDir = "$generatedDir/test/java"
