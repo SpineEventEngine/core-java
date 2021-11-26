@@ -31,5 +31,5 @@ package io.spine.internal.gradle
  * `false` otherwise.
  */
 fun String.isSnapshot(): Boolean {
-    return contains("snapshot", true)
+    return contains("snapshot", ignoreCase = true)
 }

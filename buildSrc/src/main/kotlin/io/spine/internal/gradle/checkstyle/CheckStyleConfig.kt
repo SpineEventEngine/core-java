@@ -57,9 +57,11 @@ object CheckStyleConfig {
             plugin(CheckstylePlugin::class.java)
         }
 
+        val configDir = project.rootDir.resolve("config/quality/")
+
         with(project.the<CheckstyleExtension>()) {
             toolVersion = CheckStyle.version
-            configFile = project.rootDir.resolve("config/quality/checkstyle.xml")
+            configDirectory.set(configDir)
         }
 
         project.afterEvaluate {
