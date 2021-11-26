@@ -26,10 +26,10 @@
 
 package io.spine.client;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import static com.google.common.base.Preconditions.checkState;
 
