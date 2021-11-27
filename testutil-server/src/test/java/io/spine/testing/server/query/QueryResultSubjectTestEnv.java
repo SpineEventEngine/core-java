@@ -40,17 +40,17 @@ import static io.spine.testing.server.query.GivenResponseStatus.ok;
 
 final class QueryResultSubjectTestEnv {
 
-    public static final String TASK_1_TITLE = "Clean dishes";
-    public static final String TASK_1_DESCRIPTION = "Do clean all the dishes";
+    private static final String TASK_1_TITLE = "Clean dishes";
+    private static final String TASK_1_DESCRIPTION = "Do clean all the dishes";
 
-    public static final String TASK_2_TITLE = "Do the laundry";
-    public static final String TASK_2_DESCRIPTION = "Do the laundry very efficiently";
+    private static final String TASK_2_TITLE = "Do the laundry";
+    private static final String TASK_2_DESCRIPTION = "Do the laundry very efficiently";
 
     /** Prevents instantiation of this test env class. */
     private QueryResultSubjectTestEnv() {
     }
 
-    public static QueryResponse responseWithSingleEntity() {
+    static QueryResponse responseWithSingleEntity() {
         var stateWithVersion = EntityStateWithVersion.newBuilder()
                 .setState(pack(state1()))
                 .setVersion(version1())
@@ -62,7 +62,7 @@ final class QueryResultSubjectTestEnv {
         return queryResponse;
     }
 
-    public static QueryResponse responseWithMultipleEntities() {
+    static QueryResponse responseWithMultipleEntities() {
         var stateWithVersion1 = EntityStateWithVersion.newBuilder()
                 .setState(pack(state1()))
                 .setVersion(version1())
@@ -79,7 +79,7 @@ final class QueryResultSubjectTestEnv {
         return queryResponse;
     }
 
-    public static BbTask state1() {
+    private static BbTask state1() {
         var id = BbTaskId.newBuilder()
                 .setUuid(newUuid())
                 .vBuild();
@@ -91,7 +91,7 @@ final class QueryResultSubjectTestEnv {
         return state;
     }
 
-    public static BbTask state2() {
+    static BbTask state2() {
         var id = BbTaskId.newBuilder()
                 .setUuid(newUuid())
                 .vBuild();
@@ -103,14 +103,14 @@ final class QueryResultSubjectTestEnv {
         return state;
     }
 
-    public static Version version1() {
+    private static Version version1() {
         return Version.newBuilder()
                 .setNumber(15)
                 .setTimestamp(currentTime())
                 .vBuild();
     }
 
-    public static Version version2() {
+    static Version version2() {
         return Version.newBuilder()
                 .setNumber(42)
                 .setTimestamp(currentTime())
