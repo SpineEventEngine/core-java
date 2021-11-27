@@ -27,10 +27,7 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.IterableSubject;
-import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.test.client.TestEntity;
@@ -65,14 +62,14 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("Topic builder should")
+@DisplayName("`Topic` builder should")
 @SuppressWarnings("DuplicateStringLiteralInspection")
 class TopicBuilderTest {
 
@@ -81,7 +78,7 @@ class TopicBuilderTest {
     private TopicFactory factory;
 
     static Filter findByName(Iterable<Filter> filters, String name) {
-        for (Filter filter : filters) {
+        for (var filter : filters) {
             if (filter.getFieldPath()
                       .getFieldName(0)
                       .equals(name)) {
@@ -111,12 +108,12 @@ class TopicBuilderTest {
         @Test
         @DisplayName("for the type")
         void byType() {
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .build();
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .build();
             assertNotNull(topic);
             assertFalse(topic.hasFieldMask());
 
-            Target target = topic.getTarget();
+            var target = topic.getTarget();
             assertTrue(target.getIncludeAll());
 
             assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
@@ -125,19 +122,19 @@ class TopicBuilderTest {
         @Test
         @DisplayName("for IDs")
         void byId() {
-            int id1 = 314;
-            int id2 = 271;
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .byId(id1, id2)
-                                 .build();
+            var id1 = 314;
+            var id2 = 271;
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .byId(id1, id2)
+                               .build();
             assertNotNull(topic);
             assertFalse(topic.hasFieldMask());
 
-            Target target = topic.getTarget();
+            var target = topic.getTarget();
             assertFalse(target.getIncludeAll());
 
-            TargetFilters entityFilters = target.getFilters();
-            IdFilter idFilter = entityFilters.getIdFilter();
+            var entityFilters = target.getFilters();
+            var idFilter = entityFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
@@ -151,17 +148,17 @@ class TopicBuilderTest {
         @Test
         @DisplayName("with a field mask")
         void byFieldMask() {
-            String fieldName = "TestEntity.firstField";
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .withMask(fieldName)
-                                 .build();
+            var fieldName = "TestEntity.firstField";
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .withMask(fieldName)
+                               .build();
             assertNotNull(topic);
             assertTrue(topic.hasFieldMask());
 
-            FieldMask mask = topic.getFieldMask();
+            var mask = topic.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
 
-            IterableSubject assertFieldNames = assertThat(fieldNames);
+            var assertFieldNames = assertThat(fieldNames);
             assertFieldNames.hasSize(1);
             assertFieldNames.containsExactly(fieldName);
         }
@@ -169,59 +166,59 @@ class TopicBuilderTest {
         @Test
         @DisplayName("matching a predicate")
         void byFilter() {
-            String columnName = "first_field";
+            var columnName = "first_field";
             Object columnValue = "a column value";
 
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .where(eq(columnName, columnValue))
-                                 .build();
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .where(eq(columnName, columnValue))
+                               .build();
             assertNotNull(topic);
-            Target target = topic.getTarget();
+            var target = topic.getTarget();
             assertFalse(target.getIncludeAll());
 
-            TargetFilters entityFilters = target.getFilters();
-            List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
+            var entityFilters = target.getFilters();
+            var aggregatingFilters = entityFilters.getFilterList();
             assertThat(aggregatingFilters)
                  .hasSize(1);
-            CompositeFilter aggregatingFilter = aggregatingFilters.get(0);
+            var aggregatingFilter = aggregatingFilters.get(0);
             Collection<Filter> filters = aggregatingFilter.getFilterList();
             assertThat(filters)
                  .hasSize(1);
-            Any actualValue = findByName(filters, columnName).getValue();
+            var actualValue = findByName(filters, columnName).getValue();
             assertNotNull(columnValue);
-            StringValue messageValue = unpack(actualValue, StringValue.class);
-            String actualGenericValue = messageValue.getValue();
+            var messageValue = unpack(actualValue, StringValue.class);
+            var actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }
 
         @Test
         @DisplayName("matching multiple predicates")
         void byMultipleFilters() {
-            String columnName1 = "first_field";
+            var columnName1 = "first_field";
             Object columnValue1 = "the column value";
-            String columnName2 = "second_field";
+            var columnName2 = "second_field";
             Object columnValue2 = false;
 
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .where(eq(columnName1, columnValue1),
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .where(eq(columnName1, columnValue1),
                                         eq(columnName2, columnValue2))
-                                 .build();
+                               .build();
             assertNotNull(topic);
-            Target target = topic.getTarget();
+            var target = topic.getTarget();
             assertFalse(target.getIncludeAll());
 
-            TargetFilters entityFilters = target.getFilters();
-            List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
+            var entityFilters = target.getFilters();
+            var aggregatingFilters = entityFilters.getFilterList();
             assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
                                                            .getFilterList();
-            Any actualValue1 = findByName(filters, columnName1).getValue();
+            var actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
-            String actualGenericValue1 = toObject(actualValue1, String.class);
+            var actualGenericValue1 = toObject(actualValue1, String.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(filters, columnName2).getValue();
+            var actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             boolean actualGenericValue2 = toObject(actualValue2, boolean.class);
             assertEquals(columnValue2, actualGenericValue2);
@@ -232,25 +229,25 @@ class TopicBuilderTest {
         @Test
         @DisplayName("with filter groupings")
         void byFilterGrouping() {
-            String firstColumn = "first_field";
-            String secondColumn = "second_field";
-            String thirdColumn = "third_field";
-            String countryName = "Ukraine";
+            var firstColumn = "first_field";
+            var secondColumn = "second_field";
+            var thirdColumn = "third_field";
+            var countryName = "Ukraine";
 
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .where(all(ge(thirdColumn, 50),
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .where(all(ge(thirdColumn, 50),
                                             le(thirdColumn, 1000)),
                                         either(eq(secondColumn, false),
                                                eq(firstColumn, countryName)))
-                                 .build();
-            Target target = topic.getTarget();
-            List<CompositeFilter> filters = target.getFilters()
-                                                  .getFilterList();
+                               .build();
+            var target = topic.getTarget();
+            var filters = target.getFilters()
+                                .getFilterList();
             assertThat(filters)
                  .hasSize(2);
 
-            CompositeFilter firstFilter = filters.get(0);
-            CompositeFilter secondFilter = filters.get(1);
+            var firstFilter = filters.get(0);
+            var secondFilter = filters.get(1);
 
             List<Filter> allFilters;
             List<Filter> eitherFilters;
@@ -268,30 +265,30 @@ class TopicBuilderTest {
             assertThat(eitherFilters)
                  .hasSize(2);
 
-            Filter lowerBound = allFilters.get(0);
-            String columnName1 = lowerBound.getFieldPath()
-                                           .getFieldName(0);
+            var lowerBound = allFilters.get(0);
+            var columnName1 = lowerBound.getFieldPath()
+                                        .getFieldName(0);
             assertEquals(thirdColumn, columnName1);
             assertEquals(50L, (long) toObject(lowerBound.getValue(), int.class));
             assertEquals(GREATER_OR_EQUAL, lowerBound.getOperator());
 
-            Filter higherBound = allFilters.get(1);
-            String columnName2 = higherBound.getFieldPath()
-                                                       .getFieldName(0);
+            var higherBound = allFilters.get(1);
+            var columnName2 = higherBound.getFieldPath()
+                                         .getFieldName(0);
             assertEquals(thirdColumn, columnName2);
             assertEquals(1000L, (long) toObject(higherBound.getValue(), int.class));
             assertEquals(LESS_OR_EQUAL, higherBound.getOperator());
 
-            Filter establishedTimeFilter = eitherFilters.get(0);
-            String columnName3 = establishedTimeFilter.getFieldPath()
-                                                      .getFieldName(0);
+            var establishedTimeFilter = eitherFilters.get(0);
+            var columnName3 = establishedTimeFilter.getFieldPath()
+                                                   .getFieldName(0);
             assertEquals(secondColumn, columnName3);
             assertEquals(false, toObject(establishedTimeFilter.getValue(), boolean.class));
             assertEquals(EQUAL, establishedTimeFilter.getOperator());
 
-            Filter countryFilter = eitherFilters.get(1);
-            String columnName4 = countryFilter.getFieldPath()
-                                              .getFieldName(0);
+            var countryFilter = eitherFilters.get(1);
+            var columnName4 = countryFilter.getFieldPath()
+                                           .getFieldName(0);
             assertEquals(firstColumn, columnName4);
             assertEquals(countryName, toObject(countryFilter.getValue(), String.class));
             assertEquals(EQUAL, countryFilter.getOperator());
@@ -302,35 +299,35 @@ class TopicBuilderTest {
         @Test
         @DisplayName("with all parameters")
         void byAllArguments() {
-            int id1 = 314;
-            int id2 = 271;
-            String columnName1 = "first_field";
+            var id1 = 314;
+            var id2 = 271;
+            var columnName1 = "first_field";
             Object columnValue1 = "some column value";
-            String columnName2 = "second_field";
+            var columnName2 = "second_field";
             Object columnValue2 = true;
-            String fieldName = "TestEntity.secondField";
-            Topic query = factory.select(TEST_ENTITY_TYPE)
-                                 .withMask(fieldName)
-                                 .byId(id1, id2)
-                                 .where(eq(columnName1, columnValue1),
+            var fieldName = "TestEntity.secondField";
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .withMask(fieldName)
+                               .byId(id1, id2)
+                               .where(eq(columnName1, columnValue1),
                                         eq(columnName2, columnValue2))
-                                 .build();
+                               .build();
             assertNotNull(query);
 
             // Check FieldMask
-            FieldMask mask = query.getFieldMask();
+            var mask = query.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
 
-            IterableSubject assertFieldNames = assertThat(fieldNames);
+            var assertFieldNames = assertThat(fieldNames);
             assertFieldNames.hasSize(1);
             assertFieldNames.containsExactly(fieldName);
 
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertFalse(target.getIncludeAll());
-            TargetFilters targetFilters = target.getFilters();
+            var targetFilters = target.getFilters();
 
             // Check IDs
-            IdFilter idFilter = targetFilters.getIdFilter();
+            var idFilter = targetFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
@@ -340,7 +337,7 @@ class TopicBuilderTest {
                 .containsExactly(id1, id2);
 
             // Check query params
-            List<CompositeFilter> aggregatingFilters = targetFilters.getFilterList();
+            var aggregatingFilters = targetFilters.getFilterList();
             assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
@@ -348,12 +345,12 @@ class TopicBuilderTest {
             assertThat(filters)
                  .hasSize(2);
 
-            Any actualValue1 = findByName(filters, columnName1).getValue();
+            var actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
-            String actualGenericValue1 = toObject(actualValue1, String.class);
+            var actualGenericValue1 = toObject(actualValue1, String.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(filters, columnName2).getValue();
+            var actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             boolean actualGenericValue2 = toObject(actualValue2, boolean.class);
             assertEquals(columnValue2, actualGenericValue2);
@@ -364,7 +361,7 @@ class TopicBuilderTest {
     @Test
     @DisplayName("fail when creating a topic with an invalid filter")
     void failOnInvalidFilter() {
-        TopicBuilder builder = new TopicBuilder(TEST_ENTITY_TYPE, factory);
+        var builder = new TopicBuilder(TEST_ENTITY_TYPE, factory);
         builder.where(eq("non_existent_column", "some value"));
 
         assertThrows(IllegalStateException.class, builder::build);
@@ -380,20 +377,20 @@ class TopicBuilderTest {
             Iterable<?> genericIds = asList(newUuid(), -1, randomId());
             Long[] longIds = {1L, 2L, 3L};
             Message[] messageIds = {randomId(), randomId(), randomId()};
-            String[] stringIds = {newUuid(), newUuid(), newUuid()};
+            var stringIds = new String[]{newUuid(), newUuid(), newUuid()};
             Integer[] intIds = {4, 5, 6};
 
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .byId(genericIds)
-                                 .byId(longIds)
-                                 .byId(stringIds)
-                                 .byId(intIds)
-                                 .byId(messageIds)
-                                 .build();
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .byId(genericIds)
+                               .byId(longIds)
+                               .byId(stringIds)
+                               .byId(intIds)
+                               .byId(messageIds)
+                               .build();
             assertNotNull(topic);
 
-            Target target = topic.getTarget();
-            TargetFilters filters = target.getFilters();
+            var target = topic.getTarget();
+            var filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
                                                .getIdList();
             assertThat(entityIds)
@@ -410,17 +407,17 @@ class TopicBuilderTest {
         @DisplayName("field mask")
         void lastFieldMask() {
             Iterable<String> iterableFields = singleton("TestEntity.firstField");
-            String[] arrayFields = {"TestEntity.secondField"};
+            var arrayFields = new String[]{"TestEntity.secondField"};
 
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .withMask(iterableFields)
-                                 .withMask(arrayFields)
-                                 .build();
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .withMask(iterableFields)
+                               .withMask(arrayFields)
+                               .build();
             assertNotNull(topic);
-            FieldMask mask = topic.getFieldMask();
+            var mask = topic.getFieldMask();
 
             Collection<String> maskFields = mask.getPathsList();
-            IterableSubject assertMaskFields = assertThat(maskFields);
+            var assertMaskFields = assertThat(maskFields);
             assertMaskFields.hasSize(arrayFields.length);
             assertMaskFields.containsExactlyElementsIn(arrayFields);
         }
@@ -429,21 +426,21 @@ class TopicBuilderTest {
     @Test
     @DisplayName("be represented as a comprehensible string")
     void supportToString() {
-        int id1 = 314;
-        int id2 = 271;
-        String columnName1 = "column1";
+        var id1 = 314;
+        var id2 = 271;
+        var columnName1 = "column1";
         Object columnValue1 = 42;
-        String columnName2 = "column2";
+        var columnName2 = "column2";
         Message columnValue2 = randomId();
-        String fieldName = "TestEntity.secondField";
-        TopicBuilder builder = factory.select(TEST_ENTITY_TYPE)
-                                      .withMask(fieldName)
-                                      .byId(id1, id2)
-                                      .where(eq(columnName1, columnValue1),
+        var fieldName = "TestEntity.secondField";
+        var builder = factory.select(TEST_ENTITY_TYPE)
+                             .withMask(fieldName)
+                             .byId(id1, id2)
+                             .where(eq(columnName1, columnValue1),
                                              eq(columnName2, columnValue2));
-        String topicString = builder.toString();
+        var topicString = builder.toString();
 
-        StringSubject assertTopic = assertThat(topicString);
+        var assertTopic = assertThat(topicString);
         assertTopic.contains(TEST_ENTITY_TYPE.getSimpleName());
         assertTopic.contains(String.valueOf(id1));
         assertTopic.contains(String.valueOf(id2));

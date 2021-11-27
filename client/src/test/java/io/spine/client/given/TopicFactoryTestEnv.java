@@ -58,7 +58,7 @@ public class TopicFactoryTestEnv {
         // It's impossible to get the same creation time for the `expected` value,
         //    so checking that the `actual` value is not later than `expected`.
         Comparable<TimestampTemporal> actualTemporal = TimestampTemporal.from(actual.getTimestamp());
-        TimestampTemporal expectedTimestamp = TimestampTemporal.from(expected.getTimestamp());
+        var expectedTimestamp = TimestampTemporal.from(expected.getTimestamp());
         assertThat(actualTemporal).isAtMost(expectedTimestamp);
     }
 }

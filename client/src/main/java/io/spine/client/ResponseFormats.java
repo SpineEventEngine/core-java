@@ -62,7 +62,7 @@ final class ResponseFormats {
     static ResponseFormat responseFormat(@Nullable FieldMask mask,
                                          @Nullable OrderBy ordering,
                                          @Nullable Integer limit) {
-        ResponseFormat.Builder result = ResponseFormat.newBuilder();
+        var result = ResponseFormat.newBuilder();
         if (mask != null) {
             result.setFieldMask(mask);
         }

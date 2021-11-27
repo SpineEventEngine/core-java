@@ -73,14 +73,14 @@ final class MultiEventConsumers implements Logging {
      * Returns {@code true} if no event consumers were collected, {@code false} otherwise.
      */
     boolean isEmpty() {
-        boolean result = eventTypes().isEmpty();
+        var result = eventTypes().isEmpty();
         return result;
     }
 
     /** Obtains all the consumers grouped by type of consumed events. */
     ImmutableMap<Class<? extends EventMessage>, StreamObserver<Event>> toObservers() {
         @SuppressWarnings("ConstantConditions") // `null` values are prevented when gathering.
-        Map<Class<? extends EventMessage>, StreamObserver<Event>> observers =
+        var observers =
                 Maps.transformValues(map, EventConsumers::toObserver);
         return ImmutableMap.copyOf(observers);
     }
@@ -117,7 +117,7 @@ final class MultiEventConsumers implements Logging {
         Builder observe(Class<E> eventType, Consumer<E> consumer) {
             checkNotNull(eventType);
             checkNotNull(consumer);
-            EventConsumer<E> ec = EventConsumer.from(consumer);
+            var ec = EventConsumer.from(consumer);
             return doPut(eventType, ec);
         }
 
@@ -137,7 +137,7 @@ final class MultiEventConsumers implements Logging {
             if (map.containsKey(eventType)) {
                 @SuppressWarnings("unchecked")
                 // The cast is protected by generic params of this method.
-                EventConsumers.Builder<E> builder = (EventConsumers.Builder<E>) map.get(eventType);
+                var builder = (EventConsumers.Builder<E>) map.get(eventType);
                 builder.add(ec);
             } else {
                 map.put(eventType, EventConsumers.<E>newBuilder().add(ec));
@@ -153,8 +153,8 @@ final class MultiEventConsumers implements Logging {
             ImmutableMap.Builder<Class<? extends EventMessage>,
                                  EventConsumers<? extends EventMessage>>
             builder = ImmutableMap.builder();
-            for (Class<? extends EventMessage> eventType : map.keySet()) {
-                EventConsumers.Builder<? extends EventMessage> consumers = map.get(eventType);
+            for (var eventType : map.keySet()) {
+                var consumers = map.get(eventType);
                 if (streamingErrorHandler != null) {
                     consumers.onStreamingError(streamingErrorHandler);
                 }
@@ -223,7 +223,7 @@ final class MultiEventConsumers implements Logging {
         public void accept(MessageConsumer<E, ?> consumer, Throwable throwable) {
             @SuppressWarnings("unchecked")
             // The cast is protected by generic params of `EventConsumers`.
-                    MessageConsumer<EventMessage, EventContext> cast =
+            var cast =
                     (MessageConsumer<EventMessage, EventContext>) consumer;
             delegate.accept(cast, throwable);
         }

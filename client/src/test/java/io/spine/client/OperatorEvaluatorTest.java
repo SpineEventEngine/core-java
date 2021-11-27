@@ -27,8 +27,6 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -61,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         "DuplicateStringLiteralInspection" /* Common test display names */,
         "ThrowableNotThrown" /* from custom assertions */
 })
-@DisplayName("OperatorEvaluator should")
+@DisplayName("`OperatorEvaluator` should")
 class OperatorEvaluatorTest {
 
     @Test
@@ -76,7 +74,7 @@ class OperatorEvaluatorTest {
     @Test
     @DisplayName("compare equal instances")
     void compareEqual() {
-        String left = "myobject";
+        var left = "myobject";
         Object right = new String(left);
         Object third = new String(left);
 
@@ -106,10 +104,10 @@ class OperatorEvaluatorTest {
         @Test
         @DisplayName("`GREATER_THAN`")
         void gt() {
-            Duration delta = seconds(5);
-            Timestamp small = currentTime();
-            Timestamp medium = add(small, delta);
-            Timestamp big = add(medium, delta);
+            var delta = seconds(5);
+            var small = currentTime();
+            var medium = add(small, delta);
+            var big = add(medium, delta);
 
             assertTrue(medium, GREATER_THAN, small);
             assertTrue(big, GREATER_THAN, medium);
@@ -123,10 +121,10 @@ class OperatorEvaluatorTest {
         @Test
         @DisplayName("`GREATER_OR_EQUAL`")
         void ge() {
-            Duration delta = seconds(5);
-            Timestamp small = currentTime();
-            Timestamp medium = add(small, delta);
-            Timestamp big = add(medium, delta);
+            var delta = seconds(5);
+            var small = currentTime();
+            var medium = add(small, delta);
+            var big = add(medium, delta);
 
             assertTrue(medium, GREATER_OR_EQUAL, small);
             assertTrue(big, GREATER_OR_EQUAL, medium);
@@ -140,10 +138,10 @@ class OperatorEvaluatorTest {
         @Test
         @DisplayName("`LESS_THAN`")
         void lt() {
-            Duration delta = seconds(5);
-            Timestamp small = currentTime();
-            Timestamp medium = add(small, delta);
-            Timestamp big = add(medium, delta);
+            var delta = seconds(5);
+            var small = currentTime();
+            var medium = add(small, delta);
+            var big = add(medium, delta);
 
             assertTrue(medium, LESS_THAN, big);
             assertTrue(small, LESS_THAN, medium);
@@ -157,10 +155,10 @@ class OperatorEvaluatorTest {
         @Test
         @DisplayName("`LESS_OR_EQUAL`")
         void le() {
-            Duration delta = seconds(5);
-            Timestamp small = currentTime();
-            Timestamp medium = add(small, delta);
-            Timestamp big = add(medium, delta);
+            var delta = seconds(5);
+            var small = currentTime();
+            var medium = add(small, delta);
+            var big = add(medium, delta);
 
             assertTrue(medium, LESS_OR_EQUAL, big);
             assertTrue(small, LESS_OR_EQUAL, medium);

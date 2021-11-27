@@ -89,9 +89,9 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
      */
     public static EntityQueryToProto transformWith(ClientRequest request) {
         checkNotNull(request);
-        Client client = request.client();
-        UserId user = request.user();
-        ActorRequestFactory factory = client.requestOf(user);
+        var client = request.client();
+        var user = request.user();
+        var factory = client.requestOf(user);
         return transformWith(factory.query());
     }
 
@@ -109,10 +109,9 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
 
     @Override
     public Query apply(EntityQuery<?, ?, ?> query) {
-        Class<? extends EntityState<?>> entityStateType = query.subject()
-                                                               .recordType();
-        QueryBuilder builder = factory.select(entityStateType);
-        Query result = toProtoQuery(builder, query);
+        var entityStateType = query.subject().recordType();
+        var builder = factory.select(entityStateType);
+        var result = toProtoQuery(builder, query);
         return result;
     }
 
@@ -128,7 +127,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
 
     @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addFieldMask(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
-        FieldMask originMask = query.mask();
+        var originMask = query.mask();
         if (!originMask.equals(FieldMask.getDefaultInstance())) {
             builder.withMask(originMask.getPathsList());
         }
@@ -136,7 +135,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
 
     @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addLimit(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
-        Integer originLimit = query.limit();
+        var originLimit = query.limit();
         if (originLimit != null) {
             builder.limit(originLimit);
         }
@@ -145,35 +144,35 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
     @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addSorting(QueryBuilder builder, EntityQuery<?, ?, ?> query) {
         for (io.spine.query.SortBy<?, ?> sortBy : query.sorting()) {
-            String columnName = sortBy.column()
-                                      .name()
-                                      .value();
-            OrderBy.Direction direction = sortBy.direction() == ASC ? ASCENDING : DESCENDING;
+            var columnName = sortBy.column()
+                                   .name()
+                                   .value();
+            var direction = sortBy.direction() == ASC ? ASCENDING : DESCENDING;
             builder.orderBy(columnName, direction);
         }
     }
 
     private static void addPredicate(QueryBuilder builder, QueryPredicate<?> predicate) {
-        CompositeFilter composite = toCompositeFilter(predicate);
+        var composite = toCompositeFilter(predicate);
         builder.where(composite);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")      /* Builder is using in step-by-step mode. */
     private static CompositeFilter toCompositeFilter(QueryPredicate<?> predicate) {
-        LogicalOperator operator = predicate.operator();
-        CompositeFilter.Builder builder = CompositeFilter.newBuilder();
+        var operator = predicate.operator();
+        var builder = CompositeFilter.newBuilder();
         builder.setOperator(operator == AND ? ALL
                                             : EITHER);
-        ImmutableList<SubjectParameter<?, ?, ?>> parameters = predicate.allParams();
-        ImmutableList<Filter> filters = toFilters(parameters);
+        var parameters = predicate.allParams();
+        var filters = toFilters(parameters);
         builder.addAllFilter(filters);
 
-        ImmutableList<CompositeFilter> childFilters =
+        var childFilters =
                 predicate.children()
                          .stream()
                          .map(EntityQueryToProto::toCompositeFilter)
                          .collect(toImmutableList());
-        CompositeFilter childCompositeFilter =
+        var childCompositeFilter =
                 builder.addAllCompositeFilter(childFilters)
                        .vBuild();
         return childCompositeFilter;
@@ -182,19 +181,19 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
     private static ImmutableList<Filter>
     toFilters(ImmutableList<SubjectParameter<?, ?, ?>> params) {
         ImmutableList.Builder<Filter> filters = ImmutableList.builder();
-        for (SubjectParameter<?, ?, ?> parameter : params) {
-            Filter filter = asProtoFilter(parameter);
+        for (var parameter : params) {
+            var filter = asProtoFilter(parameter);
             filters.add(filter);
         }
-        ImmutableList<Filter> filterList = filters.build();
+        var filterList = filters.build();
         return filterList;
     }
 
     private static Filter asProtoFilter(SubjectParameter<?, ?, ?> parameter) {
-        Object value = parameter.value();
-        ComparisonOperator comparison = parameter.operator();
-        Column<?, ?> column = parameter.column();
-        ColumnName colName = column.name();
+        var value = parameter.value();
+        var comparison = parameter.operator();
+        var column = parameter.column();
+        var colName = column.name();
 
         Filter result;
         switch (comparison) {
@@ -221,8 +220,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
 
     @SuppressWarnings("ResultOfMethodCallIgnored")  /* No call chaining here. */
     private static void addIds(QueryBuilder builder, Subject<?, ?> subject) {
-        ImmutableSet<?> ids = subject.id()
-                                     .values();
+        var ids = subject.id().values();
         if (!ids.isEmpty()) {
             builder.byId(ids);
         }

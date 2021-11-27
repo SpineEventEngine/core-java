@@ -33,8 +33,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
@@ -53,24 +51,24 @@ class TargetMixinTest {
         @Test
         @DisplayName("which is valid")
         void valid() {
-            Filter filter = Filters.eq("first_field", "some str");
-            Target target = target(TEST_ENTITY_TYPE, filter);
+            var filter = Filters.eq("first_field", "some str");
+            var target = target(TEST_ENTITY_TYPE, filter);
             target.checkValid();
         }
 
         @Test
         @DisplayName("which has invalid type")
         void withInvalidType() {
-            Filter filter = Filters.eq("second_field", false);
-            Target target = target(PROJECT_ID_TYPE, filter);
+            var filter = Filters.eq("second_field", false);
+            var target = target(PROJECT_ID_TYPE, filter);
             assertInvalid(target);
         }
 
         @Test
         @DisplayName("which has invalid filters")
         void withInvalidFilters() {
-            Filter filter = Filters.eq("non_existent_field", false);
-            Target target = target(TEST_ENTITY_TYPE, filter);
+            var filter = Filters.eq("non_existent_field", false);
+            var target = target(TEST_ENTITY_TYPE, filter);
             assertInvalid(target);
         }
 
@@ -80,15 +78,13 @@ class TargetMixinTest {
     }
 
     private static Target target(TypeUrl type, Filter... filters) {
-        Set<CompositeFilter> compositeFilters = stream(filters)
+        var compositeFilters = stream(filters)
                 .map(TargetMixinTest::compositeFilter)
                 .collect(toSet());
-        TargetFilters targetFilters = TargetFilters
-                .newBuilder()
+        var targetFilters = TargetFilters.newBuilder()
                 .addAllFilter(compositeFilters)
                 .build();
-        Target result = Target
-                .newBuilder()
+        var result = Target.newBuilder()
                 .setType(type.value())
                 .setFilters(targetFilters)
                 .build();
@@ -96,8 +92,7 @@ class TargetMixinTest {
     }
 
     private static CompositeFilter compositeFilter(Filter filter) {
-        CompositeFilter result = CompositeFilter
-                .newBuilder()
+        var result = CompositeFilter.newBuilder()
                 .setOperator(ALL)
                 .addFilter(filter)
                 .build();

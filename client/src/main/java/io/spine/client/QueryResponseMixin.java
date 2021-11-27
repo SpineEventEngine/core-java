@@ -49,7 +49,7 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      * Obtains the size of the response.
      */
     default int size() {
-        int result = getMessageList().size();
+        var result = getMessageList().size();
         return result;
     }
 
@@ -57,7 +57,7 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      * Verifies if the response is empty.
      */
     default boolean isEmpty() {
-        boolean result = size() == 0;
+        var result = size() == 0;
         return result;
     }
 
@@ -81,7 +81,7 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      */
     default <S extends EntityState<?>> ImmutableList<S> states(Class<S> type)
             throws UnexpectedTypeException {
-        ImmutableList<S> result = getMessageList()
+        var result = getMessageList()
                 .stream()
                 .map(EntityStateWithVersion::getState)
                 .map(unpackFunc(type))
@@ -96,8 +96,8 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      *         if the index is out of the range of entities returned by this query response
      */
     default EntityState<?> state(int index) {
-        EntityStateWithVersion stateWithVersion = getMessageList().get(index);
-        EntityState<?> result = (EntityState<?>) unpack(stateWithVersion.getState());
+        var stateWithVersion = getMessageList().get(index);
+        var result = (EntityState<?>) unpack(stateWithVersion.getState());
         return result;
     }
 
@@ -105,8 +105,7 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      * Obtains immutable list of entity states returned in this query response.
      */
     default List<Version> versions() {
-        ImmutableList<Version> result = getMessageList()
-                .stream()
+        var result = getMessageList().stream()
                 .map(EntityStateWithVersion::getVersion)
                 .collect(toImmutableList());
         return result;
@@ -119,8 +118,8 @@ interface QueryResponseMixin extends QueryResponseOrBuilder {
      *         if the index is out of the range of entities returned by this query response
      */
     default Version version(int index) {
-        EntityStateWithVersion stateWithVersion = getMessageList().get(index);
-        Version result = stateWithVersion.getVersion();
+        var stateWithVersion = getMessageList().get(index);
+        var result = stateWithVersion.getVersion();
         return result;
     }
 }

@@ -44,7 +44,7 @@ import static io.spine.type.TypeUrl.parse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Targets utility should")
+@DisplayName("`Targets` utility should")
 class TargetsTest extends UtilityClassTest<Targets> {
 
     TargetsTest() {
@@ -54,7 +54,7 @@ class TargetsTest extends UtilityClassTest<Targets> {
     @Test
     @DisplayName("compose Target for all of type")
     void composeForAllOfType() {
-        Target target = allOf(TestEntity.class);
+        var target = allOf(TestEntity.class);
 
         assertUrl(target);
     }
@@ -66,63 +66,63 @@ class TargetsTest extends UtilityClassTest<Targets> {
     @Test
     @DisplayName("compose Target with Message IDs")
     void composeWithMessageIds() {
-        TaskId taskId = newTaskId();
-        Target target = someOf(TestEntity.class, ImmutableSet.of(taskId));
+        var taskId = newTaskId();
+        var target = someOf(TestEntity.class, ImmutableSet.of(taskId));
 
         assertUrl(target);
 
-        TargetFilters expected = acceptingOnly(taskId);
+        var expected = acceptingOnly(taskId);
         assertEquals(expected, target.getFilters());
     }
 
     @Test
     @DisplayName("compose Target with String IDs")
     void composeWithStringIds() {
-        String firstId = "a";
-        String secondId = "b";
-        String thirdId = "c";
+        var firstId = "a";
+        var secondId = "b";
+        var thirdId = "c";
 
-        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
+        var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
-        TargetFilters expected = acceptingOnly(StringValue.of(firstId),
-                                               StringValue.of(secondId),
-                                               StringValue.of(thirdId));
+        var expected = acceptingOnly(StringValue.of(firstId),
+                                     StringValue.of(secondId),
+                                     StringValue.of(thirdId));
         assertEquals(expected, target.getFilters());
     }
 
     @Test
     @DisplayName("compose Target with Integer IDs")
     void composeWithIntIds() {
-        int firstId = 1;
-        int secondId = 2;
-        int thirdId = 3;
+        var firstId = 1;
+        var secondId = 2;
+        var thirdId = 3;
 
-        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
+        var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
-        TargetFilters expected = acceptingOnly(Int32Value.of(firstId),
-                                               Int32Value.of(secondId),
-                                               Int32Value.of(thirdId));
+        var expected = acceptingOnly(Int32Value.of(firstId),
+                                     Int32Value.of(secondId),
+                                     Int32Value.of(thirdId));
         assertEquals(expected, target.getFilters());
     }
 
     @Test
     @DisplayName("compose Target with Long IDs")
     void composeWithLongIds() {
-        long firstId = 1L;
-        long secondId = 2L;
-        long thirdId = 3L;
+        var firstId = 1L;
+        var secondId = 2L;
+        var thirdId = 3L;
 
-        Target target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
+        var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
 
         assertUrl(target);
 
-        TargetFilters expected = acceptingOnly(Int64Value.of(firstId),
-                                               Int64Value.of(secondId),
-                                               Int64Value.of(thirdId));
+        var expected = acceptingOnly(Int64Value.of(firstId),
+                                     Int64Value.of(secondId),
+                                     Int64Value.of(thirdId));
         assertEquals(expected, target.getFilters());
     }
 

@@ -27,16 +27,12 @@
 package io.spine.client;
 
 import com.google.protobuf.Descriptors.Descriptor;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.ProtocolStringList;
 import io.spine.base.EntityState;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-
-import java.util.Optional;
 
 import static io.spine.code.proto.ColumnOption.isColumn;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -49,7 +45,7 @@ final class FilteringField {
     private final Field field;
 
     FilteringField(FilterOrBuilder filter) {
-        FieldPath fieldPath = filter.getFieldPath();
+        var fieldPath = filter.getFieldPath();
         this.field = Field.withPath(fieldPath);
     }
 
@@ -66,8 +62,8 @@ final class FilteringField {
      *         if the field does not apply to the passed target
      */
     void checkAppliesTo(Target target) {
-        Descriptor descriptor = target.messageDescriptor();
-        boolean targetIsEntityState = EntityState.class.isAssignableFrom(target.messageClass());
+        var descriptor = target.messageDescriptor();
+        var targetIsEntityState = EntityState.class.isAssignableFrom(target.messageClass());
         if (targetIsEntityState) {
             checkFieldOfEntityState(descriptor);
         } else {
@@ -84,17 +80,17 @@ final class FilteringField {
     }
 
     private boolean refersToContext() {
-        String contextFieldName = Event.Field.context()
-                                             .getField()
-                                             .toString();
-        String firstInPath = field.path().getFieldName(0);
-        boolean result = contextFieldName.equals(firstInPath);
+        var contextFieldName = Event.Field.context()
+                                          .getField()
+                                          .toString();
+        var firstInPath = field.path().getFieldName(0);
+        var result = contextFieldName.equals(firstInPath);
         return result;
     }
 
     private void checkPresentInEventContext() {
-        Field contextField = fieldInContext();
-        Descriptor eventContext = EventContext.getDescriptor();
+        var contextField = fieldInContext();
+        var eventContext = EventContext.getDescriptor();
         if (!contextField.presentIn(eventContext)) {
             throw newIllegalStateException(
                     "The filter for event messages references a field of `%s` as `%s`." +
@@ -108,9 +104,9 @@ final class FilteringField {
     }
 
     private Field fieldInContext() {
-        FieldPath pathInEvent = field.path();
-        ProtocolStringList fieldNames = pathInEvent.getFieldNameList();
-        FieldPath pathInEventContext = FieldPath.newBuilder()
+        var pathInEvent = field.path();
+        var fieldNames = pathInEvent.getFieldNameList();
+        var pathInEventContext = FieldPath.newBuilder()
                 .addAllFieldName(fieldNames.subList(1, fieldNames.size()))
                 .build();
         return Field.withPath(pathInEventContext);
@@ -139,12 +135,12 @@ final class FilteringField {
     }
 
     private boolean isColumnIn(Descriptor message) {
-        Optional<FieldDescriptor> fieldDescriptor = field.findDescriptor(message);
-        if (!fieldDescriptor.isPresent()) {
+        var fieldDescriptor = field.findDescriptor(message);
+        if (fieldDescriptor.isEmpty()) {
             return false;
         }
-        FieldDeclaration declaration = new FieldDeclaration(fieldDescriptor.get());
-        boolean result = isColumn(declaration);
+        var declaration = new FieldDeclaration(fieldDescriptor.get());
+        var result = isColumn(declaration);
         return result;
     }
 

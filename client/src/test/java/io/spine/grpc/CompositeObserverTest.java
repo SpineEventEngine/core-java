@@ -52,7 +52,7 @@ class CompositeObserverTest {
         StreamObserver<String> observer =
                 new CompositeObserver<>(ImmutableList.of(observer1, observer2));
 
-        String value = "String value.";
+        var value = "String value.";
         observer.onNext(value);
 
         assertThat(observer1.firstResponse()).isEqualTo(value);
@@ -67,7 +67,7 @@ class CompositeObserverTest {
         StreamObserver<String> observer =
                 new CompositeObserver<>(ImmutableList.of(observer1, observer2));
 
-        RuntimeException error = new RuntimeException("An error.");
+        var error = new RuntimeException("An error.");
         observer.onError(error);
 
         assertThat(observer1.getError()).isEqualTo(error);

@@ -258,12 +258,12 @@ public final class EventFilter extends TypedFilter<Event> {
     }
 
     private static boolean isContextFilter(Filter filter) {
-        String contextFieldName = Event.Field.context()
-                                             .getField()
-                                             .toString();
-        String firstInPath = filter.getFieldPath()
-                                   .getFieldName(0);
-        boolean result = contextFieldName.equals(firstInPath);
+        var contextFieldName = Event.Field.context()
+                                          .getField()
+                                          .toString();
+        var firstInPath = filter.getFieldPath()
+                                .getFieldName(0);
+        var result = contextFieldName.equals(firstInPath);
         return result;
     }
 }

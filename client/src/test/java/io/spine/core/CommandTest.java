@@ -58,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
  */
 @SuppressWarnings("MethodOnlyUsedFromInnerClass" /* to simplify the structure, allow for re-use */)
-@DisplayName("Command should")
+@DisplayName("`Command` should")
 class CommandTest {
 
     private final TestActorRequestFactory requestFactory =
@@ -70,7 +70,7 @@ class CommandTest {
 
     @BeforeEach
     void createCommands() {
-        String projectId = Identifier.newUuid();
+        var projectId = Identifier.newUuid();
         createProject = CmdCreateProject.newBuilder()
                 .setId(projectId)
                 .build();
@@ -88,7 +88,7 @@ class CommandTest {
         CommandMessage message = TestCommandMessage.newBuilder()
                 .setId(Identifier.newUuid())
                 .build();
-        Command command = command(message);
+        var command = command(message);
         assertThat(command.enclosedMessage())
                 .isEqualTo(message);
     }
@@ -100,7 +100,7 @@ class CommandTest {
         @Test
         @DisplayName("after given time")
         void after() {
-            Command command = command(stopProject);
+            var command = command(stopProject);
             assertThat(command.isAfter(secondsAgo(5)))
                  .isTrue();
         }
@@ -108,7 +108,7 @@ class CommandTest {
         @Test
         @DisplayName("before given time")
         void before() {
-            Command command = command(startProject);
+            var command = command(startProject);
             assertThat(command.isBefore(secondsFromNow(10)))
                     .isTrue();
         }
@@ -116,13 +116,13 @@ class CommandTest {
         @Test
         @DisplayName("withing time range")
         void between() {
-            Command fiveMinsAgo = command(createProject, minutesAgo(5));
-            Command twoMinsAgo = command(startProject, minutesAgo(2));
-            Command thirtySecondsAgo = command(stopProject, secondsAgo(30));
-            Command twentySecondsAgo = command(stopProject, secondsAgo(20));
-            Command fiveSecondsAgo = command(stopProject, secondsAgo(5));
+            var fiveMinsAgo = command(createProject, minutesAgo(5));
+            var twoMinsAgo = command(startProject, minutesAgo(2));
+            var thirtySecondsAgo = command(stopProject, secondsAgo(30));
+            var twentySecondsAgo = command(stopProject, secondsAgo(20));
+            var fiveSecondsAgo = command(stopProject, secondsAgo(5));
 
-            long filteredCommands =
+            var filteredCommands =
                     Stream.of(fiveMinsAgo,
                               twoMinsAgo,
                               thirtySecondsAgo,
@@ -136,7 +136,7 @@ class CommandTest {
     @Test
     @DisplayName("consider command scheduled when command delay is set")
     void recognizeScheduled() {
-        Command cmd = commandWithDelay(createProject, seconds(10));
+        var cmd = commandWithDelay(createProject, seconds(10));
         assertThat(cmd.isScheduled())
                 .isTrue();
     }
@@ -144,7 +144,7 @@ class CommandTest {
     @Test
     @DisplayName("consider command not scheduled when no scheduling options are present")
     void recognizeNotScheduled() {
-        Command cmd = command(createProject);
+        var cmd = command(createProject);
         assertThat(cmd.isScheduled())
                 .isFalse();
     }
@@ -152,7 +152,7 @@ class CommandTest {
     @Test
     @DisplayName("throw exception when command delay set to negative")
     void throwOnNegativeDelay() {
-        Command cmd = commandWithDelay(createProject, seconds(-10));
+        var cmd = commandWithDelay(createProject, seconds(-10));
         assertThrows(IllegalStateException.class, cmd::isScheduled);
     }
 
@@ -165,9 +165,9 @@ class CommandTest {
     }
 
     private Command commandWithDelay(CommandMessage msg, Duration delay) {
-        CommandContext context = GivenCommandContext.withScheduledDelayOf(delay);
-        Command result = requestFactory.command()
-                                       .createBasedOnContext(msg, context);
+        var context = GivenCommandContext.withScheduledDelayOf(delay);
+        var result = requestFactory.command()
+                                   .createBasedOnContext(msg, context);
         return result;
     }
 }

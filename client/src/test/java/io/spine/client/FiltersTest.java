@@ -27,13 +27,11 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessageField;
 import io.spine.base.Field;
-import io.spine.base.FieldPath;
 import io.spine.client.Filter.Operator;
 import io.spine.core.EventContext;
 import io.spine.core.EventContextField;
@@ -138,19 +136,17 @@ class FiltersTest extends UtilityClassTest<Filters> {
         @Test
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
-            Filter filter = eq(ENUM_FIELD, ENUM_VALUE);
+            var filter = eq(ENUM_FIELD, ENUM_VALUE);
 
-            FieldPath fieldPath = filter.getFieldPath();
-            String actual = Field.withPath(fieldPath)
-                                 .toString();
+            var fieldPath = filter.getFieldPath();
+            var actual = Field.withPath(fieldPath).toString();
             assertEquals(ENUM_FIELD, actual);
             assertEquals(toAny(ENUM_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
         }
 
         private void checkCreatesInstance(Filter filter, Operator operator) {
-            String actual = Field.withPath(filter.getFieldPath())
-                                 .toString();
+            var actual = Field.withPath(filter.getFieldPath()).toString();
             assertEquals(FIELD, actual);
             assertEquals(pack(REQUESTED_VALUE), filter.getValue());
             assertEquals(operator, filter.getOperator());
@@ -164,39 +160,36 @@ class FiltersTest extends UtilityClassTest<Filters> {
         @Test
         @DisplayName("column")
         void column() {
-            EntityColumn<TestEntity, String> column = TestEntity.Column.firstField();
-            String value = "expected-filter-value";
-            String expectedPath = column.name()
-                                        .value();
+            var column = TestEntity.Column.firstField();
+            var value = "expected-filter-value";
+            var expectedPath = column.name().value();
             checkCreates(eq(column, value), expectedPath, value, EQUAL);
         }
 
         @Test
         @DisplayName("entity state field")
         void entityStateField() {
-            EntityStateField field = TestEntity.Field.thirdField();
-            int value = 142;
-            String expectedPath = field.getField()
-                                       .toString();
+            var field = TestEntity.Field.thirdField();
+            var value = 142;
+            var expectedPath = field.getField().toString();
             checkCreates(gt(field, value), expectedPath, value, GREATER_THAN);
         }
 
         @Test
         @DisplayName("event message field")
         void eventMessageField() {
-            EventMessageField field = ClProjectCreated.Field.name().value();
-            String value = "expected-project-name";
-            String expectedPath = field.getField()
-                                       .toString();
+            var field = ClProjectCreated.Field.name().value();
+            var value = "expected-project-name";
+            var expectedPath = field.getField().toString();
             checkCreates(eq(field, value), expectedPath, value, EQUAL);
         }
 
         @Test
         @DisplayName("event context field")
         void eventContextField() {
-            EventContextField field = EventContext.Field.external();
-            boolean value = true;
-            String expectedPath = format("context.%s", field.getField());
+            var field = EventContext.Field.external();
+            var value = true;
+            var expectedPath = format("context.%s", field.getField());
             checkCreates(eq(field, value), expectedPath, value, EQUAL);
         }
 
@@ -204,15 +197,14 @@ class FiltersTest extends UtilityClassTest<Filters> {
                                   String expectedPath,
                                   Object expectedValue,
                                   Operator expectedOperator) {
-            String fieldPath = Field.withPath(filter.getFieldPath())
-                                    .toString();
+            var fieldPath = Field.withPath(filter.getFieldPath()).toString();
             assertThat(fieldPath).isEqualTo(expectedPath);
 
-            Any value = filter.getValue();
-            Any packedExpectedValue = toAny(expectedValue);
+            var value = filter.getValue();
+            var packedExpectedValue = toAny(expectedValue);
             assertThat(value).isEqualTo(packedExpectedValue);
 
-            Operator operator = filter.getOperator();
+            var operator = filter.getOperator();
             assertThat(operator).isEqualTo(expectedOperator);
         }
     }
@@ -224,7 +216,7 @@ class FiltersTest extends UtilityClassTest<Filters> {
         @Test
         @DisplayName("`all`")
         void all() {
-            Filter[] filters = {
+            var filters = new Filter[]{
                     le(FIELD, REQUESTED_VALUE),
                     ge(FIELD, REQUESTED_VALUE)
             };
@@ -234,7 +226,7 @@ class FiltersTest extends UtilityClassTest<Filters> {
         @Test
         @DisplayName("`either`")
         void either() {
-            Filter[] filters = {
+            var filters = new Filter[]{
                     lt(FIELD, REQUESTED_VALUE),
                     gt(FIELD, REQUESTED_VALUE)
             };
@@ -257,45 +249,45 @@ class FiltersTest extends UtilityClassTest<Filters> {
         @Test
         @DisplayName("for numbers")
         void forNumbers() {
-            double number = 3.14;
-            Filter filter = le("third_field", number);
+            var number = 3.14;
+            var filter = le("third_field", number);
             assertThat(filter.getOperator()).isEqualTo(LESS_OR_EQUAL);
 
-            DoubleValue value = unpack(filter.getValue(), DoubleValue.class);
+            var value = unpack(filter.getValue(), DoubleValue.class);
             assertThat(value.getValue()).isWithin(0.01).of(number);
         }
 
         @Test
         @DisplayName("for strings")
         void forStrings() {
-            String theString = "abc";
-            Filter filter = gt("first_field", theString);
+            var theString = "abc";
+            var filter = gt("first_field", theString);
             assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
 
-            StringValue value = unpack(filter.getValue(), StringValue.class);
+            var value = unpack(filter.getValue(), StringValue.class);
             assertThat(value.getValue()).isEqualTo(theString);
         }
 
         @Test
         @DisplayName("for timestamps")
         void forTimestamps() {
-            Timestamp timestamp = currentTime();
-            Filter filter = gt(FIELD, timestamp);
+            var timestamp = currentTime();
+            var filter = gt(FIELD, timestamp);
 
             assertThat(filter.getOperator()).isEqualTo(GREATER_THAN);
-            Timestamp value = unpack(filter.getValue(), Timestamp.class);
+            var value = unpack(filter.getValue(), Timestamp.class);
             assertThat(value).isEqualTo(timestamp);
         }
 
         @Test
         @DisplayName("for versions")
         void forVersions() {
-            Version version = Versions.zero();
-            Filter filter = ge("some_version_field", version);
+            var version = Versions.zero();
+            var filter = ge("some_version_field", version);
 
             assertThat(filter).isNotNull();
             assertThat(filter.getOperator()).isEqualTo(GREATER_OR_EQUAL);
-            Version value = unpack(filter.getValue(), Version.class);
+            var value = unpack(filter.getValue(), Version.class);
             assertThat(value).isEqualTo(version);
         }
     }
@@ -314,7 +306,7 @@ class FiltersTest extends UtilityClassTest<Filters> {
         @Test
         @DisplayName("for non-primitive number types")
         void forNonPrimitiveNumbers() {
-            AtomicInteger number = new AtomicInteger(42);
+            var number = new AtomicInteger(42);
             assertThrows(IllegalArgumentException.class, () -> ge("atomicField", number));
         }
 

@@ -47,7 +47,7 @@ public interface QueryMixin extends QueryOrBuilder {
      *         if the {@code Target} type is unknown to the application.
      */
     default TypeUrl targetType() {
-        TypeUrl typeUrl = getTarget().type();
+        var typeUrl = getTarget().type();
         checkState(KnownTypes.instance()
                              .contains(typeUrl),
                    "Unknown type URL: `%s`.", typeUrl.value());

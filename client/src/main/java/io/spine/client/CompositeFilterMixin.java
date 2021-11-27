@@ -40,12 +40,11 @@ interface CompositeFilterMixin extends CompositeFilterOrBuilder, CompositeMessag
 
     @Override
     default List<MessageFilter<Message>> filters() {
-        List<Filter> filterList = getFilterList();
+        var filterList = getFilterList();
         @SuppressWarnings("unchecked") /* The cast below is safe (see
          https://docs.oracle.com/javase/tutorial/java/generics/subtyping.html for details).
          `Filter` does implement `MessageFilter<Message>` via `FilterMixin`. */
-        List<MessageFilter<Message>> list =
-                (List<MessageFilter<Message>>) (List<?>) filterList;
+        var list = (List<MessageFilter<Message>>) (List<?>) filterList;
         return list;
     }
 

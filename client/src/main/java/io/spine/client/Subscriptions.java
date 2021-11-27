@@ -32,7 +32,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
@@ -96,7 +95,7 @@ public final class Subscriptions implements Logging {
      * @return new subscription identifier.
      */
     public static SubscriptionId generateId() {
-        String formattedId = format("s-%s", Identifier.newUuid());
+        var formattedId = format("s-%s", Identifier.newUuid());
         return newId(formattedId);
     }
 
@@ -124,9 +123,8 @@ public final class Subscriptions implements Logging {
     public static Subscription from(Topic topic) {
         checkNotNull(topic);
 
-        SubscriptionId id = generateId();
-        Subscription subscription = Subscription
-                .newBuilder()
+        var id = generateId();
+        var subscription = Subscription.newBuilder()
                 .setId(id)
                 .setTopic(topic)
                 .vBuild();
@@ -147,7 +145,7 @@ public final class Subscriptions implements Logging {
      * @see #cancel(Subscription)
      */
     <M extends Message> Subscription subscribeTo(Topic topic, StreamObserver<M> observer) {
-        Subscription subscription = blockingServiceStub.subscribe(topic);
+        var subscription = blockingServiceStub.subscribe(topic);
         service.activate(subscription, new SubscriptionObserver<>(observer));
         add(subscription);
         return subscription;
@@ -173,7 +171,7 @@ public final class Subscriptions implements Logging {
     @CanIgnoreReturnValue
     public boolean cancel(Subscription s) {
         checkNotNull(s);
-        boolean isActive = items.contains(s);
+        var isActive = items.contains(s);
         if (isActive) {
             requestCancellation(s);
         }
@@ -220,7 +218,7 @@ public final class Subscriptions implements Logging {
         @Override
         public void onNext(Response response) {
             if (response.isError()) {
-                Error err = response.error();
+                var err = response.error();
                 serverErrorHandler().accept(subscription, err);
             }
         }

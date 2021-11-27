@@ -100,7 +100,7 @@ public enum OperatorEvaluator {
         private boolean compare(Comparable<?> left, Comparable<?> right) {
             Comparable cmpLeft = left;
             Comparable cmpRight = right;
-            int result = cmpLeft.compareTo(cmpRight);
+            var result = cmpLeft.compareTo(cmpRight);
             return result > 0;
         }
     },
@@ -158,9 +158,9 @@ public enum OperatorEvaluator {
     public static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
-        OperatorEvaluator evaluator = EVALUATORS.get(operator);
+        var evaluator = EVALUATORS.get(operator);
         checkArgument(evaluator != null, operator);
-        boolean result = evaluator.eval(left, right);
+        var result = evaluator.eval(left, right);
         return result;
     }
 

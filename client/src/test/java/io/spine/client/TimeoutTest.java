@@ -28,7 +28,6 @@ package io.spine.client;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.StringSubject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -48,10 +47,10 @@ class TimeoutTest {
     @Test
     @DisplayName("obtain value and unit")
     void valueAndUnit() {
-        int value = 356;
-        TimeUnit unit = TimeUnit.DAYS;
-        
-        Timeout timeout = Timeout.of(value, unit);
+        var value = 356;
+        var unit = TimeUnit.DAYS;
+
+        var timeout = Timeout.of(value, unit);
         assertThat(timeout.value())
                 .isEqualTo(value);
         assertThat(timeout.unit())
@@ -72,12 +71,12 @@ class TimeoutTest {
     @Test
     @DisplayName("have string diagnostics output")
     void diags() {
-        int timout = 100;
-        TimeUnit unit = TimeUnit.HOURS;
-        String diags = Timeout.of(timout, unit)
-                              .toString();
+        var timout = 100;
+        var unit = TimeUnit.HOURS;
+        var diags = Timeout.of(timout, unit)
+                           .toString();
 
-        StringSubject assertOutput = assertThat(diags);
+        var assertOutput = assertThat(diags);
         assertOutput.contains(String.valueOf(timout));
         assertOutput.contains(String.valueOf(unit));
     }

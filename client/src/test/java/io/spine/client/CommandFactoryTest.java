@@ -26,11 +26,8 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.test.commands.CmdCreateProject;
 import io.spine.validate.ValidationException;
@@ -75,13 +72,12 @@ class CommandFactoryTest {
         @Test
         @DisplayName("with current time")
         void withTimestamp() {
-            Timestamp beforeCall = secondsAgo(1);
-            CmdCreateProject commandMessage = CmdCreateProject
-                    .newBuilder()
+            var beforeCall = secondsAgo(1);
+            var commandMessage = CmdCreateProject.newBuilder()
                     .setId(Identifier.newUuid())
                     .build();
-            Command command = factory.create(commandMessage);
-            Timestamp afterCall = secondsFromNow(1);
+            var command = factory.create(commandMessage);
+            var afterCall = secondsFromNow(1);
 
             assertTrue(command.isBetween(beforeCall, afterCall));
         }
@@ -89,32 +85,30 @@ class CommandFactoryTest {
         @Test
         @DisplayName("with given entity version")
         void withEntityVersion() {
-            Command command = factory.create(command(), 2);
+            var command = factory.create(command(), 2);
 
-            CommandContext context = command.context();
+            var context = command.context();
             assertEquals(2, context.getTargetVersion());
         }
 
         @Test
         @DisplayName("with own tenant ID")
         void withOwnTenantId() {
-            TenantId tenantId = TenantId
-                    .newBuilder()
+            var tenantId = TenantId.newBuilder()
                     .setValue(getClass().getSimpleName())
                     .build();
-            ActorRequestFactory mtFactory = requestFactoryBuilder()
+            var mtFactory = requestFactoryBuilder()
                     .setTenantId(tenantId)
                     .setActor(ACTOR)
                     .build();
-            Command command = mtFactory.command().create(command());
+            var command = mtFactory.command().create(command());
             assertEquals(tenantId, command.context()
                                           .getActorContext()
                                           .getTenantId());
         }
 
         private CommandMessage command() {
-            CmdCreateProject commandMessage = CmdCreateProject
-                    .newBuilder()
+            var commandMessage = CmdCreateProject.newBuilder()
                     .setId(Identifier.newUuid())
                     .build();
             return commandMessage;

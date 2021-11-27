@@ -180,7 +180,7 @@ public final class CommandRequest extends ClientRequest implements Logging {
      * @see #postAndForget()
      */
     public ImmutableSet<Subscription> post() {
-        PostOperation op = new PostOperation();
+        var op = new PostOperation();
         return op.perform();
     }
 
@@ -194,7 +194,7 @@ public final class CommandRequest extends ClientRequest implements Logging {
      * @see #post()
      */
     public void postAndForget() throws IllegalStateException {
-        PostOperation op = new PostOperation();
+        var op = new PostOperation();
         op.performWithoutSubscriptions();
     }
 
@@ -231,8 +231,8 @@ public final class CommandRequest extends ClientRequest implements Logging {
                 );
             }
             subscribeToEvents();
-            Ack ack = client().post(command);
-            Status status = ack.getStatus();
+            var ack = client().post(command);
+            var status = ack.getStatus();
             return handleStatus(status);
         }
 
@@ -242,13 +242,13 @@ public final class CommandRequest extends ClientRequest implements Logging {
                         "Subscriptions to events were requested. Please call `post()` instead."
                 );
             }
-            Ack ack = client().post(command);
-            Status status = ack.getStatus();
+            var ack = client().post(command);
+            var status = ack.getStatus();
             handleStatus(status);
         }
 
         private void subscribeToEvents() {
-            Client client = client();
+            var client = client();
             this.subscriptions = subscribe(client, command, consumers, streamingErrorHandler());
             client.subscriptions()
                   .addAll(subscriptions);
@@ -282,7 +282,7 @@ public final class CommandRequest extends ClientRequest implements Logging {
          */
         private void cancelVoidSubscriptions() {
             if (subscriptions != null) {
-                Subscriptions activeSubscriptions = client().subscriptions();
+                var activeSubscriptions = client().subscriptions();
                 subscriptions.forEach(activeSubscriptions::cancel);
             }
         }

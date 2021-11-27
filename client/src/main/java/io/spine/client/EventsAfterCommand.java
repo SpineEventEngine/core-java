@@ -27,9 +27,6 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableSet;
-import io.grpc.stub.StreamObserver;
-import io.spine.base.EventMessage;
-import io.spine.base.Field;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -59,8 +56,8 @@ final class EventsAfterCommand implements Logging {
               Command command,
               MultiEventConsumers consumers,
               @Nullable ErrorHandler errorHandler) {
-        EventsAfterCommand commandOutcome = new EventsAfterCommand(client, command, consumers);
-        ImmutableSet<Subscription> result = commandOutcome.subscribeWith(errorHandler);
+        var commandOutcome = new EventsAfterCommand(client, command, consumers);
+        var result = commandOutcome.subscribeWith(errorHandler);
         return result;
     }
 
@@ -72,9 +69,9 @@ final class EventsAfterCommand implements Logging {
     }
 
     private ImmutableSet<Subscription> subscribeWith(@Nullable ErrorHandler errorHandler) {
-        ImmutableSet<Topic> topics = eventsOf(command);
-        StreamObserver<Event> observer = consumers.toObserver(errorHandler);
-        ImmutableSet<Subscription> subscriptions =
+        var topics = eventsOf(command);
+        var observer = consumers.toObserver(errorHandler);
+        var subscriptions =
                 topics.stream()
                       .map((topic) -> client.subscriptions()
                                             .subscribeTo(topic, observer))
@@ -87,18 +84,18 @@ final class EventsAfterCommand implements Logging {
      * as the origin.
      */
     private ImmutableSet<Topic> eventsOf(Command c) {
-        Field pastMessage =
+        var pastMessage =
                 EventContext.Field.pastMessage()
                                   .getField();
-        String fieldName =
+        var fieldName =
                 Event.Field.context()
                            .getField()
                            .nested(pastMessage)
                            .toString();
-        ImmutableSet<Class<? extends EventMessage>> eventTypes = consumers.eventTypes();
-        TopicFactory topic = client.requestOf(user)
-                                   .topic();
-        ImmutableSet<Topic> topics =
+        var eventTypes = consumers.eventTypes();
+        var topic = client.requestOf(user)
+                          .topic();
+        var topics =
                 eventTypes.stream()
                           .map((eventType) -> topic.select(eventType)
                                                    .where(eq(fieldName, c.asMessageOrigin()))

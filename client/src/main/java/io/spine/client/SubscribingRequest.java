@@ -115,8 +115,8 @@ SubscribingRequest<M extends Message,
      * Creates and posts the subscription request to the server.
      */
     public Subscription post() {
-        Topic topic = builder().build();
-        StreamObserver<W> observer = createObserver();
+        var topic = builder().build();
+        var observer = createObserver();
         return subscribe(topic, observer);
     }
 
@@ -125,7 +125,7 @@ SubscribingRequest<M extends Message,
     }
 
     private Subscription subscribe(Topic topic, StreamObserver<W> observer) {
-        Subscription subscription =
+        var subscription =
                 client().subscriptions()
                         .subscribeTo(topic, observer);
         return subscription;

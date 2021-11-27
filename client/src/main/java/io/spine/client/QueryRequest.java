@@ -59,7 +59,7 @@ final class QueryRequest<S extends EntityState<?>> extends ClientRequest {
         this.entityQuery = query;
         this.entityStateType = query.subject()
                                     .recordType();
-        QueryFactory factory = client().requestOf(user()).query();
+        var factory = client().requestOf(user()).query();
         this.transformer = EntityQueryToProto.transformWith(factory);
     }
 
@@ -67,8 +67,8 @@ final class QueryRequest<S extends EntityState<?>> extends ClientRequest {
      * Executes and obtains results of the query.
      */
     ImmutableList<S> run() {
-        Query query = transformer.apply(entityQuery);
-        ImmutableList<S> result = client().read(query, entityStateType);
+        var query = transformer.apply(entityQuery);
+        var result = client().read(query, entityStateType);
         return result;
     }
 }

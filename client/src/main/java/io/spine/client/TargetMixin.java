@@ -47,7 +47,7 @@ interface TargetMixin extends TargetOrBuilder {
      * Returns the URL of the target type.
      */
     default TypeUrl type() {
-        String type = getType();
+        var type = getType();
         return TypeUrl.parse(type);
     }
 
@@ -55,7 +55,7 @@ interface TargetMixin extends TargetOrBuilder {
      * Obtains the class of the target.
      */
     default Class<Message> messageClass() {
-        Class<Message> result = type().getMessageClass();
+        var result = type().getMessageClass();
         return result;
     }
 
@@ -63,8 +63,8 @@ interface TargetMixin extends TargetOrBuilder {
      * Obtains the descriptor of the target type.
      */
     default Descriptor messageDescriptor() {
-        Descriptor result = type().toTypeName()
-                                  .messageDescriptor();
+        var result = type().toTypeName()
+                           .messageDescriptor();
         return result;
     }
 
@@ -75,9 +75,9 @@ interface TargetMixin extends TargetOrBuilder {
      *         if the target type is not a valid type for querying
      */
     default void checkTypeValid() {
-        Class<Message> targetClass = messageClass();
-        boolean isEntityState = EntityState.class.isAssignableFrom(targetClass);
-        boolean isEventMessage = EventMessage.class.isAssignableFrom(targetClass);
+        var targetClass = messageClass();
+        var isEntityState = EntityState.class.isAssignableFrom(targetClass);
+        var isEventMessage = EventMessage.class.isAssignableFrom(targetClass);
         if (!isEntityState && !isEventMessage) {
             throw newIllegalStateException(
                     "The queried type should represent either an entity state or an event " +
@@ -96,7 +96,7 @@ interface TargetMixin extends TargetOrBuilder {
     @SuppressWarnings("ClassReferencesSubclass") // OK for a proto mixin.
     default void checkValid() {
         checkTypeValid();
-        Target thisAsTarget = (Target) this;
+        var thisAsTarget = (Target) this;
         getFilters()
                 .getFilterList()
                 .stream()

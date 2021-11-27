@@ -69,7 +69,7 @@ public final class Targets {
         checkNotNull(targetClass);
         checkNotNull(ids);
 
-        Target result = composeTarget(targetClass, ids, null);
+        var result = composeTarget(targetClass, ids, null);
         return result;
     }
 
@@ -83,7 +83,7 @@ public final class Targets {
     public static Target allOf(Class<? extends Message> targetClass) {
         checkNotNull(targetClass);
 
-        Target result = composeTarget(targetClass, null, null);
+        var result = composeTarget(targetClass, null, null);
         return result;
     }
 
@@ -106,19 +106,19 @@ public final class Targets {
                                        @Nullable Iterable<CompositeFilter> filters) {
         checkNotNull(targetClass);
 
-        boolean includeAll = (ids == null && filters == null);
+        var includeAll = (ids == null && filters == null);
 
-        TypeUrl typeUrl = TypeUrl.of(targetClass);
-        Target.Builder builder = Target.newBuilder()
+        var typeUrl = TypeUrl.of(targetClass);
+        var builder = Target.newBuilder()
                                        .setType(typeUrl.value());
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {
             List<?> idsList = nonNullList(ids);
-            IdFilter idFilter = acceptingOnly(idsList);
+            var idFilter = acceptingOnly(idsList);
 
             List<CompositeFilter> filterList = nonNullList(filters);
-            TargetFilters targetFilters = targetFilters(filterList, idFilter);
+            var targetFilters = targetFilters(filterList, idFilter);
             builder.setFilters(targetFilters);
         }
 
@@ -129,13 +129,13 @@ public final class Targets {
      * Creates an {@code IdFilter} which accepts only the passed identifiers.
      */
     public static IdFilter acceptingOnly(Collection<?> identifiers) {
-        List<Any> ids = identifiers
+        var ids = identifiers
                 .stream()
                 .distinct()
                 .map(Targets::checkId)
                 .map(Identifier::pack)
                 .collect(toList());
-        IdFilter filter = idFilter(ids);
+        var filter = idFilter(ids);
         return filter;
     }
 
@@ -159,8 +159,8 @@ public final class Targets {
      */
     @SafeVarargs
     public static <I> TargetFilters acceptingOnly(I... id) {
-        IdFilter idFilter = toIdFilter(id);
-        TargetFilters result = TargetFilters
+        var idFilter = toIdFilter(id);
+        var result = TargetFilters
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();

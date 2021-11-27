@@ -26,7 +26,6 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.base.Field;
@@ -53,7 +52,7 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
      */
     default void checkCanApplyTo(Target target) {
         checkNotNull(target);
-        FilteringField field = new FilteringField(this);
+        var field = new FilteringField(this);
         field.checkAppliesTo(target);
     }
 
@@ -62,10 +61,10 @@ interface FilterMixin extends FilterOrBuilder, MessageFilter<Message> {
      */
     @Override
     default boolean test(Message message) {
-        Field field = Field.withPath(getFieldPath());
-        Object actual = field.valueIn(message);
-        Any requiredAsAny = getValue();
-        Object required = TypeConverter.toObject(requiredAsAny, actual.getClass());
+        var field = Field.withPath(getFieldPath());
+        var actual = field.valueIn(message);
+        var requiredAsAny = getValue();
+        var required = TypeConverter.toObject(requiredAsAny, actual.getClass());
         try {
             return eval(actual, getOperator(), required);
         } catch (IllegalArgumentException e) {

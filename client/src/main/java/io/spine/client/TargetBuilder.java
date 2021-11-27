@@ -113,7 +113,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
         if (fieldMask == null || fieldMask.isEmpty()) {
             return null;
         }
-        FieldMask mask = fromStringList(fieldMask);
+        var mask = fromStringList(fieldMask);
         return mask;
     }
 
@@ -215,7 +215,7 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
      */
     @CanIgnoreReturnValue
     public B where(Filter... predicate) {
-        CompositeFilter aggregatingFilter = all(asList(predicate));
+        var aggregatingFilter = all(asList(predicate));
         filters = singleton(aggregatingFilter);
         return self();
     }
@@ -341,11 +341,11 @@ public abstract class TargetBuilder<T extends Message, B extends TargetBuilder<T
     @SuppressWarnings("MethodWithMoreThanThreeNegations")
     // OK for this method as it's used primarily for debugging
     private String queryString() {
-        String valueSeparator = "; ";
-        StringBuilder sb = new StringBuilder();
+        var valueSeparator = "; ";
+        var sb = new StringBuilder();
 
         @SuppressWarnings("unchecked") // Ensured by declaration of this class.
-        Class<B> builderCls = (Class<B>) self().getClass();
+        var builderCls = (Class<B>) self().getClass();
         sb.append(builderCls.getSimpleName())
           .append('(')
           .append("SELECT ")

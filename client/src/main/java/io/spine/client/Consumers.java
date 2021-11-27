@@ -104,11 +104,11 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
 
     @SuppressWarnings({
             "SerializableNonStaticInnerClassWithoutSerialVersionUID",
-            "SerializableInnerClassWithNonSerializableOuterClass" /* for TypeToken work */,
+            "SerializableInnerClassWithNonSerializableOuterClass" /* for `TypeToken` work */,
             "unchecked" /* The returned type is a class of messages, which is protected
                            by generic params of this class. */})
-    final Class<? extends Message> messageType() {
-        Class<? super M> result = new TypeToken<M>(getClass()){}.getRawType();
+    private final Class<? extends Message> messageType() {
+        var result = new TypeToken<M>(getClass()){}.getRawType();
         return (Class<? extends Message>) result;
     }
 
@@ -140,8 +140,8 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
          */
         @Override
         public void onNext(W value) {
-            M msg = toMessage(value);
-            C ctx = toContext(value);
+            var msg = toMessage(value);
+            var ctx = toContext(value);
             deliver(msg, ctx);
         }
 

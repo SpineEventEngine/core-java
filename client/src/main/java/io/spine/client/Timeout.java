@@ -73,7 +73,7 @@ final class Timeout {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Timeout timeout = (Timeout) o;
+        var timeout = (Timeout) o;
         return value == timeout.value &&
                 unit == timeout.unit;
     }

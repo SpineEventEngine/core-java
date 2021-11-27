@@ -30,7 +30,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandMessage;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
@@ -74,8 +73,8 @@ public final class CommandFactory {
         checkNotNull(message);
         checkValid(message);
 
-        CommandContext context = createContext();
-        Command result = createCommand(message, context);
+        var context = createContext();
+        var result = createCommand(message, context);
         return result;
     }
 
@@ -96,8 +95,8 @@ public final class CommandFactory {
         checkNotNull(message);
         checkValid(message);
 
-        CommandContext context = createContext(targetVersion);
-        Command result = createCommand(message, context);
+        var context = createContext(targetVersion);
+        var result = createCommand(message, context);
         return result;
     }
 
@@ -121,8 +120,8 @@ public final class CommandFactory {
         checkNotNull(context);
         checkValid(message);
 
-        CommandContext newContext = withCurrentTime(context);
-        Command result = createCommand(message, newContext);
+        var newContext = withCurrentTime(context);
+        var result = createCommand(message, newContext);
         return result;
     }
 
@@ -139,9 +138,8 @@ public final class CommandFactory {
      * @return a new command
      */
     private static Command createCommand(CommandMessage message, CommandContext context) {
-        Any packed = AnyPacker.pack(message);
-        Command.Builder result = Command
-                .newBuilder()
+        var packed = AnyPacker.pack(message);
+        var result = Command.newBuilder()
                 .setId(CommandId.generate())
                 .setMessage(packed)
                 .setContext(context);
@@ -153,36 +151,34 @@ public final class CommandFactory {
      */
     @VisibleForTesting
     CommandContext createContext() {
-        ActorContext actorContext = actorRequestFactory.newActorContext();
+        var actorContext = actorRequestFactory.newActorContext();
         return CommandContext.newBuilder()
-                             .setActorContext(actorContext)
-                             .build();
+                .setActorContext(actorContext)
+                .build();
     }
 
     /**
      * Creates command context for a new command with entity ID.
      */
     private CommandContext createContext(int targetVersion) {
-        ActorContext actorContext = actorRequestFactory.newActorContext();
+        var actorContext = actorRequestFactory.newActorContext();
         return CommandContext.newBuilder()
-                             .setActorContext(actorContext)
-                             .setTargetVersion(targetVersion)
-                             .build();
+                .setActorContext(actorContext)
+                .setTargetVersion(targetVersion)
+                .build();
     }
 
     /**
      * Creates a copy of the passed {@code CommandContext} updated with the current time.
      */
     private static CommandContext withCurrentTime(CommandContext value) {
-        ActorContext withCurrentTime =
-                value.getActorContext()
-                     .toBuilder()
-                     .setTimestamp(currentTime())
-                     .build();
-        CommandContext result =
-                value.toBuilder()
-                     .setActorContext(withCurrentTime)
-                     .build();
+        var withCurrentTime = value.getActorContext()
+                .toBuilder()
+                .setTimestamp(currentTime())
+                .build();
+        var result = value.toBuilder()
+                .setActorContext(withCurrentTime)
+                .build();
         return result;
     }
 }

@@ -53,7 +53,7 @@ class ThreadSafeObserverTest {
     @Test
     @DisplayName("delegate all calls to a wrapped `StreamObserver` instance")
     void delegate() {
-        MemoizingObserver<Timestamp> original = new MemoizingObserver<>();
+        var original = new MemoizingObserver<Timestamp>();
         StreamObserver<Timestamp> threadSafe = new ThreadSafeObserver<>(original);
 
         assertThat(original.isCompleted()).isFalse();
@@ -66,13 +66,13 @@ class ThreadSafeObserverTest {
         assertThat(original.getError()).isEqualTo(exception);
 
         assertThat(original.responses()).isEmpty();
-        ImmutableList<Timestamp> values = timestamps();
+        var values = timestamps();
         values.forEach(threadSafe::onNext);
         assertThat(original.responses()).containsExactlyElementsIn(values);
     }
 
     private static ImmutableList<Timestamp> timestamps() {
-        ImmutableList<Timestamp> values =
+        var values =
                 IntStream.range(0, 10)
                          .mapToObj(i -> Time.currentTime())
                          .collect(toImmutableList());
@@ -80,7 +80,7 @@ class ThreadSafeObserverTest {
     }
 
     private static NullPointerException exception() {
-        NullPointerException exception = new NullPointerException("This is a test NPE.");
+        var exception = new NullPointerException("This is a test NPE.");
         return exception;
     }
 }

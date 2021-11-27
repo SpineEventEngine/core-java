@@ -122,8 +122,8 @@ public class ClientRequest {
      *         the type of the entity state for which the query is run
      */
     public <S extends EntityState<?>> ImmutableList<S> run(EntityQuery<?, S, ?> query) {
-        QueryRequest<S> request = new QueryRequest<>(this, query);
-        ImmutableList<S> results = request.run();
+        var request = new QueryRequest<>(this, query);
+        var results = request.run();
         return results;
     }
 
