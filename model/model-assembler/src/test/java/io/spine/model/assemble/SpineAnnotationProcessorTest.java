@@ -27,12 +27,9 @@
 package io.spine.model.assemble;
 
 import io.spine.model.assemble.given.MemoizingMessager;
-import io.spine.model.assemble.given.MemoizingMessager.MemoizedMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.truth.Truth.assertThat;
@@ -74,7 +71,7 @@ abstract class SpineAnnotationProcessorTest {
     @DisplayName("generate supported annotation names based on target annotation")
     void getSupportedAnnotationTypes() {
         Class<?> targetType = processor.getAnnotationType();
-        Set<String> supportedAnnotations = processor.getSupportedAnnotationTypes();
+        var supportedAnnotations = processor.getSupportedAnnotationTypes();
 
         assertNotNull(supportedAnnotations);
         assertEquals(targetType.getName(), supportedAnnotations.iterator().next());
@@ -83,13 +80,13 @@ abstract class SpineAnnotationProcessorTest {
     @Test
     @DisplayName("print error message")
     void printErrorMessage() {
-        MemoizingMessager messager = new MemoizingMessager();
+        var messager = new MemoizingMessager();
         processor.setMessager(messager);
 
-        String errorMessage = "custom error";
+        var errorMessage = "custom error";
         processor.error(errorMessage);
 
-        MemoizedMessage received = messager.firstMessage();
+        var received = messager.firstMessage();
         assertThat(received.kind()).isEqualTo(ERROR);
         assertThat(received.message()).isEqualTo(errorMessage);
     }
@@ -97,13 +94,13 @@ abstract class SpineAnnotationProcessorTest {
     @Test
     @DisplayName("print warning message")
     void printWarningMessage() {
-        MemoizingMessager messager = new MemoizingMessager();
+        var messager = new MemoizingMessager();
         processor.setMessager(messager);
 
-        String message = "custom warning";
+        var message = "custom warning";
         processor.warn(message);
 
-        MemoizedMessage received = messager.firstMessage();
+        var received = messager.firstMessage();
         assertThat(received.kind()).isEqualTo(WARNING);
         assertThat(received.message()).isEqualTo(message);
     }
