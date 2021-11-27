@@ -48,8 +48,8 @@ class UnsupportedCommandGuardTest {
     @Test
     @DisplayName("check and remember the unsupported command error")
     void checkAndRememberUnsupported() {
-        String commandType = "SomeCommand";
-        boolean result = guard.checkAndRemember(unsupportedError(commandType));
+        var commandType = "SomeCommand";
+        var result = guard.checkAndRemember(unsupportedError(commandType));
 
         assertThat(result).isTrue();
         assertThat(guard.commandType()).isEqualTo(commandType);
@@ -58,7 +58,7 @@ class UnsupportedCommandGuardTest {
     @Test
     @DisplayName("return `false` and ignore the command validation error with the different code")
     void ignoreGenericValidationError() {
-        boolean result = guard.checkAndRemember(duplicationError());
+        var result = guard.checkAndRemember(duplicationError());
 
         assertThat(result).isFalse();
         assertThat(guard.commandType()).isNull();
@@ -67,7 +67,7 @@ class UnsupportedCommandGuardTest {
     @Test
     @DisplayName("return `false` and ignore the command error of the different type")
     void ignoreGenericCommandError() {
-        boolean result = guard.checkAndRemember(nonValidationError());
+        var result = guard.checkAndRemember(nonValidationError());
 
         assertThat(result).isFalse();
         assertThat(guard.commandType()).isNull();

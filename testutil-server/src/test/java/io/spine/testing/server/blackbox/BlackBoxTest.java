@@ -31,18 +31,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Message;
-import io.spine.base.EntityState;
-import io.spine.client.Client;
-import io.spine.client.ClientRequest;
-import io.spine.client.Query;
-import io.spine.client.QueryFactory;
-import io.spine.client.Topic;
 import io.spine.client.TopicFactory;
 import io.spine.core.ActorContext;
-import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.core.UserId;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -59,17 +50,11 @@ import io.spine.server.type.CommandClass;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
-import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.blackbox.command.BbAssignSelf;
 import io.spine.testing.server.blackbox.command.BbCreateProject;
-import io.spine.testing.server.blackbox.command.BbFailProject;
-import io.spine.testing.server.blackbox.command.BbFinalizeProject;
 import io.spine.testing.server.blackbox.command.BbRegisterCommandDispatcher;
 import io.spine.testing.server.blackbox.event.BbAssigneeAdded;
 import io.spine.testing.server.blackbox.event.BbAssigneeRemoved;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
-import io.spine.testing.server.blackbox.event.BbProjectDone;
-import io.spine.testing.server.blackbox.event.BbProjectFailed;
 import io.spine.testing.server.blackbox.event.BbReportCreated;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
@@ -85,7 +70,6 @@ import io.spine.testing.server.blackbox.given.Given;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
-import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.AfterEach;
@@ -133,14 +117,14 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @BeforeEach
     @OverridingMethodsMustInvokeSuper
     void setUp() {
-        BoundedContextBuilder builder = newBuilder();
+        var builder = newBuilder();
         builder.add(new BbProjectRepository())
                .add(new BbReportRepository())
                .add(BbProjectViewProjection.class)
                .add(BbInitProcess.class)
                .add(BbProjectFailerProcess.class);
         @SuppressWarnings("unchecked") // see Javadoc for newBuilder().
-        T ctx = (T) BlackBox.from(builder);
+        var ctx = (T) BlackBox.from(builder);
         context = ctx;
     }
 
@@ -164,12 +148,11 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("ignore sent events in emitted")
     void ignoreSentEvents() {
-        BbProjectId id = newProjectId();
+        var id = newProjectId();
         context.receivesCommand(createProject(id))
                 .receivesEvent(taskAdded(id));
         context.assertEvent(
-                BbProjectCreated
-                        .newBuilder()
+                BbProjectCreated.newBuilder()
                         .setProjectId(id)
                         .build());
     }
@@ -181,8 +164,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("an aggregate")
         void aggregate() {
-            BbCreateProject createProject = createProject();
-            BbProject expectedProject = createdProjectState(createProject);
+            var createProject = createProject();
+            var expectedProject = createdProjectState(createProject);
             context.receivesCommand(createProject)
                    .assertEntityWithState(createProject.getProjectId(), expectedProject.getClass())
                    .hasStateThat()
@@ -192,8 +175,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("a projection")
         void projection() {
-            BbCreateProject createProject = createProject();
-            BbProjectView expectedProject = createProjectView(createProject);
+            var createProject = createProject();
+            var expectedProject = createProjectView(createProject);
             context.receivesCommand(createProject)
                    .assertState(createProject.getProjectId(), expectedProject);
         }
@@ -227,8 +210,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
-        BbProjectId projectId = newProjectId();
-        EventSubject assertEvents = context
+        var projectId = newProjectId();
+        var assertEvents = context
                 .receivesCommand(createProject(projectId))
                 .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
                 .assertEvents();
@@ -240,7 +223,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("reject a command")
     void rejectsCommand() {
-        BbProjectId projectId = newProjectId();
+        var projectId = newProjectId();
         // Create and start the project.
         context.receivesCommands(createProject(projectId), startProject(projectId));
 
@@ -269,7 +252,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @MuteLogging
         @DisplayName("directly from the caller")
         void fromCaller() {
-            BbFailProject command = failProject(newProjectId());
+            var command = failProject(newProjectId());
 
             assertThrows(AssertionError.class, () -> context.receivesCommand(command));
         }
@@ -278,7 +261,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @MuteLogging
         @DisplayName("generated as a response to some other signal")
         void generatedWithinModel() {
-            BbProjectFailed event = projectFailed(newProjectId());
+            var event = projectFailed(newProjectId());
 
             assertThrows(AssertionError.class, () -> context.receivesEvent(event));
         }
@@ -307,7 +290,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @MuteLogging
         @DisplayName("directly from the caller")
         void fromCaller() {
-            BbFailProject command = failProject(newProjectId());
+            var command = failProject(newProjectId());
 
             assertDoesNotThrow(() -> context.receivesCommand(command));
         }
@@ -316,7 +299,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @MuteLogging
         @DisplayName("generated as a response to some other signal")
         void generatedWithinModel() {
-            BbProjectFailed event = projectFailed(newProjectId());
+            var event = projectFailed(newProjectId());
 
             assertDoesNotThrow(() -> context.receivesEvent(event));
         }
@@ -340,7 +323,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @MuteLogging
         @DisplayName("directly from the caller")
         void fromCaller() {
-            BbFinalizeProject command = finalizeProject(newProjectId());
+            var command = finalizeProject(newProjectId());
 
             assertThrows(AssertionError.class, () -> context.receivesCommand(command));
         }
@@ -349,7 +332,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @MuteLogging
         @DisplayName("generated as a response to some other signal")
         void generatedWithinModel() {
-            BbProjectDone event = projectDone(newProjectId());
+            var event = projectDone(newProjectId());
 
             assertThrows(AssertionError.class, () -> context.receivesEvent(event));
         }
@@ -358,8 +341,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("receive and react on single event")
     void receivesEvent() {
-        BbProjectId projectId = newProjectId();
-        EventSubject assertEvents = context
+        var projectId = newProjectId();
+        var assertEvents = context
                 .receivesCommand(createReport(projectId))
                 .receivesEvent(taskAdded(projectId))
                 .assertEvents();
@@ -371,8 +354,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
-        BbProjectId projectId = newProjectId();
-        EventSubject assertEvents = context
+        var projectId = newProjectId();
+        var assertEvents = context
                 .receivesCommand(createReport(projectId))
                 .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                 .assertEvents();
@@ -384,15 +367,15 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("post an event with the default producer")
     void defaultProducer() {
-        BbProjectId projectId = newProjectId();
+        var projectId = newProjectId();
         context.receivesEvent(taskAdded(projectId));
-        ImmutableList<Event> events = context.allEvents();
+        var events = context.allEvents();
         assertThat(events).hasSize(1);
-        Message producer = unpack(getOnlyElement(events).getContext()
-                                                        .getProducerId());
+        var producer = unpack(getOnlyElement(events).getContext()
+                                                    .getProducerId());
         Subject assertProducer = assertThat(producer);
         assertProducer.isInstanceOf(BlackBoxId.class);
-        BlackBoxId expectedId = BlackBoxId
+        var expectedId = BlackBoxId
                 .newBuilder()
                 .setContextName(context.name())
                 .build();
@@ -402,12 +385,12 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("post an event with a given producer")
     void customProducer() {
-        BbProjectId projectId = newProjectId();
+        var projectId = newProjectId();
         context.receivesEventsProducedBy(projectId, taskAdded(projectId));
-        ImmutableList<Event> events = context.allEvents();
+        var events = context.allEvents();
         assertThat(events).hasSize(1);
-        Message producer = unpack(getOnlyElement(events).getContext()
-                                                        .getProducerId());
+        var producer = unpack(getOnlyElement(events).getContext()
+                                                    .getProducerId());
         Subject assertProducer = assertThat(producer);
         assertProducer.isInstanceOf(BbProjectId.class);
         assertProducer.isEqualTo(projectId);
@@ -420,10 +403,10 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName(" an external event")
         void single() {
-            BbProjectId projectId = newProjectId();
-            UserId user = newUuid();
+            var projectId = newProjectId();
+            var user = newUuid();
 
-            EventSubject assertEvents = context
+            var assertEvents = context
                     .receivesCommand(createProject(projectId))
                     .receivesCommand(addProjectAssignee(projectId, user))
                     .receivesExternalEvent(userDeleted(user, projectId))
@@ -438,12 +421,12 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("multiple external events")
         void multiple() {
-            BbProjectId projectId = newProjectId();
-            UserId user1 = newUuid();
-            UserId user2 = newUuid();
-            UserId user3 = newUuid();
+            var projectId = newProjectId();
+            var user1 = newUuid();
+            var user2 = newUuid();
+            var user3 = newUuid();
 
-            EventSubject assertEvents = context
+            var assertEvents = context
                     .receivesCommand(createProject(projectId))
                     .receivesCommands(addProjectAssignee(projectId, user1),
                                       addProjectAssignee(projectId, user2),
@@ -463,14 +446,14 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("throw Illegal State Exception on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
-        RepositoryThrowingExceptionOnClose throwingRepo = new RepositoryThrowingExceptionOnClose() {
+        var throwingRepo = new RepositoryThrowingExceptionOnClose() {
             @Override
             protected void throwException() {
                 throw new RuntimeException("Expected error");
             }
         };
 
-        BlackBox ctx = BlackBox.from(
+        var ctx = BlackBox.from(
                 newBuilder().add(throwingRepo)
         );
 
@@ -507,7 +490,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @Test
         void singleTenant() {
-            BoundedContextBuilder builder = BoundedContextBuilder
+            var builder = BoundedContextBuilder
                     .assumingTests(false)
                     .enrichEventsUsing(enricher);
             assertBlackBox(builder, StBlackBox.class);
@@ -515,7 +498,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @Test
         void multiTenant() {
-            BoundedContextBuilder builder = BoundedContextBuilder
+            var builder = BoundedContextBuilder
                     .assumingTests(true)
                     .enrichEventsUsing(enricher);
             assertBlackBox(builder, MtBlackBox.class);
@@ -536,8 +519,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
         }
 
         private void assertRepositories() {
-            for (Repository<?, ?> repository : repositories) {
-                Class<? extends EntityState<?>> stateClass =
+            for (var repository : repositories) {
+                var stateClass =
                         repository.entityModelClass()
                                   .stateClass();
                 assertDoesNotThrow(() -> context.repositoryOf(stateClass));
@@ -545,7 +528,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         }
 
         private void assertEntityTypes() {
-            Set<TypeName> allStateTypes = context().stateTypes();
+            var allStateTypes = context().stateTypes();
             assertThat(allStateTypes).containsAtLeastElementsIn(types);
         }
 
@@ -598,7 +581,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("via entity class")
         void entityClass() {
-            EntitySubject subject = context.assertEntity(id, BbInitProcess.class);
+            var subject = context.assertEntity(id, BbInitProcess.class);
             assertThat(subject)
                     .isNotNull();
             subject.isInstanceOf(BbInitProcess.class);
@@ -607,7 +590,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("via entity state class")
         void entityStateClass() {
-            EntitySubject subject = context.assertEntityWithState(id, BbInit.class);
+            var subject = context.assertEntityWithState(id, BbInit.class);
             assertThat(subject)
                     .isNotNull();
             subject.hasStateThat()
@@ -642,8 +625,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
             @Test
             @DisplayName("state subject")
             void stateSubject() {
-                BbInit expectedState = BbInit
-                        .newBuilder()
+                var expectedState = BbInit.newBuilder()
                         .setId(id)
                         .setInitialized(true)
                         .build();
@@ -659,7 +641,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @BeforeEach
         void sendCommand() {
-            BbProjectId id = newProjectId();
+            var id = newProjectId();
             context.receivesCommand(createProject(id));
         }
 
@@ -681,14 +663,13 @@ abstract class BlackBoxTest<T extends BlackBox> {
     @Test
     @DisplayName("provide `Subject` for a specified `Query` result")
     void obtainQueryResultSubject() {
-        BbProjectId id = newProjectId();
+        var id = newProjectId();
         context.receivesCommand(createProject(id));
 
-        QueryFactory queryFactory = context.requestFactory()
-                                           .query();
-        Query query = queryFactory.all(BbProject.class);
+        var queryFactory = context.requestFactory().query();
+        var query = queryFactory.all(BbProject.class);
 
-        BbProject expected = BbProject
+        var expected = BbProject
                 .newBuilder()
                 .setId(id)
                 .build();
@@ -709,14 +690,13 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("for entity states")
         void forEntityStates() {
-            Topic topic = topic().allOf(BbProject.class);
-            SubscriptionFixture subscription = context.subscribeTo(topic);
+            var topic = topic().allOf(BbProject.class);
+            var subscription = context.subscribeTo(topic);
 
-            BbProjectId id = newProjectId();
+            var id = newProjectId();
             context.receivesCommand(createProject(id));
 
-            BbProject expected = BbProject
-                    .newBuilder()
+            var expected = BbProject.newBuilder()
                     .setId(id)
                     .build();
             subscription.assertEntityStates()
@@ -727,14 +707,13 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("for event messages")
         void forEventMessages() {
-            Topic topic = topic().allOf(BbProjectCreated.class);
-            SubscriptionFixture subscription = context.subscribeTo(topic);
+            var topic = topic().allOf(BbProjectCreated.class);
+            var subscription = context.subscribeTo(topic);
 
-            BbProjectId id = newProjectId();
+            var id = newProjectId();
             context.receivesCommand(createProject(id));
 
-            BbProjectCreated expected = BbProjectCreated
-                    .newBuilder()
+            var expected = BbProjectCreated.newBuilder()
                     .setProjectId(id)
                     .build();
             subscription.assertEventMessages()
@@ -750,10 +729,10 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("ID")
         void id() {
-            UserId actor = GivenUserId.of("my-actor");
-            BbCreateProject createProject = createProject();
-            BbProjectId id = createProject.getProjectId();
-            BbAssignSelf assignSelf = assignSelf(id);
+            var actor = GivenUserId.of("my-actor");
+            var createProject = createProject();
+            var id = createProject.getProjectId();
+            var assignSelf = assignSelf(id);
             context.withActor(actor)
                    .receivesCommands(createProject, assignSelf)
                    .assertState(id,
@@ -766,23 +745,23 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("time zone")
         void timeZone() {
-            UserId actor = GivenUserId.of("my-other-actor");
-            BbCreateProject createProject = createProject();
-            BbProjectId id = createProject.getProjectId();
-            ZoneId zoneId = ZoneIds.of("UTC+1");
+            var actor = GivenUserId.of("my-other-actor");
+            var createProject = createProject();
+            var id = createProject.getProjectId();
+            var zoneId = ZoneIds.of("UTC+1");
             context.withActor(actor)
                    .in(zoneId)
                    .receivesCommand(createProject)
                    .assertEntityWithState(id, BbProject.class)
                    .exists();
-            EventSubject events = context.assertEvents()
-                                         .withType(BbProjectCreated.class);
+            var events = context.assertEvents()
+                                .withType(BbProjectCreated.class);
             events.hasSize(1);
             ActorContext context = events.actual()
                                          .get(0)
                                          .context()
                                          .actorContext();
-            ActorContext expected = ActorContext.newBuilder()
+            var expected = ActorContext.newBuilder()
                     .setActor(actor)
                     .setZoneId(zoneId)
                     .buildPartial();
@@ -794,21 +773,21 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("ID and time zone")
         void idAndTimeZone() {
-            BbCreateProject createProject = createProject();
-            BbProjectId id = createProject.getProjectId();
-            ZoneId zoneId = ZoneIds.of("UTC-1");
+            var createProject = createProject();
+            var id = createProject.getProjectId();
+            var zoneId = ZoneIds.of("UTC-1");
             context.in(zoneId)
                    .receivesCommand(createProject)
                    .assertEntityWithState(id, BbProject.class)
                    .exists();
-            EventSubject events = context.assertEvents()
-                                         .withType(BbProjectCreated.class);
+            var events = context.assertEvents()
+                                .withType(BbProjectCreated.class);
             events.hasSize(1);
             ActorContext context = events.actual()
                                          .get(0)
                                          .context()
                                          .actorContext();
-            ActorContext expected = ActorContext.newBuilder()
+            var expected = ActorContext.newBuilder()
                     .setZoneId(zoneId)
                     .buildPartial();
             assertThat(context)
@@ -824,7 +803,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @Test
         @DisplayName("linked to the context under the test")
         void linkedToTheContextUnderTest() {
-            ClientRequest clientRequest = context().clients().withMatchingTenant().asGuest();
+            var clientRequest = context().clients().withMatchingTenant().asGuest();
 
             // Ensuring the context is empty by `BlackBoxContext` and `Client` APIs.
             context().assertEvents()
@@ -847,8 +826,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
         @DisplayName("closed as `BlackBoxContext` is closed")
         @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting an exception. */
         void closedAsBlackBoxContextClosed() {
-            BlackBoxClients factory = context().clients();
-            Client client = factory.withMatchingTenant();
+            var factory = context().clients();
+            var client = factory.withMatchingTenant();
             assertThat(client.isOpen()).isTrue();
 
             context().close();

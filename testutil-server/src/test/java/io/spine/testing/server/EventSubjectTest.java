@@ -50,9 +50,8 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, Ev
 
     @Override
     Event createMessage() {
-        TuTaskId taskId = generateTaskId();
-        TuCommentAdded event = TuCommentAdded
-                .newBuilder()
+        var taskId = generateTaskId();
+        var event = TuCommentAdded.newBuilder()
                 .setId(taskId)
                 .build();
         return newEvent(event);
@@ -60,9 +59,8 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, Ev
 
     @Override
     Event createAnotherMessage() {
-        TuTaskId taskId = generateTaskId();
-        TuTaskCreated event = TuTaskCreated
-                .newBuilder()
+        var taskId = generateTaskId();
+        var event = TuTaskCreated.newBuilder()
                 .setId(taskId)
                 .build();
         return newEvent(event);
@@ -73,8 +71,7 @@ class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, Ev
     }
 
     private static TuTaskId generateTaskId() {
-        return TuTaskId
-                .newBuilder()
+        return TuTaskId.newBuilder()
                 .setValue(newUuid())
                 .build();
     }

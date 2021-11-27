@@ -31,7 +31,6 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.client.Client;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.testing.server.blackbox.command.BbCreateProject;
 import io.spine.testing.server.blackbox.event.BbProjectCreated;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +38,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static com.google.common.truth.Truth8.assertThat;
@@ -68,12 +66,12 @@ class MtBlackBoxTest
     @Test
     @DisplayName("verify using a particular tenant ID")
     void verifyForDifferentTenants() {
-        TenantId john = generate();
-        TenantId carl = generate();
-        TenantId newUser = generate();
-        BbCreateProject createJohnProject = createProject();
-        BbCreateProject createCarlProject = createProject();
-        BlackBox context = context()
+        var john = generate();
+        var carl = generate();
+        var newUser = generate();
+        var createJohnProject = createProject();
+        var createCarlProject = createProject();
+        var context = context()
                 // Create a project for John.
                 .withTenant(john)
                 .receivesCommand(createJohnProject)
@@ -90,7 +88,7 @@ class MtBlackBoxTest
                .hasStateThat()
                .isEqualTo(createdProjectState(createJohnProject));
         // Verify project was created for Carl.
-        BlackBox contextForCarl = context.withTenant(carl);
+        var contextForCarl = context.withTenant(carl);
         contextForCarl
                 .assertEvents()
                 .withType(BbProjectCreated.class)
@@ -100,7 +98,7 @@ class MtBlackBoxTest
                 .hasStateThat()
                 .isEqualTo(createdProjectState(createCarlProject));
         // Verify nothing happened for a new user.
-        BlackBox newUserContext = context.withTenant(newUser);
+        var newUserContext = context.withTenant(newUser);
         newUserContext
                 .assertCommands()
                 .isEmpty();
@@ -128,7 +126,7 @@ class MtBlackBoxTest
         void matchingTenant() {
             BlackBox context = context();
             List<TenantId> threeTenants =  ImmutableList.of(generate(), generate(), generate());
-            for (TenantId tenant : threeTenants) {
+            for (var tenant : threeTenants) {
                 assertTenant(tenant, (id) ->
                         context.withTenant(id).clients().withMatchingTenant());
             }
@@ -139,14 +137,14 @@ class MtBlackBoxTest
         void specificTenant() {
             BlackBox context = context();
             List<TenantId> threeTenants =  ImmutableList.of(generate(), generate(), generate());
-            for (TenantId tenant : threeTenants) {
+            for (var tenant : threeTenants) {
                 assertTenant(tenant, (id) -> context.clients().create(id));
             }
         }
 
         private void assertTenant(TenantId expected, Function<TenantId, Client> createClient) {
-            Client client = createClient.apply(expected);
-            Optional<TenantId> actual = client.tenant();
+            var client = createClient.apply(expected);
+            var actual = client.tenant();
             assertThat(actual).hasValue(expected);
         }
     }

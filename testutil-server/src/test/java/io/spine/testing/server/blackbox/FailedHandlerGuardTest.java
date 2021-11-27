@@ -26,7 +26,6 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.spine.base.Error;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,10 +51,9 @@ final class FailedHandlerGuardTest extends DiagnosticLoggingTest {
     @DisplayName("log `HandlerFailedUnexpectedly` event")
     void tolerateException() {
         guard.tolerateFailures();
-        Error error = causeOf(new IllegalStateException("Test exception. Handler is fine."));
+        var error = causeOf(new IllegalStateException("Test exception. The handler is OK."));
         guard.on(
-                HandlerFailedUnexpectedly
-                        .newBuilder()
+                HandlerFailedUnexpectedly.newBuilder()
                         .setEntity(entity())
                         .setError(error)
                         .vBuild()
@@ -66,10 +64,9 @@ final class FailedHandlerGuardTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("fail test on `HandlerFailedUnexpectedly` event")
     void failTest() {
-        Error error = causeOf(new IllegalStateException("Test exception. Handler is fine."));
+        var error = causeOf(new IllegalStateException("Test exception. Handler is fine."));
         assertThrows(AssertionFailedError.class, () -> guard.on(
-                HandlerFailedUnexpectedly
-                        .newBuilder()
+                HandlerFailedUnexpectedly.newBuilder()
                         .setEntity(entity())
                         .setError(error)
                         .vBuild()

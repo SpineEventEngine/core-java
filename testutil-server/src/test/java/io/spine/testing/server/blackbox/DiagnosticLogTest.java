@@ -26,7 +26,6 @@
 
 package io.spine.testing.server.blackbox;
 
-import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.CommandId;
 import io.spine.core.EventId;
@@ -55,10 +54,9 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("log `ConstraintViolated` event")
     void acceptConstraintViolated() {
-        MessageId entity = entity();
+        var entity = entity();
         DiagnosticLog.instance()
-                     .on(ConstraintViolated
-                                 .newBuilder()
+                     .on(ConstraintViolated.newBuilder()
                                  .setEntity(entity)
                                  .vBuild());
         assertLogged(Identifier.toString(entity.getId()));
@@ -67,14 +65,13 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("log `CannotDispatchDuplicateCommand` event")
     void acceptCannotDispatchDuplicateCommand() {
-        MessageId command = MessageId
+        var command = MessageId
                 .newBuilder()
                 .setId(pack(CommandId.generate()))
                 .setTypeUrl(TypeUrl.of(BbCreateProject.class).value())
                 .vBuild();
         DiagnosticLog.instance()
-                     .on(CannotDispatchDuplicateCommand
-                                 .newBuilder()
+                     .on(CannotDispatchDuplicateCommand.newBuilder()
                                  .setEntity(entity())
                                  .setDuplicateCommand(command)
                                  .vBuild());
@@ -85,7 +82,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("log `CannotDispatchDuplicateEvent` event")
     void acceptCannotDispatchDuplicateEvent() {
-        MessageId event = MessageId
+        var event = MessageId
                 .newBuilder()
                 .setId(pack(EventId.newBuilder()
                                    .setValue(newUuid())
@@ -93,8 +90,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
                 .setTypeUrl(TypeUrl.of(BbProjectCreated.class).value())
                 .vBuild();
         DiagnosticLog.instance()
-                     .on(CannotDispatchDuplicateEvent
-                                 .newBuilder()
+                     .on(CannotDispatchDuplicateEvent.newBuilder()
                                  .setEntity(entity())
                                  .setDuplicateEvent(event)
                                  .vBuild());
@@ -105,10 +101,9 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("log `RoutingFailed` event")
     void acceptRoutingFailed() {
-        Error error = causeOf(new IllegalStateException("Test exception. Routing is fine."));
+        var error = causeOf(new IllegalStateException("Test exception. Routing is fine."));
         DiagnosticLog.instance()
-                     .on(RoutingFailed
-                                 .newBuilder()
+                     .on(RoutingFailed.newBuilder()
                                  .setError(error)
                                  .vBuild());
         assertLogged(error.getMessage());
@@ -117,12 +112,11 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("log `AggregateHistoryCorrupted` event")
     void acceptAggregateHistoryCorrupted() {
-        Error error =
+        var error =
                 fromThrowable(new IllegalStateException("Test exception. Aggregates are fine."));
-        MessageId entityId = entity();
+        var entityId = entity();
         DiagnosticLog.instance()
-                     .on(AggregateHistoryCorrupted
-                                 .newBuilder()
+                     .on(AggregateHistoryCorrupted.newBuilder()
                                  .setEntity(entityId)
                                  .setError(error)
                                  .vBuild());

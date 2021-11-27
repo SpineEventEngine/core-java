@@ -44,7 +44,7 @@ import static io.spine.testing.server.entity.given.GivenEntityVersion.newerVersi
 import static io.spine.testing.server.entity.given.GivenEntityVersion.olderVersion;
 import static io.spine.testing.server.entity.given.GivenEntityVersion.version;
 
-@DisplayName("IterableEntityVersionSubject should")
+@DisplayName("`IterableEntityVersionSubject` should")
 class IterableEntityVersionSubjectTest
         extends SubjectTest<IterableEntityVersionSubject, Iterable<Version>> {
 
@@ -107,7 +107,7 @@ class IterableEntityVersionSubjectTest
         @Test
         @DisplayName("not allow to containsAllNewerThan(...)")
         void containsAllNewerThan() {
-            AssertionError error = expectFailure(
+            var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
                                               .containsAllNewerThan(zero())
             );
@@ -117,7 +117,7 @@ class IterableEntityVersionSubjectTest
         @Test
         @DisplayName("not allow to containsAllNewerOrEqualTo(...)")
         void containsAllNewerOrEqualTo() {
-            AssertionError error = expectFailure(
+            var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
                                               .containsAllNewerOrEqualTo(zero())
             );
@@ -127,7 +127,7 @@ class IterableEntityVersionSubjectTest
         @Test
         @DisplayName("not allow to containsAllOlderThan(...)")
         void containsAllOlderThan() {
-            AssertionError error = expectFailure(
+            var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
                                               .containsAllOlderThan(zero())
             );
@@ -137,7 +137,7 @@ class IterableEntityVersionSubjectTest
         @Test
         @DisplayName("not allow to containsAllOlderOrEqualTo(...)")
         void containsAllOlderOrEqualTo() {
-            AssertionError error = expectFailure(
+            var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
                                               .containsAllOlderOrEqualTo(zero())
             );
@@ -147,7 +147,7 @@ class IterableEntityVersionSubjectTest
         @Test
         @DisplayName("not allow to containsSingleEntityVersionThat()")
         void containsSingleEntityVersionThat() {
-            AssertionError error = expectFailure(
+            var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
                                               .containsSingleEntityVersionThat()
             );
@@ -160,9 +160,9 @@ class IterableEntityVersionSubjectTest
         }
     }
 
-    @SuppressWarnings("CheckReturnValue") // Method called to raise an error.
     @Test
     @DisplayName("return a subject for a single stored entity version")
+    @SuppressWarnings("CheckReturnValue") // Method called to raise an error.
     void returnEntityVersionSubject() {
         assertWithSubjectThat(singleVersion())
                 .containsSingleEntityVersionThat()

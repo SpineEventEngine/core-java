@@ -38,8 +38,7 @@ public final class GivenEntityVersion {
     }
 
     public static Version version() {
-        Version version = Version
-                .newBuilder()
+        var version = Version.newBuilder()
                 .setNumber(42)
                 .setTimestamp(currentTime())
                 .vBuild();
@@ -47,8 +46,7 @@ public final class GivenEntityVersion {
     }
 
     public static Version olderVersion() {
-        Version version = Version
-                .newBuilder()
+        var version = Version.newBuilder()
                 .setNumber(15)
                 .setTimestamp(Timestamps.MIN_VALUE)
                 .vBuild();
@@ -56,8 +54,7 @@ public final class GivenEntityVersion {
     }
 
     public static Version newerVersion() {
-        Version version = Version
-                .newBuilder()
+        var version = Version.newBuilder()
                 .setNumber(125)
                 .setTimestamp(Timestamps.MAX_VALUE)
                 .vBuild();

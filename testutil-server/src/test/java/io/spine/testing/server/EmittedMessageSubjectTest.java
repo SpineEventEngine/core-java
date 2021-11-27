@@ -27,8 +27,6 @@
 package io.spine.testing.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.TruthFailureSubject;
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Any;
 import io.spine.core.Signal;
 import io.spine.testing.SubjectTest;
@@ -69,14 +67,14 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @Test
     @DisplayName("check message count")
     void checkSize() {
-        int messageCount = 42;
-        Iterable<W> messages = messages(messageCount);
+        var messageCount = 42;
+        var messages = messages(messageCount);
         assertWithSubjectThat(messages).hasSize(messageCount);
-        AssertionError error = expectFailure(
+        var error = expectFailure(
                 whenTesting -> whenTesting.that(messages)
                                           .hasSize(0)
         );
-        TruthFailureSubject assertError = assertThat(error);
+        var assertError = assertThat(error);
         assertError.factValue(EXPECTED)
                    .isEqualTo(String.valueOf(0));
         assertError.factValue(BUT_WAS)
@@ -86,8 +84,8 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @Test
     @DisplayName("check if there is no messages")
     void checkIfAbsent() {
-        int messageCount = 0;
-        Iterable<W> messages = messages(messageCount);
+        var messageCount = 0;
+        var messages = messages(messageCount);
         assertWithSubjectThat(messages).isEmpty();
         expectSomeFailure(whenTesting -> whenTesting.that(messages)
                                                     .isNotEmpty());
@@ -96,8 +94,8 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @Test
     @DisplayName("check if there are some messages")
     void checkIfPresent() {
-        int messageCount = 1;
-        Iterable<W> messages = messages(messageCount);
+        var messageCount = 1;
+        var messages = messages(messageCount);
         assertWithSubjectThat(messages).isNotEmpty();
         expectSomeFailure(whenTesting -> whenTesting.that(messages)
                                                     .isEmpty());
@@ -106,9 +104,9 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @Test
     @DisplayName("retrieve a subject of an emitted message by its index")
     void retrieveMessage() {
-        int messageCount = 3;
-        Iterable<W> messages = messages(messageCount);
-        ProtoSubject protoSubject = assertWithSubjectThat(messages).message(2);
+        var messageCount = 3;
+        var messages = messages(messageCount);
+        var protoSubject = assertWithSubjectThat(messages).message(2);
         assertThat(protoSubject).isNotNull();
         protoSubject.isNotEqualToDefaultInstance();
         protoSubject.isNotInstanceOf(Any.class);
@@ -118,13 +116,13 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @Test
     @DisplayName("check the message count when obtaining a ProtoSubject")
     void failOnIndexOutOfBounds() {
-        int messageCount = 5;
-        Iterable<W> messages = messages(messageCount);
-        int index = 13;
+        var messageCount = 5;
+        var messages = messages(messageCount);
+        var index = 13;
         @SuppressWarnings("CheckReturnValue")
-        AssertionError error = expectFailure(whenTesting -> whenTesting.that(messages)
-                                                                       .message(index));
-        TruthFailureSubject assertError = assertThat(error);
+        var error = expectFailure(whenTesting -> whenTesting.that(messages)
+                                                            .message(index));
+        var assertError = assertThat(error);
         assertError.factValue(MESSAGE_COUNT.value())
                    .isEqualTo(String.valueOf(messageCount));
         assertError.factValue(REQUESTED_INDEX.value())
@@ -134,8 +132,8 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @Test
     @DisplayName("fail to get a message if the list is `null`")
     void failForNull() {
-        AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
-                                                                       .message(42));
+        var error = expectFailure(whenTesting -> whenTesting.that(null)
+                                                            .message(42));
         assertThat(error).factKeys()
                          .contains(ACTUAL.value());
     }
@@ -143,44 +141,44 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     @Test
     @DisplayName("obtain derived subject with messages of type")
     void subSubjectByType() {
-        int messageCount = 3;
-        int otherMessageCount = 2;
+        var messageCount = 3;
+        var otherMessageCount = 2;
         Iterable<W> outerObjects = ImmutableList
                 .<W>builder()
                 .addAll(messages(messageCount))
                 .addAll(messages(otherMessageCount, this::createAnotherMessage))
                 .build();
 
-        Class<M> type = typeOf(createMessage());
-        Class<M> anotherType = typeOf(createAnotherMessage());
+        var type = typeOf(createMessage());
+        var anotherType = typeOf(createAnotherMessage());
 
-        S subject = assertWithSubjectThat(outerObjects);
+        var subject = assertWithSubjectThat(outerObjects);
 
-        S subSubject = subject.withType(type);
+        var subSubject = subject.withType(type);
         subSubject.hasSize(messageCount);
 
-        S anotherSubSubject = subject.withType(anotherType);
+        var anotherSubSubject = subject.withType(anotherType);
         anotherSubSubject.hasSize(otherMessageCount);
     }
 
     @Test
     @DisplayName("fail when trying to obtain filtered sub-subject over null actual")
     void failWithNull() {
-        Class<M> type = typeOf(createMessage());
+        var type = typeOf(createMessage());
         @SuppressWarnings("CheckReturnValue") /* The call to `withType()` should fail,
             we don't need its result. */
-        AssertionError error = expectFailure(whenTesting -> whenTesting.that(null)
-                                                                       .withType(type));
-        TruthFailureSubject assertError = assertThat(error);
+        var error = expectFailure(whenTesting -> whenTesting.that(null)
+                                                                    .withType(type));
+        var assertError = assertThat(error);
         assertError.factValue(ACTUAL.value())
                    .isEqualTo("null");
     }
 
     private Class<M> typeOf(W outerObject) {
-        @SuppressWarnings("unchecked") Class<M> /* The cast is protected by matching outer type
+        @SuppressWarnings("unchecked") /* The cast is protected by matching outer type
             (such as `Event` or `Command`) to corresponding enclosed message type (such as
             `EventMessage` or `CommandMessage`) in the generic parameters of the derived classes. */
-        result = (Class<M>) outerObject.enclosedMessage().getClass();
+        var result = (Class<M>) outerObject.enclosedMessage().getClass();
         return result;
     }
 }

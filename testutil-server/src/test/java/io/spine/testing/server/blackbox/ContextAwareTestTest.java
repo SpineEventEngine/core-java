@@ -34,7 +34,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,7 +71,7 @@ class ContextAwareTestTest {
     private static <T extends Annotation>
     void assertAnnotated(String methodName, Class<T> annotationClass)
             throws NoSuchMethodException {
-        Method method = ContextAwareTest.class.getDeclaredMethod(methodName);
+        var method = ContextAwareTest.class.getDeclaredMethod(methodName);
         Annotation annotation = method.getAnnotation(annotationClass);
         assertThat(annotation).isNotNull();
     }

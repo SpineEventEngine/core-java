@@ -43,57 +43,46 @@ public final class GivenSubscriptionUpdate {
     }
 
     public static SubscriptionUpdate withTwoEntities() {
-        BbProject state1 = BbProject
-                .newBuilder()
+        var state1 = BbProject.newBuilder()
                 .setId(BbProjectId.generate())
                 .build();
-        BbProject state2 = BbProject
-                .newBuilder()
+        var state2 = BbProject.newBuilder()
                 .setId(BbProjectId.generate())
                 .build();
-        EntityStateUpdate stateUpdate1 = EntityStateUpdate
-                .newBuilder()
+        var stateUpdate1 = EntityStateUpdate.newBuilder()
                 .setState(pack(state1))
                 .build();
-        EntityStateUpdate stateUpdate2 = EntityStateUpdate
-                .newBuilder()
+        var stateUpdate2 = EntityStateUpdate.newBuilder()
                 .setState(pack(state2))
                 .build();
-        EntityUpdates updates = EntityUpdates
-                .newBuilder()
+        var updates = EntityUpdates.newBuilder()
                 .addUpdate(stateUpdate1)
                 .addUpdate(stateUpdate2)
                 .build();
-        SubscriptionUpdate update = SubscriptionUpdate
-                .newBuilder()
+        var update = SubscriptionUpdate.newBuilder()
                 .setEntityUpdates(updates)
                 .build();
         return update;
     }
 
     public static SubscriptionUpdate withTwoEvents() {
-        BbProjectCreated eventMessage1 = BbProjectCreated
-                .newBuilder()
+        var eventMessage1 = BbProjectCreated.newBuilder()
                 .setProjectId(BbProjectId.generate())
                 .build();
-        BbProjectCreated eventMessage2 = BbProjectCreated
-                .newBuilder()
+        var eventMessage2 = BbProjectCreated.newBuilder()
                 .setProjectId(BbProjectId.generate())
                 .build();
-        Event event1 = Event
-                .newBuilder()
+        var event1 = Event.newBuilder()
                 .setMessage(pack(eventMessage1))
                 .build();
-        Event event2 = Event
-                .newBuilder()
+        var event2 = Event.newBuilder()
                 .setMessage(pack(eventMessage2))
                 .build();
-        EventUpdates updates = EventUpdates
-                .newBuilder()
+        var updates = EventUpdates.newBuilder()
                 .addEvent(event1)
                 .addEvent(event2)
                 .build();
-        SubscriptionUpdate update = SubscriptionUpdate
+        var update = SubscriptionUpdate
                 .newBuilder()
                 .setEventUpdates(updates)
                 .build();
@@ -101,9 +90,7 @@ public final class GivenSubscriptionUpdate {
     }
 
     public static SubscriptionUpdate empty() {
-        SubscriptionUpdate update = SubscriptionUpdate
-                .newBuilder()
-                .build();
+        var update = SubscriptionUpdate.newBuilder().build();
         return update;
     }
 }
