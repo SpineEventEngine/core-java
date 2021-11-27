@@ -26,14 +26,11 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.StackSize;
 import com.google.errorprone.annotations.FormatMethod;
 import com.google.errorprone.annotations.FormatString;
 import io.spine.logging.Logging;
 import io.spine.system.server.DiagnosticEvent;
-
-import java.io.PrintStream;
 
 import static io.spine.json.Json.toJson;
 import static java.lang.String.format;
@@ -54,7 +51,7 @@ interface DiagnosticLogging extends Logging {
      */
     @FormatMethod
     default void log(DiagnosticEvent event, @FormatString String errorMessage, Object... formatArgs) {
-        String msg = format(errorMessage, formatArgs);
+        var msg = format(errorMessage, formatArgs);
         log(msg, event);
     }
 
@@ -65,18 +62,18 @@ interface DiagnosticLogging extends Logging {
      *         the formatted error message to log
      */
     default void log(String msg, DiagnosticEvent event) {
-        FluentLogger.Api severeLogger = logger()
+        var severeLogger = logger()
                 .atSevere()
                 .withStackTrace(StackSize.NONE);
-        boolean loggingEnabled = severeLogger.isEnabled();
-        String eventJson = toJson(event);
+        var loggingEnabled = severeLogger.isEnabled();
+        var eventJson = toJson(event);
         if (loggingEnabled) {
             severeLogger.log(msg);
             severeLogger.log(eventJson);
         } else {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             // Edge case for disabled/misconfigured logging .
-            PrintStream stderr = System.err;
+            var stderr = System.err;
             stderr.println(msg);
             stderr.println(eventJson);
         }

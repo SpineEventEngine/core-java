@@ -52,7 +52,6 @@ import io.spine.server.QueryService;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventStore;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
@@ -63,7 +62,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -141,7 +139,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
     public static BlackBox from(BoundedContextBuilder builder) {
-        BlackBox result =
+        var result =
                 builder.isMultitenant()
                 ? new MtBlackBox(builder)
                 : new StBlackBox(builder);
@@ -155,14 +153,14 @@ public abstract class BlackBox implements Logging, Closeable {
         this.events = new EventCollector();
         this.postedEvents = synchronizedSet(new HashSet<>());
         this.failedHandlerGuard = new FailedHandlerGuard();
-        BoundedContextBuilder wiredCopy = wiredCopyOf(builder);
+        var wiredCopy = wiredCopyOf(builder);
         this.context = wiredCopy.build();
         this.actor = defaultActor();
         this.clientFactory = new ClientFactory(context);
     }
 
     private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
-        BoundedContextBuilder result = builder.testingCopy();
+        var result = builder.testingCopy();
         result.addCommandListener(commands)
               .addEventListener(events)
               .addEventDispatcher(failedHandlerGuard)
@@ -234,7 +232,7 @@ public abstract class BlackBox implements Logging, Closeable {
     @CanIgnoreReturnValue
     public final BlackBox append(Event event) {
         checkNotNull(event);
-        EventStore eventStore =
+        var eventStore =
                 context.eventBus()
                        .eventStore();
         eventStore.append(event);
@@ -284,7 +282,7 @@ public abstract class BlackBox implements Logging, Closeable {
      */
     private BlackBox receivesCommands(Collection<CommandMessage> domainCommands) {
         checkNotNull(domainCommands);
-        List<Command> posted = setup().postCommands(domainCommands);
+        var posted = setup().postCommands(domainCommands);
         postedCommands.addAll(posted);
         return this;
     }
@@ -404,7 +402,7 @@ public abstract class BlackBox implements Logging, Closeable {
     @CanIgnoreReturnValue
     public final BlackBox
     receivesEventsProducedBy(Object producerId, EventMessage first, EventMessage... rest) {
-        List<Event> sentEvents = setup().postEvents(producerId, first, rest);
+        var sentEvents = setup().postEvents(producerId, first, rest);
         postedEvents.addAll(sentEvents);
         return this;
     }
@@ -417,7 +415,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * @return current instance
      */
     private BlackBox receivesEvents(Collection<EventMessage> domainEvents) {
-        List<Event> sentEvents = setup().postEvents(domainEvents);
+        var sentEvents = setup().postEvents(domainEvents);
         this.postedEvents.addAll(sentEvents);
         return this;
     }
@@ -508,7 +506,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * during test setup.
      */
     private ImmutableList<Command> commands() {
-        Predicate<Command> wasNotReceived =
+        var wasNotReceived =
                 ((Predicate<Command>) postedCommands::contains).negate();
         return select(this.commands)
                 .stream()
@@ -529,9 +527,8 @@ public abstract class BlackBox implements Logging, Closeable {
      * during test setup.
      */
     private ImmutableList<Event> events() {
-        Predicate<Event> wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
-        return allEvents()
-                .stream()
+        var wasNotReceived = ((Predicate<Event>) postedEvents::contains).negate();
+        return allEvents().stream()
                 .filter(wasNotReceived)
                 .collect(toImmutableList());
     }
@@ -583,7 +580,7 @@ public abstract class BlackBox implements Logging, Closeable {
     private <I, S extends EntityState<I>> @Nullable Entity<I, S>
     findByState(I id, Class<S> stateClass) {
         @SuppressWarnings("unchecked")
-        Repository<I, ? extends Entity<I, S>> repo =
+        var repo =
                 (Repository<I, ? extends Entity<I, S>>) repositoryOf(stateClass);
         return readOperation(() -> (Entity<I, S>) repo.find(id)
                                                       .orElse(null));
@@ -606,7 +603,7 @@ public abstract class BlackBox implements Logging, Closeable {
     assertState(I id, Class<S> stateClass) {
         checkNotNull(id);
         checkNotNull(stateClass);
-        ProtoFluentAssertion stateAssertion =
+        var stateAssertion =
                 assertEntityWithState(id, stateClass)
                         .hasStateThat()
                         .comparingExpectedFieldsOnly();
@@ -622,7 +619,7 @@ public abstract class BlackBox implements Logging, Closeable {
         checkNotNull(id);
         checkNotNull(entityState);
         @SuppressWarnings("unchecked")  // Guaranteed by `S` boundaries.
-        Class<? extends EntityState<I>> typedWithI =
+        var typedWithI =
                 (Class<? extends EntityState<I>>) entityState.getClass();
         assertState(id, typedWithI)
                 .isEqualTo(entityState);
@@ -651,7 +648,7 @@ public abstract class BlackBox implements Logging, Closeable {
      */
     @CanIgnoreReturnValue
     public final ProtoFluentAssertion assertEvent(Class<? extends EventMessage> eventClass) {
-        EventSubject assertEvents =
+        var assertEvents =
                 assertEvents().withType(eventClass);
         assertEvents.hasSize(1);
         return assertEvents.message(0)
@@ -671,14 +668,14 @@ public abstract class BlackBox implements Logging, Closeable {
     @SuppressWarnings("TestOnlyProblems")   /* `QueryResultSubject` is not test-only. */
     public QueryResultSubject assertQueryResult(Query query) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        QueryService service = QueryService
+        var service = QueryService
                 .newBuilder()
                 .add(context)
                 .build();
         service.read(query, observer);
         assertTrue(observer.isCompleted());
 
-        QueryResponse response = observer.firstResponse();
+        var response = observer.firstResponse();
         return QueryResultSubject.assertQueryResult(response);
     }
 
@@ -690,7 +687,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * @return a fixture for testing subscription updates.
      */
     public SubscriptionFixture subscribeTo(Topic topic) {
-        SubscriptionFixture result = new SubscriptionFixture(context, topic);
+        var result = new SubscriptionFixture(context, topic);
         result.activate();
         return result;
     }
@@ -700,7 +697,7 @@ public abstract class BlackBox implements Logging, Closeable {
      * to this instance of {@code BlackBox}.
      */
     public BlackBoxClients clients() {
-        BlackBoxClients result = new BlackBoxClients(this, clientFactory);
+        var result = new BlackBoxClients(this, clientFactory);
         return result;
     }
 }

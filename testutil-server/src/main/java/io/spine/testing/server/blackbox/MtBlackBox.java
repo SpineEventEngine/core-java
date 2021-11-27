@@ -88,8 +88,8 @@ final class MtBlackBox extends BlackBox {
 
     @Override
     protected <@Nullable D> D readOperation(Supplier<D> supplier) {
-        TenantAwareRunner tenantAwareRunner = TenantAwareRunner.with(tenantId());
-        D result = tenantAwareRunner.evaluate(() -> super.readOperation(supplier));
+        var tenantAwareRunner = TenantAwareRunner.with(tenantId());
+        var result = tenantAwareRunner.evaluate(() -> super.readOperation(supplier));
         return result;
     }
 

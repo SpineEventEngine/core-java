@@ -67,11 +67,10 @@ public final class SubscriptionFixture {
      * Creates and activates a subscription on the topic.
      */
     void activate() {
-        SubscriptionService service =
-                SubscriptionService.newBuilder()
-                                   .add(context)
-                                   .build();
-        Observer updateObserver = new Observer(updates::add);
+        var service = SubscriptionService.newBuilder()
+                .add(context)
+                .build();
+        var updateObserver = new Observer(updates::add);
         StreamObserver<Subscription> activator = new Activator(service, updateObserver);
         service.subscribe(topic, activator);
     }

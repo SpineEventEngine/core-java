@@ -61,7 +61,7 @@ final class FailedHandlerGuard extends AbstractEventSubscriber implements Diagno
 
     @Override
     protected void handle(EventEnvelope eventEnvelope) {
-        HandlerFailedUnexpectedly event = (HandlerFailedUnexpectedly) eventEnvelope.message();
+        var event = (HandlerFailedUnexpectedly) eventEnvelope.message();
         on(event);
     }
 
@@ -73,7 +73,7 @@ final class FailedHandlerGuard extends AbstractEventSubscriber implements Diagno
      */
     @VisibleForTesting
     void on(HandlerFailedUnexpectedly event) {
-        String msg = format(
+        var msg = format(
                 "The entity (state type `%s`) could not handle the signal `%s`:%n%s%n",
                 event.getEntity().getTypeUrl(),
                 event.getHandledSignal().getTypeUrl(),

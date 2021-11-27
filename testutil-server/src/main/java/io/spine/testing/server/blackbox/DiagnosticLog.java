@@ -27,7 +27,6 @@
 package io.spine.testing.server.blackbox;
 
 import io.spine.base.Identifier;
-import io.spine.core.MessageId;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.system.server.AggregateHistoryCorrupted;
@@ -63,16 +62,16 @@ final class DiagnosticLog
 
     @Subscribe
     void on(ConstraintViolated event) {
-        MessageId entity = event.getEntity();
-        String typeUrl = entity.getTypeUrl();
-        String idAsString = Identifier.toString(entity.getId());
+        var entity = event.getEntity();
+        var typeUrl = entity.getTypeUrl();
+        var idAsString = Identifier.toString(entity.getId());
         log(event, "The state (type: `%s`) of the entity (ID: `%s`) is invalid.",
             typeUrl, idAsString);
     }
 
     @Subscribe
     void on(CannotDispatchDuplicateCommand event) {
-        MessageId command = event.getDuplicateCommand();
+        var command = event.getDuplicateCommand();
         log(event, "The command `%s` (ID: `%s`) should not be dispatched twice.",
             command.getTypeUrl(),
             command.asCommandId()
@@ -81,7 +80,7 @@ final class DiagnosticLog
 
     @Subscribe
     void on(CannotDispatchDuplicateEvent event) {
-        MessageId duplicateEvent = event.getDuplicateEvent();
+        var duplicateEvent = event.getDuplicateEvent();
         log(event, "Event `%s` (ID: `%s`) should not be dispatched twice.",
             duplicateEvent.getTypeUrl(),
             duplicateEvent.asEventId()
@@ -101,8 +100,8 @@ final class DiagnosticLog
 
     @Subscribe
     void on(AggregateHistoryCorrupted event) {
-        MessageId aggregate = event.getEntity();
-        String idAsString = Identifier.toString(aggregate.getId());
+        var aggregate = event.getEntity();
+        var idAsString = Identifier.toString(aggregate.getId());
         log(event,
             "Unable to load the history of the aggregate (state type: `%s`, ID: `%s`):%n%s%n",
             aggregate.getTypeUrl(),

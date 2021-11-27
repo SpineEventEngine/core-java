@@ -57,10 +57,10 @@ final class MessageTypeCounter<C extends MessageClass, W extends Message, M exte
                        Function<W, C> classFn,
                        Function<Class<? extends M>, C> fn) {
         checkNotNull(wrappers);
-        Function<W, C> classFn1 = checkNotNull(classFn);
+        var classFn1 = checkNotNull(classFn);
         Map<C, Integer> counters = new HashMap<>(wrappers.size());
-        for (W wrapper : wrappers) {
-            C cls = classFn1.apply(wrapper);
+        for (var wrapper : wrappers) {
+            var cls = classFn1.apply(wrapper);
             int currentCount = counters.getOrDefault(cls, 0);
             counters.put(cls, currentCount + 1);
         }
@@ -83,20 +83,20 @@ final class MessageTypeCounter<C extends MessageClass, W extends Message, M exte
 
     int get(Class<? extends M> messageClass) {
         checkNotNull(messageClass);
-        C cls = toMessageClass(messageClass);
+        var cls = toMessageClass(messageClass);
         return get(cls);
     }
 
     boolean contains(Class<? extends M> classOfMessage) {
         checkNotNull(classOfMessage);
-        C cls = toMessageClass(classOfMessage);
-        boolean result = contains(cls);
+        var cls = toMessageClass(classOfMessage);
+        var result = contains(cls);
         return result;
     }
 
     boolean contains(C messageClass) {
         checkNotNull(messageClass);
-        boolean result = countByType.containsKey(messageClass);
+        var result = countByType.containsKey(messageClass);
         return result;
     }
 }

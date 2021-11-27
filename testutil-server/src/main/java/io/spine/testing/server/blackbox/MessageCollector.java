@@ -69,11 +69,11 @@ abstract class MessageCollector<I extends SignalId,
      * Looks up the command message by the command ID.
      */
     public final <M extends Message> Optional<M> find(I messageId, Class<M> messageClass) {
-        Message commandMessage = messages.get(messageId);
+        var commandMessage = messages.get(messageId);
         ProtoTruth.assertThat(commandMessage)
                   .isInstanceOf(messageClass);
         @SuppressWarnings("unchecked") // Checked with an assertion.
-                M result = (M) commandMessage;
+        var result = (M) commandMessage;
         return ofNullable(result);
     }
 

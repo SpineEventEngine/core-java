@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Abstract base for test suites based on {@link BlackBox}.
@@ -66,9 +66,9 @@ public abstract class ContextAwareTest {
     @BeforeEach
     @OverridingMethodsMustInvokeSuper
     protected void createContext() {
-        BoundedContextBuilder contextBuilder = contextBuilder();
-        checkNotNull(contextBuilder,
-                     "`contextBuilder()` must return a non-null `BoundedContextBuilder`.");
+        var contextBuilder = contextBuilder();
+        requireNonNull(contextBuilder,
+                       "`contextBuilder()` must return a non-null `BoundedContextBuilder`.");
         context = BlackBox.from(contextBuilder);
     }
 
@@ -83,7 +83,7 @@ public abstract class ContextAwareTest {
      * Obtains test configuration and assertion API for the Bounded Context under the test.
      */
     protected BlackBox context() {
-        return checkNotNull(
+        return requireNonNull(
                 context,
                 "The `BoundedContext` under the test is already destroyed or not yet created."
         );
