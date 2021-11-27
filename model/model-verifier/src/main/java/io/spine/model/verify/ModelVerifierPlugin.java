@@ -40,7 +40,6 @@ import org.gradle.api.Task;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
@@ -61,7 +60,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     @Override
     public void apply(Project project) {
         _debug().log("Applying Spine model verifier plugin.");
-        Path rawModelStorage = rawModelPath(project);
+        var rawModelStorage = rawModelPath(project);
         // Ensure right environment (`main` scope sources with the `java` plugin)
         if (project.getTasks()
                    .findByPath(classes.name()) != null) {
@@ -79,7 +78,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
 
     private static Path rawModelPath(Project project) {
         Path rootDir = project.getRootDir().toPath();
-        Path result = rootDir.resolve(RELATIVE_RAW_MODEL_PATH);
+        var result = rootDir.resolve(RELATIVE_RAW_MODEL_PATH);
         return result;
     }
 
@@ -110,16 +109,16 @@ public final class ModelVerifierPlugin extends SpinePlugin {
             if (!exists(rawModelPath)) {
                 _warn().log("No Spine model definition found under `%s`.", rawModelPath);
             } else {
-                Project project = task.getProject();
+                var project = task.getProject();
                 extendKnownTypes(project);
                 verifyModel(project);
             }
         }
 
         private void extendKnownTypes(Project project) {
-            String pluginExtensionName = McJavaOptions.name();
+            var pluginExtensionName = McJavaOptions.name();
             if (project.getExtensions().findByName(pluginExtensionName) != null) {
-                File descriptorFile = McJavaOptions.descriptorSetFileOf(project, true);
+                var descriptorFile = McJavaOptions.descriptorSetFileOf(project, true);
                 tryExtend(descriptorFile);
             } else {
                 _warn().log(
@@ -145,13 +144,13 @@ public final class ModelVerifierPlugin extends SpinePlugin {
          * @param project the Gradle project to process the model upon
          */
         private void verifyModel(Project project) {
-            ModelVerifier verifier = new ModelVerifier(project);
-            CommandHandlers commandHandlers = readCommandHandlers();
+            var verifier = new ModelVerifier(project);
+            var commandHandlers = readCommandHandlers();
             verifier.verify(commandHandlers);
         }
 
         private CommandHandlers readCommandHandlers() {
-            try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
+            try (var in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
                 return CommandHandlers.parseFrom(in);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
