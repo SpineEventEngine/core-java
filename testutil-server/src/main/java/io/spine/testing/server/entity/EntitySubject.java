@@ -105,7 +105,7 @@ public final class EntitySubject extends Subject {
     }
 
     private LifecycleFlags flags() {
-        Entity<?, ?> actual = actual();
+        var actual = actual();
         checkNotNull(actual);
         return actual.lifecycleFlags();
     }
@@ -126,7 +126,7 @@ public final class EntitySubject extends Subject {
      * Obtains the subject for the state of the entity.
      */
     public ProtoSubject hasStateThat() {
-        Entity<?, ?> entity = actual();
+        var entity = actual();
         if (entity == null) {
             shouldExistButDoesNot();
             return ignoreCheck().about(protos())
