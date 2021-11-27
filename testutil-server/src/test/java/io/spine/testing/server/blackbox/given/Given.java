@@ -98,22 +98,6 @@ public class Given {
                 .build();
     }
 
-    public static BbRegisterCommandDispatcher
-    registerCommandDispatcher(Class<? extends CommandDispatcher> dispatcherName) {
-        return BbRegisterCommandDispatcher.newBuilder()
-                .setDispatcherName(dispatcherName.getName())
-                .build();
-    }
-
-    public static BbEventDispatcherRegistered
-    eventDispatcherRegistered(Class<? extends EventDispatcher> dispatcherClass) {
-        var name = dispatcherClass.getName();
-        var result = BbEventDispatcherRegistered.newBuilder()
-                .setDispatcherName(name)
-                .build();
-        return result;
-    }
-
     public static BbCreateProject createProject() {
         return createProject(newProjectId());
     }
