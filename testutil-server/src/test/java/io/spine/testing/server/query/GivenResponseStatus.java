@@ -44,14 +44,14 @@ final class GivenResponseStatus {
         return status;
     }
 
-    public static Status error() {
+    static Status error() {
         var status = Status.newBuilder()
                 .setError(Error.getDefaultInstance())
                 .vBuild();
         return status;
     }
 
-    public static Status rejection() {
+    static Status rejection() {
         var status = Status.newBuilder()
                 .setRejection(Event.getDefaultInstance())
                 .vBuild();
