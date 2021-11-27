@@ -34,7 +34,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventOrigin;
@@ -64,15 +63,15 @@ public class TestEventFactory extends EventFactory {
     }
 
     public static TestEventFactory newInstance(Message producerId, Class<?> testSuiteClass) {
-        Any id = toAny(producerId);
+        var id = toAny(producerId);
         return newInstance(id, new TestActorRequestFactory(testSuiteClass));
     }
 
     public static TestEventFactory newInstance(Message producerId,
                                                TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        Any id = toAny(producerId);
-        CommandEnvelope cmd = CommandEnvelope.of(requestFactory.generateCommand());
+        var id = toAny(producerId);
+        var cmd = CommandEnvelope.of(requestFactory.generateCommand());
         return new TestEventFactory(cmd, id);
     }
 
@@ -93,18 +92,16 @@ public class TestEventFactory extends EventFactory {
     public Event createEvent(EventMessage message, @Nullable Version version, Timestamp atTime) {
         checkNotNull(message);
         checkNotNull(atTime);
-        Event event = version != null
-                      ? createEvent(message, version)
-                      : createEvent(message);
-        EventContext context =
-                event.context()
-                     .toBuilder()
-                     .setTimestamp(atTime)
-                     .build();
-        Event result =
-                event.toBuilder()
-                     .setContext(context)
-                     .build();
+        var event = version != null
+                    ? createEvent(message, version)
+                    : createEvent(message);
+        var context = event.context()
+                .toBuilder()
+                .setTimestamp(atTime)
+                .build();
+        var result = event.toBuilder()
+                .setContext(context)
+                .build();
         return result;
     }
 }

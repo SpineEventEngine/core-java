@@ -75,11 +75,11 @@ public final class Assertions {
                         Class<? extends M>...classes) {
         checkNotNull(collection);
         checkNotNull(classes);
-        for (Class<? extends M> cls : classes) {
+        for (var cls : classes) {
             assertNotNull(cls);
             @SuppressWarnings("unchecked") // OK for tests.
-            Class<M> messageType = (Class<M>) cls;
-            C messageClass = func.apply(messageType);
+            var messageType = (Class<M>) cls;
+            var messageClass = func.apply(messageType);
             assertTrue(collection.contains(messageClass));
         }
     }

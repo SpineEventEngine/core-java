@@ -85,7 +85,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         if (actual == null) {
             failWithoutActual(simpleFact("message list should not be equal to null"));
         } else {
-            int actualSize = size(actual);
+            var actualSize = size(actual);
             check("size()").that(actualSize).isEqualTo(expectedSize);
         }
     }
@@ -113,7 +113,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
         }
-        int size = size(messages());
+        var size = size(messages());
         if (index >= size(messages())) {
             failWithActual(
                     fact(MESSAGE_COUNT.value, size),
@@ -123,7 +123,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
                                 .that(Empty.getDefaultInstance());
         }
         T outerObject = Iterables.get(messages(), index);
-        Message unpacked = AnyPacker.unpack(outerObject.getMessage());
+        var unpacked = AnyPacker.unpack(outerObject.getMessage());
         return ProtoTruth.assertThat(unpacked);
     }
 
@@ -169,7 +169,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      * @return an immutable copy of the {@code actual} messages
      */
     public ImmutableList<T> actual() {
-        Iterable<T> messages = requireNonNull(actual);
+        var messages = requireNonNull(actual);
         return ImmutableList.copyOf(messages);
     }
 

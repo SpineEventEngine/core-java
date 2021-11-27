@@ -110,13 +110,13 @@ public final class QueryResultSubject
         checkNotNull(queryResponse, "`QueryResponse` must never be `null`.");
 
         Iterable<EntityState<?>> entityStates = extractEntityStates(queryResponse);
-        QueryResultSubject subject = assertAbout(queryResult()).that(entityStates);
+        var subject = assertAbout(queryResult()).that(entityStates);
         subject.initChildSubjects(queryResponse);
         return subject;
     }
 
     private void initChildSubjects(QueryResponse queryResponse) {
-        Status status = extractStatus(queryResponse);
+        var status = extractStatus(queryResponse);
         statusSubject = check("getResponse().getStatus()").about(responseStatus())
                                                           .that(status);
 
@@ -154,9 +154,9 @@ public final class QueryResultSubject
     public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
         EntityState<?> state = actual.iterator()
-                                  .next();
-        ProtoSubject subject = check("singleEntityState()").about(protos())
-                                                           .that(state);
+                                     .next();
+        var subject = check("singleEntityState()").about(protos())
+                                                  .that(state);
         return subject;
     }
 
