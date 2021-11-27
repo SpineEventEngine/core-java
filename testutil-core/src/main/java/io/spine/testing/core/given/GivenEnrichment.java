@@ -26,7 +26,6 @@
 
 package io.spine.testing.core.given;
 
-import com.google.protobuf.Any;
 import io.spine.core.Enrichment;
 
 import static io.spine.base.Identifier.newUuid;
@@ -50,13 +49,13 @@ public final class GivenEnrichment {
      * @return a new enrichment instance
      */
     public static Enrichment withOneAttribute() {
-        String key = newUuid();
-        Any value = pack(toMessage(newUuid()));
-        Enrichment result = Enrichment.newBuilder()
-                                      .setContainer(Enrichment.Container.newBuilder()
-                                                                        .putItems(key, value)
-                                                                        .build())
-                                      .build();
+        var key = newUuid();
+        var value = pack(toMessage(newUuid()));
+        var result = Enrichment.newBuilder()
+                .setContainer(Enrichment.Container.newBuilder()
+                                      .putItems(key, value)
+                                      .build())
+                .build();
         return result;
     }
 }
