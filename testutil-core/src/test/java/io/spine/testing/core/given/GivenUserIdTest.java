@@ -44,11 +44,10 @@ class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
     @Test
     @DisplayName("create UserId by string")
     void createByString() {
-        String testIdString = "12345";
-        UserId userId = GivenUserId.of(testIdString);
+        var testIdString = "12345";
+        var userId = GivenUserId.of(testIdString);
 
-        UserId expected = UserId
-                .newBuilder()
+        var expected = UserId.newBuilder()
                 .setValue(testIdString)
                 .build();
 

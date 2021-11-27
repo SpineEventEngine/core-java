@@ -26,7 +26,6 @@
 
 package io.spine.testing.core.given;
 
-import io.spine.core.Version;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,9 +43,9 @@ class GivenVersionTest extends UtilityClassTest<GivenVersion> {
     @Test
     @DisplayName("generate version by number")
     void generateByNumber() {
-        int number = random(100);
+        var number = random(100);
 
-        Version version = GivenVersion.withNumber(number);
+        var version = GivenVersion.withNumber(number);
 
         assertEquals(number, version.getNumber());
     }
