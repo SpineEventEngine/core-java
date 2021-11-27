@@ -77,7 +77,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     private static Path rawModelPath(Project project) {
-        Path rootDir = project.getRootDir().toPath();
+        var rootDir = project.getRootDir().toPath();
         var result = rootDir.resolve(RELATIVE_RAW_MODEL_PATH);
         return result;
     }

@@ -127,7 +127,7 @@ final class BlackBoxSetup {
      * @return list of events posted to {@link EventBus}
      */
     List<Event> postEvents(Object producerId, EventMessage first, EventMessage... rest) {
-        List<EventMessage> eventMessages = asList(first, rest);
+        var eventMessages = asList(first, rest);
         var customFactory = newEventFactory(producerId);
         var events = toEvents(eventMessages, customFactory);
         eventBus.post(events, observer);

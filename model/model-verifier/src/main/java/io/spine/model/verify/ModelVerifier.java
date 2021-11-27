@@ -109,8 +109,7 @@ final class ModelVerifier implements Logging {
         _debug().log("Initializing `ClassLoader` for URLs: `%s`.",
                      lazy(() -> deepToString(compiledCodePath)));
         try {
-            ClassLoader projectClassloader = project.getBuildscript()
-                                                    .getClassLoader();
+            var projectClassloader = project.getBuildscript().getClassLoader();
             @SuppressWarnings("ClassLoaderInstantiation") // Caught exception.
             var result = new URLClassLoader(compiledCodePath, projectClassloader);
             return result;
@@ -154,7 +153,7 @@ final class ModelVerifier implements Logging {
             if (!directory.isPresent()) {
                 return null;
             }
-            File dir = directory.getAsFile().get();
+            var dir = directory.getAsFile().get();
             var uri = dir.toURI();
             try {
                 var url = uri.toURL();

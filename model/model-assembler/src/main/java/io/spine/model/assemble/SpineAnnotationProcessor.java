@@ -189,7 +189,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
      *         the option is not present in the processor or has no value (i.e. is a flag option)
      */
     protected final Optional<String> getOption(String optName) {
-        String optValue = options.get(optName);
+        var optValue = options.get(optName);
         return Optional.ofNullable(optValue);
     }
 

@@ -757,10 +757,10 @@ abstract class BlackBoxTest<T extends BlackBox> {
             var events = context.assertEvents()
                                 .withType(BbProjectCreated.class);
             events.hasSize(1);
-            ActorContext context = events.actual()
-                                         .get(0)
-                                         .context()
-                                         .actorContext();
+            var context = events.actual()
+                                .get(0)
+                                .context()
+                                .actorContext();
             var expected = ActorContext.newBuilder()
                     .setActor(actor)
                     .setZoneId(zoneId)
@@ -783,10 +783,10 @@ abstract class BlackBoxTest<T extends BlackBox> {
             var events = context.assertEvents()
                                 .withType(BbProjectCreated.class);
             events.hasSize(1);
-            ActorContext context = events.actual()
-                                         .get(0)
-                                         .context()
-                                         .actorContext();
+            var context = events.actual()
+                                .get(0)
+                                .context()
+                                .actorContext();
             var expected = ActorContext.newBuilder()
                     .setZoneId(zoneId)
                     .buildPartial();

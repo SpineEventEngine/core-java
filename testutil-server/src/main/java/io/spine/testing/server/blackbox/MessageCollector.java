@@ -98,10 +98,9 @@ abstract class MessageCollector<I extends SignalId,
      */
     public final ImmutableList<T> ofTenant(TenantId tenantId) {
         checkNotNull(tenantId);
-        ImmutableList<T> result =
-                outerObjects.stream()
-                            .filter(m -> tenantId.equals(m.tenant()))
-                            .collect(toImmutableList());
+        var result = outerObjects.stream()
+                .filter(m -> tenantId.equals(m.tenant()))
+                .collect(toImmutableList());
         return result;
     }
 }

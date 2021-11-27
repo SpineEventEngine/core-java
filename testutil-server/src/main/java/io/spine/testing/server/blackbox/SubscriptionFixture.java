@@ -26,9 +26,7 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.IterableOfProtosSubject;
-import com.google.common.truth.extensions.proto.ProtoTruth;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
@@ -45,6 +43,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.client.SubscriptionUpdate.UpdateCase.ENTITY_UPDATES;
 import static io.spine.client.SubscriptionUpdate.UpdateCase.EVENT_UPDATES;
 import static java.util.Collections.synchronizedList;
@@ -81,11 +80,10 @@ public final class SubscriptionFixture {
      * <p>If messages of other kind were received instead, the returned iterable would be empty.
      */
     public IterableOfProtosSubject<EventMessage> assertEventMessages() {
-        ImmutableList<EventMessage> eventMessages =
-                updates.stream()
-                       .flatMap(SubscriptionFixture::toEventMessages)
-                       .collect(toImmutableList());
-        IterableOfProtosSubject<EventMessage> subject = ProtoTruth.assertThat(eventMessages);
+        var eventMessages = updates.stream()
+                .flatMap(SubscriptionFixture::toEventMessages)
+                .collect(toImmutableList());
+        var subject = assertThat(eventMessages);
         return subject;
     }
 
@@ -95,11 +93,10 @@ public final class SubscriptionFixture {
      * <p>If messages of other kind were received instead, the returned iterable would be empty.
      */
     public IterableOfProtosSubject<EntityState<?>> assertEntityStates() {
-        ImmutableList<EntityState<?>> states =
-                updates.stream()
-                       .flatMap(SubscriptionFixture::toEntityState)
-                       .collect(toImmutableList());
-        IterableOfProtosSubject<EntityState<?>> subject = ProtoTruth.assertThat(states);
+        var states = updates.stream()
+                .flatMap(SubscriptionFixture::toEntityState)
+                .collect(toImmutableList());
+        var subject = assertThat(states);
         return subject;
     }
 

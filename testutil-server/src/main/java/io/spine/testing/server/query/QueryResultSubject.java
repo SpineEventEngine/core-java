@@ -153,8 +153,7 @@ public final class QueryResultSubject
      */
     public ProtoSubject containsSingleEntityStateThat() {
         assertContainsSingleItem();
-        EntityState<?> state = actual.iterator()
-                                     .next();
+        var state = actual.iterator().next();
         var subject = check("singleEntityState()").about(protos())
                                                   .that(state);
         return subject;

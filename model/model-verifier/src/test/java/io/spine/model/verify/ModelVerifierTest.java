@@ -204,9 +204,9 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve compilation destination directory from task")
     void getCompilationDestDir() throws MalformedURLException {
-        JavaCompile compileTask = actualProject().getTasks()
-                                                 .withType(JavaCompile.class)
-                                                 .getByName(compileJava.name());
+        var compileTask = actualProject().getTasks()
+                                         .withType(JavaCompile.class)
+                                         .getByName(compileJava.name());
         var dest = TempDir.forClass(getClass());
         compileTask.getDestinationDirectory().set(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
@@ -217,9 +217,9 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve `null` if destination directory is null")
     void getNullDestDir() {
-        JavaCompile compileTask = actualProject().getTasks()
-                                                 .withType(JavaCompile.class)
-                                                 .getByName(compileJava.name());
+        var compileTask = actualProject().getTasks()
+                                         .withType(JavaCompile.class)
+                                         .getByName(compileJava.name());
         compileTask.getDestinationDirectory().set((File) null);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));
