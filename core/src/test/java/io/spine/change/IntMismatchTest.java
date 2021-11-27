@@ -41,7 +41,7 @@ import static io.spine.change.IntMismatch.unpackNewValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("IntMismatch should")
+@DisplayName("`IntMismatch` should")
 class IntMismatchTest extends UtilityClassTest<IntMismatch> {
 
     private static final int EXPECTED = 1986;
@@ -54,13 +54,13 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
     }
 
     @Nested
-    @DisplayName("create ValueMismatch instance")
+    @DisplayName("create `ValueMismatch` instance")
     class Create {
 
         @Test
         @DisplayName("from given int values")
         void withInts() {
-            ValueMismatch mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -71,8 +71,8 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
         @Test
         @DisplayName("for expected zero amount")
         void forExpectedZero() {
-            int expected = 0;
-            ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+            var expected = 0;
+            var mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -81,10 +81,10 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
         }
 
         @Test
-        @DisplayName("for expected non zero amount")
+        @DisplayName("for expected non-zero amount")
         void forExpectedNonZero() {
-            int actual = 0;
-            ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+            var actual = 0;
+            var mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -95,8 +95,8 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
         @Test
         @DisplayName("for unexpected int value")
         void forUnexpectedInt() {
-            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE,
-                                                     VERSION);
+            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE,
+                                           VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -108,33 +108,33 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        int value = 5;
+        var value = 5;
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("if given non-int ValueMismatch, fail to unpack")
+    @DisplayName("if given non-int `ValueMismatch`, fail to unpack")
     class FailToUnpack {
 
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual int")
         void actualWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }

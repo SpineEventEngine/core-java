@@ -77,7 +77,7 @@ public final class Responses {
      */
     public static Status rejectedBecauseOf(Event rejection) {
         checkNotDefaultArg(rejection);
-        Status status = Status.newBuilder()
+        var status = Status.newBuilder()
                 .setRejection(rejection)
                 .build();
         return status;

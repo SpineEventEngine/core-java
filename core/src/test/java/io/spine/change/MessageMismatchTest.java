@@ -40,7 +40,7 @@ import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("MessageMismatch should")
+@DisplayName("`MessageMismatch` should")
 class MessageMismatchTest extends UtilityClassTest<MessageMismatch> {
 
     private static final StringValue EXPECTED = StringValue.of("expected_value");
@@ -54,13 +54,13 @@ class MessageMismatchTest extends UtilityClassTest<MessageMismatch> {
     }
 
     @Nested
-    @DisplayName("create ValueMismatch instance")
+    @DisplayName("create `ValueMismatch` instance")
     class Create {
 
         @Test
         @DisplayName("for expected default value")
         void forExpectedDefault() {
-            ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -71,7 +71,7 @@ class MessageMismatchTest extends UtilityClassTest<MessageMismatch> {
         @Test
         @DisplayName("for unexpected default when clearing")
         void forUnexpectedDefaultWhenClearing() {
-            ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
+            var mismatch = expectedNotDefault(EXPECTED, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
 
@@ -87,7 +87,7 @@ class MessageMismatchTest extends UtilityClassTest<MessageMismatch> {
         @Test
         @DisplayName("for unexpected default when changing")
         void forUnexpectedDefaultWhenChanging() {
-            ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
+            var mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
 
@@ -101,7 +101,7 @@ class MessageMismatchTest extends UtilityClassTest<MessageMismatch> {
         @Test
         @DisplayName("for unexpected value")
         void forUnexpectedValue() {
-            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));

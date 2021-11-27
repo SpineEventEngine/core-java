@@ -90,7 +90,7 @@ public interface WithTime {
      */
     default LocalDate localDate() {
         @SuppressWarnings("FromTemporalAccessor") // `Instant` does have date info.
-        LocalDate result = LocalDate.from(instant());
+        var result = LocalDate.from(instant());
         return result;
     }
 
@@ -99,7 +99,7 @@ public interface WithTime {
      */
     default LocalDateTime localDateTime() {
         @SuppressWarnings("FromTemporalAccessor") // `Instant` does have date/time info.
-        LocalDateTime result = LocalDateTime.from(instant());
+        var result = LocalDateTime.from(instant());
         return result;
     }
 }

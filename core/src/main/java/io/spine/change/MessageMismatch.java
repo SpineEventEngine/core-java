@@ -26,7 +26,6 @@
 
 package io.spine.change;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -55,7 +54,7 @@ public final class MessageMismatch {
     public static ValueMismatch expectedDefault(Message actual, Message newValue, int version) {
         checkNotNull(actual);
         checkNotNull(newValue);
-        Message expectedDefault = actual.getDefaultInstanceForType();
+        var expectedDefault = actual.getDefaultInstanceForType();
         return of(expectedDefault, actual, newValue, version);
     }
 
@@ -69,7 +68,7 @@ public final class MessageMismatch {
      */
     public static ValueMismatch expectedNotDefault(Message expected, int version) {
         checkNotNull(expected);
-        Message defaultValue = expected.getDefaultInstanceForType();
+        var defaultValue = expected.getDefaultInstanceForType();
         return of(expected, defaultValue, defaultValue, version);
     }
 
@@ -87,7 +86,7 @@ public final class MessageMismatch {
                                                    int version) {
         checkNotNull(expected);
         checkNotNull(newValue);
-        Message defaultValue = expected.getDefaultInstanceForType();
+        var defaultValue = expected.getDefaultInstanceForType();
         return of(expected, defaultValue, newValue, version);
     }
 
@@ -116,8 +115,7 @@ public final class MessageMismatch {
      */
     private static ValueMismatch of(Message expected, Message actual,
                                     Message newValue, int version) {
-        ValueMismatch result = ValueMismatch
-                .newBuilder()
+        var result = ValueMismatch.newBuilder()
                 .setExpected(pack(expected))
                 .setActual(pack(actual))
                 .setNewValue(pack(newValue))
@@ -134,8 +132,8 @@ public final class MessageMismatch {
      */
     public static Message unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any any = mismatch.getExpected();
-        Message result = unpack(any);
+        var any = mismatch.getExpected();
+        var result = unpack(any);
         return result;
     }
 
@@ -147,8 +145,8 @@ public final class MessageMismatch {
      */
     public static Message unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any any = mismatch.getActual();
-        Message result = unpack(any);
+        var any = mismatch.getActual();
+        var result = unpack(any);
         return result;
     }
 
@@ -160,8 +158,8 @@ public final class MessageMismatch {
      */
     public static Message unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any any = mismatch.getNewValue();
-        Message result = unpack(any);
+        var any = mismatch.getNewValue();
+        var result = unpack(any);
         return result;
     }
 }

@@ -42,7 +42,7 @@ class SignalTest {
     @Test
     @DisplayName("verify type of the enclosed message")
     void checkType() {
-        Event event = stubEvent();
+        var event = stubEvent();
 
         assertThat(event.is(ProjectCreated.class))
                 .isTrue();
@@ -56,16 +56,13 @@ class SignalTest {
      * Creates a stub instance of {@code Event} with the type {@link ProjectCreated}.
      */
     private Event stubEvent() {
-        ProjectId project = ProjectId
-                .newBuilder()
+        var project = ProjectId.newBuilder()
                 .setId(getClass().getName())
                 .build();
-        ProjectCreated message = ProjectCreated
-                .newBuilder()
+        var message = ProjectCreated.newBuilder()
                 .setProjectId(project)
                 .build();
-        Event event = Event
-                .newBuilder()
+        var event = Event.newBuilder()
                 .setMessage(AnyPacker.pack(message))
                 .build();
         return event;

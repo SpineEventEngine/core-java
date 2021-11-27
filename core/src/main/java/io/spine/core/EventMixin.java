@@ -77,7 +77,7 @@ interface EventMixin
 
     @Override
     default Optional<Origin> origin() {
-        Origin parent = context().getPastMessage();
+        var parent = context().getPastMessage();
         return Optional.of(parent)
                        .filter(Messages::isNotDefault);
     }
@@ -107,8 +107,8 @@ interface EventMixin
      * @return {@code true} if the given event is a rejection, {@code false} otherwise
      */
     default boolean isRejection() {
-        EventContext context = context();
-        boolean result = context.hasRejection() || !isDefault(context.getRejection());
+        var context = context();
+        var result = context.hasRejection() || !isDefault(context.getRejection());
         return result;
     }
 
@@ -177,8 +177,8 @@ interface EventMixin
     @Override
     @Internal
     default ActorContext actorContext() {
-        EventContext eventContext = context();
-        ActorContext result = eventContext.actorContext();
+        var eventContext = context();
+        var result = eventContext.actorContext();
         return result;
     }
 

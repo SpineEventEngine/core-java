@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
                    "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
-@DisplayName("BooleanMismatch should")
+@DisplayName("`BooleanMismatch` should")
 class BooleanMismatchTest extends UtilityClassTest<BooleanMismatch> {
 
     private static final int VERSION = 2;
@@ -51,16 +51,16 @@ class BooleanMismatchTest extends UtilityClassTest<BooleanMismatch> {
     }
 
     @Nested
-    @DisplayName("create ValueMismatch instance")
+    @DisplayName("create `ValueMismatch` instance")
     class Create {
 
         @Test
         @DisplayName("for `expectedFalse` case")
         void forExpectedFalse() {
-            boolean expected = false;
-            boolean actual = true;
-            boolean newValue = true;
-            ValueMismatch mismatch = expectedFalse(VERSION);
+            var expected = false;
+            var actual = true;
+            var newValue = true;
+            var mismatch = expectedFalse(VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -71,10 +71,10 @@ class BooleanMismatchTest extends UtilityClassTest<BooleanMismatch> {
         @Test
         @DisplayName("for `expectedTrue` case")
         void forExpectedTrue() {
-            boolean expected = true;
-            boolean actual = false;
-            boolean newValue = false;
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var expected = true;
+            var actual = false;
+            var newValue = false;
+            var mismatch = expectedTrue(VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -84,27 +84,27 @@ class BooleanMismatchTest extends UtilityClassTest<BooleanMismatch> {
     }
 
     @Nested
-    @DisplayName("if given non-boolean ValueMismatch, fail to unpack")
+    @DisplayName("if given non-boolean `ValueMismatch`, fail to unpack")
     class FailToUnpack {
 
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            var mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual boolean")
         void actualWithWrongType() {
-            ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            var mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            var mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));
         }
     }

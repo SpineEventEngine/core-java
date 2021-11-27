@@ -26,7 +26,6 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Message;
 import io.spine.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -50,14 +49,14 @@ public final class Acks {
      */
     public static CommandId toCommandId(Ack ack) {
         checkNotNull(ack);
-        Message unpacked = AnyPacker.unpack(ack.getMessageId());
+        var unpacked = AnyPacker.unpack(ack.getMessageId());
         if (!(unpacked instanceof CommandId)) {
             throw newIllegalArgumentException(
                     "Unable to get a command ID from the acknowledgement: `%s`.",
                     shortDebugString(ack)
             );
         }
-        CommandId commandId = (CommandId) unpacked;
+        var commandId = (CommandId) unpacked;
         return commandId;
     }
 }

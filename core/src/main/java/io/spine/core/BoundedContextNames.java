@@ -60,8 +60,7 @@ public final class BoundedContextNames {
      */
     public static BoundedContextName newName(String name) {
         checkNotEmptyOrBlank(name, "Empty context name is not allowed.");
-        BoundedContextName result = BoundedContextName
-                .newBuilder()
+        var result = BoundedContextName.newBuilder()
                 .setValue(name)
                 .build();
         checkValid(result);
@@ -78,7 +77,7 @@ public final class BoundedContextNames {
     @Internal
     public static void checkValid(BoundedContextName name) throws IllegalArgumentException {
         checkNotNull(name);
-        String value = name.getValue();
+        var value = name.getValue();
         checkValid(value);
     }
 

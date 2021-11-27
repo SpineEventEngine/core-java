@@ -41,7 +41,7 @@ import static io.spine.change.LongMismatch.unpackNewValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("LongMismatch should")
+@DisplayName("`LongMismatch` should")
 class LongMismatchTest extends UtilityClassTest<LongMismatch> {
 
     private static final long EXPECTED = 1839L;
@@ -54,13 +54,13 @@ class LongMismatchTest extends UtilityClassTest<LongMismatch> {
     }
 
     @Nested
-    @DisplayName("create ValueMismatch instance")
+    @DisplayName("create `ValueMismatch` instance")
     class Create {
 
         @Test
         @DisplayName("from given long values")
         void withLongs() {
-            ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -71,8 +71,8 @@ class LongMismatchTest extends UtilityClassTest<LongMismatch> {
         @Test
         @DisplayName("for expected zero amount")
         void forExpectedZero() {
-            long expected = 0L;
-            ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+            var expected = 0L;
+            var mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -81,10 +81,10 @@ class LongMismatchTest extends UtilityClassTest<LongMismatch> {
         }
 
         @Test
-        @DisplayName("for expected non zero amount")
+        @DisplayName("for expected non-zero amount")
         void forExpectedNonZero() {
-            long actual = 0L;
-            ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+            var actual = 0L;
+            var mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -95,7 +95,7 @@ class LongMismatchTest extends UtilityClassTest<LongMismatch> {
         @Test
         @DisplayName("for unexpected long value")
         void forUnexpectedLong() {
-            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -107,33 +107,33 @@ class LongMismatchTest extends UtilityClassTest<LongMismatch> {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        long value = 1919L;
+        var value = 1919L;
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("if given non-long ValueMismatch, fail to unpack")
+    @DisplayName("if given non-long `ValueMismatch`, fail to unpack")
     class FailToUnpack {
 
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual long")
         void actualWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }

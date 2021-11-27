@@ -89,16 +89,16 @@ public final class LongMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values for a long attribute.
      */
     public static ValueMismatch of(long expected, long actual, long newValue, int version) {
-        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                     .setExpected(toAny(expected))
-                                                     .setActual(toAny(actual))
-                                                     .setNewValue(toAny(newValue))
-                                                     .setVersion(version);
+        var builder = ValueMismatch.newBuilder()
+                .setExpected(toAny(expected))
+                .setActual(toAny(actual))
+                .setNewValue(toAny(newValue))
+                .setVersion(version);
         return builder.build();
     }
 
     private static long unpacked(Any any) {
-        Int64Value unpacked = unpack(any, Int64Value.class);
+        var unpacked = unpack(any, Int64Value.class);
         return unpacked.getValue();
     }
 
@@ -109,7 +109,7 @@ public final class LongMismatch {
      */
     public static long unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any expected = mismatch.getExpected();
+        var expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -120,7 +120,7 @@ public final class LongMismatch {
      */
     public static long unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any actual = mismatch.getActual();
+        var actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -131,7 +131,7 @@ public final class LongMismatch {
      */
     public static long unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any newValue = mismatch.getNewValue();
+        var newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

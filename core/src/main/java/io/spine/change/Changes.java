@@ -55,8 +55,7 @@ public final class Changes {
         checkNewValueNotEmpty(newValue);
         checkNotEqual(previousValue, newValue);
 
-        StringChange result = StringChange
-                .newBuilder()
+        var result = StringChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -73,8 +72,7 @@ public final class Changes {
         checkNotNull(newValue);
         checkNotEqual(previousValue, newValue);
 
-        TimestampChange result = TimestampChange
-                .newBuilder()
+        var result = TimestampChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -89,8 +87,7 @@ public final class Changes {
     public static DoubleChange of(double previousValue, double newValue) {
         checkNotEqual(previousValue, newValue);
 
-        DoubleChange result = DoubleChange
-                .newBuilder()
+        var result = DoubleChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -105,8 +102,7 @@ public final class Changes {
     public static FloatChange of(float previousValue, float newValue) {
         checkNotEqual(previousValue, newValue);
 
-        FloatChange result = FloatChange
-                .newBuilder()
+        var result = FloatChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -121,8 +117,7 @@ public final class Changes {
     public static Int32Change ofInt32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Int32Change result = Int32Change
-                .newBuilder()
+        var result = Int32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -137,8 +132,7 @@ public final class Changes {
     public static Int64Change ofInt64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Int64Change result = Int64Change
-                .newBuilder()
+        var result = Int64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -153,8 +147,7 @@ public final class Changes {
     public static UInt32Change ofUInt32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        UInt32Change result = UInt32Change
-                .newBuilder()
+        var result = UInt32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -169,8 +162,7 @@ public final class Changes {
     public static UInt64Change ofUInt64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        UInt64Change result = UInt64Change
-                .newBuilder()
+        var result = UInt64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -185,8 +177,7 @@ public final class Changes {
     public static SInt32Change ofSInt32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        SInt32Change result = SInt32Change
-                .newBuilder()
+        var result = SInt32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -201,8 +192,7 @@ public final class Changes {
     public static SInt64Change ofSInt64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        SInt64Change result = SInt64Change
-                .newBuilder()
+        var result = SInt64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -217,8 +207,7 @@ public final class Changes {
     public static Fixed32Change ofFixed32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Fixed32Change result = Fixed32Change
-                .newBuilder()
+        var result = Fixed32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -233,8 +222,7 @@ public final class Changes {
     public static Fixed64Change ofFixed64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Fixed64Change result = Fixed64Change
-                .newBuilder()
+        var result = Fixed64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -249,8 +237,7 @@ public final class Changes {
     public static Sfixed32Change ofSfixed32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Sfixed32Change result = Sfixed32Change
-                .newBuilder()
+        var result = Sfixed32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -265,8 +252,7 @@ public final class Changes {
     public static Sfixed64Change ofSfixed64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Sfixed64Change result = Sfixed64Change
-                .newBuilder()
+        var result = Sfixed64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -283,8 +269,7 @@ public final class Changes {
         checkNotNull(newValue);
         checkNotEqual(previousValue, newValue);
 
-        BytesChange result = BytesChange
-                .newBuilder()
+        var result = BytesChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
@@ -299,8 +284,7 @@ public final class Changes {
     public static BooleanChange of(boolean previousValue, boolean newValue) {
         checkNotEqual(previousValue, newValue);
 
-        BooleanChange result = BooleanChange
-                .newBuilder()
+        var result = BooleanChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
                 .vBuild();
