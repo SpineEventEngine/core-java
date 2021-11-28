@@ -28,21 +28,17 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ComparisonOperator;
-import io.spine.query.Direction;
 import io.spine.query.Either;
 import io.spine.query.EntityQuery;
 import io.spine.query.LogicalOperator;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordColumn;
-import io.spine.query.RecordCriterion;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
-import io.spine.query.SortBy;
 import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
 import io.spine.server.entity.EntityRecord;
@@ -84,7 +80,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
     private ToEntityRecordQuery(EntityQuery<I, S, ?> source) {
         super(source.subject()
                     .idType(), EntityRecord.class);
-        Subject<I, S> subject = source.subject();
+        var subject = source.subject();
         this.setIdParameter(subject.id());
         copyPredicates(subject);
         copySorting(source);
@@ -97,7 +93,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
      * of {@code ToEntityRecordQuery}.
      */
     private void copyMask(EntityQuery<I, S, ?> source) {
-        FieldMask mask = source.mask();
+        var mask = source.mask();
         if (mask != null) {
             this.withMask(mask);
         }
@@ -108,7 +104,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
      * of {@code ToEntityRecordQuery}.
      */
     private void copyLimit(EntityQuery<I, S, ?> source) {
-        Integer limit = source.limit();
+        var limit = source.limit();
         if (limit != null) {
             this.limit(limit);
         }
@@ -119,11 +115,11 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
      * of {@code ToEntityRecordQuery}.
      */
     private void copySorting(EntityQuery<I, S, ?> source) {
-        ImmutableList<SortBy<?, S>> sorting = source.sorting();
-        for (SortBy<?, S> sortByOrigin : sorting) {
+        var sorting = source.sorting();
+        for (var sortByOrigin : sorting) {
             RecordColumn<EntityRecord, ?> thisColumn =
                     AsEntityRecordColumn.apply(sortByOrigin.column());
-            Direction direction = sortByOrigin.direction();
+            var direction = sortByOrigin.direction();
             if (ASC == direction) {
                 this.sortAscendingBy(thisColumn);
             } else {
@@ -139,11 +135,11 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
      *         the subject which predicates to copy
      */
     private void copyPredicates(Subject<I, S> subject) {
-        QueryPredicate<S> root = subject.predicate();
+        var root = subject.predicate();
         copyDescendants(this, root);
 
-        ImmutableList<QueryPredicate<S>> children = root.children();
-        for (QueryPredicate<S> child : children) {
+        var children = root.children();
+        for (var child : children) {
             copyDescendants(this, child);
         }
     }
@@ -163,16 +159,16 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
     private RecordQueryBuilder<I, EntityRecord>
     copyDescendants(RecordQueryBuilder<I, EntityRecord> builder,
                     QueryPredicate<S> sourcePredicate) {
-        ImmutableList<SubjectParameter<?, ?, ?>> params = sourcePredicate.allParams();
-        ImmutableList<QueryPredicate<S>> children = sourcePredicate.children();
-        LogicalOperator operator = sourcePredicate.operator();
+        var params = sourcePredicate.allParams();
+        var children = sourcePredicate.children();
+        var operator = sourcePredicate.operator();
         if (operator == LogicalOperator.AND) {
             copyParameters(this, params);
-            for (QueryPredicate<S> child : children) {
+            for (var child : children) {
                 copyDescendants(builder, child);
             }
         } else {
-            ImmutableList<Either<RecordQueryBuilder<I, EntityRecord>>> eitherStatements =
+            var eitherStatements =
                     toEither(params, children);
             builder.either(eitherStatements);
         }
@@ -189,11 +185,11 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
     toEither(Iterable<SubjectParameter<?, ?, ?>> params, Iterable<QueryPredicate<S>> predicates) {
         ImmutableList.Builder<Either<RecordQueryBuilder<I, EntityRecord>>> result =
                 ImmutableList.builder();
-        for (SubjectParameter<?, ?, ?> param : params) {
+        for (var param : params) {
             result.add(builder -> addParameter(builder,
                                                param.column(), param.operator(), param.value()));
         }
-        for (QueryPredicate<S> predicate : predicates) {
+        for (var predicate : predicates) {
             result.add(builder -> copyDescendants(builder, predicate));
         }
         return result.build();
@@ -206,7 +202,7 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
     private RecordQueryBuilder<I, EntityRecord>
     copyParameters(RecordQueryBuilder<I, EntityRecord> builder,
                    Iterable<SubjectParameter<?, ?, ?>> params) {
-        for (SubjectParameter<?, ?, ?> parameter : params) {
+        for (var parameter : params) {
             addParameter(builder, parameter.column(), parameter.operator(), parameter.value());
         }
         return builder;
@@ -229,9 +225,9 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
     private RecordQueryBuilder<I, EntityRecord>
     addParameter(RecordQueryBuilder<I, EntityRecord> builder, Column<?, ?> source,
                  ComparisonOperator operator, Object value) {
-        RecordColumn<EntityRecord, Object> column = AsEntityRecordColumn.apply(source);
+        var column = AsEntityRecordColumn.apply(source);
 
-        RecordCriterion<I, EntityRecord, Object> where = builder.where(column);
+        var where = builder.where(column);
         switch (operator) {
             case EQUALS:
                 return where.is(value);

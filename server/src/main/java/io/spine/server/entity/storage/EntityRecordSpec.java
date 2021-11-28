@@ -29,7 +29,6 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
@@ -100,7 +99,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityRecordSpec<I, S, E> of(EntityClass<E> entityClass) {
         checkNotNull(entityClass);
-        Scanner<S, E> scanner = new Scanner<>(entityClass);
+        var scanner = new Scanner<>(entityClass);
         return new EntityRecordSpec<>(entityClass, scanner.columns());
     }
 
@@ -120,8 +119,8 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     EntityRecordSpec<I, S, E> of(E entity) {
         checkNotNull(entity);
         @SuppressWarnings("unchecked")  // Ensured by the entity type declaration.
-        EntityClass<E> modelClass = (EntityClass<E>) entity.modelClass();
-        Scanner<S, E> scanner = new Scanner<>(modelClass);
+        var modelClass = (EntityClass<E>) entity.modelClass();
+        var scanner = new Scanner<>(modelClass);
         return new EntityRecordSpec<>(modelClass, scanner.columns());
     }
 
@@ -130,7 +129,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
      */
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityRecordSpec<I, S, E> of(Class<E> cls) {
-        EntityClass<E> aClass = asParameterizedEntityClass(cls);
+        var aClass = asParameterizedEntityClass(cls);
         return of(aClass);
     }
 
@@ -174,7 +173,7 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
     @Override
     @SuppressWarnings("unchecked")      /* See the documentation. */
     public I idFromRecord(EntityRecord record) {
-        Any packed = record.getEntityId();
+        var packed = record.getEntityId();
         return (I) Identifier.unpack(packed);
     }
 
@@ -191,11 +190,9 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
 
     @Override
     public ImmutableSet<Column<?, ?>> columns() {
-        ImmutableSet<Column<E, ?>> typed = columns.values();
+        var typed = columns.values();
         ImmutableSet.Builder<Column<?, ?>> builder = ImmutableSet.builder();
-        ImmutableSet<Column<?, ?>> result =
-                builder.addAll(typed)
-                       .build();
+        var result = builder.addAll(typed).build();
         return result;
     }
 
