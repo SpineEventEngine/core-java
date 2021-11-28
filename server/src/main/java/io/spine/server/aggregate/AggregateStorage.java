@@ -37,7 +37,6 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.query.EntityQuery;
-import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
@@ -49,7 +48,6 @@ import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -223,7 +221,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<AggregateHistory> read(I id, int batchSize) {
-        ReadOperation<I, S> op = new ReadOperation<>(this, id, batchSize);
+        var op = new ReadOperation<>(this, id, batchSize);
         return op.perform();
     }
 
@@ -247,11 +245,11 @@ public class AggregateStorage<I, S extends EntityState<I>>
     public void write(I id, AggregateHistory events) {
         checkNotClosedAndArguments(id, events);
 
-        List<Event> eventList = events.getEventList();
+        var eventList = events.getEventList();
         checkArgument(!eventList.isEmpty(), "Event list must not be empty.");
 
-        for (Event event : eventList) {
-            AggregateEventRecord record = newEventRecord(id, event);
+        for (var event : eventList) {
+            var record = newEventRecord(id, event);
             writeEventRecord(id, record);
         }
         if (events.hasSnapshot()) {
@@ -273,8 +271,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
     void writeEvent(I id, Event event) {
         checkNotClosedAndArguments(id, event);
 
-        Event eventWithoutEnrichments = event.clearEnrichments();
-        AggregateEventRecord record = newEventRecord(id, eventWithoutEnrichments);
+        var eventWithoutEnrichments = event.clearEnrichments();
+        var record = newEventRecord(id, eventWithoutEnrichments);
         writeEventRecord(id, record);
     }
 
@@ -289,7 +287,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
     void writeSnapshot(I aggregateId, Snapshot snapshot) {
         checkNotClosedAndArguments(aggregateId, snapshot);
 
-        AggregateEventRecord record = newEventRecord(aggregateId, snapshot);
+        var record = newEventRecord(aggregateId, snapshot);
         writeEventRecord(aggregateId, record);
     }
 
@@ -323,8 +321,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
      */
     protected Iterator<EntityRecord> readStates(TargetFilters filters, ResponseFormat format) {
         ensureStatesQueryable();
-        RecordQuery<I, EntityRecord> query = convert(filters, format, stateStorage.recordSpec());
-        Iterator<EntityRecord> result = stateStorage.readAll(query);
+        var query = convert(filters, format, stateStorage.recordSpec());
+        var result = stateStorage.readAll(query);
         return result;
     }
 
@@ -340,9 +338,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
      */
     protected Iterator<EntityRecord> readStates(ResponseFormat format) {
         ensureStatesQueryable();
-        RecordQuery<I, EntityRecord> query =
-                QueryConverter.newQuery(stateStorage.recordSpec(), format);
-        Iterator<EntityRecord> result = stateStorage.readAll(query);
+        var query = QueryConverter.newQuery(stateStorage.recordSpec(), format);
+        var result = stateStorage.readAll(query);
         return result;
     }
 
@@ -355,8 +352,8 @@ public class AggregateStorage<I, S extends EntityState<I>>
      */
     protected Iterator<EntityRecord> readStates(EntityQuery<I, S, ?> query) {
         ensureStatesQueryable();
-        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
-        Iterator<EntityRecord> result = stateStorage.readAll(recordQuery);
+        var recordQuery = ToEntityRecordQuery.transform(query);
+        var result = stateStorage.readAll(recordQuery);
         return result;
     }
 
@@ -377,15 +374,14 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
-        EntityRecord record = AggregateRecords.newStateRecord(aggregate, queryingEnabled);
-        EntityRecordWithColumns<I> result =
-                EntityRecordWithColumns.create(aggregate, record);
+        var record = AggregateRecords.newStateRecord(aggregate, queryingEnabled);
+        var result = EntityRecordWithColumns.create(aggregate, record);
         stateStorage.write(result);
     }
 
     protected void writeAll(Aggregate<I, ?, ?> aggregate,
                             ImmutableList<AggregateHistory> historySegments) {
-        for (AggregateHistory history : historySegments) {
+        for (var history : historySegments) {
             write(aggregate.id(), history);
         }
         writeState(aggregate);

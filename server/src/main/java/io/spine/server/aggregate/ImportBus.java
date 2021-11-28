@@ -131,7 +131,7 @@ public final class ImportBus
      */
     @Override
     protected void store(Iterable<Event> events) {
-        TenantId tenantId = tenantOf(events);
+        var tenantId = tenantOf(events);
         tenantIndex.keep(tenantId);
     }
 

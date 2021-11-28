@@ -26,17 +26,11 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.string.Stringifiers;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -73,22 +67,20 @@ final class AggregateRecords {
         checkArgument(event.hasContext(), "Event context must be set.");
         checkArgument(event.hasMessage(), "Event message must be set.");
 
-        String eventIdStr = Identifier.toString(event.getId());
+        var eventIdStr = Identifier.toString(event.getId());
         checkNotEmptyOrBlank(eventIdStr, "Event ID cannot be empty or blank.");
 
-        EventContext context = event.context();
-        Timestamp timestamp = checkValid(context.getTimestamp());
-        Any packedId = Identifier.pack(aggregateId);
+        var context = event.context();
+        var timestamp = checkValid(context.getTimestamp());
+        var packedId = Identifier.pack(aggregateId);
 
-        AggregateEventRecordId recordId = eventRecordId(eventIdStr);
-        AggregateEventRecord result =
-                AggregateEventRecord
-                        .newBuilder()
-                        .setId(recordId)
-                        .setAggregateId(packedId)
-                        .setTimestamp(timestamp)
-                        .setEvent(event)
-                        .vBuild();
+        var recordId = eventRecordId(eventIdStr);
+        var result = AggregateEventRecord.newBuilder()
+                .setId(recordId)
+                .setAggregateId(packedId)
+                .setTimestamp(timestamp)
+                .setEvent(event)
+                .vBuild();
         return result;
     }
 
@@ -106,22 +98,19 @@ final class AggregateRecords {
     static <I> AggregateEventRecord newEventRecord(I aggregateId, Snapshot snapshot) {
         checkNotNull(aggregateId);
         checkNotNull(snapshot);
-        Timestamp value = checkValid(snapshot.getTimestamp());
+        var value = checkValid(snapshot.getTimestamp());
 
-        String stringId = Stringifiers.toString(aggregateId);
-        String snapshotTimestamp = Timestamps.toString(snapshot.getTimestamp());
-        String snapshotColumnName = AggregateEventRecordColumn.snapshot.name()
-                                                                       .value();
-        String snapshotId = format("%s_%s_%s", snapshotColumnName, stringId, snapshotTimestamp);
-        AggregateEventRecordId recordId = eventRecordId(snapshotId);
-        AggregateEventRecord result =
-                AggregateEventRecord
-                        .newBuilder()
-                        .setId(recordId)
-                        .setAggregateId(Identifier.pack(aggregateId))
-                        .setTimestamp(value)
-                        .setSnapshot(snapshot)
-                        .vBuild();
+        var stringId = Stringifiers.toString(aggregateId);
+        var snapshotTimestamp = Timestamps.toString(snapshot.getTimestamp());
+        var snapshotColumnName = AggregateEventRecordColumn.snapshot.name().value();
+        var snapshotId = format("%s_%s_%s", snapshotColumnName, stringId, snapshotTimestamp);
+        var recordId = eventRecordId(snapshotId);
+        var result = AggregateEventRecord.newBuilder()
+                .setId(recordId)
+                .setAggregateId(Identifier.pack(aggregateId))
+                .setTimestamp(value)
+                .setSnapshot(snapshot)
+                .vBuild();
         return result;
     }
 
@@ -140,17 +129,16 @@ final class AggregateRecords {
     static <I> EntityRecord newStateRecord(Aggregate<I, ?, ?> aggregate, boolean includeState) {
         checkNotNull(aggregate);
 
-        LifecycleFlags flags = aggregate.lifecycleFlags();
-        I id = aggregate.id();
-        Version version = aggregate.version();
+        var flags = aggregate.lifecycleFlags();
+        var id = aggregate.id();
+        var version = aggregate.version();
 
-        EntityRecord.Builder builder =
-                EntityRecord.newBuilder()
-                            .setEntityId(Identifier.pack(id))
-                            .setLifecycleFlags(flags)
-                            .setVersion(version);
+        var builder = EntityRecord.newBuilder()
+                .setEntityId(Identifier.pack(id))
+                .setLifecycleFlags(flags)
+                .setVersion(version);
         if (includeState) {
-            EntityState<I> state = aggregate.state();
+            var state = aggregate.state();
             builder.setState(AnyPacker.pack(state));
         }
         return builder.vBuild();

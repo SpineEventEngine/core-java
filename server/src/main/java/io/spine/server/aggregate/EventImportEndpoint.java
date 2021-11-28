@@ -63,12 +63,11 @@ final class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected DispatchOutcome invokeDispatcher(A aggregate) {
-        Event event = envelope().outerObject();
-        Success.Builder success = Success.newBuilder();
+        var event = envelope().outerObject();
+        var success = Success.newBuilder();
         success.getProducedEventsBuilder()
                .addEvent(event);
-        DispatchOutcome outcome = DispatchOutcome
-                .newBuilder()
+        var outcome = DispatchOutcome.newBuilder()
                 .setPropagatedSignal(event.messageId())
                 .setSuccess(success)
                 .vBuild();

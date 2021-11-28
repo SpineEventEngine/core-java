@@ -26,14 +26,11 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.base.EventMessage;
 import io.spine.server.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.type.EventEnvelope;
-import io.spine.validate.ConstraintViolation;
 import io.spine.validate.Validate;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,8 +44,8 @@ final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
     @Override
     public Optional<MessageInvalid> validate(EventEnvelope event) {
         checkNotNull(event);
-        EventMessage eventMessage = event.message();
-        List<ConstraintViolation> violations = Validate.violationsOf(eventMessage);
+        var eventMessage = event.message();
+        var violations = Validate.violationsOf(eventMessage);
         if (violations.isEmpty()) {
             return Optional.empty();
         }

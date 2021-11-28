@@ -28,16 +28,11 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
-import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.Version;
 import io.spine.logging.Logging;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.ProducedEvents;
-import io.spine.server.dispatch.Success;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
@@ -45,7 +40,6 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.type.SignalEnvelope;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Functions.identity;
@@ -75,29 +69,28 @@ abstract class AggregateEndpoint<I,
 
     @Override
     public final void dispatchTo(I aggregateId) {
-        A aggregate = loadOrCreate(aggregateId);
-        LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
-        DispatchOutcome outcome = handleAndApplyEvents(aggregate);
+        var aggregate = loadOrCreate(aggregateId);
+        var flagsBefore = aggregate.lifecycleFlags();
+        var outcome = handleAndApplyEvents(aggregate);
         if (outcome.hasSuccess()) {
             storeAndPost(aggregate, outcome, flagsBefore);
         } else if (outcome.hasError()) {
-            Error error = outcome.getError();
+            var error = outcome.getError();
             repository().lifecycleOf(aggregateId)
                         .onDispatchingFailed(envelope(), error);
         }
     }
 
     private void storeAndPost(A aggregate, DispatchOutcome outcome, LifecycleFlags flagsBefore) {
-        Success success = outcome.getSuccess();
-        LifecycleFlags flagsAfter = aggregate.lifecycleFlags();
-        boolean withEvents = success.hasEvents();
+        var success = outcome.getSuccess();
+        var flagsAfter = aggregate.lifecycleFlags();
+        var withEvents = success.hasEvents();
         if (withEvents ||
                 (flagsAfter != null && !flagsBefore.equals(flagsAfter))) {
             store(aggregate);
         }
         if (withEvents) {
-            List<Event> events = success.getProducedEvents()
-                                        .getEventList();
+            var events = success.getProducedEvents().getEventList();
             post(events);
         } else if (success.hasRejection()) {
             post(success.getRejection());
@@ -121,8 +114,8 @@ abstract class AggregateEndpoint<I,
 
     @CanIgnoreReturnValue
     final DispatchOutcome handleAndApplyEvents(A aggregate) {
-        DispatchOutcome outcome = invokeDispatcher(aggregate);
-        Success successfulOutcome = outcome.getSuccess();
+        var outcome = invokeDispatcher(aggregate);
+        var successfulOutcome = outcome.getSuccess();
         return successfulOutcome.hasEvents()
                ? applyProducedEvents(aggregate, outcome)
                : outcome;
@@ -139,12 +132,12 @@ abstract class AggregateEndpoint<I,
      *         the erroneous outcome of applying an event
      */
     private DispatchOutcome applyProducedEvents(A aggregate, DispatchOutcome commandOutcome) {
-        List<Event> events = commandOutcome.getSuccess()
-                                           .getProducedEvents()
-                                           .getEventList();
+        var events = commandOutcome.getSuccess()
+                                   .getProducedEvents()
+                                   .getEventList();
         AggregateTransaction<I, ?, ?> tx = startTransaction(aggregate);
-        int snapshotTrigger = repository().snapshotTrigger();
-        BatchDispatchOutcome batchDispatchOutcome = aggregate.apply(events, snapshotTrigger);
+        var snapshotTrigger = repository().snapshotTrigger();
+        var batchDispatchOutcome = aggregate.apply(events, snapshotTrigger);
         if (batchDispatchOutcome.getSuccessful()) {
             tx.commitIfActive();
             return correctProducedEvents(commandOutcome, batchDispatchOutcome);
@@ -167,20 +160,19 @@ abstract class AggregateEndpoint<I,
      */
     private static DispatchOutcome
     correctProducedEvents(DispatchOutcome commandOutcome, BatchDispatchOutcome eventDispatch) {
-        DispatchOutcome.Builder correctedCommandOutcome = commandOutcome.toBuilder();
-        ProducedEvents.Builder eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
-                                                                      .getProducedEventsBuilder();
+        var correctedCommandOutcome = commandOutcome.toBuilder();
+        var eventsBuilder = correctedCommandOutcome.getSuccessBuilder()
+                                                   .getProducedEventsBuilder();
         Map<EventId, Event.Builder> correctedEvents = eventsBuilder
                 .getEventBuilderList()
                 .stream()
                 .collect(toImmutableMap(Event.Builder::getId, identity()));
-        for (DispatchOutcome outcome : eventDispatch.getOutcomeList()) {
-            Any signalId = outcome.getPropagatedSignal()
+        for (var outcome : eventDispatch.getOutcomeList()) {
+            var signalId = outcome.getPropagatedSignal()
                                   .getId();
-            EventId eventId = unpack(signalId, EventId.class);
-            Event.Builder event = checkNotNull(correctedEvents.get(eventId));
-            Version signalVersion = outcome.getPropagatedSignal()
-                                           .getVersion();
+            var eventId = unpack(signalId, EventId.class);
+            var event = checkNotNull(correctedEvents.get(eventId));
+            var signalVersion = outcome.getPropagatedSignal().getVersion();
             event.getContextBuilder()
                  .setVersion(signalVersion);
         }
@@ -190,13 +182,12 @@ abstract class AggregateEndpoint<I,
     /**
      * Finds the first erroneous outcome in the given batchDispatchOutcome report.
      *
-     * @param batchDispatchOutcome
+     * @param outcome
      *         the non-successful dispatch
      * @return the first found outcome with an error
      */
-    private static DispatchOutcome firstErroneousOutcome(BatchDispatchOutcome batchDispatchOutcome) {
-        DispatchOutcome erroneous = batchDispatchOutcome
-                .getOutcomeList()
+    private static DispatchOutcome firstErroneousOutcome(BatchDispatchOutcome outcome) {
+        var erroneous = outcome.getOutcomeList()
                 .stream()
                 .filter(DispatchOutcome::hasError)
                 .findFirst()

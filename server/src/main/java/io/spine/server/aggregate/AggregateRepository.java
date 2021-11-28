@@ -34,7 +34,6 @@ import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.query.EntityQuery;
@@ -43,11 +42,8 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.BatchDeliveryListener;
-import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
-import io.spine.server.dispatch.BatchDispatchOutcome;
-import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.QueryableRepository;
@@ -58,7 +54,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.Route;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -183,8 +178,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * Initializes the {@code Inbox}.
      */
     private void initInbox() {
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
+        var delivery = ServerEnvironment.instance()
+                                        .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
                 .withBatchListener(new BatchDeliveryListener<I>() {
@@ -215,8 +210,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * Ensures that this repository dispatches at least one kind of messages.
      */
     private void checkNotVoid() {
-        boolean handlesCommands = dispatchesCommands();
-        boolean reactsOnEvents = dispatchesEvents();
+        var handlesCommands = dispatchesCommands();
+        var reactsOnEvents = dispatchesEvents();
 
         if (!handlesCommands && !reactsOnEvents) {
             throw newIllegalStateException(
@@ -284,7 +279,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
 
     @Override
     public A create(I id) {
-        A aggregate = aggregateClass().create(id);
+        var aggregate = aggregateClass().create(id);
         return aggregate;
     }
 
@@ -308,7 +303,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
 
     @VisibleForTesting
     protected void doStore(A aggregate) {
-        UncommittedHistory history = aggregate.uncommittedHistory();
+        var history = aggregate.uncommittedHistory();
         aggregateStorage().writeAll(aggregate, history.get());
         aggregate.commitEvents();
     }
@@ -320,8 +315,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      */
     @Override
     protected AggregateStorage<I, S> createStorage() {
-        StorageFactory sf = defaultStorageFactory();
-        AggregateStorage<I, S> result = sf.createAggregateStorage(context().spec(), entityClass());
+        var sf = defaultStorageFactory();
+        var result = sf.createAggregateStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -344,7 +339,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     @Override
     public final void dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
-        Optional<I> target = route(cmd);
+        var target = route(cmd);
         target.ifPresent(id -> inbox().send(cmd)
                                       .toHandler(id));
     }
@@ -360,7 +355,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     }
 
     private Optional<I> route(CommandEnvelope cmd) {
-        Optional<I> target = route(commandRouting(), cmd);
+        var target = route(commandRouting(), cmd);
         target.ifPresent(id -> onCommandTargetSet(id, cmd));
         return target;
     }
@@ -413,7 +408,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     @Override
     public void dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
-        Set<I> targets = route(event);
+        var targets = route(event);
         targets.forEach((id) -> inbox().send(event)
                                        .toReactor(id));
     }
@@ -428,23 +423,23 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      */
     final void importEvent(EventEnvelope event) {
         checkNotNull(event);
-        Optional<I> target = routeImport(event);
+        var target = routeImport(event);
         target.ifPresent(id -> inbox().send(event)
                                       .toImporter(id));
     }
 
     private Optional<I> routeImport(EventEnvelope event) {
-        Optional<I> id = route(eventImportRouting(), event);
+        var id = route(eventImportRouting(), event);
         return id;
     }
 
     @SuppressWarnings("UnnecessaryLambda")
     private Route<? extends EventMessage, EventContext, I> eventImportRouting() {
         return (message, context) -> {
-            Set<I> ids = eventImportRouting.apply(message, context);
-            int numberOfTargets = ids.size();
-            String messageType = message.getClass()
-                                        .getName();
+            var ids = eventImportRouting.apply(message, context);
+            var numberOfTargets = ids.size();
+            var messageType = message.getClass()
+                                     .getName();
             checkState(
                     numberOfTargets > 0,
                     "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
@@ -459,7 +454,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
                     messageType,
                     context
             );
-            I id = ids.stream()
+            var id = ids.stream()
                       .findFirst()
                       .orElseThrow(() -> newIllegalStateException(
                               "Unable to route import event `%s`.", messageType)
@@ -529,8 +524,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * <p>This feature is enabled for all aggregates visible for querying or subscribing.
      */
     private boolean exposedToQuerying() {
-        boolean result = aggregateClass().visibility()
-                                         .isNotNone();
+        var result = aggregateClass().visibility()
+                                     .isNotNone();
         return result;
     }
 
@@ -543,7 +538,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      */
     protected AggregateStorage<I, S> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        AggregateStorage<I, S> result = (AggregateStorage<I, S>) storage();
+        var result = (AggregateStorage<I, S>) storage();
         return result;
     }
 
@@ -560,13 +555,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
 
     @VisibleForTesting
     protected A doLoadOrCreate(I id) {
-        A result = load(id).orElseGet(() -> createNew(id));
+        var result = load(id).orElseGet(() -> createNew(id));
         return result;
     }
 
     /** Creates a new entity with the passed ID. */
     private A createNew(I id) {
-        A created = create(id);
+        var created = create(id);
         lifecycleOf(id).onEntityCreated(AGGREGATE);
         return created;
     }
@@ -585,8 +580,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      *         with the ID
      */
     private Optional<A> load(I id) {
-        Optional<AggregateHistory> found = loadHistory(id);
-        Optional<A> result = found.map(history -> restore(id, history));
+        var found = loadHistory(id);
+        var result = found.map(history -> restore(id, history));
         return result;
     }
 
@@ -605,9 +600,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      *         {@code Optional.empty()} if there is no record with the ID
      */
     private Optional<AggregateHistory> loadHistory(I id) {
-        AggregateStorage<I, S> storage = aggregateStorage();
-        int batchSize = snapshotTrigger + 1;
-        Optional<AggregateHistory> result = storage.read(id, batchSize);
+        var storage = aggregateStorage();
+        var batchSize = snapshotTrigger + 1;
+        var result = storage.read(id, batchSize);
         return result;
     }
 
@@ -622,10 +617,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * @return an instance of {@link Aggregate}
      */
     protected A restore(I id, AggregateHistory history) {
-        A result = create(id);
+        var result = create(id);
         AggregateTransaction<I, ?, ?> tx = AggregateTransaction.start(result);
-        BatchDispatchOutcome outcome = result.replay(history);
-        boolean success = outcome.getSuccessful();
+        var outcome = result.replay(history);
+        var success = outcome.getSuccessful();
         tx.commitIfActive();
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
@@ -656,8 +651,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     }
 
     private void onCommandTargetSet(I id, CommandEnvelope cmd) {
-        EntityLifecycle lifecycle = lifecycleOf(id);
-        CommandId commandId = cmd.id();
+        var lifecycle = lifecycleOf(id);
+        var commandId = cmd.id();
         with(cmd.tenantId()).run(() -> lifecycle.onTargetAssignedToCommand(commandId));
     }
 
@@ -678,8 +673,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
 
     @Override
     public Iterator<S> findStates(EntityQuery<I, S, ?> query) {
-        Iterator<EntityRecord> rawStates = aggregateStorage().readStates(query);
-        Iterator<S> result = transform(rawStates, this::stateFrom);
+        var rawStates = aggregateStorage().readStates(query);
+        var result = transform(rawStates, this::stateFrom);
         return result;
     }
 

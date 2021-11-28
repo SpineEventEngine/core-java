@@ -26,10 +26,8 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
-import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -71,21 +69,19 @@ final class HistoryBackwardOperation<I> {
      */
     Iterator<AggregateEventRecord>
     read(I aggregateId, int batchSize, @Nullable Version startingFrom) {
-        RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord> builder =
-                historyBackwardQuery(aggregateId);
+        var builder = historyBackwardQuery(aggregateId);
         if (startingFrom != null) {
             builder.where(version)
                    .isLessThan(startingFrom.getNumber());
         }
-        RecordQuery<AggregateEventRecordId, AggregateEventRecord> query =
-                inChronologicalOrder(builder, batchSize).build();
-        Iterator<AggregateEventRecord> iterator = eventStorage.readAll(query);
+        var query = inChronologicalOrder(builder, batchSize).build();
+        var iterator = eventStorage.readAll(query);
         return iterator;
     }
 
     private RecordQueryBuilder<AggregateEventRecordId, AggregateEventRecord>
     historyBackwardQuery(I id) {
-        Any packedId = Identifier.pack(id);
+        var packedId = Identifier.pack(id);
         return eventStorage.queryBuilder()
                            .where(aggregate_id)
                            .is(packedId);

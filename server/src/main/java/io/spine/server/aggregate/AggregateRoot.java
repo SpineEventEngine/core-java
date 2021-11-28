@@ -83,7 +83,7 @@ public class AggregateRoot<I> {
     S partState(Class<S> partStateClass) {
         AggregatePartRepository<I, A, S, ?> repo = repositoryOf(partStateClass);
         AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(id());
-        S partState = aggregatePart.state();
+        var partState = aggregatePart.state();
         return partState;
     }
 
@@ -97,7 +97,7 @@ public class AggregateRoot<I> {
     @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
     private <S extends EntityState<I>, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, S, ?> repositoryOf(Class<S> stateClass) {
-        Class<? extends AggregateRoot<?>> thisType = (Class<? extends AggregateRoot<?>>) getClass();
+        var thisType = (Class<? extends AggregateRoot<?>>) getClass();
         Optional<? extends AggregatePartRepository<?, ?, ?, ?>> partRepository =
                 context.internalAccess()
                        .aggregateRootDirectory()
@@ -106,7 +106,7 @@ public class AggregateRoot<I> {
                 () -> newIllegalStateException("Could not find repository for aggregate part `%s`.",
                                                stateClass.getName())
         );
-        AggregatePartRepository<I, A, S, ?> result =
+        var result =
                 (AggregatePartRepository<I, A, S, ?>) repository;
         return result;
     }

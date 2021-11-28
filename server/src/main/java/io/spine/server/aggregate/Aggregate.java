@@ -26,20 +26,15 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.aggregate.model.Applier;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
@@ -47,7 +42,6 @@ import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecentHistory;
 import io.spine.server.event.EventReactor;
-import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -55,7 +49,6 @@ import io.spine.validate.ValidatingBuilder;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.google.common.collect.Iterators.any;
@@ -229,17 +222,16 @@ public abstract class Aggregate<I,
      */
     @Override
     protected DispatchOutcome dispatchCommand(CommandEnvelope command) {
-        Optional<Error> error = idempotencyGuard.check(command);
+        var error = idempotencyGuard.check(command);
         if (error.isPresent()) {
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setPropagatedSignal(command.messageId())
                     .setError(error.get())
                     .vBuild();
             return outcome;
         } else {
-            CommandHandlerMethod method = thisClass().handlerOf(command);
-            DispatchOutcome outcome = method.invoke(this, command);
+            var method = thisClass().handlerOf(command);
+            var outcome = method.invoke(this, command);
             return outcome;
         }
     }
@@ -256,17 +248,16 @@ public abstract class Aggregate<I,
      *         an empty list if the aggregate state does not change because of the event
      */
     DispatchOutcome reactOn(EventEnvelope event) {
-        Optional<Error> error = idempotencyGuard.check(event);
+        var error = idempotencyGuard.check(event);
         if (error.isPresent()) {
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setPropagatedSignal(event.messageId())
                     .setError(error.get())
                     .vBuild();
             return outcome;
         }
-        Optional<EventReactorMethod> method = thisClass().reactorOf(event);
-        if (!method.isPresent()) {
+        var method = thisClass().reactorOf(event);
+        if (method.isEmpty()) {
             return ignored(thisClass(), event);
         }
         return method.get().invoke(this, event);
@@ -280,7 +271,7 @@ public abstract class Aggregate<I,
      *         the event to apply
      */
     final DispatchOutcome invokeApplier(EventEnvelope event) {
-        Applier method = thisClass().applierOf(event);
+        var method = thisClass().applierOf(event);
         return method.invoke(this, event);
     }
 
@@ -311,12 +302,12 @@ public abstract class Aggregate<I,
      *         the thrown instance
      */
     final BatchDispatchOutcome replay(AggregateHistory history) {
-        Snapshot snapshot = history.getSnapshot();
+        var snapshot = history.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-        List<Event> events = history.getEventList();
-        BatchDispatchOutcome batchDispatchOutcome = play(events);
+        var events = history.getEventList();
+        var batchDispatchOutcome = play(events);
         uncommittedHistory.onAggregateRestored(history);
         appendToRecentHistory(events);
         return batchDispatchOutcome;
@@ -351,10 +342,10 @@ public abstract class Aggregate<I,
      * @return the exact list of {@code events} but with adjusted versions
      */
     final BatchDispatchOutcome apply(List<Event> events, int snapshotTrigger) {
-        VersionSequence versionSequence = new VersionSequence(version());
-        ImmutableList<Event> versionedEvents = versionSequence.update(events);
+        var versionSequence = new VersionSequence(version());
+        var versionedEvents = versionSequence.update(events);
         uncommittedHistory.startTracking(snapshotTrigger);
-        BatchDispatchOutcome result = play(versionedEvents);
+        var result = play(versionedEvents);
         uncommittedHistory.stopTracking();
         return result;
     }
@@ -382,10 +373,10 @@ public abstract class Aggregate<I,
     final void restore(Snapshot snapshot) {
         @SuppressWarnings("unchecked") /* The cast is safe since the snapshot is created
             with the state of this aggregate, which is bound by the type <S>. */
-        S stateToRestore = (S) unpack(snapshot.getState());
-        Version versionFromSnapshot = snapshot.getVersion();
+        var stateToRestore = (S) unpack(snapshot.getState());
+        var versionFromSnapshot = snapshot.getVersion();
         setInitialState(stateToRestore, versionFromSnapshot);
-        LifecycleFlags lifecycle = snapshot.getLifecycle();
+        var lifecycle = snapshot.getLifecycle();
         setArchived(lifecycle.getArchived());
         setDeleted(lifecycle.getDeleted());
     }
@@ -457,9 +448,8 @@ public abstract class Aggregate<I,
             lifecycle = lifecycleFlags();
         }
 
-        Any packedState = AnyPacker.pack(state);
-        Snapshot.Builder builder = Snapshot
-                .newBuilder()
+        var packedState = AnyPacker.pack(state);
+        var builder = Snapshot.newBuilder()
                 .setState(packedState)
                 .setVersion(version)
                 .setTimestamp(currentTime())
@@ -505,8 +495,8 @@ public abstract class Aggregate<I,
      * Verifies if the aggregate history contains an event which satisfies the passed predicate.
      */
     protected final boolean historyContains(Predicate<Event> predicate) {
-        Iterator<Event> iterator = historyBackward();
-        boolean found = any(iterator, predicate::test);
+        var iterator = historyBackward();
+        var found = any(iterator, predicate::test);
         return found;
     }
 

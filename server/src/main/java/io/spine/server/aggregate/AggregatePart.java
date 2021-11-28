@@ -109,7 +109,7 @@ public abstract class AggregatePart<I,
      *                               the ID type of the {@code root}
      */
     protected <P extends EntityState<I>> P partState(Class<P> partStateClass) {
-        P partState = root.partState(partStateClass);
+        var partState = root.partState(partStateClass);
         return partState;
     }
 

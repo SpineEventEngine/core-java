@@ -26,11 +26,8 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.command.DispatchCommand;
 import io.spine.server.delivery.CommandEndpoint;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
 import static io.spine.server.command.DispatchCommand.operationFor;
@@ -52,8 +49,8 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected DispatchOutcome invokeDispatcher(A aggregate) {
-        EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.id());
-        DispatchCommand<I> dispatch = operationFor(lifecycle, aggregate, envelope());
+        var lifecycle = repository().lifecycleOf(aggregate.id());
+        var dispatch = operationFor(lifecycle, aggregate, envelope());
         return dispatch.perform();
     }
 
@@ -71,12 +68,11 @@ final class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected void onEmptyResult(A aggregate) throws IllegalStateException {
-        CommandEnvelope cmd = envelope();
-        String entityId = aggregate.idAsString();
-        String entityClass = aggregate.getClass()
-                                      .getName();
-        String commandId = cmd.id().value();
-        CommandClass commandClass = cmd.messageClass();
+        var cmd = envelope();
+        var entityId = aggregate.idAsString();
+        var entityClass = aggregate.getClass().getName();
+        var commandId = cmd.id().value();
+        var commandClass = cmd.messageClass();
         throw newIllegalStateException(
                 "The aggregate (class: %s, ID: %s) produced empty response for " +
                         "the command (class: %s, ID: %s).",

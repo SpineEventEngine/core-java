@@ -31,7 +31,6 @@ import io.spine.query.RecordQuery;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -79,13 +78,13 @@ final class TruncateOperation {
      *         the currently examined history record
      */
     void performWith(int snapshotIndex, Predicate<AggregateEventRecord> predicate) {
-        Iterator<AggregateEventRecord> eventRecords = eventStorage.readAll(chronologically());
+        var eventRecords = eventStorage.readAll(chronologically());
         Map<Any, Integer> snapshotHitsByAggregateId = new HashMap<>();
         Set<AggregateEventRecordId> toDelete = new HashSet<>();
         while (eventRecords.hasNext()) {
-            AggregateEventRecord eventRecord = eventRecords.next();
-            Any packedId = eventRecord.getAggregateId();
-            int snapshotsHit = snapshotHitsByAggregateId.get(packedId) != null
+            var eventRecord = eventRecords.next();
+            var packedId = eventRecord.getAggregateId();
+            var snapshotsHit = snapshotHitsByAggregateId.get(packedId) != null
                                ? snapshotHitsByAggregateId.get(packedId)
                                : 0;
             if (snapshotsHit > snapshotIndex && predicate.test(eventRecord)) {
@@ -99,7 +98,7 @@ final class TruncateOperation {
     }
 
     private RecordQuery<AggregateEventRecordId, AggregateEventRecord> chronologically() {
-        RecordQuery<AggregateEventRecordId, AggregateEventRecord> orderChronologically =
+        var orderChronologically =
                 inChronologicalOrder(eventStorage.queryBuilder(), null).build();
         return orderChronologically;
     }

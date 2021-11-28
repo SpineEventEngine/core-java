@@ -27,10 +27,8 @@
 package io.spine.server.aggregate;
 
 import io.spine.base.Error;
-import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Event;
-import io.spine.core.EventId;
 import io.spine.core.EventValidationError;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -63,12 +61,12 @@ final class IdempotencyGuard {
      */
     Optional<Error> check(CommandEnvelope command) {
         if (didHandleRecently(command)) {
-            String errorMessage = format(
+            var errorMessage = format(
                     "Command %s[%s] is a duplicate.",
                     command.messageClass(),
                     command.id().value()
             );
-            Error error = Error.newBuilder()
+            var error = Error.newBuilder()
                     .setType(CommandValidationError.class.getSimpleName())
                     .setCode(DUPLICATE_COMMAND_VALUE)
                     .setMessage(errorMessage)
@@ -89,12 +87,12 @@ final class IdempotencyGuard {
      */
     Optional<Error> check(EventEnvelope event) {
         if (didHandleRecently(event)) {
-            String errorMessage = format(
+            var errorMessage = format(
                     "Event %s[%s] is a duplicate.",
                     event.messageClass(),
                     event.id().value()
             );
-            Error error = Error.newBuilder()
+            var error = Error.newBuilder()
                     .setType(EventValidationError.class.getSimpleName())
                     .setCode(DUPLICATE_EVENT_VALUE)
                     .setMessage(errorMessage)
@@ -119,7 +117,7 @@ final class IdempotencyGuard {
      * @return {@code true} if the event was handled since last snapshot, {@code false} otherwise
      */
     private boolean didHandleRecently(EventEnvelope event) {
-        EventId eventId = event.id();
+        var eventId = event.id();
         Predicate<Event> causedByEvent = e -> e.context()
                                                .getPastMessage()
                                                .messageId()
@@ -129,7 +127,7 @@ final class IdempotencyGuard {
                                                   .messageId()
                                                   .asEventId()
                                                   .equals(eventId);
-        boolean found = aggregate.historyContains(causedByEvent.and(originHasGivenId));
+        var found = aggregate.historyContains(causedByEvent.and(originHasGivenId));
         return found;
     }
 
@@ -147,7 +145,7 @@ final class IdempotencyGuard {
      * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
      */
     private boolean didHandleRecently(CommandEnvelope command) {
-        CommandId commandId = command.id();
+        var commandId = command.id();
         Predicate<Event> causedByCommand = e -> e.context()
                                                  .getPastMessage()
                                                  .messageId()
@@ -157,7 +155,7 @@ final class IdempotencyGuard {
                                                   .messageId()
                                                   .asCommandId()
                                                   .equals(commandId);
-        boolean found = aggregate.historyContains(causedByCommand.and(originHasGivenId));
+        var found = aggregate.historyContains(causedByCommand.and(originHasGivenId));
         return found;
     }
 }
