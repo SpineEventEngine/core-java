@@ -80,7 +80,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
 
     @Override
     public Optional<Ack> filter(CommandEnvelope envelope) {
-        Command command = envelope.command();
+        var command = envelope.command();
         if (!command.isScheduled()) {
             return letPass();
         }
@@ -113,11 +113,11 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
         if (isScheduledAlready(command)) {
             return;
         }
-        Command commandUpdated = setSchedulingTime(command, currentTime());
+        var commandUpdated = setSchedulingTime(command, currentTime());
         doSchedule(commandUpdated);
         rememberAsScheduled(commandUpdated);
 
-        CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
+        var updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
         watcher().onScheduled(updatedCommandEnvelope);
     }
 
@@ -163,13 +163,13 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
     }
 
     private static boolean isScheduledAlready(Command command) {
-        CommandId id = command.getId();
-        boolean isScheduledAlready = scheduledCommandIds.contains(id);
+        var id = command.getId();
+        var isScheduledAlready = scheduledCommandIds.contains(id);
         return isScheduledAlready;
     }
 
     private static void rememberAsScheduled(Command command) {
-        CommandId id = command.getId();
+        var id = command.getId();
         scheduledCommandIds.add(id);
     }
 
@@ -197,10 +197,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
         checkNotNull(command);
         checkNotNull(schedulingTime);
 
-        Duration delay = command.getContext()
-                                .getSchedule()
-                                .getDelay();
-        Command result = setSchedule(command, delay, schedulingTime);
+        var delay = command.getContext()
+                           .getSchedule()
+                           .getDelay();
+        var result = setSchedule(command, delay, schedulingTime);
         return result;
     }
 
@@ -221,23 +221,23 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope>, Cl
         checkNotNull(schedulingTime);
         checkValid(schedulingTime);
 
-        CommandContext context = command.getContext();
-        CommandContext.Schedule scheduleUpdated = context.getSchedule()
-                                                         .toBuilder()
-                                                         .setDelay(delay)
-                                                         .build();
-        CommandContext contextUpdated = context.toBuilder()
-                                               .setSchedule(scheduleUpdated)
-                                               .build();
+        var context = command.getContext();
+        var scheduleUpdated = context.getSchedule()
+                .toBuilder()
+                .setDelay(delay)
+                .build();
+        var contextUpdated = context.toBuilder()
+                .setSchedule(scheduleUpdated)
+                .build();
 
-        Command.SystemProperties sysProps = command.getSystemProperties()
-                                                   .toBuilder()
-                                                   .setSchedulingTime(schedulingTime)
-                                                   .build();
-        Command result = command.toBuilder()
-                                .setContext(contextUpdated)
-                                .setSystemProperties(sysProps)
-                                .build();
+        var sysProps = command.getSystemProperties()
+                .toBuilder()
+                .setSchedulingTime(schedulingTime)
+                .build();
+        var result = command.toBuilder()
+                .setContext(contextUpdated)
+                .setSystemProperties(sysProps)
+                .build();
         return result;
     }
 }

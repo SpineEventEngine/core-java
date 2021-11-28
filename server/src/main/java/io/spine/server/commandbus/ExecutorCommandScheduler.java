@@ -34,7 +34,6 @@ import io.spine.logging.Logging;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static io.spine.core.CommandContext.Schedule;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -66,7 +65,7 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
     @SuppressWarnings("FutureReturnValueIgnored") // Error handling is done manually.
     @Override
     protected void doSchedule(Command command) {
-        final long delayMillis = delayMillisecondsOf(command);
+        final var delayMillis = delayMillisecondsOf(command);
         executorService.schedule(() -> safePost(command),
                                  delayMillis, MILLISECONDS);
     }
@@ -93,10 +92,9 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
     }
 
     private static long delayMillisecondsOf(Command command) {
-        Schedule schedule = command.getContext()
-                                   .getSchedule();
-        Duration delay = schedule.getDelay();
-        long delaySec = delay.getSeconds();
+        var schedule = command.getContext().getSchedule();
+        var delay = schedule.getDelay();
+        var delaySec = delay.getSeconds();
         long delayMillisFraction = delay.getNanos() / NANOS_IN_MILLISECOND;
 
         /**
@@ -106,7 +104,7 @@ public class ExecutorCommandScheduler extends CommandScheduler implements Loggin
          * {@link Long.MAX_VALUE} is +9,223,372,036,854,775,807. That's why it is safe to multiply
          * {@code delaySec * MILLIS_IN_SECOND}.
          */
-        long absoluteMillis = delaySec * MILLIS_IN_SECOND + delayMillisFraction;
+        var absoluteMillis = delaySec * MILLIS_IN_SECOND + delayMillisFraction;
         return absoluteMillis;
     }
 

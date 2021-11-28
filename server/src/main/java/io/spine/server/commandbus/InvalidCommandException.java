@@ -72,8 +72,7 @@ public class InvalidCommandException extends CommandException implements Message
     public static InvalidCommandException onConstraintViolations(
             Command command, Iterable<ConstraintViolation> violations) {
 
-        Factory helper =
-                new Factory(command, violations);
+        var helper = new Factory(command, violations);
         return helper.newException();
     }
 
@@ -82,9 +81,9 @@ public class InvalidCommandException extends CommandException implements Message
      * the {@code CommandContext} which is required in a multitenant application.
      */
     public static InvalidCommandException missingTenantId(Command command) {
-        CommandEnvelope envelope = CommandEnvelope.of(command);
+        var envelope = CommandEnvelope.of(command);
         Message commandMessage = envelope.message();
-        String errMsg = format(
+        var errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to " +
                 "multi-tenant Bounded Context, but has no `tenant_id` attribute in the context.",
                 CommandClass.of(commandMessage)
@@ -92,7 +91,7 @@ public class InvalidCommandException extends CommandException implements Message
                             .getName(),
                 TypeName.of(commandMessage),
                 Identifier.toString(envelope.id()));
-        Error error = unknownTenantError(commandMessage, errMsg);
+        var error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
@@ -101,8 +100,7 @@ public class InvalidCommandException extends CommandException implements Message
      * attribute in the {@code CommandContext} which is required in a multitenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setType(InvalidCommandException.class.getCanonicalName())
                 .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
                 .setMessage(errorText)
@@ -115,22 +113,21 @@ public class InvalidCommandException extends CommandException implements Message
      * Creates an exception for the command which specifies a tenant in a single-tenant context.
      */
     public static InvalidCommandException inapplicableTenantId(Command command) {
-        CommandEnvelope cmd = CommandEnvelope.of(command);
-        TypeName typeName = TypeName.of(cmd.message());
-        String errMsg = format(
+        var cmd = CommandEnvelope.of(command);
+        var typeName = TypeName.of(cmd.message());
+        var errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) was posted to a single-tenant " +
                 "Bounded Context, but has `tenant_id` (`%s`) attribute set in the command context.",
                 cmd.messageClass(),
                 typeName,
                 shortDebugString(cmd.id()),
                 shortDebugString(cmd.tenantId()));
-        Error error = inapplicableTenantError(cmd.message(), errMsg);
+        var error = inapplicableTenantError(cmd.message(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
 
     private static Error inapplicableTenantError(CommandMessage commandMessage, String errMsg) {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setType(InvalidCommandException.class.getCanonicalName())
                 .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
                 .setMessage(errMsg)
@@ -138,6 +135,7 @@ public class InvalidCommandException extends CommandException implements Message
                 .build();
         return error;
     }
+
     /**
      * A helper utility aimed to create an {@code InvalidCommandException} to report the
      * command which field values violate validation constraint(s).

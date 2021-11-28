@@ -78,11 +78,10 @@ public abstract class CommandException extends RuntimeException implements Messa
      * @param commandMessage a command message to get the type from
      */
     public static Map<String, Value> commandTypeAttribute(Message commandMessage) {
-        String commandType = TypeName.of(commandMessage)
-                                     .value();
-        Value value = Value.newBuilder()
-                           .setStringValue(commandType)
-                           .build();
+        var commandType = TypeName.of(commandMessage).value();
+        var value = Value.newBuilder()
+                .setStringValue(commandType)
+                .build();
         return ImmutableMap.of(ATTR_COMMAND_TYPE_NAME, value);
     }
 
@@ -92,17 +91,16 @@ public abstract class CommandException extends RuntimeException implements Messa
         Message commandMessage = CommandEnvelope.of(command)
                                                 .message();
 
-        String commandType = commandMessage.getDescriptorForType()
-                                           .getFullName();
-        String errMsg = format(format, commandType);
-        String descriptorName = CommandValidationError.getDescriptor()
-                                                      .getFullName();
-        Error.Builder error =
-                Error.newBuilder()
-                     .setType(descriptorName)
-                     .setMessage(errMsg)
-                     .setCode(errorCode.getNumber())
-                     .putAllAttributes(commandTypeAttribute(commandMessage));
+        var commandType = commandMessage.getDescriptorForType()
+                                        .getFullName();
+        var errMsg = format(format, commandType);
+        var descriptorName = CommandValidationError.getDescriptor()
+                                                   .getFullName();
+        var error = Error.newBuilder()
+                .setType(descriptorName)
+                .setMessage(errMsg)
+                .setCode(errorCode.getNumber())
+                .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
     }
 
@@ -129,12 +127,11 @@ public abstract class CommandException extends RuntimeException implements Messa
      * <p>The second parameter is a {@link TypeName} of the command message.
      */
     protected static String messageFormat(String format, Command command) {
-        CommandEnvelope envelope = CommandEnvelope.of(command);
-        Class<? extends Message> commandClass = envelope.messageClass()
-                                                        .value();
-        ClassName commandClassName = ClassName.of(commandClass);
-        TypeName typeName = envelope.messageTypeName();
-        String result = format(format, commandClassName, typeName);
+        var envelope = CommandEnvelope.of(command);
+        Class<? extends Message> commandClass = envelope.messageClass().value();
+        var commandClassName = ClassName.of(commandClass);
+        var typeName = envelope.messageTypeName();
+        var result = format(format, commandClassName, typeName);
         return result;
     }
 }

@@ -26,7 +26,6 @@
 
 package io.spine.server.commandbus;
 
-import io.spine.core.Command;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.type.CommandEnvelope;
 
@@ -37,8 +36,8 @@ final class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
 
     @Override
     public UnsupportedCommandException handle(CommandEnvelope message) {
-        Command command = message.command();
-        UnsupportedCommandException exception = new UnsupportedCommandException(command);
+        var command = message.command();
+        var exception = new UnsupportedCommandException(command);
         return exception;
     }
 }

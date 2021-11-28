@@ -33,7 +33,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.Origin;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.server.type.CommandEnvelope;
@@ -90,13 +89,12 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
     }
 
     private void postSystemEvent(Ack ack) {
-        Status status = ack.getStatus();
-        CommandId commandId = toCommandId(ack);
-        EventMessage systemEvent = systemEventFor(status, commandId);
-        Command command = commands.get(commandId);
+        var status = ack.getStatus();
+        var commandId = toCommandId(ack);
+        var systemEvent = systemEventFor(status, commandId);
+        var command = commands.get(commandId);
         checkState(command != null, "Unknown command ID encountered: `%s`.", commandId.value());
-        Origin systemEventOrigin = CommandEnvelope.of(command)
-                                                  .asMessageOrigin();
+        var systemEventOrigin = CommandEnvelope.of(command).asMessageOrigin();
         writeSide.postEvent(systemEvent, systemEventOrigin);
     }
 
