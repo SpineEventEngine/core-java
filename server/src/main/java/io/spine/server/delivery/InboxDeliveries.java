@@ -26,8 +26,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.type.TypeUrl;
-
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -48,7 +46,7 @@ final class InboxDeliveries {
      *         if there is no delivery found
      */
     ShardedMessageDelivery<InboxMessage> get(String typeUrl) {
-        ShardedMessageDelivery<InboxMessage> result = contents.get(typeUrl);
+        var result = contents.get(typeUrl);
         checkState(result != null,
                    "Cannot find the registered Inbox for the type URL `%s`.", typeUrl);
         return result;
@@ -61,8 +59,8 @@ final class InboxDeliveries {
      *         if there is no delivery found
      */
     ShardedMessageDelivery<InboxMessage> get(InboxMessage message) {
-        String typeUrl = message.getInboxId()
-                                .getTypeUrl();
+        var typeUrl = message.getInboxId()
+                             .getTypeUrl();
         return get(typeUrl);
     }
 
@@ -70,7 +68,7 @@ final class InboxDeliveries {
      * Registers the given {@code Inbox}.
      */
     void register(Inbox<?> inbox) {
-        TypeUrl entityType = inbox.entityStateType();
+        var entityType = inbox.entityStateType();
         contents.put(entityType.value(), inbox.delivery());
     }
 
@@ -80,7 +78,7 @@ final class InboxDeliveries {
      * <p>If there was no such {@code Inbox} registered, does nothing.
      */
     void unregister(Inbox<?> inbox) {
-        TypeUrl entityType = inbox.entityStateType();
+        var entityType = inbox.entityStateType();
         contents.remove(entityType.value());
     }
 }

@@ -27,7 +27,6 @@
 package io.spine.server.delivery;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.TenantId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.tenant.TenantAwareRunner;
 
@@ -65,9 +64,9 @@ public final class LocalDispatchingObserver implements ShardObserver {
 
     @Override
     public void onMessage(InboxMessage update) {
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
-        ShardIndex index = update.shardIndex();
+        var delivery = ServerEnvironment.instance()
+                                        .delivery();
+        var index = update.shardIndex();
         if (async) {
             new Thread(() -> runDelivery(update, delivery, index)).start();
         } else {
@@ -76,7 +75,7 @@ public final class LocalDispatchingObserver implements ShardObserver {
     }
 
     private static void runDelivery(InboxMessage message, Delivery delivery, ShardIndex index) {
-        TenantId tenant = message.tenant();
+        var tenant = message.tenant();
         TenantAwareRunner.with(tenant)
                          .run(() -> delivery.deliverMessagesFrom(index));
     }

@@ -69,7 +69,7 @@ public final class InboxPage implements Page<InboxMessage> {
     }
 
     private ImmutableList<InboxMessage> readNext() {
-        ImmutableList<InboxMessage> contents = lookup.readAll(whenLastRead);
+        var contents = lookup.readAll(whenLastRead);
         if (!contents.isEmpty()) {
             this.whenLastRead = contents.get(contents.size() - 1)
                                         .getWhenReceived();
@@ -95,11 +95,11 @@ public final class InboxPage implements Page<InboxMessage> {
      */
     @Override
     public Optional<Page<InboxMessage>> next() {
-        ImmutableList<InboxMessage> moreContent = readNext();
+        var moreContent = readNext();
         if (moreContent.isEmpty()) {
             return Optional.empty();
         }
-        InboxPage nextPage = new InboxPage(this, moreContent);
+        var nextPage = new InboxPage(this, moreContent);
         return Optional.of(nextPage);
     }
 

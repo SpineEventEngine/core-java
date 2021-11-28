@@ -53,7 +53,7 @@ public final class InboxMessageComparator implements Comparator<InboxMessage>, S
 
     @Override
     public int compare(InboxMessage m1, InboxMessage m2) {
-        int result = Comparator
+        var result = Comparator
                 .comparing(InboxMessage::getWhenReceived, Timestamps.comparator())
                 .thenComparing(InboxMessage::getVersion)
                 .thenComparing((m) -> m.getId()

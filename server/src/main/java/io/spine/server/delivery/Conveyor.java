@@ -29,7 +29,6 @@ package io.spine.server.delivery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Time;
 
@@ -38,9 +37,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,7 +76,7 @@ final class Conveyor implements Iterable<InboxMessage> {
      */
     Conveyor(Collection<InboxMessage> messages, DeliveredMessages deliveredMessages) {
         this.deliveredMessages = deliveredMessages;
-        for (InboxMessage message : messages) {
+        for (var message : messages) {
             this.messages.put(message.getId(), message);
         }
     }
@@ -111,7 +108,7 @@ final class Conveyor implements Iterable<InboxMessage> {
      * {@link #flushTo(InboxStorage) flushTo(InboxStorage)} invocation.
      */
     void markDelivered(Collection<InboxMessage> messages) {
-        for (InboxMessage message : messages) {
+        for (var message : messages) {
             markDelivered(message);
         }
     }
@@ -156,9 +153,9 @@ final class Conveyor implements Iterable<InboxMessage> {
      *         the job to run
      */
     void updateWith(ConveyorJob job) {
-        for (InboxMessageId id : messages.keySet()) {
-            InboxMessage message = messages.get(id);
-            Optional<InboxMessage> modified = job.modify(message);
+        for (var id : messages.keySet()) {
+            var message = messages.get(id);
+            var modified = job.modify(message);
             modified.ifPresent(
                     inboxMessage -> messages.put(id, inboxMessage)
             );
@@ -166,7 +163,7 @@ final class Conveyor implements Iterable<InboxMessage> {
     }
 
     private void changeStatus(InboxMessage message, InboxMessageStatus status) {
-        InboxMessage modified = mutableMessage(message.getId())
+        var modified = mutableMessage(message.getId())
                 .setStatus(status)
                 .build();
         messages.put(message.getId(), modified);
@@ -184,7 +181,7 @@ final class Conveyor implements Iterable<InboxMessage> {
      * @return the builder for the message
      */
     private InboxMessage.Builder mutableMessage(InboxMessageId id) {
-        InboxMessage existingMessage = messages.get(id);
+        var existingMessage = messages.get(id);
         checkNotNull(existingMessage);
         return existingMessage.toBuilder();
     }
@@ -198,12 +195,10 @@ final class Conveyor implements Iterable<InboxMessage> {
      * {@linkplain Conveyor#Conveyor(Collection, DeliveredMessages) before it}.
      */
     Set<DispatchingId> allDelivered() {
-        Set<DispatchingId> recentlyDelivered =
-                recentlyDelivered()
-                        .map(DispatchingId::new)
-                        .collect(Collectors.toSet());
-        Sets.SetView<DispatchingId> result = Sets.union(recentlyDelivered,
-                                                        deliveredMessages.allDelivered());
+        var recentlyDelivered = recentlyDelivered()
+                .map(DispatchingId::new)
+                .collect(Collectors.toSet());
+        var result = Sets.union(recentlyDelivered, deliveredMessages.allDelivered());
         return result;
     }
 
@@ -214,8 +209,7 @@ final class Conveyor implements Iterable<InboxMessage> {
     Stream<InboxMessage> recentlyDelivered() {
         return messages.values()
                        .stream()
-                       .filter(m -> m.getStatus() ==
-                               DELIVERED);
+                       .filter(m -> m.getStatus() == DELIVERED);
     }
 
     /**
@@ -225,8 +219,8 @@ final class Conveyor implements Iterable<InboxMessage> {
      * <p>Such an operation may be used to keep the message as a deduplication source.
      */
     void keepForLonger(InboxMessage message, Duration howLongTooKeep) {
-        Timestamp keepUntil = Timestamps.add(Time.currentTime(), howLongTooKeep);
-        InboxMessage modified = mutableMessage(message.getId())
+        var keepUntil = Timestamps.add(Time.currentTime(), howLongTooKeep);
+        var modified = mutableMessage(message.getId())
                 .setKeepUntil(keepUntil)
                 .build();
         messages.put(message.getId(), modified);
@@ -244,11 +238,10 @@ final class Conveyor implements Iterable<InboxMessage> {
      * Writes all the pending changes to the passed {@code InboxStorage}.
      */
     void flushTo(InboxStorage storage) {
-        List<InboxMessage> dirtyMessages =
-                messages.values()
-                        .stream()
-                        .filter(message -> this.dirtyMessages.contains(message.getId()))
-                        .collect(toList());
+        var dirtyMessages = messages.values()
+                .stream()
+                .filter(message -> this.dirtyMessages.contains(message.getId()))
+                .collect(toList());
         storage.writeBatch(dirtyMessages);
         storage.removeBatch(removals);
         dirtyMessages.clear();

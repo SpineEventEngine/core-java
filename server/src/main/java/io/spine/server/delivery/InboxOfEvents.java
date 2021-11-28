@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.core.Event;
 import io.spine.server.type.EventEnvelope;
 
 /**
@@ -44,7 +43,7 @@ final class InboxOfEvents<I> extends InboxPart<I, EventEnvelope> {
 
     @Override
     protected void setRecordPayload(EventEnvelope envelope, InboxMessage.Builder builder) {
-        Event event = envelope.outerObject();
+        var event = envelope.outerObject();
         builder.setEvent(event);
     }
 

@@ -27,7 +27,6 @@
 package io.spine.server.delivery;
 
 import io.spine.base.EventMessage;
-import io.spine.core.Event;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 
 import java.util.Optional;
@@ -52,12 +51,12 @@ final class UpdateShardProcessingEvents implements ConveyorJob {
     @Override
     public Optional<InboxMessage> modify(InboxMessage message) {
         if (message.hasEvent()) {
-            Event event = message.getEvent();
-            EventMessage eventMessage = event.enclosedMessage();
+            var event = message.getEvent();
+            var eventMessage = event.enclosedMessage();
             if (eventMessage instanceof ShardProcessingRequested) {
-                ShardProcessingRequested cast = (ShardProcessingRequested) eventMessage;
-                ShardProcessingRequested updatedSignal = updateWithRunInfo(cast);
-                InboxMessage modified = inject(updatedSignal, message);
+                var cast = (ShardProcessingRequested) eventMessage;
+                var updatedSignal = updateWithRunInfo(cast);
+                var modified = inject(updatedSignal, message);
                 return Optional.of(modified);
             }
         }
@@ -76,23 +75,20 @@ final class UpdateShardProcessingEvents implements ConveyorJob {
      * @return a copy of the passed {@code InboxMessage} with the passed event message injected
      */
     private static InboxMessage inject(EventMessage what, InboxMessage destination) {
-        Event event = destination.getEvent();
-        Event modifiedEvent =
-                event.toBuilder()
-                     .setMessage(pack(what))
-                     .vBuild();
-        InboxMessage modifiedMessage =
-                destination.toBuilder()
-                           .setEvent(modifiedEvent)
-                           .vBuild();
+        var event = destination.getEvent();
+        var modifiedEvent = event.toBuilder()
+                .setMessage(pack(what))
+                .vBuild();
+        var modifiedMessage = destination.toBuilder()
+                .setEvent(modifiedEvent)
+                .vBuild();
         return modifiedMessage;
     }
 
     private ShardProcessingRequested updateWithRunInfo(ShardProcessingRequested signal) {
-        ShardProcessingRequested modifiedSignal =
-                signal.toBuilder()
-                      .setRunInfo(runInfo)
-                      .vBuild();
+        var modifiedSignal = signal.toBuilder()
+                .setRunInfo(runInfo)
+                .vBuild();
         return modifiedSignal;
     }
 }

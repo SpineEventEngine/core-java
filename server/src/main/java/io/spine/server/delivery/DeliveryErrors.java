@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Throwables observed during signal delivery.
@@ -66,8 +67,8 @@ final class DeliveryErrors {
      */
     void throwIfAny() {
         if (hasErrors()) {
-            DeliveryError first = errors.get(0);
-            ImmutableList<DeliveryError> other = this.errors.subList(1, this.errors.size());
+            var first = errors.get(0);
+            var other = this.errors.subList(1, this.errors.size());
             other.forEach(first::addSuppressed);
             first.rethrow();
         }
@@ -101,7 +102,7 @@ final class DeliveryErrors {
         }
 
         private Throwable asThrowable() {
-            return exception != null ? exception : checkNotNull(error);
+            return exception != null ? exception : requireNonNull(error);
         }
 
         private void addSuppressed(DeliveryError error) {
@@ -112,7 +113,7 @@ final class DeliveryErrors {
             if (exception != null) {
                 throw exception;
             } else {
-                throw checkNotNull(error);
+                throw requireNonNull(error);
             }
         }
     }

@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A station that delivers those messages which are incoming in a live mode.
@@ -97,15 +96,15 @@ final class LiveDeliveryStation extends Station {
      */
     @Override
     public final Result process(Conveyor conveyor) {
-        FilterToDeliver filter = new FilterToDeliver(conveyor);
-        Collection<InboxMessage> filtered = filter.messagesToDispatch();
+        var filter = new FilterToDeliver(conveyor);
+        var filtered = filter.messagesToDispatch();
         if (filtered.isEmpty()) {
             return emptyResult();
         }
-        List<InboxMessage> toDispatch = deduplicateAndSort(filtered, conveyor);
-        DeliveryErrors errors = action.executeFor(toDispatch);
+        var toDispatch = deduplicateAndSort(filtered, conveyor);
+        var errors = action.executeFor(toDispatch);
         conveyor.markDelivered(toDispatch);
-        Result result = new Result(toDispatch.size(), errors);
+        var result = new Result(toDispatch.size(), errors);
         return result;
     }
 
@@ -126,7 +125,7 @@ final class LiveDeliveryStation extends Station {
          * Returns the messages considered to ready for further dispatching.
          */
         private Collection<InboxMessage> messagesToDispatch() {
-            for (InboxMessage message : conveyor) {
+            for (var message : conveyor) {
                 accept(message);
             }
             return seen.values();
@@ -150,9 +149,9 @@ final class LiveDeliveryStation extends Station {
          *         the message to run through the filter
          */
         private void accept(InboxMessage message) {
-            InboxMessageStatus status = message.getStatus();
+            var status = message.getStatus();
             if (status == InboxMessageStatus.TO_DELIVER) {
-                DispatchingId dispatchingId = new DispatchingId(message);
+                var dispatchingId = new DispatchingId(message);
                 if (seen.containsKey(dispatchingId)) {
                     conveyor.markDuplicateAndRemove(message);
                 } else {
@@ -184,10 +183,10 @@ final class LiveDeliveryStation extends Station {
      */
     private static List<InboxMessage> deduplicateAndSort(Collection<InboxMessage> messages,
                                                          Conveyor conveyor) {
-        Set<DispatchingId> previouslyDelivered = conveyor.allDelivered();
+        var previouslyDelivered = conveyor.allDelivered();
         List<InboxMessage> result = new ArrayList<>();
-        for (InboxMessage message : messages) {
-            DispatchingId id = new DispatchingId(message);
+        for (var message : messages) {
+            var id = new DispatchingId(message);
             if (previouslyDelivered.contains(id)) {
                 conveyor.markDuplicateAndRemove(message);
             } else {

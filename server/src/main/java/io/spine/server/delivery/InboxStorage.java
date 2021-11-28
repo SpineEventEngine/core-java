@@ -29,15 +29,12 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
-import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Streams.stream;
@@ -68,11 +65,10 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
     private static MessageRecordSpec<InboxMessageId, InboxMessage> spec() {
         @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
-        MessageRecordSpec<InboxMessageId, InboxMessage> spec =
-                new MessageRecordSpec<>(InboxMessageId.class,
-                                        InboxMessage.class,
-                                        InboxMessage::getId,
-                                        InboxColumn.definitions());
+        var spec = new MessageRecordSpec<>(InboxMessageId.class,
+                                           InboxMessage.class,
+                                           InboxMessage::getId,
+                                           InboxColumn.definitions());
         return spec;
     }
 
@@ -115,15 +111,14 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
     public ImmutableList<InboxMessage>
     readAll(ShardIndex index, @Nullable Timestamp sinceWhen, int pageSize) {
-        RecordQueryBuilder<InboxMessageId, InboxMessage> builder =
-                queryBuilder().where(inbox_shard)
-                              .is(index);
+        var builder =
+                queryBuilder().where(inbox_shard).is(index);
         if (sinceWhen != null) {
             builder.where(received_at)
                    .isGreaterThan(sinceWhen);
         }
-        RecordQuery<InboxMessageId, InboxMessage> query = limitAndOrder(pageSize, builder).build();
-        Iterator<InboxMessage> iterator = readAll(query);
+        var query = limitAndOrder(pageSize, builder).build();
+        var iterator = readAll(query);
         return ImmutableList.copyOf(iterator);
     }
 
@@ -144,13 +139,13 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
      *         in the specified shard
      */
     public Optional<InboxMessage> newestMessageToDeliver(ShardIndex index) {
-        RecordQuery<InboxMessageId, InboxMessage> query =
+        var query =
                 queryBuilder().where(inbox_shard).is(index)
                               .where(status).is(TO_DELIVER)
                               .sortDescendingBy(received_at)
                               .limit(1)
                               .build();
-        Iterator<InboxMessage> iterator = readAll(query);
+        var iterator = readAll(query);
         Optional<InboxMessage> result = iterator.hasNext() ? Optional.of(iterator.next())
                                                            : Optional.empty();
         return result;
@@ -165,8 +160,8 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
      *         the messages to remove
      */
     synchronized void removeBatch(Iterable<InboxMessage> messages) {
-        List<InboxMessageId> toRemove = stream(messages).map(InboxMessage::getId)
-                                                        .collect(toList());
+        var toRemove = stream(messages).map(InboxMessage::getId)
+                                       .collect(toList());
         deleteAll(toRemove);
     }
 }

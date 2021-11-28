@@ -97,7 +97,7 @@ public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
 
         @Override
         protected void complete() {
-            ShardSessionRecord record = workByNode.get(shardIndex());
+            var record = workByNode.get(shardIndex());
             // Clear the node ID value and release the session.
             clearNode(record);
         }

@@ -28,7 +28,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
@@ -55,17 +54,17 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
         checkNotNull(index);
         checkNotNull(nodeId);
 
-        Optional<ShardSessionRecord> record = find(index);
+        var record = find(index);
         if (record.isPresent()) {
-            ShardSessionRecord existingRecord = record.get();
+            var existingRecord = record.get();
             if (hasPickedBy(existingRecord)) {
                 return Optional.empty();
             } else {
-                ShardSessionRecord updatedRecord = updateNode(existingRecord, nodeId);
+                var updatedRecord = updateNode(existingRecord, nodeId);
                 return Optional.of(asSession(updatedRecord));
             }
         } else {
-            ShardSessionRecord newRecord = createRecord(index, nodeId);
+            var newRecord = createRecord(index, nodeId);
             return Optional.of(asSession(newRecord));
         }
     }
@@ -75,8 +74,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
     }
 
     private ShardSessionRecord createRecord(ShardIndex index, NodeId nodeId) {
-        ShardSessionRecord newRecord = ShardSessionRecord
-                .newBuilder()
+        var newRecord = ShardSessionRecord.newBuilder()
                 .setIndex(index)
                 .setPickedBy(nodeId)
                 .setWhenLastPicked(currentTime())
@@ -86,8 +84,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
     }
 
     private ShardSessionRecord updateNode(ShardSessionRecord record, NodeId nodeId) {
-        ShardSessionRecord updatedRecord = record
-                .toBuilder()
+        var updatedRecord = record.toBuilder()
                 .setPickedBy(nodeId)
                 .setWhenLastPicked(currentTime())
                 .build();
@@ -101,10 +98,10 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
         ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
         allRecords().forEachRemaining(record -> {
             if (record.hasPickedBy()) {
-                Timestamp whenPicked = record.getWhenLastPicked();
-                Duration elapsed = between(whenPicked, currentTime());
+                var whenPicked = record.getWhenLastPicked();
+                var elapsed = between(whenPicked, currentTime());
 
-                int comparison = Durations.compare(elapsed, inactivityPeriod);
+                var comparison = Durations.compare(elapsed, inactivityPeriod);
                 if (comparison >= 0) {
                     clearNode(record);
                     resultBuilder.add(record.getIndex());
@@ -118,9 +115,9 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
      * Clears the value of {@code ShardSessionRecord.when_last_picked} and stores the session.
      */
     protected void clearNode(ShardSessionRecord session) {
-        ShardSessionRecord record = session.toBuilder()
-                                           .clearPickedBy()
-                                           .build();
+        var record = session.toBuilder()
+                .clearPickedBy()
+                .build();
         write(record);
     }
 

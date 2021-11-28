@@ -65,9 +65,9 @@ final class Segment {
             return ImmutableList.of();
         }
         Segment segment = null;
-        for (InboxMessage message : source) {
-            String typeUrl = message.getInboxId()
-                                    .getTypeUrl();
+        for (var message : source) {
+            var typeUrl = message.getInboxId()
+                                 .getTypeUrl();
             if (segment == null) {
                 segment = new Segment(typeUrl);
             } else {
@@ -81,7 +81,7 @@ final class Segment {
         if (segment.hasMessages()) {
             builder.add(segment);
         }
-        ImmutableList<Segment> result = builder.build();
+        var result = builder.build();
         return result;
     }
 

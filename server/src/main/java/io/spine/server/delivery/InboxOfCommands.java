@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.core.Command;
 import io.spine.server.type.CommandEnvelope;
 
 /**
@@ -44,7 +43,7 @@ final class InboxOfCommands<I> extends InboxPart<I, CommandEnvelope> {
 
     @Override
     protected void setRecordPayload(CommandEnvelope envelope, InboxMessage.Builder builder) {
-        Command command = envelope.outerObject();
+        var command = envelope.outerObject();
         builder.setCommand(command);
     }
 

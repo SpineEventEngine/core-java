@@ -26,11 +26,8 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Any;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
-
-import java.util.List;
 
 /**
  * A mixin for the state of the {@linkplain CatchUpProcess catch-up process job}.
@@ -56,18 +53,17 @@ interface CatchUpMixin extends CatchUpOrBuilder {
      * @return {@code true} if the message matches the job, {@code false} otherwise
      */
     default boolean matches(InboxMessage message) {
-        String expectedProjectionType = getId().getProjectionType();
-        InboxId targetInbox = message.getInboxId();
-        String actualTargetType = targetInbox.getTypeUrl();
+        var expectedProjectionType = getId().getProjectionType();
+        var targetInbox = message.getInboxId();
+        var actualTargetType = targetInbox.getTypeUrl();
         if (!expectedProjectionType.equals(actualTargetType)) {
             return false;
         }
-        List<Any> targets = getRequest().getTargetList();
+        var targets = getRequest().getTargetList();
         if (targets.isEmpty()) {
             return true;
         }
-        Any rawEntityId = targetInbox.getEntityId()
-                                     .getId();
+        var rawEntityId = targetInbox.getEntityId().getId();
         return targets.stream()
                       .anyMatch((t) -> t.equals(rawEntityId));
     }

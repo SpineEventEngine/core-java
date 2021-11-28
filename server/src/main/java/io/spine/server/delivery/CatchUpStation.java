@@ -29,8 +29,6 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
-import io.spine.base.EventMessage;
-import io.spine.core.Event;
 import io.spine.server.delivery.event.CatchUpStarted;
 
 import java.util.ArrayList;
@@ -85,8 +83,8 @@ final class CatchUpStation extends Station {
      */
     @Override
     public final Result process(Conveyor conveyor) {
-        JobFilter jobFilter = new JobFilter(jobs, conveyor);
-        Collection<InboxMessage> toDispatch = jobFilter.messagesToDispatch();
+        var jobFilter = new JobFilter(jobs, conveyor);
+        var toDispatch = jobFilter.messagesToDispatch();
         return dispatch(toDispatch, conveyor);
     }
 
@@ -113,9 +111,9 @@ final class CatchUpStation extends Station {
         List<InboxMessage> ordered = new ArrayList<>(messages);
         ordered.sort(COMPARATOR);
 
-        DeliveryErrors errors = action.executeFor(ordered);
+        var errors = action.executeFor(ordered);
         conveyor.markDelivered(ordered);
-        Result result = new Result(ordered.size(), errors);
+        var result = new Result(ordered.size(), errors);
         return result;
     }
 
@@ -155,7 +153,7 @@ final class CatchUpStation extends Station {
          * all the stages and are ready for the dispatching.
          */
         private Collection<InboxMessage> messagesToDispatch() {
-            for (InboxMessage message : conveyor) {
+            for (var message : conveyor) {
                 accept(message);
             }
             return dispatchToCatchUp.values();
@@ -175,7 +173,7 @@ final class CatchUpStation extends Station {
          *         the message to process
          */
         private void started(InboxMessage message) {
-            boolean dispatched = dispatchAsCatchUpSignal(message, CatchUpStarted.class);
+            var dispatched = dispatchAsCatchUpSignal(message, CatchUpStarted.class);
             if(dispatched) {
                 return;
             }
@@ -187,11 +185,10 @@ final class CatchUpStation extends Station {
         private boolean dispatchAsCatchUpSignal(InboxMessage message,
                                                 Class<? extends CatchUpSignal> signalType) {
             if(message.hasEvent()) {
-                Event event = message.getEvent();
-                Class<? extends EventMessage> eventType = event.enclosedMessage()
-                                                               .getClass();
+                var event = message.getEvent();
+                var eventType = event.enclosedMessage().getClass();
                 if (eventType.equals(signalType)) {
-                    DispatchingId dispatchingId = new DispatchingId(message);
+                    var dispatchingId = new DispatchingId(message);
                     dispatchToCatchUp.put(dispatchingId, message);
                     return true;
                 }
@@ -212,7 +209,7 @@ final class CatchUpStation extends Station {
          *         the message to process
          */
         private void inProgress(InboxMessage message) {
-            DispatchingId dispatchingId = new DispatchingId(message);
+            var dispatchingId = new DispatchingId(message);
             if (message.getStatus() == TO_CATCH_UP) {
                 if (dispatchToCatchUp.containsKey(dispatchingId)) {
                     conveyor.remove(message);
@@ -269,7 +266,7 @@ final class CatchUpStation extends Station {
          *         the message to process
          */
         private void completedWith(InboxMessage message) {
-            DispatchingId dispatchingId = new DispatchingId(message);
+            var dispatchingId = new DispatchingId(message);
             if (message.getStatus() == TO_CATCH_UP) {
                 if (!dispatchToCatchUp.containsKey(dispatchingId)) {
                     dispatchToCatchUp.put(dispatchingId, message);
@@ -290,11 +287,11 @@ final class CatchUpStation extends Station {
          *         the message to run through the filter
          */
         private void accept(InboxMessage message) {
-            for (CatchUp job : jobs) {
+            for (var job : jobs) {
                 if (!job.matches(message)) {
                     continue;
                 }
-                CatchUpStatus jobStatus = job.getStatus();
+                var jobStatus = job.getStatus();
 
                 switch (jobStatus) {
                     case STARTED:

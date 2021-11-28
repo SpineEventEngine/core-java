@@ -52,7 +52,7 @@ public final class CatchUpAlreadyStartedException extends IllegalStateException 
 
     @Override
     public String getMessage() {
-        String message = String.format(
+        var message = String.format(
                 "Cannot start the catch-up for the `%s` Projection, `%s`. " +
                         "Another catch-up is already in progress.",
                 projectionStateType, targetsAsString());

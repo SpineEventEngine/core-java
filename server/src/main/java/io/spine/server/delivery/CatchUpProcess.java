@@ -53,7 +53,6 @@ import io.spine.server.delivery.event.ShardProcessed;
 import io.spine.server.delivery.event.ShardProcessingRequested;
 import io.spine.server.event.AbstractStatefulReactor;
 import io.spine.server.event.EventFactory;
-import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.EventStreamQuery.Limit;
@@ -371,15 +370,15 @@ public final class CatchUpProcess<I>
      */
     @React
     Nothing handle(CatchUpRequested e, EventContext ctx) {
-        CatchUpId id = e.getId();
+        var id = e.getId();
 
-        CatchUp.Request request = e.getRequest();
+        var request = e.getRequest();
 
-        Timestamp sinceWhen = request.getSinceWhen();
-        Timestamp withWindow = subtract(sinceWhen, fromNanos(1));
+        var sinceWhen = request.getSinceWhen();
+        var withWindow = subtract(sinceWhen, fromNanos(1));
         builder().setWhenLastRead(withWindow)
                  .setRequest(request);
-        CatchUpStarted started = started(id);
+        var started = started(id);
         builder().setStatus(CatchUpStatus.STARTED);
         flushState();
 
@@ -388,9 +387,9 @@ public final class CatchUpProcess<I>
     }
 
     private void dispatchCatchUpStarted(CatchUpStarted started, EventContext ctx) {
-        Event event = wrapAsEvent(started, ctx);
-        Set<I> ids = targetsForCatchUpSignals(builder().getRequest());
-        Set<I> targetIds = dispatchAll(ImmutableList.of(event), ids);
+        var event = wrapAsEvent(started, ctx);
+        var ids = targetsForCatchUpSignals(builder().getRequest());
+        var targetIds = dispatchAll(ImmutableList.of(event), ids);
         builder().setInstancesToClear(targetIds.size());
     }
 
@@ -408,14 +407,14 @@ public final class CatchUpProcess<I>
     @React
     EitherOf3<HistoryEventsRecalled, HistoryFullyRecalled, Nothing>
     handle(EntityPreparedForCatchUp event) {
-        int leftToClear = builder().getInstancesToClear() - 1;
+        var leftToClear = builder().getInstancesToClear() - 1;
         builder().setInstancesToClear(leftToClear);
         if (leftToClear > 0) {
             return EitherOf3.withC(nothing());
         }
         builder().setStatus(IN_PROGRESS);
 
-        EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> result = recallMoreEvents();
+        var result = recallMoreEvents();
         if (result.hasA()) {
             return EitherOf3.withA(result.getA());
         } else {
@@ -457,16 +456,15 @@ public final class CatchUpProcess<I>
      * will still have to deal with the event potentially emitted during the turbulence.
      */
     private EitherOf2<HistoryEventsRecalled, HistoryFullyRecalled> recallMoreEvents() {
-        CatchUpId id = builder().getId();
-        CatchUp.Request request = builder().getRequest();
+        var id = builder().getId();
+        var request = builder().getRequest();
 
-        List<Event> readInThisRound = readMore(request, TURBULENCE.whenStarts(), queryLimit);
+        var readInThisRound = readMore(request, TURBULENCE.whenStarts(), queryLimit);
         if (!readInThisRound.isEmpty()) {
-            List<Event> stripped = stripLastTimestamp(readInThisRound);
+            var stripped = stripLastTimestamp(readInThisRound);
 
-            Event lastEvent = stripped.get(stripped.size() - 1);
-            Timestamp lastEventTimestamp = lastEvent.getContext()
-                                                    .getTimestamp();
+            var lastEvent = stripped.get(stripped.size() - 1);
+            var lastEventTimestamp = lastEvent.getContext().getTimestamp();
             builder().setWhenLastRead(lastEventTimestamp);
             dispatchAll(stripped);
         } else {
@@ -484,7 +482,7 @@ public final class CatchUpProcess<I>
      */
     @React
     LiveEventsPickedUp handle(HistoryFullyRecalled event, EventContext context) {
-        CatchUpId id = event.getId();
+        var id = event.getId();
         if (builder().getStatus() != FINALIZING) {
             builder().setStatus(FINALIZING);
             flushState();
@@ -493,11 +491,10 @@ public final class CatchUpProcess<I>
     }
 
     private LiveEventsPickedUp runFinalization(CatchUpId id) {
-        CatchUp.Request request = builder().getRequest();
-        List<Event> events = readMore(request, null, null);
+        var request = builder().getRequest();
+        var events = readMore(request, null, null);
         if (events.size() > 0) {
-            Timestamp lastEventTimestamp = events.get(events.size() - 1)
-                                                 .timestamp();
+            var lastEventTimestamp = events.get(events.size() - 1).timestamp();
             builder().setWhenLastRead(lastEventTimestamp);
             dispatchAll(events);
         }
@@ -521,9 +518,9 @@ public final class CatchUpProcess<I>
      */
     @React
     List<ShardProcessingRequested> handle(LiveEventsPickedUp event, EventContext context) {
-        List<Integer> affectedShards = builder().getAffectedShardList();
-        int totalShards = builder().getTotalShards();
-        List<ShardProcessingRequested> messages = toShardEvents(totalShards, affectedShards);
+        var affectedShards = builder().getAffectedShardList();
+        var totalShards = builder().getTotalShards();
+        var messages = toShardEvents(totalShards, affectedShards);
         return messages;
     }
 
@@ -542,39 +539,37 @@ public final class CatchUpProcess<I>
      */
     @React
     EitherOf3<CatchUpCompleted, ShardProcessingRequested, Nothing> handle(ShardProcessed event) {
-        CatchUp.Builder builder = builder();
+        var builder = builder();
         if (builder.getStatus() == COMPLETED) {
             return EitherOf3.withC(nothing());
         }
 
-        CatchUpId id = builder.getId();
-        Optional<CatchUp> stateVisibleToDelivery = findJob(id, event.getRunInfo());
+        var id = builder.getId();
+        var stateVisibleToDelivery = findJob(id, event.getRunInfo());
         if (stateVisibleToDelivery.isPresent()) {
-            CatchUp observedJob = stateVisibleToDelivery.get();
+            var observedJob = stateVisibleToDelivery.get();
             if (observedJob.getStatus() == FINALIZING) {
-                int indexOfFinalized = event.getIndex()
-                                            .getIndex();
+                var indexOfFinalized = event.getIndex().getIndex();
                 if (!builder.getFinalizedShardList().contains(indexOfFinalized)) {
                     builder.addFinalizedShard(indexOfFinalized);
                 }
-                List<Integer> affectedShards = builder.getAffectedShardList();
+                var affectedShards = builder.getAffectedShardList();
                 if (builder.getFinalizedShardList().containsAll(affectedShards)) {
-                    CatchUpCompleted completed = completeProcess(builder.getId());
+                    var completed = completeProcess(builder.getId());
                     return EitherOf3.withA(completed);
                 }
                 return EitherOf3.withC(nothing());
             }
         }
-        ShardProcessingRequested stillRequested = shardProcessingRequested(id, event.getIndex());
+        var stillRequested = shardProcessingRequested(id, event.getIndex());
         return EitherOf3.withB(stillRequested);
     }
 
     private static Optional<CatchUp> findJob(CatchUpId id, DeliveryRunInfo deliveryInfo) {
-        Optional<CatchUp> stateVisibileToDelivery =
-                deliveryInfo.getCatchUpJobList()
-                               .stream()
-                               .filter((job) -> id.equals(job.getId()))
-                               .findFirst();
+        var stateVisibileToDelivery = deliveryInfo.getCatchUpJobList()
+                .stream()
+                .filter((job) -> id.equals(job.getId()))
+                .findFirst();
         return stateVisibileToDelivery;
     }
 
@@ -589,23 +584,23 @@ public final class CatchUpProcess<I>
     @SuppressWarnings("unused") // We just need the fact of dispatching.
     @React
     List<ShardProcessingRequested> on(CatchUpCompleted ignored) {
-        int shardCount = builder().getTotalShards();
-        List<Integer> affectedShards = builder().getAffectedShardList();
+        var shardCount = builder().getTotalShards();
+        var affectedShards = builder().getAffectedShardList();
 
-        List<ShardProcessingRequested> events = toShardEvents(shardCount, affectedShards);
+        var events = toShardEvents(shardCount, affectedShards);
         return events;
     }
 
     private CatchUpCompleted completeProcess(CatchUpId id) {
         builder().setStatus(COMPLETED);
         flushState();
-        CatchUpCompleted completed = catchUpCompleted(id);
+        var completed = catchUpCompleted(id);
         return completed;
     }
 
     private Set<I> targetsForCatchUpSignals(CatchUp.Request request) {
         Set<I> ids;
-        List<Any> rawTargets = request.getTargetList();
+        var rawTargets = request.getTargetList();
         ids = rawTargets.isEmpty()
               ? ImmutableSet.copyOf(repository().index())
               : unpack(rawTargets);
@@ -613,22 +608,21 @@ public final class CatchUpProcess<I>
     }
 
     private Event wrapAsEvent(EventMessage event, EventContext context) {
-        EventFactory factory = EventFactory.forImport(context.actorContext(), producerId());
-        Event result = factory.createEvent(event, Versions.zero());
+        var factory = EventFactory.forImport(context.actorContext(), producerId());
+        var result = factory.createEvent(event, Versions.zero());
         return result;
     }
 
     private static List<Event> stripLastTimestamp(List<Event> events) {
-        int lastIndex = events.size() - 1;
-        Event lastEvent = events.get(lastIndex);
-        Timestamp lastTimestamp = lastEvent.getContext()
-                                           .getTimestamp();
-        for (int index = lastIndex; index >= 0; index--) {
-            Event event = events.get(index);
-            Timestamp timestamp = event.getContext()
-                                       .getTimestamp();
+        var lastIndex = events.size() - 1;
+        var lastEvent = events.get(lastIndex);
+        var lastTimestamp = lastEvent.getContext()
+                                     .getTimestamp();
+        for (var index = lastIndex; index >= 0; index--) {
+            var event = events.get(index);
+            var timestamp = event.getContext().getTimestamp();
             if (!timestamp.equals(lastTimestamp)) {
-                List<Event> result = events.subList(0, index + 1);
+                var result = events.subList(0, index + 1);
                 return result;
             }
         }
@@ -636,34 +630,33 @@ public final class CatchUpProcess<I>
     }
 
     private List<ShardProcessingRequested> toShardEvents(int totalShards, List<Integer> indexes) {
-        CatchUpId id = builder().getId();
+        var id = builder().getId();
         return indexes
                 .stream()
                 .map(indexValue -> {
-                    ShardIndex shardIndex = newIndex(indexValue, totalShards);
-                    ShardProcessingRequested event = shardProcessingRequested(id, shardIndex);
+                    var shardIndex = newIndex(indexValue, totalShards);
+                    var event = shardProcessingRequested(id, shardIndex);
                     return event;
                 })
                 .collect(toList());
     }
 
     private void recordAffectedShards(Set<I> actualTargets) {
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
-        String type = builder().getId()
-                               .getProjectionType();
-        TypeUrl projectionType = TypeUrl.parse(type);
+        var delivery = ServerEnvironment.instance()
+                                        .delivery();
+        var type = builder().getId().getProjectionType();
+        var projectionType = TypeUrl.parse(type);
 
-        Set<Integer> affectedShards =
+        var affectedShards =
                 actualTargets.stream()
                              .map(t -> delivery.whichShardFor(t, projectionType))
                              .map(ShardIndex::getIndex)
                              .collect(toSet());
-        List<Integer> previouslyAffectedShards = builder().getAffectedShardList();
+        var previouslyAffectedShards = builder().getAffectedShardList();
         Set<Integer> newValue = new TreeSet<>(affectedShards);
         newValue.addAll(previouslyAffectedShards);
 
-        int totalShards = delivery.shardCount();
+        var totalShards = delivery.shardCount();
         builder().clearAffectedShard()
                  .addAllAffectedShard(newValue)
                  .setTotalShards(totalShards);
@@ -674,12 +667,12 @@ public final class CatchUpProcess<I>
         if (events.isEmpty()) {
             return ImmutableSet.of();
         }
-        CatchUp.Request request = builder().getRequest();
-        List<Any> packedIds = request.getTargetList();
+        var request = builder().getRequest();
+        var packedIds = request.getTargetList();
         if (packedIds.isEmpty()) {
             return dispatchAll(events, new HashSet<>());
         } else {
-            Set<I> ids = unpack(packedIds);
+            var ids = unpack(packedIds);
             return dispatchAll(events, ids);
         }
     }
@@ -705,8 +698,8 @@ public final class CatchUpProcess<I>
         @Nullable Set<I> targetsForDispatch = targets.isEmpty()
                                               ? null
                                               : targets;
-        for (Event event : events) {
-            Set<I> targetsOfThisDispatch = dispatchOperation.perform(event, targetsForDispatch);
+        for (var event : events) {
+            var targetsOfThisDispatch = dispatchOperation.perform(event, targetsForDispatch);
             actualTargets.addAll(targetsOfThisDispatch);
         }
         if (!actualTargets.isEmpty()) {
@@ -722,11 +715,11 @@ public final class CatchUpProcess<I>
                 && Timestamps.compare(readBefore, builder().getWhenLastRead()) <= 0) {
             return ImmutableList.of();
         }
-        EventStreamQuery query = toEventQuery(request, readBefore, limit);
-        MemoizingObserver<Event> observer = new MemoizingObserver<>();
+        var query = toEventQuery(request, readBefore, limit);
+        var observer = new MemoizingObserver<Event>();
         eventStore.get()
                   .read(query, observer);
-        List<Event> allEvents = observer.responses();
+        var allEvents = observer.responses();
         return allEvents;
     }
 
@@ -744,8 +737,8 @@ public final class CatchUpProcess<I>
      * repository matching each other.
      */
     private ProjectionRepository<I, ?, ?> repository() {
-        CatchUpId id = builder().getId();
-        TypeUrl projectionType = TypeUrl.parse(id.getProjectionType());
+        var id = builder().getId();
+        var projectionType = TypeUrl.parse(id.getProjectionType());
         ProjectionRepository<I, ?, ?> result = CatchUpRepositories.cache()
                                                                   .get(projectionType);
         return result;
@@ -754,12 +747,11 @@ public final class CatchUpProcess<I>
     private EventStreamQuery toEventQuery(CatchUp.Request request,
                                           @Nullable Timestamp readBefore,
                                           @Nullable Limit limit) {
-        ImmutableList<EventFilter> filters = toFilters(request.getEventTypeList());
-        Timestamp readAfter = builder().getWhenLastRead();
-        EventStreamQuery.Builder builder =
-                EventStreamQuery.newBuilder()
-                                .setAfter(readAfter)
-                                .addAllFilter(filters);
+        var filters = toFilters(request.getEventTypeList());
+        var readAfter = builder().getWhenLastRead();
+        var builder = EventStreamQuery.newBuilder()
+                .setAfter(readAfter)
+                .addAllFilter(filters);
         if (readBefore != null) {
             builder.setBefore(readBefore);
         }
@@ -780,7 +772,7 @@ public final class CatchUpProcess<I>
      */
     @Override
     public boolean canDispatch(EventEnvelope envelope) {
-        EventMessage message = envelope.message();
+        var message = envelope.message();
         return message instanceof CatchUpSignal
                 || message instanceof ShardProcessed;
     }
@@ -788,7 +780,7 @@ public final class CatchUpProcess<I>
     @SuppressWarnings("ChainOfInstanceofChecks")    // Handling two distinct cases.
     @Override
     protected ImmutableSet<CatchUpId> route(EventEnvelope event) {
-        EventMessage message = event.message();
+        var message = event.message();
         if (message instanceof CatchUpSignal) {
             return routeCatchUpSignal(message);
         }
@@ -799,12 +791,12 @@ public final class CatchUpProcess<I>
     }
 
     private static ImmutableSet<CatchUpId> routeShardProcessed(ShardProcessed message) {
-        CatchUpId id = message.getProcess();
+        var id = message.getProcess();
         return ImmutableSet.of(id);
     }
 
     private static ImmutableSet<CatchUpId> routeCatchUpSignal(EventMessage message) {
-        CatchUpSignal signal = (CatchUpSignal) message;
+        var signal = (CatchUpSignal) message;
         return ImmutableSet.of(signal.getId());
     }
 

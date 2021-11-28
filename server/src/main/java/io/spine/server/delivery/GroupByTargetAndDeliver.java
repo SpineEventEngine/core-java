@@ -61,9 +61,9 @@ final class GroupByTargetAndDeliver implements DeliveryAction {
     @Override
     public DeliveryErrors executeFor(List<InboxMessage> messages) {
         List<Segment> segments = Segment.groupByTargetType(messages);
-        DeliveryErrors.Builder errors = DeliveryErrors.newBuilder();
-        for (Segment segment : segments) {
-            ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(segment.typeUrl());
+        var errors = DeliveryErrors.newBuilder();
+        for (var segment : segments) {
+            var delivery = inboxDeliveries.get(segment.typeUrl());
             List<InboxMessage> deliveryPackage = segment.messages();
             try {
                 delivery.deliver(deliveryPackage);

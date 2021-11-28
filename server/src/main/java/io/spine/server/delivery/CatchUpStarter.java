@@ -27,20 +27,15 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
-import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.event.CatchUpRequested;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.EventClass;
-import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -101,19 +96,17 @@ final class CatchUpStarter<I> {
     CatchUpId start(@Nullable Set<I> ids, Timestamp since) throws CatchUpAlreadyStartedException {
         checkNotActive(ids);
 
-        CatchUp.Request request = buildRequest(ids, since);
-        CatchUpId id = CatchUpId.newBuilder()
-                                .setUuid(Identifier.newUuid())
-                                .setProjectionType(projectionStateType.value())
-                                .vBuild();
-        CatchUpRequested eventMessage = CatchUpRequested
-                .newBuilder()
+        var request = buildRequest(ids, since);
+        var id = CatchUpId.newBuilder()
+                .setUuid(Identifier.newUuid())
+                .setProjectionType(projectionStateType.value())
+                .vBuild();
+        var eventMessage = CatchUpRequested.newBuilder()
                 .setId(id)
                 .setRequest(request)
                 .vBuild();
-        CatchUpEventFactory eventFactory =
-                new CatchUpEventFactory(projectionStateType, context.isMultitenant());
-        Event event = eventFactory.createEvent(eventMessage);
+        var eventFactory = new CatchUpEventFactory(projectionStateType, context.isMultitenant());
+        var event = eventFactory.createEvent(eventMessage);
         context.eventBus()
                .post(event);
         return id;
@@ -121,28 +114,28 @@ final class CatchUpStarter<I> {
 
     @SuppressWarnings("MethodWithMultipleLoops")
     private CatchUp.Request buildRequest(@Nullable Set<I> ids, Timestamp since) {
-        CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder();
+        var requestBuilder = CatchUp.Request.newBuilder();
         if (ids != null) {
-            for (I id : ids) {
-                Any packed = Identifier.pack(id);
+            for (var id : ids) {
+                var packed = Identifier.pack(id);
                 requestBuilder.addTarget(packed);
             }
         }
 
         requestBuilder.setSinceWhen(since);
-        for (EventClass eventClass : eventClasses) {
-            TypeName name = eventClass.typeName();
+        for (var eventClass : eventClasses) {
+            var name = eventClass.typeName();
             requestBuilder.addEventType(name.value());
         }
         return requestBuilder.vBuild();
     }
 
     private void checkNotActive(@Nullable Set<I> ids) throws CatchUpAlreadyStartedException {
-        Iterator<CatchUp> ongoing = storage.readByType(projectionStateType);
-        List<CatchUp> active = stream(ongoing)
+        var ongoing = storage.readByType(projectionStateType);
+        var active = stream(ongoing)
                 .filter(catchUp -> CatchUpStatus.COMPLETED != catchUp.getStatus())
                 .collect(toList());
-        boolean alreadyCatchingUp = hasIntersections(active, ids);
+        var alreadyCatchingUp = hasIntersections(active, ids);
         if (alreadyCatchingUp) {
             throw new CatchUpAlreadyStartedException(projectionStateType, ids);
         }
@@ -157,16 +150,16 @@ final class CatchUpStarter<I> {
         if (ids.isEmpty()) {
             return false;
         }
-        Set<Any> packedIds = ids.stream()
-                                .map(Identifier::pack)
-                                .collect(toSet());
-        for (CatchUp ongoingProcess : ongoing) {
-            List<Any> targets = ongoingProcess.getRequest()
-                                              .getTargetList();
+        var packedIds = ids.stream()
+                .map(Identifier::pack)
+                .collect(toSet());
+        for (var ongoingProcess : ongoing) {
+            var targets = ongoingProcess.getRequest()
+                                        .getTargetList();
             if (targets.isEmpty()) {
                 return true;
             }
-            for (Any target : targets) {
+            for (var target : targets) {
                 if (packedIds.contains(target)) {
                     return true;
                 }

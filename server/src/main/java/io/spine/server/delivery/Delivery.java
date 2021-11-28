@@ -37,7 +37,6 @@ import io.spine.core.BoundedContextNames;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
-import io.spine.server.NodeId;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.MulticastDispatchListener;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
@@ -48,7 +47,6 @@ import io.spine.type.TypeUrl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -368,7 +366,7 @@ public final class Delivery implements Logging {
      * @see #local() to create a syncrhonous version of the local {@code Delivery}
      */
     public static Delivery localAsync() {
-        Delivery delivery = newBuilder()
+        var delivery = newBuilder()
                 .setStrategy(UniformAcrossAllShards.singleShard())
                 .build();
         delivery.subscribe(new LocalDispatchingObserver(true));
@@ -384,17 +382,17 @@ public final class Delivery implements Logging {
         checkArgument(shardCount > 0, "Shard count must be positive");
         checkNotNull(deduplicationWindow);
 
-        DeliveryStrategy strategy = UniformAcrossAllShards.forNumber(shardCount);
+        var strategy = UniformAcrossAllShards.forNumber(shardCount);
         return localWithStrategyAndWindow(strategy, deduplicationWindow);
     }
 
     @VisibleForTesting
     static Delivery localWithStrategyAndWindow(DeliveryStrategy strategy,
                                                Duration deduplicationWindow) {
-        Delivery delivery =
-                newBuilder().setDeduplicationWindow(deduplicationWindow)
-                            .setStrategy(strategy)
-                            .build();
+        var delivery = newBuilder()
+                .setDeduplicationWindow(deduplicationWindow)
+                .setStrategy(strategy)
+                .build();
         delivery.subscribe(new LocalDispatchingObserver());
         return delivery;
     }
@@ -427,17 +425,17 @@ public final class Delivery implements Logging {
      */
     @CanIgnoreReturnValue
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
-        NodeId currentNode = ServerEnvironment.instance()
-                                              .nodeId();
-        Optional<ShardProcessingSession> picked = workRegistry.pickUp(index, currentNode);
-        if (!picked.isPresent()) {
+        var currentNode = ServerEnvironment.instance()
+                                           .nodeId();
+        var picked = workRegistry.pickUp(index, currentNode);
+        if (picked.isEmpty()) {
             return Optional.empty();
         }
-        ShardProcessingSession session = picked.get();
+        var session = picked.get();
         monitor.onDeliveryStarted(index);
 
         RunResult runResult;
-        int totalDelivered = 0;
+        var totalDelivered = 0;
         try {
             do {
                 runResult = runDelivery(session);
@@ -446,9 +444,9 @@ public final class Delivery implements Logging {
         } finally {
             session.complete();
         }
-        DeliveryStats stats = new DeliveryStats(index, totalDelivered);
+        var stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
-        Optional<InboxMessage> lateMessage = inboxStorage.newestMessageToDeliver(index);
+        var lateMessage = inboxStorage.newestMessageToDeliver(index);
         lateMessage.ifPresent(this::onNewMessage);
 
         return Optional.of(stats);
@@ -466,19 +464,19 @@ public final class Delivery implements Logging {
      * @return the results of the run
      */
     private RunResult runDelivery(ShardProcessingSession session) {
-        ShardIndex index = session.shardIndex();
+        var index = session.shardIndex();
 
-        Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
-        Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
+        var startingPage = inboxStorage.readAll(index, pageSize);
+        var maybePage = Optional.of(startingPage);
 
-        boolean shouldContinue = true;
+        var shouldContinue = true;
         List<DeliveryStage> stages = new ArrayList<>();
         Iterable<CatchUp> catchUpJobs = refreshCatchUpJobs();
         while (shouldContinue && maybePage.isPresent()) {
-            Page<InboxMessage> currentPage = maybePage.get();
-            ImmutableList<InboxMessage> messages = currentPage.contents();
+            var currentPage = maybePage.get();
+            var messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                DeliveryStage stage = deliverMessages(messages, index, catchUpJobs);
+                var stage = deliverMessages(messages, index, catchUpJobs);
                 stages.add(stage);
                 shouldContinue = monitorTellsToContinueAfter(stage);
             }
@@ -504,9 +502,9 @@ public final class Delivery implements Logging {
                                           ShardIndex index,
                                           Iterable<CatchUp> catchUpJobs) {
         DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
-        Conveyor conveyor = new Conveyor(messages, deliveredMessages);
+        var conveyor = new Conveyor(messages, deliveredMessages);
         List<Station> stations = conveyorStationsFor(catchUpJobs, action);
-        DeliveryStage stage = launch(conveyor, stations, index);
+        var stage = launch(conveyor, stations, index);
         return stage;
     }
 
@@ -520,10 +518,10 @@ public final class Delivery implements Logging {
      * @return the delivery stage results
      */
     private DeliveryStage launch(Conveyor conveyor, Iterable<Station> stations, ShardIndex index) {
-        int deliveredInBatch = 0;
+        var deliveredInBatch = 0;
 
-        for (Station station : stations) {
-            Station.Result result = station.process(conveyor);
+        for (var station : stations) {
+            var result = station.process(conveyor);
             result.errors()
                   .throwIfAny();
             deliveredInBatch += result.deliveredCount();
@@ -551,9 +549,9 @@ public final class Delivery implements Logging {
     }
 
     private void notifyOfDuplicatesIn(Conveyor conveyor) {
-        Stream<InboxMessage> streamOfDuplicates = conveyor.recentDuplicates();
+        var streamOfDuplicates = conveyor.recentDuplicates();
         streamOfDuplicates.forEach((message) -> {
-            ShardedMessageDelivery<InboxMessage> delivery = deliveries.get(message);
+            var delivery = deliveries.get(message);
             delivery.onDuplicate(message);
         });
     }
@@ -579,7 +577,7 @@ public final class Delivery implements Logging {
      */
     @SuppressWarnings("OverlyBroadCatchBlock")
     private void onNewMessage(InboxMessage message) {
-        for (ShardObserver observer : shardObservers) {
+        for (var observer : shardObservers) {
             try {
                 observer.onMessage(message);
             } catch (Exception e) {
@@ -613,7 +611,7 @@ public final class Delivery implements Logging {
      * @return new builder for the {@code CatchUpProcess}
      */
     public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repo) {
-        CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repo);
+        var builder = CatchUpProcess.newBuilder(repo);
         CatchUpRepositories.cache().put(repo);
         return builder.setStorage(catchUpStorage)
                       .setPageSize(catchUpPageSize);
@@ -727,7 +725,7 @@ public final class Delivery implements Logging {
      */
     @SuppressWarnings("TestOnlyProblems")   // The called code is not test-only.
     static ContextSpec contextSpec(boolean multitenant) {
-        String name = SYSTEM_DELIVERY.value();
+        var name = SYSTEM_DELIVERY.value();
         return multitenant ?
                ContextSpec.multitenant(name) :
                ContextSpec.singleTenant(name);

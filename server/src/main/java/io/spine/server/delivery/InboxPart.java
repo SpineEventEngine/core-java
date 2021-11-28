@@ -84,13 +84,12 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     }
 
     void store(M envelope, I entityId, InboxLabel label) {
-        InboxId inboxId = InboxIds.wrap(entityId, entityStateType);
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
-        ShardIndex shardIndex = delivery.whichShardFor(entityId, entityStateType);
-        InboxMessageId id = InboxMessageMixin.generateIdWith(shardIndex);
-        InboxMessage.Builder builder = InboxMessage
-                .newBuilder()
+        var inboxId = InboxIds.wrap(entityId, entityStateType);
+        var delivery = ServerEnvironment.instance()
+                                        .delivery();
+        var shardIndex = delivery.whichShardFor(entityId, entityStateType);
+        var id = InboxMessageMixin.generateIdWith(shardIndex);
+        var builder = InboxMessage.newBuilder()
                 .setId(id)
                 .setSignalId(signalIdFrom(envelope, entityId))
                 .setInboxId(inboxId)
@@ -99,7 +98,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setStatus(determineStatus(envelope, label))
                 .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);
-        InboxMessage message = builder.vBuild();
+        var message = builder.vBuild();
 
         TenantAwareRunner
                 .with(envelope.tenantId())
@@ -107,7 +106,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     }
 
     private InboxSignalId signalIdFrom(M envelope, I targetId) {
-        String uuid = extractUuidFrom(envelope);
+        var uuid = extractUuidFrom(envelope);
         return InboxIds.newSignalId(targetId, uuid);
     }
 
@@ -126,15 +125,14 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
     }
 
     private void callEndpoint(InboxMessage message, EndpointCall<I, M> call) {
-        M envelope = asEnvelope(message);
-        InboxLabel label = message.getLabel();
-        InboxId inboxId = message.getInboxId();
-        MessageEndpoint<I, M> endpoint =
-                endpoints.get(label, envelope)
-                         .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
+        var envelope = asEnvelope(message);
+        var label = message.getLabel();
+        var inboxId = message.getInboxId();
+        var endpoint = endpoints.get(label, envelope)
+                                .orElseThrow(() -> new LabelNotFoundException(inboxId, label));
 
         @SuppressWarnings("unchecked")    // Only IDs of type `I` are stored.
-                I unpackedId = (I) InboxIds.unwrap(message.getInboxId());
+        var unpackedId = (I) InboxIds.unwrap(message.getInboxId());
         TenantAwareRunner
                 .with(envelope.tenantId())
                 .run(() -> call.invoke(endpoint, unpackedId, envelope));
