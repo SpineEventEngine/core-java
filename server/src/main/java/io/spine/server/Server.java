@@ -28,7 +28,6 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -90,7 +89,7 @@ public final class Server implements Logging {
     public void start() throws IOException {
         grpcContainer.start();
         grpcContainer.addShutdownHook();
-        FluentLogger.Api info = _info();
+        var info = _info();
         grpcContainer
                 .port()
                 .ifPresent(p -> info.log("Server started, listening to the port %d.", p));
@@ -111,15 +110,15 @@ public final class Server implements Logging {
      * Initiates an orderly shutdown in which existing calls continue but new calls are rejected.
      */
     public void shutdown() {
-        FluentLogger.Api info = _info();
+        var info = _info();
         info.log("Shutting down the server...");
         grpcContainer.shutdown();
         contexts.forEach(context -> {
             try {
                 context.close();
             } catch (Exception e) {
-                String contextName = context.name()
-                                            .getValue();
+                var contextName = context.name()
+                                         .getValue();
                 _error().withCause(e)
                         .log("Unable to close the `%s` Context.", contextName);
             }
@@ -165,7 +164,7 @@ public final class Server implements Logging {
          * Creates a new instance of the server.
          */
         public Server build() {
-            Server result = new Server(this);
+            var result = new Server(this);
             return result;
         }
 
@@ -182,21 +181,20 @@ public final class Server implements Logging {
          * Creates a container for the passed Bounded Contexts.
          */
         private GrpcContainer createContainer() {
-            CommandService.Builder commandService = CommandService.newBuilder();
-            QueryService.Builder queryService = QueryService.newBuilder();
-            SubscriptionService.Builder subscriptionService = SubscriptionService.newBuilder();
+            var commandService = CommandService.newBuilder();
+            var queryService = QueryService.newBuilder();
+            var subscriptionService = SubscriptionService.newBuilder();
 
             contexts().forEach(context -> {
                 commandService.add(context);
                 queryService.add(context);
                 subscriptionService.add(context);
             });
-            GrpcContainer.Builder builder = createContainerBuilder();
-            GrpcContainer result = builder
-                    .addService(commandService.build())
-                    .addService(queryService.build())
-                    .addService(subscriptionService.build())
-                    .build();
+            var builder = createContainerBuilder();
+            var result = builder.addService(commandService.build())
+                                .addService(queryService.build())
+                                .addService(subscriptionService.build())
+                                .build();
             return result;
         }
 

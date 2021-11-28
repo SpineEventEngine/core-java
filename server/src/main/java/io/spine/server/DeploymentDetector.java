@@ -75,7 +75,7 @@ final class DeploymentDetector implements Supplier<DeploymentType> {
     }
 
     private static DeploymentType detect() {
-        Optional<String> gaeEnvironment = getProperty(APP_ENGINE_ENVIRONMENT_PATH);
+        var gaeEnvironment = getProperty(APP_ENGINE_ENVIRONMENT_PATH);
         if (gaeEnvironment.isPresent()) {
             if (APP_ENGINE_ENVIRONMENT_DEVELOPMENT_VALUE.equals(gaeEnvironment.get())) {
                 return APPENGINE_EMULATOR;

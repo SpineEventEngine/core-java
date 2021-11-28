@@ -136,9 +136,9 @@ public final class BoundedContextBuilder implements Logging {
     @Internal
     @VisibleForTesting
     public static BoundedContextBuilder assumingTests(boolean multitenant) {
-        ContextSpec spec = multitenant
-                           ? multitenant(assumingTestsValue())
-                           : singleTenant(assumingTestsValue());
+        var spec = multitenant
+                   ? multitenant(assumingTestsValue())
+                   : singleTenant(assumingTestsValue());
         return new BoundedContextBuilder(spec);
     }
 
@@ -198,9 +198,9 @@ public final class BoundedContextBuilder implements Logging {
      * the {@code BoundedContext}.
      */
     TenantIndex buildTenantIndex() {
-        TenantIndex result = isMultitenant()
-                             ? checkNotNull(tenantIndex)
-                             : TenantIndex.singleTenant();
+        var result = isMultitenant()
+                     ? checkNotNull(tenantIndex)
+                     : TenantIndex.singleTenant();
         return result;
     }
 
@@ -416,7 +416,7 @@ public final class BoundedContextBuilder implements Logging {
         if (commandDispatcher instanceof Repository) {
             return hasRepository((Repository<?, ?>) commandDispatcher);
         }
-        boolean result = commandDispatchers.contains(commandDispatcher);
+        var result = commandDispatchers.contains(commandDispatcher);
         return result;
     }
 
@@ -430,7 +430,7 @@ public final class BoundedContextBuilder implements Logging {
         if (eventDispatcher instanceof Repository) {
             return hasRepository((Repository<?, ?>) eventDispatcher);
         }
-        boolean result = eventDispatchers.contains(eventDispatcher);
+        var result = eventDispatchers.contains(eventDispatcher);
         return result;
     }
 
@@ -441,7 +441,7 @@ public final class BoundedContextBuilder implements Logging {
     @VisibleForTesting
     <I, E extends Entity<I, ?>> boolean hasRepository(Class<E> entityClass) {
         checkNotNull(entityClass);
-        boolean result =
+        var result =
                 repositories.stream()
                             .anyMatch(repository -> repository.entityClass()
                                                               .equals(entityClass));
@@ -455,7 +455,7 @@ public final class BoundedContextBuilder implements Logging {
     @VisibleForTesting
     boolean hasRepository(Repository<?, ?> repository) {
         checkNotNull(repository);
-        boolean result = repositories.contains(repository);
+        var result = repositories.contains(repository);
         return result;
     }
 
@@ -548,8 +548,8 @@ public final class BoundedContextBuilder implements Logging {
      * @return new {@code BoundedContext}
      */
     public BoundedContext build() {
-        SystemContext system = buildSystem();
-        BoundedContext result = buildDomain(system);
+        var system = buildSystem();
+        var result = buildDomain(system);
         _debug().log("%s created.", result.nameForLogging());
 
         registerRepositories(result);
@@ -572,7 +572,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private void registerRepositories(BoundedContext result) {
-        for (Repository<?, ?> repository : repositories) {
+        for (var repository : repositories) {
             result.register(repository);
             _debug().log("`%s` registered.", repository);
         }
@@ -584,7 +584,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private BoundedContext buildDomain(SystemContext system) {
-        SystemClient systemClient = system.createClient();
+        var systemClient = system.createClient();
         Function<BoundedContextBuilder, DomainContext> instanceFactory =
                 builder -> DomainContext.newInstance(builder, systemClient);
         BoundedContext result = buildPartial(instanceFactory, systemClient, system.stand());
@@ -592,16 +592,15 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem() {
-        BoundedContextBuilder system = new BoundedContextBuilder(systemSpec(), systemSettings);
-        Optional<? extends TenantIndex> tenantIndex = tenantIndex();
+        var system = new BoundedContextBuilder(systemSpec(), systemSettings);
+        var tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
-        SystemContext result =
-                system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);
+        var result = system.buildPartial(SystemContext::newInstance, NoOpSystemClient.INSTANCE);
         return result;
     }
 
     private ContextSpec systemSpec() {
-        ContextSpec systemSpec = this.spec.toSystem();
+        var systemSpec = this.spec.toSystem();
         if (!systemSettings.includePersistentEvents()) {
             systemSpec = systemSpec.notStoringEvents();
         }
@@ -620,7 +619,7 @@ public final class BoundedContextBuilder implements Logging {
         initTenantIndex();
         initCommandBus(client.writeSide());
         this.stand = createStand(systemStand);
-        B result = instanceFactory.apply(this);
+        var result = instanceFactory.apply(this);
         return result;
     }
 
@@ -639,8 +638,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private Stand createStand(@Nullable Stand systemStand) {
-        Stand.Builder result = Stand
-                .newBuilder()
+        var result = Stand.newBuilder()
                 .setMultitenant(isMultitenant());
         if (systemStand != null) {
             result.withSubscriptionRegistryFrom(systemStand);
@@ -654,11 +652,10 @@ public final class BoundedContextBuilder implements Logging {
     @Internal
     @VisibleForTesting
     public BoundedContextBuilder testingCopy() {
-        String name = name().getValue();
-        EventEnricher enricher =
-                eventEnricher().orElseGet(() -> EventEnricher.newBuilder()
-                                                             .build());
-        BoundedContextBuilder copy =
+        var name = name().getValue();
+        var enricher = eventEnricher().orElseGet(() ->
+                                                         EventEnricher.newBuilder().build());
+        var copy =
                 isMultitenant()
                 ? BoundedContext.multitenant(name)
                 : BoundedContext.singleTenant(name);

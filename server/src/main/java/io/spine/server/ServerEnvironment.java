@@ -40,7 +40,6 @@ import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.server.storage.system.SystemAwareStorageFactory;
 import io.spine.server.trace.TracerFactory;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -192,12 +191,12 @@ public final class ServerEnvironment implements AutoCloseable {
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public synchronized Delivery delivery() {
-        Class<? extends EnvironmentType> currentEnv = environment().type();
-        Optional<Delivery> currentDelivery = this.delivery.optionalValue(currentEnv);
+        var currentEnv = environment().type();
+        var currentDelivery = this.delivery.optionalValue(currentEnv);
         if (currentDelivery.isPresent()) {
             return currentDelivery.get();
         }
-        Delivery localDelivery = Delivery.local();
+        var localDelivery = Delivery.local();
         this.delivery.use(localDelivery, currentEnv);
         return localDelivery;
     }
@@ -235,7 +234,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * {@linkplain Supplier supplier} which utilizes system properties.
      */
     private void resetDeploymentType() {
-        Supplier<DeploymentType> supplier = DeploymentDetector.newInstance();
+        var supplier = DeploymentDetector.newInstance();
         configureDeployment(supplier);
     }
 
@@ -255,7 +254,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * Obtains the {@link TracerFactory} associated with the current environment, if it was set.
      */
     public Optional<TracerFactory> tracing() {
-        Class<? extends EnvironmentType> currentType = environment().type();
+        var currentType = environment().type();
         return this.tracerFactory.optionalValue(currentType);
     }
 
@@ -272,9 +271,9 @@ public final class ServerEnvironment implements AutoCloseable {
      *         {@linkplain TypeConfigurator#use(StorageFactory) configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        Class<? extends EnvironmentType> type = environment().type();
-        StorageFactory result = storageFactory.optionalValue(type)
-                .orElseThrow(() -> SuggestConfiguring.storageFactory(type));
+        var type = environment().type();
+        var result = storageFactory.optionalValue(type)
+                                   .orElseThrow(() -> SuggestConfiguring.storageFactory(type));
         return result;
     }
 
@@ -284,7 +283,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Internal
     public Optional<StorageFactory> optionalStorageFactory() {
-        Class<? extends EnvironmentType> type = environment().type();
+        var type = environment().type();
         return storageFactory.optionalValue(type);
     }
 
@@ -300,9 +299,9 @@ public final class ServerEnvironment implements AutoCloseable {
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
-        Class<? extends EnvironmentType> type = environment().type();
-        TransportFactory result = transportFactory.optionalValue(type)
-                .orElseThrow(() -> SuggestConfiguring.transportFactory(type));
+        var type = environment().type();
+        var result = transportFactory.optionalValue(type)
+                                     .orElseThrow(() -> SuggestConfiguring.transportFactory(type));
 
         return result;
     }
@@ -320,7 +319,7 @@ public final class ServerEnvironment implements AutoCloseable {
         tracerFactory.reset();
         storageFactory.reset();
         delivery.reset();
-        Class<? extends EnvironmentType> currentEnv = environment().type();
+        var currentEnv = environment().type();
         delivery.use(Delivery.local(), currentEnv);
         resetDeploymentType();
     }
@@ -361,7 +360,7 @@ public final class ServerEnvironment implements AutoCloseable {
 
         private static void registerCustomType(Class<? extends EnvironmentType> type) {
             @SuppressWarnings("unchecked") // checked by calling site.
-            Class<? extends CustomEnvironmentType> customType =
+            var customType =
                     (Class<? extends CustomEnvironmentType>) type;
             Environment.instance()
                        .register(customType);
@@ -472,7 +471,7 @@ public final class ServerEnvironment implements AutoCloseable {
          */
         @CanIgnoreReturnValue
         public TypeConfigurator use(StorageFactory factory) {
-            SystemAwareStorageFactory wrapped = wrap(factory);
+            var wrapped = wrap(factory);
             se.storageFactory.use(wrapped, type);
             return this;
         }
@@ -492,8 +491,8 @@ public final class ServerEnvironment implements AutoCloseable {
         public TypeConfigurator useStorageFactory(Fn<StorageFactory> fn) {
             checkNotNull(fn);
             se.storageFactory.lazyUse(() -> {
-                StorageFactory factory = fn.apply(type);
-                SystemAwareStorageFactory wrapped = wrap(factory);
+                var factory = fn.apply(type);
+                var wrapped = wrap(factory);
                 return wrapped;
             }, type);
             return this;
@@ -551,8 +550,8 @@ public final class ServerEnvironment implements AutoCloseable {
          */
         private static IllegalStateException
         raise(String prefixFmt, Class<? extends EnvironmentType> type, String featureParamName) {
-            String typeName = type.getSimpleName();
-            String fmt = prefixFmt + " Please call `ServerEnvironment.when(%s.class).use(%s);`.";
+            var typeName = type.getSimpleName();
+            var fmt = prefixFmt + " Please call `ServerEnvironment.when(%s.class).use(%s);`.";
             return newIllegalStateException(fmt, typeName, typeName, featureParamName);
         }
     }

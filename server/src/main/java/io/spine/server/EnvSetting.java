@@ -121,7 +121,7 @@ final class EnvSetting<V> {
      * empty {@code Optional} otherwise.
      */
     Optional<V> optionalValue(Class<? extends EnvironmentType> type) {
-        Optional<V> result = valueFor(type);
+        var result = valueFor(type);
         return result;
     }
 
@@ -137,7 +137,7 @@ final class EnvSetting<V> {
      */
     void ifPresentForEnvironment(Class<? extends EnvironmentType> type,
                                  SettingOperation<V> operation) throws Exception {
-        Optional<V> value = valueFor(type);
+        var value = valueFor(type);
         if (value.isPresent()) {
             operation.accept(value.get());
         }
@@ -153,9 +153,9 @@ final class EnvSetting<V> {
      *        unnecessary value instantiation.
      */
     void apply(SettingOperation<V> operation) throws Exception {
-        for (Value<V> v : environmentValues.values()) {
+        for (var v : environmentValues.values()) {
             if(v.isResolved()) {
-                V value = v.get();
+                var value = v.get();
                 operation.accept(value);
             }
         }
@@ -169,7 +169,7 @@ final class EnvSetting<V> {
      */
     V value(Class<? extends EnvironmentType> type) {
         checkNotNull(type);
-        Optional<V> result = valueFor(type);
+        var result = valueFor(type);
         return result.orElseThrow(
                 () -> newIllegalStateException("Env setting for environment `%s` is unset.",
                                                type));
@@ -220,18 +220,18 @@ final class EnvSetting<V> {
 
     private Optional<V> valueFor(Class<? extends EnvironmentType> type) {
         checkNotNull(type);
-        Value<V> value = this.environmentValues.get(type);
+        var value = this.environmentValues.get(type);
         if (value == null) {
-            Supplier<V> resultSupplier = this.fallbacks.get(type);
+            var resultSupplier = this.fallbacks.get(type);
             if (resultSupplier == null) {
                 return Optional.empty();
             }
-            V newValue = resultSupplier.get();
+            var newValue = resultSupplier.get();
             checkNotNull(newValue);
             this.use(newValue, type);
             return Optional.of(newValue);
         }
-        V result = value.get();
+        var result = value.get();
         return Optional.of(result);
     }
 

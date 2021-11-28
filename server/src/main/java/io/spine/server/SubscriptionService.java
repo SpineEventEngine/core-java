@@ -42,8 +42,6 @@ import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
-import io.spine.server.stand.Stand;
-import io.spine.server.stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
@@ -86,9 +84,7 @@ public final class SubscriptionService
      */
     public static SubscriptionService withSingle(BoundedContext context) {
         checkNotNull(context);
-        SubscriptionService result = newBuilder()
-                .add(context)
-                .build();
+        var result = newBuilder().add(context).build();
         return result;
     }
 
@@ -106,10 +102,10 @@ public final class SubscriptionService
     }
 
     private void subscribeTo(Topic topic, StreamObserver<Subscription> responseObserver) {
-        Target target = topic.getTarget();
-        Optional<BoundedContext> foundContext = findContextOf(target);
+        var target = topic.getTarget();
+        var foundContext = findContextOf(target);
         if (foundContext.isPresent()) {
-            Stand stand = foundContext.get().stand();
+            var stand = foundContext.get().stand();
             stand.subscribe(topic, responseObserver);
         } else {
             Set<BoundedContext> contexts = ImmutableSet.copyOf(typeToContextMap.values());
@@ -117,9 +113,9 @@ public final class SubscriptionService
                                 " Creating a subscription in contexts: %s.",
                         topic.getTarget().type(),
                         LIST_JOINER.join(contexts));
-            Subscription subscription = Subscriptions.from(topic);
-            for (BoundedContext context : contexts) {
-                Stand stand = context.stand();
+            var subscription = Subscriptions.from(topic);
+            for (var context : contexts) {
+                var stand = context.stand();
                 stand.subscribe(subscription);
             }
             responseObserver.onNext(subscription);
@@ -132,15 +128,15 @@ public final class SubscriptionService
         _debug().log("Activating the subscription: `%s`.", subscription);
         StreamObserver<SubscriptionUpdate> safeObserver = new ThreadSafeObserver<>(observer);
         try {
-            SubscriptionCallback callback = forwardingTo(safeObserver);
+            var callback = forwardingTo(safeObserver);
             StreamObserver<Response> responseObserver = forwardErrorsOnly(safeObserver);
-            Optional<BoundedContext> foundContext = findContextOf(subscription);
+            var foundContext = findContextOf(subscription);
             if (foundContext.isPresent()) {
-                Stand targetStand = foundContext.get().stand();
+                var targetStand = foundContext.get().stand();
                 targetStand.activate(subscription, callback, responseObserver);
             } else {
-                for (BoundedContext context : typeToContextMap.values()) {
-                    Stand stand = context.stand();
+                for (var context : typeToContextMap.values()) {
+                    var stand = context.stand();
                     stand.activate(subscription, callback, responseObserver);
                 }
             }
@@ -155,16 +151,16 @@ public final class SubscriptionService
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
         _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
         StreamObserver<Response> safeObserver = new ThreadSafeObserver<>(responseObserver);
-        Optional<BoundedContext> selected = findContextOf(subscription);
-        if (!selected.isPresent()) {
+        var selected = findContextOf(subscription);
+        if (selected.isEmpty()) {
             _warn().log("Trying to cancel a subscription `%s` which could not be found.",
                         lazy(subscription::toShortString));
             safeObserver.onCompleted();
             return;
         }
         try {
-            BoundedContext context = selected.get();
-            Stand stand = context.stand();
+            var context = selected.get();
+            var stand = context.stand();
             stand.cancel(subscription, safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
@@ -174,9 +170,8 @@ public final class SubscriptionService
     }
 
     private Optional<BoundedContext> findContextOf(Subscription subscription) {
-        Target target = subscription.getTopic()
-                                    .getTarget();
-        Optional<BoundedContext> result = findContextOf(target);
+        var target = subscription.getTopic().getTarget();
+        var result = findContextOf(target);
         return result;
     }
 
@@ -190,9 +185,9 @@ public final class SubscriptionService
      */
     @VisibleForTesting  /* Otherwise should have been `private`. */
     Optional<BoundedContext> findContextOf(Target target) {
-        TypeUrl type = target.type();
-        BoundedContext selected = typeToContextMap.get(type);
-        Optional<BoundedContext> result = Optional.ofNullable(selected);
+        var type = target.type();
+        var selected = typeToContextMap.get(type);
+        var result = Optional.ofNullable(selected);
         return result;
     }
 
@@ -238,14 +233,14 @@ public final class SubscriptionService
                 throw new IllegalStateException(
                         "Subscription service must have at least one Bounded Context.");
             }
-            ImmutableMap<TypeUrl, BoundedContext> map = createMap();
-            SubscriptionService result = new SubscriptionService(map);
+            var map = createMap();
+            var result = new SubscriptionService(map);
             return result;
         }
 
         private ImmutableMap<TypeUrl, BoundedContext> createMap() {
             ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
-            for (BoundedContext context : contexts) {
+            for (var context : contexts) {
                 putIntoMap(context, builder);
             }
             return builder.build();
@@ -253,7 +248,7 @@ public final class SubscriptionService
 
         private static void putIntoMap(BoundedContext context,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
-            Stand stand = context.stand();
+            var stand = context.stand();
             Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, context);
             stand.exposedTypes()
                  .forEach(putIntoMap);

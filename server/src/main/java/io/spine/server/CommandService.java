@@ -30,14 +30,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Error;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageIdExtensions;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
 
@@ -77,31 +74,29 @@ public final class CommandService
      */
     public static CommandService withSingle(BoundedContext context) {
         checkNotNull(context);
-        CommandService result = newBuilder()
-                .add(context)
-                .build();
+        var result = newBuilder().add(context).build();
         return result;
     }
 
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
-        CommandClass commandClass = CommandClass.of(request);
-        BoundedContext context = commandToContext.get(commandClass);
+        var commandClass = CommandClass.of(request);
+        var context = commandToContext.get(commandClass);
         if (context == null) {
             handleUnsupported(request, responseObserver);
         } else {
-            CommandBus commandBus = context.commandBus();
+            var commandBus = context.commandBus();
             commandBus.post(request, responseObserver);
         }
     }
 
     private void handleUnsupported(Command command, StreamObserver<Ack> responseObserver) {
-        UnsupportedCommandException unsupported = new UnsupportedCommandException(command);
+        var unsupported = new UnsupportedCommandException(command);
         _error().withCause(unsupported)
                 .log("Unsupported command posted to `CommandService`.");
-        Error error = unsupported.asError();
-        CommandId id = command.getId();
-        Ack response = MessageIdExtensions.causedError(id, error);
+        var error = unsupported.asError();
+        var id = command.getId();
+        var response = MessageIdExtensions.causedError(id, error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
@@ -139,7 +134,7 @@ public final class CommandService
          * @return {@code true} if the instance was added to the builder, {@code false} otherwise
          */
         public boolean contains(BoundedContext context) {
-            boolean contains = contexts.contains(context);
+            var contains = contexts.contains(context);
             return contains;
         }
 
@@ -147,8 +142,8 @@ public final class CommandService
          * Builds a new {@link CommandService}.
          */
         public CommandService build() {
-            ImmutableMap<CommandClass, BoundedContext> map = createMap();
-            CommandService result = new CommandService(map);
+            var map = createMap();
+            var result = new CommandService(map);
             return result;
         }
 
@@ -158,7 +153,7 @@ public final class CommandService
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
             ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
-            for (BoundedContext boundedContext : contexts) {
+            for (var boundedContext : contexts) {
                 putIntoMap(boundedContext, builder);
             }
             return builder.build();
@@ -170,9 +165,9 @@ public final class CommandService
          */
         private static void putIntoMap(BoundedContext context,
                                        ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
-            CommandBus commandBus = context.commandBus();
-            Set<CommandClass> cmdClasses = commandBus.registeredCommandClasses();
-            for (CommandClass commandClass : cmdClasses) {
+            var commandBus = context.commandBus();
+            var cmdClasses = commandBus.registeredCommandClasses();
+            for (var commandClass : cmdClasses) {
                 builder.put(commandClass, context);
             }
         }
