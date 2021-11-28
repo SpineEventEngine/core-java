@@ -27,7 +27,6 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets.SetView;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
@@ -73,7 +72,7 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
     public static <A extends Aggregate<?, ?, ?>> AggregateClass<A> asAggregateClass(Class<A> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        AggregateClass<A> result = (AggregateClass<A>)
+        var result = (AggregateClass<A>)
                 get(cls, AggregateClass.class, () -> new AggregateClass<>(cls));
         return result;
     }
@@ -116,9 +115,9 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
      * emitted by the aggregates.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
-        SetView<EventClass> methodResults = union(commandOutput(), reactionOutput());
-        SetView<EventClass> generatedEvents = union(methodResults, rejections());
-        SetView<EventClass> result = union(generatedEvents, importableEvents());
+        var methodResults = union(commandOutput(), reactionOutput());
+        var generatedEvents = union(methodResults, rejections());
+        var result = union(generatedEvents, importableEvents());
         return result.immutableCopy();
     }
 

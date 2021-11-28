@@ -33,7 +33,6 @@ import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.entity.EntityFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -65,7 +64,7 @@ public final class AggregatePartClass<A extends AggregatePart<?, ?, ?, ?>>
     AggregatePartClass<A> asAggregatePartClass(Class<A> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        AggregatePartClass<A> result = (AggregatePartClass<A>)
+        var result = (AggregatePartClass<A>)
                 get(cls, AggregatePartClass.class, () -> new AggregatePartClass<>(cls));
         return result;
     }
@@ -98,11 +97,11 @@ public final class AggregatePartClass<A extends AggregatePart<?, ?, ?, ?>>
         checkNotNull(bc);
         checkNotNull(aggregateId);
         @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
-        Class<R> rootClass = (Class<R>) rootClass();
+        var rootClass = (Class<R>) rootClass();
         R result;
         try {
-            Constructor<R> ctor = rootClass.getDeclaredConstructor(BoundedContext.class,
-                                                                   aggregateId.getClass());
+            var ctor = rootClass.getDeclaredConstructor(BoundedContext.class,
+                                                        aggregateId.getClass());
             ctor.setAccessible(true);
             result = ctor.newInstance(bc, aggregateId);
         } catch (NoSuchMethodException | InvocationTargetException |

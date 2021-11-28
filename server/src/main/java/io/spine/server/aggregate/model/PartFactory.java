@@ -60,9 +60,9 @@ final class PartFactory<A extends AggregatePart<?, ?, ?, ?>> extends AbstractEnt
      */
     @Override
     public A create(Object root) {
-        Constructor<A> ctor = constructor();
+        var ctor = constructor();
         try {
-            A aggregatePart = ctor.newInstance(root);
+            var aggregatePart = ctor.newInstance(root);
             return aggregatePart;
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
@@ -104,16 +104,16 @@ final class PartFactory<A extends AggregatePart<?, ?, ?, ?>> extends AbstractEnt
             throw noSuchConstructor(cls, rootClass);
         }
         @SuppressWarnings("unchecked") // The cast is protected by generic params.
-                Constructor<A> result = (Constructor<A>) ctor;
+        var result = (Constructor<A>) ctor;
         return result;
     }
 
     private static ModelError noSuchConstructor(Class<?> partClass, Class<?> rootClass) {
-        String errMsg =
+        var errMsg =
                 format("`%s` class must declare a constructor with one parameter of the `%s` type.",
                        partClass.getName(),
                        rootClass.getName());
-        NoSuchMethodException cause = new NoSuchMethodException(errMsg);
+        var cause = new NoSuchMethodException(errMsg);
         throw new ModelError(cause);
     }
 
