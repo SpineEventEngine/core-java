@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.Version;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.model.CommandHandlerClass;
-import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventBus;
@@ -83,7 +82,7 @@ public abstract class AbstractCommandHandler
      */
     @Override
     public void dispatch(CommandEnvelope envelope) {
-        CommandHandlerMethod method = thisClass.handlerOf(envelope);
+        var method = thisClass.handlerOf(envelope);
         DispatchOutcomeHandler
                 .from(method.invoke(this, envelope))
                 .onEvents(this::postEvents)

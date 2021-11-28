@@ -31,7 +31,6 @@ import com.google.protobuf.Any;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
-import io.spine.core.Origin;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
@@ -117,24 +116,22 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
     }
 
     private void postHandlerFailedUnexpectedly(SignalEnvelope<?, ?, ?> signal, Error error) {
-        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
-                .newBuilder()
+        var systemEvent = HandlerFailedUnexpectedly.newBuilder()
                 .setEntity(eventAnchor.get())
                 .setHandledSignal(signal.messageId())
                 .setError(error)
                 .vBuild();
-        Origin origin = signal.asMessageOrigin();
+        var origin = signal.asMessageOrigin();
         system.postEvent(systemEvent, origin);
     }
 
     private void postSignalRejected(SignalEnvelope<?, ?, ?> signal, Event rejection) {
-        CommandRejected commandRejected = CommandRejected
-                .newBuilder()
+        var commandRejected = CommandRejected.newBuilder()
                 .setId(signal.messageId()
                              .asCommandId())
                 .setRejectionEvent(rejection)
                 .vBuild();
-        Origin origin = rejection.asMessageOrigin();
+        var origin = rejection.asMessageOrigin();
         system.postEvent(commandRejected, origin);
     }
 
@@ -154,8 +151,8 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher, Co
         if (!(o instanceof AbstractCommandDispatcher)) {
             return false;
         }
-        AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) o;
-        boolean equals = id().equals(otherHandler.id());
+        var otherHandler = (AbstractCommandDispatcher) o;
+        var equals = id().equals(otherHandler.id());
         return equals;
     }
 
