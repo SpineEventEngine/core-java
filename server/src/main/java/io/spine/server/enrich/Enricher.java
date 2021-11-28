@@ -70,21 +70,21 @@ public abstract class Enricher<M extends Message, C extends EnrichableMessageCon
         if (schema.isEmpty()) {
             return source;
         }
-        E result = source.toEnriched(this);
+        var result = source.toEnriched(this);
         return  result;
     }
 
     @Override
     public Optional<Enrichment> createEnrichment(M message, C context) {
         @SuppressWarnings("unchecked") // correct type is ensured by a Bus which uses the Enricher.
-        Class<? extends M> cls = (Class<? extends M>) message.getClass();
-        @Nullable SchemaFn fn = schema.enrichmentOf(cls);
+        var cls = (Class<? extends M>) message.getClass();
+        @SuppressWarnings("unchecked")  /* Expected according to the `fn` setup. */
+        @Nullable SchemaFn<M, C> fn = (SchemaFn<M, C>) schema.enrichmentOf(cls);
         if (fn == null) {
             return Optional.empty();
         }
 
-        @SuppressWarnings("unchecked")
-        Enrichment enrichment = fn.apply(message, context);
+        var enrichment = fn.apply(message, context);
         return Optional.of(enrichment);
     }
 }

@@ -35,6 +35,7 @@ import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Abstract base for functions that produce {@link Enrichment} by applying aggregated enrichment
@@ -52,10 +53,9 @@ abstract class SchemaFn<M extends Message, C extends EnrichableMessageContext>
     public Enrichment apply(M m, C c) {
         checkNotNull(m);
         checkNotNull(c);
-        Container.Builder container = Container.newBuilder();
+        var container = Container.newBuilder();
         applyAndPut(container, m, c);
-        Enrichment result = Enrichment
-                .newBuilder()
+        var result = Enrichment.newBuilder()
                 .setContainer(container)
                 .build();
         return result;
@@ -71,8 +71,7 @@ abstract class SchemaFn<M extends Message, C extends EnrichableMessageContext>
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method.
     static void put(Container.Builder container, Message output) {
-        String typeName = TypeName.of(output)
-                                  .value();
+        var typeName = TypeName.of(output).value();
         container.putItems(typeName, AnyPacker.pack(output));
     }
 
@@ -83,11 +82,12 @@ abstract class SchemaFn<M extends Message, C extends EnrichableMessageContext>
     void checkResult(@Nullable Message output,
                      Message sourceMessage,
                      EnrichableMessageContext context,
-                     EnrichmentFn function) {
-        checkNotNull(
+                     EnrichmentFn<?, ?, ?> function) {
+        requireNonNull(
                 output,
-                "`%s` produced `null` for the source message `%s` (context: `%s`).",
-                function, sourceMessage, context
+                String.format(
+                        "`%s` produced `null` for the source message `%s` (context: `%s`).",
+                        function, sourceMessage, context)
         );
     }
 }

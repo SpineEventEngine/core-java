@@ -27,7 +27,6 @@
 package io.spine.server.enrich;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.EnrichableMessageContext;
@@ -85,7 +84,7 @@ public abstract class EnricherBuilder<M extends Message,
                       " implements this interface.",
                       enrichmentClass.getCanonicalName());
         checkNotNull(func);
-        Key key = new Key(messageClassOrInterface, enrichmentClass);
+        var key = new Key(messageClassOrInterface, enrichmentClass);
         checkDirectDuplication(key);
         checkInterfaceDuplication(key);
         checkImplDuplication(key);
@@ -108,11 +107,11 @@ public abstract class EnricherBuilder<M extends Message,
     }
 
     private void checkInterfaceDuplication(Key key) {
-        Class<? extends Message> sourceClass = key.sourceClass();
-        Class<? extends Message> enrichmentClass = key.enrichmentClass();
-        ImmutableSet<Class<? extends Message>> interfaces = interfacesOf(sourceClass);
+        var sourceClass = key.sourceClass();
+        var enrichmentClass = key.enrichmentClass();
+        var interfaces = interfacesOf(sourceClass);
         interfaces.forEach(i -> {
-            Key keyByInterface = new Key(i, enrichmentClass);
+            var keyByInterface = new Key(i, enrichmentClass);
             checkArgument(
                     !functions.containsKey(keyByInterface),
                     "The builder already has the function which creates enrichments of the class" +
@@ -126,11 +125,11 @@ public abstract class EnricherBuilder<M extends Message,
     }
 
     private void checkImplDuplication(Key key) {
-        Class<? extends Message> sourceInterface = key.sourceClass();
-        Class<? extends Message> enrichmentClass = key.enrichmentClass();
+        var sourceInterface = key.sourceClass();
+        var enrichmentClass = key.enrichmentClass();
         functions.forEach((k, v) -> {
-            Class<? extends Message> entrySourceCls = k.sourceClass();
-            Class<? extends Message> entryEnrichmentCls = k.enrichmentClass();
+            var entrySourceCls = k.sourceClass();
+            var entryEnrichmentCls = k.enrichmentClass();
             checkArgument(
                     !sourceInterface.isAssignableFrom(entrySourceCls)
                     || !enrichmentClass.equals(entryEnrichmentCls),
@@ -157,7 +156,7 @@ public abstract class EnricherBuilder<M extends Message,
     }
 
     /** Creates a new {@code Enricher}. */
-    public abstract Enricher build();
+    public abstract Enricher<M, C> build();
 
     /**
      * Obtains functions added to the builder by the time of the call.
@@ -204,7 +203,7 @@ public abstract class EnricherBuilder<M extends Message,
             if (!(obj instanceof Key)) {
                 return false;
             }
-            final Key other = (Key) obj;
+            final var other = (Key) obj;
             return Objects.equals(this.sourceClass, other.sourceClass)
                     && Objects.equals(this.enrichmentClass, other.enrichmentClass);
         }
