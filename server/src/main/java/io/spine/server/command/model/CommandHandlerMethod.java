@@ -64,7 +64,7 @@ public final class CommandHandlerMethod
         Success outcome =
                 EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
         if (outcome.getProducedEvents().getEventCount() == 0) {
-            String errorMessage = format(
+            var errorMessage = format(
                     "Command handler %s did not produce any events when processing command %s",
                     this,
                     handledSignal.id()

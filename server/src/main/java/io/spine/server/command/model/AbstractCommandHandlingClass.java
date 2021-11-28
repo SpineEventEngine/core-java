@@ -76,12 +76,11 @@ public abstract class AbstractCommandHandlingClass<C,
 
     @Override
     public ImmutableSet<EventClass> rejections() {
-        ImmutableSet<EventClass> result =
-                commands.methods()
-                        .stream()
-                        .map(CommandAcceptingMethod::rejections)
-                        .flatMap(ImmutableSet::stream)
-                        .collect(toImmutableSet());
+        var result = commands.methods()
+                .stream()
+                .map(CommandAcceptingMethod::rejections)
+                .flatMap(ImmutableSet::stream)
+                .collect(toImmutableSet());
         return result;
     }
 

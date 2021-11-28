@@ -30,8 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.base.RejectionThrowable;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.server.EventProducer;
 import io.spine.server.dispatch.Success;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -76,26 +74,25 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
      * if no rejections are thrown.
      */
     public ImmutableSet<EventClass> rejections() {
-        Class<?>[] exceptionTypes = rawMethod().getExceptionTypes();
+        var exceptionTypes = rawMethod().getExceptionTypes();
         @SuppressWarnings("unchecked") // The cast is safe as we filter before.
-        ImmutableSet<EventClass> result =
-                Arrays.stream(exceptionTypes)
-                      .filter(RejectionThrowable.class::isAssignableFrom)
-                      .map(c -> (Class<RejectionThrowable>) c)
-                      .map(EventClass::fromThrowable)
-                      .collect(toImmutableSet());
+        var result = Arrays.stream(exceptionTypes)
+                .filter(RejectionThrowable.class::isAssignableFrom)
+                .map(c -> (Class<RejectionThrowable>) c)
+                .map(EventClass::fromThrowable)
+                .collect(toImmutableSet());
         return result;
     }
 
     @Override
     protected final Optional<Success>
     handleRejection(T target, CommandEnvelope origin, RejectionThrowable throwable) {
-        Command command = origin.outerObject();
+        var command = origin.outerObject();
         throwable.initProducer(target.producerId());
-        Event rejection = reject(command, throwable);
-        Success success = Success.newBuilder()
-                                 .setRejection(rejection)
-                                 .vBuild();
+        var rejection = reject(command, throwable);
+        var success = Success.newBuilder()
+                .setRejection(rejection)
+                .vBuild();
         return Optional.of(success);
     }
 

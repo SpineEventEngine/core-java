@@ -57,7 +57,7 @@ public final class CommandSubstituteMethod
      */
     @Override
     public Success fromEmpty(CommandEnvelope handledSignal) {
-        String errorMessage = format(
+        var errorMessage = format(
                 "Commander method `%s` did not produce any result for command with ID `%s`.",
                 this,
                 handledSignal.id()

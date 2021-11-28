@@ -76,8 +76,7 @@ public final class CommandReactionMethod
     @Override
     protected void checkAttributesMatch(EventEnvelope envelope) {
         super.checkAttributesMatch(envelope);
-        boolean expected = envelope.context()
-                                   .getExternal();
+        var expected = envelope.context().getExternal();
         ensureExternalMatch(expected);
     }
 }

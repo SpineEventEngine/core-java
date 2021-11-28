@@ -100,7 +100,7 @@ public class CommandReactionSignature
      */
     @Override
     protected boolean skipMethod(Method method) {
-        boolean parentResult = !super.skipMethod(method);
+        var parentResult = !super.skipMethod(method);
         if (parentResult) {
             return MethodParams.firstIsCommand(method);
         }
@@ -133,14 +133,12 @@ public class CommandReactionSignature
 
         REJECTION_AND_COMMAND_CONTEXT(classImplementing(RejectionMessage.class),
                                       exactly(CommandContext.class)) {
-
             @Override
             public ExtractedArguments extractArguments(EventEnvelope event) {
-                CommandContext originContext =
-                        event.context()
-                             .getRejection()
-                             .getCommand()
-                             .getContext();
+                var originContext = event.context()
+                                         .getRejection()
+                                         .getCommand()
+                                         .getContext();
                 return ExtractedArguments.ofTwo(event.message(), originContext);
             }
         };

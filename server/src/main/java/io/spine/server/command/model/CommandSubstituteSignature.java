@@ -72,7 +72,7 @@ public class CommandSubstituteSignature extends CommandAcceptingSignature<Comman
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
     protected boolean skipMethod(Method method) {
-        boolean parentResult = !super.skipMethod(method);
+        var parentResult = !super.skipMethod(method);
         if (parentResult) {
             return !MethodParams.firstIsCommand(method);
         }
