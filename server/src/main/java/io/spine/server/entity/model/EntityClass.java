@@ -27,7 +27,6 @@
 package io.spine.server.entity.model;
 
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import com.google.protobuf.Descriptors.Descriptor;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.server.entity.DefaultEntityFactory;
@@ -100,8 +99,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     public static <E extends Entity<?, ?>> EntityClass<E> asEntityClass(Class<E> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        EntityClass<E> result = (EntityClass<E>)
-                get(cls, EntityClass.class, () -> new EntityClass<>(cls));
+        var result = (EntityClass<E>) get(cls, EntityClass.class, () -> new EntityClass<>(cls));
         return result;
     }
 
@@ -114,8 +112,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     EntityClass<E> asParameterizedEntityClass(Class<E> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        EntityClass<E> result = (EntityClass<E>)
-                get(cls, EntityClass.class, () -> new EntityClass<>(cls));
+        var result = (EntityClass<E>) get(cls, EntityClass.class, () -> new EntityClass<>(cls));
         return result;
     }
 
@@ -124,7 +121,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      */
     public E create(Object constructionArgument) {
         checkNotNull(constructionArgument);
-        E result = factory().create(constructionArgument);
+        var result = factory().create(constructionArgument);
         return result;
     }
 
@@ -149,12 +146,12 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      * Obtains the default state for this class of entities.
      */
     public final EntityState<?> defaultState() {
-        EntityState<?> result = defaultState;
+        var result = defaultState;
         if (result == null) {
             synchronized (this) {
                 result = defaultState;
                 if (result == null) {
-                    Class<? extends EntityState<?>> stateClass = stateClass();
+                    var stateClass = stateClass();
                     defaultState = defaultInstance(stateClass);
                     result = defaultState;
                 }
@@ -188,8 +185,8 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      * Obtains the entity state type.
      */
     public final MessageType stateType() {
-        Descriptor descriptor = defaultState().getDescriptorForType();
-        MessageType result = new MessageType(descriptor);
+        var descriptor = defaultState().getDescriptorForType();
+        var result = new MessageType(descriptor);
         return result;
     }
 
@@ -204,8 +201,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      * Obtains the name of this class as an {@link EntityTypeName}.
      */
     public final EntityTypeName typeName() {
-        return EntityTypeName
-                .newBuilder()
+        return EntityTypeName.newBuilder()
                 .setJavaClassName(value().getCanonicalName())
                 .vBuild();
     }
@@ -237,7 +233,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
         if (!super.equals(o)) {
             return false;
         }
-        EntityClass<?> that = (EntityClass<?>) o;
+        var that = (EntityClass<?>) o;
         return Objects.equals(idClass, that.idClass) &&
                 Objects.equals(stateClass, that.stateClass) &&
                 Objects.equals(entityStateType, that.entityStateType);
@@ -266,7 +262,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      */
     public static <I> Class<I> idClass(Class<? extends Entity<?, ?>> cls) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-                Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
+        var idClass = (Class<I>) Entity.GenericParameter.ID.argumentIn(cls);
         try {
             Identifier.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
@@ -285,7 +281,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     public static <S extends EntityState<?>> Class<S>
     stateClassOf(Class<? extends Entity<?, ?>> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
+        var result = (Class<S>) Entity.GenericParameter.STATE.argumentIn(entityClass);
         return result;
     }
 }

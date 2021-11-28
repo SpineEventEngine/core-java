@@ -51,8 +51,8 @@ public interface StateSubscribingClass {
      * entity states, either domestic or external.
      */
     default boolean subscribesToStates() {
-        boolean dispatchesDomestic = !domesticStates().isEmpty();
-        boolean dispatchesExternal = !externalStates().isEmpty();
+        var dispatchesDomestic = !domesticStates().isEmpty();
+        var dispatchesExternal = !externalStates().isEmpty();
         return dispatchesDomestic || dispatchesExternal;
     }
 }

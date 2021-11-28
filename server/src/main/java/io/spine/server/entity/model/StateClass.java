@@ -52,7 +52,7 @@ public final class StateClass<I> extends MessageClass<EntityState<?>> {
      */
     public static <I> StateClass<I> of(Entity<I, ?> entity) {
         checkNotNull(entity);
-        EntityState<I> state = entity.state();
+        var state = entity.state();
         return of(state);
     }
 
