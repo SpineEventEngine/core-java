@@ -27,7 +27,6 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
-import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
@@ -70,8 +69,8 @@ final class DeadMessageFilter<T extends Message,
     public Optional<Ack> filter(E envelope) {
         Collection<D> dispatchers = registry.dispatchersOf(envelope);
         if (dispatchers.isEmpty()) {
-            MessageUnhandled report = deadMessageHandler.handle(envelope);
-            Error error = report.asError();
+            var report = deadMessageHandler.handle(envelope);
+            var error = report.asError();
             return reject(envelope, error);
         } else {
             return letPass();

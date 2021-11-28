@@ -71,7 +71,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
     public void register(D dispatcher) {
         checkDispatcher(dispatcher);
         Set<C> messageClasses = dispatcher.messageClasses();
-        for (C messageClass : messageClasses) {
+        for (var messageClass : messageClasses) {
             dispatchers.put(messageClass, dispatcher);
         }
     }
@@ -81,7 +81,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
         checkNotEmpty(dispatcher);
 
         Set<C> messageClasses = dispatcher.messageClasses();
-        for (C messageClass : messageClasses) {
+        for (var messageClass : messageClasses) {
             dispatchers.remove(messageClass, dispatcher);
         }
     }
@@ -109,7 +109,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
      */
     final Set<D> dispatchersOf(E envelope) {
         checkNotNull(envelope);
-        C messageClass = classOf(envelope);
+        var messageClass = classOf(envelope);
         Set<D> dispatchers = this.dispatchers
                 .get(messageClass)
                 .stream()
@@ -138,9 +138,9 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
      */
     protected Optional<D> dispatcherOf(E envelope) {
         checkNotNull(envelope);
-        Set<D> dispatchers = dispatchersOf(envelope);
+        var dispatchers = dispatchersOf(envelope);
         checkNotMoreThanOne(dispatchers, classOf(envelope));
-        Optional<D> result = dispatchers.stream()
+        var result = dispatchers.stream()
                                         .findFirst();
         return result;
     }
@@ -154,7 +154,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
      */
     protected Set<D> dispatchersOf(C messageClass) {
         checkNotNull(messageClass);
-        Collection<D> dispatchersForType = dispatchers.get(messageClass);
+        var dispatchersForType = dispatchers.get(messageClass);
         return ImmutableSet.copyOf(dispatchersForType);
     }
 
@@ -167,15 +167,15 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
      *         if more than one dispatcher is found
      */
     protected Optional<? extends D> getDispatcherForType(C messageClass) {
-        Collection<D> dispatchersOfClass = dispatchers.get(messageClass);
+        var dispatchersOfClass = dispatchers.get(messageClass);
         checkNotMoreThanOne(dispatchersOfClass, messageClass);
-        Optional<D> dispatcher = dispatchersOfClass.stream()
+        var dispatcher = dispatchersOfClass.stream()
                                                    .findFirst();
         return dispatcher;
     }
 
     private void checkNotMoreThanOne(Collection<D> dispatchers, C messageClass) {
-        int size = dispatchers.size();
+        var size = dispatchers.size();
         checkState(size <= 1,
                    "More than one (%s) dispatchers found for the message class `%s`.",
                    size, messageClass);
@@ -183,7 +183,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
 
     private C classOf(E envelope) {
         @SuppressWarnings("unchecked") // Logically valid.
-        C messageClass = (C) envelope.messageClass();
+        var messageClass = (C) envelope.messageClass();
         return messageClass;
     }
 
@@ -203,7 +203,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
         checkNotEmpty(dispatcher);
     }
 
-    private static <D extends MessageDispatcher> void checkNotEmpty(D dispatcher) {
+    private static <D extends MessageDispatcher<?, ?>> void checkNotEmpty(D dispatcher) {
         Set<?> messageClasses = dispatcher.messageClasses();
         checkArgument(!messageClasses.isEmpty(),
                       "The dispatcher (%s) has empty message class set.",

@@ -231,7 +231,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
         private FieldCheck() {
         }
 
-        private static void check(BusBuilder builder) {
+        private static void check(BusBuilder<?, ?, ?, ?, ?> builder) {
             checkSet(builder.systemWriteSide, SystemWriteSide.class, SYSTEM_METHOD);
             checkSet(builder.tenantIndex, TenantIndex.class, TENANT_INDEX_METHOD);
         }
@@ -251,7 +251,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
         }
 
         private static IllegalStateException newException(Class<?> fieldClass, String setterName) {
-            String errorMessage = format(ERROR_FORMAT, fieldClass.getSimpleName(), setterName);
+            var errorMessage = format(ERROR_FORMAT, fieldClass.getSimpleName(), setterName);
             return new IllegalStateException(errorMessage);
         }
     }

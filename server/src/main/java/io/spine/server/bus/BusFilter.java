@@ -93,7 +93,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      */
     default Optional<Ack> reject(E envelope) {
         checkNotNull(envelope);
-        Ack ack = acknowledge(envelope.id());
+        var ack = acknowledge(envelope.id());
         return Optional.of(ack);
     }
 
@@ -113,7 +113,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
     default Optional<Ack> reject(E envelope, Error cause) {
         checkNotNull(envelope);
         checkNotNull(cause);
-        Ack ack = causedError(envelope.id(), cause);
+        var ack = causedError(envelope.id(), cause);
         return Optional.of(ack);
     }
 
