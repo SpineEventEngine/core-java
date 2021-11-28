@@ -103,13 +103,13 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      * @return loaded entity
      */
     public synchronized E load(I id) {
-        IdInTenant<I> idInTenant = idInTenant(id);
+        var idInTenant = idInTenant(id);
         if (!idsToCache.contains(idInTenant)) {
             return loadFn.apply(idInTenant.value());
         }
 
         if (!cache.containsKey(idInTenant)) {
-            E entity = loadFn.apply(idInTenant.value());
+            var entity = loadFn.apply(idInTenant.value());
             cache.put(idInTenant, entity);
             return entity;
         }
@@ -142,8 +142,8 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      *         an identifier of the entity to cache
      */
     public synchronized void stopCaching(I id) {
-        IdInTenant<I> idInTenant = idInTenant(id);
-        E entity = cache.get(idInTenant);
+        var idInTenant = idInTenant(id);
+        var entity = cache.get(idInTenant);
         if (entity == null) {
             _warn().log("Cannot find the cached entity in the cache for ID `%s`. " +
                                 "Cache keys: %s. IDs to cache: %s." +
@@ -176,8 +176,8 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      *         the entity to store
      */
     public synchronized void store(E entity) {
-        I id = entity.id();
-        IdInTenant<I> idInTenant = idInTenant(id);
+        var id = entity.id();
+        var idInTenant = idInTenant(id);
         if (idsToCache.contains(idInTenant)) {
             cache.put(idInTenant, entity);
         } else {
@@ -205,7 +205,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      *         the type of entity
      */
     @FunctionalInterface
-    public interface Store<E extends Entity> extends Consumer<E> {
+    public interface Store<E extends Entity<?, ?>> extends Consumer<E> {
 
     }
 }

@@ -58,8 +58,7 @@ final class EntityStateChangedFilter implements EventFilter {
      */
     static EntityStateChangedFilter forType(EntityClass<?> entityClass) {
         checkNotNull(entityClass);
-        boolean allowUpdates = entityClass.visibility()
-                                          .isNotNone();
+        var allowUpdates = entityClass.visibility().isNotNone();
         return new EntityStateChangedFilter(allowUpdates);
     }
 

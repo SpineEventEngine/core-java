@@ -60,13 +60,13 @@ public final class EventWhiteList implements EventFilter {
     @SuppressWarnings("WeakerAccess") // Public API of the framework.
     @SafeVarargs
     public static EventWhiteList allowEvents(Class<? extends EventMessage>... eventClasses) {
-        ImmutableSet<EventClass> classes = EventClass.setOf(eventClasses);
+        var classes = EventClass.setOf(eventClasses);
         return new EventWhiteList(classes);
     }
 
     @Override
     public Optional<? extends EventMessage> filter(EventMessage event) {
-        EventClass type = EventClass.of(event);
+        var type = EventClass.of(event);
         return allowedEvents.contains(type)
                ? Optional.of(event)
                : Optional.empty();

@@ -29,13 +29,11 @@ package io.spine.server.entity;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.server.entity.model.AbstractEntityFactory;
 import io.spine.server.model.ModelError;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -75,7 +73,7 @@ public final class DefaultEntityFactory<E extends Entity<?, ?>> extends Abstract
      */
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
-    private transient volatile @MonotonicNonNull Class<?> firstParameterType;
+    private transient volatile @Nullable Class<?> firstParameterType;
 
     /**
      * Creates new instance.
@@ -87,12 +85,12 @@ public final class DefaultEntityFactory<E extends Entity<?, ?>> extends Abstract
     @Override
     public E create(Object id) {
         checkArgumentMatches(id);
-        E result = doCreate(id);
+        var result = doCreate(id);
         return result;
     }
 
     private E doCreate(Object id) {
-        Constructor<E> ctor = constructor();
+        var ctor = constructor();
         try {
             E result;
             if (usesDefaultConstructor) {
@@ -107,16 +105,16 @@ public final class DefaultEntityFactory<E extends Entity<?, ?>> extends Abstract
         }
     }
 
-    @SuppressWarnings("unchecked") // we check the type when obtaining default constructor
+    @SuppressWarnings({"unchecked", "rawtypes"}) /*  Type is checked when obtaining default ctor. */
     private void setId(E entity, Object id) {
-        AbstractEntity cast = (AbstractEntity) entity;
+        var cast = (AbstractEntity) entity;
         cast.setId(id);
     }
 
     @Override
     protected Constructor<E> findConstructor() {
         Constructor<E> result;
-        Constructor<?>[] constructors = entityClass().getDeclaredConstructors();
+        var constructors = entityClass().getDeclaredConstructors();
         result = idConstructorIn(constructors);
 
         if (result == null) {
@@ -137,17 +135,17 @@ public final class DefaultEntityFactory<E extends Entity<?, ?>> extends Abstract
 
     private @Nullable Constructor<E> idConstructorIn(Constructor<?>[] constructors) {
         @SuppressWarnings("unchecked") // ensured by the generic parameter of this class.
-        Constructor<E> result = (Constructor<E>)
+        var result = (Constructor<E>)
                 Arrays.stream(constructors)
                       .filter(c -> {
-                          Class<?>[] parameterTypes = c.getParameterTypes();
+                          var parameterTypes = c.getParameterTypes();
                           return parameterTypes.length == 1
                                   && idClass().equals(parameterTypes[0]);
                       })
                       .findAny()
                       .orElse(null);
         if (result != null) {
-            Class<?>[] parameterTypes = result.getParameterTypes();
+            var parameterTypes = result.getParameterTypes();
             firstParameterType =
                     (parameterTypes.length > 0)
                     ? parameterTypes[0]
@@ -165,16 +163,16 @@ public final class DefaultEntityFactory<E extends Entity<?, ?>> extends Abstract
     }
 
     private @Nullable Constructor<E> defaultConstructorIn(Constructor<?>[] constructors) {
-        Optional<Constructor<?>> defaultCtor =
+        var defaultCtor =
                 Arrays.stream(constructors)
                       .filter(c -> c.getParameterTypes().length == 0)
                       .findAny();
 
         if (defaultCtor.isPresent()) {
             @SuppressWarnings("unchecked") // ensured by the generic parameter of this class.
-            Constructor<E> result = (Constructor<E>) defaultCtor.get();
-            Class<?> idClass = idClass();
-            Class<E> entityClass = entityClass();
+            var result = (Constructor<E>) defaultCtor.get();
+            var idClass = idClass();
+            var entityClass = entityClass();
             if (!AbstractEntity.class.isAssignableFrom(entityClass)) {
                 throw new ModelError(
                         "The entity class `%s` is not assignable from `%s`" +
@@ -195,9 +193,9 @@ public final class DefaultEntityFactory<E extends Entity<?, ?>> extends Abstract
         // If not, we must have the method for setting ID.
         checkNotNull(constructor());
 
-        Class<?> actualArgumentType = argument.getClass();
+        var actualArgumentType = argument.getClass();
 
-        Class<?> idClass = idClass();
+        var idClass = idClass();
         if (usesDefaultConstructor) {
             checkArgument(
                     idClass.isAssignableFrom(actualArgumentType),
@@ -207,14 +205,12 @@ public final class DefaultEntityFactory<E extends Entity<?, ?>> extends Abstract
             return;
         }
 
-        Class<?> firstParamType = firstParameterType();
+        var firstParamType = firstParameterType();
         checkState(firstParamType != null,
                    "The entity class `%s` does not have a constructor which" +
                            " accepts ID parameter of type `%s`.",
                    entityClass().getName(), idClass.getName());
-        String errorMessage =
-                "Argument type mismatch: expected `%s`, but was `%s`." +
-                        ADVISE_CHECK_ROUTING;
+        var errorMessage = "Argument type mismatch: expected `%s`, but was `%s`." + ADVISE_CHECK_ROUTING;
         checkArgument(firstParamType.isAssignableFrom(actualArgumentType),
                       errorMessage,
                       firstParamType.getName(),

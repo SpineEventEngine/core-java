@@ -75,7 +75,7 @@ public abstract class EntityMessageEndpoint<I,
      * @param entity the entity to store
      */
     protected final void store(E entity) {
-        boolean isModified = isModified(entity);
+        var isModified = isModified(entity);
         if (isModified) {
             onModified(entity);
         } else {

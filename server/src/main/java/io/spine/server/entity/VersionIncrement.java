@@ -73,7 +73,7 @@ public abstract class VersionIncrement {
      * and have no common versioning. Thus, a {@code Projection} has its own versioning system.
      * Each event <i>increments</i> the {@code Projection} version by one.
      */
-    public static VersionIncrement sequentially(Transaction tx) {
+    public static VersionIncrement sequentially(Transaction<?, ?, ?, ?> tx) {
         return new AutoIncrement(tx);
     }
 
@@ -91,8 +91,7 @@ public abstract class VersionIncrement {
 
         @Override
         protected Version nextVersion() {
-            Version result = event.context()
-                                  .getVersion();
+            var result = event.context().getVersion();
             return result;
         }
     }
@@ -102,17 +101,17 @@ public abstract class VersionIncrement {
      */
     private static class AutoIncrement extends VersionIncrement {
 
-        private final Transaction transaction;
+        private final Transaction<?, ?, ?, ?> transaction;
 
-        private AutoIncrement(Transaction transaction) {
+        private AutoIncrement(Transaction<?, ?, ?, ?> transaction) {
             super();
             this.transaction = checkNotNull(transaction);
         }
 
         @Override
         protected Version nextVersion() {
-            Version current = transaction.version();
-            Version result = Versions.increment(current);
+            var current = transaction.version();
+            var result = Versions.increment(current);
             return result;
         }
     }

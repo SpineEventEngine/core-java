@@ -30,8 +30,6 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.base.EntityState;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.model.EntityClass;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
@@ -70,8 +68,8 @@ public abstract class DefaultRecordBasedRepository<I,
     @Override
     protected final StorageConverter<I, E, S> storageConverter() {
         if (storageConverter == null) {
-            EntityClass<E> entityClass = entityModelClass();
-            TypeUrl stateType = entityClass.stateTypeUrl();
+            var entityClass = entityModelClass();
+            var stateType = entityClass.stateTypeUrl();
             storageConverter = DefaultConverter.forAllFields(stateType, entityFactory());
         }
         return storageConverter;
@@ -89,6 +87,6 @@ public abstract class DefaultRecordBasedRepository<I,
     public void registerWith(BoundedContext context) {
         super.registerWith(context);
         @SuppressWarnings("unused") // Trigger the method to initialize the converter.
-        StorageConverter<I, E, S> unused = storageConverter();
+        var unused = storageConverter();
     }
 }

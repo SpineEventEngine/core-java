@@ -37,7 +37,6 @@ import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ExceptionFactory;
 import io.spine.validate.ValidationException;
 
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -81,7 +80,7 @@ public final class InvalidEntityStateException extends ValidationException {
      */
     public static InvalidEntityStateException
     onConstraintViolations(EntityState<?> state, Iterable<ConstraintViolation> violations) {
-        Factory factory = new Factory(state, violations);
+        var factory = new Factory(state, violations);
         return factory.newException();
     }
 
@@ -148,9 +147,9 @@ public final class InvalidEntityStateException extends ValidationException {
          */
         @Override
         protected Map<String, Value> getMessageTypeAttribute(Message entityState) {
-            String entityStateType = TypeName.of(entityState)
-                                             .value();
-            Value value = Value.newBuilder()
+            var entityStateType = TypeName.of(entityState)
+                                          .value();
+            var value = Value.newBuilder()
                                .setStringValue(entityStateType)
                                .build();
             return ImmutableMap.of(ATTR_ENTITY_STATE_TYPE_NAME, value);
@@ -159,8 +158,8 @@ public final class InvalidEntityStateException extends ValidationException {
         @Override
         protected InvalidEntityStateException
         createException(String exceptionMsg, EntityState state, Error error) {
-            List<ConstraintViolation> violations = error.getValidationError()
-                                                        .getConstraintViolationList();
+            var violations = error.getValidationError()
+                                  .getConstraintViolationList();
             checkArgument(!violations.isEmpty(), "No constraint violations provided.");
             return new InvalidEntityStateException(state, error);
         }

@@ -64,32 +64,32 @@ public final class EventFieldFilter implements EventFilter {
 
     @Override
     public Optional<? extends EventMessage> filter(EventMessage event) {
-        EventMessage masked = mask(event);
+        var masked = mask(event);
         return Optional.of(masked);
     }
 
     @Override
     public ImmutableCollection<Event> filter(Collection<Event> events) {
         return events.stream()
-                     .map(this::maskEvent)
-                     .collect(toImmutableList());
+                .map(this::maskEvent)
+                .collect(toImmutableList());
     }
 
     private Event maskEvent(Event event) {
-        EventMessage message = event.enclosedMessage();
-        EventMessage masked = mask(message);
+        var message = event.enclosedMessage();
+        var masked = mask(message);
         return event.toBuilder()
-                    .setMessage(pack(masked))
-                    .build();
+                .setMessage(pack(masked))
+                .build();
     }
 
     private EventMessage mask(EventMessage event) {
-        EventClass eventClass = EventClass.of(event);
-        FieldMask mask = fieldMasks.get(eventClass);
+        var eventClass = EventClass.of(event);
+        var mask = fieldMasks.get(eventClass);
         if (mask == null || isDefault(mask)) {
             return event;
         } else {
-            EventMessage maskedEvent = applyMask(mask, event);
+            var maskedEvent = applyMask(mask, event);
             return maskedEvent;
         }
     }
@@ -128,7 +128,7 @@ public final class EventFieldFilter implements EventFilter {
         public Builder putMask(Class<? extends EventMessage> eventClass, FieldMask mask) {
             checkNotNull(eventClass);
             checkNotNull(mask);
-            EventClass eventType = EventClass.from(eventClass);
+            var eventType = EventClass.from(eventClass);
             masks.put(eventType, mask);
             return this;
         }

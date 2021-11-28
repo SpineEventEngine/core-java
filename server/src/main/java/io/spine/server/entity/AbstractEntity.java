@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
@@ -190,7 +189,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     @Override
     public final S state() {
-        S result = state;
+        var result = state;
         if (result == null) {
             synchronized (this) {
                 result = state;
@@ -208,7 +207,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     @Internal
     protected EntityClass<?> thisClass() {
-        EntityClass<?> result = thisClass;
+        var result = thisClass;
         if (result == null) {
             synchronized (this) {
                 result = thisClass;
@@ -243,7 +242,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     protected final S defaultState() {
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        S result = (S) thisClass().defaultState();
+        var result = (S) thisClass().defaultState();
         return result;
     }
 
@@ -291,7 +290,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      * @see #checkEntityState(EntityState)
      */
     private void validate(S newState) throws InvalidEntityStateException {
-        List<ConstraintViolation> violations = checkEntityState(newState);
+        var violations = checkEntityState(newState);
         if (!violations.isEmpty()) {
             throw InvalidEntityStateException.onConstraintViolations(newState, violations);
         }
@@ -307,7 +306,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     @Override
     public String idAsString() {
-        String result = stringId;
+        var result = stringId;
         if (result == null) {
             synchronized (this) {
                 result = stringId;
@@ -339,7 +338,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
 
     @Override
     public LifecycleFlags getLifecycleFlags() {
-        LifecycleFlags result = this.lifecycleFlags == null
+        var result = this.lifecycleFlags == null
                                 ? LifecycleFlags.getDefaultInstance()
                                 : this.lifecycleFlags;
         return result;
@@ -393,7 +392,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (lifecycleFlags().getArchived()) {
-            Any packedId = Identifier.pack(id());
+            var packedId = Identifier.pack(id());
             throw CannotModifyArchivedEntity
                     .newBuilder()
                     .setEntityId(packedId)
@@ -411,7 +410,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (lifecycleFlags().getDeleted()) {
-            Any packedId = Identifier.pack(id());
+            var packedId = Identifier.pack(id());
             throw CannotModifyDeletedEntity.newBuilder()
                     .setEntityId(packedId)
                     .build();
@@ -457,7 +456,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      * Obtains the version number of the entity.
      */
     protected int versionNumber() {
-        int result = version().getNumber();
+        var result = version().getNumber();
         return result;
     }
 
@@ -467,8 +466,8 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         if (version.equals(newVersion)) {
             return;
         }
-        int currentVersionNumber = versionNumber();
-        int newVersionNumber = newVersion.getNumber();
+        var currentVersionNumber = versionNumber();
+        var newVersionNumber = newVersion.getNumber();
         if (currentVersionNumber > newVersionNumber) {
             throw newIllegalArgumentException(
                     "A version with the lower number (%d) passed to `updateVersion()` " +
@@ -535,7 +534,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     @Override
     public void beforeInvoke(HandlerMethod<?, ?, ?, ?> method) {
         checkNotNull(method);
-        FluentLogger logger = loggerFor(getClass());
+        var logger = loggerFor(getClass());
         this.handlerLog = new HandlerLog(logger, method);
     }
 
@@ -575,7 +574,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         if (!(o instanceof AbstractEntity)) {
             return false;
         }
-        AbstractEntity<?, ?> that = (AbstractEntity<?, ?>) o;
+        var that = (AbstractEntity<?, ?>) o;
         return Objects.equals(id(), that.id()) &&
                 Objects.equals(state(), that.state()) &&
                 Objects.equals(version(), that.version()) &&

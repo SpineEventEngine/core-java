@@ -116,8 +116,8 @@ public abstract class EventDispatchingRepository<I,
     }
 
     private void doDispatch(EventEnvelope event) {
-        Set<I> targets = route(event);
-        Event outerObject = event.outerObject();
+        var targets = route(event);
+        var outerObject = event.outerObject();
         targets.forEach(id -> dispatchTo(id, outerObject));
     }
 

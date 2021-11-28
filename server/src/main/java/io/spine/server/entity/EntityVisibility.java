@@ -30,14 +30,10 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.ImmutableGraph;
 import com.google.common.graph.MutableGraph;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.GeneratedMessageV3;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.code.proto.EntityStateOption;
-import io.spine.core.Event;
-import io.spine.option.EntityOption;
-import io.spine.option.EntityOption.Kind;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.type.TypeName;
 
@@ -99,36 +95,27 @@ public final class EntityVisibility implements Serializable {
      * @param stateClass
      *         the entity state class
      * @return new instance
-     * @implNote The framework treats an {@code Event} as a state of a system {@code
-     *         EEntity}. Therefore, {@code Event.class} is one of the potential arguments passed
-     *         into this method.
-     *         We don't want to define {@code (entity)} option for the {@code Event} message,
-     *         therefore this method handles {@code Event.class} as a special case and returns
-     *         {@code NONE} visibility level for it.
      */
     public static Optional<EntityVisibility> of(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
 
-        if (Event.class.equals(stateClass)) {
-            return Optional.of(new EntityVisibility(NONE));
-        }
         if (!GeneratedMessageV3.class.isAssignableFrom(stateClass)) {
             return Optional.empty();
         }
 
-        Descriptor descriptor = TypeName.of(stateClass)
-                                        .messageDescriptor();
-        Optional<EntityOption> option = EntityStateOption.valueOf(descriptor);
-        if(!option.isPresent()) {
+        var descriptor = TypeName.of(stateClass)
+                                 .messageDescriptor();
+        var option = EntityStateOption.valueOf(descriptor);
+        if(option.isEmpty()) {
             return Optional.empty();
         }
-        EntityOption entityOption = option.get();
-        Visibility visibility = entityOption.getVisibility();
+        var entityOption = option.get();
+        var visibility = entityOption.getVisibility();
         if (visibility == DEFAULT) {
-            Kind kind = entityOption.getKind();
+            var kind = entityOption.getKind();
             visibility = kind == PROJECTION ? FULL : NONE;
         }
-        EntityVisibility result = new EntityVisibility(visibility);
+        var result = new EntityVisibility(visibility);
         return Optional.of(result);
     }
 

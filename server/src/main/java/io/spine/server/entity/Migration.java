@@ -101,9 +101,9 @@ public abstract class Migration<I,
 
     private void applyTo(E entity) {
         Transaction<I, E, S, ?> tx = txWithLifecycleMonitor();
-        S oldState = entity.state();
-        S newState = apply(oldState);
-        Operation<I, S, E> op = currentOperation();
+        var oldState = entity.state();
+        var newState = apply(oldState);
+        var op = currentOperation();
         op.updateState(newState);
         op.updateLifecycle();
         tx.commit();
@@ -218,10 +218,10 @@ public abstract class Migration<I,
      * the last handled message.
      */
     private Transaction<I, E, S, B> txWithLifecycleMonitor() {
-        E entity = currentOperation().entity;
-        I id = entity.id();
-        Transaction<I, E, S, B> tx = startTransaction(entity);
-        EntityLifecycleMonitor<I> monitor = configureLifecycleMonitor(id);
+        var entity = currentOperation().entity;
+        var id = entity.id();
+        var tx = startTransaction(entity);
+        var monitor = configureLifecycleMonitor(id);
         tx.setListener(monitor);
         currentOperation().tx = tx;
         return tx;
@@ -232,14 +232,14 @@ public abstract class Migration<I,
      * a {@link MigrationApplied} instance as the event-producing message.
      */
     private EntityLifecycleMonitor<I> configureLifecycleMonitor(I id) {
-        RecordBasedRepository<I, E, S> repository = currentOperation().repository;
-        Optional<Event> event = repository.lifecycleOf(id)
-                                          .onMigrationApplied();
-        if (!event.isPresent() || isDefault(event.get())) {
+        var repository = currentOperation().repository;
+        var event = repository.lifecycleOf(id)
+                              .onMigrationApplied();
+        if (event.isEmpty() || isDefault(event.get())) {
             warnOnNoSystemEventsPosted();
             return EntityLifecycleMonitor.newInstance(repository, id);
         }
-        Event migrationApplied = event.get();
+        var migrationApplied = event.get();
         currentOperation().systemEvent = migrationApplied;
         return EntityLifecycleMonitor.withAcknowledgedMessage(repository, id, migrationApplied);
     }
@@ -294,7 +294,7 @@ public abstract class Migration<I,
             if (!entity.state().equals(newState)) {
                 tx.builder().clear()
                             .mergeFrom(newState);
-                Version version = increment(entity.version());
+                var version = increment(entity.version());
                 tx.setVersion(version);
             }
         }

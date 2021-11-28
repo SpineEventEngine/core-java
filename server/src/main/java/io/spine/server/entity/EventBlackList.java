@@ -54,13 +54,13 @@ public final class EventBlackList implements EventFilter {
      */
     @SafeVarargs
     public static EventBlackList discardEvents(Class<? extends EventMessage>... eventClasses) {
-        ImmutableSet<EventClass> classes = EventClass.setOf(eventClasses);
+        var classes = EventClass.setOf(eventClasses);
         return new EventBlackList(classes);
     }
 
     @Override
     public Optional<? extends EventMessage> filter(EventMessage event) {
-        EventClass type = EventClass.of(event);
+        var type = EventClass.of(event);
         return forbiddenEvents.contains(type)
                ? Optional.empty()
                : Optional.of(event);

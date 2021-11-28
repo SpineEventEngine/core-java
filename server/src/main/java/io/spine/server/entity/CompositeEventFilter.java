@@ -52,9 +52,9 @@ public final class CompositeEventFilter implements EventFilter {
     @Override
     public Optional<? extends EventMessage> filter(EventMessage event) {
         Optional<? extends EventMessage> result = Optional.of(event);
-        for (EventFilter filter : filters) {
+        for (var filter : filters) {
             result = filter.filter(result.get());
-            if (!result.isPresent()) {
+            if (result.isEmpty()) {
                 return Optional.empty();
             }
         }
