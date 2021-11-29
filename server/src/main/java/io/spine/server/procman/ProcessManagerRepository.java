@@ -32,7 +32,6 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
@@ -40,10 +39,8 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.delivery.BatchDeliveryListener;
-import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
-import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -172,11 +169,11 @@ public abstract class ProcessManagerRepository<I,
      * Initializes the {@code Inbox}.
      */
     private void initInbox() {
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
+        var delivery = ServerEnvironment.instance()
+                                        .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
-                .withBatchListener(new BatchDeliveryListener<I>() {
+                .withBatchListener(new BatchDeliveryListener<>() {
                     @Override
                     public void onStart(I id) {
                         cache.startCaching(id);
@@ -305,20 +302,20 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public final void dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        Optional<I> target = route(command);
+        var target = route(command);
         target.ifPresent(id -> inbox().send(command)
                                       .toHandler(id));
     }
 
     private Optional<I> route(CommandEnvelope cmd) {
-        Optional<I> target = route(commandRouting(), cmd);
+        var target = route(commandRouting(), cmd);
         target.ifPresent(id -> onCommandTargetSet(id, cmd));
         return target;
     }
 
     private void onCommandTargetSet(I id, CommandEnvelope cmd) {
-        EntityLifecycle lifecycle = lifecycleOf(id);
-        CommandId commandId = cmd.id();
+        var lifecycle = lifecycleOf(id);
+        var commandId = cmd.id();
         with(cmd.tenantId())
                 .run(() -> lifecycle.onTargetAssignedToCommand(commandId));
     }
@@ -347,9 +344,10 @@ public abstract class ProcessManagerRepository<I,
                .toReactor(id);
     }
 
-    @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
+    @SuppressWarnings({"unchecked", "rawtypes"})   // to avoid massive generic-related issues.
     @VisibleForTesting
     protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
+        @SuppressWarnings("RedundantExplicitVariableType")  /* Because of the wildcard generic. */
         PmTransaction<I, S, ?> tx = new PmTransaction<>((ProcessManager<I, S, ?>) manager);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(this, manager.id());
         tx.setListener(listener);
@@ -360,7 +358,7 @@ public abstract class ProcessManagerRepository<I,
      * Posts passed commands to {@link CommandBus}.
      */
     final void postCommands(Collection<Command> commands) {
-        CommandBus bus = context().commandBus();
+        var bus = context().commandBus();
         bus.post(commands, noOpObserver());
     }
 
@@ -370,7 +368,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final P toEntity(EntityRecord record) {
-        P result = super.toEntity(record);
+        var result = super.toEntity(record);
         configure(result);
         return result;
     }
@@ -378,7 +376,7 @@ public abstract class ProcessManagerRepository<I,
     @OverridingMethodsMustInvokeSuper
     @Override
     public P create(I id) {
-        P procman = super.create(id);
+        var procman = super.create(id);
         lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
         configure(procman);
         return procman;
@@ -407,7 +405,7 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected final P findOrCreate(I id) {
-        P result = cache.load(id);
+        var result = cache.load(id);
         return result;
     }
 

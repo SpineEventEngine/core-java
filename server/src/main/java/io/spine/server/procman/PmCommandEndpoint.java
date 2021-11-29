@@ -27,10 +27,8 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.server.command.DispatchCommand;
 import io.spine.server.delivery.CommandEndpoint;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.type.CommandEnvelope;
 
 import static io.spine.server.command.DispatchCommand.operationFor;
@@ -65,8 +63,8 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected DispatchOutcome invokeDispatcher(P processManager) {
-        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.id());
-        DispatchCommand<I> dispatch = operationFor(lifecycle, processManager, envelope());
+        var lifecycle = repository().lifecycleOf(processManager.id());
+        var dispatch = operationFor(lifecycle, processManager, envelope());
         PmTransaction<I, ?, ?> tx = (PmTransaction<I, ?, ?>) processManager.tx();
         return tx.perform(dispatch);
     }

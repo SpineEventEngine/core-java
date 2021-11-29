@@ -27,7 +27,6 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets.SetView;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -75,35 +74,33 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
     ProcessManagerClass<P> asProcessManagerClass(Class<P> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        ProcessManagerClass<P> result = (ProcessManagerClass<P>)
+        var result = (ProcessManagerClass<P>)
                 get(cls, ProcessManagerClass.class, () -> new ProcessManagerClass<>(cls));
         return result;
     }
 
     @Override
     public ImmutableSet<CommandClass> commands() {
-        SetView<CommandClass> result =
-                union(super.commands(), commanderDelegate.commands());
+        var result = union(super.commands(), commanderDelegate.commands());
         return result.immutableCopy();
     }
 
     @Override
     public ImmutableSet<EventClass> events() {
-        SetView<EventClass> result =
-                union(reactorDelegate.events(), commanderDelegate.events());
+        var result = union(reactorDelegate.events(), commanderDelegate.events());
         return result.immutableCopy();
     }
 
     @Override
     public ImmutableSet<EventClass> domesticEvents() {
-        SetView<EventClass> result =
+        var result =
                 union(reactorDelegate.domesticEvents(), commanderDelegate.domesticEvents());
         return result.immutableCopy();
     }
 
     @Override
     public ImmutableSet<EventClass> externalEvents() {
-        SetView<EventClass> result =
+        var result =
                 union(reactorDelegate.externalEvents(), commanderDelegate.externalEvents());
         return result.immutableCopy();
     }
@@ -112,8 +109,8 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
      * Obtains event classes produced by this process manager class.
      */
     public ImmutableSet<EventClass> outgoingEvents() {
-        SetView<EventClass> methodResults = union(commandOutput(), reactionOutput());
-        SetView<EventClass> result = union(methodResults, rejections());
+        var methodResults = union(commandOutput(), reactionOutput());
+        var result = union(methodResults, rejections());
         return result.immutableCopy();
     }
 

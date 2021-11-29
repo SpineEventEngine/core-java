@@ -54,7 +54,7 @@ public abstract class ProcessManagerMigration<I,
     @SuppressWarnings("unchecked") // Logically correct.
     @Override
     protected Transaction<I, P, S, B> startTransaction(P entity) {
-        Transaction<I, P, S, B> tx = (Transaction<I, P, S, B>) new PmTransaction<>(entity);
+        var tx = (Transaction<I, P, S, B>) new PmTransaction<>(entity);
         return tx;
     }
 }
