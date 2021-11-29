@@ -139,12 +139,14 @@ public final class AccessModifier implements Predicate<Method> {
         }
     }
 
+    @SuppressWarnings("RedundantExplicitVariableType" /* Due to the regression bug in PMD.
+                                                    See https://github.com/pmd/pmd/issues/2976, */)
     private static boolean inheritedMethod(Method child, Method parent) {
         if (!parent.getName().equals(child.getName())) {
             return false;
         }
-        var parentParams = parent.getParameterTypes();
-        var childParams = child.getParameterTypes();
+        Class<?>[] parentParams = parent.getParameterTypes();
+        Class<?>[] childParams = child.getParameterTypes();
         if (parentParams.length != childParams.length) {
             return false;
         }
