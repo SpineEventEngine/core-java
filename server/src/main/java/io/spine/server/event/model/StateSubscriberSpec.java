@@ -29,7 +29,6 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EntityState;
-import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.model.ExtractedArguments;
@@ -39,8 +38,6 @@ import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeName;
-
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -79,13 +76,13 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
             return false;
         }
         @SuppressWarnings("unchecked") // Checked above.
-        Class<? extends EntityState<?>> firstParameter =
+        var firstParameter =
                 (Class<? extends EntityState<?>>) params.type(0);
-        Optional<EntityVisibility> visibilityOption = EntityVisibility.of(firstParameter);
-        if (!visibilityOption.isPresent()) {
+        var visibilityOption = EntityVisibility.of(firstParameter);
+        if (visibilityOption.isEmpty()) {
             return false;
         }
-        EntityVisibility visibility = visibilityOption.get();
+        var visibility = visibilityOption.get();
         if (visibility.canSubscribe()) {
             return true;
         } else {
@@ -95,11 +92,11 @@ enum StateSubscriberSpec implements ParameterSpec<EventEnvelope> {
 
     @Override
     public ExtractedArguments extractArguments(EventEnvelope event) {
-        EventMessage eventMessage = event.message();
+        var eventMessage = event.message();
         checkArgument(eventMessage instanceof EntityStateChanged,
                       "Must be an `%s` event.", EntityStateChanged.class.getSimpleName());
-        EntityStateChanged systemEvent = (EntityStateChanged) eventMessage;
-        EntityState<?> state = (EntityState<?>) unpack(systemEvent.getNewState());
+        var systemEvent = (EntityStateChanged) eventMessage;
+        var state = (EntityState<?>) unpack(systemEvent.getNewState());
         return arrangeArguments(state, event);
     }
 

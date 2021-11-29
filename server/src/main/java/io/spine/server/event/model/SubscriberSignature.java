@@ -84,7 +84,7 @@ public class SubscriberSignature extends EventAcceptingSignature<SubscriberMetho
     }
 
     private static boolean isEntitySubscriber(Method method) {
-        Class<?> firstParam = method.getParameterTypes()[0];
+        var firstParam = method.getParameterTypes()[0];
         return EntityState.class.isAssignableFrom(firstParam);
     }
 }

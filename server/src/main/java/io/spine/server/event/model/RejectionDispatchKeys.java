@@ -55,21 +55,20 @@ final class RejectionDispatchKeys {
     static DispatchKey of(EventClass eventClass, Method rawMethod) {
         checkNotNull(eventClass);
         checkNotNull(rawMethod);
-        Class<?>[] parameters = rawMethod.getParameterTypes();
-        String methodName = rawMethod.getName();
+        var parameters = rawMethod.getParameterTypes();
+        var methodName = rawMethod.getName();
         checkArgument(parameters.length >= 2,
                       "The method `%s` should have at least 2 parameters, but has `%s`.",
                       methodName,
                       parameters.length);
-        Class<?> secondParameter = parameters[1];
+        var secondParameter = parameters[1];
         checkArgument(CommandMessage.class.isAssignableFrom(secondParameter),
                       "The method `%s` should have the second parameter assignable from `CommandMessage`, but has `%s`.",
                       methodName,
                       secondParameter);
         @SuppressWarnings("unchecked") // checked above
-        Class<? extends CommandMessage> commandMessageClass =
-                (Class<? extends CommandMessage>) secondParameter;
-        CommandClass commandClass = CommandClass.from(commandMessageClass);
+        var commandMessageClass = (Class<? extends CommandMessage>) secondParameter;
+        var commandClass = CommandClass.from(commandMessageClass);
         return new DispatchKey(eventClass.value(), commandClass.value());
     }
 }
