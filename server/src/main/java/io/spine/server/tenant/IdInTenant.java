@@ -59,7 +59,7 @@ public final class IdInTenant<I> {
      */
     public static <I> IdInTenant<I> of(I id, boolean multitenant) {
         checkNotNull(id);
-        TenantId tenant = TenantAware.currentTenant(multitenant);
+        var tenant = TenantAware.currentTenant(multitenant);
         return new IdInTenant<>(id, tenant);
     }
 
@@ -95,7 +95,7 @@ public final class IdInTenant<I> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        IdInTenant<?> another = (IdInTenant<?>) o;
+        var another = (IdInTenant<?>) o;
         return Objects.equals(id, another.id) &&
                 Objects.equals(tenantId, another.tenantId);
     }

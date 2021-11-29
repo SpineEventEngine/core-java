@@ -29,7 +29,6 @@ package io.spine.server.tenant;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -65,7 +64,7 @@ public abstract class TenantAwareFunction<F, T> extends TenantAware implements F
      */
     public T execute(F input) {
         T result;
-        Optional<TenantId> remembered = CurrentTenant.get();
+        var remembered = CurrentTenant.get();
         try {
             CurrentTenant.set(tenantId());
             result = apply(input);
