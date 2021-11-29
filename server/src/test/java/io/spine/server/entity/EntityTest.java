@@ -29,7 +29,6 @@ package io.spine.server.entity;
 import com.google.common.collect.Range;
 import com.google.common.truth.LongSubject;
 import io.spine.core.UserId;
-import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.entity.given.entity.EntityWithMessageId;
@@ -68,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Entity should")
+@DisplayName("`Entity` should")
 class EntityTest {
 
     private Project state = Sample.messageOfType(Project.class);
@@ -84,9 +83,9 @@ class EntityTest {
         aggregateWithState = TestAggregate.withState();
     }
 
-    @SuppressWarnings("ResultOfObjectAllocationIgnored") // Because we expect the exception.
     @Test
-    @DisplayName("not accept null ID")
+    @DisplayName("not accept `null` ID")
+    @SuppressWarnings("ResultOfObjectAllocationIgnored") // Because we expect the exception.
     void notAcceptNullId() {
         assertThrows(NullPointerException.class, () -> new EntityWithMessageId(nullRef()));
     }
@@ -98,7 +97,7 @@ class EntityTest {
         @Test
         @DisplayName("for single entity")
         void forSingleEntity() {
-            Project state = entityNew.defaultState();
+            var state = entityNew.defaultState();
             assertEquals(Project.getDefaultInstance(), state);
         }
 
@@ -107,8 +106,8 @@ class EntityTest {
         void forDifferentEntities() {
             assertEquals(Project.getDefaultInstance(), entityNew.defaultState());
 
-            EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
-            Project expected = Project.getDefaultInstance();
+            var entityWithMessageId = new EntityWithMessageId();
+            var expected = Project.getDefaultInstance();
             assertEquals(expected, entityWithMessageId.defaultState());
         }
     }
@@ -118,39 +117,39 @@ class EntityTest {
     class AcceptId {
 
         @Test
-        @DisplayName("String")
+        @DisplayName("`String`")
         void ofStringType() {
-            String stringId = "stringId";
-            TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
+            var stringId = "stringId";
+            var entityWithStringId = new TestEntityWithIdString(stringId);
 
             assertEquals(stringId, entityWithStringId.id());
         }
 
         @Test
-        @DisplayName("Long")
+        @DisplayName("`Long`")
         void ofLongType() {
             Long longId = 12L;
-            TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
+            var entityWithLongId = new TestEntityWithIdLong(longId);
 
             assertEquals(longId, entityWithLongId.id());
         }
 
         @Test
-        @DisplayName("Integer")
+        @DisplayName("`Integer`")
         void ofIntegerType() {
             Integer integerId = 12;
-            TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
+            var entityWithIntegerId = new TestEntityWithIdInteger(integerId);
 
             assertEquals(integerId, entityWithIntegerId.id());
         }
 
         @Test
-        @DisplayName("Message")
+        @DisplayName("`Message`")
         void ofMessageType() {
-            ProjectId messageId = ProjectId.newBuilder()
-                                           .setId("messageId")
-                                           .vBuild();
-            TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
+            var messageId = ProjectId.newBuilder()
+                    .setId("messageId")
+                    .vBuild();
+            var entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
             assertEquals(messageId, entityWithMessageID.id());
         }
@@ -165,7 +164,7 @@ class EntityTest {
     @Test
     @DisplayName("have state")
     void haveState() {
-        Version ver = Versions.newVersion(3, currentTime());
+        var ver = Versions.newVersion(3, currentTime());
 
         entityNew.updateState(state, ver);
 
@@ -192,27 +191,24 @@ class EntityTest {
     @Test
     @DisplayName("check `(set_once)` on state update")
     void setOnce() {
-        BoundedContextBuilder context = BoundedContextBuilder
+        var context = BoundedContextBuilder
                 .assumingTests()
                 .add(UserAggregate.class);
-        UserId id = UserId.newBuilder()
-                             .setValue(newUuid())
-                             .build();
-        SignUpUser signUpUser = SignUpUser
-                .newBuilder()
+        var id = UserId.newBuilder()
+                .setValue(newUuid())
+                .build();
+        var signUpUser = SignUpUser.newBuilder()
                 .setId(id)
                 .vBuild();
-        ChooseDayOfBirth chooseInitial = ChooseDayOfBirth
-                .newBuilder()
+        var chooseInitial = ChooseDayOfBirth.newBuilder()
                 .setId(id)
                 .setDayOfBirth(LocalDates.of(2000, JANUARY, 1))
                 .vBuild();
-        ChooseDayOfBirth chooseAgain = ChooseDayOfBirth
-                .newBuilder()
+        var chooseAgain = ChooseDayOfBirth.newBuilder()
                 .setId(id)
                 .setDayOfBirth(LocalDates.of(1988, FEBRUARY, 29))
                 .vBuild();
-        BlackBox bbc = BlackBox
+        var bbc = BlackBox
                 .from(context)
                 .receivesCommand(signUpUser)
                 .receivesCommand(chooseInitial)
@@ -229,8 +225,7 @@ class EntityTest {
     @Test
     @DisplayName("have zero version by default")
     void haveZeroVersionByDefault() {
-        assertEquals(0, entityNew.version()
-                                 .getNumber());
+        assertEquals(0, entityNew.version().getNumber());
     }
 
     @Nested
@@ -240,7 +235,7 @@ class EntityTest {
         @Test
         @DisplayName("when told to do so")
         void whenAsked() {
-            int version = entityNew.incrementVersion();
+            var version = entityNew.incrementVersion();
             assertEquals(1, version);
         }
 
@@ -263,9 +258,9 @@ class EntityTest {
         @Test
         @DisplayName("when incrementing version")
         void onVersionIncrement() {
-            long timeBeforeIncrement = TimeTests.currentTimeSeconds();
+            var timeBeforeIncrement = TimeTests.currentTimeSeconds();
             entityNew.incrementVersion();
-            long timeAfterIncrement = TimeTests.currentTimeSeconds();
+            var timeAfterIncrement = TimeTests.currentTimeSeconds();
 
             assertModificationTime()
                     .isIn(Range.closed(timeBeforeIncrement, timeAfterIncrement));
@@ -275,7 +270,7 @@ class EntityTest {
         @DisplayName("when updating state")
         void onStateUpdate() {
             entityNew.incrementState(state);
-            long expectedTimeSec = TimeTests.currentTimeSeconds();
+            var expectedTimeSec = TimeTests.currentTimeSeconds();
             assertModificationTime()
                     .isEqualTo(expectedTimeSec);
         }
@@ -293,7 +288,7 @@ class EntityTest {
         @Test
         @DisplayName("same entities are equal")
         void equalToSame() {
-            TestAggregate another = TestAggregate.copyOf(aggregateWithState);
+            var another = TestAggregate.copyOf(aggregateWithState);
 
             assertEquals(aggregateWithState, another);
         }
@@ -305,13 +300,14 @@ class EntityTest {
         }
 
         @Test
-        @DisplayName("entity is not equal to null")
+        @DisplayName("entity is not equal to `null`")
         void notEqualToNull() {
             assertNotEquals(entityWithState, nullRef());
         }
 
         @Test
         @DisplayName("entity is not equal to object of another class")
+        @SuppressWarnings("AssertBetweenInconvertibleTypes") /* That's the point. */
         void notEqualToOtherClass() {
             assertNotEquals(entityWithState, newUuid());
         }
@@ -319,7 +315,7 @@ class EntityTest {
         @Test
         @DisplayName("entities with different IDs are not equal")
         void notEqualToDifferentId() {
-            TestEntity another = TestEntity.newInstance(newUuid());
+            var another = TestEntity.newInstance(newUuid());
 
             assertNotEquals(entityWithState.id(), another.id());
             assertNotEquals(entityWithState, another);
@@ -328,18 +324,18 @@ class EntityTest {
         @Test
         @DisplayName("entities with different states are not equal")
         void notEqualToDifferentState() {
-            TestEntity another = TestEntity.withStateOf(entityWithState);
+            var another = TestEntity.withStateOf(entityWithState);
             another.updateState(Sample.messageOfType(Project.class), another.version());
 
             assertNotEquals(entityWithState.state(), another.state());
             assertNotEquals(entityWithState, another);
         }
 
-        @SuppressWarnings("CheckReturnValue") // The entity version can be ignored in this test.
         @Test
         @DisplayName("entities with different versions are not equal")
+        @SuppressWarnings("CheckReturnValue") // The entity version can be ignored in this test.
         void notEqualToDifferentVersion() {
-            TestEntity another = TestEntity.withStateOf(entityWithState);
+            var another = TestEntity.withStateOf(entityWithState);
             another.incrementVersion();
 
             assertNotEquals(entityWithState, another);
@@ -358,7 +354,7 @@ class EntityTest {
                                        .trim()
                                        .isEmpty());
 
-            int hashCode = entityWithState.hashCode();
+            var hashCode = entityWithState.hashCode();
 
             assertTrue(hashCode != 0);
         }
@@ -372,7 +368,7 @@ class EntityTest {
         @Test
         @DisplayName("for different instances, unique hash code is generated")
         void uniqueForDifferentInstances() {
-            TestEntity another = TestEntity.withState();
+            var another = TestEntity.withState();
 
             assertNotEquals(entityWithState.hashCode(), another.hashCode());
         }
@@ -437,7 +433,7 @@ class EntityTest {
         @DisplayName("entities with different status are not equal")
         void consideredForEquality() {
             // Create entities with the same ID and the same (default) state.
-            String id = "This very same identifier";
+            var id = "This very same identifier";
             AbstractEntity<?, ?> oneEntity = new TestEntityWithIdString(id);
             AbstractEntity<?, ?> another = new TestEntityWithIdString(id);
 
@@ -449,7 +445,7 @@ class EntityTest {
         @Test
         @DisplayName("status can be assigned")
         void supportAssignment() {
-            LifecycleFlags status = LifecycleFlags.newBuilder()
+            var status = LifecycleFlags.newBuilder()
                                                   .setArchived(true)
                                                   .setDeleted(false)
                                                   .build();

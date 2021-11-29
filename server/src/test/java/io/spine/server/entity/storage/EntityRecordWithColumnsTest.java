@@ -42,7 +42,6 @@ import io.spine.server.entity.storage.given.TestEntity;
 import io.spine.server.storage.given.TestColumnMapping;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
-import io.spine.test.storage.StgTask;
 import io.spine.test.storage.StgTaskId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -105,8 +104,7 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ColumnName columnName = ArchivedColumn.instance()
-                                              .name();
+        var columnName = ArchivedColumn.instance().name();
         Object value = false;
         EntityRecordWithColumns<?> emptyFieldsEnvelope =
                 EntityRecordWithColumns.of(sampleEntityRecord());
@@ -125,31 +123,29 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("return empty names collection if no storage fields are set")
     void returnEmptyColumns() {
-        EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
+        var record = sampleRecordWithEmptyColumns();
         assertFalse(record.hasColumns());
-        ImmutableSet<ColumnName> names = record.columnNames();
+        var names = record.columnNames();
         assertTrue(names.isEmpty());
     }
 
     @Test
     @DisplayName("throw `ISE` on attempt to get value by non-existent name")
     void throwOnNonExistentColumn() {
-        EntityRecordWithColumns<?> record = sampleRecordWithEmptyColumns();
-        ColumnName nonExistentName = ColumnName.of("non-existent-column");
+        var record = sampleRecordWithEmptyColumns();
+        var nonExistentName = ColumnName.of("non-existent-column");
         assertThrows(IllegalStateException.class, () -> record.columnValue(nonExistentName));
     }
 
     @Test
     @DisplayName("have `Entity` lifecycle columns even if the entity does not define custom ones")
     void supportEmptyColumns() {
-        EntityWithoutCustomColumns entity = new EntityWithoutCustomColumns(TASK_ID);
+        var entity = new EntityWithoutCustomColumns(TASK_ID);
 
-        EntityRecordSpec<StgTaskId, StgTask, EntityWithoutCustomColumns> columns =
-                EntityRecordSpec.of(entity);
-        Map<ColumnName, Object> storageFields = columns.valuesIn(entity);
+        var columns = EntityRecordSpec.of(entity);
+        var storageFields = columns.valuesIn(entity);
 
-        EntityRecordWithColumns<?> record =
-                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
         assertThat(record.columnNames())
                 .containsExactlyElementsIn(EntityRecordColumn.names());
     }
@@ -157,12 +153,11 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("return column value by column name")
     void returnColumnValue() {
-        ColumnName columnName = ColumnName.of("some-boolean-column");
-        boolean columnValue = false;
+        var columnName = ColumnName.of("some-boolean-column");
+        var columnValue = false;
         ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
-        EntityRecordWithColumns<?> record =
-                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        Object value = record.columnValue(columnName);
+        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+        var value = record.columnValue(columnName);
 
         assertThat(value).isEqualTo(columnValue);
     }
@@ -170,13 +165,12 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("return a column value with the column mapping applied")
     void returnValueWithColumnMapping() {
-        ColumnName columnName = ColumnName.of("some-int-column");
-        int columnValue = 42;
+        var columnName = ColumnName.of("some-int-column");
+        var columnValue = 42;
 
         ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
-        EntityRecordWithColumns<?> record =
-                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        String value = record.columnValue(columnName, new TestColumnMapping());
+        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+        var value = record.columnValue(columnName, new TestColumnMapping());
 
         assertThat(value).isEqualTo(String.valueOf(columnValue));
     }
@@ -184,12 +178,11 @@ class EntityRecordWithColumnsTest {
     @Test
     @DisplayName("return `null` column value")
     void returnNullValue() {
-        ColumnName columnName = ColumnName.of("the-null-column");
+        var columnName = ColumnName.of("the-null-column");
         Map<ColumnName, Object> storageFields = new HashMap<>();
         storageFields.put(columnName, null);
-        EntityRecordWithColumns<?> record =
-                EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        Object value = record.columnValue(columnName);
+        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+        var value = record.columnValue(columnName);
 
         assertThat(value).isNull();
     }
@@ -201,9 +194,9 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("an `Entity` identifier and a record")
         void idAndRecord() {
-            EntityRecord rawRecord = sampleEntityRecord();
+            var rawRecord = sampleEntityRecord();
             Long id = 199L;
-            EntityRecordWithColumns<Long> result = EntityRecordWithColumns.create(id, rawRecord);
+            var result = EntityRecordWithColumns.create(id, rawRecord);
             assertThat(result).isNotNull();
             assertThat(result.id()).isEqualTo(id);
             assertThat(result.record()).isEqualTo(rawRecord);
@@ -212,15 +205,14 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("an `Entity` and a record")
         void entityAndRecord() {
-            TestEntity entity = new TestEntity(PROJECT_ID);
-            EntityRecord rawRecord = sampleEntityRecord();
-            EntityRecordWithColumns<StgProjectId> result =
-                    EntityRecordWithColumns.create(entity, rawRecord);
+            var entity = new TestEntity(PROJECT_ID);
+            var rawRecord = sampleEntityRecord();
+            var result = EntityRecordWithColumns.create(entity, rawRecord);
             assertThat(result).isNotNull();
             assertThat(result.id()).isEqualTo(PROJECT_ID);
             assertThat(result.record()).isEqualTo(rawRecord);
-            ImmutableSet<ColumnName> names = result.columnNames();
-            ImmutableSet<ColumnName> expectedNames =
+            var names = result.columnNames();
+            var expectedNames =
                     StgProject.Column.definitions()
                                      .stream()
                                      .map(RecordColumn::name)
@@ -239,21 +231,20 @@ class EntityRecordWithColumnsTest {
         @Test
         @DisplayName("record")
         void record() {
-            EntityRecordWithColumns<?> recordWithFields = sampleRecordWithEmptyColumns();
-            EntityRecord record = recordWithFields.record();
+            var recordWithFields = sampleRecordWithEmptyColumns();
+            var record = recordWithFields.record();
             assertNotNull(record);
         }
 
         @Test
         @DisplayName("column values")
         void columnValues() {
-            ColumnName columnName = DeletedColumn.instance()
-                                                 .name();
+            var columnName = DeletedColumn.instance()
+                                          .name();
             Object value = false;
-            Map<ColumnName, Object> columnsExpected = singletonMap(columnName, value);
-            EntityRecordWithColumns<?> record =
-                    EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
-            ImmutableSet<ColumnName> columnNames = record.columnNames();
+            var columnsExpected = singletonMap(columnName, value);
+            var record = EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
+            var columnNames = record.columnNames();
             assertThat(columnNames).hasSize(1);
             assertTrue(columnNames.contains(columnName));
             assertThat(value).isEqualTo(record.columnValue(columnName));

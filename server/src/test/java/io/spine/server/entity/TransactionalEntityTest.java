@@ -43,8 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("rawtypes")   // for simplicity
 @DisplayName("`TransactionalEntity` should")
+@SuppressWarnings("rawtypes")   // for simplicity
 class TransactionalEntityTest {
 
     @Nested
@@ -60,7 +60,7 @@ class TransactionalEntityTest {
         @Test
         @DisplayName("if transaction isn't changed")
         void withUnchangedTx() {
-            TransactionalEntity entity = entityWithActiveTx(false);
+            var entity = entityWithActiveTx(false);
 
             assertFalse(entity.changed());
         }
@@ -73,7 +73,7 @@ class TransactionalEntityTest {
         @Test
         @DisplayName("if transaction state changed")
         void ifTxStateChanged() {
-            TransactionalEntity entity = entityWithActiveTx(true);
+            var entity = entityWithActiveTx(true);
 
             assertTrue(entity.changed());
         }
@@ -108,7 +108,7 @@ class TransactionalEntityTest {
         @Test
         @DisplayName("until transaction started")
         void untilTxStarted() {
-            TransactionalEntity entity = newEntity(false, false);
+            var entity = newEntity(false, false);
 
             assertFalse(entity.isTransactionInProgress());
         }
@@ -117,7 +117,7 @@ class TransactionalEntityTest {
     @Test
     @DisplayName("have transaction in progress when transaction is active")
     void haveTxInProgress() {
-        TransactionalEntity entity = entityWithActiveTx(false);
+        var entity = entityWithActiveTx(false);
 
         assertTrue(entity.isTransactionInProgress());
     }
@@ -138,8 +138,8 @@ class TransactionalEntityTest {
     @Test
     @DisplayName("disallow injecting transaction wrapped around another entity instance")
     void disallowOtherInstanceTx() {
-        TransactionalEntity entity = newEntity(true, false);
-        TransactionalEntity anotherEntity = newEntity(true, false);
+        var entity = newEntity(true, false);
+        var anotherEntity = newEntity(true, false);
         assertThrows(IllegalStateException.class, () ->
                 entity.injectTransaction(anotherEntity.tx()));
     }
@@ -157,7 +157,7 @@ class TransactionalEntityTest {
         @Test
         @DisplayName("with inactive transaction")
         void withInactiveTx() {
-            TransactionalEntity entity = newEntity(false, false);
+            var entity = newEntity(false, false);
             assertThrows(IllegalStateException.class, () -> entity.setArchived(true));
         }
     }
@@ -175,7 +175,7 @@ class TransactionalEntityTest {
         @Test
         @DisplayName("with inactive transaction")
         void withInactiveTx() {
-            TransactionalEntity entity = newEntity(false, false);
+            var entity = newEntity(false, false);
 
             assertThrows(IllegalStateException.class, () -> entity.setDeleted(true));
         }
@@ -184,10 +184,10 @@ class TransactionalEntityTest {
     @Test
     @DisplayName("return transaction `lifecycleFlags` if transaction is active")
     void returnActiveTxFlags() {
-        TransactionalEntity entity = newEntity(true, true);
-        LifecycleFlags originalFlags = entity.lifecycleFlags();
+        var entity = newEntity(true, true);
+        var originalFlags = entity.lifecycleFlags();
 
-        Transaction tx = entity.transaction();
+        var tx = entity.transaction();
 
         assertThat(originalFlags)
                 .isEqualTo(tx.lifecycleFlags());
@@ -216,8 +216,7 @@ class TransactionalEntityTest {
             EntityState originalState = toBuilder(entity)
                     .build();
 
-            EmptyEntity newState = EmptyEntity
-                    .newBuilder()
+            var newState = EmptyEntity.newBuilder()
                     .setId(newUuidValue().getValue())
                     .build();
             assertThat(newState)
@@ -248,5 +247,4 @@ class TransactionalEntityTest {
         entity.injectTransaction(tx);
         return entity;
     }
-
 }

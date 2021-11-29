@@ -38,7 +38,7 @@ public class TestEntity
         implements HasLifecycleColumns<ProjectId, Project> {
 
     static TestEntity newInstance(String id) {
-        TestEntity result = new TestEntityBuilder()
+        var result = new TestEntityBuilder()
                 .setResultClass(TestEntity.class)
                 .withId(newIdWith(id))
                 .build();
@@ -46,7 +46,7 @@ public class TestEntity
     }
 
     static TestEntity withState() {
-        TestEntity result = new TestEntityBuilder()
+        var result = new TestEntityBuilder()
                 .setResultClass(TestEntity.class)
                 .withId(newIdWith(newUuid()))
                 .withState(Sample.messageOfType(Project.class))
@@ -56,7 +56,7 @@ public class TestEntity
     }
 
     static TestEntity withStateOf(TestEntity entity) {
-        TestEntity result = new TestEntityBuilder()
+        var result = new TestEntityBuilder()
                 .setResultClass(TestEntity.class)
                 .withId(entity.id())
                 .withState(entity.state())

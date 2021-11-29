@@ -37,7 +37,6 @@ import io.spine.time.testing.Past;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Constructor;
 import java.time.Instant;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -60,31 +59,32 @@ class EntityClassTest {
     @Test
     @DisplayName("obtain entity constructor")
     void getEntityConstructor() {
-        Constructor<TaskEntity> ctor = entityClass.constructor();
+        var ctor = entityClass.constructor();
         assertNotNull(ctor);
     }
 
     @Test
     @DisplayName("create and initialize entity instance")
     void createEntityInstance() {
-        TaskId id = TaskId.generate();
-        Timestamp before = Past.secondsAgo(1);
+        var id = TaskId.generate();
+        var before = Past.secondsAgo(1);
 
         // Create and init the entity.
-        EntityClass<TaskEntity> entityClass = new EntityClass<>(TaskEntity.class);
+        var entityClass = new EntityClass<>(TaskEntity.class);
         AbstractEntity<TaskId, Task> entity = entityClass.create(id);
 
-        Timestamp after = Time.currentTime();
+        var after = Time.currentTime();
 
         // The interval with a much earlier start to allow non-zero interval on faster computers.
-        Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));
+        var whileWeCreate = Range.closed(toInstant(before), toInstant(after));
 
         assertThat(entity.id())
                 .isEqualTo(id);
-        assertThat(entity.version().isZero())
+        assertThat(entity.version()
+                         .isZero())
                 .isTrue();
 
-        Instant whenModifier = toInstant(entity.whenModified());
+        var whenModifier = toInstant(entity.whenModified());
         assertTrue(whileWeCreate.contains(whenModifier));
 
         assertThat(entity.state())
@@ -98,6 +98,7 @@ class EntityClassTest {
 
     /** A test entity which defines ID and state. */
     private static class TaskEntity extends AbstractEntity<TaskId, Task> {
+
         private TaskEntity(TaskId id) {
             super(id);
         }

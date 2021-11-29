@@ -38,7 +38,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.entity.given.entity.TestAggregate;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.system.server.MemoizedSystemMessage;
 import io.spine.system.server.MemoizingWriteSide;
 import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.event.EntityCreated;
@@ -55,7 +54,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-@DisplayName("EntityLifecycle should")
+@DisplayName("`EntityLifecycle` should")
 class EntityLifecycleTest {
 
     private static final EntityClass<?> TEST_ENTITY_CLASS =
@@ -71,10 +70,9 @@ class EntityLifecycleTest {
     }
 
     @Test
-    @DisplayName("be created with a default EventFilter")
+    @DisplayName("be created with a default `EventFilter`")
     void allowCreationWithoutEventFilter() {
-        EntityLifecycle lifecycle = EntityLifecycle
-                .newBuilder()
+        var lifecycle = EntityLifecycle.newBuilder()
                 .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE)
                 .setEntityType(TEST_ENTITY_CLASS)
                 .setEntityId("sample-id")
@@ -86,44 +84,39 @@ class EntityLifecycleTest {
     @DisplayName("filter system events before posting")
     void filterEventsBeforePosting() {
         EventFilter filter = event -> {
-            boolean stateChanged = event instanceof EntityStateChanged;
+            var stateChanged = event instanceof EntityStateChanged;
             return stateChanged
                    ? Optional.empty()
                    : Optional.of(event);
         };
-        MemoizingWriteSide writeSide = MemoizingWriteSide.singleTenant();
-        int entityId = 42;
-        EntityLifecycle lifecycle = EntityLifecycle
-                .newBuilder()
+        var writeSide = MemoizingWriteSide.singleTenant();
+        var entityId = 42;
+        var lifecycle = EntityLifecycle.newBuilder()
                 .setEntityId(entityId)
                 .setEntityType(TEST_ENTITY_CLASS)
                 .setSystemWriteSide(writeSide)
                 .setEventFilter(filter)
                 .build();
         lifecycle.onEntityCreated(ENTITY);
-        MemoizedSystemMessage lastSeenEvent = writeSide.lastSeenEvent();
+        var lastSeenEvent = writeSide.lastSeenEvent();
         assertThat(lastSeenEvent.message())
                 .isInstanceOf(EntityCreated.class);
 
-        EntityRecord previousRecord = EntityRecord
-                .newBuilder()
+        var previousRecord = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(entityId))
                 .setState(pack(Timestamp.getDefaultInstance()))
                 .build();
-        EntityRecord newRecord = previousRecord
-                .toBuilder()
+        var newRecord = previousRecord.toBuilder()
                 .setState(pack(Time.currentTime()))
                 .build();
-        EntityRecordChange change = EntityRecordChange
-                .newBuilder()
+        var change = EntityRecordChange.newBuilder()
                 .setPreviousValue(previousRecord)
                 .setNewValue(newRecord)
                 .build();
-        EventId causeEventId = EventId.newBuilder()
-                            .setValue("test event ID")
-                            .build();
-        MessageId causeMessage = MessageId
-                .newBuilder()
+        var causeEventId = EventId.newBuilder()
+                .setValue("test event ID")
+                .build();
+        var causeMessage = MessageId.newBuilder()
                 .setId(AnyPacker.pack(causeEventId))
                 .setTypeUrl("example.com/test.Event")
                 .buildPartial();

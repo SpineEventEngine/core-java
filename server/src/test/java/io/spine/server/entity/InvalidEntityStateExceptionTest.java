@@ -36,16 +36,16 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@DisplayName("InvalidEntityStateException should")
+@DisplayName("`InvalidEntityStateException` should")
 class InvalidEntityStateExceptionTest {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("create exception with violations")
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     void createExceptionWithViolations() {
-        AccountDetails entityState = AccountDetails.getDefaultInstance();
+        var entityState = AccountDetails.getDefaultInstance();
 
-        InvalidEntityStateException exception = onConstraintViolations(
+        var exception = onConstraintViolations(
                 entityState,
                 singletonList(ConstraintViolation.getDefaultInstance()));
 

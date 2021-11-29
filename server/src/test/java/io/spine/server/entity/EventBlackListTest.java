@@ -37,15 +37,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-@DisplayName("EventBlackList should")
+
+@DisplayName("`EventBlackList` should")
 class EventBlackListTest {
 
     private static final TestEventFactory eventFactory =
@@ -62,7 +61,7 @@ class EventBlackListTest {
     @DisplayName("allow events of type not from the list")
     void allowArbitrary() {
         EventMessage event = EntProjectCreated.getDefaultInstance();
-        Optional<? extends EventMessage> filtered = blackList.filter(event);
+        var filtered = blackList.filter(event);
         assertTrue(filtered.isPresent());
         assertEquals(event, filtered.get());
     }
@@ -71,17 +70,17 @@ class EventBlackListTest {
     @DisplayName("not allow events of type from the list")
     void notAllowFromList() {
         EventMessage event = EntTaskAdded.getDefaultInstance();
-        Optional<? extends EventMessage> filtered = blackList.filter(event);
+        var filtered = blackList.filter(event);
         assertFalse(filtered.isPresent());
     }
 
     @Test
     @DisplayName("filter out events from bulk")
     void filterOut() {
-        List<Event> events = Stream.<EventMessage>of(EntProjectCreated.getDefaultInstance(),
-                                                     EntTaskAdded.getDefaultInstance())
-                                   .map(eventFactory::createEvent)
-                                   .collect(toList());
+        var events = Stream.<EventMessage>of(EntProjectCreated.getDefaultInstance(),
+                                             EntTaskAdded.getDefaultInstance())
+                           .map(eventFactory::createEvent)
+                           .collect(toList());
         Collection<Event> filtered = blackList.filter(events);
         assertEquals(1, filtered.size());
         assertTrue(events.contains(events.get(0)));

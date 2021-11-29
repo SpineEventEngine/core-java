@@ -27,7 +27,6 @@
 package io.spine.server.entity;
 
 import io.spine.core.Event;
-import io.spine.core.Version;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
@@ -62,12 +61,12 @@ class TransactionalEventPlayerTest {
     @Test
     @DisplayName("delegate applying events to transaction when playing")
     void delegateEventsToTx() {
-        TxPlayingEntity entity = entityWithActiveTx(false);
-        EventPlayingTransaction txMock = (EventPlayingTransaction) entity.transaction();
+        var entity = entityWithActiveTx(false);
+        var txMock = (EventPlayingTransaction) entity.transaction();
         assertNotNull(txMock);
-        Version v1 = increment(zero());
-        Event firstEvent = withVersion(v1);
-        Event secondEvent = withVersion(increment(v1));
+        var v1 = increment(zero());
+        var firstEvent = withVersion(v1);
+        var secondEvent = withVersion(increment(v1));
 
         entity.play(newArrayList(firstEvent, secondEvent));
 
@@ -77,14 +76,14 @@ class TransactionalEventPlayerTest {
 
     @SuppressWarnings("unchecked")  // OK for the test.
     private static TxPlayingEntity entityWithActiveTx(boolean txChanged) {
-        TxPlayingEntity entity = new TxPlayingEntity();
-        EventPlayingTransaction tx = new StubTransaction(entity, true, txChanged);
+        var entity = new TxPlayingEntity();
+        var tx = new StubTransaction(entity, true, txChanged);
         entity.injectTransaction(tx);
         return entity;
     }
 
     private static void verifyEventApplied(EventPlayingTransaction txMock, Event event) {
-        StubTransaction tx = (StubTransaction) txMock;
+        var tx = (StubTransaction) txMock;
         assertTrue(tx.dispatched(event));
     }
 
@@ -96,7 +95,7 @@ class TransactionalEventPlayerTest {
             implements EventPlayer {
 
         private TxPlayingEntity() {
-            super("TxPlayingEntity ID");
+            super("`TxPlayingEntity` ID");
         }
 
         @Override
@@ -126,10 +125,9 @@ class TransactionalEventPlayerTest {
 
         @Override
         protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope envelope) {
-            Event event = envelope.outerObject();
+            var event = envelope.outerObject();
             dispatchedEvents.add(event);
-            return DispatchOutcome
-                    .newBuilder()
+            return DispatchOutcome.newBuilder()
                     .setPropagatedSignal(event.messageId())
                     .setSuccess(Success.getDefaultInstance())
                     .vBuild();

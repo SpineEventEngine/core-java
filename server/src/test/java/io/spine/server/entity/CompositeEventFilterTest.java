@@ -28,7 +28,6 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.test.entity.event.EntProjectCreated;
@@ -42,30 +41,25 @@ import static com.google.common.truth.Truth8.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("CompositeEventFilter should")
+@DisplayName("`CompositeEventFilter` should")
 class CompositeEventFilterTest {
 
     @Test
     @DisplayName("accept any given event if no filters are provided")
     void acceptIfEmpty() {
-        CompositeEventFilter emptyFilter = CompositeEventFilter
-                .newBuilder()
-                .build();
-        Optional<? extends Message> filtered =
-                emptyFilter.filter(EntProjectCreated.getDefaultInstance());
+        var emptyFilter = CompositeEventFilter.newBuilder().build();
+        var filtered = emptyFilter.filter(EntProjectCreated.getDefaultInstance());
         assertTrue(filtered.isPresent());
     }
 
     @Test
     @DisplayName("accept the given event if all filter accept")
     void acceptIfAllAccept() {
-        CompositeEventFilter filter = CompositeEventFilter
-                .newBuilder()
+        var filter = CompositeEventFilter.newBuilder()
                 .add(Optional::of)
                 .add(Optional::of)
                 .build();
-        Optional<? extends Message> filtered =
-                filter.filter(EntProjectCreated.getDefaultInstance());
+        var filtered = filter.filter(EntProjectCreated.getDefaultInstance());
         assertTrue(filtered.isPresent());
     }
 
@@ -74,15 +68,14 @@ class CompositeEventFilterTest {
     void rejectIfOneRejects() {
         EventMessage eventMessage = EntProjectCreated.getDefaultInstance();
 
-        MockFilter mockFilter = new MockFilter(eventMessage);
+        var mockFilter = new MockFilter(eventMessage);
 
-        CompositeEventFilter filter = CompositeEventFilter
-                .newBuilder()
+        var filter = CompositeEventFilter.newBuilder()
                 .add(anyEvent -> Optional.empty())
                 .add(mockFilter)
                 .build();
 
-        Optional<? extends EventMessage> filtered = filter.filter(eventMessage);
+        var filtered = filter.filter(eventMessage);
 
         assertThat(filtered)
                 .isEmpty();
@@ -102,7 +95,7 @@ class CompositeEventFilterTest {
             this.eventMessage = message;
         }
 
-        boolean called() {
+        private boolean called() {
             return called;
         }
 

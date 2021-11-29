@@ -26,7 +26,6 @@
 package io.spine.server.entity;
 
 import io.spine.base.EntityState;
-import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
@@ -41,6 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A utility class providing various test-only methods, which in production mode are allowed
  * with the transactions only.
  */
+@SuppressWarnings("rawtypes")   /* To avoid hell with generic parameters. */
 public class TestTransaction {
 
     /** Prevents instantiation from outside. */
@@ -55,7 +55,7 @@ public class TestTransaction {
      */
     public static void
     injectState(TransactionalEntity entity, EntityState state, Version version) {
-        TestTx tx = new TestTx(entity, state, version);
+        var tx = new TestTx(entity, state, version);
         tx.commit();
     }
 
@@ -66,7 +66,7 @@ public class TestTransaction {
      * <p>To be used in tests only.
      */
     public static void archive(TransactionalEntity entity) {
-        TestTx tx = new TestTx(entity) {
+        var tx = new TestTx(entity) {
 
             @Override
             protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
@@ -86,7 +86,7 @@ public class TestTransaction {
      * <p>To be used in tests only.
      */
     public static void delete(TransactionalEntity entity) {
-        TestTx tx = new TestTx(entity) {
+        var tx = new TestTx(entity) {
 
             @Override
             protected DispatchOutcome dispatch(TransactionalEntity entity, EventEnvelope event) {
@@ -125,13 +125,13 @@ public class TestTransaction {
             return new NoIncrement(this);
         }
 
-        private void dispatchForTest() {
-            EntProjectCreated eventMessage = EntProjectCreated
+        void dispatchForTest() {
+            var eventMessage = EntProjectCreated
                     .newBuilder()
                     .setProjectId(ProjectId.getDefaultInstance())
                     .buildPartial();
-            TestEventFactory factory = TestEventFactory.newInstance(TestTransaction.class);
-            Event event = factory.createEvent(eventMessage);
+            var factory = TestEventFactory.newInstance(TestTransaction.class);
+            var event = factory.createEvent(eventMessage);
             dispatch(entity(), EventEnvelope.of(event));
         }
     }

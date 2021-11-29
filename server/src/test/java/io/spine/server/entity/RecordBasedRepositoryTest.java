@@ -27,7 +27,6 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
-import com.google.common.truth.IterableSubject;
 import com.google.common.truth.OptionalSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
@@ -38,12 +37,10 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.CompositeFilter;
-import io.spine.client.Filter;
 import io.spine.client.IdFilter;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.server.entity.given.repository.GivenLifecycleFlags;
-import io.spine.server.storage.RecordWithColumns;
 import io.spine.testing.TestValues;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
@@ -96,7 +93,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     protected abstract E createEntity(I id);
 
     protected final E createEntity(int idValue) {
-        I id = createId(idValue);
+        var id = createId(idValue);
         return createEntity(id);
     }
 
@@ -148,13 +145,13 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
 
     @CanIgnoreReturnValue
     private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S> repo, int count) {
-        List<E> entities = createEntities(count);
+        var entities = createEntities(count);
         storeEntities(repo, entities);
         return entities;
     }
 
     private void storeEntities(RecordBasedRepository<I, E, S> repo, List<E> entities) {
-        for (E entity : entities) {
+        for (var entity : entities) {
             repo.store(entity);
         }
     }
@@ -174,8 +171,8 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     @Test
     @DisplayName("create entities")
     void createEntities() {
-        I id = createId(5);
-        E projectEntity = repository().create(id);
+        var id = createId(5);
+        var projectEntity = repository().create(id);
         assertNotNull(projectEntity);
         assertEquals(id, projectEntity.id());
     }
@@ -224,7 +221,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         }
 
         private void assertResult(Optional<E> optional) {
-            OptionalSubject assertResult = assertThat(optional);
+            var assertResult = assertThat(optional);
             assertResult.isPresent();
             assertResult.hasValue(entity);
         }
@@ -245,13 +242,13 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("by IDs")
         void multipleEntitiesByIds() {
-            int count = 10;
-            List<E> entities = createAndStoreEntities(repository(), count);
+            var count = 10;
+            var entities = createAndStoreEntities(repository(), count);
 
             List<I> ids = Lists.newLinkedList();
 
             // Find some of the records (half of them in this case)
-            for (int i = 0; i < count / 2; i++) {
+            for (var i = 0; i < count / 2; i++) {
                 ids.add(entities.get(i)
                                 .id());
             }
@@ -265,30 +262,28 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("by query")
         void entitiesByQuery() {
-            I id1 = createId(271);
-            I id2 = createId(314);
-            E entity1 = createEntity(id1);
-            E entity2 = createEntity(id2);
+            var id1 = createId(271);
+            var id2 = createId(314);
+            var entity1 = createEntity(id1);
+            var entity2 = createEntity(id2);
             repository().store(entity1);
             repository().store(entity2);
 
-            String fieldPath = "id_string";
-            StringValue fieldValue = StringValue.newBuilder()
-                                                .setValue(id1.toString())
-                                                .build();
-            Filter filter = eq(fieldPath, fieldValue);
-            CompositeFilter aggregatingFilter = CompositeFilter
-                    .newBuilder()
+            var fieldPath = "id_string";
+            var fieldValue = StringValue.newBuilder()
+                    .setValue(id1.toString())
+                    .build();
+            var filter = eq(fieldPath, fieldValue);
+            var aggregatingFilter = CompositeFilter.newBuilder()
                     .addFilter(filter)
                     .setOperator(ALL)
                     .build();
-            TargetFilters filters = TargetFilters
-                    .newBuilder()
+            var filters = TargetFilters.newBuilder()
                     .addFilter(aggregatingFilter)
                     .build();
             Collection<E> found = newArrayList(repository().find(filters, emptyFormat()));
 
-            IterableSubject assertThatFound = assertThat(found);
+            var assertThatFound = assertThat(found);
             assertThatFound.hasSize(1);
             assertThatFound.contains(entity1);
             assertThatFound.doesNotContain(entity2);
@@ -297,20 +292,20 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("by query and field mask")
         void entitiesByQueryAndFields() {
-            int count = 10;
-            List<E> entities = createAndStoreEntities(repository(), count);
+            var count = 10;
+            var entities = createAndStoreEntities(repository(), count);
 
             // Find some of the entities (half of them in this case).
-            int idsToObtain = count / 2;
-            List<Any> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
+            var idsToObtain = count / 2;
+            var ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
 
-            TargetFilters filters = createIdFilters(ids);
-            FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
-            Iterator<E> readEntities = find(filters, firstFieldOnly);
+            var filters = createIdFilters(ids);
+            var firstFieldOnly = createFirstFieldOnlyMask(entities);
+            var readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
 
             assertThat(foundList).hasSize(ids.size());
-            for (E entity : foundList) {
+            for (var entity : foundList) {
                 assertMatches(entity, firstFieldOnly);
             }
         }
@@ -318,66 +313,63 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("in ascending order")
         void entitiesInAscendingOrder() {
-            int count = 10;
+            var count = 10;
             // UUIDs are used to produce a collection with the names in a random order.
-            List<E> entities = entitiesWithNames(repository(), count, Identifier::newUuid);
+            var entities = entitiesWithNames(repository(), count, Identifier::newUuid);
 
-            ResponseFormat format = ResponseFormat
-                    .newBuilder()
+            var format = ResponseFormat.newBuilder()
                     .addOrderBy(orderByName(ASCENDING))
                     .vBuild();
-            Iterator<E> readEntities = repository().loadAll(format);
+            var readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
-            List<E> expectedList = orderedByName(entities);
+            var expectedList = orderedByName(entities);
             assertThat(foundList).containsExactlyElementsIn(expectedList);
         }
 
         @Test
         @DisplayName("in descending order")
         void entitiesInDescendingOrder() {
-            int count = 10;
+            var count = 10;
             // UUIDs are used to produce a collection with the names in a random order.
-            List<E> entities = entitiesWithNames(repository(), count, Identifier::newUuid);
+            var entities = entitiesWithNames(repository(), count, Identifier::newUuid);
 
-            ResponseFormat format = ResponseFormat
-                    .newBuilder()
+            var format = ResponseFormat.newBuilder()
                     .addOrderBy(orderByName(DESCENDING))
                     .vBuild();
-            Iterator<E> readEntities = repository().loadAll(format);
+            var readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
-            List<E> expectedList = reverse(orderedByName(entities));
+            var expectedList = reverse(orderedByName(entities));
             assertThat(foundList).containsExactlyElementsIn(expectedList);
         }
 
         @Test
         @DisplayName("limited number of entities")
         void limitedNumberOfEntities() {
-            int totalCount = 10;
-            int limit = 5;
+            var totalCount = 10;
+            var limit = 5;
             // UUIDs are used to produce a collection with the names in a random order.
-            List<E> entities = entitiesWithNames(repository(), totalCount, Identifier::newUuid);
+            var entities = entitiesWithNames(repository(), totalCount, Identifier::newUuid);
 
-            ResponseFormat format = ResponseFormat
-                    .newBuilder()
+            var format = ResponseFormat.newBuilder()
                     .addOrderBy(orderByName(ASCENDING))
                     .setLimit(limit)
                     .vBuild();
-            Iterator<E> readEntities = repository().loadAll(format);
+            var readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
-            List<E> expectedList = orderedByName(entities).subList(0, limit);
+            var expectedList = orderedByName(entities).subList(0, limit);
             assertThat(foundList).containsExactlyElementsIn(expectedList);
         }
 
         @Test
         @DisplayName("all entities")
         void allEntities() {
-            List<E> entities = createAndStoreEntities(repository(), 150);
+            var entities = createAndStoreEntities(repository(), 150);
             Collection<E> found = newArrayList(loadAll());
 
-            IterableSubject assertFoundEntities = assertThat(found);
+            var assertFoundEntities = assertThat(found);
 
             assertFoundEntities.hasSize(entities.size());
 
@@ -387,12 +379,12 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("all entity records")
         void allEntityRecords() {
-            List<E> entities = createAndStoreEntities(repository, 150);
+            var entities = createAndStoreEntities(repository, 150);
             Collection<EntityRecord> found = newArrayList(loadAllRecords());
             assertThat(found).hasSize(entities.size());
 
-            for (E entity : entities) {
-                RecordWithColumns<I, EntityRecord> record = repository.toRecord(entity);
+            for (var entity : entities) {
+                var record = repository.toRecord(entity);
                 assertThat(found).contains(record.record());
             }
         }
@@ -405,8 +397,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         }
 
         private Iterator<E> find(TargetFilters filters, FieldMask firstFieldOnly) {
-            ResponseFormat format = ResponseFormat
-                    .newBuilder()
+            var format = ResponseFormat.newBuilder()
                     .setFieldMask(firstFieldOnly)
                     .vBuild();
             return repository().find(filters, format);
@@ -414,38 +405,36 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
 
         private List<E> entitiesWithNames(RecordBasedRepository<I, E, S> repo, int count,
                                           Supplier<String> nameSupplier) {
-            List<E> entities = createWithNames(count, nameSupplier);
+            var entities = createWithNames(count, nameSupplier);
             storeEntities(repo, entities);
             return entities;
         }
 
         private List<Any> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
             List<Any> ids = Lists.newLinkedList();
-            for (int i = 0; i < count; i++) {
-                Message entityId = (Message) entities.get(i)
-                                                     .id();
-                Any id = pack(entityId);
+            for (var i = 0; i < count; i++) {
+                var entityId = (Message) entities.get(i)
+                                                 .id();
+                var id = pack(entityId);
                 ids.add(id);
             }
             return ids;
         }
 
         private TargetFilters createIdFilters(List<Any> ids) {
-            IdFilter filter = IdFilter
-                    .newBuilder()
+            var filter = IdFilter.newBuilder()
                     .addAllId(ids)
                     .build();
-            TargetFilters filters = TargetFilters
-                    .newBuilder()
+            var filters = TargetFilters.newBuilder()
                     .setIdFilter(filter)
                     .build();
             return filters;
         }
 
         private FieldMask createFirstFieldOnlyMask(List<E> entities) {
-            E firstEntity = entities.get(0);
-            FieldMask fieldMask = fromFieldNumbers(firstEntity.defaultState()
-                                                              .getClass(), 1);
+            var firstEntity = entities.get(0);
+            var fieldMask = fromFieldNumbers(firstEntity.defaultState()
+                                                        .getClass(), 1);
             return fieldMask;
         }
 
@@ -457,11 +446,11 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     @Test
     @DisplayName("create entity on `loadOrCreate` if not found")
     void loadOrCreateEntity() {
-        int count = 3;
+        var count = 3;
         createAndStoreEntities(repository(), count);
 
-        I id = createId(count + 1);
-        E entity = loadOrCreate(id);
+        var id = createId(count + 1);
+        var entity = loadOrCreate(id);
 
         assertNotNull(entity);
         assertEquals(id, entity.id());
@@ -470,10 +459,10 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     @Test
     @DisplayName("handle wrong passed IDs")
     void handleWrongPassedIds() {
-        int count = 10;
-        List<E> entities = createAndStoreEntities(repository(), count);
+        var count = 10;
+        var entities = createAndStoreEntities(repository(), count);
         List<I> ids = Lists.newLinkedList();
-        for (int i = 0; i < count; i++) {
+        for (var i = 0; i < count; i++) {
             ids.add(entities.get(i)
                             .id());
         }
@@ -481,7 +470,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         ids.add(sideEntity.id());
 
         Collection<E> found = newArrayList(loadMany(ids));
-        IterableSubject assertThatFound = assertThat(found);
+        var assertThatFound = assertThat(found);
         assertThatFound.hasSize(ids.size() - 1); // Check we've found all existing items
         assertThatFound.containsExactlyElementsIn(entities);
     }
@@ -493,8 +482,8 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("archived")
         void archived() {
-            E entity = createEntity(821);
-            I id = entity.id();
+            var entity = createEntity(821);
+            var id = entity.id();
 
             storeEntity(entity);
 
@@ -509,8 +498,8 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         @Test
         @DisplayName("deleted")
         void deleted() {
-            E entity = createEntity(822);
-            I id = entity.id();
+            var entity = createEntity(822);
+            var id = entity.id();
 
             storeEntity(entity);
 
@@ -523,7 +512,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         }
 
         private OptionalSubject assertFound(I id) {
-            Optional<E> entity = repository().findActive(id);
+            var entity = repository().findActive(id);
             return assertThat(entity);
         }
     }
@@ -531,9 +520,9 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
     @Test
     @DisplayName("exclude non-active records from entity query")
     void excludeNonActiveRecords() {
-        E activeEntity = createEntity(271);
-        E archivedEntity = createEntity(42);
-        E deletedEntity = createEntity(314);
+        var activeEntity = createEntity(271);
+        var archivedEntity = createEntity(42);
+        var deletedEntity = createEntity(314);
         delete(asTxEntity(deletedEntity));
         archive(asTxEntity(archivedEntity));
 
@@ -542,20 +531,20 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        Iterator<E> found = repository().loadAll(emptyFormat());
+        var found = repository().loadAll(emptyFormat());
         List<E> foundList = newArrayList(found);
         // Check results
         assertThat(foundList).hasSize(1);
-        E actualEntity = foundList.get(0);
+        var actualEntity = foundList.get(0);
         assertEquals(activeEntity, actualEntity);
     }
 
     @Test
     @DisplayName("allow any lifecycle if column is involved in query")
     void ignoreLifecycleForColumns() {
-        E activeEntity = createEntity(42);
-        E archivedEntity = createEntity(314);
-        E deletedEntity = createEntity(271);
+        var activeEntity = createEntity(42);
+        var archivedEntity = createEntity(314);
+        var deletedEntity = createEntity(271);
         delete(asTxEntity(deletedEntity));
         archive(asTxEntity(archivedEntity));
 
@@ -564,16 +553,15 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         storeEntity(archivedEntity);
         storeEntity(deletedEntity);
 
-        CompositeFilter filter = all(eq(ArchivedColumn.instance(), false));
-        TargetFilters filters = TargetFilters
-                .newBuilder()
+        var filter = all(eq(ArchivedColumn.instance(), false));
+        var filters = TargetFilters.newBuilder()
                 .addFilter(filter)
                 .build();
 
-        Iterator<E> found = repository().find(filters, emptyFormat());
+        var found = repository().find(filters, emptyFormat());
         Collection<E> foundList = newArrayList(found);
         // Check result
-        IterableSubject assertFoundList = assertThat(foundList);
+        var assertFoundList = assertThat(foundList);
         assertFoundList.hasSize(2);
         assertFoundList.containsExactly(activeEntity, deletedEntity);
     }

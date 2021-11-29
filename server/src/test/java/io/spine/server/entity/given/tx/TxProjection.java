@@ -74,7 +74,7 @@ public final class TxProjection
      * @see io.spine.server.projection.ProjectionTransactionTest#failingInHandler
      */
     @Subscribe
-    @SuppressWarnings("DoNotCallSuggester") // Does not apply to this test env. class.
+    @SuppressWarnings("DoNotCallSuggester") /* Does not apply to this test env. class. */
     void event(TxErrorRequested e) {
         throw new RuntimeException("that tests the projection tx behaviour");
     }
@@ -97,12 +97,12 @@ public final class TxProjection
     }
 
     private void updateTypeValue() {
-        ProjectionType newTypeValue = typeValueOf(isNullType);
+        var newTypeValue = typeValueOf(isNullType);
         builder().setType(newTypeValue);
     }
 
     private void updateNameLength() {
-        int newLengthValue = calculateLength(builder().getName());
+        var newLengthValue = calculateLength(builder().getName());
         builder().setNameLength(newLengthValue);
     }
 
@@ -113,7 +113,7 @@ public final class TxProjection
     }
 
     public static int calculateLength(String name) {
-        int lengthValue = name.length();
+        var lengthValue = name.length();
         return lengthValue;
     }
 }
