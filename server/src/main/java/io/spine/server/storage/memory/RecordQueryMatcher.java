@@ -30,8 +30,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.query.Column;
-import io.spine.query.LogicalOperator;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
 import io.spine.query.Subject;
@@ -79,7 +77,7 @@ public class RecordQueryMatcher<I, R extends Message>
         if (input == null) {
             return false;
         }
-        boolean result = idMatches(input) && columnValuesMatch(input);
+        var result = idMatches(input) && columnValuesMatch(input);
         return result;
     }
 
@@ -87,7 +85,7 @@ public class RecordQueryMatcher<I, R extends Message>
         if (acceptedIds.isEmpty()) {
             return true;
         }
-        I actualId = record.id();
+        var actualId = record.id();
         return acceptedIds.contains(actualId);
     }
 
@@ -99,9 +97,9 @@ public class RecordQueryMatcher<I, R extends Message>
     checkPredicate(RecordWithColumns<I, R> record, QueryPredicate<R> predicate) {
         boolean match;
 
-        LogicalOperator operator = predicate.operator();
-        ImmutableList<SubjectParameter<R, ?, ?>> parameters = predicate.parameters();
-        ImmutableList<QueryPredicate<R>> children = predicate.children();
+        var operator = predicate.operator();
+        var parameters = predicate.parameters();
+        var children = predicate.children();
         switch (operator) {
             case AND:
                 match = checkAnd(record, parameters, children);
@@ -122,11 +120,11 @@ public class RecordQueryMatcher<I, R extends Message>
         if (params.isEmpty() && predicates.isEmpty()) {
             return true;
         }
-        boolean paramsMatch =
+        var paramsMatch =
                 params.stream()
                       .allMatch(param -> matches(record, param));
         if (paramsMatch) {
-            boolean predicatesMatch =
+            var predicatesMatch =
                     predicates.stream()
                               .allMatch(predicate -> checkPredicate(record,
                                                                     predicate));
@@ -142,11 +140,11 @@ public class RecordQueryMatcher<I, R extends Message>
         if (params.isEmpty() && predicates.isEmpty()) {
             return true;
         }
-        boolean paramsMatch =
+        var paramsMatch =
                 params.stream()
                       .anyMatch(param -> matches(record, param));
         if (!paramsMatch) {
-            boolean predicatesMatch =
+            var predicatesMatch =
                     predicates.stream()
                               .anyMatch(predicate -> checkPredicate(record, predicate));
             return predicatesMatch;
@@ -156,13 +154,13 @@ public class RecordQueryMatcher<I, R extends Message>
 
     private static <I, R extends Message> boolean
     matches(RecordWithColumns<I, R> recWithColumns, SubjectParameter<R, ?, ?> param) {
-        Column<R, ?> column = param.column();
+        var column = param.column();
         if (!recWithColumns.hasColumn(column.name())) {
             return false;
         }
         @Nullable Object columnValue = recWithColumns.columnValue(param.column()
                                                                        .name());
-        boolean result = checkSingleParameter(param, columnValue);
+        var result = checkSingleParameter(param, columnValue);
         return result;
     }
 
@@ -171,9 +169,9 @@ public class RecordQueryMatcher<I, R extends Message>
         if (actualValue == null) {
             return false;
         }
-        Object paramValue = parameter.value();
-        boolean result = parameter.operator()
-                                  .eval(actualValue, paramValue);
+        var paramValue = parameter.value();
+        var result = parameter.operator()
+                              .eval(actualValue, paramValue);
         return result;
     }
 }

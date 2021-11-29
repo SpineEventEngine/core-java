@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.synchronizedMap;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The multitenant storage.
@@ -64,10 +64,10 @@ abstract class MultitenantStorage<S extends TenantDataStorage<?, ?>> {
      * <p>If the slice has not been created for this tenant, it will be created.
      */
     final S currentSlice() {
-        TenantFunction<S> func = new TenantFunction<S>(isMultitenant()) {
+        var func = new TenantFunction<S>(isMultitenant()) {
             @Override
             public @Nullable S apply(@Nullable TenantId tenantId) {
-                checkNotNull(tenantId);
+                requireNonNull(tenantId);
                 lock.lock();
                 try {
                     return tenantSlices.computeIfAbsent(tenantId, id -> createSlice());
@@ -76,8 +76,8 @@ abstract class MultitenantStorage<S extends TenantDataStorage<?, ?>> {
                 }
             }
         };
-        S result = func.execute();
-        checkNotNull(result, "Current tenant slice is null.");
+        var result = func.execute();
+        requireNonNull(result, "Current tenant slice is `null`.");
         return result;
     }
 

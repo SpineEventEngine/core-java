@@ -26,13 +26,11 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.query.RecordQuery;
-import io.spine.query.SortBy;
 import io.spine.query.Subject;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordWithColumns;
@@ -72,8 +70,7 @@ final class TenantRecords<I, R extends Message>
 
     @Override
     public Iterator<I> index() {
-        Iterator<I> result = records.keySet()
-                                    .iterator();
+        var result = records.keySet().iterator();
         return result;
     }
 
@@ -81,9 +78,9 @@ final class TenantRecords<I, R extends Message>
      * Obtains the iterator over the identifiers of the records which match the passed query.
      */
     public Iterator<I> index(RecordQuery<I, R> query) {
-        List<RecordWithColumns<I, R>> subset = findRecords(query);
+        var subset = findRecords(query);
         @SuppressWarnings("ConstantConditions")  // Elements of the returned list are non-`null`.
-        Iterator<I> result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
+        var result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
         return result;
     }
 
@@ -103,7 +100,7 @@ final class TenantRecords<I, R extends Message>
 
     @Override
     public Optional<RecordWithColumns<I, R>> get(I id) {
-        RecordWithColumns<I, R> record = records.get(id);
+        var record = records.get(id);
         return Optional.ofNullable(record);
     }
 
@@ -112,10 +109,9 @@ final class TenantRecords<I, R extends Message>
     }
 
     Iterator<R> readAll(RecordQuery<I, R> query) {
-        FieldMask fieldMask = query.mask();
-        List<RecordWithColumns<I, R>> records = findRecords(query);
-        return records
-                .stream()
+        var fieldMask = query.mask();
+        var records = findRecords(query);
+        return records.stream()
                 .map(RecordWithColumns::record)
                 .map(new FieldMaskApplier(fieldMask))
                 .iterator();
@@ -123,8 +119,8 @@ final class TenantRecords<I, R extends Message>
 
     private List<RecordWithColumns<I, R>> findRecords(RecordQuery<I, R> query) {
         synchronized (records) {
-            Map<I, RecordWithColumns<I, R>> filtered = filterRecords(query.subject());
-            Stream<RecordWithColumns<I, R>> stream = filtered.values()
+            var filtered = filterRecords(query.subject());
+            var stream = filtered.values()
                                                              .stream();
             return sortAndLimit(stream, query).collect(toList());
         }
@@ -132,12 +128,12 @@ final class TenantRecords<I, R extends Message>
 
     private static <I, R extends Message> Stream<RecordWithColumns<I, R>>
     sortAndLimit(Stream<RecordWithColumns<I, R>> data, RecordQuery<I, R> query) {
-        Stream<RecordWithColumns<I, R>> stream = data;
-        ImmutableList<SortBy<?, R>> sortingSpecs = query.sorting();
+        var stream = data;
+        var sortingSpecs = query.sorting();
         if (sortingSpecs.size() > 0) {
             stream = stream.sorted(accordingTo(sortingSpecs.asList()));
         }
-        Integer limit = query.limit();
+        var limit = query.limit();
         if (limit != null && limit > 0) {
             stream = stream.limit(limit);
         }
@@ -149,7 +145,7 @@ final class TenantRecords<I, R extends Message>
      * {@linkplain Subject subject of the record query}.
      */
     private Map<I, RecordWithColumns<I, R>> filterRecords(Subject<I, R> subject) {
-        RecordQueryMatcher<I, R> matcher = new RecordQueryMatcher<>(subject);
+        var matcher = new RecordQueryMatcher<>(subject);
         return filterValues(records, matcher::test);
     }
 
@@ -188,18 +184,17 @@ final class TenantRecords<I, R extends Message>
 
         private EntityRecord maskEntityRecord(EntityRecord input) {
             checkNotNull(input);
-            Any maskedState = maskAny(input.getState());
-            EntityRecord result = EntityRecord
-                    .newBuilder(input)
+            var maskedState = maskAny(input.getState());
+            var result = EntityRecord.newBuilder(input)
                     .setState(maskedState)
                     .build();
             return result;
         }
 
         private Any maskAny(Any message) {
-            Message stateMessage = unpack(message);
-            Message maskedMessage = applyMask(fieldMask, stateMessage);
-            Any result = pack(maskedMessage);
+            var stateMessage = unpack(message);
+            var maskedMessage = applyMask(fieldMask, stateMessage);
+            var result = pack(maskedMessage);
             return result;
         }
     }

@@ -29,7 +29,6 @@ package io.spine.server.storage.memory;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.query.ColumnName;
 import io.spine.query.Direction;
 import io.spine.query.RecordColumn;
 import io.spine.query.SortBy;
@@ -85,10 +84,10 @@ public class RecordComparator<I, R extends Message>
         checkArgument(!sortByList.isEmpty(),
                       "`RecordComparator` requires at least one `SortBy` instance.");
         Comparator<RecordWithColumns<I, R>> result = null;
-        for (SortBy<?, R> sortBy : sortByList) {
+        for (var sortBy : sortByList) {
             Comparator<RecordWithColumns<I, R>> thisComparator;
-            Direction direction = sortBy.direction();
-            RecordColumn<R, ?> column = sortBy.column();
+            var direction = sortBy.direction();
+            var column = sortBy.column();
             thisComparator = direction == Direction.ASC
                              ? ascending(column)
                              : descending(column);
@@ -116,9 +115,9 @@ public class RecordComparator<I, R extends Message>
         checkNotNull(a);
         checkNotNull(b);
 
-        ColumnName columnName = column.name();
-        Object aValue = a.columnValue(columnName);
-        Object bValue = b.columnValue(columnName);
+        var columnName = column.name();
+        var aValue = a.columnValue(columnName);
+        var bValue = b.columnValue(columnName);
         if (aValue == null) {
             return bValue == null ? 0 : -1;
         }
@@ -127,12 +126,12 @@ public class RecordComparator<I, R extends Message>
         }
         if (aValue instanceof Comparable) {
             @SuppressWarnings({"unchecked", "rawtypes"}) // For convenience.
-                    int result = ((Comparable) aValue).compareTo(bValue);
+            var result = ((Comparable) aValue).compareTo(bValue);
             return result;
         }
 
         if (aValue instanceof Timestamp) {
-            int result = Timestamps.compare((Timestamp) aValue, (Timestamp) bValue);
+            var result = Timestamps.compare((Timestamp) aValue, (Timestamp) bValue);
             return result;
         }
         throw newIllegalStateException(
