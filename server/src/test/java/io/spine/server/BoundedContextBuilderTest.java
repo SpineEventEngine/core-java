@@ -59,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("BoundedContext Builder should")
+@DisplayName("`BoundedContextBuilder` should")
 class BoundedContextBuilderTest {
 
     private BoundedContextBuilder builder;
@@ -83,7 +83,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("name if it was set")
         void name() {
-            String nameString = getClass().getName();
+            var nameString = getClass().getName();
             assertEquals(nameString, BoundedContext.singleTenant(nameString)
                                                    .name()
                                                    .getValue());
@@ -103,7 +103,7 @@ class BoundedContextBuilderTest {
     class CreateDefault {
 
         @Test
-        @DisplayName("TenantIndex")
+        @DisplayName("`TenantIndex`")
         void tenantIndex() {
             assertNotNull(BoundedContextBuilder.assumingTests(true)
                                                .build()
@@ -112,17 +112,17 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("CommandBus and EventBus simultaneously")
+        @DisplayName("`CommandBus` and `EventBus` simultaneously")
         void commandBusAndEventBus() {
-            BoundedContext boundedContext = builder.build();
+            var boundedContext = builder.build();
             assertNotNull(boundedContext.commandBus());
             assertNotNull(boundedContext.eventBus());
         }
 
         @Test
-        @DisplayName("AggregateRootDirectory")
+        @DisplayName("`AggregateRootDirectory`")
         void aggregateRootDirectory() {
-            BoundedContext context = builder.build();
+            var context = builder.build();
             assertNotNull(context.internalAccess()
                                  .aggregateRootDirectory());
         }
@@ -131,7 +131,7 @@ class BoundedContextBuilderTest {
     @Test
     @DisplayName("support multitenancy")
     void supportMultitenancy() {
-        BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(true);
+        var builder = BoundedContextBuilder.assumingTests(true);
         assertTrue(builder.isMultitenant());
     }
 
@@ -140,7 +140,7 @@ class BoundedContextBuilderTest {
     void setTenantIndex() {
         TenantIndex tenantIndex = new StubTenantIndex();
 
-        BoundedContextBuilder builder = BoundedContextBuilder
+        var builder = BoundedContextBuilder
                 .assumingTests()
                 .setTenantIndex(tenantIndex);
 
@@ -258,7 +258,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("register repository if it's passed as command dispatcher")
+        @DisplayName("register repository if it's passed as a command dispatcher")
         void registerRepo() {
             assertFalse(builder.hasRepository(repository));
             builder.addCommandDispatcher(repository);
@@ -266,7 +266,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("remove registered repository if it's passed as command dispatcher")
+        @DisplayName("remove registered repository if it's passed as a command dispatcher")
         void removeRegisteredRepo() {
             builder.add(repository);
             assertTrue(builder.hasRepository(repository));
@@ -276,7 +276,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("check repository presence in Builder if it's queried as command dispatcher")
+        @DisplayName("check repository presence if it's queried as a command dispatcher")
         void checkHasRepo() {
             builder.add(repository);
             assertTrue(builder.hasCommandDispatcher(repository));
@@ -337,7 +337,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("check repository presence in Builder if it's queried as event dispatcher")
+        @DisplayName("check repository presence if it's queried as an event dispatcher")
         void checkHasRepo() {
             builder.add(repository);
             assertTrue(builder.hasEventDispatcher(repository));

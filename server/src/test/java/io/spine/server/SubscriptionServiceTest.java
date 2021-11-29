@@ -26,23 +26,16 @@
 
 package io.spine.server;
 
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.client.EntityStateUpdate;
-import io.spine.client.EntityUpdates;
-import io.spine.client.EventUpdates;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.client.TopicFactory;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
@@ -52,7 +45,6 @@ import io.spine.server.Given.ReportSender;
 import io.spine.server.stand.InvalidSubscriptionException;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggOwnerNotified;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
@@ -69,7 +61,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -108,8 +99,7 @@ class SubscriptionServiceTest {
                 .addEventDispatcher(new AggProjectCreatedReactor())
                 .addCommandDispatcher(new ReportSender())
                 .build();
-        subscriptionService = SubscriptionService
-                .newBuilder()
+        subscriptionService = SubscriptionService.newBuilder()
                 .add(context)
                 .add(randomCtx())
                 .add(randomCtx())
@@ -147,13 +137,11 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("one bounded context")
         void oneBc() {
-            BoundedContext oneContext = ctx("One");
+            var oneContext = ctx("One");
 
-            SubscriptionService.Builder builder = SubscriptionService
-                    .newBuilder()
-                    .add(oneContext);
+            var builder = SubscriptionService.newBuilder().add(oneContext);
 
-            SubscriptionService subscriptionService = builder.build();
+            var subscriptionService = builder.build();
             assertNotNull(subscriptionService);
 
             List<BoundedContext> contexts = builder.contexts();
@@ -164,16 +152,15 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("several bounded contexts")
         void severalBcs() {
-            BoundedContext bc1 = ctx("First");
-            BoundedContext bc2 = ctx("Second");
-            BoundedContext bc3 = ctx("Third");
+            var bc1 = ctx("First");
+            var bc2 = ctx("Second");
+            var bc3 = ctx("Third");
 
-            SubscriptionService.Builder builder = SubscriptionService
-                    .newBuilder()
+            var builder = SubscriptionService.newBuilder()
                     .add(bc1)
                     .add(bc2)
                     .add(bc3);
-            SubscriptionService service = builder.build();
+            var service = builder.build();
             assertNotNull(service);
 
             List<BoundedContext> contexts = builder.contexts();
@@ -184,18 +171,17 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("be able to remove bounded context from builder")
     void removeBcFromBuilder() {
-        BoundedContext bc1 = ctx("Removed");
-        BoundedContext bc2 = ctx("Also removed");
-        BoundedContext bc3 = ctx("The one to stay");
+        var bc1 = ctx("Removed");
+        var bc2 = ctx("Also removed");
+        var bc3 = ctx("The one to stay");
 
-        SubscriptionService.Builder builder = SubscriptionService
-                .newBuilder()
+        var builder = SubscriptionService.newBuilder()
                 .add(bc1)
                 .add(bc2)
                 .add(bc3)
                 .remove(bc2)
                 .remove(bc1);
-        SubscriptionService subscriptionService = builder.build();
+        var subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
         List<BoundedContext> contexts = builder.contexts();
@@ -236,7 +222,7 @@ class SubscriptionServiceTest {
      * in the context under the test.
      */
     private Subscription invalidSubscription() {
-        Topic invalidTopic = invalidTopic();
+        var invalidTopic = invalidTopic();
         return Subscription
                 .newBuilder()
                 .setTopic(invalidTopic)
@@ -263,19 +249,18 @@ class SubscriptionServiceTest {
         @DisplayName("events from abstract reactors")
         @MuteLogging
         void eventsFromReactors() {
-            Subscription subscription = checkSubscribesTo(AggOwnerNotified.class);
+            var subscription = checkSubscribesTo(AggOwnerNotified.class);
             MemoizingObserver<SubscriptionUpdate> observer = StreamObservers.memoizingObserver();
             subscriptionService.activate(subscription, observer);
-            ProjectId projectId = ProjectId.generate();
-            Command command = new TestActorRequestFactory(SubscriptionServiceTest.class)
+            var projectId = ProjectId.generate();
+            var command = new TestActorRequestFactory(SubscriptionServiceTest.class)
                     .createCommand(createProject(projectId));
             context.commandBus()
                    .post(command, noOpObserver());
-            EventUpdates events = observer.firstResponse()
-                                          .getEventUpdates();
+            var events = observer.firstResponse().getEventUpdates();
             assertThat(events.getEventList())
                     .hasSize(1);
-            Event event = events.getEvent(0);
+            var event = events.getEvent(0);
             assertThat(event.enclosedMessage())
                     .isInstanceOf(AggOwnerNotified.class);
         }
@@ -284,30 +269,29 @@ class SubscriptionServiceTest {
         @DisplayName("events from standalone command handlers")
         @MuteLogging
         void eventsFromCommandHandlers() {
-            Subscription subscription = checkSubscribesTo(ReportSent.class);
+            var subscription = checkSubscribesTo(ReportSent.class);
             MemoizingObserver<SubscriptionUpdate> observer = StreamObservers.memoizingObserver();
             subscriptionService.activate(subscription, observer);
-            Command command = new TestActorRequestFactory(SubscriptionServiceTest.class)
+            var command = new TestActorRequestFactory(SubscriptionServiceTest.class)
                     .createCommand(sendReport());
             context.commandBus()
                    .post(command, noOpObserver());
-            EventUpdates events = observer.firstResponse()
-                                          .getEventUpdates();
+            var events = observer.firstResponse().getEventUpdates();
             assertThat(events.getEventList())
                     .hasSize(1);
-            Event event = events.getEvent(0);
+            var event = events.getEvent(0);
             assertThat(event.enclosedMessage())
                     .isInstanceOf(ReportSent.class);
         }
 
         @CanIgnoreReturnValue
         private Subscription checkSubscribesTo(Class<? extends Message> aClass) {
-            Target target = Targets.allOf(aClass);
-            Topic topic = topic().forTarget(target);
+            var target = Targets.allOf(aClass);
+            var topic = topic().forTarget(target);
             subscriptionService.subscribe(topic, observer);
 
-            Subscription response = observer.firstResponse();
-            ProtoSubject assertResponse = ProtoTruth.assertThat(response);
+            var response = observer.firstResponse();
+            var assertResponse = ProtoTruth.assertThat(response);
             assertResponse.isNotNull();
             assertResponse.hasAllRequiredFields();
             assertThat(response.getTopic()
@@ -351,10 +335,10 @@ class SubscriptionServiceTest {
         }
 
         private void assertTargetFound(Class<? extends Message> targetType) {
-            Target target = Targets.allOf(targetType);
-            Optional<BoundedContext> result = subscriptionService.findContextOf(target);
+            var target = Targets.allOf(targetType);
+            var result = subscriptionService.findContextOf(target);
             assertThat(result).isPresent();
-            BoundedContext actual = result.get();
+            var actual = result.get();
             assertThat(actual.name())
                     .isEqualTo(context.name());
         }
@@ -363,7 +347,7 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("activate subscription")
     void activateSubscription() {
-        Topic topic = newTopic();
+        var topic = newTopic();
         // Subscribe to the topic.
         subscriptionService.subscribe(topic, observer);
         verifyState(observer, true);
@@ -372,14 +356,14 @@ class SubscriptionServiceTest {
         subscriptionService.activate(observer.firstResponse(), activationObserver);
 
         // Generate the update and get the ID of the updated entity.
-        ProjectId entityId = updateEntity();
+        var entityId = updateEntity();
 
         // `isCompleted` set to false since we don't expect
         // `activationObserver::onCompleted` to be called.
         verifyState(activationObserver, false);
 
         EntityState<?> actual = memoizedEntity(activationObserver, AggProject.class);
-        EntityState<?> expected = toExpected(entityId);
+        var expected = toExpected(entityId);
         ProtoTruth.assertThat(actual)
                   .comparingExpectedFieldsOnly()
                   .isEqualTo(expected);
@@ -387,12 +371,12 @@ class SubscriptionServiceTest {
 
     @CanIgnoreReturnValue
     private ProjectId updateEntity() {
-        ProjectId projectId = ProjectId
+        var projectId = ProjectId
                 .newBuilder()
                 .setUuid("some-id")
                 .build();
-        AggCreateProject cmd = createProject(projectId);
-        Command command = requestFactory.createCommand(cmd);
+        var cmd = createProject(projectId);
+        var command = requestFactory.createCommand(cmd);
         context.commandBus()
                .post(command, noOpObserver());
         return projectId;
@@ -400,17 +384,17 @@ class SubscriptionServiceTest {
 
     private static EntityState<?> toExpected(ProjectId entityId) {
         return AggProject.newBuilder()
-                         .setId(entityId)
-                         .build();
+                .setId(entityId)
+                .build();
     }
 
     private static <T extends EntityState<?>>
     T memoizedEntity(MemoizingObserver<SubscriptionUpdate> observer, Class<T> stateType) {
-        SubscriptionUpdate update = observer.firstResponse();
-        EntityUpdates entityUpdates = update.getEntityUpdates();
+        var update = observer.firstResponse();
+        var entityUpdates = update.getEntityUpdates();
         assertThat(entityUpdates.getUpdateCount()).isEqualTo(1);
 
-        EntityStateUpdate stateUpdate = entityUpdates.getUpdate(0);
+        var stateUpdate = entityUpdates.getUpdate(0);
         return unpack(stateUpdate.getState(), stateType);
     }
 
@@ -424,7 +408,7 @@ class SubscriptionServiceTest {
     @MuteLogging
     @DisplayName("receive IAE in error callback when activating non-existent subscription")
     void failOnActivatingNonExistent() {
-        Subscription invalidSubscription = invalidSubscription();
+        var invalidSubscription = invalidSubscription();
         subscriptionService.activate(invalidSubscription, activationObserver);
         assertThat(activationObserver.responses())
                 .isEmpty();
@@ -437,7 +421,7 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("cancel subscription")
     void cancelSubscription() {
-        Topic topic = newTopic();
+        var topic = newTopic();
 
         // Subscribe.
         subscriptionService.subscribe(topic, observer);
@@ -466,7 +450,7 @@ class SubscriptionServiceTest {
 
         @BeforeEach
         void cancelSubscription() {
-            Subscription invalidSubscription = invalidSubscription();
+            var invalidSubscription = invalidSubscription();
 
             // Hook the log here to minimize the trapped output.
             interceptLogging();
@@ -526,11 +510,11 @@ class SubscriptionServiceTest {
         @MuteLogging
         @DisplayName("cancellation process")
         void cancellation() {
-            Topic topic = newTopic();
+            var topic = newTopic();
             subscriptionService.subscribe(topic, observer);
 
-            String rejectionMessage = "Execution breaking exception";
-            MemoizingObserver<Response> faultyObserver = new MemoizingObserver<Response>() {
+            var rejectionMessage = "Execution breaking exception";
+            var faultyObserver = new MemoizingObserver<Response>() {
                 @Override
                 public void onNext(Response value) {
                     super.onNext(value);

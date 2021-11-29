@@ -45,16 +45,12 @@ import io.spine.server.bc.given.SecretProjectRepository;
 import io.spine.server.bc.given.TestEventSubscriber;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.stand.Stand;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.test.bc.Project;
-import io.spine.test.bc.ProjectId;
 import io.spine.test.bc.SecretProject;
 import io.spine.testing.logging.Interceptor;
-import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +61,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.List;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
@@ -74,6 +69,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.testing.TestValues.nullRef;
 import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -84,12 +80,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>Messages used in this test suite are defined in:
  * <ul>
- *     <li>spine/test/bc/project.proto - data types
- *     <li>spine/test/bc/command_factory_test.proto — commands
- *     <li>spine/test/bc/events.proto — events.
+ *     <li>{@code spine/test/bc/project.proto} - data types
+ *     <li>{@code spine/test/bc/commands.proto} — commands
+ *     <li>{@code spine/test/bc/events.proto} — events.
  * </ul>
  */
-@DisplayName("BoundedContext should")
+@DisplayName("`BoundedContext` should")
 class BoundedContextTest {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
@@ -126,20 +122,20 @@ class BoundedContextTest {
     class Return {
 
         @Test
-        @DisplayName("EventBus")
+        @DisplayName("`EventBus`")
         void eventBus() {
             assertNotNull(context.eventBus());
         }
 
         @Test
-        @DisplayName("IntegrationBroker")
+        @DisplayName("`IntegrationBroker`")
         void integrationBroker() {
             assertNotNull(context.internalAccess()
                                  .broker());
         }
 
         @Test
-        @DisplayName("CommandDispatcher")
+        @DisplayName("`CommandDispatcher`")
         void commandDispatcher() {
             assertNotNull(context.commandBus());
         }
@@ -147,7 +143,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("multitenancy state")
         void ifSetMultitenant() {
-            BoundedContext bc = BoundedContextBuilder.assumingTests(true).build();
+            var bc = BoundedContextBuilder.assumingTests(true).build();
             assertTrue(bc.isMultitenant());
         }
     }
@@ -157,19 +153,19 @@ class BoundedContextTest {
     class Register {
 
         @Test
-        @DisplayName("AggregateRepository")
+        @DisplayName("`AggregateRepository`")
         void aggregateRepository() {
             registerAndAssertRepository(ProjectAggregate.class);
         }
 
         @Test
-        @DisplayName("ProcessManagerRepository")
+        @DisplayName("`ProcessManagerRepository`")
         void processManagerRepository() {
             registerAndAssertRepository(ProjectProcessManager.class);
         }
 
         @Test
-        @DisplayName("ProjectionRepository")
+        @DisplayName("`ProjectionRepository`")
         void projectionRepository() {
             registerAndAssertRepository(ProjectReport.class);
         }
@@ -180,7 +176,7 @@ class BoundedContextTest {
         }
 
         @Test
-        @DisplayName("DefaultRepository via passed entity class")
+        @DisplayName("`DefaultRepository` via passed entity class")
         void entityClass() {
             context.register(ProjectAggregate.class);
             assertTrue(context.hasEntitiesOfType(ProjectAggregate.class));
@@ -232,14 +228,14 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("propagate registered repositories to Stand")
+    @DisplayName("propagate registered repositories to `Stand`")
     void propagateRepositoriesToStand() {
-        BoundedContext context = BoundedContextBuilder.assumingTests().build();
-        Stand stand = context.stand();
+        var context = BoundedContextBuilder.assumingTests().build();
+        var stand = context.stand();
 
-        Repository<ProjectId, ProjectAggregate> repo =
+        var repo =
                 DefaultRepository.of(ProjectAggregate.class);
-        TypeUrl stateType = repo.entityStateType();
+        var stateType = repo.entityStateType();
 
         assertThat(stand.exposedTypes())
                 .doesNotContain(stateType);
@@ -276,6 +272,7 @@ class BoundedContextTest {
      * </ul>
      * All of the returned repositories manage entities of the same state type.
      */
+    @SuppressWarnings("unused") /* A method source. */
     private static Stream<Arguments> sameStateRepositories() {
         Set<Repository<?, ?>> repositories =
                 ImmutableSet.of(DefaultRepository.of(ProjectAggregate.class),
@@ -287,9 +284,9 @@ class BoundedContextTest {
                                 DefaultRepository.of(FinishedProjectProjection.class),
                                 DefaultRepository.of(ProjectRemovalProcman.class));
 
-        Set<List<Repository<?, ?>>> cartesianProduct =
+        var cartesianProduct =
                 Sets.cartesianProduct(repositories, sameStateRepositories);
-        Stream<Arguments> result =
+        var result =
                 cartesianProduct.stream()
                                 .map(repos -> Arguments.of(repos.get(0), repos.get(1)));
         return result;
@@ -298,8 +295,7 @@ class BoundedContextTest {
     @Test
     @DisplayName("assign storage during registration if repository does not have one")
     void setStorageOnRegister() {
-        Repository<ProjectId, ProjectAggregate> repository =
-                DefaultRepository.of(ProjectAggregate.class);
+        var repository = DefaultRepository.of(ProjectAggregate.class);
         context.register(repository);
         assertTrue(repository.storageAssigned());
     }
@@ -311,7 +307,7 @@ class BoundedContextTest {
         private BoundedContext context;
 
         @Test
-        @DisplayName("CommandBus")
+        @DisplayName("`CommandBus`")
         void toCommandBus() {
             context = multiTenant();
             assertMultitenancyEqual(context::isMultitenant, context.commandBus()::isMultitenant);
@@ -321,7 +317,7 @@ class BoundedContextTest {
         }
 
         @Test
-        @DisplayName("Stand")
+        @DisplayName("`Stand`")
         void toStand() {
             context = multiTenant();
 
@@ -370,7 +366,7 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("throw ISE when obtaining a repository for non-registered entity state class")
+    @DisplayName("throw `ISE` when obtaining a repository for non-registered entity state class")
     void throwOnNoRepoRegistered() {
         // Attempt to get a repository without registering.
         assertThrows(IllegalStateException.class,
@@ -391,17 +387,17 @@ class BoundedContextTest {
     }
 
     @Test
-    @DisplayName("prohibit 3rd party descendants")
+    @DisplayName("prohibit 3rd-party descendants")
     void noExternalDescendants() {
         assertThrows(
                 IllegalStateException.class,
                 () ->
                 new BoundedContext(BoundedContextBuilder.assumingTests()) {
-                    @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
+
                     @Internal
                     @Override
                     public SystemClient systemClient() {
-                        return null;
+                        return nullRef();
                     }
                 }
         );
@@ -420,9 +416,7 @@ class BoundedContextTest {
 
         @BeforeEach
         void closeContext() throws Exception {
-            BoundedContext context =
-                    BoundedContext.singleTenant(contextName.getValue())
-                                  .build();
+            var context = BoundedContext.singleTenant(contextName.getValue()).build();
             domainInterceptor = new Interceptor(DomainContext.class, debugLevel);
             domainInterceptor.intercept();
             systemInterceptor = new Interceptor(SystemContext.class, debugLevel);
@@ -440,9 +434,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("log its closing")
         void logClosing() {
-            LogRecordSubject assertDomainLog =
-                    domainInterceptor.assertLog()
-                                     .record();
+            var assertDomainLog = domainInterceptor.assertLog().record();
             assertDomainLog.hasLevelThat()
                            .isEqualTo(debugLevel);
             assertDomainLog.hasMessageThat()
@@ -452,9 +444,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("close its System context")
         void closeSystem() {
-            LogRecordSubject assertSystemLog =
-                    systemInterceptor.assertLog()
-                                     .record();
+            var assertSystemLog = systemInterceptor.assertLog().record();
             assertSystemLog.hasLevelThat()
                            .isEqualTo(debugLevel);
             assertSystemLog.hasMessageThat()
@@ -465,7 +455,7 @@ class BoundedContextTest {
     @Test
     @DisplayName("return its name in `toString()`")
     void stringForm() {
-        String name = randomString();
+        var name = randomString();
 
         assertThat(BoundedContext.singleTenant(name)
                                  .build()

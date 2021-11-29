@@ -27,13 +27,10 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import com.google.protobuf.Any;
-import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
-import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.test.commandservice.CmdServDontHandle;
@@ -58,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("CommandService should")
+@DisplayName("`CommandService` should")
 class CommandServiceTest {
 
     private CommandService service;
@@ -74,19 +71,19 @@ class CommandServiceTest {
         ModelTests.dropAllModels();
         // Create Projects Bounded Context with one repository.
         projectsContext = BoundedContext.multitenant("Projects").build();
-        Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
+        var projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
         customersContext = BoundedContext.multitenant("Customers").build();
-        Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
+        var customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
         // Expose two Bounded Contexts via an instance of {@code CommandService}.
-        CommandService.Builder builder = CommandService.newBuilder();
-        for (BoundedContext context : boundedContexts) {
+        var builder = CommandService.newBuilder();
+        for (var context : boundedContexts) {
             builder.add(context);
         }
         service = builder.build();
@@ -94,7 +91,7 @@ class CommandServiceTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        for (BoundedContext boundedContext : boundedContexts) {
+        for (var boundedContext : boundedContexts) {
             boundedContext.close();
         }
     }
@@ -109,14 +106,13 @@ class CommandServiceTest {
     @Test
     @DisplayName("never retrieve removed bounded contexts from builder")
     void notRetrieveRemovedBc() {
-        CommandService.Builder builder = CommandService
-                .newBuilder()
+        var builder = CommandService.newBuilder()
                 .add(projectsContext)
                 .add(customersContext)
                 .remove(projectsContext);
 
         // Create BoundedContext map.
-        CommandService service = builder.build();
+        var service = builder.build();
         assertNotNull(service);
 
         assertTrue(builder.contains(customersContext));
@@ -129,8 +125,8 @@ class CommandServiceTest {
 
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        Ack acked = observer.firstResponse();
-        Any messageId = acked.getMessageId();
+        var acked = observer.firstResponse();
+        var messageId = acked.getMessageId();
         assertEquals(cmd.getId(), Identifier.unpack(messageId));
     }
 
@@ -138,28 +134,28 @@ class CommandServiceTest {
     @DisplayName("return error status if command is unsupported")
     @MuteLogging
     void returnCommandUnsupportedError() {
-        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
+        var factory = new TestActorRequestFactory(getClass());
 
-        Command unsupportedCmd = factory.createCommand(CmdServDontHandle.getDefaultInstance());
+        var unsupportedCmd = factory.createCommand(CmdServDontHandle.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 
         assertTrue(responseObserver.isCompleted());
-        Ack result = responseObserver.firstResponse();
+        var result = responseObserver.firstResponse();
         assertNotNull(result);
         assertTrue(isNotDefault(result));
-        Status status = result.getStatus();
+        var status = result.getStatus();
         assertEquals(ERROR, status.getStatusCase());
-        Error error = status.getError();
+        var error = status.getError();
         assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
     }
 
     @Test
     @DisplayName("deploy to gRPC container")
     void deployToGrpcContainer() throws IOException {
-        GrpcContainer grpcContainer = GrpcContainer.inProcess(TestValues.randomString())
-                                                   .addService(service)
-                                                   .build();
+        var grpcContainer = GrpcContainer.inProcess(TestValues.randomString())
+                                         .addService(service)
+                                         .build();
         grpcContainer.injectServer(new TestGrpcServer());
         assertTrue(grpcContainer.isScheduledForDeployment(service));
 

@@ -44,7 +44,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,11 +55,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * See `client/spine/test/option/entity_options_should.proto` for definition of messages
  * used for aggregates and repositories in this test.
  */
-@DisplayName("VisibilityGuard should")
+@DisplayName("`VisibilityGuard` should")
 class VisibilityGuardTest {
 
     private VisibilityGuard guard;
-    private List<Repository> repositories;
+    private List<Repository<?, ?>> repositories;
     private BoundedContext boundedContext;
 
     @BeforeEach
@@ -74,7 +73,7 @@ class VisibilityGuardTest {
         register(new HiddenRepository());
     }
 
-    private void register(Repository repository) {
+    private void register(Repository<?, ?> repository) {
         guard.register(repository);
         repositories.add(repository);
     }
@@ -114,15 +113,15 @@ class VisibilityGuardTest {
     @Test
     @DisplayName("obtain repos by visibility")
     void obtainByVisibility() {
-        Set<TypeName> full = guard.entityStateTypes(Visibility.FULL);
+        var full = guard.entityStateTypes(Visibility.FULL);
         assertEquals(1, full.size());
         assertTrue(full.contains(TypeName.of(FullAccessAggregate.class)));
 
-        Set<TypeName> subscribable = guard.entityStateTypes(Visibility.SUBSCRIBE);
+        var subscribable = guard.entityStateTypes(Visibility.SUBSCRIBE);
         assertEquals(1, subscribable.size());
         assertTrue(subscribable.contains(TypeName.of(SubscribableAggregate.class)));
 
-        Set<TypeName> hidden = guard.entityStateTypes(Visibility.NONE);
+        var hidden = guard.entityStateTypes(Visibility.NONE);
         assertEquals(1, hidden.size());
         assertTrue(hidden.contains(TypeName.of(HiddenAggregate.class)));
     }
@@ -132,7 +131,7 @@ class VisibilityGuardTest {
     void shutdownRepositories() {
         guard.shutDownRepositories();
 
-        for (Repository repository : repositories) {
+        for (var repository : repositories) {
             assertFalse(repository.isOpen());
         }
     }

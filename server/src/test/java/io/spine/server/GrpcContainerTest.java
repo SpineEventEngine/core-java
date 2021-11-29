@@ -25,9 +25,7 @@
  */
 package io.spine.server;
 
-import com.google.common.collect.ImmutableSet;
 import io.grpc.BindableService;
-import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
 import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.testing.logging.mute.MuteLogging;
@@ -57,8 +55,7 @@ class GrpcContainerTest {
 
     @BeforeEach
     void setUp() {
-        grpcContainer = GrpcContainer.inProcess(randomString())
-                                     .build();
+        grpcContainer = GrpcContainer.inProcess(randomString()).build();
         grpcContainer.injectServer(new TestGrpcServer());
     }
 
@@ -66,20 +63,20 @@ class GrpcContainerTest {
     @Test
     @DisplayName("add and remove parameters from builder")
     void setParamsInBuilder() {
-        int port = 60;
-        GrpcContainer.Builder builder = GrpcContainer
+        var port = 60;
+        var builder = GrpcContainer
                 .atPort(port);
 
         assertThat(builder.port()).hasValue(port);
 
-        int count = 3;
-        for (int i = 0; i < count; i++) {
+        var count = 3;
+        for (var i = 0; i < count; i++) {
             BindableService service = CommandService.newBuilder()
                                                     .build();
             builder.addService(service);
         }
 
-        ImmutableSet<ServerServiceDefinition> services = builder.services();
+        var services = builder.services();
 
         // Perform removal and check that the return value is builder itself.
         assertEquals(builder, builder.removeService(services.iterator().next()));
@@ -87,7 +84,7 @@ class GrpcContainerTest {
         Set<ServerServiceDefinition> serviceSet = builder.services();
         assertThat(serviceSet).hasSize(count - 1);
 
-        GrpcContainer container = builder.build();
+        var container = builder.build();
         assertNotNull(container);
     }
 
@@ -114,7 +111,7 @@ class GrpcContainerTest {
     void shutdownItself() throws IOException {
         grpcContainer.start();
 
-        Server server = grpcContainer.grpcServer();
+        var server = grpcContainer.grpcServer();
         grpcContainer.shutdown();
 
         assertThat(server.isShutdown())
@@ -136,8 +133,7 @@ class GrpcContainerTest {
     @MuteLogging
     @DisplayName("stop properly upon application shutdown")
     void stopUponAppShutdown() throws IOException {
-        GrpcContainer container = GrpcContainer.inProcess(randomString())
-                                               .build();
+        var container = GrpcContainer.inProcess(randomString()).build();
         container.addShutdownHook();
 
         container.start();
@@ -148,7 +144,7 @@ class GrpcContainerTest {
     }
 
     @Nested
-    @DisplayName("throw ISE if performing")
+    @DisplayName("throw `ISE` if performing")
     class NotPerformTwice {
 
         @Test

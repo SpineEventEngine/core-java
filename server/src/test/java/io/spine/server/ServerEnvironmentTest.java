@@ -72,11 +72,11 @@ class ServerEnvironmentTest {
     @Test
     @DisplayName("allow to customize delivery mechanism")
     void allowToCustomizeDeliveryStrategy() {
-        Delivery newDelivery = Delivery.newBuilder()
-                                       .setStrategy(UniformAcrossAllShards.forNumber(42))
-                                       .build();
-        ServerEnvironment environment = serverEnvironment;
-        Delivery defaultValue = environment.delivery();
+        var newDelivery = Delivery.newBuilder()
+                .setStrategy(UniformAcrossAllShards.forNumber(42))
+                .build();
+        var environment = serverEnvironment;
+        var defaultValue = environment.delivery();
         ServerEnvironment.when(Tests.class)
                          .use(newDelivery);
         assertEquals(newDelivery, environment.delivery());

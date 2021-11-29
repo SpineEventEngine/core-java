@@ -25,8 +25,6 @@
  */
 package io.spine.server;
 
-import com.google.common.truth.ThrowableSubject;
-import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
@@ -45,6 +43,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.server.Given.CUSTOMERS_CONTEXT_NAME;
 import static io.spine.server.Given.PROJECTS_CONTEXT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -53,15 +52,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("QueryService should")
+@DisplayName("`QueryService` should")
 class QueryServiceTest {
 
     private Set<BoundedContext> boundedContexts;
     private QueryService service;
     private MemoizingObserver<QueryResponse> responseObserver;
 
-    @SuppressWarnings("CheckReturnValue") // Calling builder.
     @BeforeEach
+    @SuppressWarnings("CheckReturnValue") // Calling builder.
     void setUp() {
         ModelTests.dropAllModels();
 
@@ -70,7 +69,7 @@ class QueryServiceTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        for (BoundedContext boundedContext : boundedContexts) {
+        for (var boundedContext : boundedContexts) {
             boundedContext.close();
         }
     }
@@ -78,7 +77,7 @@ class QueryServiceTest {
     @Test
     @DisplayName("execute queries")
     void executeQueries() {
-        Query query = Given.AQuery.readAllProjects();
+        var query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkOkResponse(responseObserver);
     }
@@ -86,7 +85,7 @@ class QueryServiceTest {
     @Test
     @DisplayName("dispatch queries to proper Bounded Context")
     void dispatchQueriesToBc() {
-        Query query = Given.AQuery.readAllProjects();
+        var query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
 
         checkOkResponse(responseObserver);
@@ -95,8 +94,8 @@ class QueryServiceTest {
     @Test
     @DisplayName("fail to create with Bounded Context removed from builder")
     void notCreateWithRemovedBc() {
-        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
-        QueryService.Builder builder = QueryService.newBuilder();
+        var boundedContext = BoundedContextBuilder.assumingTests().build();
+        var builder = QueryService.newBuilder();
         assertThrows(IllegalStateException.class, () -> builder.add(boundedContext)
                                                                .remove(boundedContext)
                                                                .build());
@@ -114,23 +113,22 @@ class QueryServiceTest {
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
         setUpService(new ThrowingProjectDetailsRepository());
-        Query query = Given.AQuery.readAllProjects();
+        var query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
     }
 
     @Test
     @MuteLogging
-    @DisplayName("throw an IllegalStateException if the requested entity type is unknown")
+    @DisplayName("throw an `IllegalStateException` if the requested entity type is unknown")
     void failOnUnknownType() {
-        Query query = Given.AQuery.readUnknownType();
+        var query = Given.AQuery.readUnknownType();
         service.read(query, responseObserver);
-        Throwable error = responseObserver.getError();
-        ThrowableSubject assertError = assertThat(error);
+        var error = responseObserver.getError();
+        var assertError = assertThat(error);
         assertError.isNotNull();
         assertError.isInstanceOf(UnknownEntityTypeException.class);
-        String unknownTypeUrl = query.targetType()
-                                     .value();
+        var unknownTypeUrl = query.targetType().value();
         assertError.hasMessageThat().contains(unknownTypeUrl);
     }
 
@@ -141,25 +139,21 @@ class QueryServiceTest {
         boundedContexts = newHashSet();
         responseObserver = memoizingObserver();
         // Create Projects Bounded Context with one repository and one projection.
-        BoundedContext projectsContext = BoundedContext
-                .singleTenant(PROJECTS_CONTEXT_NAME)
-                .build();
-        Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
+        var projectsContext = BoundedContext.singleTenant(PROJECTS_CONTEXT_NAME).build();
+        var projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         projectsContext.register(repository);
 
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        BoundedContext customersContext = BoundedContext
-                .singleTenant("Customers")
-                .build();
-        Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
+        var customersContext = BoundedContext.singleTenant(CUSTOMERS_CONTEXT_NAME).build();
+        var customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
-        QueryService.Builder queryService = QueryService.newBuilder();
-        for (BoundedContext context : boundedContexts) {
+        var queryService = QueryService.newBuilder();
+        for (var context : boundedContexts) {
             queryService.add(context);
         }
 
@@ -167,7 +161,7 @@ class QueryServiceTest {
     }
 
     private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {
-        QueryResponse responseHandled = responseObserver.firstResponse();
+        var responseHandled = responseObserver.firstResponse();
         assertNotNull(responseHandled);
         assertEquals(Responses.ok(), responseHandled.getResponse());
         assertTrue(responseObserver.isCompleted());
