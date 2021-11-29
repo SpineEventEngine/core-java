@@ -69,9 +69,8 @@ public final class AllowedParams<E extends MessageEnvelope<?, ?, ?>> {
      *         or {@link Optional#empty() Optional.empty()} if no matching specification is found
      */
     Optional<? extends ParameterSpec<E>> findMatching(Method method) {
-        MethodParams params = MethodParams.of(method);
-        Optional<? extends ParameterSpec<E>> result =
-                specs.stream()
+        var params = MethodParams.of(method);
+        var result = specs.stream()
                      .filter(spec -> spec.matches(params))
                      .findFirst();
         return result;
@@ -85,7 +84,7 @@ public final class AllowedParams<E extends MessageEnvelope<?, ?, ?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        AllowedParams<?> params = (AllowedParams<?>) o;
+        var params = (AllowedParams<?>) o;
         return Objects.equal(specs, params.specs);
     }
 

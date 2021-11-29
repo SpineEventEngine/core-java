@@ -28,12 +28,9 @@ package io.spine.server.model;
 
 import io.spine.core.ContractFor;
 import io.spine.reflect.J2Kt;
-import kotlin.reflect.KCallable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Optional;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -66,10 +63,9 @@ public final class AccessModifier implements Predicate<Method> {
     public static final AccessModifier PRIVATE =
             onJavaMethod(Modifier::isPrivate, "private");
 
-    @SuppressWarnings("OptionalIsPresent") // More readable this way.
     public static final AccessModifier KOTLIN_INTERNAL = new AccessModifier(m -> {
-        Optional<KCallable<?>> kotlinMethod = J2Kt.findKotlinMethod(m);
-        if (!kotlinMethod.isPresent()) {
+        var kotlinMethod = J2Kt.findKotlinMethod(m);
+        if (kotlinMethod.isEmpty()) {
             return false;
         }
         return kotlinMethod.get().getVisibility() == INTERNAL;
@@ -112,10 +108,10 @@ public final class AccessModifier implements Predicate<Method> {
 
     @SuppressWarnings("MethodWithMultipleLoops")
     private static boolean derivedFromContract(Method method) {
-        Class<?> cls = method.getDeclaringClass().getSuperclass();
+        var cls = method.getDeclaringClass().getSuperclass();
         while (!cls.equals(Object.class)) {
-            Method[] methods = cls.getDeclaredMethods();
-            for (Method m : methods) {
+            var methods = cls.getDeclaredMethods();
+            for (var m : methods) {
                 if (inheritedMethod(method, m)) {
                     validateContract(m, method);
                     return true;
@@ -127,14 +123,14 @@ public final class AccessModifier implements Predicate<Method> {
     }
 
     private static void validateContract(Method contract, Method implementation) {
-        ContractFor annotation = contract.getAnnotation(ContractFor.class);
+        var annotation = contract.getAnnotation(ContractFor.class);
         if (annotation == null) {
             throw new ModelError(
                     "Handler method `%s` overrides `%s` which is not marked with `@ContractFor`.",
                     implementation, contract
             );
         }
-        Class<? extends Annotation> target = annotation.handler();
+        var target = annotation.handler();
         if (!implementation.isAnnotationPresent(target)) {
             throw new ModelError(
                     "Handler method `%s` overrides the contract `%s` but is not marked with `@%s`.",
@@ -147,14 +143,14 @@ public final class AccessModifier implements Predicate<Method> {
         if (!parent.getName().equals(child.getName())) {
             return false;
         }
-        Class<?>[] parentParams = parent.getParameterTypes();
-        Class<?>[] childParams = child.getParameterTypes();
+        var parentParams = parent.getParameterTypes();
+        var childParams = child.getParameterTypes();
         if (parentParams.length != childParams.length) {
             return false;
         }
-        for (int i = 0; i < parentParams.length; i++) {
-            Class<?> parentParam = parentParams[i];
-            Class<?> childParam = childParams[i];
+        for (var i = 0; i < parentParams.length; i++) {
+            var parentParam = parentParams[i];
+            var childParam = childParams[i];
             if (!parentParam.isAssignableFrom(childParam)) {
                 return false;
             }
@@ -171,7 +167,7 @@ public final class AccessModifier implements Predicate<Method> {
      */
     static AccessModifier fromMethod(Method method) {
         checkNotNull(method);
-        AccessModifier matchedModifier = Stream
+        var matchedModifier = Stream
                 .of(PRIVATE,
                     PACKAGE_PRIVATE,
                     PROTECTED_CONTRACT,

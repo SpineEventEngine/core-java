@@ -83,8 +83,7 @@ public enum MatchCriterion {
                        + " of `@%s` for allowed parameter types.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            Optional<? extends ParameterSpec<?>> matching =
-                    signature.params().findMatching(method);
+            var matching = signature.params().findMatching(method);
             if (matching.isPresent()) {
                 return Optional.empty();
             }
@@ -102,8 +101,8 @@ public enum MatchCriterion {
                             + "Refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
-            ImmutableSet<AccessModifier> recommended = signature.modifier();
-            boolean hasMatch = recommended.stream().anyMatch(m -> m.test(method));
+            var recommended = signature.modifier();
+            var hasMatch = recommended.stream().anyMatch(m -> m.test(method));
             if (hasMatch) {
                 return Optional.empty();
             }
@@ -114,9 +113,9 @@ public enum MatchCriterion {
         createMismatch(Method method,
                        MethodSignature<?, ?> signature,
                        ImmutableSet<AccessModifier> recommended) {
-            String methodReference = methodAsString(method);
-            String annotationName = signature.annotation().getSimpleName();
-            AccessModifier currentModifier = AccessModifier.fromMethod(method);
+            var methodReference = methodAsString(method);
+            var annotationName = signature.annotation().getSimpleName();
+            var currentModifier = AccessModifier.fromMethod(method);
             return SignatureMismatch.create(
                     this, methodReference, currentModifier, recommended, annotationName);
         }
@@ -132,13 +131,12 @@ public enum MatchCriterion {
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             @Nullable Class<? extends Throwable> allowed =
                     signature.allowedThrowable().orElse(null);
-            MethodExceptionCheck checker = check(method, allowed);
-            ImmutableList<Class<? extends Throwable>> prohibited = checker.findProhibited();
+            var checker = check(method, allowed);
+            var prohibited = checker.findProhibited();
             if (prohibited.isEmpty()) {
                 return Optional.empty();
             }
-            ProhibitedExceptionMessage errorMessage
-                    = new ProhibitedExceptionMessage(method, prohibited, allowed);
+            var errorMessage = new ProhibitedExceptionMessage(method, prohibited, allowed);
             return SignatureMismatch.create(this, errorMessage);
         }
     };
@@ -172,7 +170,7 @@ public enum MatchCriterion {
     }
 
     protected final String formatMsg(Object... args) {
-        String message = format(Locale.ROOT, format, args);
+        var message = format(Locale.ROOT, format, args);
         return message;
     }
 
@@ -181,16 +179,16 @@ public enum MatchCriterion {
      */
     protected final Optional<SignatureMismatch>
     createMismatch(Method method, Class<? extends Annotation> annotation) {
-        String methodReference = methodAsString(method);
-        String annotationName = annotation.getSimpleName();
+        var methodReference = methodAsString(method);
+        var annotationName = annotation.getSimpleName();
         return SignatureMismatch.create(this, methodReference, annotationName);
     }
 
     private static String methodAsString(Method method) {
-        String declaringClassName = method.getDeclaringClass()
-                                          .getCanonicalName();
-        String parameterTypes = Diags.join(method.getParameterTypes());
-        String result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
+        var declaringClassName = method.getDeclaringClass()
+                                       .getCanonicalName();
+        var parameterTypes = Diags.join(method.getParameterTypes());
+        var result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
         return result;
     }
 

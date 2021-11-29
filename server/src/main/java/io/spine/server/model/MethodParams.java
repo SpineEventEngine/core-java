@@ -57,9 +57,9 @@ public final class MethodParams {
      */
     public static MethodParams of(SubscriberMethod method) {
         checkNotNull(method);
-        ArgumentFilter filter = method.filter();
-        Class<?>[] paramTypes = method.rawMethod()
-                                      .getParameterTypes();
+        var filter = method.filter();
+        var paramTypes = method.rawMethod()
+                               .getParameterTypes();
         return new MethodParams(filter, paramTypes);
     }
 
@@ -107,7 +107,7 @@ public final class MethodParams {
      * @param index the zero-based index of the type.
      */
     public Class<?> type(int index) {
-        Class<?> type = params.get(index);
+        var type = params.get(index);
         return type;
     }
 
@@ -118,7 +118,7 @@ public final class MethodParams {
         if (size() != 1) {
             return false;
         }
-        Class<?> firstParam = type(0);
+        var firstParam = type(0);
         return type.test(firstParam);
     }
 
@@ -130,9 +130,9 @@ public final class MethodParams {
             return false;
         }
 
-        for (int i = 0; i < size(); i++) {
-            Class<?> actual = type(i);
-            Class<?> expected = types[i];
+        for (var i = 0; i < size(); i++) {
+            var actual = type(i);
+            var expected = types[i];
             if (!exactly(expected).test(actual)) {
                 return false;
             }
@@ -155,9 +155,9 @@ public final class MethodParams {
             return false;
         }
 
-        for (int i = 0; i < size(); i++) {
-            Class<?> actual = type(i);
-            TypeMatcher matcher = criteria.get(i);
+        for (var i = 0; i < size(); i++) {
+            var actual = type(i);
+            var matcher = criteria.get(i);
             if (!matcher.test(actual)) {
                 return false;
             }
@@ -175,11 +175,11 @@ public final class MethodParams {
      */
     public static boolean firstIsCommand(Method method) {
         checkNotNull(method);
-        MethodParams params = of(method);
+        var params = of(method);
         if (params.size() == 0) {
             return false;
         }
-        boolean result = CommandMessage.class.isAssignableFrom(params.type(0));
+        var result = CommandMessage.class.isAssignableFrom(params.type(0));
         return result;
     }
 
@@ -191,7 +191,7 @@ public final class MethodParams {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        MethodParams other = (MethodParams) o;
+        var other = (MethodParams) o;
         return params.equals(other.params) &&
                 Objects.equals(filter, other.filter);
     }

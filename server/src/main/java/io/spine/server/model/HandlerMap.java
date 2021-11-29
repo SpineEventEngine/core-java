@@ -87,8 +87,8 @@ public final class HandlerMap<M extends MessageClass<?>,
     HandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
-        ImmutableSetMultimap<DispatchKey, H> map = findMethodsBy(declaringClass, signature);
-        ImmutableSet<M> messageClasses = messageClasses(map.values());
+        var map = findMethodsBy(declaringClass, signature);
+        var messageClasses = messageClasses(map.values());
         return new HandlerMap<>(map, messageClasses);
     }
 
@@ -127,8 +127,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      * Obtains the classes of messages produced by the handler methods in this map.
      */
     public ImmutableSet<R> producedTypes() {
-        ImmutableSet<R> result = map
-                .values()
+        var result = map.values()
                 .stream()
                 .map(HandlerMethod::producedMessages)
                 .flatMap(Set::stream)
@@ -150,16 +149,16 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         the class of the message, from which the handled message is originate
      */
     private ImmutableSet<H> handlersOf(M messageClass, MessageClass<?> originClass) {
-        DispatchKey key =
+        var key =
                 originClass.equals(EmptyClass.instance())
                 ? new DispatchKey(messageClass.value(), null)
                 : new DispatchKey(messageClass.value(), originClass.value());
         // If we have a handler with origin type, use the key. Otherwise, find handlers only
         // by the first parameter.
-        DispatchKey presentKey = map.containsKey(key)
-                                 ? key
-                                 : new DispatchKey(messageClass.value(), null);
-        ImmutableSet<H> handlers = map.get(presentKey);
+        var presentKey = map.containsKey(key)
+                         ? key
+                         : new DispatchKey(messageClass.value(), null);
+        var handlers = map.get(presentKey);
         return handlers;
     }
 
@@ -171,7 +170,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @return a handler method for the given signal or {@code Optional.empty()}
      */
     public Optional<H> findHandlerFor(SignalEnvelope<?, ?, ?> message) {
-        MessageClass<?> messageClass = message.messageClass();
+        var messageClass = message.messageClass();
         MessageClass<?> originClass;
         if (message instanceof EnvelopeWithOrigin) {
             originClass = ((EnvelopeWithOrigin<?, ?, ?>) message).originClass();
@@ -179,7 +178,7 @@ public final class HandlerMap<M extends MessageClass<?>,
             originClass = EmptyClass.instance();
         }
         @SuppressWarnings("unchecked")
-        ImmutableSet<H> handlers = handlersOf(((M) messageClass), originClass);
+        var handlers = handlersOf(((M) messageClass), originClass);
         return handlers.stream()
                        .sorted(comparing((H h) -> h.filter().pathLength()).reversed())
                        .filter(h -> h.filter().test(message.message()))
@@ -196,9 +195,9 @@ public final class HandlerMap<M extends MessageClass<?>,
      *         if the handler the the message was not found
      */
     public H getHandlerFor(SignalEnvelope<?, ?, ?> message) {
-        Optional<H> handler = findHandlerFor(message);
+        var handler = findHandlerFor(message);
         return handler.orElseThrow(() -> {
-            String msg = format(
+            var msg = format(
                     "No handler method found for the type `%s`.", message.messageClass()
             );
             _error().log(msg);
@@ -219,10 +218,9 @@ public final class HandlerMap<M extends MessageClass<?>,
 
     private static <M extends MessageClass<?>, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableSet<M> messageClasses(Collection<H> handlerMethods) {
-        ImmutableSet<M> result =
-                handlerMethods.stream()
-                              .map(HandlerMethod::messageClass)
-                              .collect(toImmutableSet());
+        var result = handlerMethods.stream()
+                .map(HandlerMethod::messageClass)
+                .collect(toImmutableSet());
         return result;
     }
 

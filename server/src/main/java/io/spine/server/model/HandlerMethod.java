@@ -28,7 +28,6 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
 import io.spine.server.type.MessageEnvelope;
@@ -142,7 +141,7 @@ public interface HandlerMethod<T,
      * @see ExternalAttribute
      */
     default void ensureExternalMatch(boolean expectedValue) throws SignalOriginMismatchError {
-        boolean actualValue = isExternal();
+        var actualValue = isExternal();
         if (actualValue != expectedValue) {
             throw new SignalOriginMismatchError(this, expectedValue, actualValue);
         }
@@ -152,7 +151,7 @@ public interface HandlerMethod<T,
      * Creates a handler method dispatch key out of the {@linkplain #messageClass() message class}.
      */
     default DispatchKey key() {
-        Class<? extends Message> rawCls = messageClass().value();
+        var rawCls = messageClass().value();
         return new DispatchKey(rawCls, filter(), null);
     }
 }

@@ -86,30 +86,29 @@ public class Model {
      * @see BoundedContext
      */
     public static synchronized <T> Model inContextOf(Class<? extends T> rawClass) {
-        Model model = models.get(rawClass);
+        var model = models.get(rawClass);
         if (model != null) {
             return model;
         }
-        Optional<BoundedContextName> optional = findContext(rawClass);
+        var optional = findContext(rawClass);
 
         // If no name of a Bounded Context found, assume the default name.
         // This is a safety net for newcomers and our tests.
         // We may want to make this check strict, and require specifying Bounded Context names.
-        BoundedContextName context = optional.orElseGet(BoundedContextNames::assumingTests);
+        var context = optional.orElseGet(BoundedContextNames::assumingTests);
 
         // Try to find a Model if it already exists.
-        Optional<Model> alreadyAvailable =
-                models.values()
-                      .stream()
-                      .filter((m) -> m.context.equals(context))
-                      .findAny();
+        var alreadyAvailable = models.values()
+                .stream()
+                .filter((m) -> m.context.equals(context))
+                .findAny();
         if (alreadyAvailable.isPresent()) {
             return alreadyAvailable.get();
         }
 
         // Since a model is not found, create for new Bounded Context and associated with the
         // passed raw class.
-        Model newModel = new Model(context);
+        var newModel = new Model(context);
         models.put(rawClass, newModel);
         return newModel;
     }
@@ -120,19 +119,18 @@ public class Model {
      */
     @VisibleForTesting
     static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
-        ClassName clazzName = ClassName.of(rawClass);
+        var clazzName = ClassName.of(rawClass);
         try {
             return knownContexts.get(clazzName, () -> {
                 Optional<BoundedContextName> result;
 
-                PackageInfo pkg = PackageInfo.of(rawClass);
-                Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
-                if (!annotation.isPresent()) {
+                var pkg = PackageInfo.of(rawClass);
+                var annotation = pkg.findAnnotation(BoundedContext.class);
+                if (annotation.isEmpty()) {
                     result = Optional.empty();
                 } else {
-                    String nameAsString = annotation.get()
-                                                    .value();
-                    BoundedContextName contextName = BoundedContextNames.newName(nameAsString);
+                    var nameAsString = annotation.get().value();
+                    var contextName = BoundedContextNames.newName(nameAsString);
                     result = Optional.of(contextName);
                 }
                 return result;
@@ -161,7 +159,7 @@ public class Model {
      * Clears all models, and then clears the {@link #models} map.
      */
     private static void reset() {
-        for (Model model : models.values()) {
+        for (var model : models.values()) {
             model.clear();
         }
         models.clear();
@@ -197,7 +195,7 @@ public class Model {
     ModelClass<T> getClass(Class<? extends T> cls,
                            Class<M> classOfModelClass,
                            Supplier<ModelClass<T>> supplier) {
-        ModelClass<T> result = classes.get(cls, classOfModelClass, supplier);
+        var result = classes.get(cls, classOfModelClass, supplier);
         return result;
     }
 }

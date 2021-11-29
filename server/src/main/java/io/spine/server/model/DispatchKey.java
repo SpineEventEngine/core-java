@@ -93,7 +93,7 @@ public final class DispatchKey {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final DispatchKey other = (DispatchKey) obj;
+        final var other = (DispatchKey) obj;
         return Objects.equals(this.messageClass, other.messageClass)
                 && Objects.equals(this.filter, other.filter)
                 && Objects.equals(this.originClass, other.originClass);
@@ -102,7 +102,7 @@ public final class DispatchKey {
     @SuppressWarnings("DuplicateStringLiteralInspection")   // Both classes have `filter` field.
     @Override
     public String toString() {
-        MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this);
+        var helper = MoreObjects.toStringHelper(this);
         helper.add("messageClass", messageClass.getName());
         if (filter != null && !filter.acceptsAll()) {
             helper.add("filter", filter);

@@ -98,7 +98,7 @@ public final class SignatureMismatch {
     static Optional<SignatureMismatch> create(MatchCriterion criterion, Object... values) {
         checkNotNull(criterion);
         checkNotNull(values);
-        SignatureMismatch result = new SignatureMismatch(criterion, values);
+        var result = new SignatureMismatch(criterion, values);
         return Optional.of(result);
     }
 

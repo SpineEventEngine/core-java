@@ -33,7 +33,6 @@ import io.spine.server.type.MessageEnvelope;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -136,17 +135,15 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         if (skipMethod(method)) {
             return false;
         }
-        Collection<SignatureMismatch> mismatches = match(method);
-        boolean hasErrors =
-                mismatches.stream()
-                          .anyMatch(SignatureMismatch::isError);
+        var mismatches = match(method);
+        var hasErrors = mismatches.stream()
+                .anyMatch(SignatureMismatch::isError);
         if (hasErrors) {
             throw new SignatureMismatchException(mismatches);
         }
-        List<SignatureMismatch> warnings =
-                mismatches.stream()
-                          .filter(SignatureMismatch::isWarning)
-                          .collect(toList());
+        var warnings = mismatches.stream()
+                .filter(SignatureMismatch::isWarning)
+                .collect(toList());
         if (!warnings.isEmpty()) {
             warnings.stream()
                     .map(SignatureMismatch::toString)
@@ -159,7 +156,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * Verifies if the passed return type conforms this method signature.
      */
     final boolean returnTypeMatches(Method method) {
-        boolean conforms = returnTypes().matches(method, mayReturnIgnored());
+        var conforms = returnTypes().matches(method, mayReturnIgnored());
         return conforms;
     }
 
@@ -217,13 +214,13 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         encountered
      */
     public final Optional<H> classify(Method method) throws SignatureMismatchException {
-        boolean matches = matches(method);
+        var matches = matches(method);
         if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = params().findMatching(method);
+        var matchingSpec = params().findMatching(method);
         return matchingSpec.map(spec -> {
-            H handler = create(method, spec);
+            var handler = create(method, spec);
             handler.discoverAttributes();
             return handler;
         });

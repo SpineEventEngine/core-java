@@ -29,9 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
-import io.spine.base.Error;
 import io.spine.base.RejectionThrowable;
-import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
@@ -152,8 +150,8 @@ class AbstractHandlerMethod<T,
     @Override
     public final void discoverAttributes() {
         ImmutableSet.Builder<Attribute<?>> builder = ImmutableSet.builder();
-        for (Function<Method, Attribute<?>> fn : attributeSuppliers()) {
-            Attribute<?> attr = fn.apply(method);
+        for (var fn : attributeSuppliers()) {
+            var attr = fn.apply(method);
             builder.add(attr);
         }
         attributes = builder.build();
@@ -215,7 +213,7 @@ class AbstractHandlerMethod<T,
     protected static <M extends Message> Class<M> firstParamType(Method handler) {
         @SuppressWarnings("unchecked")
             // We always expect first param as a Message of required type.
-        Class<M> result = (Class<M>) handler.getParameterTypes()[0];
+        var result = (Class<M>) handler.getParameterTypes()[0];
         return result;
     }
 
@@ -245,7 +243,7 @@ class AbstractHandlerMethod<T,
      * {@code false} otherwise.
      */
     protected final boolean isPublic() {
-        boolean result = Modifier.isPublic(modifiers());
+        var result = Modifier.isPublic(modifiers());
         return result;
     }
 
@@ -254,7 +252,7 @@ class AbstractHandlerMethod<T,
      * {@code false} otherwise.
      */
     protected final boolean isPrivate() {
-        boolean result = Modifier.isPrivate(modifiers());
+        var result = Modifier.isPrivate(modifiers());
         return result;
     }
 
@@ -265,7 +263,7 @@ class AbstractHandlerMethod<T,
 
     private static ImmutableSet<Attribute<?>> discoverAttributes(Method method) {
         checkNotNull(method);
-        ExternalAttribute externalAttribute = ExternalAttribute.of(method);
+        var externalAttribute = ExternalAttribute.of(method);
         return ImmutableSet.of(externalAttribute);
     }
 
@@ -282,30 +280,30 @@ class AbstractHandlerMethod<T,
         checkNotNull(target);
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
-        MessageId signal = envelope.outerObject().messageId();
-        DispatchOutcome.Builder outcome = DispatchOutcome
+        var signal = envelope.outerObject().messageId();
+        var outcome = DispatchOutcome
                 .newBuilder()
                 .setPropagatedSignal(signal);
-        HandlerLifecycle lifecycle = target instanceof HandlerLifecycle
+        var lifecycle = target instanceof HandlerLifecycle
                                             ? (HandlerLifecycle) target
                                             : null;
         if (lifecycle != null) {
             lifecycle.beforeInvoke(this);
         }
         try {
-            Success success = doInvoke(target, envelope);
+            var success = doInvoke(target, envelope);
             outcome.setSuccess(success);
         } catch (IllegalOutcomeException e) {
-            Error error = fromThrowable(e);
+            var error = fromThrowable(e);
             outcome.setError(error);
         } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
+            var cause = e.getCause();
             checkNotNull(cause);
             if (cause instanceof RejectionThrowable) {
-                Success success = asRejection(target, envelope, (RejectionThrowable) cause);
+                var success = asRejection(target, envelope, (RejectionThrowable) cause);
                 outcome.setSuccess(success);
             } else {
-                Error error = causeOf(cause);
+                var error = causeOf(cause);
                 outcome.setError(error);
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -320,18 +318,18 @@ class AbstractHandlerMethod<T,
 
     private Success doInvoke(T target, E envelope)
             throws IllegalAccessException, InvocationTargetException {
-        ExtractedArguments arguments = parameterSpec.extractArguments(envelope);
-        Object rawOutput = arguments.invokeMethod(method, target);
+        var arguments = parameterSpec.extractArguments(envelope);
+        var rawOutput = arguments.invokeMethod(method, target);
         return toSuccessfulOutcome(rawOutput, target, envelope);
     }
 
     private Success asRejection(T target, E envelope, RejectionThrowable cause) {
-        Optional<Success> maybeSuccess = handleRejection(target, envelope, cause);
+        var maybeSuccess = handleRejection(target, envelope, cause);
         return maybeSuccess.orElseThrow(this::cannotThrowRejections);
     }
 
     private RuntimeException cannotThrowRejections() {
-        String errorMessage = format("`%s` may not throw rejections.", this);
+        var errorMessage = format("`%s` may not throw rejections.", this);
         return new IllegalOutcomeException(errorMessage);
     }
 
@@ -364,15 +362,15 @@ class AbstractHandlerMethod<T,
      * @return full name of the subscriber
      */
     public String getFullName() {
-        String template = "%s.%s(%s)";
-        String className = method.getDeclaringClass()
-                                 .getName();
-        String methodName = method.getName();
-        String parameterTypes =
+        var template = "%s.%s(%s)";
+        var className = method.getDeclaringClass()
+                              .getName();
+        var methodName = method.getName();
+        var parameterTypes =
                 Stream.of(method.getParameterTypes())
                       .map(Class::getSimpleName)
                       .collect(joining(", "));
-        String result = format(template, className, methodName, parameterTypes);
+        var result = format(template, className, methodName, parameterTypes);
         return result;
     }
 
@@ -383,7 +381,7 @@ class AbstractHandlerMethod<T,
 
     @Override
     public int hashCode() {
-        int prime = 31;
+        var prime = 31;
         return (prime * method.hashCode());
     }
 
@@ -395,7 +393,7 @@ class AbstractHandlerMethod<T,
         if (!(obj instanceof AbstractHandlerMethod)) {
             return false;
         }
-        AbstractHandlerMethod<?, ?, ?, ?, ?> other = (AbstractHandlerMethod<?, ?, ?, ?, ?>) obj;
+        var other = (AbstractHandlerMethod<?, ?, ?, ?, ?>) obj;
         return Objects.equals(this.method, other.method);
     }
 

@@ -77,9 +77,9 @@ final class MethodResult {
     }
 
     static MethodResult from(@Nullable Object rawMethodOutput) {
-        List<Message> messages = toMessages(rawMethodOutput);
+        var messages = toMessages(rawMethodOutput);
         messages.forEach(MethodResult::checkNotRejection);
-        ImmutableList<Message> filtered = filterIgnored(messages);
+        var filtered = filterIgnored(messages);
         return new MethodResult(filtered);
     }
 
@@ -88,12 +88,12 @@ final class MethodResult {
             return ImmutableList.of();
         } else if (output instanceof Optional) {
             // Allow `Optional` for event reactions and command generation in response to events.
-            Optional<?> optional = (Optional<?>) output;
+            var optional = (Optional<?>) output;
             return optional.map(MethodResult::singleton)
                            .orElse(ImmutableList.of());
         } else if (output instanceof Iterable) {
             @SuppressWarnings("unchecked")
-            Iterable<Message> messages = (Iterable<Message>) output;
+            var messages = (Iterable<Message>) output;
             return ImmutableList.copyOf(messages);
         } else {
             // Another type of result is single event message (as Message).
@@ -102,7 +102,7 @@ final class MethodResult {
     }
 
     private static List<Message> singleton(Object messageDisguised) {
-        Message message = (Message) messageDisguised;
+        var message = (Message) messageDisguised;
         return ImmutableList.of(message);
     }
 
@@ -110,7 +110,7 @@ final class MethodResult {
      * Filters the list removing instances of the {@linkplain #IGNORED_MESSAGES ignored types}.
      */
     private static ImmutableList<Message> filterIgnored(List<Message> messages) {
-        ImmutableList<Message> result = messages
+        var result = messages
                 .stream()
                 .filter(message -> !IGNORED_MESSAGES.contains(message))
                 .collect(toImmutableList());
@@ -138,7 +138,7 @@ final class MethodResult {
     <T extends Message> ImmutableList<T> messages(
             @SuppressWarnings("unused") Class<T> messageType) {
         @SuppressWarnings("unchecked")
-        ImmutableList<T> castMessages = (ImmutableList<T>) this.messages;
+        var castMessages = (ImmutableList<T>) this.messages;
         return castMessages;
     }
 
