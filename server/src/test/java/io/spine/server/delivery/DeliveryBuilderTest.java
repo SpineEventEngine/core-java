@@ -116,7 +116,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("delivery strategy")
         void strategy() {
-            DeliveryStrategy strategy = UniformAcrossAllShards.forNumber(42);
+            var strategy = UniformAcrossAllShards.forNumber(42);
             assertThat(builder().setStrategy(strategy).strategy())
                   .hasValue(strategy);
         }
@@ -124,7 +124,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("Inbox storage")
         void inboxStorage() {
-            InboxStorage storage = new InboxStorage(factory, false);
+            var storage = new InboxStorage(factory, false);
             assertThat(builder().setInboxStorage(storage).inboxStorage())
                   .hasValue(storage);
         }
@@ -132,7 +132,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("Catch-up storage")
         void catchUpStorage() {
-            CatchUpStorage storage = new CatchUpStorage(factory, false);
+            var storage = new CatchUpStorage(factory, false);
             assertThat(builder().setCatchUpStorage(storage).catchUpStorage())
                   .hasValue(storage);
         }
@@ -140,7 +140,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("work registry")
         void workRegistry() {
-            InMemoryShardedWorkRegistry registry = new InMemoryShardedWorkRegistry();
+            var registry = new InMemoryShardedWorkRegistry();
             assertThat(builder().setWorkRegistry(registry)
                                        .workRegistry())
                   .hasValue(registry);
@@ -149,7 +149,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("deduplication window")
         void deduplicationWindow() {
-            Duration duration = fromMinutes(123);
+            var duration = fromMinutes(123);
             assertThat(builder().setDeduplicationWindow(duration).deduplicationWindow())
                     .hasValue(duration);
         }
@@ -157,7 +157,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("delivery monitor")
         void deliveryMonitor() {
-            DeliveryMonitor monitor = DeliveryMonitor.alwaysContinue();
+            var monitor = DeliveryMonitor.alwaysContinue();
             assertThat(builder().setMonitor(monitor).deliveryMonitor())
                     .hasValue(monitor);
         }
@@ -165,7 +165,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("page size")
         void pageSize() {
-            int pageSize = 42;
+            var pageSize = 42;
             assertThat(builder().setPageSize(pageSize).pageSize())
                     .hasValue(pageSize);
         }
@@ -173,7 +173,7 @@ class DeliveryBuilderTest {
         @Test
         @DisplayName("catch-up page size")
         void catchUpPageSize() {
-            int catchUpPageSize = 499;
+            var catchUpPageSize = 499;
             assertThat(builder().setCatchUpPageSize(catchUpPageSize).catchUpPageSize())
                     .hasValue(catchUpPageSize);
         }

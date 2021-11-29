@@ -41,20 +41,20 @@ class DeliveryDefaultsTest {
     @Test
     @DisplayName("initialize the `InboxStorage` in a single-tenant mode")
     void createSingleTenantInboxStorage() {
-        InboxStorage storage = defaultDelivery().inboxStorage();
+        var storage = defaultDelivery().inboxStorage();
         assertSingleTenant(storage);
     }
 
     @Test
     @DisplayName("initialize the `CatchUp` in a single-tenant mode")
     void createSingleTenantCatchUpStorage() {
-        CatchUpStorage storage = defaultDelivery().catchUpStorage();
+        var storage = defaultDelivery().catchUpStorage();
         assertSingleTenant(storage);
     }
 
     private static Delivery defaultDelivery() {
         return Delivery.newBuilder()
-                       .build();
+                .build();
     }
 
     private static void assertSingleTenant(Storage<?, ?> storage) {

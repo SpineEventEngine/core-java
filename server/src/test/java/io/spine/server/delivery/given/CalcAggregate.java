@@ -43,28 +43,27 @@ public class CalcAggregate extends Aggregate<String, Calc, Calc.Builder> {
 
     @Assign
     NumberAdded handle(AddNumber command) {
-        int value = command.getValue();
+        var value = command.getValue();
         return NumberAdded.newBuilder()
-                          .setValue(value)
-                          .vBuild();
+                .setValue(value)
+                .vBuild();
     }
 
     @Apply
     private void on(NumberAdded event) {
-        int currentSum = builder().getSum();
+        var currentSum = builder().getSum();
         builder().setSum(currentSum + event.getValue());
     }
 
     @Apply(allowImport = true)
     private void on(NumberImported event) {
-        int currentSum = builder().getSum();
+        var currentSum = builder().getSum();
         builder().setSum(currentSum + event.getValue());
     }
 
     @React
     NumberAdded on(NumberReacted event) {
-        return NumberAdded
-                .newBuilder()
+        return NumberAdded.newBuilder()
                 .setCalculatorId(event.getCalculatorId())
                 .setValue(event.getValue())
                 .vBuild();

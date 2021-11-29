@@ -33,35 +33,35 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`UniformAcrossAllShards should")
-public class UniformStrategyTest {
+class UniformStrategyTest {
 
     @Test
     @DisplayName("return single shard strategy")
-    public void singleShard() {
-        DeliveryStrategy strategy = UniformAcrossAllShards.singleShard();
+    void singleShard() {
+        var strategy = UniformAcrossAllShards.singleShard();
         assertThat(strategy.shardCount())
                 .isEqualTo(1);
     }
 
     @Test
     @DisplayName("allow to create a strategy with the given number of shards")
-    public void customShardNumber() {
-        int shards = 42;
-        DeliveryStrategy strategy = UniformAcrossAllShards.forNumber(shards);
+    void customShardNumber() {
+        var shards = 42;
+        var strategy = UniformAcrossAllShards.forNumber(shards);
         assertThat(strategy.shardCount())
                 .isEqualTo(shards);
     }
 
     @Test
     @DisplayName("not accept a negative shard number")
-    public void negativeNumberOfShards() {
+    void negativeNumberOfShards() {
         assertThrows(IllegalArgumentException.class,
                      () -> UniformAcrossAllShards.forNumber(-7));
     }
 
     @Test
     @DisplayName("not accept a zero number of shards")
-    public void zeroShards() {
+    void zeroShards() {
         assertThrows(IllegalArgumentException.class,
                      () -> UniformAcrossAllShards.forNumber(0));
     }

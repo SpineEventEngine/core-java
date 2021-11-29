@@ -63,11 +63,11 @@ abstract class AbstractStationTest {
     @Test
     @DisplayName("do nothing on an empty conveyor")
     void doNothingOnEmptyConveyor() {
-        MemoizingAction action = new MemoizingAction();
-        Station station = newStation(action);
-        Conveyor emptyConveyor = new Conveyor(new ArrayList<>(), new DeliveredMessages());
+        var action = new MemoizingAction();
+        var station = newStation(action);
+        var emptyConveyor = new Conveyor(new ArrayList<>(), new DeliveredMessages());
 
-        Station.Result result = station.process(emptyConveyor);
+        var result = station.process(emptyConveyor);
         assertDeliveredCount(result, 0);
 
         assertThat(action.passedMessages()).isNull();
@@ -99,7 +99,7 @@ abstract class AbstractStationTest {
 
     static void assertKeptForLonger(InboxMessageId id,
                                     Map<InboxMessageId, InboxMessage> remaindersById) {
-        InboxMessage message = remaindersById.get(id);
+        var message = remaindersById.get(id);
         assertThat(
                 compare(message.getKeepUntil(), message.getWhenReceived())
         ).isGreaterThan(0);
@@ -107,7 +107,7 @@ abstract class AbstractStationTest {
 
     static void assertNotKeptForLonger(InboxMessageId id,
                                     Map<InboxMessageId, InboxMessage> remaindersById) {
-        InboxMessage message = remaindersById.get(id);
+        var message = remaindersById.get(id);
         assertThat(message.getKeepUntil()).isEqualTo(Timestamp.getDefaultInstance());
     }
 }

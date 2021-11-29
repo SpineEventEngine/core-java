@@ -50,17 +50,17 @@ class CleanupStationTest extends AbstractStationTest {
     @Test
     @DisplayName("remove the messages in `DELIVERED` status")
     void removeDeliveredMessages() {
-        InboxMessage delivered = delivered(targetOne, type);
-        InboxMessage deliveredToAnotherTarget = delivered(targetTwo, type);
-        InboxMessage catchingUp = catchingUp(targetTwo, type);
-        InboxMessage toDeliver = toDeliver(targetOne, type);
-        Conveyor conveyor = new Conveyor(
+        var delivered = delivered(targetOne, type);
+        var deliveredToAnotherTarget = delivered(targetTwo, type);
+        var catchingUp = catchingUp(targetTwo, type);
+        var toDeliver = toDeliver(targetOne, type);
+        var conveyor = new Conveyor(
                 ImmutableList.of(delivered, deliveredToAnotherTarget, catchingUp, toDeliver),
                 new DeliveredMessages()
         );
 
         Station station = new CleanupStation();
-        Station.Result result = station.process(conveyor);
+        var result = station.process(conveyor);
 
         assertDeliveredCount(result, 0);
 
@@ -77,19 +77,19 @@ class CleanupStationTest extends AbstractStationTest {
     @DisplayName("keep the messages in `DELIVERED` status if they have `keep_until` in future" +
             "and remove `DELIVERED` messages if their `keep_until` is in the past")
     void considerKeepUntilWhenRemoving() {
-        InboxMessage deliveredKeepTillFuture = keepUntil(
+        var deliveredKeepTillFuture = keepUntil(
                 delivered(targetOne, type), add(currentTime(), fromSeconds(10))
         );
-        InboxMessage deliveredKeepUntilPastTime = keepUntil(
+        var deliveredKeepUntilPastTime = keepUntil(
                 delivered(targetTwo, type), subtract(currentTime(), fromSeconds(5))
         );
-        Conveyor conveyor = new Conveyor(
+        var conveyor = new Conveyor(
                 ImmutableList.of(deliveredKeepTillFuture, deliveredKeepUntilPastTime),
                 new DeliveredMessages()
         );
 
         Station station = new CleanupStation();
-        Station.Result result = station.process(conveyor);
+        var result = station.process(conveyor);
         assertDeliveredCount(result, 0);
 
         assertContainsExactly(conveyor.removals(),

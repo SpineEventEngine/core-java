@@ -28,7 +28,6 @@ package io.spine.server.delivery;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
 import org.junit.jupiter.api.DisplayName;
@@ -53,14 +52,14 @@ class TurbulenceTest {
     @DisplayName("define the turbulence start time " +
             "by counting back its duration from the current time")
     void defineStartTime() {
-        Duration duration = Durations.fromSeconds(10);
-        Turbulence turbulence = Turbulence.of(duration);
-        Timestamp actual = turbulence.whenStarts();
+        var duration = Durations.fromSeconds(10);
+        var turbulence = Turbulence.of(duration);
+        var actual = turbulence.whenStarts();
 
-        Timestamp currentTime = Time.currentTime();
-        Timestamp approximateExpected = subtract(currentTime, duration);
+        var currentTime = Time.currentTime();
+        var approximateExpected = subtract(currentTime, duration);
 
-        long difference = Math.abs(toMillis(actual) - toMillis(approximateExpected));
+        var difference = Math.abs(toMillis(actual) - toMillis(approximateExpected));
         assertThat(difference).isLessThan(50 /* ms */);
     }
 }

@@ -48,18 +48,17 @@ class DispatchingIdTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        Timestamp now = Time.currentTime();
-        Timestamp inPast = subtract(now, fromSeconds(1));
-        Command commandA = command("Target A");
-        Command commandB = command("Target B");
+        var now = Time.currentTime();
+        var inPast = subtract(now, fromSeconds(1));
+        var commandA = command("Target A");
+        var commandB = command("Target B");
 
+        var messageOne = new DispatchingId(toDeliver(commandA, now));
+        var anotherMessageOne = new DispatchingId(toDeliver(commandA, now));
+        var messageOneFromPast = new DispatchingId(toDeliver(commandA, inPast));
 
-        DispatchingId messageOne = new DispatchingId(toDeliver(commandA, now));
-        DispatchingId anotherMessageOne = new DispatchingId(toDeliver(commandA, now));
-        DispatchingId messageOneFromPast = new DispatchingId(toDeliver(commandA, inPast));
-
-        DispatchingId messageTwo = new DispatchingId(toDeliver(commandB, now));
-        DispatchingId messageTwoFromPast = new DispatchingId(toDeliver(commandB, inPast));
+        var messageTwo = new DispatchingId(toDeliver(commandB, now));
+        var messageTwoFromPast = new DispatchingId(toDeliver(commandB, inPast));
 
         new EqualsTester().addEqualityGroup(messageOne, anotherMessageOne, messageOneFromPast)
                           .addEqualityGroup(messageTwo, messageTwoFromPast)

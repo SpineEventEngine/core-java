@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
@@ -48,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -104,18 +102,18 @@ class NastyClient {
      *         the identifiers of target entities
      */
     void runWith(Set<String> targets) {
-        BlackBox context = BlackBox.from(
+        var context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(repository)
         );
-        DeliveryTestEnv.SignalMemoizer memoizer = subscribeToDelivered();
+        var memoizer = subscribeToDelivered();
 
-        int streamSize = targets.size() * 30;
+        var streamSize = targets.size() * 30;
 
-        Iterator<String> targetsIterator = Iterators.cycle(targets);
-        List<AddNumber> commands = commands(streamSize, targetsIterator);
-        List<NumberImported> importEvents = eventsToImport(streamSize, targetsIterator);
-        List<NumberReacted> reactEvents = eventsToReact(streamSize, targetsIterator);
+        var targetsIterator = Iterators.cycle(targets);
+        var commands = commands(streamSize, targetsIterator);
+        var importEvents = eventsToImport(streamSize, targetsIterator);
+        var reactEvents = eventsToReact(streamSize, targetsIterator);
 
         postAsync(context, commands, importEvents, reactEvents);
 
@@ -124,19 +122,18 @@ class NastyClient {
 
         signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
-        for (String calcId : signalsPerTarget.keySet()) {
+        for (var calcId : signalsPerTarget.keySet()) {
 
-            ImmutableSet<CalculatorSignal> receivedMessages = memoizer.messagesBy(calcId);
+            var receivedMessages = memoizer.messagesBy(calcId);
             Set<CalculatorSignal> targetSignals =
                     ImmutableSet.copyOf(signalsPerTarget.get(calcId));
             assertEquals(targetSignals, receivedMessages);
 
-            Integer sumForTarget =
+            var sumForTarget =
                     targetSignals.stream()
                                  .map(CalculatorSignal::getValue)
                                  .reduce(0, Integer::sum);
-            Calc expectedState = Calc
-                    .newBuilder()
+            var expectedState = Calc.newBuilder()
                     .setId(calcId)
                     .setSum(sumForTarget)
                     .build();
@@ -182,28 +179,28 @@ class NastyClient {
 
     private static List<NumberReacted> eventsToReact(int streamSize,
                                                      Iterator<String> targetsIterator) {
-        IntStream ints = IntStream.range(0, streamSize);
+        var ints = IntStream.range(0, streamSize);
         return ints.mapToObj((value) ->
                                      NumberReacted.newBuilder()
-                                                  .setCalculatorId(targetsIterator.next())
-                                                  .setValue(value)
-                                                  .vBuild())
+                                             .setCalculatorId(targetsIterator.next())
+                                             .setValue(value)
+                                             .vBuild())
                    .collect(toList());
     }
 
     private static List<NumberImported> eventsToImport(int streamSize,
                                                        Iterator<String> targetsIterator) {
-        IntStream ints = IntStream.range(streamSize, streamSize * 2);
+        var ints = IntStream.range(streamSize, streamSize * 2);
         return ints.mapToObj((value) ->
                                      NumberImported.newBuilder()
-                                                   .setCalculatorId(targetsIterator.next())
-                                                   .setValue(value)
-                                                   .vBuild())
+                                             .setCalculatorId(targetsIterator.next())
+                                             .setValue(value)
+                                             .vBuild())
                    .collect(toList());
     }
 
     private static List<AddNumber> commands(int streamSize, Iterator<String> targetsIterator) {
-        IntStream ints = IntStream.range(streamSize * 2, streamSize * 3);
+        var ints = IntStream.range(streamSize * 2, streamSize * 3);
         return ints.mapToObj((value) ->
                                      AddNumber.newBuilder()
                                               .setCalculatorId(targetsIterator.next())
@@ -213,7 +210,7 @@ class NastyClient {
     }
 
     private static DeliveryTestEnv.SignalMemoizer subscribeToDelivered() {
-        DeliveryTestEnv.SignalMemoizer observer = new DeliveryTestEnv.SignalMemoizer();
+        var observer = new DeliveryTestEnv.SignalMemoizer();
         ServerEnvironment.instance()
                          .delivery()
                          .subscribe(observer);
@@ -222,10 +219,10 @@ class NastyClient {
 
     private void ensureInboxesEmpty() {
         if (shouldInboxBeEmpty) {
-            ImmutableMap<ShardIndex, ImmutableList<InboxMessage>> shardedItems = InboxContents.get();
+            var shardedItems = InboxContents.get();
 
-            for (ShardIndex index : shardedItems.keySet()) {
-                ImmutableList<InboxMessage> page = shardedItems.get(index);
+            for (var index : shardedItems.keySet()) {
+                var page = shardedItems.get(index);
                 assertThat(page).isEmpty();
             }
         }
@@ -236,7 +233,7 @@ class NastyClient {
                            List<NumberImported> eventsToImport,
                            List<NumberReacted> eventsToReact) {
 
-        Stream<Callable<Object>> signalStream =
+        var signalStream =
                 concat(
                         commandCallables(context, commands),
                         importEventCallables(context, eventsToImport),
@@ -251,7 +248,7 @@ class NastyClient {
     }
 
     private void runAsync(Collection<Callable<Object>> signals) {
-        ExecutorService executorService = newFixedThreadPool(threadCount);
+        var executorService = newFixedThreadPool(threadCount);
         try {
             executorService.invokeAll(signals);
         } catch (InterruptedException e) {
@@ -262,7 +259,7 @@ class NastyClient {
     }
 
     private static void runSync(Collection<Callable<Object>> signals) {
-        for (Callable<Object> signal : signals) {
+        for (var signal : signals) {
             try {
                 signal.call();
             } catch (Exception e) {

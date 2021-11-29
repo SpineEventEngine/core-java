@@ -43,12 +43,12 @@ public class TaskAssignment
 
     @React
     DTaskAssigned on(DTaskCreated event) {
-        String rawId = event.getId();
+        var rawId = event.getId();
         builder().setId(rawId);
         return DTaskAssigned.newBuilder()
-                            .setId(rawId)
-                            .setAssignee(GivenUserId.generated())
-                            .vBuild();
+                .setId(rawId)
+                .setAssignee(GivenUserId.generated())
+                .vBuild();
     }
 
     public static class Repository

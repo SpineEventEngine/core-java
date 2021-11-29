@@ -28,9 +28,7 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
-import io.spine.server.NodeId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,13 +58,13 @@ public abstract class ShardedWorkRegistryTest {
     @Test
     @DisplayName("pick up the shard if it is not picked up previously and allow to complete it")
     void testPickUp() {
-        ShardedWorkRegistry registry = registry();
+        var registry = registry();
 
-        ShardIndex index = newIndex(1, 42);
-        NodeId node = generateNodeId();
+        var index = newIndex(1, 42);
+        var node = generateNodeId();
 
-        Optional<ShardProcessingSession> session = registry.pickUp(index, node);
-        ShardProcessingSession actualSession = assertSession(session, index);
+        var session = registry.pickUp(index, node);
+        var actualSession = assertSession(session, index);
 
         assertThat(registry.pickUp(index, node))
                 .isEmpty();
@@ -74,19 +72,19 @@ public abstract class ShardedWorkRegistryTest {
                 .isEmpty();
 
         actualSession.complete();
-        Optional<ShardProcessingSession> newSession = registry.pickUp(index, generateNodeId());
+        var newSession = registry.pickUp(index, generateNodeId());
         assertSession(newSession, index);
     }
 
     @Test
     @DisplayName("release the shards which sessions expired")
     void testReleaseExpired() {
-        ShardedWorkRegistry registry = registry();
+        var registry = registry();
 
-        int totalShards = 35;
+        var totalShards = 35;
 
-        ImmutableSet<ShardIndex> indexes = pickUp(registry, totalShards, totalShards);
-        Iterable<ShardIndex> releasedIndexes =
+        var indexes = pickUp(registry, totalShards, totalShards);
+        var releasedIndexes =
                 registry.releaseExpiredSessions(Durations.fromSeconds(100));
         assertThat(releasedIndexes.iterator()
                                   .hasNext()).isFalse();
@@ -95,9 +93,9 @@ public abstract class ShardedWorkRegistryTest {
         releasedIndexes = registry.releaseExpiredSessions(Durations.fromMillis(100));
         assertThat(releasedIndexes).containsExactlyElementsIn(indexes);
 
-        for (ShardIndex shardIndex : indexes) {
-            NodeId anotherNode = generateNodeId();
-            Optional<ShardProcessingSession> newSession = registry.pickUp(shardIndex, anotherNode);
+        for (var shardIndex : indexes) {
+            var anotherNode = generateNodeId();
+            var newSession = registry.pickUp(shardIndex, anotherNode);
             assertSession(newSession, shardIndex);
         }
     }
@@ -105,31 +103,31 @@ public abstract class ShardedWorkRegistryTest {
     @Test
     @DisplayName("release a shard only if it's blocked")
     void testOnlyReleaseBlocked() {
-        ShardedWorkRegistry registry = registry();
+        var registry = registry();
 
-        int totalShards = 12;
+        var totalShards = 12;
 
-        Duration expirationPeriod = Durations.fromMillis(1);
+        var expirationPeriod = Durations.fromMillis(1);
         pickUp(registry, totalShards, totalShards);
         sleepUninterruptibly(ofSeconds(1));
         registry.releaseExpiredSessions(expirationPeriod);
 
         // Pick up half of the shards and leave another half empty.
-        ImmutableSet<ShardIndex> newIndexes =
+        var newIndexes =
                 pickUp(registry, totalShards, totalShards / 2);
         sleepUninterruptibly(ofSeconds(1));
-        Iterable<ShardIndex> releasedIndexes = registry.releaseExpiredSessions(expirationPeriod);
+        var releasedIndexes = registry.releaseExpiredSessions(expirationPeriod);
         assertThat(releasedIndexes).containsExactlyElementsIn(newIndexes);
     }
 
     private static ImmutableSet<ShardIndex>
     pickUp(ShardedWorkRegistry registry, int outOfTotal, int howMany) {
-        ImmutableSet<ShardIndex> indexes = range(1, howMany)
+        var indexes = range(1, howMany)
                 .mapToObj(i -> {
-                    NodeId newNode = generateNodeId();
-                    ShardIndex newIndex = newIndex(i, outOfTotal);
+                    var newNode = generateNodeId();
+                    var newIndex = newIndex(i, outOfTotal);
 
-                    Optional<ShardProcessingSession> session = registry.pickUp(newIndex, newNode);
+                    var session = registry.pickUp(newIndex, newNode);
                     assertSession(session, newIndex);
                     return newIndex;
                 })
@@ -143,7 +141,7 @@ public abstract class ShardedWorkRegistryTest {
     assertSession(Optional<ShardProcessingSession> session, ShardIndex index) {
         assertThat(session)
                 .isPresent();
-        ShardProcessingSession actualSession = session.get();
+        var actualSession = session.get();
         assertThat(actualSession.shardIndex()).isEqualTo(index);
         return actualSession;
     }

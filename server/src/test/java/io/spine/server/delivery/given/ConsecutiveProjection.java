@@ -90,10 +90,10 @@ public class ConsecutiveProjection
 
         mode.validate(newValue);
 
-        int lastValue = state().getLastValue();
-        int difference = abs(newValue) - abs(lastValue);
+        var lastValue = state().getLastValue();
+        var difference = abs(newValue) - abs(lastValue);
         if (difference != 1) {
-            String message =
+            var message =
                     format("`ConsecutiveNumberProjection` with ID `%s` got wrong value. " +
                                    "Current value is %d, but got `%d`.",
                            id, lastValue, newValue);
@@ -115,7 +115,7 @@ public class ConsecutiveProjection
         }
 
         void validate(int incoming) {
-            Boolean valid = validator.apply(incoming);
+            var valid = validator.apply(incoming);
             if (!valid) {
                 throw newIllegalArgumentException(
                         "The mode `%s` does not accept the supplied `%d` value.",
