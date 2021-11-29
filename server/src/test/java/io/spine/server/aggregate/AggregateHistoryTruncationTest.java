@@ -29,7 +29,6 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.core.Version;
@@ -53,7 +52,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -98,15 +96,14 @@ public abstract class AggregateHistoryTruncationTest {
         @Test
         @DisplayName("restore the `Aggregate` state properly")
         void restoreAggregateState() {
-            FibonacciRepository repo = new FibonacciRepository();
-            BlackBox context = BlackBox.from(
+            var repo = new FibonacciRepository();
+            var context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(repo)
             );
 
             // Set the starting numbers.
-            SetStartingNumbers setStartingNumbers = SetStartingNumbers
-                    .newBuilder()
+            var setStartingNumbers = SetStartingNumbers.newBuilder()
                     .setId(ID)
                     .setNumberOne(0)
                     .setNumberTwo(1)
@@ -116,43 +113,42 @@ public abstract class AggregateHistoryTruncationTest {
                    .withType(StartingNumbersSet.class)
                    .hasSize(1);
             // Send a lot of `MoveSequence` events, so several snapshots are created.
-            MoveSequence moveSequence = MoveSequence
-                    .newBuilder()
+            var moveSequence = MoveSequence.newBuilder()
                     .setId(ID)
                     .vBuild();
-            int snapshotTrigger = repo.snapshotTrigger();
-            for (int i = 0; i < snapshotTrigger * 5 + 1; i++) {
+            var snapshotTrigger = repo.snapshotTrigger();
+            for (var i = 0; i < snapshotTrigger * 5 + 1; i++) {
                 context.receivesCommand(moveSequence);
             }
 
             // Compare against the numbers calculated by hand.
-            int expectedNumberOne = 121393;
-            int expectedNumberTwo = 196418;
+            var expectedNumberOne = 121393;
+            var expectedNumberTwo = 196418;
             assertThat(lastNumberOne())
                     .isEqualTo(expectedNumberOne);
             assertThat(lastNumberTwo())
                     .isEqualTo(expectedNumberTwo);
 
             // Truncate the storage.
-            AggregateStorage<SequenceId, Sequence> storage = repo.aggregateStorage();
-            int countBeforeTruncate = recordCount(storage);
+            var storage = repo.aggregateStorage();
+            var countBeforeTruncate = recordCount(storage);
             assertThat(countBeforeTruncate)
                     .isGreaterThan(snapshotTrigger);
             storage.truncateOlderThan(0);
-            int countAfterTruncate = recordCount(storage);
+            var countAfterTruncate = recordCount(storage);
             assertThat(countAfterTruncate)
                     .isAtMost(snapshotTrigger);
 
             // Run one more command and check the result.
-            int expectedNext = lastNumberOne() + lastNumberTwo();
+            var expectedNext = lastNumberOne() + lastNumberTwo();
             context.receivesCommand(moveSequence);
             assertThat(lastNumberTwo())
                     .isEqualTo(expectedNext);
         }
 
         private int recordCount(AggregateStorage<SequenceId, Sequence> storage) {
-            Iterator<AggregateEventRecord> iterator = storage.historyBackward(ID,
-                                                                              Integer.MAX_VALUE);
+            var iterator = storage.historyBackward(ID,
+                                                   Integer.MAX_VALUE);
             return Iterators.size(iterator);
         }
     }
@@ -171,7 +167,7 @@ public abstract class AggregateHistoryTruncationTest {
         void setUp() {
             currentVersion = zero();
 
-            ContextSpec spec = ContextSpec.singleTenant("Aggregate truncation tests");
+            var spec = ContextSpec.singleTenant("Aggregate truncation tests");
             storage = ServerEnvironment.instance()
                                        .storageFactory()
                                        .createAggregateStorage(spec, TestAggregate.class);
@@ -182,9 +178,9 @@ public abstract class AggregateHistoryTruncationTest {
         void toTheNthSnapshot() {
             writeSnapshot();
             writeEvent();
-            Snapshot latestSnapshot = writeSnapshot();
+            var latestSnapshot = writeSnapshot();
 
-            int snapshotIndex = 0;
+            var snapshotIndex = 0;
             storage.truncateOlderThan(snapshotIndex);
 
             List<AggregateEventRecord> records = historyBackward();
@@ -198,17 +194,17 @@ public abstract class AggregateHistoryTruncationTest {
         @Test
         @DisplayName("by date")
         void byDate() {
-            Duration delta = seconds(10);
-            Timestamp now = currentTime();
-            Timestamp before = subtract(now, delta);
-            Timestamp after = add(now, delta);
+            var delta = seconds(10);
+            var now = currentTime();
+            var before = subtract(now, delta);
+            var after = add(now, delta);
 
             writeSnapshot(before);
             writeEvent(before);
-            Event latestEvent = writeEvent(after);
-            Snapshot latestSnapshot = writeSnapshot(after);
+            var latestEvent = writeEvent(after);
+            var latestSnapshot = writeSnapshot(after);
 
-            int snapshotIndex = 0;
+            var snapshotIndex = 0;
             storage.truncateOlderThan(snapshotIndex, now);
 
             List<AggregateEventRecord> records = historyBackward();
@@ -225,18 +221,18 @@ public abstract class AggregateHistoryTruncationTest {
         @Test
         @DisplayName("by date preserving at least the Nth latest snapshot")
         void byDateAndSnapshot() {
-            Duration delta = seconds(10);
-            Timestamp now = currentTime();
-            Timestamp before = subtract(now, delta);
-            Timestamp after = add(now, delta);
+            var delta = seconds(10);
+            var now = currentTime();
+            var before = subtract(now, delta);
+            var after = add(now, delta);
 
             writeEvent(before);
-            Snapshot snapshot1 = writeSnapshot(before);
-            Event event1 = writeEvent(before);
-            Event event2 = writeEvent(after);
-            Snapshot snapshot2 = writeSnapshot(after);
+            var snapshot1 = writeSnapshot(before);
+            var event1 = writeEvent(before);
+            var event2 = writeEvent(after);
+            var snapshot2 = writeSnapshot(after);
 
-            int snapshotIndex = 1;
+            var snapshotIndex = 1;
             storage.truncateOlderThan(snapshotIndex, now);
 
             // The `event1` should be preserved event though it occurred before the specified date.
@@ -266,7 +262,7 @@ public abstract class AggregateHistoryTruncationTest {
         }
 
         private ImmutableList<AggregateEventRecord> historyBackward() {
-            Iterator<AggregateEventRecord> iterator = storage.historyBackward(id, MAX_VALUE);
+            var iterator = storage.historyBackward(id, MAX_VALUE);
             return ImmutableList.copyOf(iterator);
         }
 
@@ -278,8 +274,7 @@ public abstract class AggregateHistoryTruncationTest {
         @CanIgnoreReturnValue
         private Snapshot writeSnapshot(Timestamp atTime) {
             currentVersion = increment(currentVersion);
-            Snapshot snapshot = Snapshot
-                    .newBuilder()
+            var snapshot = Snapshot.newBuilder()
                     .setTimestamp(atTime)
                     .setVersion(currentVersion)
                     .build();
@@ -295,8 +290,8 @@ public abstract class AggregateHistoryTruncationTest {
         @CanIgnoreReturnValue
         private Event writeEvent(Timestamp atTime) {
             currentVersion = increment(currentVersion);
-            AggProject state = AggProject.getDefaultInstance();
-            Event event = eventFactory.createEvent(event(state), currentVersion, atTime);
+            var state = AggProject.getDefaultInstance();
+            var event = eventFactory.createEvent(event(state), currentVersion, atTime);
             storage.writeEvent(id, event);
             return event;
         }

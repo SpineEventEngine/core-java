@@ -29,15 +29,12 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
 import io.spine.core.Ack;
-import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
@@ -56,17 +53,12 @@ import io.spine.server.aggregate.given.thermometer.SafeThermometerRepo;
 import io.spine.server.aggregate.given.thermometer.Thermometer;
 import io.spine.server.aggregate.given.thermometer.ThermometerId;
 import io.spine.server.aggregate.given.thermometer.event.TemperatureChanged;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.MessageEndpoint;
-import io.spine.server.dispatch.BatchDispatchOutcome;
-import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.model.ModelError;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.CannotDispatchDuplicateCommand;
-import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
@@ -87,7 +79,6 @@ import io.spine.test.aggregate.event.AggTaskCreated;
 import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.mute.MuteLogging;
-import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.ContextAwareTest;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.BackToTheFuture;
@@ -153,18 +144,18 @@ public class AggregateTest {
     private TestAggregateRepository repository;
 
     private static TestAggregate newAggregate(ProjectId id) {
-        TestAggregate result = new TestAggregate(id);
+        var result = new TestAggregate(id);
         return result;
     }
 
     private static AmishAggregate newAmishAggregate(ProjectId id) {
-        AmishAggregate result = new AmishAggregate(id);
+        var result = new AmishAggregate(id);
         return result;
     }
 
     private static List<Event> generateProjectEvents() {
-        String projectName = AggregateTest.class.getSimpleName();
-        List<Event> events = ImmutableList.<Event>builder()
+        var projectName = AggregateTest.class.getSimpleName();
+        var events = ImmutableList.<Event>builder()
                 .add(event(projectCreated(ID, projectName), 1))
                 .add(event(taskAdded(ID), 3))
                 .add(event(projectStarted(ID), 4))
@@ -231,7 +222,7 @@ public class AggregateTest {
         @Test
         @DisplayName("non-null last modification time")
         void timeLastModified() {
-            Timestamp creationTime = new TestAggregate(ID).whenModified();
+            var creationTime = new TestAggregate(ID).whenModified();
             assertNotNull(creationTime);
         }
     }
@@ -252,7 +243,7 @@ public class AggregateTest {
         @Test
         @DisplayName("by one upon handling command with one event")
         void byOne() {
-            int version = aggregate.versionNumber();
+            var version = aggregate.versionNumber();
 
             dispatchCommand(aggregate, command(createProject));
 
@@ -265,9 +256,9 @@ public class AggregateTest {
         @Test
         @DisplayName("by one upon handling command with single event and empty event applier")
         void byOneForEmptyApplier() {
-            int version = amishAggregate.versionNumber();
+            var version = amishAggregate.versionNumber();
 
-            Command command = command(pauseProject);
+            var command = command(pauseProject);
             List<? extends Message> messages = dispatchCommand(amishAggregate, command)
                     .getSuccess()
                     .getProducedEvents()
@@ -284,9 +275,9 @@ public class AggregateTest {
         @Test
         @DisplayName("by number of events upon handling command with several events")
         void byNumberOfEvents() {
-            int version = amishAggregate.versionNumber();
+            var version = amishAggregate.versionNumber();
 
-            Command command = command(cancelProject);
+            var command = command(cancelProject);
             List<? extends Message> eventMessages =
                     dispatchCommand(amishAggregate, command)
                             .getSuccess()
@@ -301,7 +292,7 @@ public class AggregateTest {
         @Test
         @DisplayName("by number of commands upon handling several commands")
         void byNumberOfCommands() {
-            int version = aggregate.versionNumber();
+            var version = aggregate.versionNumber();
 
             dispatchCommand(aggregate, command(createProject));
             dispatchCommand(aggregate, command(startProject));
@@ -320,8 +311,8 @@ public class AggregateTest {
         Aggregate<?, ?, ?> agg = aggregate;
         List<Event> uncommittedEvents = agg.getUncommittedEvents()
                                            .list();
-        Event event = uncommittedEvents.get(0);
-        EventContext context = event.context();
+        var event = uncommittedEvents.get(0);
+        var context = event.context();
         assertThat(aggregate.version())
                 .isEqualTo(context.getVersion());
     }
@@ -365,7 +356,7 @@ public class AggregateTest {
         @DisplayName("command handler")
         void commandHandler() {
             ModelTests.dropAllModels();
-            AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
+            var aggregate = new AggregateWithMissingApplier(ID);
 
             // Pass a command for which the target aggregate does not have a handling method.
             assertThrows(ModelError.class,
@@ -376,13 +367,12 @@ public class AggregateTest {
         @DisplayName("event applier for the event emitted in a result of command handling")
         void eventApplier() {
             ModelTests.dropAllModels();
-            AggregateWithMissingApplier aggregate =
-                    new AggregateWithMissingApplier(ID);
-            Command command = command(createProject);
-            DispatchOutcome outcome = dispatchCommand(aggregate, command);
+            var aggregate = new AggregateWithMissingApplier(ID);
+            var command = command(createProject);
+            var outcome = dispatchCommand(aggregate, command);
             assertTrue(aggregate.commandHandled());
             assertTrue(outcome.hasError());
-            Error error = outcome.getError();
+            var error = outcome.getError();
             assertThat(error.getType())
                     .isEqualTo(ModelError.class.getCanonicalName());
         }
@@ -397,7 +387,7 @@ public class AggregateTest {
         void updatedUponCommandHandled() {
             dispatchCommand(aggregate, command(createProject));
 
-            AggProject state = aggregate.state();
+            var state = aggregate.state();
 
             assertEquals(ID, state.getId());
             assertEquals(Status.CREATED, state.getStatus());
@@ -408,7 +398,7 @@ public class AggregateTest {
     @DisplayName("record modification time when command is handled")
     void recordModificationUponCommandHandled() {
         try {
-            Timestamp frozenTime = Time.currentTime();
+            var frozenTime = Time.currentTime();
             Time.setProvider(new FrozenMadHatterParty(frozenTime));
 
             dispatchCommand(aggregate, command(createProject));
@@ -422,11 +412,10 @@ public class AggregateTest {
     @Test
     @DisplayName("replay historical events")
     void playEvents() {
-        List<Event> events = generateProjectEvents();
-        AggregateHistory aggregateHistory =
-                AggregateHistory.newBuilder()
-                                .addAllEvent(events)
-                                .build();
+        var events = generateProjectEvents();
+        var aggregateHistory = AggregateHistory.newBuilder()
+                .addAllEvent(events)
+                .build();
 
         AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
         aggregate().replay(aggregateHistory);
@@ -442,7 +431,7 @@ public class AggregateTest {
     void restoreSnapshot() {
         dispatchCommand(aggregate, command(createProject));
 
-        Snapshot snapshot = aggregate().toSnapshot();
+        var snapshot = aggregate().toSnapshot();
 
         Aggregate<?, ?, ?> anotherAggregate = newAggregate(aggregate.id());
 
@@ -481,7 +470,7 @@ public class AggregateTest {
                                        command(addTask),
                                        command(startProject));
             aggregate().commitEvents();
-            ImmutableList<Event> historyBackward =
+            var historyBackward =
                     ImmutableList.copyOf(aggregate().historyBackward());
             assertEventClasses(
                     getEventClasses(historyBackward),
@@ -490,10 +479,9 @@ public class AggregateTest {
         }
 
         private Collection<EventClass> getEventClasses(Collection<Event> events) {
-            List<EventClass> result =
-                    events.stream()
-                          .map(EventClass::of)
-                          .collect(toList());
+            var result = events.stream()
+                    .map(EventClass::of)
+                    .collect(toList());
             return result;
         }
 
@@ -506,7 +494,7 @@ public class AggregateTest {
         @Test
         @DisplayName("which are uncommitted")
         void uncommitedByDefault() {
-            UncommittedEvents events = aggregate().getUncommittedEvents();
+            var events = aggregate().getUncommittedEvents();
 
             assertFalse(events.nonEmpty());
         }
@@ -539,8 +527,8 @@ public class AggregateTest {
 
         dispatchCommand(aggregate, command(createProject));
 
-        Snapshot snapshot = aggregate().toSnapshot();
-        AggProject state = unpack(snapshot.getState(), AggProject.class);
+        var snapshot = aggregate().toSnapshot();
+        var state = unpack(snapshot.getState(), AggProject.class);
 
         assertEquals(ID, state.getId());
         assertEquals(Status.CREATED, state.getStatus());
@@ -552,7 +540,7 @@ public class AggregateTest {
 
         dispatchCommand(aggregate, command(createProject));
 
-        Snapshot snapshotNewProject = aggregate().toSnapshot();
+        var snapshotNewProject = aggregate().toSnapshot();
 
         Aggregate<?, ?, ?> anotherAggregate = newAggregate(aggregate.id());
 
@@ -568,7 +556,7 @@ public class AggregateTest {
     @Test
     @DisplayName("increment version upon state changing event applied")
     void incrementVersionOnEventApplied() {
-        int version = aggregate.version()
+        var version = aggregate.version()
                                .getNumber();
         // Dispatch two commands that cause events that modify aggregate state.
         aggregate.dispatchCommands(command(createProject), command(startProject));
@@ -581,10 +569,10 @@ public class AggregateTest {
     @DisplayName("record modification timestamp")
     void recordModificationTimestamp() {
         try {
-            BackToTheFuture provider = new BackToTheFuture();
+            var provider = new BackToTheFuture();
             Time.setProvider(provider);
 
-            Timestamp currentTime = Time.currentTime();
+            var currentTime = Time.currentTime();
 
             aggregate.dispatchCommands(command(createProject));
 
@@ -601,7 +589,7 @@ public class AggregateTest {
     }
 
     @Nested
-    @DisplayName("catch RuntimeExceptions in")
+    @DisplayName("catch `RuntimeException`s in")
     class CatchHandlerFailures {
 
         @Test
@@ -609,12 +597,12 @@ public class AggregateTest {
         void whenHandlerThrows() {
             ModelTests.dropAllModels();
 
-            FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
+            var faultyAggregate = new FaultyAggregate(ID, true, false);
 
-            Command command = Given.ACommand.createProject();
-            DispatchOutcome outcome = dispatchCommand(faultyAggregate, env(command));
+            var command = Given.ACommand.createProject();
+            var outcome = dispatchCommand(faultyAggregate, env(command));
             assertTrue(outcome.hasError());
-            Error error = outcome.getError();
+            var error = outcome.getError();
             assertThat(error)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(Error.newBuilder()
@@ -627,14 +615,14 @@ public class AggregateTest {
         @DisplayName("appliers")
         void whenApplierThrows() {
             ModelTests.dropAllModels();
-            FaultyAggregate faultyAggregate =
+            var faultyAggregate =
                     new FaultyAggregate(ID, false, true);
 
-            Command command = Given.ACommand.createProject();
-            DispatchOutcome outcome = dispatchCommand(faultyAggregate, env(command));
+            var command = Given.ACommand.createProject();
+            var outcome = dispatchCommand(faultyAggregate, env(command));
 
             assertThat(outcome.hasError()).isTrue();
-            Error error = outcome.getError();
+            var error = outcome.getError();
             assertThat(error)
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(Error.newBuilder()
@@ -647,20 +635,17 @@ public class AggregateTest {
         @DisplayName("the event replay")
         void whenPlayThrows() {
             ModelTests.dropAllModels();
-            FaultyAggregate faultyAggregate =
-                    new FaultyAggregate(ID, false, true);
+            var faultyAggregate = new FaultyAggregate(ID, false, true);
 
-            Event event = event(projectCreated(ID, getClass().getSimpleName()), 1);
+            var event = event(projectCreated(ID, getClass().getSimpleName()), 1);
             AggregateTransaction.start(faultyAggregate);
-            AggregateHistory history = AggregateHistory
-                    .newBuilder()
+            var history = AggregateHistory.newBuilder()
                     .addEvent(event)
                     .build();
-            BatchDispatchOutcome batchDispatchOutcome =
+            var batchDispatchOutcome =
                     ((Aggregate<?, ?, ?>) faultyAggregate).replay(history);
             assertThat(batchDispatchOutcome.getSuccessful()).isFalse();
-            MessageId expectedTarget = MessageId
-                    .newBuilder()
+            var expectedTarget = MessageId.newBuilder()
                     .setId(Identifier.pack(faultyAggregate.id()))
                     .setTypeUrl(faultyAggregate.modelClass()
                                                .stateTypeUrl()
@@ -670,10 +655,10 @@ public class AggregateTest {
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(expectedTarget);
             assertThat(batchDispatchOutcome.getOutcomeCount()).isEqualTo(1);
-            DispatchOutcome outcome = batchDispatchOutcome.getOutcome(0);
+            var outcome = batchDispatchOutcome.getOutcome(0);
             assertThat(outcome.hasError()).isTrue();
             assertThat(outcome.getPropagatedSignal()).isEqualTo(event.messageId());
-            Error error = outcome.getError();
+            var error = outcome.getError();
             assertThat(error.getType()).isEqualTo(IllegalStateException.class.getCanonicalName());
             assertThat(error.getMessage()).isEqualTo(FaultyAggregate.BROKEN_APPLIER);
         }
@@ -694,19 +679,19 @@ public class AggregateTest {
         @Test
         @DisplayName("iterating through newest events first")
         void throughNewestEventsFirst() {
-            TenantId tenantId = newTenantId();
-            Command createCommand = command(createProject, tenantId);
-            Command startCommand = command(startProject, tenantId);
-            Command addTaskCommand = command(addTask, tenantId);
-            Command addTaskCommand2 = command(addTask, tenantId);
+            var tenantId = newTenantId();
+            var createCommand = command(createProject, tenantId);
+            var startCommand = command(startProject, tenantId);
+            var addTaskCommand = command(addTask, tenantId);
+            var addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = context.commandBus();
+            var commandBus = context.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(addTaskCommand, noOpObserver);
             commandBus.post(newArrayList(addTaskCommand2, startCommand), noOpObserver);
 
-            TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
+            var aggregate = repository.loadAggregate(tenantId, ID);
             history = aggregate.historyBackward();
 
             assertNextCommandId().isEqualTo(startCommand.id());
@@ -719,7 +704,7 @@ public class AggregateTest {
         }
 
         private ProtoSubject assertNextCommandId() {
-            Event event = history.next();
+            var event = history.next();
             return assertThat(event.rootMessage()
                                    .asCommandId());
         }
@@ -729,19 +714,19 @@ public class AggregateTest {
         void upToLatestSnapshot() {
             repository.setSnapshotTrigger(3);
 
-            TenantId tenantId = newTenantId();
-            Command createCommand = command(createProject, tenantId);
-            Command startCommand = command(startProject, tenantId);
-            Command addTaskCommand = command(addTask, tenantId);
-            Command addTaskCommand2 = command(addTask, tenantId);
+            var tenantId = newTenantId();
+            var createCommand = command(createProject, tenantId);
+            var startCommand = command(startProject, tenantId);
+            var addTaskCommand = command(addTask, tenantId);
+            var addTaskCommand2 = command(addTask, tenantId);
 
-            CommandBus commandBus = context.commandBus();
+            var commandBus = context.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(startCommand, noOpObserver);
             commandBus.post(ImmutableList.of(addTaskCommand, addTaskCommand2), noOpObserver);
 
-            TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
+            var aggregate = repository.loadAggregate(tenantId, ID);
 
             history = aggregate.historyBackward();
 
@@ -756,19 +741,18 @@ public class AggregateTest {
     @Test
     @DisplayName("throw DuplicateCommandException for a duplicated command")
     void acknowledgeExceptionForDuplicateCommand() {
-        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        var monitor = new DiagnosticMonitor();
         context.internalAccess()
                .registerEventDispatcher(monitor);
 
-        TenantId tenantId = newTenantId();
-        Command createCommand = command(createProject, tenantId);
-        CommandEnvelope envelope = CommandEnvelope.of(createCommand);
+        var tenantId = newTenantId();
+        var createCommand = command(createProject, tenantId);
+        var envelope = CommandEnvelope.of(createCommand);
         repository.dispatch(envelope);
         repository.dispatch(envelope);
-        List<CannotDispatchDuplicateCommand> duplicateCommandEvents =
-                monitor.duplicateCommandEvents();
+        var duplicateCommandEvents = monitor.duplicateCommandEvents();
         assertThat(duplicateCommandEvents).hasSize(1);
-        CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
+        var event = duplicateCommandEvents.get(0);
         assertThat(event.getDuplicateCommand())
                 .isEqualTo(envelope.messageId());
     }
@@ -776,19 +760,19 @@ public class AggregateTest {
     @Test
     @DisplayName("run Idempotency guard when dispatching commands")
     void checkCommandsUponHistory() {
-        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        var monitor = new DiagnosticMonitor();
         context.internalAccess()
                .registerEventDispatcher(monitor);
-        Command createCommand = command(createProject);
-        CommandEnvelope cmd = CommandEnvelope.of(createCommand);
-        TenantId tenantId = newTenantId();
+        var createCommand = command(createProject);
+        var cmd = CommandEnvelope.of(createCommand);
+        var tenantId = newTenantId();
         Supplier<MessageEndpoint<ProjectId, ?>> endpoint =
                 () -> new AggregateCommandEndpoint<>(repository, cmd);
         dispatch(tenantId, endpoint);
         dispatch(tenantId, endpoint);
-        List<CannotDispatchDuplicateCommand> events = monitor.duplicateCommandEvents();
+        var events = monitor.duplicateCommandEvents();
         assertThat(events).hasSize(1);
-        CannotDispatchDuplicateCommand systemEvent = events.get(0);
+        var systemEvent = events.get(0);
         assertThat(systemEvent.getDuplicateCommand())
                 .isEqualTo(cmd.messageId());
     }
@@ -796,23 +780,22 @@ public class AggregateTest {
     @Test
     @DisplayName("run Idempotency guard when dispatching events")
     void checkEventsUponHistory() {
-        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        var monitor = new DiagnosticMonitor();
         context.internalAccess()
                .registerEventDispatcher(monitor);
-        AggProjectDeleted eventMessage = AggProjectDeleted
-                .newBuilder()
+        var eventMessage = AggProjectDeleted.newBuilder()
                 .setProjectId(ID)
                 .vBuild();
-        Event event = event(eventMessage, 2);
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var event = event(eventMessage, 2);
+        var envelope = EventEnvelope.of(event);
         Supplier<MessageEndpoint<ProjectId, ?>> endpoint =
                 () -> new AggregateEventReactionEndpoint<>(repository, envelope);
-        TenantId tenantId = newTenantId();
+        var tenantId = newTenantId();
         dispatch(tenantId, endpoint);
         dispatch(tenantId, endpoint);
-        List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
+        var events = monitor.duplicateEventEvents();
         assertThat(events).hasSize(1);
-        CannotDispatchDuplicateEvent systemEvent = events.get(0);
+        var systemEvent = events.get(0);
         assertThat(systemEvent.getDuplicateEvent())
                 .isEqualTo(envelope.messageId());
     }
@@ -864,8 +847,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on an event")
         void fromEventReact() {
-            EventSubject assertEvents = context().receivesCommand(assignTask())
-                                                 .assertEvents();
+            var assertEvents = context().receivesCommand(assignTask())
+                                        .assertEvents();
             assertEvents.hasSize(2);
             assertEvents.withType(AggTaskAssigned.class)
                         .hasSize(1);
@@ -885,8 +868,8 @@ public class AggregateTest {
         @Test
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
-            EventSubject assertEvents = context().receivesCommand(reassignTask())
-                                                 .assertEvents();
+            var assertEvents = context().receivesCommand(reassignTask())
+                                        .assertEvents();
             assertEvents.hasSize(2);
             assertEvents.withType(AggCannotReassignUnassignedTask.class)
                         .hasSize(1);
@@ -911,10 +894,9 @@ public class AggregateTest {
         @Test
         @DisplayName("not change the Aggregate state when there is no reaction on the event")
         void notChangeStateIfNoReaction() {
-            TemperatureChanged booksOnFire =
-                    TemperatureChanged.newBuilder()
-                                      .setFahrenheit(451)
-                                      .vBuild();
+            var booksOnFire = TemperatureChanged.newBuilder()
+                    .setFahrenheit(451)
+                    .vBuild();
             context().receivesExternalEvent(booksOnFire)
                      .assertEntity(thermometer, SafeThermometer.class)
                      .doesNotExist();
@@ -923,13 +905,11 @@ public class AggregateTest {
         @Test
         @DisplayName("save valid aggregate state on change")
         void safelySaveValidState() {
-            TemperatureChanged gettingWarmer =
-                    TemperatureChanged.newBuilder()
-                                      .setFahrenheit(72)
-                                      .vBuild();
+            var gettingWarmer = TemperatureChanged.newBuilder()
+                    .setFahrenheit(72)
+                    .vBuild();
             context().receivesExternalEvent(gettingWarmer);
-            Thermometer expected = Thermometer
-                    .newBuilder()
+            var expected = Thermometer.newBuilder()
                     .setId(thermometer)
                     .setFahrenheit(72)
                     .vBuild();

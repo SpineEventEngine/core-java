@@ -26,7 +26,6 @@
 
 package io.spine.server.aggregate.model;
 
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.part.AnAggregatePart;
 import io.spine.server.aggregate.given.part.AnAggregateRoot;
@@ -53,8 +52,8 @@ class AggregatePartClassTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext boundedContext = BoundedContextBuilder.assumingTests().build();
-        ProjectId projectId = ProjectId.generate();
+        var boundedContext = BoundedContextBuilder.assumingTests().build();
+        var projectId = ProjectId.generate();
         root = new AnAggregateRoot(boundedContext, projectId);
     }
 
@@ -67,15 +66,14 @@ class AggregatePartClassTest {
     @Test
     @DisplayName("throw exception when aggregate part does not have appropriate constructor")
     void throwOnNoProperCtorAvailable() {
-        AggregatePartClass<WrongAggregatePart> wrongPartClass =
-                asAggregatePartClass(WrongAggregatePart.class);
+        var wrongPartClass = asAggregatePartClass(WrongAggregatePart.class);
         assertThrows(ModelError.class, wrongPartClass::constructor);
     }
 
     @Test
     @DisplayName("create aggregate part entity")
     void createAggregatePartEntity() {
-        AnAggregatePart part = partClass.create(root);
+        var part = partClass.create(root);
 
         assertNotNull(part);
         assertEquals(root.id(), part.id());

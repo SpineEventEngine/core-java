@@ -47,7 +47,7 @@ import java.lang.reflect.Constructor;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@DisplayName("AggregateRoot should")
+@DisplayName("`AggregateRoot` should")
 class AggregateRootTest {
 
     private AggregateRootTestEnv.ProjectRoot aggregateRoot;
@@ -57,9 +57,9 @@ class AggregateRootTest {
     void setUp() {
         ModelTests.dropAllModels();
         context = BoundedContextBuilder.assumingTests().build();
-        ProjectId projectId = ProjectId.generate();
+        var projectId = ProjectId.generate();
         aggregateRoot = new AggregateRootTestEnv.ProjectRoot(context, projectId);
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        var contextAccess = context.internalAccess();
         contextAccess.register(new ProjectDefinitionRepository());
         contextAccess.register(new ProjectLifeCycleRepository());
     }
@@ -67,7 +67,7 @@ class AggregateRootTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() throws NoSuchMethodException {
-        Constructor<AnAggregateRoot> ctor =
+        var ctor =
                 AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
         new NullPointerTester()
                 .setDefault(Constructor.class, ctor)
@@ -78,10 +78,10 @@ class AggregateRootTest {
     @Test
     @DisplayName("obtain part state by its class")
     void returnPartStateByClass() {
-        EntityState definitionPart = aggregateRoot.partState(ProjectDefinition.class);
+        EntityState<?> definitionPart = aggregateRoot.partState(ProjectDefinition.class);
         assertNotNull(definitionPart);
 
-        EntityState lifeCyclePart = aggregateRoot.partState(ProjectLifecycle.class);
+        EntityState<?> lifeCyclePart = aggregateRoot.partState(ProjectLifecycle.class);
         assertNotNull(lifeCyclePart);
     }
 }

@@ -45,15 +45,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.server.aggregate.given.Given.ACommand.addTask;
 import static io.spine.server.aggregate.given.Given.ACommand.createProject;
 import static io.spine.server.aggregate.given.Given.ACommand.startProject;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("AggregateCommandEndpoint should")
+@DisplayName("`AggregateCommandEndpoint` should")
 class AggregateCommandEndpointTest {
 
     private BoundedContext context;
@@ -88,10 +86,10 @@ class AggregateCommandEndpointTest {
     @Test
     @DisplayName("post events on command dispatching")
     void postEventsOnCommandDispatching() {
-        CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
+        var cmd = CommandEnvelope.of(createProject(projectId));
 
         repository.dispatch(cmd);
-        AggProjectCreated msg = subscriber.remembered;
+        var msg = subscriber.remembered;
         assertThat(msg.getProjectId())
                 .isEqualTo(projectId);
     }
@@ -99,14 +97,14 @@ class AggregateCommandEndpointTest {
     @Test
     @DisplayName("store aggregate on command dispatching")
     void storeAggregateOnCommandDispatching() {
-        CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        AggCreateProject msg = (AggCreateProject) cmd.message();
+        var cmd = CommandEnvelope.of(createProject(projectId));
+        var msg = (AggCreateProject) cmd.message();
 
         repository.dispatch(cmd);
-        Optional<ProjectAggregate> optional = repository.find(projectId);
+        var optional = repository.find(projectId);
         assertTrue(optional.isPresent());
 
-        ProjectAggregate aggregate = optional.get();
+        var aggregate = optional.get();
         assertThat(aggregate.id()).isEqualTo(projectId);
 
         Truth.assertThat(aggregate.state().getName())
@@ -134,7 +132,7 @@ class AggregateCommandEndpointTest {
     @SuppressWarnings("CheckReturnValue")
     // ignore ID of the aggregate returned by the repository
     private void assertDispatches(Command cmd) {
-        CommandEnvelope envelope = CommandEnvelope.of(cmd);
+        var envelope = CommandEnvelope.of(cmd);
         repository.dispatch(envelope);
         ProjectAggregate.assertHandled(cmd);
     }
