@@ -26,9 +26,7 @@
 
 package io.spine.server.enrich;
 
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
-import io.spine.core.Enrichment;
 import io.spine.core.EventContext;
 import io.spine.server.enrich.given.event.SfnTestEvent;
 import io.spine.server.enrich.given.event.SfnTestStarted;
@@ -39,7 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("SingularFn should")
+@DisplayName("`SingularFn` should")
 class SingularFnTest {
 
     private final TestEventFactory factory = TestEventFactory.newInstance(getClass());
@@ -53,18 +51,18 @@ class SingularFnTest {
     @Test
     @DisplayName("create Enrichment instance")
     void enrichment() {
-        SingularFn<SfnTestEvent, EventContext> fn = new SingularFn<>(
+        var fn = new SingularFn<SfnTestEvent, EventContext>(
                 (m, c) -> c.getTimestamp()
         );
 
-        EventEnvelope event = EventEnvelope.of(
+        var event = EventEnvelope.of(
                 factory.createEvent(SfnTestStarted.newBuilder()
                                                   .setTestName(getClass().getCanonicalName())
                                                   .build()
                 ));
 
-        Enrichment enrichment = fn.apply((SfnTestEvent) event.message(), event.context());
-        ProtoSubject assertThat = ProtoTruth.assertThat(enrichment);
+        var enrichment = fn.apply((SfnTestEvent) event.message(), event.context());
+        var assertThat = ProtoTruth.assertThat(enrichment);
         assertThat.isNotNull();
         assertThat.hasAllRequiredFields();
     }
