@@ -58,9 +58,9 @@ public final class CommandHistory {
         Message message = command.enclosedMessage();
 
         if (messages.contains(message)) {
-            int messageIndex = messages.indexOf(message);
-            CommandContext actualContext = command.context();
-            CommandContext storedContext = contexts.get(messageIndex);
+            var messageIndex = messages.indexOf(message);
+            var actualContext = command.context();
+            var storedContext = contexts.get(messageIndex);
             return actualContext.equals(storedContext);
         }
 
@@ -78,9 +78,9 @@ public final class CommandHistory {
     }
 
     public void assertHandled(Command expected) {
-        String cmdName = expected.enclosedMessage()
-                                 .getClass()
-                                 .getName();
+        var cmdName = expected.enclosedMessage()
+                              .getClass()
+                              .getName();
         assertTrue(contains(expected), "Expected but wasn't handled, command: " + cmdName);
     }
 }

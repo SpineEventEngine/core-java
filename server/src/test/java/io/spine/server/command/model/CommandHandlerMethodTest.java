@@ -36,8 +36,6 @@ import io.spine.base.Identifier;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Event;
-import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.model.given.handler.HandlerReturnsEmptyList;
@@ -52,11 +50,8 @@ import io.spine.server.command.model.given.handler.ValidHandlerTwoParams;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.ModelError;
-import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.given.dispatch.PmDispatcher;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.reflect.ProjectId;
-import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.mute.MuteLogging;
@@ -65,10 +60,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.truth.Truth.assertThat;
@@ -120,44 +111,42 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("one `Message`")
         void returningMessage() {
-            ValidHandlerTwoParams handlerObject = new ValidHandlerTwoParams();
+            var handlerObject = new ValidHandlerTwoParams();
 
-            Optional<CommandHandlerMethod> createdMethod =
+            var createdMethod =
                     new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(createdMethod.isPresent());
-            CommandHandlerMethod handler = createdMethod.get();
-            RefCreateProject cmd = createProject();
-            CommandEnvelope envelope = envelope(cmd);
+            var handler = createdMethod.get();
+            var cmd = createProject();
+            var envelope = envelope(cmd);
 
-            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
-            List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
+            var outcome = handler.invoke(handlerObject, envelope);
+            var events = outcome.getSuccess().getProducedEvents().getEventList();
 
             assertThat(handlerObject.handledCommands())
                     .containsExactly(cmd);
             assertEquals(1, events.size());
-            RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
+            var event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());
         }
 
         @Test
         @DisplayName("`Message` list")
         void returningMessageList() {
-            ValidHandlerOneParamReturnsList handlerObject =
-                    new ValidHandlerOneParamReturnsList();
-            Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().classify(handlerObject.method());
+            var handlerObject = new ValidHandlerOneParamReturnsList();
+            var method = new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(method.isPresent());
-            CommandHandlerMethod handler = method.get();
-            RefCreateProject cmd = createProject();
-            CommandEnvelope envelope = envelope(cmd);
+            var handler = method.get();
+            var cmd = createProject();
+            var envelope = envelope(cmd);
 
-            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
-            List<Event> events = outcome.getSuccess().getProducedEvents().getEventList();
+            var outcome = handler.invoke(handlerObject, envelope);
+            var events = outcome.getSuccess().getProducedEvents().getEventList();
 
             assertThat(handlerObject.handledCommands())
                     .containsExactly(cmd);
             assertEquals(1, events.size());
-            RefProjectCreated event = (RefProjectCreated) events.get(0).enclosedMessage();
+            var event = (RefProjectCreated) events.get(0).enclosedMessage();
             assertEquals(cmd.getProjectId(), event.getProjectId());
         }
     }
@@ -169,14 +158,13 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("no events")
         void noEvents() {
-            HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
-            Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().classify(handlerObject.method());
+            var handlerObject = new HandlerReturnsEmptyList();
+            var method = new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(method.isPresent());
-            CommandHandlerMethod handler = method.get();
-            RefCreateProject cmd = createProject();
-            CommandEnvelope envelope = envelope(cmd);
-            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
+            var handler = method.get();
+            var cmd = createProject();
+            var envelope = envelope(cmd);
+            var outcome = handler.invoke(handlerObject, envelope);
             assertTrue(outcome.hasError());
             assertThat(outcome.getError().getType())
                     .isEqualTo(IllegalOutcomeException.class.getCanonicalName());
@@ -185,35 +173,31 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("`Nothing` event")
         void nothingEvent() {
-            HandlerReturnsNothing handlerObject = new HandlerReturnsNothing();
-            Optional<CommandHandlerMethod> method =
-                    new CommandHandlerSignature().classify(handlerObject.method());
+            var handlerObject = new HandlerReturnsNothing();
+            var method = new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(method.isPresent());
-            CommandHandlerMethod handler = method.get();
-            RefCreateProject cmd = createProject();
-            CommandEnvelope envelope = envelope(cmd);
+            var handler = method.get();
+            var cmd = createProject();
+            var envelope = envelope(cmd);
 
-            DispatchOutcome outcome = handler.invoke(handlerObject, envelope);
+            var outcome = handler.invoke(handlerObject, envelope);
             checkIllegalOutcome(outcome, envelope.command());
         }
 
         @Test
         @DisplayName("`Nothing` event from PM")
         void nothingEventInPm() {
-            RefCreateProject commandMessage = createProject();
-            ProcessManager<String, ?, ?> entity =
-                    new ProcessManagerDoingNothing(commandMessage.getProjectId()
-                                                                 .getId());
-            CommandEnvelope cmd = newCommand(commandMessage);
-            DispatchOutcome outcome = PmDispatcher.dispatch(entity, cmd);
+            var commandMessage = createProject();
+            var entity = new ProcessManagerDoingNothing(commandMessage.getProjectId().getId());
+            var cmd = newCommand(commandMessage);
+            var outcome = PmDispatcher.dispatch(entity, cmd);
             checkIllegalOutcome(outcome, cmd.command());
         }
 
         private void checkIllegalOutcome(DispatchOutcome outcome, Command command) {
-            Error.Builder error =
-                    Error.newBuilder()
-                         .setType(IllegalOutcomeException.class.getCanonicalName());
-            DispatchOutcome expected = DispatchOutcome.newBuilder()
+            var error = Error.newBuilder()
+                    .setType(IllegalOutcomeException.class.getCanonicalName());
+            var expected = DispatchOutcome.newBuilder()
                     .setPropagatedSignal(command.messageId())
                     .setError(error)
                     .buildPartial();
@@ -230,7 +214,7 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("no annotation")
         void noAnnotation() {
-            Method handler = new InvalidHandlerNoAnnotation().method();
+            var handler = new InvalidHandlerNoAnnotation().method();
             assertFalse(new CommandHandlerSignature().matches(handler));
         }
     }
@@ -244,7 +228,7 @@ class CommandHandlerMethodTest {
         @DisplayName("command handler")
         void onDispatchToHandler() {
             AbstractCommandHandler handler = new RejectingHandler();
-            CommandEnvelope envelope = newCommand(createProject());
+            var envelope = newCommand(createProject());
             try {
                 handler.dispatch(envelope);
             } catch (IllegalStateException e) {
@@ -256,10 +240,9 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("entity")
         void onDispatchToEntity() {
-            RefCreateProject commandMessage = createProject();
-            Aggregate<ProjectId, ?, ?> entity =
-                    new RejectingAggregate(commandMessage.getProjectId());
-            CommandEnvelope cmd = newCommand(commandMessage);
+            var commandMessage = createProject();
+            var entity = new RejectingAggregate(commandMessage.getProjectId());
+            var cmd = newCommand(commandMessage);
             try {
                 AggregateMessageDispatcher.dispatchCommand(entity, cmd);
             } catch (IllegalStateException e) {
@@ -268,10 +251,10 @@ class CommandHandlerMethodTest {
         }
 
         private void assertCauseAndId(Throwable e, Object handlerId) {
-            Throwable cause = getRootCause(e);
+            var cause = getRootCause(e);
 
             assertTrue(cause instanceof RejectionThrowable);
-            RejectionThrowable thrown = (RejectionThrowable) cause;
+            var thrown = (RejectionThrowable) cause;
 
             assertTrue(thrown.producerId()
                              .isPresent());
@@ -284,18 +267,17 @@ class CommandHandlerMethodTest {
     @DisplayName("throw `ModelError` when dispatching command of non-handled type")
     void notDispatchNonHandledCmd() {
         AbstractCommandHandler handler = new ValidHandlerOneParam();
-        CommandEnvelope cmd = newCommand(startProject());
+        var cmd = newCommand(startProject());
 
         assertThrows(ModelError.class, () -> handler.dispatch(cmd));
     }
 
     private static CommandEnvelope envelope(Message commandMessage) {
-        Any cmd = pack(commandMessage);
-        Command command = Command
-                .newBuilder()
+        var cmd = pack(commandMessage);
+        var command = Command.newBuilder()
                 .setMessage(cmd)
                 .build();
-        CommandEnvelope envelope = CommandEnvelope.of(command);
+        var envelope = CommandEnvelope.of(command);
         return envelope;
     }
 }

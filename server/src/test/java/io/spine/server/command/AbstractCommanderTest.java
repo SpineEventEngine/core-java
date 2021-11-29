@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("OverlyCoupledClass")
-@DisplayName("AbstractCommander should")
+@DisplayName("`AbstractCommander` should")
 class AbstractCommanderTest {
 
     private final CommandFactory commandFactory = new TestActorRequestFactory(getClass()).command();
@@ -92,8 +92,7 @@ class AbstractCommanderTest {
     @Test
     @DisplayName("create a command in response to a command")
     void commandOnCommand() {
-        CmdCreateProject commandMessage = CmdCreateProject
-                .newBuilder()
+        var commandMessage = CmdCreateProject.newBuilder()
                 .setProjectId(newProjectId())
                 .build();
         createCommandAndPost(commandMessage);
@@ -104,8 +103,7 @@ class AbstractCommanderTest {
     @Test
     @DisplayName("create a command on an event")
     void commandOnEvent() {
-        CmdTaskAdded eventMessage = CmdTaskAdded
-                .newBuilder()
+        var eventMessage = CmdTaskAdded.newBuilder()
                 .setProjectId(newProjectId())
                 .setTask(Task.newBuilder()
                              .setTaskId(newTaskId())
@@ -141,49 +139,44 @@ class AbstractCommanderTest {
      *******************************/
 
     private static ProjectId newProjectId() {
-        return ProjectId
-                .newBuilder()
+        return ProjectId.newBuilder()
                 .setId(newUuid())
                 .build();
     }
 
     private static TaskId newTaskId() {
-        return TaskId
-                .newBuilder()
+        return TaskId.newBuilder()
                 .setId(random(1, 100))
                 .build();
     }
 
     private static UserId newUserId() {
-        return UserId
-                .newBuilder()
+        return UserId.newBuilder()
                 .setValue(newUuid())
                 .build();
 
     }
 
     private void createCommandAndPost(CommandMessage commandMessage) {
-        io.spine.core.Command command = commandFactory.create(commandMessage);
+        var command = commandFactory.create(commandMessage);
         context.commandBus()
                .post(command, StreamObservers.noOpObserver());
     }
 
     private void createEventAndPost(EventMessage eventMessage) {
-        io.spine.core.Event event = eventFactory.createEvent(eventMessage, null);
+        var event = eventFactory.createEvent(eventMessage, null);
         context.eventBus()
                .post(event);
     }
 
     private void postCreateTaskCommand(boolean startTask) {
-        TaskId taskId = newTaskId();
-        UserId userId = newUserId();
-        Task task = Task
-                .newBuilder()
+        var taskId = newTaskId();
+        var userId = newUserId();
+        var task = Task.newBuilder()
                 .setTaskId(taskId)
                 .setAssignee(userId)
                 .build();
-        CmdCreateTask commandMessage = CmdCreateTask
-                .newBuilder()
+        var commandMessage = CmdCreateTask.newBuilder()
                 .setTaskId(taskId)
                 .setTask(task)
                 .setStart(startTask)
@@ -198,16 +191,14 @@ class AbstractCommanderTest {
 
         @Command
         FirstCmdCreateProject on(CmdCreateProject command) {
-            return FirstCmdCreateProject
-                    .newBuilder()
+            return FirstCmdCreateProject.newBuilder()
                     .setId(command.getProjectId())
                     .build();
         }
 
         @Command
         CmdSetTaskDescription on(CmdTaskAdded event) {
-            return CmdSetTaskDescription
-                    .newBuilder()
+            return CmdSetTaskDescription.newBuilder()
                     .setTaskId(event.getTask()
                                     .getTaskId())
                     .setDescription("Testing command creation on event")
@@ -216,20 +207,18 @@ class AbstractCommanderTest {
 
         @Command
         Pair<CmdAssignTask, Optional<CmdStartTask>> on(CmdCreateTask command) {
-            TaskId taskId = command.getTaskId();
-            UserId assignee = command.getTask()
-                                     .getAssignee();
-            CmdAssignTask cmdAssignTask = CmdAssignTask
-                    .newBuilder()
+            var taskId = command.getTaskId();
+            var assignee = command.getTask()
+                                  .getAssignee();
+            var cmdAssignTask = CmdAssignTask.newBuilder()
                     .setTaskId(taskId)
                     .setAssignee(assignee)
                     .build();
-            CmdStartTask cmdStartTask = command.getStart()
-                                        ? CmdStartTask
-                                                .newBuilder()
-                                                .setTaskId(taskId)
-                                                .build()
-                                        : null;
+            var cmdStartTask = command.getStart()
+                               ? CmdStartTask.newBuilder()
+                                       .setTaskId(taskId)
+                                       .build()
+                               : null;
             return Pair.withNullable(cmdAssignTask, cmdStartTask);
         }
     }

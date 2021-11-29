@@ -26,18 +26,14 @@
 
 package io.spine.server.command.model;
 
-import com.google.common.truth.IterableSubject;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.server.command.model.given.reaction.ReEitherWithNothing;
 import io.spine.server.command.model.given.reaction.ReOneParam;
 import io.spine.server.command.model.given.reaction.ReOptionalResult;
 import io.spine.server.command.model.given.reaction.ReTwoParams;
 import io.spine.server.command.model.given.reaction.TestCommandReactor;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.Success;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.command.CmdAddTask;
@@ -50,8 +46,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -59,8 +53,8 @@ import static io.spine.base.Identifier.newUuid;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("`CommandReactionMethod` should")
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("CommandReactionMethod should")
 class CommandReactionMethodTest {
 
     private static final
@@ -77,14 +71,14 @@ class CommandReactionMethodTest {
         @Test
         @DisplayName("one event message parameter")
         void oneParam() {
-            Method method = new ReOneParam().getMethod();
+            var method = new ReOneParam().getMethod();
             assertValid(method, true);
         }
 
         @Test
         @DisplayName("event message and context")
         void twoParams() {
-            Method method = new ReTwoParams().getMethod();
+            var method = new ReTwoParams().getMethod();
             assertValid(method, true);
         }
     }
@@ -102,12 +96,12 @@ class CommandReactionMethodTest {
         void setUp() {
             target = new ReOneParam();
             rawMethod = ((TestCommandReactor) target).getMethod();
-            Optional<CommandReactionMethod> result = signature.classify(rawMethod);
+            var result = signature.classify(rawMethod);
             assertTrue(result.isPresent());
             this.method = result.get();
             id = ProjectId.newBuilder()
-                          .setId(newUuid())
-                          .build();
+                    .setId(newUuid())
+                    .build();
         }
 
         @Test
@@ -125,8 +119,8 @@ class CommandReactionMethodTest {
         @Test
         @DisplayName("when returning value")
         void returnValue() {
-            CmdProjectCreated message = createInitEvent(id);
-            DispatchOutcome outcome = method.invoke(target, envelope(message));
+            var message = createInitEvent(id);
+            var outcome = method.invoke(target, envelope(message));
             assertResult(outcome, this.id);
         }
     }
@@ -162,7 +156,7 @@ class CommandReactionMethodTest {
         @Test
         @DisplayName("in predicate")
         void inPredicate() {
-            boolean result = signature.matches(rawMethod);
+            var result = signature.matches(rawMethod);
             assertThat(result).isTrue();
         }
 
@@ -175,27 +169,26 @@ class CommandReactionMethodTest {
         @Test
         @DisplayName("when returning value")
         void returnValue() {
-            ProjectId givenId = this.id;
-            CmdProjectCreated message = createInitEvent(givenId);
+            var givenId = this.id;
+            var message = createInitEvent(givenId);
 
-            DispatchOutcome outcome = method.invoke(target, envelope(message));
+            var outcome = method.invoke(target, envelope(message));
 
             assertResult(outcome, givenId);
         }
 
         @Test
         void returnEmpty() {
-            CmdProjectCreated message = createVoidEvent(id);
+            var message = createVoidEvent(id);
 
-            DispatchOutcome outcome = method.invoke(target, envelope(message));
+            var outcome = method.invoke(target, envelope(message));
 
             assertThat(outcome.getSuccess().hasCommands())
                     .isFalse();
         }
 
         private static CmdProjectCreated createVoidEvent(ProjectId givenId) {
-            return CmdProjectCreated
-                    .newBuilder()
+            return CmdProjectCreated.newBuilder()
                     .setProjectId(givenId)
                     .setInitialize(false) // This will make the method return `Optional.empty()`.
                     .build();
@@ -238,8 +231,7 @@ class CommandReactionMethodTest {
      * Creates the event message which will cause the handling method return non-empty result.
      */
     private static CmdProjectCreated createInitEvent(ProjectId givenId) {
-        return CmdProjectCreated
-                .newBuilder()
+        return CmdProjectCreated.newBuilder()
                 .setProjectId(givenId)
                 .setInitialize(true) // This will make the method return result with a value.
                 .build();
@@ -249,28 +241,26 @@ class CommandReactionMethodTest {
      * Asserts that the result has a message with correct type and passed field value.
      */
     private static void assertResult(DispatchOutcome outcome, ProjectId id) {
-        CmdAddTask expected = CmdAddTask
-                .newBuilder()
+        var expected = CmdAddTask.newBuilder()
                 .setProjectId(id)
                 .build();
         assertTrue(outcome.hasSuccess());
-        Success success = outcome.getSuccess();
+        var success = outcome.getSuccess();
         assertTrue(success.hasCommands());
-        List<Command> commands = success.getProducedCommands()
-                                        .getCommandList();
-        List<CommandMessage> commandMessages = commands
-                .stream()
+        var commands = success.getProducedCommands()
+                              .getCommandList();
+        var commandMessages = commands.stream()
                 .map(Command::enclosedMessage)
                 .collect(toList());
-        IterableSubject assertThat = assertThat(commandMessages);
+        var assertThat = assertThat(commandMessages);
         assertThat.hasSize(1);
         assertThat.containsExactly(expected);
     }
 
     private static EventEnvelope envelope(EventMessage eventMessage) {
-        TestEventFactory factory = TestEventFactory.newInstance(CommandReactionMethodTest.class);
-        Event event = factory.createEvent(eventMessage);
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var factory = TestEventFactory.newInstance(CommandReactionMethodTest.class);
+        var event = factory.createEvent(eventMessage);
+        var envelope = EventEnvelope.of(event);
         return envelope;
     }
 }
