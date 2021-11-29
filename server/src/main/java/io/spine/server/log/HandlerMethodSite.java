@@ -30,7 +30,6 @@ import com.google.common.base.Objects;
 import com.google.common.flogger.LogSite;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.code.java.ClassName;
-import io.spine.code.java.SimpleClassName;
 import io.spine.server.model.HandlerMethod;
 
 import java.lang.reflect.Method;
@@ -66,10 +65,10 @@ final class HandlerMethodSite extends LogSite {
 
     @Override
     public String getMethodName() {
-        String params = Stream.of(method.getParameterTypes())
-                              .map(Class::getSimpleName)
-                              .collect(joining(", "));
-        String methodName = format("%s(%s)", method.getName(), params);
+        var params = Stream.of(method.getParameterTypes())
+                           .map(Class::getSimpleName)
+                           .collect(joining(", "));
+        var methodName = format("%s(%s)", method.getName(), params);
         return methodName;
     }
 
@@ -80,8 +79,8 @@ final class HandlerMethodSite extends LogSite {
 
     @Override
     public String getFileName() {
-        SimpleClassName className = ClassName.of(method.getDeclaringClass())
-                                        .topLevelClass();
+        var className = ClassName.of(method.getDeclaringClass())
+                                 .topLevelClass();
         return className.value() + ".java";
     }
 
@@ -93,7 +92,7 @@ final class HandlerMethodSite extends LogSite {
         if (!(o instanceof HandlerMethodSite)) {
             return false;
         }
-        HandlerMethodSite site = (HandlerMethodSite) o;
+        var site = (HandlerMethodSite) o;
         return Objects.equal(method, site.method);
     }
 
