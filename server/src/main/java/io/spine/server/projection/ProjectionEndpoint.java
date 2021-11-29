@@ -29,7 +29,6 @@ package io.spine.server.projection;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.base.Error;
 import io.spine.server.delivery.EventEndpoint;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;
@@ -71,8 +70,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Enti
 
     @Override
     public void dispatchTo(I entityId) {
-        ProjectionRepository<I, P, ?> repository = repository();
-        P projection = repository.findOrCreate(entityId);
+        var repository = repository();
+        var projection = repository.findOrCreate(entityId);
         runTransactionFor(projection);
         store(projection);
     }
@@ -84,16 +83,16 @@ public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Enti
     }
 
     protected void runTransactionFor(P projection) {
-        ProjectionTransaction<I, S, ?> tx = start((Projection<I, S, ?>) projection);
+        var tx = start((Projection<I, S, ?>) projection);
         TransactionListener<I> listener =
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
         tx.setListener(listener);
-        DispatchOutcome outcome = invokeDispatcher(projection);
+        var outcome = invokeDispatcher(projection);
         tx.commitIfActive();
         if (outcome.hasSuccess()) {
             afterDispatched(projection.id());
         } else if (outcome.hasError()) {
-            Error error = outcome.getError();
+            var error = outcome.getError();
             repository().lifecycleOf(projection.id())
                         .onDispatchingFailed(envelope(), error);
         }
@@ -107,13 +106,13 @@ public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Enti
 
     @Override
     protected boolean isModified(P projection) {
-        boolean result = projection.changed();
+        var result = projection.changed();
         return result;
     }
 
     @Override
     protected void onModified(P projection) {
-        ProjectionRepository<I, P, ?> repository = repository();
+        var repository = repository();
         repository.store(projection);
     }
 

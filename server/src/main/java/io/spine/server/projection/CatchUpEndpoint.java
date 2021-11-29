@@ -70,7 +70,7 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
 
     @Override
     public void dispatchTo(I entityId) {
-        TypeName actualTypeName = envelope().messageTypeName();
+        var actualTypeName = envelope().messageTypeName();
         if (actualTypeName.equals(CATCH_UP_STARTED)) {
             onCatchUpStarted(entityId);
         } else {
@@ -79,8 +79,8 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
     }
 
     private void onCatchUpStarted(I entityId) {
-        ProjectionRepository<I, P, ?> repository = repository();
-        CatchUpStarted event = (CatchUpStarted) envelope().message();
+        var repository = repository();
+        var event = (CatchUpStarted) envelope().message();
         repository.recordStorage()
                   .delete(entityId);
         repository.lifecycleOf(entityId)

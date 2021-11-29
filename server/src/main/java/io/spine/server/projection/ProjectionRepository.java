@@ -27,7 +27,6 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Timestamp;
@@ -41,7 +40,6 @@ import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.CatchUpAlreadyStartedException;
 import io.spine.server.delivery.CatchUpId;
 import io.spine.server.delivery.CatchUpProcess;
-import io.spine.server.delivery.CatchUpProcessBuilder;
 import io.spine.server.delivery.CatchUpSignal;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
@@ -51,7 +49,6 @@ import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.event.EventStore;
-import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
@@ -62,7 +59,6 @@ import io.spine.time.TimestampTemporal;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -153,8 +149,8 @@ public abstract class ProjectionRepository<I,
         super.registerWith(context);
         ensureDispatchesEvents();
         initCache(context.isMultitenant());
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
+        var delivery = ServerEnvironment.instance()
+                                        .delivery();
         initInbox(delivery);
         initCatchUp(context, delivery);
     }
@@ -164,7 +160,7 @@ public abstract class ProjectionRepository<I,
      * as an event dispatcher in the same Bounded Context as the repository itself.
      */
     private void initCatchUp(BoundedContext context, Delivery delivery) {
-        CatchUpProcessBuilder<I> builder = delivery.newCatchUpProcess(this);
+        var builder = delivery.newCatchUpProcess(this);
         catchUpProcess = builder.setDispatchOp(this::sendToCatchingUp)
                                 .build();
         context.internalAccess()
@@ -184,7 +180,7 @@ public abstract class ProjectionRepository<I,
     private void initInbox(Delivery delivery) {
         inbox = delivery
                 .<I>newInbox(entityStateType())
-                .withBatchListener(new BatchDeliveryListener<I>() {
+                .withBatchListener(new BatchDeliveryListener<>() {
                     @Override
                     public void onStart(I id) {
                         cache.startCaching(id);
@@ -211,13 +207,13 @@ public abstract class ProjectionRepository<I,
     protected void setupEventRouting(EventRouting<I> routing) {
         super.setupEventRouting(routing);
         if (projectionClass().subscribesToStates()) {
-            StateUpdateRouting<I> stateRouting = createStateRouting();
+            var stateRouting = createStateRouting();
             routing.routeStateUpdates(stateRouting);
         }
     }
 
     private void ensureDispatchesEvents() {
-        boolean noEventSubscriptions = !dispatchesEvents();
+        var noEventSubscriptions = !dispatchesEvents();
         if (noEventSubscriptions) {
             throw newIllegalStateException(
                     "Projections of the repository `%s` have neither domestic nor external" +
@@ -235,22 +231,22 @@ public abstract class ProjectionRepository<I,
      *         if one of the subscribed state classes cannot be served by the created state routing
      */
     private StateUpdateRouting<I> createStateRouting() {
-        StateUpdateRouting<I> routing = StateUpdateRouting.newInstance(idClass());
+        var routing = StateUpdateRouting.newInstance(idClass());
         setupStateRouting(routing);
         validate(routing);
         return routing;
     }
 
     private void validate(StateUpdateRouting<I> routing) throws IllegalStateException {
-        ProjectionClass<P> cls = projectionClass();
+        var cls = projectionClass();
         Set<StateClass<?>> stateClasses = union(cls.domesticStates(), cls.externalStates());
-        ImmutableList<StateClass<?>> unsupported =
+        var unsupported =
                 stateClasses.stream()
                             .filter(c -> !routing.supports(c.typedValue()))
                             .collect(toImmutableList());
         if (!unsupported.isEmpty()) {
-            boolean moreThanOne = unsupported.size() > 1;
-            String fmt =
+            var moreThanOne = unsupported.size() > 1;
+            var fmt =
                     "The repository `%s` does not provide routing for updates of the state " +
                             (moreThanOne ? "classes" : "class") +
                             " `%s` to which the class `%s` is subscribed.";
@@ -301,7 +297,7 @@ public abstract class ProjectionRepository<I,
     @OverridingMethodsMustInvokeSuper
     @Override
     public P create(I id) {
-        P projection = super.create(id);
+        var projection = super.create(id);
         lifecycleOf(id).onEntityCreated(PROJECTION);
         return projection;
     }
@@ -364,7 +360,7 @@ public abstract class ProjectionRepository<I,
     @OverridingMethodsMustInvokeSuper
     @Override
     public final boolean canDispatch(EventEnvelope event) {
-        Optional<SubscriberMethod> subscriber = projectionClass().subscriberOf(event);
+        var subscriber = projectionClass().subscriberOf(event);
         return subscriber.isPresent();
     }
 
@@ -408,13 +404,13 @@ public abstract class ProjectionRepository<I,
         checkCatchUpTargets(ids);
         checkCatchUpStartTime(since);
 
-        CatchUpId catchUpId = withCurrentTenant(context().isMultitenant())
+        var catchUpId = withCurrentTenant(context().isMultitenant())
                 .evaluate(() -> catchUpProcess.startCatchUp(since, ids));
         return catchUpId;
     }
 
     private static void checkCatchUpStartTime(Timestamp since) {
-        TimestampTemporal whenStarts = TimestampTemporal.from(since);
+        var whenStarts = TimestampTemporal.from(since);
         if (!whenStarts.isInPast()) {
             throw newIllegalArgumentException(
                     "The catch-up must be started from the moment in the past, " +
@@ -476,20 +472,20 @@ public abstract class ProjectionRepository<I,
      * @see CatchUpEndpoint
      */
     private Set<I> sendToCatchingUp(Event event, @Nullable Set<I> restrictToIds) {
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var envelope = EventEnvelope.of(event);
         Set<I> catchUpTargets;
         if (envelope.message() instanceof CatchUpSignal) {
             catchUpTargets = restrictToIds == null
                              ? ImmutableSet.copyOf(index())
                              : restrictToIds;
         } else {
-            Set<I> routedTargets = route(envelope);
+            var routedTargets = route(envelope);
             catchUpTargets = restrictToIds == null
                              ? routedTargets
                              : intersection(routedTargets, restrictToIds).immutableCopy();
         }
-        Inbox<I> inbox = inbox();
-        for (I target : catchUpTargets) {
+        var inbox = inbox();
+        for (var target : catchUpTargets) {
             inbox.send(envelope)
                  .toCatchUp(target);
         }
