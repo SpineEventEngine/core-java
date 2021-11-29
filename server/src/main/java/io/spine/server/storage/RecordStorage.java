@@ -109,7 +109,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     @Override
     public Optional<R> read(I id) {
         checkNotClosed();
-        RecordQuery<I, R> query = toQuery(id);
+        var query = toQuery(id);
         return readSingleRecord(query);
     }
 
@@ -127,7 +127,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      */
     protected Optional<R> read(I id, FieldMask mask) {
         checkNotClosed();
-        RecordQuery<I, R> query = toQuery(id, mask);
+        var query = toQuery(id, mask);
         return readSingleRecord(query);
     }
 
@@ -142,7 +142,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      */
     protected Iterator<R> readAll() {
         checkNotClosed();
-        RecordQuery<I, R> query = queryForAll();
+        var query = queryForAll();
         return readAll(query);
     }
 
@@ -159,7 +159,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      */
     protected Iterator<R> readAll(Iterable<I> ids) {
         checkNotClosed();
-        RecordQuery<I, R> query = toQuery(ids);
+        var query = toQuery(ids);
         return readAll(query);
     }
 
@@ -179,7 +179,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      */
     protected Iterator<R> readAll(Iterable<I> ids, FieldMask mask) {
         checkNotClosed();
-        RecordQuery<I, R> query = toQuery(ids, mask);
+        var query = toQuery(ids, mask);
         return readAll(query);
     }
 
@@ -230,7 +230,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      *         if the storage was closed before
      */
     protected void deleteAll(Iterable<I> ids) {
-        for (I id : ids) {
+        for (var id : ids) {
             delete(id);
         }
     }
@@ -330,7 +330,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
     }
 
     private Optional<R> readSingleRecord(RecordQuery<I, R> query) {
-        Iterator<R> iterator = readAll(query);
+        var iterator = readAll(query);
         return iterator.hasNext()
                ? Optional.of(iterator.next())
                : Optional.empty();

@@ -150,8 +150,7 @@ public interface StorageFactory extends AutoCloseable {
      */
     default <I, S extends EntityState<I>> EntityRecordStorage<I, S>
     createEntityRecordStorage(ContextSpec context, Class<? extends Entity<I, S>> entityClass) {
-        EntityRecordStorage<I, S> result =
-                new EntityRecordStorage<>(context, this, entityClass);
+        var result = new EntityRecordStorage<>(context, this, entityClass);
         return result;
     }
 

@@ -31,7 +31,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
-import io.spine.base.FieldPath;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
@@ -48,7 +47,6 @@ import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -88,9 +86,9 @@ public final class QueryConverter {
         checkNotNull(filters);
         checkNotNull(format);
 
-        Class<I> idType = spec.idType();
-        Class<R> recordType = spec.storedType();
-        RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(idType, recordType);
+        var idType = spec.idType();
+        var recordType = spec.storedType();
+        var builder = RecordQuery.newBuilder(idType, recordType);
 
         identifiers(builder, filters.getIdFilter());
         filters(builder, spec, filters);
@@ -121,9 +119,9 @@ public final class QueryConverter {
         checkNotNull(spec);
         checkNotNull(format);
 
-        Class<I> idType = spec.idType();
-        Class<R> recordType = spec.storedType();
-        RecordQueryBuilder<I, R> builder = RecordQuery.newBuilder(idType, recordType);
+        var idType = spec.idType();
+        var recordType = spec.storedType();
+        var builder = RecordQuery.newBuilder(idType, recordType);
         fieldMask(builder, format);
         orderByAndLimit(builder, spec, format);
         return builder.build();
@@ -131,7 +129,7 @@ public final class QueryConverter {
 
     private static <I, R extends Message> void
     filters(RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec, TargetFilters filters) {
-        for (CompositeFilter composite : filters.getFilterList()) {
+        for (var composite : filters.getFilterList()) {
             convertComposite(composite, builder, spec);
         }
     }
@@ -140,7 +138,7 @@ public final class QueryConverter {
     convertComposite(CompositeFilter composite,
                      RecordQueryBuilder<I, R> builder,
                      RecordSpec<I, R, ?> spec) {
-        CompositeFilter.CompositeOperator compositeOperator = composite.getOperator();
+        var compositeOperator = composite.getOperator();
 
         switch (compositeOperator) {
             case ALL:
@@ -171,11 +169,11 @@ public final class QueryConverter {
     doCompositeWithAnd(CompositeFilter filter,
                        RecordQueryBuilder<I, R> builder,
                        RecordSpec<I, R, ?> spec) {
-        for (Filter childFilter : filter.getFilterList()) {
+        for (var childFilter : filter.getFilterList()) {
             doSimpleFilter(childFilter, builder, spec);
         }
-        List<CompositeFilter> childComposites = filter.getCompositeFilterList();
-        for (CompositeFilter child : childComposites) {
+        var childComposites = filter.getCompositeFilterList();
+        for (var child : childComposites) {
             convertComposite(child, builder, spec);
         }
 
@@ -197,12 +195,12 @@ public final class QueryConverter {
         ImmutableList.Builder<Either<RecordQueryBuilder<I, R>>> eithers =
                 ImmutableList.builder();
 
-        ImmutableList<Either<RecordQueryBuilder<I, R>>> simpleEithers =
+        var simpleEithers =
                 simpleFiltersToEither(filter.getFilterList(), spec);
-        ImmutableList<Either<RecordQueryBuilder<I, R>>> compositeEithers =
+        var compositeEithers =
                 compositesToEither(filter.getCompositeFilterList(), spec);
 
-        ImmutableList<Either<RecordQueryBuilder<I, R>>> result =
+        var result =
                 eithers.addAll(simpleEithers)
                        .addAll(compositeEithers)
                        .build();
@@ -251,13 +249,13 @@ public final class QueryConverter {
      */
     private static <I, R extends Message> void
     doSimpleFilter(Filter filter, RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec) {
-        ColumnName name = columnNameOf(filter);
-        Column<?, ?> column = findColumn(spec, name);
-        AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
+        var name = columnNameOf(filter);
+        var column = findColumn(spec, name);
+        var convertedColumn = new AsRecordColumn<R>(column);
 
-        Object value = TypeConverter.toObject(filter.getValue(), column.type());
+        var value = TypeConverter.toObject(filter.getValue(), column.type());
 
-        Filter.Operator operator = filter.getOperator();
+        var operator = filter.getOperator();
         switch (operator) {
             case EQUAL:
                 builder.where(convertedColumn).is(value);
@@ -287,11 +285,11 @@ public final class QueryConverter {
     private static <I, R extends Message>
     void identifiers(RecordQueryBuilder<I, R> builder, IdFilter idFilter) {
         if (idFilter.getIdCount() > 0) {
-            List<I> ids = idFilter.getIdList()
-                                  .stream()
-                                  .map(Identifier::unpack)
-                                  .map(id -> (I) id)
-                                  .collect(toList());
+            var ids = idFilter.getIdList()
+                    .stream()
+                    .map(Identifier::unpack)
+                    .map(id -> (I) id)
+                    .collect(toList());
             builder.id().in(ids);
         }
     }
@@ -307,14 +305,14 @@ public final class QueryConverter {
     void orderByAndLimit(RecordQueryBuilder<I, R> builder,
                          RecordSpec<I, R, ?> spec,
                          ResponseFormat format) {
-        boolean hasOrderBy = false;
-        for (OrderBy protoOrderBy : format.getOrderByList()) {
+        var hasOrderBy = false;
+        for (var protoOrderBy : format.getOrderByList()) {
             hasOrderBy = true;
-            ColumnName columnName = ColumnName.of(protoOrderBy.getColumn());
-            OrderBy.Direction protoDirection = protoOrderBy.getDirection();
+            var columnName = ColumnName.of(protoOrderBy.getColumn());
+            var protoDirection = protoOrderBy.getDirection();
 
-            Column<?, ?> column = findColumn(spec, columnName);
-            AsRecordColumn<R> convertedColumn = new AsRecordColumn<>(column);
+            var column = findColumn(spec, columnName);
+            var convertedColumn = new AsRecordColumn<R>(column);
             if (protoDirection == OrderBy.Direction.ASCENDING) {
                 builder.sortAscendingBy(convertedColumn);
             } else {
@@ -322,7 +320,7 @@ public final class QueryConverter {
             }
         }
 
-        int limit = format.getLimit();
+        var limit = format.getLimit();
         if (limit > 0) {
             checkArgument(hasOrderBy, "Storage query must have at least one ordering directive " +
                     "if the limit is set.");
@@ -332,20 +330,20 @@ public final class QueryConverter {
 
     private static <I, R extends Message> Column<?, ?>
     findColumn(RecordSpec<I, R, ?> spec, ColumnName columnName) {
-        Optional<Column<?, ?>> maybeColumn = spec.findColumn(columnName);
+        var maybeColumn = spec.findColumn(columnName);
         checkArgument(maybeColumn.isPresent(),
                       "Cannot find the column `%s` for the type `%s`.",
                       columnName, spec.storedType());
-        Column<?, ?> column = maybeColumn.get();
+        var column = maybeColumn.get();
         return column;
     }
 
     private static ColumnName columnNameOf(Filter filter) {
-        FieldPath fieldPath = filter.getFieldPath();
+        var fieldPath = filter.getFieldPath();
         checkArgument(fieldPath.getFieldNameCount() == 1,
                       "Incorrect Column name in Entity Filter: `%s`.",
                       join(".", fieldPath.getFieldNameList()));
-        String column = fieldPath.getFieldName(0);
+        var column = fieldPath.getFieldName(0);
         return ColumnName.of(column);
     }
 

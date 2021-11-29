@@ -81,7 +81,7 @@ public class RecordWithColumns<I, R extends Message> {
         checkNotNull(identifier);
         checkNotNull(record);
         checkNotNull(recordSpec);
-        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
+        var storageFields = recordSpec.valuesIn(record);
         return of(identifier, record, storageFields);
     }
 
@@ -92,8 +92,8 @@ public class RecordWithColumns<I, R extends Message> {
     RecordWithColumns<I, R> create(R record, RecordSpec<I, R, R> recordSpec) {
         checkNotNull(record);
         checkNotNull(recordSpec);
-        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(record);
-        I identifier = recordSpec.idValueIn(record);
+        var storageFields = recordSpec.valuesIn(record);
+        var identifier = recordSpec.idValueIn(record);
         return of(identifier, record, storageFields);
     }
 
@@ -171,14 +171,14 @@ public class RecordWithColumns<I, R extends Message> {
             throw newIllegalStateException("Column with the name `%s` was not found.",
                                            columnName);
         }
-        Object columnValue = storageFields.get(columnName);
+        var columnValue = storageFields.get(columnName);
         if (columnValue == null) {
-            V result = columnMapping.ofNull()
-                                    .apply(null);
+            var result = columnMapping.ofNull()
+                                      .apply(null);
             return result;
         }
-        V result = columnMapping.of(columnValue.getClass())
-                                .applyTo(columnValue);
+        var result = columnMapping.of(columnValue.getClass())
+                                  .applyTo(columnValue);
         return result;
     }
 
@@ -194,7 +194,7 @@ public class RecordWithColumns<I, R extends Message> {
      * Determines if there is a column with the specified name among the storage fields.
      */
     public final boolean hasColumn(ColumnName name) {
-        boolean result = storageFields.containsKey(name);
+        var result = storageFields.containsKey(name);
         return result;
     }
 
@@ -217,7 +217,7 @@ public class RecordWithColumns<I, R extends Message> {
         if (!(o instanceof RecordWithColumns)) {
             return false;
         }
-        RecordWithColumns<?, ?> columns = (RecordWithColumns<?, ?>) o;
+        var columns = (RecordWithColumns<?, ?>) o;
         return Objects.equals(id, columns.id) &&
                 Objects.equals(record, columns.record) &&
                 Objects.equals(storageFields, columns.storageFields);
