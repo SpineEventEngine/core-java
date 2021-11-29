@@ -40,28 +40,26 @@ import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("Command bus, when a `Rejection` is thrown from a bus filter, should")
+@DisplayName("`CommandBus`, when a `Rejection` is thrown from a bus filter, should")
 class RejectionInFilterTest {
 
     @Test
     @DisplayName("post this rejection to `EventBus`")
     void postRejection() {
-        BlackBox context = BlackBox.from(
+        var context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(OrderAggregate.class)
                                      .add(new CaffetteriaStatsRepository())
                                      .addCommandFilter(new BeachCustomerFilter())
         );
-        CmdBusCaffetteriaId caffetteria = CmdBusCaffetteriaId.generate();
-        int allowedCount = 2;
-        Visitors visitorsAllowedToEnter = Visitors
-                .newBuilder()
+        var caffetteria = CmdBusCaffetteriaId.generate();
+        var allowedCount = 2;
+        var visitorsAllowedToEnter = Visitors.newBuilder()
                 .setCount(allowedCount)
                 .setBringOwnFood(false)
                 .build();
-        int deniedCount = 4;
-        Visitors visitorsDeniedEntrance = Visitors
-                .newBuilder()
+        var deniedCount = 4;
+        var visitorsDeniedEntrance = Visitors.newBuilder()
                 .setCount(deniedCount)
                 .setBringOwnFood(true)
                 .build();
@@ -76,8 +74,7 @@ class RejectionInFilterTest {
                .hasStateThat()
                .comparingExpectedFieldsOnly()
                .isEqualTo(
-                       CmdBusCaffetteriaStats
-                               .newBuilder()
+                       CmdBusCaffetteriaStats.newBuilder()
                                .setVisitorCount(allowedCount)
                                .setEntryDenied(deniedCount)
                                .build()
@@ -86,8 +83,7 @@ class RejectionInFilterTest {
 
     private static CmdBusAllocateTable allocateTableForVisitors(CmdBusCaffetteriaId caffetteria,
                                                                 Visitors visitorsDenied) {
-        return CmdBusAllocateTable
-                .newBuilder()
+        return CmdBusAllocateTable.newBuilder()
                 .setId(CmdBusOrderId.generate())
                 .setCaffetteria(caffetteria)
                 .setVisitors(visitorsDenied)

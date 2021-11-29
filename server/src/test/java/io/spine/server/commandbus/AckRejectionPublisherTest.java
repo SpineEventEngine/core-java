@@ -26,15 +26,9 @@
 
 package io.spine.server.commandbus;
 
-import io.spine.base.RejectionThrowable;
-import io.spine.core.Ack;
-import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.Event;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.Listener;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionFactory;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.commandbus.CmdBusCaffetteriaId;
@@ -59,24 +53,23 @@ class AckRejectionPublisherTest {
     @BeforeEach
     void createPublisher() {
         listener = new MemoizingListener();
-        BoundedContext context = BoundedContextBuilder
+        var context = BoundedContextBuilder
                 .assumingTests()
                 .addEventListener(listener)
                 .build();
-        EventBus eventBus = context.eventBus();
+        var eventBus = context.eventBus();
         publisher = new AckRejectionPublisher(eventBus);
     }
 
     @Test
     @DisplayName("publish the passed rejection to event bus")
     void publishRejection() {
-        TestActorRequestFactory requestFactory =
-                new TestActorRequestFactory(AckRejectionPublisherTest.class);
-        Command command = requestFactory.generateCommand();
+        var requestFactory = new TestActorRequestFactory(AckRejectionPublisherTest.class);
+        var command = requestFactory.generateCommand();
 
-        RejectionThrowable throwable = stubThrowable();
-        Event rejection = RejectionFactory.reject(command, throwable);
-        Ack ack = reject(CommandId.generate(), rejection);
+        var throwable = stubThrowable();
+        var rejection = RejectionFactory.reject(command, throwable);
+        var ack = reject(CommandId.generate(), rejection);
         publisher.onNext(ack);
         assertThat(listener.lastReceived)
                 .isNotNull();
@@ -85,8 +78,7 @@ class AckRejectionPublisherTest {
     }
 
     private static CmdBusEntryDenied stubThrowable() {
-        CmdBusEntryDenied throwable = CmdBusEntryDenied
-                .newBuilder()
+        var throwable = CmdBusEntryDenied.newBuilder()
                 .setId(CmdBusCaffetteriaId.generate())
                 .setVisitorCount(15)
                 .setReason("Test command bus rejection.")
@@ -97,7 +89,7 @@ class AckRejectionPublisherTest {
     @Test
     @DisplayName("ignore non-rejection `Ack`s")
     void ignoreNonRejection() {
-        Ack ack = acknowledge(CommandId.generate());
+        var ack = acknowledge(CommandId.generate());
         publisher.onNext(ack);
         assertThat(listener.lastReceived)
                 .isNull();
@@ -106,8 +98,8 @@ class AckRejectionPublisherTest {
     @Test
     @DisplayName("re-throw an error passed to `onError` as `IllegalStateException`")
     void rethrowError() {
-        RuntimeException exception = new RuntimeException("Test Ack publisher exception.");
-        IllegalStateException thrown = assertIllegalState(() -> publisher.onError(exception));
+        var exception = new RuntimeException("Test Ack publisher exception.");
+        var thrown = assertIllegalState(() -> publisher.onError(exception));
         assertThat(thrown.getCause())
                 .isEqualTo(exception);
     }

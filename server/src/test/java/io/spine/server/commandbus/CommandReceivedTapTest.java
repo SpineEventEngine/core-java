@@ -46,7 +46,7 @@ import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@DisplayName("CommandReceivedTap should")
+@DisplayName("`CommandReceivedTap` should")
 class CommandReceivedTapTest {
 
     private MemoizingWriteSide writeSide;
@@ -72,59 +72,55 @@ class CommandReceivedTapTest {
     }
 
     @Test
-    @DisplayName("post MarkCommandAsReceived on command")
+    @DisplayName("post `MarkCommandAsReceived` on command")
     void postSystemCommand() {
-        Command command = command(commandMessage(), null);
+        var command = command(commandMessage(), null);
         postAndCheck(command);
     }
 
     @Test
-    @DisplayName("post MarkCommandAsReceived to specific tenant")
+    @DisplayName("post `MarkCommandAsReceived` to specific tenant")
     void postIfMultitenant() {
         initMultitenant();
 
-        TenantId expectedTenant = tenantId();
-        Command command = command(commandMessage(), expectedTenant);
+        var expectedTenant = tenantId();
+        var command = command(commandMessage(), expectedTenant);
         postAndCheck(command);
 
-        TenantId actualTenant = writeSide.lastSeenEvent()
-                                         .tenant();
+        var actualTenant = writeSide.lastSeenEvent().tenant();
         assertThat(actualTenant)
                 .isEqualTo(expectedTenant);
     }
 
     private void postAndCheck(Command command) {
-        CommandEnvelope envelope = CommandEnvelope.of(command);
+        var envelope = CommandEnvelope.of(command);
 
         Optional<?> ack = filter.filter(envelope);
         assertFalse(ack.isPresent());
 
-        CommandReceived systemEvent = (CommandReceived) writeSide.lastSeenEvent()
-                                                                 .message();
+        var systemEvent = (CommandReceived) writeSide.lastSeenEvent().message();
         assertThat(systemEvent.getId())
                 .isEqualTo(envelope.id());
     }
 
     private static TenantId tenantId() {
-        TenantId tenant = TenantId
-                .newBuilder()
+        var tenant = TenantId.newBuilder()
                 .setValue(CommandReceivedTapTest.class.getSimpleName())
                 .build();
         return tenant;
     }
 
     private static Command command(CommandMessage message, @Nullable TenantId tenantId) {
-        TestActorRequestFactory requestFactory =
+        var requestFactory =
                 tenantId == null
                 ? new TestActorRequestFactory(CommandReceivedTapTest.class)
                 : new TestActorRequestFactory(CommandReceivedTapTest.class, tenantId);
-        Command command = requestFactory.createCommand(message);
+        var command = requestFactory.createCommand(message);
         return command;
     }
 
     private static CommandMessage commandMessage() {
-        return CmdCreateProject
-                .newBuilder()
+        return CmdCreateProject.newBuilder()
                 .setId(newUuid())
                 .build();
     }

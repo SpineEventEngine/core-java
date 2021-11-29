@@ -38,8 +38,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static io.spine.testing.TestValues.nullRef;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -48,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-@DisplayName("CommandBus Builder should")
+@DisplayName("`CommandBus.Builder` should")
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
@@ -65,7 +63,7 @@ class CommandBusBuilderTest
 
     @BeforeEach
     void setUp() {
-        BoundedContext context =
+        var context =
                 BoundedContext.multitenant(getClass().getSimpleName())
                               .build();
         tenantIndex = context.internalAccess()
@@ -75,8 +73,7 @@ class CommandBusBuilderTest
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
-        CommandBus commandBus = CommandBus
-                .newBuilder()
+        var commandBus = CommandBus.newBuilder()
                 .injectTenantIndex(tenantIndex)
                 .injectSystem(SYSTEM_WRITE_SIDE)
                 .build();
@@ -95,8 +92,8 @@ class CommandBusBuilderTest
     void neverOmitCommandStore() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
-                                     .injectSystem(SYSTEM_WRITE_SIDE)
-                                     .build());
+                             .injectSystem(SYSTEM_WRITE_SIDE)
+                             .build());
     }
 
     @Test
@@ -104,8 +101,8 @@ class CommandBusBuilderTest
     void neverOmitSystem() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
-                                     .injectTenantIndex(tenantIndex)
-                                     .build());
+                             .injectTenantIndex(tenantIndex)
+                             .build());
     }
 
     @Nested
@@ -127,8 +124,8 @@ class CommandBusBuilderTest
         @DisplayName("system write side")
         void system() {
             SystemWriteSide systemWriteSide = NoOpSystemWriteSide.INSTANCE;
-            CommandBus.Builder builder = builder().injectSystem(systemWriteSide);
-            Optional<SystemWriteSide> actual = builder.system();
+            var builder = builder().injectSystem(systemWriteSide);
+            var actual = builder.system();
             assertTrue(actual.isPresent());
             assertSame(systemWriteSide, actual.get());
         }
@@ -136,9 +133,9 @@ class CommandBusBuilderTest
         @Test
         @DisplayName("tenant index")
         void tenantIndex() {
-            TenantIndex index = TenantIndex.singleTenant();
-            CommandBus.Builder builder = builder().injectTenantIndex(index);
-            Optional<TenantIndex> actual = builder.tenantIndex();
+            var index = TenantIndex.singleTenant();
+            var builder = builder().injectTenantIndex(index);
+            var actual = builder.tenantIndex();
             assertTrue(actual.isPresent());
             assertSame(index, actual.get());
         }

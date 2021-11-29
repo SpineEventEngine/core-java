@@ -81,10 +81,10 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         private void handleProjectCreated(ProjectId projectId) {
-            Project newState = state().toBuilder()
-                                      .setId(projectId)
-                                      .setStatus(Project.Status.CREATED)
-                                      .build();
+            var newState = state().toBuilder()
+                    .setId(projectId)
+                    .setStatus(Project.Status.CREATED)
+                    .build();
             builder().mergeFrom(newState);
         }
 
@@ -92,12 +92,12 @@ public class CommandDispatcherRegistryTestEnv {
         void on(CmdBusTaskAdded event) {
             keep(event);
 
-            Task task = event.getTask();
+            var task = event.getTask();
             handleTaskAdded(task);
         }
 
         private void handleTaskAdded(Task task) {
-            Project newState = state().toBuilder()
+            var newState = state().toBuilder()
                                       .addTask(task)
                                       .build();
             builder().mergeFrom(newState);
@@ -111,9 +111,9 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         private void handleProjectStarted() {
-            Project newState = state().toBuilder()
-                                      .setStatus(Project.Status.STARTED)
-                                      .build();
+            var newState = state().toBuilder()
+                    .setStatus(Project.Status.STARTED)
+                    .build();
             builder().mergeFrom(newState);
         }
     }

@@ -28,8 +28,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
@@ -37,7 +35,6 @@ import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.RejectionFactory;
@@ -73,14 +70,11 @@ class CommandAckMonitorTest {
 
     @BeforeEach
     void setUp() {
-        TestActorRequestFactory requests =
-                new TestActorRequestFactory(CommandAckMonitorTest.class);
-        CmdBusStartProject command = CmdBusStartProject
-                .newBuilder()
+        var requests = new TestActorRequestFactory(CommandAckMonitorTest.class);
+        var command = CmdBusStartProject.newBuilder()
                 .setProjectId(ProjectId.newBuilder().setId(newUuid()))
                 .vBuild();
-        mockCommand = requests.command()
-                              .create(command);
+        mockCommand = requests.command().create(command);
         commandId = mockCommand.id();
     }
 
@@ -151,16 +145,15 @@ class CommandAckMonitorTest {
         @Test
         @DisplayName("OK marker, post `CommandAcknowledged`")
         void onOk() {
-            Ack ack = okAck(commandId);
+            var ack = okAck(commandId);
             monitor.onNext(ack);
 
-            Message lastSeenEvent = writeSide.lastSeenEvent()
-                                             .message();
+            var lastSeenEvent = writeSide.lastSeenEvent().message();
 
             assertThat(lastSeenEvent)
                     .isInstanceOf(CommandAcknowledged.class);
 
-            CommandAcknowledged actualEvent = (CommandAcknowledged) lastSeenEvent;
+            var actualEvent = (CommandAcknowledged) lastSeenEvent;
             assertThat(actualEvent.getId())
                     .isEqualTo(commandId);
         }
@@ -168,16 +161,15 @@ class CommandAckMonitorTest {
         @Test
         @DisplayName("error, post `CommandErrored`")
         void onError() {
-            Ack ack = errorAck(commandId);
+            var ack = errorAck(commandId);
             monitor.onNext(ack);
 
-            Message lastSeenEvent = writeSide.lastSeenEvent()
-                                             .message();
+            var lastSeenEvent = writeSide.lastSeenEvent().message();
 
             assertThat(lastSeenEvent)
                     .isInstanceOf(CommandErrored.class);
 
-            CommandErrored actualEvent = (CommandErrored) lastSeenEvent;
+            var actualEvent = (CommandErrored) lastSeenEvent;
 
             assertThat(actualEvent.getId())
                     .isEqualTo(commandId);
@@ -188,14 +180,13 @@ class CommandAckMonitorTest {
         @Test
         @DisplayName("rejection, post `CommandRejected`")
         void onRejection() {
-            Ack ack = rejectionAck(commandId);
+            var ack = rejectionAck(commandId);
             monitor.onNext(ack);
 
-            Message lastSeenEvent = writeSide.lastSeenEvent()
-                                             .message();
+            var lastSeenEvent = writeSide.lastSeenEvent().message();
             assertThat(lastSeenEvent).isInstanceOf(CommandRejected.class);
 
-            CommandRejected actualEvent = (CommandRejected) lastSeenEvent;
+            var actualEvent = (CommandRejected) lastSeenEvent;
             assertThat(actualEvent.getId())
                     .isEqualTo(commandId);
             assertThat(actualEvent.getRejectionEvent())
@@ -206,15 +197,14 @@ class CommandAckMonitorTest {
     @Test
     @DisplayName("re-throw errors passed to `onError` as `IllegalStateException`")
     void rethrowOnError() {
-        MemoizingWriteSide writeSide = MemoizingWriteSide.singleTenant();
-        CommandAckMonitor monitor = CommandAckMonitor
-                .newBuilder()
+        var writeSide = MemoizingWriteSide.singleTenant();
+        var monitor = CommandAckMonitor.newBuilder()
                 .setSystemWriteSide(writeSide)
                 .setTenantId(TenantId.getDefaultInstance())
                 .setPostedCommands(ImmutableSet.of(mockCommand))
                 .build();
-        RuntimeException error = new RuntimeException("The command Ack monitor test error.");
-        IllegalStateException exception = assertIllegalState(() -> monitor.onError(error));
+        var error = new RuntimeException("The command Ack monitor test error.");
+        var exception = assertIllegalState(() -> monitor.onError(error));
         assertThat(exception)
              .hasCauseThat()
              .isEqualTo(error);
@@ -225,8 +215,7 @@ class CommandAckMonitorTest {
     }
 
     private static Ack errorAck(CommandId commandId) {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setCode(42)
                 .setMessage("Wrong question")
                 .build();
@@ -234,27 +223,25 @@ class CommandAckMonitorTest {
     }
 
     private static Ack rejectionAck(CommandId commandId) {
-        ProjectId projectId = ProjectId
-                .newBuilder()
+        var projectId = ProjectId.newBuilder()
                 .setId(commandId.getUuid())
                 .build();
         CommandMessage commandMessage = CmdBusStartProject
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        Command command = Command
-                .newBuilder()
+        var command = Command.newBuilder()
                 .setId(commandId)
                 .setMessage(pack(commandMessage))
                 .build();
 
-        RuntimeException exception = throwableCausedByRejection();
-        Event rejection = RejectionFactory.reject(command, exception);
+        var exception = throwableCausedByRejection();
+        var rejection = RejectionFactory.reject(command, exception);
         return reject(commandId, rejection);
     }
 
     private static RuntimeException throwableCausedByRejection() {
-        Any entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
+        var entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
         RejectionThrowable rt = CannotModifyArchivedEntity.newBuilder()
                 .setEntityId(entityId)
                 .build();

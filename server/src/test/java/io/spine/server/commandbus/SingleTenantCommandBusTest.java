@@ -31,9 +31,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
-import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Single tenant CommandBus should")
+@DisplayName("Single-tenant `CommandBus` should")
 class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     private static final TestActorRequestFactory requestFactory =
@@ -84,7 +82,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("invalid command")
         void invalidCmd() {
-            Command cmd = newCommandWithoutContext();
+            var cmd = newCommandWithoutContext();
 
             commandBus.post(cmd, observer);
 
@@ -99,7 +97,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @DisplayName("multitenant command in single tenant context")
         void multitenantCmdIfSingleTenant() {
             // Create a multi-tenant command.
-            Command cmd = createProject();
+            var cmd = createProject();
 
             commandBus.post(cmd, observer);
 
@@ -114,14 +112,14 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
-        FaultyHandler faultyHandler = FaultyHandler.initializedHandler();
+        var faultyHandler = FaultyHandler.initializedHandler();
         commandBus.register(faultyHandler);
 
-        Command remoteTaskCommand = clearTenantId(removeTask());
+        var remoteTaskCommand = clearTenantId(removeTask());
         MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(remoteTaskCommand, observer);
 
-        Ack ack = observer.firstResponse();
+        var ack = observer.firstResponse();
         assertTrue(ack.getStatus()
                       .hasOk());
     }
@@ -129,7 +127,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        EnvelopeValidator<CommandEnvelope> validator = commandBus.validator();
+        var validator = commandBus.validator();
         assertNotNull(validator);
         assertSame(validator, commandBus.validator());
     }

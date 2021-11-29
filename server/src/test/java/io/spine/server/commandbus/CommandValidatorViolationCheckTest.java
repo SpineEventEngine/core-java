@@ -27,8 +27,6 @@
 package io.spine.server.commandbus;
 
 import com.google.common.truth.Correspondence;
-import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Any;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -51,7 +49,7 @@ import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
 
-@DisplayName("CommandValidator violation check should")
+@DisplayName("`CommandValidator` violation check should")
 class CommandValidatorViolationCheckTest {
 
     private static final Correspondence<@NonNull ConstraintViolation, @NonNull String>
@@ -63,9 +61,9 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("validate command and return empty violations list if command is valid")
     void returnNothingForValidCmd() {
-        Command cmd = Given.ACommand.createProject();
+        var cmd = Given.ACommand.createProject();
 
-        List<ConstraintViolation> violations = inspectCommand(cmd);
+        var violations = inspectCommand(cmd);
 
         assertThat(violations)
                 .isEmpty();
@@ -74,31 +72,29 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("not allow commands without IDs")
     void notAllowDefaultId() {
-        Command cmd = Given.ACommand.createProject();
-        Command unidentifiableCommand = cmd
-                .toBuilder()
+        var cmd = Given.ACommand.createProject();
+        var unidentifiableCommand = cmd.toBuilder()
                 .setId(CommandId.getDefaultInstance())
                 .build();
-        List<ConstraintViolation> violations = inspectCommand(unidentifiableCommand);
+        var violations = inspectCommand(unidentifiableCommand);
 
         assertThat(violations)
                 .hasSize(1);
     }
 
     @Test
-    @DisplayName("return violations if command has invalid Message")
+    @DisplayName("return violations if command has invalid `Message`")
     void notAllowInvalidMessage() {
-        Any invalidMessagePacked = AnyPacker.pack(CmdBusCreateProject.getDefaultInstance());
-        Command commandWithEmptyMessage = Command
-                .newBuilder()
+        var invalidMessagePacked = AnyPacker.pack(CmdBusCreateProject.getDefaultInstance());
+        var commandWithEmptyMessage = Command.newBuilder()
                 .setId(CommandId.generate())
                 .setMessage(invalidMessagePacked)
                 .setContext(withRandomActor())
                 .build();
 
-        List<ConstraintViolation> violations = inspectCommand(commandWithEmptyMessage);
+        var violations = inspectCommand(commandWithEmptyMessage);
 
-        IterableSubject assertViolations = assertThat(violations);
+        var assertViolations = assertThat(violations);
         assertViolations
                 .hasSize(2);
     }
@@ -106,14 +102,13 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("return violations if command has invalid context")
     void notAllowInvalidContext() {
-        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
-        Command command = factory.createCommand(createProjectMessage(), Time.currentTime());
-        Command commandWithoutContext = command
-                .toBuilder()
+        var factory = new TestActorRequestFactory(getClass());
+        var command = factory.createCommand(createProjectMessage(), Time.currentTime());
+        var commandWithoutContext = command.toBuilder()
                 .setContext(CommandContext.getDefaultInstance())
                 .build();
 
-        List<ConstraintViolation> violations = inspectCommand(commandWithoutContext);
+        var violations = inspectCommand(commandWithoutContext);
         assertThat(violations)
                 .hasSize(1);
     }
@@ -121,9 +116,9 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("allow empty command messages")
     void emptyMessage() {
-        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
-        Command emptyCommand = factory.createCommand(CmdEmpty.getDefaultInstance());
-        List<ConstraintViolation> violations = inspectCommand(emptyCommand);
+        var factory = new TestActorRequestFactory(getClass());
+        var emptyCommand = factory.createCommand(CmdEmpty.getDefaultInstance());
+        var violations = inspectCommand(emptyCommand);
         assertThat(violations)
                 .comparingElementsUsing(messageFormatContains)
                 .doesNotContain("command target ID");
@@ -132,15 +127,14 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("allow messages without an ID as a first field")
     void noId() {
-        TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
-        CmdBusCreateLabels msg = CmdBusCreateLabels
-                .newBuilder()
+        var factory = new TestActorRequestFactory(getClass());
+        var msg = CmdBusCreateLabels.newBuilder()
                 .addLabel("red")
                 .addLabel("green")
                 .addLabel("blue")
                 .vBuild();
-        Command command = factory.createCommand(msg);
-        List<ConstraintViolation> violations = inspectCommand(command);
+        var command = factory.createCommand(msg);
+        var violations = inspectCommand(command);
         assertThat(violations)
                 .isEmpty();
     }

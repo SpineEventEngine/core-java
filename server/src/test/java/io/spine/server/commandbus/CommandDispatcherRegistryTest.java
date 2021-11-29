@@ -46,13 +46,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("CommandDispatcherRegistry should")
+@DisplayName("`CommandDispatcherRegistry` should")
 class CommandDispatcherRegistryTest {
 
     /**
@@ -68,21 +66,21 @@ class CommandDispatcherRegistryTest {
     }
 
     @SafeVarargs
-    private final void assertSupported(Class<? extends CommandMessage>... cmdClasses) {
-        Set<CommandClass> supportedClasses = registry.registeredMessageClasses();
+    private void assertSupported(Class<? extends CommandMessage>... cmdClasses) {
+        var supportedClasses = registry.registeredMessageClasses();
 
-        for (Class<? extends CommandMessage> cls : cmdClasses) {
-            CommandClass cmdClass = CommandClass.from(cls);
+        for (var cls : cmdClasses) {
+            var cmdClass = CommandClass.from(cls);
             assertTrue(supportedClasses.contains(cmdClass));
         }
     }
 
     @SafeVarargs
-    private final void assertNotSupported(Class<? extends CommandMessage>... cmdClasses) {
-        Set<CommandClass> supportedClasses = registry.registeredMessageClasses();
+    private void assertNotSupported(Class<? extends CommandMessage>... cmdClasses) {
+        var supportedClasses = registry.registeredMessageClasses();
 
-        for (Class<? extends CommandMessage> cls : cmdClasses) {
-            CommandClass cmdClass = CommandClass.from(cls);
+        for (var cls : cmdClasses) {
+            var cmdClass = CommandClass.from(cls);
             assertFalse(supportedClasses.contains(cmdClass));
         }
     }
@@ -132,7 +130,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            AllCommandHandler handler = new AllCommandHandler();
+            var handler = new AllCommandHandler();
 
             registry.register(handler);
             registry.unregister(handler);
@@ -182,7 +180,7 @@ class CommandDispatcherRegistryTest {
     @Test
     @DisplayName("accept empty process manager repository dispatcher")
     void acceptEmptyProcessManagerRepository() {
-        NoCommandsDispatcherRepo pmRepo = new NoCommandsDispatcherRepo();
+        var pmRepo = new NoCommandsDispatcherRepo();
         registry.register(DelegatingCommandDispatcher.of(pmRepo));
     }
 

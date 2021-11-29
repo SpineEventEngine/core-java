@@ -26,11 +26,8 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.commandbus.ProjectId;
 import io.spine.test.commandbus.command.CmdBusStartProject;
@@ -49,8 +46,8 @@ import static io.spine.time.testing.Past.minutesAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Command scheduling mechanism should")
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
     CommandSchedulingTest() {
@@ -58,10 +55,10 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("store scheduled command to CommandStore and return `OK`")
+    @DisplayName("return `OK`")
     void storeScheduledCommand() {
         commandBus.register(createProjectHandler);
-        Command cmd = createProject(/*delay=*/minutes(1));
+        var cmd = createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, observer);
 
@@ -72,7 +69,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @DisplayName("schedule command if delay is set")
     void scheduleIfDelayIsSet() {
         commandBus.register(createProjectHandler);
-        Command cmd = createProject(/*delay=*/minutes(1));
+        var cmd = createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, observer);
     }
@@ -80,11 +77,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("not schedule command if no scheduling options are set")
     void notScheduleWithoutOptions() {
-        CreateProjectHandler handler = new CreateProjectHandler();
+        var handler = new CreateProjectHandler();
         handler.registerWith(BoundedContextBuilder.assumingTests().build());
         commandBus.register(handler);
 
-        Command command = createProject();
+        var command = createProject();
         commandBus.post(command, observer);
 
         checkResult(command);
@@ -94,7 +91,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @DisplayName("post previously scheduled command")
     void postPreviouslyScheduled() {
         commandBus.register(createProjectHandler);
-        Command command = createScheduledCommand();
+        var command = createScheduledCommand();
 
         commandBus.postPreviouslyScheduled(command);
 
@@ -105,7 +102,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("reject previously scheduled command if no endpoint is found")
     void rejectPreviouslyScheduledWithoutEndpoint() {
-        Command command = createScheduledCommand();
+        var command = createScheduledCommand();
         assertThrows(IllegalStateException.class,
                      () -> commandBus.postPreviouslyScheduled(command));
     }
@@ -117,13 +114,13 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling options")
         void schedulingOptions() {
-            Command cmd = createCommand();
-            Timestamp schedulingTime = currentTime();
-            Duration delay = minutes(5);
+            var cmd = createCommand();
+            var schedulingTime = currentTime();
+            var delay = minutes(5);
 
-            Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
-            CommandContext.Schedule schedule = cmdUpdated.context()
-                                                         .getSchedule();
+            var cmdUpdated = setSchedule(cmd, delay, schedulingTime);
+            var schedule = cmdUpdated.context()
+                                     .getSchedule();
 
             assertEquals(delay, schedule.getDelay());
             assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
@@ -133,34 +130,31 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling time")
         void schedulingTime() {
-            Command cmd = createCommand();
-            Timestamp schedulingTime = currentTime();
+            var cmd = createCommand();
+            var schedulingTime = currentTime();
 
-            Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
+            var cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
 
             assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
                                                    .getSchedulingTime());
         }
 
         private Command createCommand() {
-            ProjectId id = ProjectId
-                    .newBuilder()
+            var id = ProjectId.newBuilder()
                     .setId(newUuid())
                     .build();
-            CmdBusStartProject command = CmdBusStartProject
-                    .newBuilder()
+            var command = CmdBusStartProject.newBuilder()
                     .setProjectId(id)
                     .build();
-            CommandMessage commandMessage = toMessage(command, CommandMessage.class);
-            Command cmd = requestFactory.command()
-                                        .create(commandMessage);
+            var commandMessage = toMessage(command, CommandMessage.class);
+            var cmd = requestFactory.command().create(commandMessage);
             return cmd;
         }
     }
 
     private static Command createScheduledCommand() {
-        Timestamp schedulingTime = minutesAgo(3);
-        Duration delayPrimary = minutes(5);
+        var schedulingTime = minutesAgo(3);
+        var delayPrimary = minutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
     }
 }

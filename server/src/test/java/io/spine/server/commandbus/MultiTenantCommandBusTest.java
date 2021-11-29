@@ -40,8 +40,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static io.spine.core.CommandValidationError.TENANT_UNKNOWN;
 import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.core.Status.StatusCase.ERROR;
@@ -52,8 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("Multitenant `CommandBus` should")
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-@DisplayName("Multitenant CommandBus should")
 class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     MultiTenantCommandBusTest() {
@@ -80,7 +78,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @DisplayName("verify tenant ID attribute if is multitenant")
     void requireTenantId() {
         commandBus.register(createProjectHandler);
-        Command cmd = newCommandWithoutTenantId();
+        var cmd = newCommandWithoutTenantId();
 
         commandBus.post(cmd, observer);
 
@@ -93,7 +91,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("state command not supported when there is neither handler nor dispatcher for it")
     void requireHandlerOrDispatcher() {
-        Command command = addTask();
+        var command = addTask();
         commandBus.post(command, observer);
 
         checkCommandError(observer.firstResponse(),
@@ -120,7 +118,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            CreateProjectHandler handler = new CreateProjectHandler();
+            var handler = new CreateProjectHandler();
             commandBus.register(handler);
             handler.registerWith(context);
 
@@ -164,7 +162,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         }
 
         CreateProjectHandler newCommandHandler() {
-            CreateProjectHandler handler = new CreateProjectHandler();
+            var handler = new CreateProjectHandler();
             handler.registerWith(context);
             return handler;
         }
@@ -175,7 +173,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     void postCommand() {
         commandBus.register(createProjectHandler);
 
-        Command command = createProject();
+        var command = createProject();
         commandBus.post(command, observer);
 
         checkResult(command);
@@ -198,7 +196,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("command dispatcher")
         void commandDispatcher() {
-            AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+            var dispatcher = new AddTaskDispatcher();
             commandBus.register(dispatcher);
 
             commandBus.post(addTask(), observer);
@@ -213,7 +211,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        Set<CommandClass> cmdClasses = commandBus.registeredCommandClasses();
+        var cmdClasses = commandBus.registeredCommandClasses();
 
         assertTrue(cmdClasses.contains(CommandClass.from(CmdBusCreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.from(CmdBusAddTask.class)));
