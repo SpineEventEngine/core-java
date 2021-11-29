@@ -30,8 +30,6 @@ import io.spine.core.given.CoreMixinsTestEnv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
@@ -46,21 +44,21 @@ class CoreMixinsTest {
     @Test
     @DisplayName("`CommandIdMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void commandIdMixin() {
-        CommandId msg = CommandId.generate();
+        var msg = CommandId.generate();
         assertThat(msg.checkFieldsReachable()).isTrue();
     }
 
     @Test
     @DisplayName("`CommandMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void commandMixin() {
-        Command command = CoreMixinsTestEnv.command();
+        var command = CoreMixinsTestEnv.command();
         assertThat(command.checkFieldsReachable()).isTrue();
     }
 
     @Test
     @DisplayName("`EventContextMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void eventContextMixin() {
-        Event event = CoreMixinsTestEnv.event();
+        var event = CoreMixinsTestEnv.event();
         assertThat(event.getContext()
                         .checkFieldsReachable()).isTrue();
     }
@@ -68,7 +66,7 @@ class CoreMixinsTest {
     @Test
     @DisplayName("`EventIdMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void eventIdMixin() {
-        Event event = CoreMixinsTestEnv.event();
+        var event = CoreMixinsTestEnv.event();
         assertThat(event.getId()
                         .checkFieldsReachable()).isTrue();
     }
@@ -76,23 +74,22 @@ class CoreMixinsTest {
     @Test
     @DisplayName("`EventMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void eventMixin() {
-        Event event = CoreMixinsTestEnv.event();
+        var event = CoreMixinsTestEnv.event();
         assertThat(event.checkFieldsReachable()).isTrue();
     }
 
     @Test
     @DisplayName("`MessageIdMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
     void messageIdMixin() {
-        MessageId messageId = CoreMixinsTestEnv.messageId();
+        var messageId = CoreMixinsTestEnv.messageId();
         assertThat(messageId.checkFieldsReachable()).isTrue();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat()`.
     @Test
     @DisplayName("`OriginMixin` " + SHOULD_MAKE_FIELDS_REACHABLE)
+    @SuppressWarnings("OptionalGetWithoutIsPresent")    // Checked by `Truth8.assertThat()`.
     void originIdMixin() {
-        Optional<Origin> origin = CoreMixinsTestEnv.event()
-                                                   .origin();
+        var origin = CoreMixinsTestEnv.event().origin();
         assertThat(origin).isPresent();
         assertThat(origin.get()
                          .checkFieldsReachable()).isTrue();

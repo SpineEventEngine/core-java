@@ -53,10 +53,10 @@ class EventContextTest {
 
     @BeforeEach
     void setUp() {
-        CommandEnvelope cmd = generate();
-        StringValue producerId = StringValue.of(getClass().getSimpleName());
-        EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
-        Event event = eventFactory.createEvent(GivenEvent.message(), null);
+        var cmd = generate();
+        var producerId = StringValue.of(getClass().getSimpleName());
+        var eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
+        var event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.context();
     }
 
@@ -71,8 +71,8 @@ class EventContextTest {
         @Test
         @DisplayName("of the event without origin")
         void forEventWithoutOrigin() {
-            EventContext context = contextWithoutOrigin().build();
-            Event event = event(context);
+            var context = contextWithoutOrigin().build();
+            var event = event(context);
             assertThrowsFor(event);
         }
 
@@ -80,10 +80,10 @@ class EventContextTest {
         @Test
         @DisplayName("of the event whose event context has no origin")
         void forEventContextWithoutOrigin() {
-            EventContext context = contextWithoutOrigin()
+            var context = contextWithoutOrigin()
                     .setEventContext(contextWithoutOrigin())
                     .build();
-            Event event = event(context);
+            var event = event(context);
             assertThrowsFor(event);
         }
 
@@ -115,8 +115,8 @@ class EventContextTest {
         @Test
         @DisplayName("producer")
         void producer() {
-            StringValue msg = unpack(context.getProducerId(), StringValue.class);
-            String id = (String) context.producer();
+            var msg = unpack(context.getProducerId(), StringValue.class);
+            var id = (String) context.producer();
             assertThat(id)
                  .isEqualTo(msg.getValue());
         }

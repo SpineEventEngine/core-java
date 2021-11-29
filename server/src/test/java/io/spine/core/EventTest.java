@@ -29,7 +29,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.RejectionThrowable;
 import io.spine.base.Time;
@@ -43,7 +42,6 @@ import io.spine.test.core.given.EtDoSomething;
 import io.spine.test.core.given.EtProjectCreated;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -79,9 +77,9 @@ public class EventTest extends UtilityClassTest<Events> {
 
     @BeforeEach
     void setUp() {
-        CommandEnvelope cmd = generate();
-        StringValue producerId = StringValue.of(getClass().getSimpleName());
-        EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
+        var cmd = generate();
+        var producerId = StringValue.of(getClass().getSimpleName());
+        var eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(GivenEvent.message(), null);
         context = event.context();
     }
@@ -93,8 +91,7 @@ public class EventTest extends UtilityClassTest<Events> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
-        EntityAlreadyArchived defaultRejectionThrowable = EntityAlreadyArchived
-                .newBuilder()
+        var defaultRejectionThrowable = EntityAlreadyArchived.newBuilder()
                 .setEntityId(Any.getDefaultInstance())
                 .build();
         tester.setDefault(StringValue.class, StringValue.getDefaultInstance())
@@ -111,8 +108,8 @@ public class EventTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("message")
         void message() {
-            EventMessage message = GivenEvent.message();
-            Event event = GivenEvent.withMessage(message);
+            var message = GivenEvent.message();
+            var event = GivenEvent.withMessage(message);
             assertThat(event.enclosedMessage())
                  .isEqualTo(message);
         }
@@ -120,7 +117,7 @@ public class EventTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("timestamp")
         void timestamp() {
-            Event event = GivenEvent.occurredMinutesAgo(1);
+            var event = GivenEvent.occurredMinutesAgo(1);
 
             assertThat(event.timestamp())
                     .isEqualTo(event.context()
@@ -130,8 +127,8 @@ public class EventTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("root command ID")
         void rootCommandId() {
-            CommandEnvelope command = generate();
-            Event event = newEvent(command);
+            var command = generate();
+            var event = newEvent(command);
 
             assertThat(event.rootMessage().asCommandId())
                     .isEqualTo(command.id());
@@ -140,18 +137,18 @@ public class EventTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("type name")
         void typeName() {
-            CommandEnvelope command = generate();
-            Event event = newEvent(command);
+            var command = generate();
+            var event = newEvent(command);
 
-            TypeName typeName = EventEnvelope.of(event)
-                                             .messageTypeName();
+            var typeName = EventEnvelope.of(event)
+                                        .messageTypeName();
             assertNotNull(typeName);
             assertEquals(EtProjectCreated.class.getSimpleName(), typeName.simpleName());
         }
 
         private Event newEvent(CommandEnvelope command) {
-            StringValue producerId = StringValue.of(getClass().getSimpleName());
-            EventFactory ef = EventFactory.on(command, Identifier.pack(producerId));
+            var producerId = StringValue.of(getClass().getSimpleName());
+            var ef = EventFactory.on(command, Identifier.pack(producerId));
             return ef.createEvent(GivenEvent.message(), null);
         }
     }
@@ -164,14 +161,13 @@ public class EventTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("from the previous message")
         void fromPastMessage() {
-            TenantId targetTenantId = tenantId();
-            Origin origin = Origin
-                    .newBuilder()
+            var targetTenantId = tenantId();
+            var origin = Origin.newBuilder()
                     .setActorContext(ActorContext.newBuilder().setTenantId(targetTenantId))
                     .buildPartial();
-            EventContext context = contextWithoutOrigin().setPastMessage(origin)
-                                                         .buildPartial();
-            Event event = event(context);
+            var context = contextWithoutOrigin().setPastMessage(origin)
+                                                .buildPartial();
+            var event = event(context);
 
             assertThat(event.tenant())
                     .isEqualTo(targetTenantId);
@@ -181,11 +177,11 @@ public class EventTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("from enclosed command context")
         void fromCommandContext() {
-            TenantId targetTenantId = tenantId();
-            CommandContext commandContext = commandContext(targetTenantId);
-            EventContext context = contextWithoutOrigin().setCommandContext(commandContext)
-                                                         .buildPartial();
-            Event event = event(context);
+            var targetTenantId = tenantId();
+            var commandContext = commandContext(targetTenantId);
+            var context = contextWithoutOrigin().setCommandContext(commandContext)
+                                                .buildPartial();
+            var event = event(context);
 
             assertThat(event.tenant())
                     .isEqualTo(targetTenantId);
@@ -195,17 +191,17 @@ public class EventTest extends UtilityClassTest<Events> {
         @Test
         @DisplayName("from enclosed context of origin event, which had command as origin")
         void fromEventContextWithCommandContext() {
-            TenantId targetTenantId = tenantId();
-            CommandContext commandContext = commandContext(targetTenantId);
-            EventContext outerContext =
+            var targetTenantId = tenantId();
+            var commandContext = commandContext(targetTenantId);
+            var outerContext =
                     contextWithoutOrigin()
                             .setCommandContext(commandContext)
                             .build();
-            EventContext context =
+            var context =
                     contextWithoutOrigin()
                             .setEventContext(outerContext)
                             .build();
-            Event event = event(context);
+            var event = event(context);
 
             assertThat(event.tenant())
                     .isEqualTo(targetTenantId);
@@ -215,9 +211,9 @@ public class EventTest extends UtilityClassTest<Events> {
     @Test
     @DisplayName("tell if it is a rejection")
     void tellWhenRejection() {
-        TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
-        Command cmd = requestFactory.createCommand(commandMessage());
-        Event event = reject(cmd, new StubRejectionThrowable());
+        var requestFactory = new TestActorRequestFactory(getClass());
+        var cmd = requestFactory.createCommand(commandMessage());
+        var event = reject(cmd, new StubRejectionThrowable());
 
         assertThat(event.isRejection())
                 .isTrue();
@@ -235,29 +231,26 @@ public class EventTest extends UtilityClassTest<Events> {
     @Test
     @DisplayName("clear enrichments from the event and its origin")
     void clearEnrichments() {
-        Enrichment someEnrichment = Enrichment
-                .newBuilder()
+        var someEnrichment = Enrichment.newBuilder()
                 .setDoNotEnrich(true)
                 .build();
-        EventContext.Builder grandOriginContext =
-                context.toBuilder()
-                       .setEnrichment(someEnrichment);
-        EventContext.Builder originContext =
+        var grandOriginContext = context.toBuilder().setEnrichment(someEnrichment);
+        var originContext =
                 contextWithoutOrigin()
                         .setEventContext(grandOriginContext)
                         .setEnrichment(someEnrichment);
-        EventContext eventContext =
+        var eventContext =
                 contextWithoutOrigin()
                         .setEventContext(originContext)
                         .setEnrichment(someEnrichment)
                         .build();
-        Event event = event(eventContext);
+        var event = event(eventContext);
 
-        Event eventWithoutEnrichments = event.clearEnrichments();
+        var eventWithoutEnrichments = event.clearEnrichments();
 
-        EventContext context = eventWithoutEnrichments.getContext();
-        EventContext origin = context.getEventContext();
-        EventContext grandOrigin = origin.getEventContext();
+        var context = eventWithoutEnrichments.getContext();
+        var origin = context.getEventContext();
+        var grandOrigin = origin.getEventContext();
 
         assertThat(context.hasEnrichment()).isFalse();
         assertThat(origin.hasEnrichment()).isFalse();
@@ -268,27 +261,24 @@ public class EventTest extends UtilityClassTest<Events> {
     @Test
     @DisplayName("clear enrichment hierarchy")
     void clearEnrichmentHierarchy() {
-        Enrichment someEnrichment = Enrichment
-                .newBuilder()
+        var someEnrichment = Enrichment.newBuilder()
                 .setDoNotEnrich(true)
                 .build();
-        EventContext.Builder grandOriginContext =
-                context.toBuilder()
-                       .setEnrichment(someEnrichment);
-        EventContext.Builder originContext =
+        var grandOriginContext = context.toBuilder().setEnrichment(someEnrichment);
+        var originContext =
                 contextWithoutOrigin()
                         .setEventContext(grandOriginContext);
-        EventContext context =
+        var context =
                 contextWithoutOrigin()
                         .setEventContext(originContext)
                         .build();
-        Event event = event(context);
+        var event = event(context);
 
-        Event eventWithoutEnrichments = event.clearAllEnrichments();
+        var eventWithoutEnrichments = event.clearAllEnrichments();
 
-        EventContext grandOrigin = eventWithoutEnrichments.getContext()
-                                                          .getEventContext()
-                                                          .getEventContext();
+        var grandOrigin = eventWithoutEnrichments.getContext()
+                                                 .getEventContext()
+                                                 .getEventContext();
         assertThat(grandOrigin.hasEnrichment()).isFalse();
     }
 

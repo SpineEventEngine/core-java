@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * <p>This test suite is placed under the {@code server} module to avoid dependency on the event
  * generation code which belongs to server-side.
  */
-@DisplayName("Events utility should")
+@DisplayName("`Events` utility should")
 public class EventsTest extends UtilityClassTest<Events> {
 
     private static final TestActorRequestFactory requestFactory =
@@ -65,9 +65,9 @@ public class EventsTest extends UtilityClassTest<Events> {
 
     @BeforeEach
     void setUp() {
-        CommandEnvelope cmd = generate();
-        StringValue producerId = StringValue.of(getClass().getSimpleName());
-        EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
+        var cmd = generate();
+        var producerId = StringValue.of(getClass().getSimpleName());
+        var eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
         event = eventFactory.createEvent(GivenEvent.message(), null);
     }
 
@@ -78,8 +78,7 @@ public class EventsTest extends UtilityClassTest<Events> {
     @Override
     protected void configure(NullPointerTester tester) {
         super.configure(tester);
-        EntityAlreadyArchived defaultRejectionThrowable = EntityAlreadyArchived
-                .newBuilder()
+        var defaultRejectionThrowable = EntityAlreadyArchived.newBuilder()
                 .setEntityId(Any.getDefaultInstance())
                 .build();
         tester.setDefault(StringValue.class, StringValue.getDefaultInstance())
@@ -92,16 +91,16 @@ public class EventsTest extends UtilityClassTest<Events> {
     @Test
     @DisplayName("provide stringifier for event ID")
     void provideEventIdStringifier() {
-        EventId id = event.getId();
+        var id = event.getId();
 
-        String str = Stringifiers.toString(id);
-        EventId convertedBack = Stringifiers.fromString(str, EventId.class);
+        var str = Stringifiers.toString(id);
+        var convertedBack = Stringifiers.fromString(str, EventId.class);
 
         assertEquals(id, convertedBack);
     }
 
     @Test
-    @DisplayName("provide empty Iterable")
+    @DisplayName("provide empty `Iterable`")
     void provideEmptyIterable() {
         for (Object ignored : nothing()) {
             fail("Something found in nothing().");
