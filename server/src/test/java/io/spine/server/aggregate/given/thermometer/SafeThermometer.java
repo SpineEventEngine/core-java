@@ -45,20 +45,17 @@ public final class SafeThermometer extends Aggregate<ThermometerId, Thermometer,
 
     @React
     Optional<TermTemperatureChanged> on(@External TemperatureChanged e) {
-        double temperature = e.getFahrenheit();
+        var temperature = e.getFahrenheit();
         if (!withinBounds(temperature)) {
             return Optional.empty();
         }
+        var change = TemperatureChange.newBuilder()
+                .setNewValue(temperature)
+                .setPreviousValue(state().getFahrenheit());
         return Optional.of(
-                TermTemperatureChanged
-                        .newBuilder()
+                TermTemperatureChanged.newBuilder()
                         .setThermometer(id())
-                        .setChange(
-                                TemperatureChange
-                                        .newBuilder()
-                                        .setNewValue(temperature)
-                                        .setPreviousValue(state().getFahrenheit())
-                        )
+                        .setChange(change)
                         .vBuild()
         );
     }

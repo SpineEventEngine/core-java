@@ -43,8 +43,7 @@ public final class FibonacciAggregate extends Aggregate<SequenceId, Sequence, Se
 
     @Assign
     StartingNumbersSet handle(SetStartingNumbers cmd) {
-        StartingNumbersSet event = StartingNumbersSet
-                .newBuilder()
+        var event = StartingNumbersSet.newBuilder()
                 .setId(cmd.getId())
                 .setNumberOne(cmd.getNumberOne())
                 .setNumberTwo(cmd.getNumberTwo())
@@ -54,8 +53,7 @@ public final class FibonacciAggregate extends Aggregate<SequenceId, Sequence, Se
 
     @Assign
     SequenceMoved handle(MoveSequence cmd) {
-        SequenceMoved event = SequenceMoved
-                .newBuilder()
+        var event = SequenceMoved.newBuilder()
                 .setId(cmd.getId())
                 .vBuild();
         return event;
@@ -63,8 +61,8 @@ public final class FibonacciAggregate extends Aggregate<SequenceId, Sequence, Se
 
     @Apply
     private void on(StartingNumbersSet event) {
-        int numberOne = event.getNumberOne();
-        int numberTwo = event.getNumberTwo();
+        var numberOne = event.getNumberOne();
+        var numberTwo = event.getNumberTwo();
         builder().setId(event.getId())
                  .setCurrentNumberOne(numberOne)
                  .setCurrentNumberTwo(numberTwo);
@@ -74,9 +72,9 @@ public final class FibonacciAggregate extends Aggregate<SequenceId, Sequence, Se
 
     @Apply
     private void on(SequenceMoved event) {
-        int numberOne = builder().getCurrentNumberOne();
-        int numberTwo = builder().getCurrentNumberTwo();
-        int sum = numberOne + numberTwo;
+        var numberOne = builder().getCurrentNumberOne();
+        var numberTwo = builder().getCurrentNumberTwo();
+        var sum = numberOne + numberTwo;
         builder().setId(event.getId())
                  .setCurrentNumberOne(numberTwo)
                  .setCurrentNumberTwo(sum);

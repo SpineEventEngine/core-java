@@ -78,13 +78,13 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
 
     @Override
     protected A createEntity(I id) {
-        A result = entityClass().create(aggregateRoot);
+        var result = entityClass().create(aggregateRoot);
         return result;
     }
 
     @Override
     protected Constructor<A> constructor() {
-        Constructor<A> constructor = entityClass().constructor();
+        var constructor = entityClass().constructor();
         return constructor;
     }
 }

@@ -49,8 +49,7 @@ public class TaskCommentsPart
 
     @Assign
     AggCommentAdded handle(AggAddComment command) {
-        AggCommentAdded event = AggCommentAdded
-                .newBuilder()
+        var event = AggCommentAdded.newBuilder()
                 .setTaskId(command.getTaskId())
                 .setAuthor(command.getAuthor())
                 .setText(command.getText())
@@ -60,8 +59,7 @@ public class TaskCommentsPart
 
     @Apply
     private void apply(AggCommentAdded event) {
-        Comment comment = Comment
-                .newBuilder()
+        var comment = Comment.newBuilder()
                 .setAuthor(event.getAuthor())
                 .setText(event.getText())
                 .build();

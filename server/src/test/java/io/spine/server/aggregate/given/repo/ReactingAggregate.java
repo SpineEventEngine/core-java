@@ -50,15 +50,16 @@ public class ReactingAggregate
     }
 
     /**
-     * Emits {@link io.spine.test.aggregate.event.AggProjectArchived} if the event is from the parent project.
-     * Otherwise returns empty iterable.
+     * Emits {@link io.spine.test.aggregate.event.AggProjectArchived} if the event is from
+     * the parent project.
+     *
+     * <p>Otherwise returns empty iterable.
      */
     @React
     Optional<AggProjectArchived> on(AggProjectArchived event) {
         if (event.getChildProjectIdList()
                  .contains(id())) {
-            AggProjectArchived reaction = AggProjectArchived
-                    .newBuilder()
+            var reaction = AggProjectArchived.newBuilder()
                     .setProjectId(id())
                     .build();
             return Optional.of(reaction);
@@ -68,15 +69,16 @@ public class ReactingAggregate
     }
 
     /**
-     * Emits {@link io.spine.test.aggregate.event.AggProjectDeleted} if the event is from the parent project.
-     * Otherwise returns empty iterable.
+     * Emits {@link io.spine.test.aggregate.event.AggProjectDeleted} if the event is from
+     * the parent project.
+     *
+     * <p>Otherwise returns empty iterable.
      */
     @React
     Optional<AggProjectDeleted> on(AggProjectDeleted event) {
         if (event.getChildProjectIdList()
                  .contains(id())) {
-            AggProjectDeleted reaction = AggProjectDeleted
-                    .newBuilder()
+            var reaction = AggProjectDeleted.newBuilder()
                     .setProjectId(id())
                     .build();
             return Optional.of(reaction);

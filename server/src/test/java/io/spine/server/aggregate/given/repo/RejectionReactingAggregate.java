@@ -34,7 +34,6 @@ import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.rejection.Rejections;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -52,11 +51,11 @@ public class RejectionReactingAggregate
 
     @React
     Optional<AggProjectArchived> on(Rejections.AggCannotStartArchivedProject rejection) {
-        List<ProjectId> childIdList = rejection.getChildProjectIdList();
+        var childIdList = rejection.getChildProjectIdList();
         if (childIdList.contains(id())) {
-            AggProjectArchived event = AggProjectArchived.newBuilder()
-                                                         .setProjectId(id())
-                                                         .build();
+            var event = AggProjectArchived.newBuilder()
+                    .setProjectId(id())
+                    .build();
             return Optional.of(event);
         } else {
             return Optional.empty();

@@ -57,7 +57,7 @@ public class GivenAggregate {
     }
 
     public ProjectAggregate withUncommittedEvents(ProjectId id) {
-        ProjectAggregate givenProject =
+        var givenProject =
                 Given.aggregateOfClass(ProjectAggregate.class)
                      .withId(id)
                      .build();

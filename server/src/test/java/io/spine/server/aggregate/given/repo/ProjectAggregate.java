@@ -57,9 +57,9 @@ public class ProjectAggregate
     @Assign
     AggProjectCreated handle(AggCreateProject msg) {
         return AggProjectCreated.newBuilder()
-                                .setProjectId(msg.getProjectId())
-                                .setName(msg.getName())
-                                .build();
+                .setProjectId(msg.getProjectId())
+                .setName(msg.getName())
+                .build();
     }
 
     @Apply
@@ -71,9 +71,9 @@ public class ProjectAggregate
     @Assign
     AggTaskAdded handle(AggAddTask msg) {
         return AggTaskAdded.newBuilder()
-                           .setProjectId(msg.getProjectId())
-                           .setTask(msg.getTask())
-                           .build();
+                .setProjectId(msg.getProjectId())
+                .setTask(msg.getTask())
+                .build();
     }
 
     @Apply
@@ -85,8 +85,8 @@ public class ProjectAggregate
     @Assign
     AggProjectStarted handle(AggStartProject msg) {
         return AggProjectStarted.newBuilder()
-                                .setProjectId(msg.getProjectId())
-                                .build();
+                .setProjectId(msg.getProjectId())
+                .build();
     }
 
     @Apply
@@ -104,8 +104,7 @@ public class ProjectAggregate
     Optional<AggProjectArchived> on(AggProjectArchived event) {
         if (event.getChildProjectIdList()
                  .contains(id())) {
-            AggProjectArchived reaction = AggProjectArchived
-                    .newBuilder()
+            var reaction = AggProjectArchived.newBuilder()
                     .setProjectId(id())
                     .build();
             return Optional.of(reaction);
@@ -129,8 +128,7 @@ public class ProjectAggregate
     Optional<AggProjectDeleted> on(AggProjectDeleted event) {
         if (event.getChildProjectIdList()
                  .contains(id())) {
-            AggProjectDeleted reaction = AggProjectDeleted
-                    .newBuilder()
+            var reaction = AggProjectDeleted.newBuilder()
                     .setProjectId(id())
                     .build();
             return Optional.of(reaction);

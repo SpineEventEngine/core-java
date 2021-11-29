@@ -38,9 +38,12 @@ import io.spine.validate.ValidatingBuilder;
 /**
  * Utility class for building aggregates for tests.
  *
- * @param <A> the type of the aggregate to build
- * @param <I> the type of aggregate IDs
- * @param <S> the type of the aggregate state
+ * @param <A>
+ *         the type of the aggregate to build
+ * @param <I>
+ *         the type of aggregate IDs
+ * @param <S>
+ *         the type of the aggregate state
  */
 @VisibleForTesting
 public class AggregateBuilder<A extends Aggregate<I, S, ?>,
@@ -53,17 +56,17 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
         // Have the constructor for easier location of usages.
     }
 
-    @CanIgnoreReturnValue
     @Override
+    @CanIgnoreReturnValue
     public AggregateBuilder<A, I, S> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})    /* To avoid massive generics hell. */
     protected void setState(A result, S state, Version version) {
-        TestAggregateTransaction tx = new TestAggregateTransaction(result, state, version);
+        var tx = new TestAggregateTransaction(result, state, version);
         tx.commit();
     }
 

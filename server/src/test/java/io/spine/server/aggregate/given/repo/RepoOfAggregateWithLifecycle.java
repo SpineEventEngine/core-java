@@ -28,7 +28,6 @@ package io.spine.server.aggregate.given.repo;
 
 import com.google.common.base.Splitter;
 import io.spine.base.CommandMessage;
-import io.spine.core.CommandContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.CommandRouting;
@@ -52,16 +51,7 @@ public class RepoOfAggregateWithLifecycle
      * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
      */
     private static final CommandRoute<Long, CommandMessage> parsingRoute =
-            new CommandRoute<Long, CommandMessage>() {
-
-                private static final long serialVersionUID = 0L;
-
-                @Override
-                public Long apply(CommandMessage message, CommandContext context) {
-                    Long result = getId((Evaluate) message);
-                    return result;
-                }
-            };
+            (msg, ctx) -> getId((Evaluate) msg);
 
     @Override
     protected void setupCommandRouting(CommandRouting<Long> routing) {
@@ -77,8 +67,8 @@ public class RepoOfAggregateWithLifecycle
      */
     public static Evaluate createCommandMessage(Long id, String msg) {
         return Evaluate.newBuilder()
-                       .setCmd(format("%d%s%s", id, SEPARATOR, msg))
-                       .build();
+                .setCmd(format("%d%s%s", id, SEPARATOR, msg))
+                .build();
     }
 
     private static Long getId(Evaluate commandMessage) {

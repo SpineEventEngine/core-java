@@ -26,7 +26,6 @@
 
 package io.spine.server.aggregate.given;
 
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
@@ -63,12 +62,10 @@ public class StorageRecords {
     /** Creates new builder for an aggregate event record and sets the passed timestamp. */
     private static <I> AggregateEventRecord.Builder
     newRecordWith(EventId eventId, I aggregateId, Timestamp timestamp) {
-        AggregateEventRecordId recordId = AggregateEventRecordId
-                .newBuilder()
+        var recordId = AggregateEventRecordId.newBuilder()
                 .setValue(eventId.getValue())
                 .vBuild();
-        return AggregateEventRecord
-                .newBuilder()
+        return AggregateEventRecord.newBuilder()
                 .setId(recordId)
                 .setAggregateId(Identifier.pack(aggregateId))
                 .setTimestamp(timestamp);
@@ -79,7 +76,7 @@ public class StorageRecords {
      */
     public static <I> AggregateEventRecord create(I aggregateId, Timestamp timestamp) {
         EventMessage eventMessage = Sample.messageOfType(AggProjectCreated.class);
-        Event event = eventFactory.createEvent(eventMessage);
+        var event = eventFactory.createEvent(eventMessage);
         return newRecordWith(event.getId(), aggregateId, timestamp)
                 .setEvent(event)
                 .build();
@@ -109,24 +106,20 @@ public class StorageRecords {
      *         the timestamp of first record.
      */
     public static List<AggregateEventRecord> sequenceFor(ProjectId id, Timestamp start) {
-        Duration delta = seconds(10);
-        Timestamp timestamp2 = add(start, delta);
-        Timestamp timestamp3 = add(timestamp2, delta);
+        var delta = seconds(10);
+        var timestamp2 = add(start, delta);
+        var timestamp3 = add(timestamp2, delta);
 
-        TestEventFactory eventFactory = newInstance(Given.class);
+        var factory = newInstance(Given.class);
 
-        Event e1 = eventFactory.createEvent(projectCreated(id, Given.projectName(id)),
-                                            null,
-                                            start);
-        AggregateEventRecord record1 = create(id, start, e1);
+        var e1 = factory.createEvent(projectCreated(id, Given.projectName(id)), null, start);
+        var record1 = create(id, start, e1);
 
-        Event e2 = eventFactory.createEvent(taskAdded(id), null, timestamp2);
-        AggregateEventRecord record2 = create(id, timestamp2, e2);
+        var e2 = factory.createEvent(taskAdded(id), null, timestamp2);
+        var record2 = create(id, timestamp2, e2);
 
-        Event e3 = eventFactory.createEvent(Given.EventMessage.projectStarted(id),
-                                            null,
-                                            timestamp3);
-        AggregateEventRecord record3 = create(id, timestamp3, e3);
+        var e3 = factory.createEvent(Given.EventMessage.projectStarted(id), null, timestamp3);
+        var record3 = create(id, timestamp3, e3);
 
         return newArrayList(record1, record2, record3);
     }

@@ -29,15 +29,12 @@ package io.spine.server.aggregate.given.repo;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
-import io.spine.core.EventContext;
-import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.server.Identity;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
@@ -46,7 +43,6 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static io.spine.protobuf.AnyPacker.pack;
 
@@ -69,28 +65,14 @@ public class ProjectAggregateRepository
 
     private @Nullable AggregateStorage<ProjectId, AggProject> customStorage;
 
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {
         super.setupEventRouting(routing);
         routing.route(AggProjectArchived.class,
-                      new EventRoute<ProjectId, AggProjectArchived>() {
-                          private static final long serialVersionUID = 0L;
-
-                          @Override
-                          public Set<ProjectId> apply(AggProjectArchived msg, EventContext ctx) {
-                              return ImmutableSet.copyOf(msg.getChildProjectIdList());
-                          }
-                      })
+                      (msg, ctx) -> ImmutableSet.copyOf(msg.getChildProjectIdList()))
                .route(AggProjectDeleted.class,
-                      new EventRoute<ProjectId, AggProjectDeleted>() {
-                          private static final long serialVersionUID = 0L;
+                      (msg, ctx) -> ImmutableSet.copyOf(msg.getChildProjectIdList()));
 
-                          @Override
-                          public Set<ProjectId> apply(AggProjectDeleted msg, EventContext ctx) {
-                              return ImmutableSet.copyOf(msg.getChildProjectIdList());
-                          }
-                      });
     }
 
     @Override
@@ -128,24 +110,21 @@ public class ProjectAggregateRepository
     }
 
     private void postStateUpdate(ProjectAggregate aggregate) {
-        Any id = Identifier.pack(aggregate.id());
-        Any state = pack(aggregate.state());
-        EntityRecord previousRecord = EntityRecord
-                .newBuilder()
+        var id = Identifier.pack(aggregate.id());
+        var state = pack(aggregate.state());
+        var previousRecord = EntityRecord.newBuilder()
                 .setEntityId(id)
                 .setState(Any.getDefaultInstance())
                 .build();
-        EntityRecord newRecord = previousRecord
-                .toBuilder()
+        var newRecord = previousRecord.toBuilder()
                 .setEntityId(id)
                 .setState(state)
                 .build();
-        EntityRecordChange change = EntityRecordChange
-                .newBuilder()
+        var change = EntityRecordChange.newBuilder()
                 .setPreviousValue(previousRecord)
                 .setNewValue(newRecord)
                 .build();
-        MessageId origin = Identity.byString("some-random-origin");
+        var origin = Identity.byString("some-random-origin");
         lifecycleOf(aggregate.id())
                 .onStateChanged(change, ImmutableSet.of(origin), Origin.getDefaultInstance());
     }

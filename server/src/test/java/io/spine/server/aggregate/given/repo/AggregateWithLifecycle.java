@@ -44,8 +44,8 @@ public class AggregateWithLifecycle
 
     @Assign
     Evaluated handle(Evaluate commandMessage) {
-        String command = commandMessage.getCmd();
-        String result = command + 'd';
+        var command = commandMessage.getCmd();
+        var result = command + 'd';
         return Evaluated
                 .newBuilder()
                 .setCmd(result)
@@ -54,7 +54,7 @@ public class AggregateWithLifecycle
 
     @Apply
     private void on(Evaluated eventMessage) {
-        String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
+        var msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
         if (namedAfterColumn(msg, ArchivedColumn.instance())) {
             setArchived(true);
         }

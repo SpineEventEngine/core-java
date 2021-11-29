@@ -80,28 +80,28 @@ public class AggregateRepositoryTestEnv {
     }
 
     public static ProjectAggregate givenStoredAggregate() {
-        ProjectId id = Sample.messageOfType(ProjectId.class);
-        ProjectAggregate aggregate = givenAggregate().withUncommittedEvents(id);
+        var id = Sample.messageOfType(ProjectId.class);
+        var aggregate = givenAggregate().withUncommittedEvents(id);
 
         repository.storeAggregate(aggregate);
         return aggregate;
     }
 
     public static void givenStoredAggregateWithId(String id) {
-        ProjectId projectId = givenAggregateId(id);
-        ProjectAggregate aggregate = givenAggregate().withUncommittedEvents(projectId);
+        var projectId = givenAggregateId(id);
+        var aggregate = givenAggregate().withUncommittedEvents(projectId);
 
         repository.storeAggregate(aggregate);
     }
 
     private static TestActorRequestFactory newRequestFactory() {
-        TestActorRequestFactory requestFactory =
+        var requestFactory =
                 new TestActorRequestFactory(AggregateRepositoryTestEnv.class);
         return requestFactory;
     }
 
     private static BoundedContext newBoundedContext() {
-        BoundedContext context = BoundedContextBuilder.assumingTests().build();
+        var context = BoundedContextBuilder.assumingTests().build();
         return context;
     }
 
