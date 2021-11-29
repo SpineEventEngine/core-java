@@ -26,20 +26,16 @@
 
 package io.spine.server.type;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.RejectionEventContext;
 import io.spine.core.TenantId;
 import io.spine.server.enrich.EnrichmentService;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
-
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -75,7 +71,7 @@ public final class EventEnvelope
      */
     @Override
     public EventId id() {
-        EventId result = outerObject().getId();
+        var result = outerObject().getId();
         return result;
     }
 
@@ -122,7 +118,7 @@ public final class EventEnvelope
      * Obtains the type of the event message.
      */
     public TypeName messageTypeName() {
-        TypeName result = TypeName.of(message());
+        var result = TypeName.of(message());
         return result;
     }
 
@@ -135,9 +131,9 @@ public final class EventEnvelope
     @Override
     public MessageClass<?> originClass() {
         if (isRejection()) {
-            RejectionEventContext rejection = context().getRejection();
-            CommandMessage commandMessage = rejection.getCommand()
-                                                     .enclosedMessage();
+            var rejection = context().getRejection();
+            var commandMessage = rejection.getCommand()
+                                          .enclosedMessage();
             return CommandClass.of(commandMessage);
         } else {
             return EmptyClass.instance();
@@ -164,7 +160,7 @@ public final class EventEnvelope
      * Returns {@code true} is the wrapped event is external, {@code false} otherwise.
      */
     public boolean isExternal() {
-        boolean external = context().getExternal();
+        var external = context().getExternal();
         return external;
     }
 
@@ -173,9 +169,9 @@ public final class EventEnvelope
         if (!isEnrichmentEnabled()) {
             return this;
         }
-        Optional<Enrichment> enrichment = service.createEnrichment(message(), this.context());
-        EventEnvelope result = enrichment.map(this::withEnrichment)
-                                         .orElse(this);
+        var enrichment = service.createEnrichment(message(), this.context());
+        var result = enrichment.map(this::withEnrichment)
+                               .orElse(this);
         return result;
     }
 
@@ -183,7 +179,7 @@ public final class EventEnvelope
      * Verifies if the enrichment of the message is enabled.
      */
     public final boolean isEnrichmentEnabled() {
-        boolean result = enrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
+        var result = enrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
         return result;
     }
 
@@ -192,15 +188,13 @@ public final class EventEnvelope
     }
 
     private EventEnvelope withEnrichment(Enrichment enrichment) {
-        EventContext context =
-                this.context()
-                    .toBuilder()
-                    .setEnrichment(enrichment)
-                    .build();
-        Event enrichedCopy =
-                outerObject().toBuilder()
-                             .setContext(context)
-                             .build();
+        var context = this.context()
+                .toBuilder()
+                .setEnrichment(enrichment)
+                .build();
+        var enrichedCopy = outerObject().toBuilder()
+                .setContext(context)
+                .build();
         return of(enrichedCopy);
     }
 }

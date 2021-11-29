@@ -68,7 +68,7 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
         if (!(obj instanceof AbstractMessageEnvelope)) {
             return false;
         }
-        AbstractMessageEnvelope<?, ?, ?> other = (AbstractMessageEnvelope<?, ?, ?>) obj;
+        var other = (AbstractMessageEnvelope<?, ?, ?>) obj;
         return Objects.equals(this.object, other.object);
     }
 
