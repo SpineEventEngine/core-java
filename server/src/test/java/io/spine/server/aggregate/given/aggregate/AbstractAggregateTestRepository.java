@@ -32,17 +32,18 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.tenant.TenantAwareRunner;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A test repository which can load an aggregate by its ID and fail the test if the
  * aggregate with such ID is not found.
  *
- * @param <I> the type of aggregate identifiers
- * @param <A> the type of aggregates
- * @param <S> the type of aggregate state
+ * @param <I>
+ *         the type of aggregate identifiers
+ * @param <A>
+ *         the type of aggregates
+ * @param <S>
+ *         the type of aggregate state
  */
 public class AbstractAggregateTestRepository<I,
                                              A extends Aggregate<I, S, ?>,
@@ -50,16 +51,16 @@ public class AbstractAggregateTestRepository<I,
         extends AggregateRepository<I, A, S> {
 
     public A loadAggregate(I id) {
-        Optional<A> optional = find(id);
-        if (!optional.isPresent()) {
+        var optional = find(id);
+        if (optional.isEmpty()) {
             fail("Aggregate not found.");
         }
         return optional.get();
     }
 
     public A loadAggregate(TenantId tenantId, I id) {
-        TenantAwareRunner runner = TenantAwareRunner.with(tenantId);
-        A result = runner.evaluate(() -> loadAggregate(id));
+        var runner = TenantAwareRunner.with(tenantId);
+        var result = runner.evaluate(() -> loadAggregate(id));
         return result;
     }
 }

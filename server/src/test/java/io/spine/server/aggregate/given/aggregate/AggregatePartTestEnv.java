@@ -57,8 +57,7 @@ public final class AggregatePartTestEnv {
     }
 
     public static AggCreateTask createTask() {
-        AggCreateTask command = AggCreateTask
-                .newBuilder()
+        var command = AggCreateTask.newBuilder()
                 .setTaskId(ID)
                 .setAssignee(ASSIGNEE)
                 .build();
@@ -66,8 +65,7 @@ public final class AggregatePartTestEnv {
     }
 
     public static AggAddComment commentTask() {
-        AggAddComment command = AggAddComment
-                .newBuilder()
+        var command = AggAddComment.newBuilder()
                 .setTaskId(ID)
                 .setAuthor(COMMENT_AUTHOR)
                 .setText("ASAP")
