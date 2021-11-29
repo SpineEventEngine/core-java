@@ -65,7 +65,7 @@ public class InvalidEventException extends EventException implements MessageInva
     public static
     InvalidEventException onConstraintViolations(EventMessage eventMsg,
                                                  Iterable<ConstraintViolation> violations) {
-        Factory factory = new Factory(eventMsg, violations);
+        var factory = new Factory(eventMsg, violations);
         return factory.newException();
     }
 

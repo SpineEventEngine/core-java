@@ -36,10 +36,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.Identity;
 import io.spine.server.bus.MessageDispatcher;
-import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.model.EventSubscriberClass;
-import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
@@ -47,7 +45,6 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -109,7 +106,7 @@ public abstract class AbstractEventSubscriber
      * subscriber} method of the entity.
      */
     protected void handle(EventEnvelope event) {
-        DispatchOutcome outcome =
+        var outcome =
                 thisClass.subscriberOf(event)
                          .map(method -> method.invoke(this, event))
                          .orElseGet(() -> ignored(thisClass, event));
@@ -120,8 +117,7 @@ public abstract class AbstractEventSubscriber
     }
 
     private void postFailure(Error error, EventEnvelope event) {
-        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
-                .newBuilder()
+        var systemEvent = HandlerFailedUnexpectedly.newBuilder()
                 .setEntity(eventAnchor())
                 .setHandledSignal(event.messageId())
                 .setError(error)
@@ -142,7 +138,7 @@ public abstract class AbstractEventSubscriber
 
     @Override
     public boolean canDispatch(EventEnvelope event) {
-        Optional<SubscriberMethod> subscriber = thisClass.subscriberOf(event);
+        var subscriber = thisClass.subscriberOf(event);
         return subscriber.isPresent();
     }
 

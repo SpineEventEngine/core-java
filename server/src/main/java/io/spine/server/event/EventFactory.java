@@ -30,7 +30,6 @@ import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.validate.ValidationException;
@@ -60,7 +59,7 @@ public class EventFactory extends EventFactoryBase {
     public static EventFactory on(MessageEnvelope<?, ?, ?> origin, Any producerId) {
         checkNotNull(origin);
         checkNotNull(producerId);
-        EventOrigin eventOrigin = fromAnotherMessage(origin);
+        var eventOrigin = fromAnotherMessage(origin);
         return new EventFactory(eventOrigin, producerId);
     }
 
@@ -78,7 +77,7 @@ public class EventFactory extends EventFactoryBase {
         checkNotNull(producerId);
         checkValid(actorContext);
 
-        EventOrigin origin = EventOrigin.forImport(actorContext);
+        var origin = EventOrigin.forImport(actorContext);
         return new EventFactory(origin, producerId);
     }
 
@@ -100,7 +99,7 @@ public class EventFactory extends EventFactoryBase {
      */
     public Event createEvent(EventMessage msg, Version version)
             throws ValidationException {
-        EventContext context = createContext(version);
+        var context = createContext(version);
         return assemble(msg, context);
     }
 
@@ -112,7 +111,7 @@ public class EventFactory extends EventFactoryBase {
      * @see #createEvent(EventMessage, Version)
      */
     public Event createEvent(EventMessage msg) throws ValidationException {
-        EventContext context = createContext(null);
+        var context = createContext(null);
         return assemble(msg, context);
     }
 }
