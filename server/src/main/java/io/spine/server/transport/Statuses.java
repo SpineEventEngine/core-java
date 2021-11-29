@@ -26,7 +26,6 @@
 
 package io.spine.server.transport;
 
-import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.annotation.Internal;
@@ -69,9 +68,9 @@ public final class Statuses {
      * @see #invalidArgumentWithCause(MessageError)
      */
     private static StatusRuntimeException createException(Throwable cause, Error error) {
-        Metadata metadata = MetadataConverter.toMetadata(error);
-        StatusRuntimeException result = INVALID_ARGUMENT.withCause(cause)
-                                                        .asRuntimeException(metadata);
+        var metadata = MetadataConverter.toMetadata(error);
+        var result = INVALID_ARGUMENT.withCause(cause)
+                                     .asRuntimeException(metadata);
         return result;
     }
 }

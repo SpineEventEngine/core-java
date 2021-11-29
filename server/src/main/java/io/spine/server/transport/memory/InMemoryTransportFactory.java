@@ -70,14 +70,14 @@ public class InMemoryTransportFactory implements TransportFactory {
     @Override
     public final synchronized Publisher createPublisher(ChannelId id) {
         checkNotNull(id);
-        InMemoryPublisher result = new InMemoryPublisher(id, providerOf(subscribers()));
+        var result = new InMemoryPublisher(id, providerOf(subscribers()));
         return result;
     }
 
     @Override
     public final synchronized Subscriber createSubscriber(ChannelId id) {
         checkNotNull(id);
-        Subscriber subscriber = newSubscriber(id);
+        var subscriber = newSubscriber(id);
         subscribers().put(id, subscriber);
         return subscriber;
     }

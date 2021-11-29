@@ -90,7 +90,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * @return a channel with the key
      */
     public C get(ChannelId channelId) {
-        C channel = channels.computeIfAbsent(channelId, this::newChannel);
+        var channel = channels.computeIfAbsent(channelId, this::newChannel);
         return channel;
     }
 
@@ -98,16 +98,16 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * Closes the stale channels and removes those from the hub.
      */
     public void closeStaleChannels() {
-        Set<ChannelId> staleChannels = detectStale();
-        for (ChannelId id : staleChannels) {
+        var staleChannels = detectStale();
+        for (var id : staleChannels) {
             channels.remove(id);
         }
     }
 
     private Set<ChannelId> detectStale() {
         Set<ChannelId> toRemove = newHashSet();
-        for (ChannelId channelId : channels.keySet()) {
-            C channel = channels.get(channelId);
+        for (var channelId : channels.keySet()) {
+            var channel = channels.get(channelId);
             if (channel.isStale()) {
                 try {
                     channel.close();
@@ -123,7 +123,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
 
     @Override
     public void close() throws Exception {
-        for (C channel : channels.values()) {
+        for (var channel : channels.values()) {
             channel.close();
         }
         channels.clear();
