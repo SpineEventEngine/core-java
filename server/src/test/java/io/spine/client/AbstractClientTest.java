@@ -66,8 +66,8 @@ abstract class AbstractClientTest {
 
     @BeforeEach
     void createServerAndClient() throws IOException {
-        String serverName = generateServerName();
-        Server.Builder serverBuilder = Server.inProcess(serverName);
+        var serverName = generateServerName();
+        var serverBuilder = Server.inProcess(serverName);
         contexts().forEach(serverBuilder::add);
         server = serverBuilder.build();
         server.start();

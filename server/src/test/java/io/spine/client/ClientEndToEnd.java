@@ -113,9 +113,8 @@ class ClientEndToEnd {
     @Test
     @DisplayName("post Command and subscribe to Event which is not declared explicitly")
     void subscribeToEvent() {
-        AtomicBoolean fired = new AtomicBoolean(false);
-        CreateTask task = CreateTask
-                .newBuilder()
+        var fired = new AtomicBoolean(false);
+        var task = CreateTask.newBuilder()
                 .setId(TaskId.generate())
                 .setName("My task")
                 .setAuthor(GivenUserId.generated())

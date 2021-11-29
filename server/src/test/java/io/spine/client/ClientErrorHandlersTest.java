@@ -58,7 +58,7 @@ public class ClientErrorHandlersTest extends AbstractClientTest {
      */
     @Override
     protected Client.Builder newClientBuilder(String serverName) {
-        Client.Builder builder = super.newClientBuilder(serverName);
+        var builder = super.newClientBuilder(serverName);
         builder.onStreamingError(errorHandler)
                .onServerError(serverErrorHandler);
         return builder;

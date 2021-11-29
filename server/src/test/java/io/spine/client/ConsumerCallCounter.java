@@ -58,7 +58,7 @@ final class ConsumerCallCounter {
 
     @SafeVarargs
     final boolean containsAll(Class<? extends EventMessage>... types) {
-        ImmutableList<Class<? extends EventMessage>> asList = ImmutableList.copyOf(types);
+        var asList = ImmutableList.copyOf(types);
         return eventTypes.containsAll(asList);
     }
 }

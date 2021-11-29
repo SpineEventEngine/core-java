@@ -141,7 +141,7 @@ class CommandRequestTest extends AbstractClientTest {
         }
 
         @SafeVarargs
-        private final void assertDelivered(Class<? extends EventMessage>... classes) {
+        private void assertDelivered(Class<? extends EventMessage>... classes) {
             assertThat(counter.containsAll(classes))
                     .isTrue();
         }
@@ -197,7 +197,7 @@ class CommandRequestTest extends AbstractClientTest {
                     handlerInvoked = true;
                     passedThrowable = th;
                 };
-                RuntimeException exception = new RuntimeException("Consumer-generated error.");
+                var exception = new RuntimeException("Consumer-generated error.");
 
                 commandRequest.onConsumingError(handler)
                               .observe(UserLoggedIn.class, e -> {
@@ -239,11 +239,10 @@ class CommandRequestTest extends AbstractClientTest {
                     returnedError = error;
                 };
 
-                UnsupportedCommand commandMessage = UnsupportedCommand
-                        .newBuilder()
+                var commandMessage = UnsupportedCommand.newBuilder()
                         .setUser(GivenUserId.generated())
                         .build();
-                CommandRequest request =
+                var request =
                         client().asGuest()
                                 .command(commandMessage)
                                 .onServerError(handler);
@@ -253,8 +252,7 @@ class CommandRequestTest extends AbstractClientTest {
                         .isNotNull();
                 assertThat(postedMessage)
                         .isInstanceOf(Command.class);
-                Command expected = Command
-                        .newBuilder()
+                var expected = Command.newBuilder()
                         .setMessage(AnyPacker.pack(commandMessage))
                         .build();
                 assertThat(postedMessage)

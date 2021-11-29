@@ -127,8 +127,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
         void byMessageField() {
             assertThat(rememberedMessage)
                     .isInstanceOf(UserLoggedIn.class);
-            UserLoggedIn expected = UserLoggedIn
-                    .newBuilder()
+            var expected = UserLoggedIn.newBuilder()
                     .setUser(userId)
                     .build();
             ProtoTruth.assertThat(rememberedMessage)
