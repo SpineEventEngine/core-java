@@ -78,7 +78,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     Quintet<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
         checkAllNotNullOrEmpty(a, b, c, d, e);
-        Quintet<A, B, C, D, E> result = new Quintet<>(a, b, c, d, e);
+        var result = new Quintet<>(a, b, c, d, e);
         return result;
     }
 
@@ -91,7 +91,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable(A a, B b, C c, D d, @Nullable E e) {
         checkAllNotNullOrEmpty(a, b, c, d);
         checkNotEmpty(e);
-        Quintet<A, B, C, D, Optional<E>> result = new Quintet<>(a, b, c, d, ofNullable(e));
+        var result = new Quintet<>(a, b, c, d, ofNullable(e));
         return result;
     }
 
@@ -104,8 +104,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable2(A a, B b, C c, @Nullable D d, @Nullable E e) {
         checkAllNotNullOrEmpty(a, b, c);
         checkAllNotEmpty(e, d);
-        Quintet<A, B, C, Optional<D>, Optional<E>> result =
-                new Quintet<>(a, b, c, ofNullable(d), ofNullable(e));
+        var result = new Quintet<>(a, b, c, ofNullable(d), ofNullable(e));
         return result;
     }
 
@@ -118,8 +117,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable3(A a, B b, @Nullable C c, @Nullable D d, @Nullable E e) {
         checkAllNotNullOrEmpty(a, b);
         checkAllNotEmpty(c, d, e);
-        Quintet<A, B, Optional<C>, Optional<D>, Optional<E>> result =
-                new Quintet<>(a, b, ofNullable(c), ofNullable(d), ofNullable(e));
+        var result = new Quintet<>(a, b, ofNullable(c), ofNullable(d), ofNullable(e));
         return result;
     }
 
@@ -132,8 +130,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable4(A a, @Nullable B b, @Nullable C c, @Nullable D d, @Nullable E e) {
         checkNotNullOrEmpty(a);
         checkAllNotEmpty(b, c, d, e);
-        Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>> result =
-                new Quintet<>(a, ofNullable(b), ofNullable(c), ofNullable(d), ofNullable(e));
+        var result = new Quintet<>(a, ofNullable(b), ofNullable(c), ofNullable(d), ofNullable(e));
         return result;
     }
 
@@ -159,7 +156,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public boolean hasB() {
-        B value = getB();
+        var value = getB();
         return isOptionalPresent(value);
     }
 
@@ -170,7 +167,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public boolean hasC() {
-        C value = getC();
+        var value = getC();
         return isOptionalPresent(value);
     }
 
@@ -181,7 +178,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public boolean hasD() {
-        D value = getD();
+        var value = getD();
         return isOptionalPresent(value);
     }
 
@@ -192,7 +189,7 @@ public final class Quintet<A extends Message, B, C, D, E>
 
     @Override
     public boolean hasE() {
-        E value = getE();
+        var value = getE();
         return isOptionalPresent(value);
     }
 

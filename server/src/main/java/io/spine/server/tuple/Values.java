@@ -51,7 +51,7 @@ final class Values {
         if(!(value instanceof Optional)) {
             return true;
         }
-        Optional<?> asOptional = (Optional<?>) value;
+        var asOptional = (Optional<?>) value;
         return asOptional.isPresent();
     }
 }

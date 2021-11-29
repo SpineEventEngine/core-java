@@ -56,7 +56,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     public static <A extends Message, B extends Message, C extends Message>
     EitherOf3<A, B, C> withA(A a) {
         checkNotNull(a);
-        EitherOf3<A, B, C> result = new EitherOf3<>(a, IndexOf.A);
+        var result = new EitherOf3<A, B, C>(a, IndexOf.A);
         return result;
     }
 
@@ -66,7 +66,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     public static <A extends Message, B extends Message, C extends Message>
     EitherOf3<A, B, C> withB(B b) {
         checkNotNull(b);
-        EitherOf3<A, B, C> result = new EitherOf3<>(b, IndexOf.B);
+        var result = new EitherOf3<A, B, C>(b, IndexOf.B);
         return result;
     }
 
@@ -76,7 +76,7 @@ public final class EitherOf3<A extends Message, B extends Message, C extends Mes
     public static <A extends Message, B extends Message, C extends Message>
     EitherOf3<A, B, C> withC(C c) {
         checkNotNull(c);
-        EitherOf3<A, B, C> result = new EitherOf3<>(c, IndexOf.C);
+        var result = new EitherOf3<A, B, C>(c, IndexOf.C);
         return result;
     }
 

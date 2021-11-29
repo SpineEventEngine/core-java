@@ -53,7 +53,7 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOf2<A, B> withA(A a) {
         checkNotNull(a);
-        EitherOf2<A, B> result = new EitherOf2<>(a, IndexOf.A);
+        var result = new EitherOf2<A, B>(a, IndexOf.A);
         return result;
     }
 
@@ -62,7 +62,7 @@ public final class EitherOf2<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOf2<A, B> withB(B b) {
         checkNotNull(b);
-        EitherOf2<A, B> result = new EitherOf2<>(b, IndexOf.B);
+        var result = new EitherOf2<A, B>(b, IndexOf.B);
         return result;
     }
 

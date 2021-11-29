@@ -65,7 +65,7 @@ public class EitherOf5<A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOf5<A, B, C, D, E> withA(A a) {
         checkNotNull(a);
-        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(a, IndexOf.A);
+        var result = new EitherOf5<A, B, C, D, E>(a, IndexOf.A);
         return result;
     }
 
@@ -76,7 +76,7 @@ public class EitherOf5<A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOf5<A, B, C, D, E> withB(B b) {
         checkNotNull(b);
-        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(b, IndexOf.B);
+        var result = new EitherOf5<A, B, C, D, E>(b, IndexOf.B);
         return result;
     }
 
@@ -87,7 +87,7 @@ public class EitherOf5<A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOf5<A, B, C, D, E> withC(C c) {
         checkNotNull(c);
-        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(c, IndexOf.C);
+        var result = new EitherOf5<A, B, C, D, E>(c, IndexOf.C);
         return result;
     }
 
@@ -98,7 +98,7 @@ public class EitherOf5<A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOf5<A, B, C, D, E> withD(D d) {
         checkNotNull(d);
-        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(d, IndexOf.D);
+        var result = new EitherOf5<A, B, C, D, E>(d, IndexOf.D);
         return result;
     }
 
@@ -109,7 +109,7 @@ public class EitherOf5<A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOf5<A, B, C, D, E> withE(E e) {
         checkNotNull(e);
-        EitherOf5<A, B, C, D, E> result = new EitherOf5<>(e, IndexOf.E);
+        var result = new EitherOf5<A, B, C, D, E>(e, IndexOf.E);
         return result;
     }
 

@@ -67,9 +67,9 @@ public final class Pair<A extends Message, B>
      * Creates a new pair of values.
      */
     public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
-        A safeA = checkNotNullOrEmpty(a);
-        B safeB = checkNotNullOrEmpty(b);
-        Pair<A, B> result = new Pair<>(safeA, safeB);
+        var safeA = checkNotNullOrEmpty(a);
+        var safeB = checkNotNullOrEmpty(b);
+        var result = new Pair<>(safeA, safeB);
         return result;
     }
 
@@ -82,7 +82,7 @@ public final class Pair<A extends Message, B>
     Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
         checkNotNullOrEmpty(a);
         checkNotEmpty(b);
-        Pair<A, Optional<B>> result = new Pair<>(a, ofNullable(b));
+        var result = new Pair<>(a, ofNullable(b));
         return result;
     }
 
@@ -102,7 +102,7 @@ public final class Pair<A extends Message, B>
     ) {
         checkNotNullOrEmpty(a);
         checkNotNull(b);
-        Pair<A, Optional<B>> result = new Pair<>(a, b);
+        var result = new Pair<>(a, b);
         return result;
     }
 
@@ -112,7 +112,7 @@ public final class Pair<A extends Message, B>
     public static <A extends Message, B extends Either> Pair<A, B> withEither(A a, B b) {
         checkNotNullOrEmpty(a);
         checkNotNull(b);
-        Pair<A, B> result = new Pair<>(a, b);
+        var result = new Pair<>(a, b);
         return result;
     }
 
@@ -138,7 +138,7 @@ public final class Pair<A extends Message, B>
 
     @Override
     public boolean hasB() {
-        B value = getB();
+        var value = getB();
         return isOptionalPresent(value);
     }
 

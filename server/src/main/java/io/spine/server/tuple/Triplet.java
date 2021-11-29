@@ -71,7 +71,7 @@ public final class Triplet<A extends Message, B, C>
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, B, C> of(A a, B b, C c) {
         checkAllNotNullOrEmpty(a, b, c);
-        Triplet<A, B, C> result = new Triplet<>(a, b, c);
+        var result = new Triplet<>(a, b, c);
         return result;
     }
 
@@ -82,7 +82,7 @@ public final class Triplet<A extends Message, B, C>
     Triplet<A, B, Optional<C>> withNullable(A a, B b, @Nullable C c) {
         checkAllNotNullOrEmpty(a, b);
         checkNotEmpty(c);
-        Triplet<A, B, Optional<C>> result = new Triplet<>(a, b, ofNullable(c));
+        var result = new Triplet<>(a, b, ofNullable(c));
         return result;
     }
 
@@ -93,8 +93,7 @@ public final class Triplet<A extends Message, B, C>
     Triplet<A, Optional<B>, Optional<C>> withNullable2(A a, @Nullable B b, @Nullable C c) {
         checkNotNullOrEmpty(a);
         checkAllNotEmpty(b, c);
-        Triplet<A, Optional<B>, Optional<C>> result =
-                new Triplet<>(a, ofNullable(b), ofNullable(c));
+        var result = new Triplet<>(a, ofNullable(b), ofNullable(c));
         return result;
     }
 
@@ -120,7 +119,7 @@ public final class Triplet<A extends Message, B, C>
 
     @Override
     public boolean hasB() {
-        B value = getB();
+        var value = getB();
         return isOptionalPresent(value);
     }
 
@@ -131,7 +130,7 @@ public final class Triplet<A extends Message, B, C>
 
     @Override
     public boolean hasC() {
-        C value = getC();
+        var value = getC();
         return isOptionalPresent(value);
     }
 

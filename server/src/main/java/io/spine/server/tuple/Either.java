@@ -77,9 +77,9 @@ public abstract class Either implements Iterable<Message>, Serializable {
      */
     @SuppressWarnings("TypeParameterUnusedInFormals") // We want to save of casts at the callers.
     protected static <T> T get(Either either, IndexOf index) {
-        int requestedIdx = index.value();
+        var requestedIdx = index.value();
         if (requestedIdx != either.index()) {
-            String errMsg =
+            var errMsg =
                     format("`Either` instance has value of a different type than requested. " +
                                    "Value index in `Either` is %d. Requested index: %d",
                            either.index(), requestedIdx);
@@ -87,7 +87,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
         }
 
         @SuppressWarnings("unchecked") // It's the caller responsibility to ensure correct type.
-        T result = (T) either.value();
+        var result = (T) either.value();
         return result;
 
     }
@@ -105,7 +105,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
         if (!(obj instanceof Either)) {
             return false;
         }
-        Either other = (Either) obj;
+        var other = (Either) obj;
         return Objects.equals(this.value, other.value)
                 && (this.index == other.index);
     }

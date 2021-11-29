@@ -61,7 +61,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withA(A a) {
         checkNotNull(a);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(a, IndexOf.A);
+        var result = new EitherOf4<A, B, C, D>(a, IndexOf.A);
         return result;
     }
 
@@ -71,7 +71,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withB(B b) {
         checkNotNull(b);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(b, IndexOf.B);
+        var result = new EitherOf4<A, B, C, D>(b, IndexOf.B);
         return result;
     }
 
@@ -81,7 +81,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withC(C c) {
         checkNotNull(c);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(c, IndexOf.C);
+        var result = new EitherOf4<A, B, C, D>(c, IndexOf.C);
         return result;
     }
 
@@ -91,7 +91,7 @@ public final class EitherOf4<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOf4<A, B, C, D> withD(D d) {
         checkNotNull(d);
-        EitherOf4<A, B, C, D> result = new EitherOf4<>(d, IndexOf.D);
+        var result = new EitherOf4<A, B, C, D>(d, IndexOf.D);
         return result;
     }
 

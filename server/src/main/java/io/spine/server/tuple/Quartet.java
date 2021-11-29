@@ -74,7 +74,7 @@ public final class Quartet<A extends Message, B, C, D>
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, C, D> of(A a, B b, C c, D d) {
         checkAllNotNullOrEmpty(a, b, c, d);
-        Quartet<A, B, C, D> result = new Quartet<>(a, b, c, d);
+        var result = new Quartet<>(a, b, c, d);
         return result;
     }
 
@@ -85,7 +85,7 @@ public final class Quartet<A extends Message, B, C, D>
     Quartet<A, B, C, Optional<D>> withNullable(A a, B b, C c, @Nullable D d) {
         checkAllNotNullOrEmpty(a, b, c);
         checkNotEmpty(d);
-        Quartet<A, B, C, Optional<D>> result = new Quartet<>(a, b, c, ofNullable(d));
+        var result = new Quartet<>(a, b, c, ofNullable(d));
         return result;
     }
 
@@ -96,8 +96,7 @@ public final class Quartet<A extends Message, B, C, D>
     Quartet<A, B, Optional<C>, Optional<D>> withNullable2(A a, B b, @Nullable C c, @Nullable D d) {
         checkAllNotNullOrEmpty(a, b);
         checkAllNotEmpty(c, d);
-        Quartet<A, B, Optional<C>, Optional<D>> result =
-                new Quartet<>(a, b, ofNullable(c), ofNullable(d));
+        var result = new Quartet<>(a, b, ofNullable(c), ofNullable(d));
         return result;
     }
 
@@ -109,8 +108,7 @@ public final class Quartet<A extends Message, B, C, D>
     withNullable3(A a, @Nullable B b, @Nullable C c, @Nullable D d) {
         checkNotNullOrEmpty(a);
         checkAllNotEmpty(b, c, d);
-        Quartet<A, Optional<B>, Optional<C>, Optional<D>> result =
-                new Quartet<>(a, ofNullable(b), ofNullable(c), ofNullable(d));
+        var result = new Quartet<>(a, ofNullable(b), ofNullable(c), ofNullable(d));
         return result;
     }
 
@@ -136,7 +134,7 @@ public final class Quartet<A extends Message, B, C, D>
 
     @Override
     public boolean hasB() {
-        B value = getB();
+        var value = getB();
         return isOptionalPresent(value);
     }
 
@@ -147,7 +145,7 @@ public final class Quartet<A extends Message, B, C, D>
 
     @Override
     public boolean hasC() {
-        C value = getC();
+        var value = getC();
         return isOptionalPresent(value);
     }
 
@@ -158,7 +156,7 @@ public final class Quartet<A extends Message, B, C, D>
 
     @Override
     public boolean hasD() {
-        D value = getD();
+        var value = getD();
         return isOptionalPresent(value);
     }
 

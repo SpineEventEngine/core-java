@@ -67,9 +67,9 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         super();
 
         ImmutableList.Builder<Element> builder = ImmutableList.builder();
-        for (Object value : values) {
+        for (var value : values) {
             checkNotNull(value);
-            Element element = new Element(value);
+            var element = new Element(value);
             builder.add(element);
         }
 
@@ -88,9 +88,9 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         if (value == null) {
             return null;
         }
-        boolean isEmpty = value instanceof Empty;
+        var isEmpty = value instanceof Empty;
         if (isEmpty) {
-            String shortClassName = checkingClass.getSimpleName();
+            var shortClassName = checkingClass.getSimpleName();
             throw newIllegalArgumentException(
                     "`%s` cannot have `Empty` elements. Use `Optional` instead",
                     shortClassName);
@@ -99,23 +99,24 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     @CanIgnoreReturnValue
+    @SuppressWarnings("ConstantConditions") /* `checkNotNull` is used by design. */
     static <M extends Message, T extends Tuple>
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
-        M result = checkNotEmpty(checkingClass, value);
+        var result = checkNotEmpty(checkingClass, value);
         checkNotNull(result);
         return result;
     }
 
     static <T extends Tuple>
     void checkAllNotNullOrEmpty(Class<T> checkingClass, Message... values) {
-        for (Message value : values) {
+        for (var value : values) {
             checkNotNullOrEmpty(checkingClass, value);
         }
     }
 
     static <T extends Tuple>
     void checkAllNotEmpty(Class<T> checkingClass, Message... values) {
-        for (Message value : values) {
+        for (var value : values) {
             checkNotEmpty(checkingClass, value);
         }
     }
@@ -134,8 +135,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * @throws IndexOutOfBoundsException if the index is out of range
      */
     protected final Object get(int index) {
-        Element element = values.get(index);
-        Object result = element.value();
+        var element = values.get(index);
+        var result = element.value();
         return result;
     }
 
@@ -152,7 +153,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         if (!(obj instanceof Tuple)) {
             return false;
         }
-        Tuple other = (Tuple) obj;
+        var other = (Tuple) obj;
         return Objects.equals(this.values, other.values);
     }
 
@@ -175,8 +176,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
 
         @Override
         public Message next() {
-            Element next = source.next();
-            Message result = next.toMessage();
+            var next = source.next();
+            var result = next.toMessage();
             return result;
         }
     }
