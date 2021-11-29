@@ -118,7 +118,7 @@ public final class Quartet<A extends Message, B, C, D>
     }
 
     /**
-     * {@inheritDoc}
+     * Tells whether the first element of the tuple is set.
      *
      * <p>Always returns {@code true}.
      */

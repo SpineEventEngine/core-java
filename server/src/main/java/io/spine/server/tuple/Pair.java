@@ -122,7 +122,7 @@ public final class Pair<A extends Message, B>
     }
 
     /**
-     * {@inheritDoc}
+     * Tells whether the first element of the tuple is set.
      *
      * <p>Always returns {@code true}.
      */
