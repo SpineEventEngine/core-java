@@ -31,8 +31,6 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.type.TypeUrl;
 
-import java.util.Optional;
-
 /**
  * An abstract base for {@code RequestValidator}s, that check
  * whether the {@link Target target} is supported.
@@ -53,21 +51,21 @@ abstract class AbstractTargetValidator<M extends Message> extends RequestValidat
     }
 
     boolean typeRegistryContains(Target target) {
-        TypeUrl typeUrl = getTypeOf(target);
-        boolean result = typeRegistry.allTypes()
-                                     .contains(typeUrl);
+        var typeUrl = getTypeOf(target);
+        var result = typeRegistry.allTypes()
+                                 .contains(typeUrl);
         return result;
     }
 
     boolean visibilitySufficient(Target target) {
-        TypeUrl typeUrl = getTypeOf(target);
-        Optional<EntityVisibility> visibility = EntityVisibility.of(typeUrl.getMessageClass());
+        var typeUrl = getTypeOf(target);
+        var visibility = EntityVisibility.of(typeUrl.getMessageClass());
         return visibility.isPresent() && visibility.get()
                                                    .isAsLeast(requiredVisibility);
     }
 
     static TypeUrl getTypeOf(Target target) {
-        String typeAsString = target.getType();
+        var typeAsString = target.getType();
         return TypeUrl.parse(typeAsString);
     }
 }

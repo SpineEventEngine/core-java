@@ -26,7 +26,6 @@
 package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.ResponseFormat;
@@ -51,29 +50,28 @@ class EntityQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
-        Iterator<EntityRecord> entities = query.all()
-                                          ? loadAll(query.responseFormat())
-                                          : loadByQuery(query);
-        ImmutableList<EntityStateWithVersion> result = stream(entities)
+        var entities = query.all()
+                       ? loadAll(query.responseFormat())
+                       : loadByQuery(query);
+        var result = stream(entities)
                 .map(EntityQueryProcessor::toEntityState)
                 .collect(toImmutableList());
         return result;
     }
 
     private Iterator<EntityRecord> loadByQuery(Query query) {
-        Iterator<EntityRecord> entities =
+        var entities =
                 repository.findRecords(query.filters(), query.responseFormat());
         return entities;
     }
 
     private Iterator<EntityRecord> loadAll(ResponseFormat format) {
-        Iterator<EntityRecord> entities = repository.findRecords(format);
+        var entities = repository.findRecords(format);
         return entities;
     }
 
     private static EntityStateWithVersion toEntityState(EntityRecord record) {
-        EntityStateWithVersion result = EntityStateWithVersion
-                .newBuilder()
+        var result = EntityStateWithVersion.newBuilder()
                 .setState(record.getState())
                 .setVersion(record.getVersion())
                 .build();

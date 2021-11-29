@@ -54,7 +54,7 @@ final class InMemoryEventRegistry implements EventRegistry {
     @Override
     public void register(Repository<?, ?> repository) {
         if (repository instanceof EventProducingRepository) {
-            EventProducingRepository repo = (EventProducingRepository) repository;
+            var repo = (EventProducingRepository) repository;
             repo.outgoingEvents()
                 .forEach(this::putIntoMap);
         }
@@ -87,7 +87,7 @@ final class InMemoryEventRegistry implements EventRegistry {
     }
 
     private void putIntoMap(EventClass eventClass) {
-        TypeUrl typeUrl = eventClass.typeUrl();
+        var typeUrl = eventClass.typeUrl();
         eventClasses.put(typeUrl, eventClass);
     }
 }

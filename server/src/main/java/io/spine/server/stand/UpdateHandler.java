@@ -31,7 +31,6 @@ import io.spine.client.IdFilter;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
-import io.spine.client.TargetFilters;
 import io.spine.logging.Logging;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -150,16 +149,16 @@ abstract class UpdateHandler implements Logging {
      * Checks if the event matches the subscription ID filter.
      */
     boolean idMatches(EventEnvelope event) {
-        TargetFilters filters = target().getFilters();
-        IdFilter idFilter = filters.getIdFilter();
-        boolean idFilterSet = !IdFilter.getDefaultInstance()
-                                       .equals(idFilter);
+        var filters = target().getFilters();
+        var idFilter = filters.getIdFilter();
+        var idFilterSet = !IdFilter.getDefaultInstance()
+                                   .equals(idFilter);
         if (!idFilterSet) {
             return true;
         }
-        Any id = extractId(event);
-        boolean result = idFilter.getIdList()
-                                 .contains(id);
+        var id = extractId(event);
+        var result = idFilter.getIdList()
+                             .contains(id);
         return result;
     }
 

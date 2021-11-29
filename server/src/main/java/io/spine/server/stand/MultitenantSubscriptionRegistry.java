@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Registry for subscription management in a multi-tenant context.
@@ -97,19 +97,18 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     private SubscriptionRegistry registrySlice() {
-        TenantFunction<SubscriptionRegistry> func =
-                new TenantFunction<SubscriptionRegistry>(isMultitenant()) {
-                    @Override
-                    public SubscriptionRegistry apply(@Nullable TenantId tenantId) {
-                        checkNotNull(tenantId);
-                        SubscriptionRegistry slice = tenantSlices.computeIfAbsent(
-                                tenantId,
-                                id -> new TenantSubscriptionRegistry()
-                        );
-                        return slice;
-                    }
-                };
-        SubscriptionRegistry result = func.execute();
-        return result;
+        var func = new TenantFunction<SubscriptionRegistry>(isMultitenant()) {
+            @Override
+            public SubscriptionRegistry apply(@Nullable TenantId tenantId) {
+                requireNonNull(tenantId);
+                var slice = tenantSlices.computeIfAbsent(
+                        tenantId,
+                        id -> new TenantSubscriptionRegistry()
+                );
+                return slice;
+            }
+        };
+        var result = func.execute();
+        return requireNonNull(result);
     }
 }

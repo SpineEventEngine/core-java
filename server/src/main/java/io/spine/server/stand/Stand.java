@@ -28,7 +28,6 @@ package io.spine.server.stand;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -37,11 +36,9 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
-import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.Response;
 import io.spine.core.Responses;
-import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.EventProducer;
 import io.spine.server.Identity;
@@ -50,7 +47,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.entity.QueryableRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
@@ -61,7 +57,6 @@ import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.ack;
@@ -150,18 +145,16 @@ public class Stand implements AutoCloseable {
      */
     @VisibleForTesting
     void post(Entity<?, ?> entity, EntityLifecycle lifecycle) {
-        Any id = Identifier.pack(entity.id());
-        Any state = AnyPacker.pack(entity.state());
-        EntityRecord record = EntityRecord
-                .newBuilder()
+        var id = Identifier.pack(entity.id());
+        var state = AnyPacker.pack(entity.state());
+        var record = EntityRecord.newBuilder()
                 .setEntityId(id)
                 .setState(state)
                 .vBuild();
-        EntityRecordChange change = EntityRecordChange
-                .newBuilder()
+        var change = EntityRecordChange.newBuilder()
                 .setNewValue(record)
                 .vBuild();
-        MessageId origin = Identity.byString("Stand-received-entity-update");
+        var origin = Identity.byString("Stand-received-entity-update");
         lifecycle.onStateChanged(change,
                                  ImmutableSet.of(origin),
                                  Origin.getDefaultInstance());
@@ -185,12 +178,12 @@ public class Stand implements AutoCloseable {
             throws InvalidRequestException {
         topicValidator.validate(topic);
 
-        TenantId tenantId = topic.getContext()
-                                 .getTenantId();
-        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+        var tenantId = topic.getContext()
+                            .getTenantId();
+        var op = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                Subscription subscription = subscriptionRegistry.add(topic);
+                var subscription = subscriptionRegistry.add(topic);
                 responseObserver.onNext(subscription);
                 responseObserver.onCompleted();
             }
@@ -207,12 +200,12 @@ public class Stand implements AutoCloseable {
      *         an existing subscription
      */
     public void subscribe(Subscription subscription) throws InvalidRequestException {
-        Topic topic = subscription.getTopic();
+        var topic = subscription.getTopic();
         topicValidator.validate(topic);
 
-        TenantId tenantId = topic.getContext()
-                                 .getTenantId();
-        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+        var tenantId = topic.getContext()
+                            .getTenantId();
+        var op = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 subscriptionRegistry.add(subscription);
@@ -245,7 +238,7 @@ public class Stand implements AutoCloseable {
 
         subscriptionValidator.validate(subscription);
 
-        SubscriptionOperation op = new SubscriptionOperation(subscription) {
+        var op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
                 subscriptionRegistry.activate(subscription, callback);
@@ -275,7 +268,7 @@ public class Stand implements AutoCloseable {
             throws InvalidRequestException {
         subscriptionValidator.validate(subscription);
 
-        SubscriptionOperation op = new SubscriptionOperation(subscription) {
+        var op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
                 subscriptionRegistry.remove(subscription);
@@ -344,15 +337,14 @@ public class Stand implements AutoCloseable {
             throws InvalidRequestException {
         queryValidator.validate(query);
 
-        TypeUrl type = query.targetType();
-        QueryProcessor queryProcessor = processorFor(type);
+        var type = query.targetType();
+        var queryProcessor = processorFor(type);
 
-        QueryOperation op = new QueryOperation(query) {
+        var op = new QueryOperation(query) {
             @Override
             public void run() {
                 Collection<EntityStateWithVersion> readResult = queryProcessor.process(query());
-                QueryResponse response = QueryResponse
-                        .newBuilder()
+                var response = QueryResponse.newBuilder()
                         .addAllMessage(readResult)
                         .setResponse(Responses.ok())
                         .build();
@@ -401,9 +393,9 @@ public class Stand implements AutoCloseable {
      * @return suitable implementation of {@code QueryProcessor}
      */
     private QueryProcessor processorFor(TypeUrl type) {
-        Optional<QueryableRepository<?, ?>> maybeRepo = typeRegistry.recordRepositoryOf(type);
+        var maybeRepo = typeRegistry.recordRepositoryOf(type);
         if (maybeRepo.isPresent()) {
-            QueryableRepository<?, ?> recordRepo = maybeRepo.get();
+            var recordRepo = maybeRepo.get();
             return new EntityQueryProcessor(recordRepo);
         }
         return NO_OP_PROCESSOR;
@@ -491,7 +483,7 @@ public class Stand implements AutoCloseable {
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
-            Stand result = new Stand(this);
+            var result = new Stand(this);
             return result;
         }
     }

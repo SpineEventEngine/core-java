@@ -70,7 +70,7 @@ final class SubscriptionRecord {
      * Creates a record managing an event subscription.
      */
     private static SubscriptionRecord createEventRecord(Subscription subscription) {
-        EventUpdateHandler handler = new EventUpdateHandler(subscription);
+        var handler = new EventUpdateHandler(subscription);
         return new SubscriptionRecord(subscription, subscription.targetType(), handler);
     }
 
@@ -81,7 +81,7 @@ final class SubscriptionRecord {
      * callback and matcher (to validate the entity state packed inside the event).
      */
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
-        EntityUpdateHandler handler = new EntityUpdateHandler(subscription);
+        var handler = new EntityUpdateHandler(subscription);
         return new SubscriptionRecord(subscription, ENTITY_STATE_CHANGED, handler);
     }
 
@@ -139,7 +139,7 @@ final class SubscriptionRecord {
         if (!(o instanceof SubscriptionRecord)) {
             return false;
         }
-        SubscriptionRecord that = (SubscriptionRecord) o;
+        var that = (SubscriptionRecord) o;
         return Objects.equal(subscription, that.subscription);
     }
 

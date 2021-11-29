@@ -67,11 +67,11 @@ final class InMemoryTypeRegistry implements TypeRegistry {
     @SuppressWarnings("ChainOfInstanceofChecks")
     @Override
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        TypeUrl entityType = repository.entityStateType();
+        var entityType = repository.entityStateType();
 
         if (repository instanceof QueryableRepository) {
             @SuppressWarnings("unchecked")  /* Guaranteed by the `QueryableRepository` contract. */
-            QueryableRepository<I, ?> recordRepo = (QueryableRepository<I, ?>) repository;
+            var recordRepo = (QueryableRepository<I, ?>) repository;
             repositories.put(entityType, recordRepo);
         }
         if (repository instanceof AggregateRepository) {
@@ -82,14 +82,14 @@ final class InMemoryTypeRegistry implements TypeRegistry {
 
     @Override
     public Optional<QueryableRepository<?, ?>> recordRepositoryOf(TypeUrl type) {
-        QueryableRepository<?, ?> repo = repositories.get(type);
+        var repo = repositories.get(type);
         Optional<QueryableRepository<?, ?>> result = ofNullable(repo);
         return result;
     }
 
     @Override
     public ImmutableSet<TypeUrl> aggregateTypes() {
-        ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(aggregateTypes);
+        var result = ImmutableSet.copyOf(aggregateTypes);
         return result;
     }
 

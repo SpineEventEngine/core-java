@@ -29,11 +29,11 @@ import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionValidationError;
-import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Validates the {@linkplain Subscription} instances submitted to {@linkplain Stand}.
@@ -87,15 +87,15 @@ final class SubscriptionValidator extends RequestValidator<Subscription> {
     }
 
     private boolean checkInRegistry(Subscription request) {
-        TenantId tenantId = request.getTopic()
-                                   .getContext()
-                                   .getTenantId();
-        Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
+        var tenantId = request.getTopic()
+                              .getContext()
+                              .getTenantId();
+        var result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
 
             @Override
             public Boolean apply(@Nullable Subscription input) {
-                checkNotNull(input);
-                boolean result = registry.containsId(input.getId());
+                requireNonNull(input);
+                var result = registry.containsId(input.getId());
                 return result;
             }
         }.execute(request);
