@@ -41,13 +41,13 @@ import io.spine.server.model.HandlerMethod;
  *         // ...
  *     }
  *
- *    {@literal @Override}
- *     public void beforeInvoke(HandlerMethod<?, ?, ?, ?> method) {
+ *    {@literal @Override                                                       }
+ *    {@literal public void beforeInvoke(HandlerMethod<?, ?, ?, ?> method) {    }
  *         // ...
  *     }
  *
- *    {@literal @Override}
- *     public void afterInvoke(HandlerMethod<?, ?, ?, ?> method) {
+ *    {@literal @Override                                                       }
+ *    {@literal public void afterInvoke(HandlerMethod<?, ?, ?, ?> method) {     }
  *         // ...
  *     }
  * }
