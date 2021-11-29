@@ -79,10 +79,10 @@ public final class StateUpdateRouting<I>
      */
     @Override
     public boolean supports(Class<? extends EntityState<?>> stateType) {
-        boolean customRouteSet = super.supports(stateType);
+        var customRouteSet = super.supports(stateType);
         @SuppressWarnings({"unchecked", "RedundantSuppression"}) // cast to the type used in ctor.
-        DefaultStateRoute<I> defaultRoute = (DefaultStateRoute<I>) defaultRoute();
-        boolean defaultRouteAvailable = defaultRoute.supports(stateType);
+        var defaultRoute = (DefaultStateRoute<I>) defaultRoute();
+        var defaultRouteAvailable = defaultRoute.supports(stateType);
         return customRouteSet || defaultRouteAvailable;
     }
 
@@ -107,8 +107,7 @@ public final class StateUpdateRouting<I>
     StateUpdateRouting<I> route(Class<S> stateClass, StateUpdateRoute<I, S> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
-        Route<EntityState<?>, EventContext, Set<I>> route =
-                (Route<EntityState<?>, EventContext, Set<I>>) via;
+        var route = (Route<EntityState<?>, EventContext, Set<I>>) via;
         addRoute(stateClass, route);
         return this;
     }
@@ -123,7 +122,7 @@ public final class StateUpdateRouting<I>
     EventRoute<I, EntityStateChanged> eventRoute() {
         return (event, context) -> {
             @SuppressWarnings("unchecked")      // `EntityStateChanged` passes the `EntityState`s.
-            EntityState<I> state = (EntityState<I>) AnyPacker.unpack(event.getNewState());
+            var state = (EntityState<I>) AnyPacker.unpack(event.getNewState());
             return apply(state, context);
         };
     }

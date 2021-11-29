@@ -66,7 +66,7 @@ final class EventFnRoute<I, E extends EventMessage> implements EventRoute<I, E> 
 
     @Override
     public Set<I> apply(E message, EventContext context) {
-        I id = fn.apply(message, context);
+        var id = fn.apply(message, context);
         return EventRoute.withId(id);
     }
 }

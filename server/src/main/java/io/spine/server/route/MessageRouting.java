@@ -31,11 +31,11 @@ import io.spine.base.MessageContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -87,8 +87,8 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
      */
     public boolean supports(Class<? extends M> messageType) {
         checkNotNull(messageType);
-        Match match = routeFor(messageType);
-        boolean result = match.found();
+        var match = routeFor(messageType);
+        var result = match.found();
         return result;
     }
 
@@ -115,11 +115,11 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
             throws IllegalStateException {
         checkNotNull(messageType);
         checkNotNull(via);
-        Match match = routeFor(messageType);
+        var match = routeFor(messageType);
         if (match.found()) {
-            String requestedClass = messageType.getName();
-            String entryClass = match.entryClass()
-                                     .getName();
+            var requestedClass = messageType.getName();
+            var entryClass = match.entryClass()
+                                  .getName();
             if (match.direct()) {
                 throw newIllegalStateException(
                         "The route for the message class `%s` already set. " +
@@ -145,12 +145,12 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
      */
     Match routeFor(Class<? extends M> msgCls) {
         checkNotNull(msgCls);
-        Match direct = findDirect(msgCls);
+        var direct = findDirect(msgCls);
         if (direct.found()) {
             return direct;
         }
 
-        Match viaInterface = findViaInterface(msgCls);
+        var viaInterface = findViaInterface(msgCls);
         if (viaInterface.found()) {
             // Store the found route for later direct use.
             routes.put(msgCls, viaInterface.route());
@@ -161,7 +161,7 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
     }
 
     private Match findDirect(Class<? extends M> msgCls) {
-        Route<M, C, R> route = routes.get(msgCls);
+        var route = routes.get(msgCls);
         if (route != null) {
             return new Match(msgCls, msgCls, route);
         }
@@ -169,14 +169,14 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
     }
 
     private Match findViaInterface(Class<? extends M> msgCls) {
-        List<Map.Entry<Class<? extends M>, Route<M, C, R>>> interfaceEntries =
+        var interfaceEntries =
                 routes.entrySet()
                       .stream()
                       .filter(e -> e.getKey()
                                     .isInterface())
                       .collect(toList());
-        for (Map.Entry<Class<? extends M>, Route<M, C, R>> entry : interfaceEntries) {
-            Class<? extends M> key = entry.getKey();
+        for (var entry : interfaceEntries) {
+            var key = entry.getKey();
             if (key.isAssignableFrom(msgCls)) {
                 return new Match(msgCls, key, entry.getValue());
             }
@@ -213,15 +213,15 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
     public R apply(M message, C context) {
         checkNotNull(message);
         checkNotNull(context);
-        @SuppressWarnings("unchecked") Class<? extends M>
+        @SuppressWarnings("unchecked") var
         cls = (Class<? extends M>) message.getClass();
-        Match match = routeFor(cls);
+        var match = routeFor(cls);
         if (match.found()) {
-            Route<M, C, R> func = match.route();
-            R result = func.apply(message, context);
+            var func = match.route();
+            var result = func.apply(message, context);
             return result;
         }
-        R result = defaultRoute().apply(message, context);
+        var result = defaultRoute().apply(message, context);
         return result;
     }
 
@@ -269,11 +269,11 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
         }
 
         Class<? extends M> entryClass() {
-            return checkNotNull(entryClass);
+            return requireNonNull(entryClass);
         }
 
         Route<M, C, R> route() {
-            return checkNotNull(route);
+            return requireNonNull(route);
         }
     }
 }
