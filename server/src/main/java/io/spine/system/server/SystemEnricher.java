@@ -35,8 +35,6 @@ import io.spine.server.event.EventEnricher;
 import io.spine.server.projection.Projection;
 import io.spine.system.server.event.CommandScheduled;
 
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -59,7 +57,7 @@ final class SystemEnricher {
      */
     public static EventEnricher create(CommandLogRepository repo) {
         checkNotNull(repo);
-        EventEnricher enricher = EventEnricher
+        var enricher = EventEnricher
                 .newBuilder()
                 .add(CommandScheduled.class, Command.class, commandLookup(repo))
                 .build();
@@ -72,10 +70,10 @@ final class SystemEnricher {
     }
 
     private static Command findCommand(CommandLogRepository repo, CommandId id) {
-        Optional<CommandLogProjection> commandLifecycle = repo.find(id);
-        Command command = commandLifecycle.map(Projection::state)
-                                          .map(CommandLog::getCommand)
-                                          .orElse(Command.getDefaultInstance());
+        var commandLifecycle = repo.find(id);
+        var command = commandLifecycle.map(Projection::state)
+                                      .map(CommandLog::getCommand)
+                                      .orElse(Command.getDefaultInstance());
         return command;
     }
 }

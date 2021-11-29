@@ -44,8 +44,8 @@ public interface EntityLifecycleEvent extends EventMessage {
     MessageId getEntity();
 
     default TypeUrl entityType() {
-        String typeUrl = getEntity().getTypeUrl();
-        TypeUrl result = TypeUrl.parse(typeUrl);
+        var typeUrl = getEntity().getTypeUrl();
+        var result = TypeUrl.parse(typeUrl);
         return result;
     }
 }

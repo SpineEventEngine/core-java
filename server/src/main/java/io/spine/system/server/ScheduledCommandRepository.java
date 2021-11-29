@@ -31,7 +31,6 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.CommandDispatched;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.server.route.EventRoute.noTargets;
@@ -51,8 +50,8 @@ final class ScheduledCommandRepository
     }
 
     private Set<CommandId> routeToExisting(CommandDispatched event) {
-        CommandId id = event.getId();
-        Optional<ScheduledCommand> existing = find(id);
+        var id = event.getId();
+        var existing = find(id);
         return existing.isPresent()
                ? withId(id)
                : noTargets();

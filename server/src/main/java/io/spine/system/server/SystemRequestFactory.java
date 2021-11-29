@@ -31,8 +31,8 @@ import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.system.server.DefaultSystemWriteSide.SYSTEM_USER;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Creates an actor request factory for producing requests under the context of specified tenant.
@@ -59,23 +59,22 @@ final class SystemRequestFactory {
     }
 
     private static ActorRequestFactory newForCurrentTenant() {
-        TenantFunction<ActorRequestFactory> createFactory =
-                new TenantFunction<ActorRequestFactory>(true) {
-                    @Override
-                    public ActorRequestFactory apply(@Nullable TenantId tenantId) {
-                        checkNotNull(tenantId);
-                        return newFactoryFor(tenantId);
-                    }
-                };
-        ActorRequestFactory result = createFactory.execute();
-        checkNotNull(result);
+        var createFactory = new TenantFunction<ActorRequestFactory>(true) {
+            @Override
+            public ActorRequestFactory apply(@Nullable TenantId tenantId) {
+                requireNonNull(tenantId);
+                return newFactoryFor(tenantId);
+            }
+        };
+        var result = createFactory.execute();
+        requireNonNull(result);
         return result;
     }
 
     private static ActorRequestFactory newFactoryFor(@Nullable TenantId tenantId) {
         return ActorRequestFactory.newBuilder()
-                                  .setActor(SYSTEM_USER)
-                                  .setTenantId(tenantId)
-                                  .build();
+                .setActor(SYSTEM_USER)
+                .setTenantId(tenantId)
+                .build();
     }
 }

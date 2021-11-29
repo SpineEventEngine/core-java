@@ -30,15 +30,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.client.ActorRequestFactory;
-import io.spine.core.ActorContext;
 import io.spine.core.EventContext;
 import io.spine.core.Origin;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventOrigin;
 import io.spine.server.route.EventRoute;
-
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.Messages.isNotDefault;
@@ -62,27 +58,27 @@ final class SystemEventFactory extends EventFactory {
      * @return new instance of {@code SystemEventFactory}
      */
     static SystemEventFactory forMessage(EventMessage message, Origin origin, boolean multitenant) {
-        Message aggregateId = aggregateIdFrom(message);
-        Any producerId = Identifier.pack(aggregateId);
+        var aggregateId = aggregateIdFrom(message);
+        var producerId = Identifier.pack(aggregateId);
         EventOrigin eventOrigin;
         if (isNotDefault(origin)) {
             eventOrigin = EventOrigin.from(origin);
         } else {
-            ActorRequestFactory factory = SystemRequestFactory.instance(multitenant);
-            ActorContext importContext = factory.newActorContext();
+            var factory = SystemRequestFactory.instance(multitenant);
+            var importContext = factory.newActorContext();
             eventOrigin = EventOrigin.forImport(importContext);
         }
         return new SystemEventFactory(eventOrigin, producerId);
     }
 
     private static Message aggregateIdFrom(EventMessage systemEvent) {
-        Set<Object> routingOut =
+        var routingOut =
                 EventRoute.byFirstMessageField(Object.class)
                           .apply(systemEvent, EventContext.getDefaultInstance());
         checkArgument(routingOut.size() == 1,
                       "System event message must have entity ID in the first field.");
-        Object id = routingOut.iterator()
-                              .next();
+        var id = routingOut.iterator()
+                           .next();
         checkArgument(id instanceof Message, "System entity ID must be a `Message`.");
         return (Message) id;
     }

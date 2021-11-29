@@ -70,7 +70,7 @@ final class SystemConfig implements SystemFeatures {
         if (!(o instanceof SystemConfig)) {
             return false;
         }
-        SystemConfig config = (SystemConfig) o;
+        var config = (SystemConfig) o;
         return commandLog == config.commandLog &&
                 storeEvents == config.storeEvents &&
                 parallelPosting == config.parallelPosting;
