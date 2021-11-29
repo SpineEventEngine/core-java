@@ -26,8 +26,6 @@
 
 package io.spine.server.event.store;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.query.Either;
@@ -35,8 +33,6 @@ import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -56,13 +52,12 @@ final class Queries {
     static RecordQuery<EventId, Event> convert(EventStreamQuery query) {
         checkNotNull(query);
 
-        RecordQueryBuilder<EventId, Event> builder =
-                RecordQuery.newBuilder(EventId.class, Event.class);
+        var builder = RecordQuery.newBuilder(EventId.class, Event.class);
         if (!query.includeAll()) {
             addTimeBounds(query, builder);
             addTypeParams(query, builder);
         }
-        RecordQuery<EventId, Event> result = addOrderAndLimit(query, builder);
+        var result = addOrderAndLimit(query, builder);
         return result;
     }
 
@@ -70,30 +65,26 @@ final class Queries {
     private static void addTimeBounds(EventStreamQuery query,
                                       RecordQueryBuilder<EventId, Event> builder) {
         if (query.hasAfter()) {
-            Timestamp timestamp = query.getAfter();
-            builder.where(created)
-                   .isGreaterThan(timestamp);
+            var timestamp = query.getAfter();
+            builder.where(created).isGreaterThan(timestamp);
         }
         if (query.hasBefore()) {
-            Timestamp timestamp = query.getBefore();
-            builder.where(created)
-                   .isLessThan(timestamp);
+            var timestamp = query.getBefore();
+            builder.where(created).isLessThan(timestamp);
         }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")  /* Configuring `builder` step-by-step. */
     private static void addTypeParams(EventStreamQuery query,
                                       RecordQueryBuilder<EventId, Event> builder) {
-        if(query.getFilterCount() == 0) {
+        if (query.getFilterCount() == 0) {
             return;
         }
-        List<EventFilter> filters = query.getFilterList();
-        ImmutableList<Either<RecordQueryBuilder<EventId, Event>>> eitherStatements =
-                filters
-                     .stream()
-                     .filter(Queries::hasEventType)
-                     .map(Queries::toEither)
-                     .collect(toImmutableList());
+        var filters = query.getFilterList();
+        var eitherStatements = filters.stream()
+                .filter(Queries::hasEventType)
+                .map(Queries::toEither)
+                .collect(toImmutableList());
         builder.either(eitherStatements);
     }
 
@@ -104,10 +95,8 @@ final class Queries {
     @SuppressWarnings("ResultOfMethodCallIgnored")  /* Configuring `builder` step-by-step. */
     private static Either<RecordQueryBuilder<EventId, Event>> toEither(EventFilter filter) {
         return builder -> {
-            String type = filter.getEventType()
-                                .trim();
-            builder.where(EventColumn.type)
-                   .is(type);
+            var type = filter.getEventType().trim();
+            builder.where(EventColumn.type).is(type);
             return builder;
         };
     }
@@ -116,8 +105,7 @@ final class Queries {
     addOrderAndLimit(EventStreamQuery query, RecordQueryBuilder<EventId, Event> builder) {
         builder.sortAscendingBy(created);
         if (query.hasLimit()) {
-            builder.limit(query.getLimit()
-                               .getValue());
+            builder.limit(query.getLimit().getValue());
         }
 
         return builder.build();

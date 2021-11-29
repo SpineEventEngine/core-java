@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The predicate for filtering {@code Event} instances by {@link EventStreamQuery}.
@@ -54,12 +55,12 @@ final class MatchesStreamQuery implements Predicate<Event> {
 
     @Override
     public boolean test(@Nullable Event input) {
-        checkNotNull(input);
+        requireNonNull(input);
         if (filterList.isEmpty()) {
             return true; // No filters specified.
         }
         // Check if one of the filters matches. If so, the event matches.
-        for (EventFilter filter : filterList) {
+        for (var filter : filterList) {
             Predicate<Event> filterPredicate = new MatchFilter(filter);
             if (filterPredicate.test(input)) {
                 return true;

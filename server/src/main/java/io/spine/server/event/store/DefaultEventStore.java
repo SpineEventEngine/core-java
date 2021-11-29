@@ -26,16 +26,13 @@
 package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.Signal;
-import io.spine.core.TenantId;
 import io.spine.logging.Logging;
-import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
@@ -48,12 +45,12 @@ import io.spine.server.tenant.TenantAwareOperation;
 
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.Streams.stream;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.server.event.EventComparator.chronological;
 import static java.util.stream.Collectors.toSet;
@@ -80,19 +77,16 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
     }
 
     private static MessageRecordSpec<EventId, Event> spec() {
-        MessageRecordSpec<EventId, Event> spec =
-                new MessageRecordSpec<>(EventId.class,
-                                        Event.class,
-                                        Signal::id,
-                                        EventColumn.definitions());
+        var spec = new MessageRecordSpec<>(EventId.class, Event.class, Signal::id,
+                                           EventColumn.definitions());
         return spec;
     }
 
     private static void ensureSameTenant(ImmutableList<Event> events) {
         checkNotNull(events);
-        Set<TenantId> tenants = events.stream()
-                                      .map(Event::tenant)
-                                      .collect(toSet());
+        var tenants = events.stream()
+                .map(Event::tenant)
+                .collect(toSet());
         checkArgument(tenants.size() == 1, TENANT_MISMATCH_ERROR_MSG, tenants);
     }
 
@@ -112,14 +106,13 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
     @Override
     public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
-        ImmutableList<Event> eventList =
-                Streams.stream(events)
-                       .filter(Objects::nonNull)
-                       .collect(toImmutableList());
+        var eventList = stream(events)
+                .filter(Objects::nonNull)
+                .collect(toImmutableList());
         if (eventList.isEmpty()) {
             return;
         }
-        Event event = eventList.get(0);
+        var event = eventList.get(0);
         TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
@@ -141,9 +134,9 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
 
         log.readingStart(request, responseObserver);
 
-        Iterator<Event> eventRecords = iterator(request);
+        var eventRecords = iterator(request);
         while (eventRecords.hasNext()) {
-            Event event = eventRecords.next();
+            var event = eventRecords.next();
             responseObserver.onNext(event);
         }
         responseObserver.onCompleted();
@@ -157,11 +150,10 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
      */
     private Iterator<Event> iterator(EventStreamQuery query) {
         checkNotNull(query);
-        Iterator<Event> iterator = find(query);
-        ImmutableList<Event> entities = ImmutableList.copyOf(iterator);
+        var iterator = find(query);
+        var entities = ImmutableList.copyOf(iterator);
         Predicate<Event> predicate = new MatchesStreamQuery(query);
-        Iterator<Event> result = entities
-                .stream()
+        var result = entities.stream()
                 .filter(predicate)
                 .sorted(chronological())
                 .iterator();
@@ -172,21 +164,20 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
      * Obtains iteration over entities matching the passed query.
      */
     private Iterator<Event> find(EventStreamQuery query) {
-        RecordQuery<EventId, Event> converted = Queries.convert(query);
+        var converted = Queries.convert(query);
         return readAll(converted);
     }
 
     private void store(Event event) {
-        Event toStore = event.clearEnrichments();
+        var toStore = event.clearEnrichments();
         write(toStore.getId(), toStore);
     }
 
     private void store(Iterable<Event> events) {
-        ImmutableList<RecordWithColumns<EventId, Event>> records =
-                Streams.stream(events)
-                       .map(Event::clearEnrichments)
-                       .map((e) -> RecordWithColumns.create(e.getId(), e, recordSpec()))
-                       .collect(toImmutableList());
+        var records = stream(events)
+                .map(Event::clearEnrichments)
+                .map((e) -> RecordWithColumns.create(e.getId(), e, recordSpec()))
+                .collect(toImmutableList());
         writeAll(records);
     }
 
@@ -204,7 +195,7 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
 
         private void stored(Iterable<Event> events) {
             if (debugEnabled) {
-                for (Event event : events) {
+                for (var event : events) {
                     stored(event);
                 }
             }
