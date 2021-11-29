@@ -52,7 +52,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the reactor identifiers
  * @param <S>
  *         the type of reactor states
- * @param <B>>
+ * @param <B>
  *         the type of the builders for the reactor states
  */
 public abstract class AbstractStatefulReactor<I, S extends Message, B extends ValidatingBuilder<S>>
