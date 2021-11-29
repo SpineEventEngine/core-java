@@ -76,7 +76,7 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
 
     @Override
     public void onError(Throwable t) {
-        boolean wasCompleted = !completed.compareAndSet(false, true);
+        var wasCompleted = !completed.compareAndSet(false, true);
         if (wasCompleted) {
             _warn().log("Observer for `%s` received an error despite being closed.",
                         messageClass.getName());
@@ -87,7 +87,7 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
 
     @Override
     public void onCompleted() {
-        boolean wasNotCompleted = completed.compareAndSet(false, true);
+        var wasNotCompleted = completed.compareAndSet(false, true);
         checkState(wasNotCompleted, "Observer of `%s` is already closed.", messageClass.getName());
     }
 
@@ -100,8 +100,8 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
                           .getName(),
                    message.getOriginalMessage()
                           .getTypeUrl());
-        BoundedContextName source = message.getBoundedContextName();
-        boolean sameContext = boundedContextName.equals(source)
+        var source = message.getBoundedContextName();
+        var sameContext = boundedContextName.equals(source)
                 || boundedContextName.isSystemOf(source)
                 || source.isSystemOf(boundedContextName);
         if (!sameContext) {
@@ -124,7 +124,7 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
         if (!(o instanceof AbstractChannelObserver)) {
             return false;
         }
-        AbstractChannelObserver that = (AbstractChannelObserver) o;
+        var that = (AbstractChannelObserver) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(messageClass, that.messageClass);
     }

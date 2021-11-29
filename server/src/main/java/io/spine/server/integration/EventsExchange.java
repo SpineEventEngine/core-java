@@ -26,18 +26,12 @@
 
 package io.spine.server.integration;
 
-import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.transport.ChannelId;
-import io.spine.server.transport.Publisher;
-import io.spine.server.transport.Subscriber;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeUrl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.transport.MessageChannel.channelIdFor;
 
 /**
@@ -71,12 +65,12 @@ final class EventsExchange extends AbstractExchange {
      *         event to publish
      */
     void publish(EventEnvelope event) {
-        ChannelId channelId = toChannelId(event.messageClass());
-        boolean wantedByOthers = !subscriptionChannels().contains(channelId);
+        var channelId = toChannelId(event.messageClass());
+        var wantedByOthers = !subscriptionChannels().contains(channelId);
         if (wantedByOthers) {
-            Event outerObject = event.outerObject();
-            ExternalMessage msg = ExternalMessages.of(outerObject, context());
-            Publisher publisher = publisher(channelId);
+            var outerObject = event.outerObject();
+            var msg = ExternalMessages.of(outerObject, context());
+            var publisher = publisher(channelId);
             publisher.publish(AnyPacker.pack(event.id()), msg);
         }
     }
@@ -90,10 +84,10 @@ final class EventsExchange extends AbstractExchange {
      */
     void register(EventDispatcher dispatcher) {
         Iterable<EventClass> receivedTypes = dispatcher.externalEventClasses();
-        for (EventClass cls : receivedTypes) {
-            ChannelId channelId = toChannelId(cls);
-            Subscriber subscriber = subscriber(channelId);
-            IncomingEventObserver observer = observerFor(cls);
+        for (var cls : receivedTypes) {
+            var channelId = toChannelId(cls);
+            var subscriber = subscriber(channelId);
+            var observer = observerFor(cls);
             subscriber.addObserver(observer);
         }
     }
@@ -107,10 +101,10 @@ final class EventsExchange extends AbstractExchange {
      */
     void unregister(EventDispatcher dispatcher) {
         Iterable<EventClass> externalEvents = dispatcher.externalEventClasses();
-        for (EventClass cls : externalEvents) {
-            ChannelId channelId = toChannelId(cls);
-            Subscriber subscriber = subscriber(channelId);
-            IncomingEventObserver observer = observerFor(cls);
+        for (var cls : externalEvents) {
+            var channelId = toChannelId(cls);
+            var subscriber = subscriber(channelId);
+            var observer = observerFor(cls);
             subscriber.removeObserver(observer);
         }
     }
@@ -119,7 +113,7 @@ final class EventsExchange extends AbstractExchange {
      * Creates a new observer for a particular type of events.
      */
     private IncomingEventObserver observerFor(EventClass eventType) {
-        IncomingEventObserver observer = new IncomingEventObserver(context(), eventType, bus);
+        var observer = new IncomingEventObserver(context(), eventType, bus);
         return observer;
     }
 
@@ -127,7 +121,7 @@ final class EventsExchange extends AbstractExchange {
      * Creates an ID of the channel that will transmit the events of the given class.
      */
     private static ChannelId toChannelId(EventClass cls) {
-        TypeUrl targetType = cls.typeUrl();
+        var targetType = cls.typeUrl();
         return channelIdFor(targetType);
     }
 }

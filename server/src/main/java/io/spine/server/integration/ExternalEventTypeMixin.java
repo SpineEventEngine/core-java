@@ -40,8 +40,8 @@ interface ExternalEventTypeMixin extends ExternalEventTypeOrBuilder {
      * Obtains the message type as a Java class.
      */
     default Class<? extends Message> asMessageClass() {
-        String rawValue = getTypeUrl();
-        TypeUrl typeUrl = TypeUrl.parse(rawValue);
+        var rawValue = getTypeUrl();
+        var typeUrl = TypeUrl.parse(rawValue);
         return typeUrl.getMessageClass();
     }
 }

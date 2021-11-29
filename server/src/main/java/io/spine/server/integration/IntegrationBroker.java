@@ -126,7 +126,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     private @MonotonicNonNull EventsExchange events;
 
     public IntegrationBroker() {
-        TransportFactory transportFactory = ServerEnvironment
+        var transportFactory = ServerEnvironment
                 .instance()
                 .transportFactory();
         this.subscriberHub = new SubscriberHub(transportFactory);
@@ -138,8 +138,8 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         checkNotRegistered();
         this.contextName = context.name();
 
-        BusAdapter bus = new BusAdapter(this, context.eventBus());
-        TransportLink link = new TransportLink(contextName, subscriberHub, publisherHub);
+        var bus = new BusAdapter(this, context.eventBus());
+        var link = new TransportLink(contextName, subscriberHub, publisherHub);
         config = new ConfigExchange(link);
         events = new EventsExchange(link, bus);
         config.transmitRequestedEventsFrom(bus);
@@ -147,7 +147,7 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
     }
 
     private void runStatusExchange(TransportLink link) {
-        StatusExchange statuses = new StatusExchange(link);
+        var statuses = new StatusExchange(link);
         statuses.onBoundedContextOnline((msg) -> config.requestWantedEvents());
         statuses.declareOnlineStatus();
     }

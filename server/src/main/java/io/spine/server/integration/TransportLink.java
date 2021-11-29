@@ -61,7 +61,7 @@ final class TransportLink {
      * Obtains the publisher for the given channel ID.
      */
     Publisher publisher(ChannelId channel) {
-        Publisher result = publisherHub.get(channel);
+        var result = publisherHub.get(channel);
         return result;
     }
 
@@ -69,7 +69,7 @@ final class TransportLink {
      * Obtains the subscriber for the given channel ID.
      */
     Subscriber subscriber(ChannelId channel) {
-        Subscriber result = subscriberHub.get(channel);
+        var result = subscriberHub.get(channel);
         return result;
     }
 
