@@ -26,7 +26,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.given.stock.JowDonsIndex;
 import io.spine.server.bus.given.stock.ShareAggregate;
@@ -54,32 +53,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DispatchingQueueSynchronisationTest {
 
     @Test
-    @DisplayName("Bus should not lock with its system counterpart")
+    @DisplayName("`Bus` should not lock with its system counterpart")
     void deadlock() throws InterruptedException {
-        ThreadPoolExecutor executor = (ThreadPoolExecutor) newFixedThreadPool(10);
-        BlackBox context = BlackBox.from(
+        var executor = (ThreadPoolExecutor) newFixedThreadPool(10);
+        var context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(ShareAggregate.class)
                                      .add(new JowDonsIndex.Repository())
         );
-        int taskCount = 10;
-        ImmutableList<ShareId> shares =
-                Stream.generate(() -> ShareId
-                        .newBuilder()
+        var taskCount = 10;
+        var shares =
+                Stream.generate(() -> ShareId.newBuilder()
                         .setValue(newUuid())
                         .vBuild())
                       .limit(taskCount)
                       .collect(toImmutableList());
         shares.forEach(share -> executor.execute(() -> {
-            Buy buy = Buy
-                    .newBuilder()
+            var buy = Buy.newBuilder()
                     .setShare(share)
                     .setAmount(42)
                     .vBuild();
             context.receivesCommand(buy);
             sleepUninterruptibly(Duration.ofSeconds(1));
-            Sell sell = Sell
-                    .newBuilder()
+            var sell = Sell.newBuilder()
                     .setShare(share)
                     .setAmount(12)
                     .vBuild();

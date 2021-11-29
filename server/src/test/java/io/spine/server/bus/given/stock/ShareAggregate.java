@@ -31,7 +31,6 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.tuple.Pair;
 import io.spine.test.bus.Buy;
-import io.spine.test.bus.Price;
 import io.spine.test.bus.PriceDropped;
 import io.spine.test.bus.PriceRaised;
 import io.spine.test.bus.Sell;
@@ -42,21 +41,19 @@ import io.spine.test.bus.ShareTraded;
 import java.math.BigDecimal;
 
 import static java.lang.Math.max;
-import static java.math.BigDecimal.ROUND_UP;
+import static java.math.RoundingMode.CEILING;
 
 public final class ShareAggregate extends Aggregate<ShareId, Share, Share.Builder> {
 
     @Assign
     Pair<ShareTraded, PriceRaised> handle(Buy command) {
-        int amount = command.getAmount();
-        ShareTraded traded = ShareTraded
-                .newBuilder()
+        var amount = command.getAmount();
+        var traded = ShareTraded.newBuilder()
                 .setShare(id())
                 .setAmount(amount)
                 .vBuild();
-        float percent = max(amount / 100.0f, 50.0f);
-        PriceRaised raised = PriceRaised
-                .newBuilder()
+        var percent = max(amount / 100.0f, 50.0f);
+        var raised = PriceRaised.newBuilder()
                 .setShare(id())
                 .setPercent(percent)
                 .build();
@@ -65,15 +62,13 @@ public final class ShareAggregate extends Aggregate<ShareId, Share, Share.Builde
 
     @Assign
     Pair<ShareTraded, PriceDropped> handle(Sell command) {
-        int amount = command.getAmount();
-        ShareTraded traded = ShareTraded
-                .newBuilder()
+        var amount = command.getAmount();
+        var traded = ShareTraded.newBuilder()
                 .setShare(id())
                 .setAmount(amount)
                 .vBuild();
-        float percent = max(amount / 100.0f, 50.0f);
-        PriceDropped raised = PriceDropped
-                .newBuilder()
+        var percent = max(amount / 100.0f, 50.0f);
+        var raised = PriceDropped.newBuilder()
                 .setShare(id())
                 .setPercent(percent)
                 .build();
@@ -87,26 +82,24 @@ public final class ShareAggregate extends Aggregate<ShareId, Share, Share.Builde
 
     @Apply
     private void event(PriceRaised event) {
-        Price.Builder priceBuilder = builder().getPriceBuilder();
-        float oldPrice = priceBuilder.getUsd();
-        float newPrice = oldPrice + percentage(oldPrice, event.getPercent());
+        var priceBuilder = builder().getPriceBuilder();
+        var oldPrice = priceBuilder.getUsd();
+        var newPrice = oldPrice + percentage(oldPrice, event.getPercent());
         priceBuilder.setUsd(newPrice);
     }
 
     @Apply
     private void event(PriceDropped event) {
-        Price.Builder priceBuilder = builder().getPriceBuilder();
-        float oldPrice = priceBuilder.getUsd();
-        float newPrice = oldPrice - percentage(oldPrice, event.getPercent());
+        var priceBuilder = builder().getPriceBuilder();
+        var oldPrice = priceBuilder.getUsd();
+        var newPrice = oldPrice - percentage(oldPrice, event.getPercent());
         priceBuilder.setUsd(newPrice);
     }
 
     private static float percentage(float value, float percent) {
-        float raise = (value * percent / 100.0f);
-        BigDecimal decimalRaise = BigDecimal.valueOf(raise);
-        return decimalRaise.setScale(2, ROUND_UP)
+        var raise = (value * percent / 100.0f);
+        var decimalRaise = BigDecimal.valueOf(raise);
+        return decimalRaise.setScale(2, CEILING)
                            .floatValue();
     }
-
-
 }
