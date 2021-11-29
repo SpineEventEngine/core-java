@@ -1,6 +1,6 @@
 
 
-# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -316,10 +316,10 @@
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -478,6 +478,11 @@
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -505,12 +510,12 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:25 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:27 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -786,10 +791,10 @@ This report was generated on **Sat Nov 27 19:57:25 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -948,6 +953,11 @@ This report was generated on **Sat Nov 27 19:57:25 EET 2021** using [Gradle-Lice
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -975,12 +985,12 @@ This report was generated on **Sat Nov 27 19:57:25 EET 2021** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:28 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -1296,10 +1306,10 @@ This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -1458,6 +1468,11 @@ This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-Lice
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -1485,12 +1500,12 @@ This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:29 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 2.8.8.
@@ -1898,10 +1913,10 @@ This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -2068,6 +2083,11 @@ This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-Lice
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -2095,12 +2115,12 @@ This report was generated on **Sat Nov 27 19:57:26 EET 2021** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:29 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2424,10 +2444,10 @@ This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -2586,6 +2606,11 @@ This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-Lice
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -2613,12 +2638,12 @@ This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:30 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2986,10 +3011,10 @@ This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -3148,6 +3173,11 @@ This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-Lice
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -3175,12 +3205,12 @@ This report was generated on **Sat Nov 27 19:57:27 EET 2021** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:30 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -3548,10 +3578,10 @@ This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -3710,6 +3740,11 @@ This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-Lice
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -3737,12 +3772,12 @@ This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:31 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.83`
+# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.84`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -4154,10 +4189,10 @@ This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
-1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.36.0.
+1.  **Group** : net.sourceforge.pmd. **Name** : pmd-java. **Version** : 6.41.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
 1.  **Group** : net.sourceforge.saxon. **Name** : saxon. **Version** : 9.1.0.8.
@@ -4316,6 +4351,11 @@ This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-Lice
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.ow2.asm. **Name** : asm. **Version** : 9.2.
+     * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
+     * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.ow2.asm. **Name** : asm-analysis. **Version** : 9.1.
      * **Project URL:** [http://asm.ow2.io/](http://asm.ow2.io/)
      * **License:** [BSD-3-Clause](https://asm.ow2.io/license.html)
@@ -4343,4 +4383,4 @@ This report was generated on **Sat Nov 27 19:57:28 EET 2021** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Sat Nov 27 19:57:29 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 29 15:58:31 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
