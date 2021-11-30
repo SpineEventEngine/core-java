@@ -28,7 +28,6 @@ package io.spine.server.stand.given;
 
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.test.integration.OrderId;
 import io.spine.test.integration.command.PlaceOrder;
 import io.spine.test.integration.event.OrderPlaced;
 
@@ -41,11 +40,10 @@ public final class AloneWaiter extends AbstractCommandHandler {
 
     @Assign
     OrderPlaced handler(PlaceOrder command) {
-        OrderId id = command.getId();
-        OrderPlaced placed =
-                OrderPlaced.newBuilder()
-                           .setId(id)
-                           .vBuild();
+        var id = command.getId();
+        var placed = OrderPlaced.newBuilder()
+                .setId(id)
+                .vBuild();
         ordersPlaced++;
         return placed;
     }

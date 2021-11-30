@@ -38,7 +38,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.EntityStateUpdate;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -48,13 +47,12 @@ import io.spine.client.Topic;
 import io.spine.core.Event;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
-import io.spine.core.Version;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregateRepository;
+import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.Repository;
 import io.spine.server.stand.Stand;
@@ -70,7 +68,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +85,6 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.given.Given.projectionOfClass;
-import io.spine.server.commandbus.CommandDispatcher;
 import static io.spine.test.projection.Project.Status.STARTED;
 import static io.spine.testing.Assertions.assertMatchesMask;
 import static java.util.stream.Collectors.toList;
@@ -117,26 +113,25 @@ public final class StandTestEnv {
     }
 
     public static Stand newStand(boolean multitenant, Repository<?, ?>... repositories) {
-        BoundedContextBuilder builder = BoundedContextBuilder.assumingTests(multitenant);
-        for (Repository<?, ?> repository : repositories) {
+        var builder = BoundedContextBuilder.assumingTests(multitenant);
+        for (var repository : repositories) {
             builder.add(repository);
         }
-        BoundedContext context = builder.build();
+        var context = builder.build();
         return context.stand();
     }
 
     public static Stand newStand(CommandDispatcher... dispatchers) {
-        BoundedContextBuilder builder = BoundedContextBuilder.assumingTests();
-        for (CommandDispatcher dispatcher : dispatchers) {
+        var builder = BoundedContextBuilder.assumingTests();
+        for (var dispatcher : dispatchers) {
             builder.addCommandDispatcher(dispatcher);
         }
-        BoundedContext context = builder.build();
+        var context = builder.build();
         return context.stand();
     }
 
     public static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
-        ActorRequestFactory.Builder builder = ActorRequestFactory
-                .newBuilder()
+        var builder = ActorRequestFactory.newBuilder()
                 .setActor(GivenUserId.of(newUuid()));
         if (tenant != null) {
             builder.setTenantId(tenant);
@@ -157,8 +152,8 @@ public final class StandTestEnv {
     }
 
     public static int storeSampleProject(StandTestProjectionRepository repository) {
-        ProjectId id = projectIdFor(42);
-        int projectVersion = 42;
+        var id = projectIdFor(42);
+        var projectVersion = 42;
         storeSampleProject(repository, id, "Some sample project", projectVersion);
         return projectVersion;
     }
@@ -167,7 +162,7 @@ public final class StandTestEnv {
                                           ProjectId id,
                                           String name,
                                           int projectVersion) {
-        Project project = Project
+        var project = Project
                 .newBuilder()
                 .setId(id)
                 .setName(name)
@@ -185,7 +180,7 @@ public final class StandTestEnv {
                                                     SubscriptionCallback callback) {
         MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
-        Subscription subscription = observer.firstResponse();
+        var subscription = observer.firstResponse();
         stand.activate(subscription, callback, noOpObserver());
 
         assertNotNull(subscription);
@@ -200,8 +195,8 @@ public final class StandTestEnv {
 
     public static void setupExpectedFindAllBehaviour(StandTestProjectionRepository repo,
                                                      Map<ProjectId, Project> contentToReturn) {
-        Set<ProjectId> projectIds = contentToReturn.keySet();
-        ImmutableCollection<EntityRecord> allRecords = toProjectionRecords(projectIds);
+        var projectIds = contentToReturn.keySet();
+        var allRecords = toProjectionRecords(projectIds);
 
         repo.setRecords(allRecords.iterator());
     }
@@ -221,12 +216,12 @@ public final class StandTestEnv {
 
     public static void appendWithGeneratedProjects(Map<ProjectId, Project> destination,
                                                    int howMany) {
-        for (int projectIndex = 0; projectIndex < howMany; projectIndex++) {
-            Project project = Project.getDefaultInstance();
-            ProjectId projectId = ProjectId.newBuilder()
-                                           .setId(UUID.randomUUID()
-                                                      .toString())
-                                           .build();
+        for (var projectIndex = 0; projectIndex < howMany; projectIndex++) {
+            var project = Project.getDefaultInstance();
+            var projectId = ProjectId.newBuilder()
+                    .setId(UUID.randomUUID()
+                               .toString())
+                    .build();
             destination.put(projectId, project);
         }
     }
@@ -245,10 +240,9 @@ public final class StandTestEnv {
     }
 
     private static PersonName personName() {
-        String givenName = selectOne(FIRST_NAMES);
-        String familyName = selectOne(LAST_NAMES);
-        return PersonName
-                .newBuilder()
+        var givenName = selectOne(FIRST_NAMES);
+        var familyName = selectOne(LAST_NAMES);
+        return PersonName.newBuilder()
                 .setGivenName(givenName)
                 .setFamilyName(familyName)
                 .build();
@@ -257,37 +251,36 @@ public final class StandTestEnv {
     private static <T> T selectOne(List<T> choices) {
         checkArgument(!choices.isEmpty());
         Random random = new SecureRandom();
-        int index = random.nextInt(choices.size());
+        var index = random.nextInt(choices.size());
         return choices.get(index);
     }
 
     private static ImmutableCollection<EntityRecord>
     toProjectionRecords(Collection<ProjectId> projectionIds) {
-        Collection<EntityRecord> transformed = Collections2.transform(
+        var transformed = Collections2.transform(
                 projectionIds,
                 input -> {
                     checkNotNull(input);
-                    Given.StandTestProjection projection = new Given.StandTestProjection(input);
-                    Any id = Identifier.pack(projection.id());
-                    Any state = AnyPacker.pack(projection.state());
-                    EntityRecord record = EntityRecord
-                            .newBuilder()
+                    var projection = new Given.StandTestProjection(input);
+                    var id = Identifier.pack(projection.id());
+                    var state = AnyPacker.pack(projection.state());
+                    var record = EntityRecord.newBuilder()
                             .setEntityId(id)
                             .setState(state)
                             .build();
                     return record;
                 });
-        ImmutableList<EntityRecord> result = ImmutableList.copyOf(transformed);
+        var result = ImmutableList.copyOf(transformed);
         return result;
     }
 
     private static <T extends Message> Collection<T> generate(int count, IntFunction<T> idMapper) {
         Random random = new SecureRandom();
-        List<T> result = IntStream.generate(random::nextInt)
-                                  .limit(count)
-                                  .map(Math::abs)
-                                  .mapToObj(idMapper)
-                                  .collect(toList());
+        var result = IntStream.generate(random::nextInt)
+                              .limit(count)
+                              .map(Math::abs)
+                              .mapToObj(idMapper)
+                              .collect(toList());
         return result;
     }
 
@@ -296,11 +289,11 @@ public final class StandTestEnv {
         assertTrue(responseObserver.isCompleted(), "Query has not completed successfully");
         assertNull(responseObserver.throwable(), "Throwable has been caught upon query execution");
 
-        QueryResponse response = responseObserver.responseHandled();
+        var response = responseObserver.responseHandled();
         assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
         assertNotNull(response, "Query response must not be null");
 
-        List<EntityStateWithVersion> messages = response.getMessageList();
+        var messages = response.getMessageList();
         assertNotNull(messages, "Query response has null message list");
         return messages;
     }
@@ -316,9 +309,8 @@ public final class StandTestEnv {
                                           Descriptors.Descriptor expectedType) {
         assertEquals(1, availableTypes.size());
 
-        TypeUrl actualTypeUrl = availableTypes.iterator()
-                                              .next();
-        TypeUrl expectedTypeUrl = TypeUrl.from(expectedType);
+        var actualTypeUrl = availableTypes.iterator().next();
+        var expectedTypeUrl = TypeUrl.from(expectedType);
         assertEquals(expectedTypeUrl, actualTypeUrl, "Type was registered incorrectly");
     }
 
@@ -392,9 +384,9 @@ public final class StandTestEnv {
             acceptedUpdates.add(update);
             switch (update.getUpdateCase()) {
                 case ENTITY_UPDATES:
-                    EntityStateUpdate entityStateUpdate = update.getEntityUpdates()
-                                                                .getUpdateList()
-                                                                .get(0);
+                    var entityStateUpdate = update.getEntityUpdates()
+                                                  .getUpdateList()
+                                                  .get(0);
                     newEntityState = entityStateUpdate.getState();
                     break;
                 case EVENT_UPDATES:
@@ -448,15 +440,15 @@ public final class StandTestEnv {
         @Override
         public void onNext(QueryResponse value) {
             super.onNext(value);
-            List<EntityStateWithVersion> messages = value.getMessageList();
+            var messages = value.getMessageList();
             assertThat(messages).hasSize(ids.size());
-            for (EntityStateWithVersion stateWithVersion : messages) {
-                Any state = stateWithVersion.getState();
-                Project project = unpack(state, Project.class);
+            for (var stateWithVersion : messages) {
+                var state = stateWithVersion.getState();
+                var project = unpack(state, Project.class);
                 assertThat(project).isNotNull();
                 assertMatchesMask(project, fieldMask);
 
-                Version version = stateWithVersion.getVersion();
+                var version = stateWithVersion.getVersion();
                 assertThat(version.getNumber())
                         .isEqualTo(projectVersion);
             }

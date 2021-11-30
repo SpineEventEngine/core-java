@@ -26,17 +26,13 @@
 
 package io.spine.server.stand;
 
-import com.google.protobuf.Any;
 import io.spine.base.EntityState;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.Topic;
-import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
 import io.spine.test.commandservice.customer.Customer;
-import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.testing.core.given.GivenTenantId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +54,7 @@ class MultitenantStandTest extends StandTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        TenantId tenantId = GivenTenantId.generate();
+        var tenantId = GivenTenantId.generate();
 
         setCurrentTenant(tenantId);
         setMultitenant(true);
@@ -73,32 +69,32 @@ class MultitenantStandTest extends StandTest {
     @Test
     @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
     void updateOnlySameTenant() {
-        CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        Stand stand = newStand(isMultitenant(), repository);
+        var repository = new CustomerAggregateRepository();
+        var stand = newStand(isMultitenant(), repository);
 
         // --- Default Tenant
-        ActorRequestFactory requestFactory = getRequestFactory();
-        MemoizeSubscriptionCallback defaultTenantCallback =
+        var requestFactory = getRequestFactory();
+        var defaultTenantCallback =
                 subscribeToAllOf(stand, requestFactory, Customer.class);
 
         // --- Another Tenant
-        TenantId anotherTenant = GivenTenantId.generate();
-        ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
-        MemoizeSubscriptionCallback anotherCallback =
+        var anotherTenant = GivenTenantId.generate();
+        var anotherFactory = createRequestFactory(anotherTenant);
+        var anotherCallback =
                 subscribeToAllOf(stand, anotherFactory, Customer.class);
 
         // Trigger updates in Default Tenant.
-        Customer customer = einCustomer();
-        CustomerId customerId = customer.getId();
-        int version = 1;
-        CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+        var customer = einCustomer();
+        var customerId = customer.getId();
+        var version = 1;
+        var entity = aggregateOfClass(CustomerAggregate.class)
                 .withId(customerId)
                 .withState(customer)
                 .withVersion(version)
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        Any packedState = AnyPacker.pack(customer);
+        var packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.
         assertEquals(packedState, defaultTenantCallback.newEntityState());
 
@@ -110,9 +106,9 @@ class MultitenantStandTest extends StandTest {
     subscribeToAllOf(Stand stand,
                      ActorRequestFactory requestFactory,
                      Class<? extends EntityState<?>> stateClass) {
-        Topic allCustomers = requestFactory.topic()
-                                           .allOf(stateClass);
-        MemoizeSubscriptionCallback action = new MemoizeSubscriptionCallback();
+        var allCustomers = requestFactory.topic()
+                                         .allOf(stateClass);
+        var action = new MemoizeSubscriptionCallback();
         subscribeAndActivate(stand, allCustomers, action);
 
         assertNull(action.newEntityState());
