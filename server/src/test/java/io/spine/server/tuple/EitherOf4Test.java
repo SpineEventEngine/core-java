@@ -29,7 +29,6 @@ package io.spine.server.tuple;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
@@ -40,8 +39,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
-
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,19 +46,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("`EitherOfFour` should")
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
         "DuplicateStringLiteralInspection" /* Common test display names. */,
         "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
-@DisplayName("EitherOfFour should")
 class EitherOf4Test {
 
     private final StringValue a = TestValues.newUuidValue();
     private final BoolValue b = BoolValue.of(true);
     private final Timestamp c = Time.currentTime();
-    private final UInt32Value d = UInt32Value.newBuilder()
-                                             .setValue(1024)
-                                             .build();
+    private final UInt32Value d = UInt32Value.newBuilder().setValue(1024).build();
 
     private EitherOf4<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithA;
     private EitherOf4<StringValue, BoolValue, Timestamp, UInt32Value> eitherWithB;
@@ -137,22 +132,22 @@ class EitherOf4Test {
     @Test
     @DisplayName("return only one value in iteration")
     void provideProperIterator() {
-        Iterator<Message> iteratorA = eitherWithA.iterator();
+        var iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
         assertFalse(iteratorA.hasNext());
 
-        Iterator<Message> iteratorB = eitherWithB.iterator();
+        var iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
         assertFalse(iteratorB.hasNext());
 
-        Iterator<Message> iteratorC = eitherWithC.iterator();
+        var iteratorC = eitherWithC.iterator();
 
         assertEquals(c, iteratorC.next());
         assertFalse(iteratorC.hasNext());
 
-        Iterator<Message> iteratorD = eitherWithD.iterator();
+        var iteratorD = eitherWithD.iterator();
 
         assertEquals(d, iteratorD.next());
         assertFalse(iteratorD.hasNext());

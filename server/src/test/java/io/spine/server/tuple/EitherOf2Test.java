@@ -28,7 +28,6 @@ package io.spine.server.tuple;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
@@ -37,8 +36,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
-
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,11 +43,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("`EitherOfTwo` should")
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
         "DuplicateStringLiteralInspection" /* Common test display names. */,
         "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
-@DisplayName("EitherOfTwo should")
 class EitherOf2Test {
 
     private final StringValue a = TestValues.newUuidValue();
@@ -106,12 +103,12 @@ class EitherOf2Test {
     @Test
     @DisplayName("return only one value in iteration")
     void provideProperIterator() {
-        Iterator<Message> iteratorA = eitherWithA.iterator();
+        var iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
         assertFalse(iteratorA.hasNext());
 
-        Iterator<Message> iteratorB = eitherWithB.iterator();
+        var iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
         assertFalse(iteratorB.hasNext());

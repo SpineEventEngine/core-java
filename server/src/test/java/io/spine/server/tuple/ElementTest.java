@@ -28,7 +28,6 @@ package io.spine.server.tuple;
 
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Time;
 import org.junit.jupiter.api.DisplayName;
@@ -46,13 +45,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Element should")
+@DisplayName("`Element` should")
 class ElementTest {
 
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        Timestamp time = Time.currentTime();
+        var time = Time.currentTime();
         new EqualsTester().addEqualityGroup(new Element(time), new Element(time))
                           .addEqualityGroup(new Element(newUuidValue()))
                           .addEqualityGroup(new Element(Optional.empty()))
@@ -74,6 +73,7 @@ class ElementTest {
      * <p>The first argument is the value used by the test. The second argument is the type name
      * to be used in the display test name.
      */
+    @SuppressWarnings("unused") /* Used as a method source. */
     private static Stream<Object> elementArgument() {
         return Stream.of(
                 Arguments.of(EitherOf2.withA(newUuidValue()), Either.class.getSimpleName()),
@@ -95,19 +95,19 @@ class ElementTest {
     class Serialize {
 
         @Test
-        @DisplayName("Message")
+        @DisplayName("`Message`")
         void message() {
             reserializeAndAssert(new Element(Time.currentTime()));
         }
 
         @Test
-        @DisplayName("Optional with Message")
+        @DisplayName("`Optional` with `Message`")
         void optionalMessage() {
             reserializeAndAssert(new Element(Optional.of(Time.currentTime())));
         }
 
         @Test
-        @DisplayName("empty Optional")
+        @DisplayName("empty `Optional`")
         void emptyOptional() {
             reserializeAndAssert(new Element(Optional.empty()));
         }

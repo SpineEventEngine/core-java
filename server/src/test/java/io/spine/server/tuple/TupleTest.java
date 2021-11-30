@@ -46,11 +46,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("`Tuple` should")
 @SuppressWarnings({
         "FieldNamingConvention",
         "InstanceVariableNamingConvention" /* OK for tuple entry values. */
 })
-@DisplayName("Tuple should")
 class TupleTest {
 
     private final StringValue a = TestValues.newUuidValue();
@@ -64,23 +64,23 @@ class TupleTest {
     }
 
     @Test
-    @DisplayName("prohibit Empty values")
+    @DisplayName("prohibit `Empty` values")
     void prohibitEmptyValues() {
         assertThrows(IllegalArgumentException.class,
                      () -> new TTuple<>(TestValues.newUuidValue(), Empty.getDefaultInstance()));
     }
 
     @Test
-    @DisplayName("allow Either argument")
+    @DisplayName("allow `Either` argument")
     void allowEitherArgument() {
         assertEquals(a, tuple.getA());
         assertEquals(b, tuple.getB());
     }
 
     @Test
-    @DisplayName("return value from Either on iteration")
+    @DisplayName("return value from `Either` on iteration")
     void returnValueOnIteration() {
-        Iterator<Message> iterator = tuple.iterator();
+        var iterator = tuple.iterator();
 
         assertEquals(a, iterator.next());
         assertEquals(b.getA(), iterator.next());
