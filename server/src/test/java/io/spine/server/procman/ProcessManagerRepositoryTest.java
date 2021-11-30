@@ -29,21 +29,17 @@ package io.spine.server.procman;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Correspondence;
-import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.entity.EventFilter;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
@@ -68,18 +64,12 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.CannotDispatchDuplicateCommand;
-import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
-import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.procman.PmDontHandle;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.Task;
-import io.spine.test.procman.command.PmArchiveProject;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmDeleteProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -95,9 +85,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -149,11 +137,10 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected TestProcessManager createEntity(ProjectId id) {
-        Project state = Project
-                .newBuilder()
+        var state = Project.newBuilder()
                 .setId(id)
                 .build();
-        TestProcessManager result =
+        var result =
                 Given.processManagerOfClass(TestProcessManager.class)
                      .withId(id)
                      .withState(state)
@@ -175,11 +162,11 @@ class ProcessManagerRepositoryTest
     createNamedEntities(int count, Function<ProjectId, String> nameSupplier) {
         List<TestProcessManager> procmans = newArrayList();
 
-        for (int i = 0; i < count; i++) {
-            ProjectId id = createId(i);
-            String name = nameSupplier.apply(id);
+        for (var i = 0; i < count; i++) {
+            var id = createId(i);
+            var name = nameSupplier.apply(id);
 
-            TestProcessManager pm =
+            var pm =
                     Given.processManagerOfClass(TestProcessManager.class)
                          .withId(id)
                          .withState(Project.newBuilder()
@@ -207,8 +194,8 @@ class ProcessManagerRepositoryTest
     @Override
     protected ProjectId createId(int value) {
         return ProjectId.newBuilder()
-                        .setId(format("procman-number-%s", value))
-                        .build();
+                .setId(format("procman-number-%s", value))
+                .build();
     }
 
     @Override
@@ -216,9 +203,7 @@ class ProcessManagerRepositoryTest
     protected void setUp() {
         super.setUp();
         setCurrentTenant(requestFactory.tenantId());
-        context = BoundedContextBuilder
-                .assumingTests(true)
-                .build();
+        context = BoundedContextBuilder.assumingTests(true).build();
         context.internalAccess()
                .register(repository());
         TestProcessManager.clearMessageDeliveryHistory();
@@ -244,38 +229,36 @@ class ProcessManagerRepositoryTest
     }
 
     private void testDispatchCommand(CommandMessage cmdMsg) {
-        Command cmd = requestFactory.command()
+        var cmd = requestFactory.command()
                                     .create(cmdMsg);
         dispatchCommand(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
     private void testDispatchEvent(EventMessage eventMessage) {
-        Event event = GivenEvent.withMessage(eventMessage);
+        var event = GivenEvent.withMessage(eventMessage);
         dispatchEvent(event);
         assertTrue(TestProcessManager.processed(eventMessage));
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore IDs of target PMs in this test.
     private void dispatchEvent(Event event) {
-        CommandId randomCommandId = CommandId.generate();
-        MessageId originId = MessageId
-                .newBuilder()
+        var randomCommandId = CommandId.generate();
+        var originId = MessageId.newBuilder()
                 .setId(pack(randomCommandId))
                 .setTypeUrl("example.org/example.test.InjectEvent")
                 .buildPartial();
-        ActorContext actor = requestFactory.newActorContext();
-        Origin origin = Origin
-                .newBuilder()
+        var actor = requestFactory.newActorContext();
+        var origin = Origin.newBuilder()
                 .setActorContext(actor)
                 .setMessage(originId)
                 .buildPartial();
-        EventContext eventContextWithTenantId =
+        var eventContextWithTenantId =
                 GivenEvent.context()
                           .toBuilder()
                           .setPastMessage(origin)
                           .buildPartial();
-        Event eventWithTenant = event.toBuilder()
+        var eventWithTenant = event.toBuilder()
                                      .setContext(eventContextWithTenantId)
                                      .vBuild();
         repository().dispatch(EventEnvelope.of(eventWithTenant));
@@ -284,7 +267,7 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("allow customizing command routing")
     void setupOfCommandRouting() {
-        ProjectCompletion.Repository repo = new ProjectCompletion.Repository();
+        var repo = new ProjectCompletion.Repository();
         context.internalAccess()
                .register(repo);
         assertTrue(repo.callbackCalled());
@@ -310,13 +293,13 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("dispatch command and post events")
     void dispatchCommandAndPostEvents() {
-        RememberingSubscriber subscriber = new RememberingSubscriber();
+        var subscriber = new RememberingSubscriber();
         context.internalAccess()
                .registerEventDispatcher(subscriber);
 
         testDispatchCommand(addTask());
 
-        PmTaskAdded message = subscriber.getRemembered();
+        var message = subscriber.getRemembered();
         assertNotNull(message);
         assertThat(message.getProjectId())
                 .isEqualTo(ID);
@@ -330,22 +313,22 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("events")
         void events() {
-            DiagnosticMonitor monitor = new DiagnosticMonitor();
+            var monitor = new DiagnosticMonitor();
             context.internalAccess()
                    .registerEventDispatcher(monitor);
-            Event event = GivenMessage.projectStarted();
+            var event = GivenMessage.projectStarted();
 
             dispatchEvent(event);
             assertTrue(TestProcessManager.processed(event.enclosedMessage()));
             dispatchEvent(event);
 
-            List<CannotDispatchDuplicateEvent> duplicateEventEvents = monitor.duplicateEventEvents();
+            var duplicateEventEvents = monitor.duplicateEventEvents();
             assertThat(duplicateEventEvents).hasSize(1);
-            CannotDispatchDuplicateEvent systemEvent = duplicateEventEvents.get(0);
+            var systemEvent = duplicateEventEvents.get(0);
             assertThat(systemEvent.getDuplicateEvent())
                     .comparingExpectedFieldsOnly()
                     .isEqualTo(event.messageId());
-            PmProjectStarted eventMessage = (PmProjectStarted) event.enclosedMessage();
+            var eventMessage = (PmProjectStarted) event.enclosedMessage();
             assertThat(unpack(systemEvent.getEntity()
                                          .getId()))
                     .comparingExpectedFieldsOnly()
@@ -355,22 +338,22 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("commands")
         void commands() {
-            DiagnosticMonitor monitor = new DiagnosticMonitor();
+            var monitor = new DiagnosticMonitor();
             context.internalAccess()
                    .registerEventDispatcher(monitor);
-            Command command = GivenMessage.createProject();
+            var command = GivenMessage.createProject();
 
             dispatchCommand(command);
             assertTrue(TestProcessManager.processed(command.enclosedMessage()));
             dispatchCommand(command);
 
-            List<CannotDispatchDuplicateCommand> duplicateCommandEvents =
+            var duplicateCommandEvents =
                     monitor.duplicateCommandEvents();
             assertThat(duplicateCommandEvents).hasSize(1);
-            CannotDispatchDuplicateCommand event = duplicateCommandEvents.get(0);
+            var event = duplicateCommandEvents.get(0);
             assertThat(event.getDuplicateCommand())
                     .isEqualTo(command.messageId());
-            PmCreateProject commandMessage = (PmCreateProject) command.enclosedMessage();
+            var commandMessage = (PmCreateProject) command.enclosedMessage();
             assertThat(unpack(event.getEntity()
                                    .getId()))
                     .isEqualTo(commandMessage.getProjectId());
@@ -405,17 +388,17 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("command")
         void command() {
-            PmArchiveProject archiveProject = archiveProject();
+            var archiveProject = archiveProject();
             testDispatchCommand(archiveProject);
-            ProjectId projectId = archiveProject.getProjectId();
-            TestProcessManager processManager = repository().findOrCreate(projectId);
+            var projectId = archiveProject.getProjectId();
+            var processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isArchived());
 
             // Dispatch a command to the deleted process manager.
             testDispatchCommand(addTask());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.state()
-                                                  .getTaskList();
+            var addedTasks = processManager.state()
+                                           .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
             // Check that the process manager was not re-created before dispatching.
@@ -425,17 +408,17 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("event")
         void event() {
-            PmArchiveProject archiveProject = archiveProject();
+            var archiveProject = archiveProject();
             testDispatchCommand(archiveProject);
-            ProjectId projectId = archiveProject.getProjectId();
-            TestProcessManager processManager = repository().findOrCreate(projectId);
+            var projectId = archiveProject.getProjectId();
+            var processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isArchived());
 
             // Dispatch an event to the archived process manager.
             testDispatchEvent(taskAdded());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.state()
-                                                  .getTaskList();
+            var addedTasks = processManager.state()
+                                           .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
             // Check that the process manager was not re-created before dispatching.
@@ -450,17 +433,17 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("command")
         void command() {
-            PmDeleteProject deleteProject = deleteProject();
+            var deleteProject = deleteProject();
             testDispatchCommand(deleteProject);
-            ProjectId projectId = deleteProject.getProjectId();
-            TestProcessManager processManager = repository().findOrCreate(projectId);
+            var projectId = deleteProject.getProjectId();
+            var processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isDeleted());
 
             // Dispatch a command to the archived process manager.
             testDispatchCommand(addTask());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.state()
-                                                  .getTaskList();
+            var addedTasks = processManager.state()
+                                           .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
             // Check that the process manager was not re-created before dispatching.
@@ -470,17 +453,17 @@ class ProcessManagerRepositoryTest
         @Test
         @DisplayName("event")
         void event() {
-            PmDeleteProject deleteProject = deleteProject();
+            var deleteProject = deleteProject();
             testDispatchCommand(deleteProject);
-            ProjectId projectId = deleteProject.getProjectId();
-            TestProcessManager processManager = repository().findOrCreate(projectId);
+            var projectId = deleteProject.getProjectId();
+            var processManager = repository().findOrCreate(projectId);
             assertTrue(processManager.isDeleted());
 
             // Dispatch an event to the deleted process manager.
             testDispatchEvent(taskAdded());
             processManager = repository().findOrCreate(projectId);
-            List<Task> addedTasks = processManager.state()
-                                                  .getTaskList();
+            var addedTasks = processManager.state()
+                                           .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
             // Check that the process manager was not re-created before dispatching.
@@ -495,19 +478,19 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("produce RoutingFailed when dispatching unknown command")
+    @DisplayName("produce `RoutingFailed` when dispatching unknown command")
     @MuteLogging
     void throwOnUnknownCommand() {
-        Command unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
-        CommandEnvelope command = CommandEnvelope.of(unknownCommand);
+        var unknownCommand = requestFactory.createCommand(PmDontHandle.getDefaultInstance());
+        var command = CommandEnvelope.of(unknownCommand);
         ProcessManagerRepository<ProjectId, ?, ?> repo = repository();
-        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        var monitor = new DiagnosticMonitor();
         context.internalAccess()
                .registerEventDispatcher(monitor);
         repo.dispatchCommand(command);
-        List<RoutingFailed> failures = monitor.routingFailures();
+        var failures = monitor.routingFailures();
         assertThat(failures).hasSize(1);
-        RoutingFailed failure = failures.get(0);
+        var failure = failures.get(0);
         assertThat(failure.getEntityType()
                           .getJavaClassName())
                 .isEqualTo(repo.entityClass()
@@ -548,26 +531,25 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("post command rejections")
     void postCommandRejections() {
-        ProjectId id = ProjectId.newBuilder()
-                                .setId(newUuid())
-                                .build();
-        PmThrowEntityAlreadyArchived commandMsg =
-                PmThrowEntityAlreadyArchived.newBuilder()
-                                            .setProjectId(id)
-                                            .build();
-        Command command = requestFactory.createCommand(commandMsg);
+        var id = ProjectId.newBuilder()
+                .setId(newUuid())
+                .build();
+        var commandMsg = PmThrowEntityAlreadyArchived.newBuilder()
+                .setProjectId(id)
+                .build();
+        var command = requestFactory.createCommand(commandMsg);
         dispatchCommand(command);
-        EntityAlreadyArchived expected = EntityAlreadyArchived.newBuilder()
-                                                              .setEntityId(pack(id))
-                                                              .build();
+        var expected = EntityAlreadyArchived.newBuilder()
+                .setEntityId(pack(id))
+                .build();
         assertTrue(TestProcessManager.processed(expected));
     }
 
     @Test
     @DisplayName("check that its `ProcessManager` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
-        SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
-        BoundedContext context = BoundedContextBuilder
+        var repo = new SensoryDeprivedPmRepository();
+        var context = BoundedContextBuilder
                 .assumingTests()
                 .build();
         assertThrows(IllegalStateException.class, () -> repo.registerWith(context));
@@ -576,22 +558,19 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("provide `EventFilter` which discards `EntityStateChanged` events")
     void discardEntityStateChangedEvents() {
-        EventFilter filter = repository().eventFilter();
-        ProjectId projectId = ProjectId
-                .newBuilder()
+        var filter = repository().eventFilter();
+        var projectId = ProjectId.newBuilder()
                 .setId(newUuid())
                 .build();
-        EventMessage arbitraryEvent = PmTaskAdded
-                .newBuilder()
+        EventMessage arbitraryEvent = PmTaskAdded.newBuilder()
                 .setProjectId(projectId)
                 .build();
         assertThat(filter.filter(arbitraryEvent))
                 .isPresent();
 
-        Any newState = pack(currentTime());
-        Any oldState = pack(Timestamp.getDefaultInstance());
-        MessageId entityId = MessageId
-                .newBuilder()
+        var newState = pack(currentTime());
+        var oldState = pack(Timestamp.getDefaultInstance());
+        var entityId = MessageId.newBuilder()
                 .setTypeUrl(TypeUrl.ofEnclosed(newState)
                                    .value())
                 .setId(pack(projectId))
@@ -609,15 +588,15 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("post all domain events through an `EventFilter`")
     void postEventsThroughFilter() {
-        ProjectId projectId = ProjectId
+        var projectId = ProjectId
                 .newBuilder()
                 .setId(newUuid())
                 .build();
-        PmCreateProject command = PmCreateProject
+        var command = PmCreateProject
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        BlackBox context = BlackBox.from(
+        var context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new EventDiscardingProcManRepository())
         );
@@ -633,10 +612,10 @@ class ProcessManagerRepositoryTest
 
         @Test
         void whenFinding() {
-            TestProcessManagerRepository repository = repository();
+            var repository = repository();
             assertFalse(repository.configureCalled());
 
-            TestProcessManager created = repository.create(ID);
+            var created = repository.create(ID);
             repository.store(created);
 
             repository.findOrCreate(ID);
@@ -645,7 +624,7 @@ class ProcessManagerRepositoryTest
 
         @Test
         void whenCreating() {
-            TestProcessManagerRepository repository = repository();
+            var repository = repository();
             assertFalse(repository.configureCalled());
 
             repository.create(ID);
@@ -657,31 +636,31 @@ class ProcessManagerRepositoryTest
     @DisplayName("update entity via a custom migration")
     void performCustomMigration() {
         // Store a new process manager instance in the repository.
-        ProjectId id = createId(42);
-        TestProcessManagerRepository repository = repository();
-        TestProcessManager pm = new TestProcessManager(id);
+        var id = createId(42);
+        var repository = repository();
+        var pm = new TestProcessManager(id);
         repository.store(pm);
 
         // Init filters by the `id_string` column.
-        Project.Query query =
+        var query =
                 Project.query()
                        .idString().is(id.toString())
                        .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProcessManager> found = repository.find(query);
+        var found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the migration.
         repository.applyMigration(id, new SetTestProcessId());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProcessManager> afterMigration = repository.find(query);
+        var afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the new entity state has all fields updated as expected.
-        TestProcessManager entityWithColumns = afterMigration.next();
-        Project expectedState = pm
+        var entityWithColumns = afterMigration.next();
+        var expectedState = pm
                 .state()
                 .toBuilder()
                 .setIdString(pm.getIdString())
@@ -693,36 +672,36 @@ class ProcessManagerRepositoryTest
     @DisplayName("update multiple entities via a custom migration")
     void performCustomMigrationForMultiple() {
         // Store three entities to the repository.
-        ProjectId id1 = createId(1);
-        ProjectId id2 = createId(2);
-        ProjectId id3 = createId(3);
-        TestProcessManagerRepository repository = repository();
-        TestProcessManager pm1 = new TestProcessManager(id1);
-        TestProcessManager pm2 = new TestProcessManager(id2);
-        TestProcessManager pm3 = new TestProcessManager(id3);
+        var id1 = createId(1);
+        var id2 = createId(2);
+        var id3 = createId(3);
+        var repository = repository();
+        var pm1 = new TestProcessManager(id1);
+        var pm2 = new TestProcessManager(id2);
+        var pm3 = new TestProcessManager(id3);
         repository.store(pm1);
         repository.store(pm2);
         repository.store(pm3);
 
         // Query by the `name` column.
-        Project.Query query =
+        var query =
                 Project.query()
                        .name().is(NEW_NAME)
                        .build();
 
         // Check nothing is found as the entity states were not yet updated.
-        Iterator<TestProcessManager> found = repository.find(query);
+        var found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the column update to two of the three entities.
         repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProcessName());
 
         // Check the entities are now found by the provided filters.
-        Iterator<TestProcessManager> foundAfterMigration = repository.find(query);
+        var foundAfterMigration = repository.find(query);
 
-        ImmutableList<TestProcessManager> results = ImmutableList.copyOf(foundAfterMigration);
-        Project expectedState1 = expectedState(pm1, NEW_NAME);
-        Project expectedState2 = expectedState(pm2, NEW_NAME);
+        var results = ImmutableList.copyOf(foundAfterMigration);
+        var expectedState1 = expectedState(pm1, NEW_NAME);
+        var expectedState2 = expectedState(pm2, NEW_NAME);
         assertThat(results).hasSize(2);
         assertThat(results)
                 .comparingElementsUsing(entityState())
@@ -732,27 +711,27 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("replace the state of the migrated process")
     void replaceState() {
-        ProjectId id = createId(42);
-        TestProcessManager entity = new TestProcessManager(id);
-        TestProcessManagerRepository repository = repository();
+        var id = createId(42);
+        var entity = new TestProcessManager(id);
+        var repository = repository();
         repository.store(entity);
         repository.applyMigration(id, new RandomFillProcess());
 
-        Project.Query byNewName =
+        var byNewName =
                 Project.query()
                        .name().is(NEW_NAME)
                        .build();
 
         // Ensure nothing found.
-        Iterator<TestProcessManager> expectedEmpty = repository.find(byNewName);
+        var expectedEmpty = repository.find(byNewName);
         assertThat(expectedEmpty.hasNext()).isFalse();
 
         repository.applyMigration(id, new SetTestProcessName());
 
         // Now we should have found a single instance.
-        Iterator<TestProcessManager> shouldHaveOne = repository.find(byNewName);
-        Project expectedState = expectedState(entity, NEW_NAME);
-        ImmutableList<TestProcessManager> actualList = ImmutableList.copyOf(shouldHaveOne);
+        var shouldHaveOne = repository.find(byNewName);
+        var expectedState = expectedState(entity, NEW_NAME);
+        var actualList = ImmutableList.copyOf(shouldHaveOne);
         assertThat(actualList)
                 .comparingElementsUsing(entityState())
                 .containsExactly(expectedState);
@@ -762,33 +741,31 @@ class ProcessManagerRepositoryTest
     @DisplayName("update state via migration operation")
     void updateState() {
         // Store a new process manager instance in the repository.
-        ProjectId id = createId(42);
-        TestProcessManagerRepository repository = repository();
-        TestProcessManager pm = new TestProcessManager(id);
+        var id = createId(42);
+        var repository = repository();
+        var pm = new TestProcessManager(id);
         repository.store(pm);
 
         // Init filters by the `id_string` column.
-        Project.Query query =
+        var query =
                 Project.query()
                        .idString().is(id.toString())
                        .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProcessManager> found = repository.find(query);
+        var found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the state update.
         repository.applyMigration(id, new UpdatePmState<>());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProcessManager> afterMigration = repository.find(query);
+        var afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the column value is propagated to the entity state.
-        TestProcessManager entityWithColumns = afterMigration.next();
-        Project expectedState = pm
-                .state()
-                .toBuilder()
+        var entityWithColumns = afterMigration.next();
+        var expectedState = pm.state().toBuilder()
                 .setIdString(pm.getIdString())
                 .build();
         assertThat(entityWithColumns.state()).isEqualTo(expectedState);
@@ -798,13 +775,13 @@ class ProcessManagerRepositoryTest
     @DisplayName("update state of multiple entities")
     void updateStateForMultiple() {
         // Store three entities to the repository.
-        ProjectId id1 = createId(1);
-        ProjectId id2 = createId(2);
-        ProjectId id3 = createId(3);
-        TestProcessManagerRepository repository = repository();
-        TestProcessManager pm1 = new TestProcessManager(id1);
-        TestProcessManager pm2 = new TestProcessManager(id2);
-        TestProcessManager pm3 = new TestProcessManager(id3);
+        var id1 = createId(1);
+        var id2 = createId(2);
+        var id3 = createId(3);
+        var repository = repository();
+        var pm1 = new TestProcessManager(id1);
+        var pm2 = new TestProcessManager(id2);
+        var pm3 = new TestProcessManager(id3);
         repository.store(pm1);
         repository.store(pm2);
         repository.store(pm3);
@@ -813,21 +790,21 @@ class ProcessManagerRepositoryTest
         repository.applyMigration(ImmutableSet.of(id1, id2), new UpdatePmState<>());
 
         // Check that entities to which the migration has been applied now have columns updated.
-        Project.Query query =
+        var query =
                 Project.query()
                        .either(p -> p.idString().is(id1.toString()),
                                p -> p.idString().is(id2.toString()),
                                p -> p.idString().is(id3.toString()))
                        .build();
-        Iterator<TestProcessManager> found = repository.find(query);
+        var found = repository.find(query);
 
-        ImmutableList<TestProcessManager> results = ImmutableList.copyOf(found);
-        Project expectedState1 = pm1
+        var results = ImmutableList.copyOf(found);
+        var expectedState1 = pm1
                 .state()
                 .toBuilder()
                 .setIdString(pm1.getIdString())
                 .build();
-        Project expectedState2 = pm2
+        var expectedState2 = pm2
                 .state()
                 .toBuilder()
                 .setIdString(pm2.getIdString())
@@ -841,13 +818,13 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("archive entity via migration")
     void archiveEntityViaMigration() {
-        ProjectId id = createId(42);
-        TestProcessManager entity = createEntity(id);
+        var id = createId(42);
+        var entity = createEntity(id);
         repository().store(entity);
 
         repository().applyMigration(id, new MarkPmArchived<>());
 
-        Optional<TestProcessManager> found = repository().find(id);
+        var found = repository().find(id);
         assertThat(found).isPresent();
         assertThat(found.get()
                         .isArchived()).isTrue();
@@ -856,13 +833,13 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("delete entity via migration")
     void deleteEntityViaMigration() {
-        ProjectId id = createId(42);
-        TestProcessManager entity = createEntity(id);
+        var id = createId(42);
+        var entity = createEntity(id);
         repository().store(entity);
 
         repository().applyMigration(id, new MarkPmDeleted<>());
 
-        Optional<TestProcessManager> found = repository().find(id);
+        var found = repository().find(id);
         assertThat(found).isPresent();
         assertThat(found.get()
                         .isDeleted()).isTrue();
@@ -871,13 +848,13 @@ class ProcessManagerRepositoryTest
     @Test
     @DisplayName("remove entity record via migration")
     void removeRecordViaMigration() {
-        ProjectId id = createId(42);
-        TestProcessManager entity = createEntity(id);
+        var id = createId(42);
+        var entity = createEntity(id);
         repository().store(entity);
 
         repository().applyMigration(id, new RemovePmFromStorage<>());
 
-        Optional<TestProcessManager> found = repository().find(id);
+        var found = repository().find(id);
         assertThat(found).isEmpty();
     }
 

@@ -26,11 +26,8 @@
 
 package io.spine.server.procman.given.pm;
 
-import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.server.commandbus.Given;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.type.EventEnvelope;
@@ -52,42 +49,37 @@ import static io.spine.testdata.Sample.messageOfType;
 /**
  * Factory of messages to be sent to the Process Manager.
  */
-public class GivenMessages {
+public final class GivenMessages {
 
     private GivenMessages() {
     }
 
     public static PmCreateProject createProject() {
-        return PmCreateProject
-                .newBuilder()
+        return PmCreateProject.newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmStartProject startProject() {
-        return PmStartProject
-                .newBuilder()
+        return PmStartProject.newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmAddTask addTask() {
-        return PmAddTask
-                .newBuilder()
+        return PmAddTask.newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmCancelIteration cancelIteration() {
-        return PmCancelIteration
-                .newBuilder()
+        return PmCancelIteration.newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmIterationPlanned iterationPlanned(boolean budgetAllocated) {
-        return PmIterationPlanned
-                .newBuilder()
+        return PmIterationPlanned.newBuilder()
                 .setProjectId(ID)
                 .setBudgetAllocated(budgetAllocated)
                 .build();
@@ -95,41 +87,36 @@ public class GivenMessages {
 
     public static EventEnvelope
     entityAlreadyArchived(Class<? extends CommandMessage> commandClass) {
-        Any id = Identifier.pack(TestProcessManager.class.getName());
-        Command command = Given.ACommand.withMessage(messageOfType(commandClass));
-        EntityAlreadyArchived throwable = EntityAlreadyArchived
-                .newBuilder()
+        var id = Identifier.pack(TestProcessManager.class.getName());
+        var command = Given.ACommand.withMessage(messageOfType(commandClass));
+        var throwable = EntityAlreadyArchived.newBuilder()
                 .setEntityId(id)
                 .build();
-        Event rejection = reject(command, throwable);
-        EventEnvelope result = EventEnvelope.of(rejection);
+        var rejection = reject(command, throwable);
+        var result = EventEnvelope.of(rejection);
         return result;
     }
 
     public static PmOwnerChanged ownerChanged() {
-        return PmOwnerChanged
-                .newBuilder()
+        return PmOwnerChanged.newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmQuizStarted quizStarted() {
-        return PmQuizStarted
-                .newBuilder()
+        return PmQuizStarted.newBuilder()
                 .setQuizId(messageOfType(PmQuizId.class))
                 .build();
     }
 
     public static PmThrowEntityAlreadyArchived throwEntityAlreadyArchived() {
-        return PmThrowEntityAlreadyArchived
-                .newBuilder()
+        return PmThrowEntityAlreadyArchived.newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmThrowRuntimeException throwRuntimeException() {
-        return PmThrowRuntimeException
-                .newBuilder()
+        return PmThrowRuntimeException.newBuilder()
                 .setProjectId(ID)
                 .build();
     }

@@ -74,7 +74,7 @@ public class TestProcessManager
     }
 
     public static boolean processed(Message message) {
-        boolean result = messagesDelivered.containsValue(message);
+        var result = messagesDelivered.containsValue(message);
         return result;
     }
 
@@ -88,24 +88,24 @@ public class TestProcessManager
     }
 
     private void handleProjectCreated(ProjectId projectId) {
-        Project newState = state().toBuilder()
-                                  .setId(projectId)
-                                  .setStatus(Project.Status.CREATED)
-                                  .build();
+        var newState = state().toBuilder()
+                .setId(projectId)
+                .setStatus(Project.Status.CREATED)
+                .build();
         builder().mergeFrom(newState);
     }
 
     private void handleTaskAdded(Task task) {
-        Project newState = state().toBuilder()
-                                  .addTask(task)
-                                  .build();
+        var newState = state().toBuilder()
+                .addTask(task)
+                .build();
         builder().mergeFrom(newState);
     }
 
     private void handleProjectStarted() {
-        Project newState = state().toBuilder()
-                                  .setStatus(Project.Status.STARTED)
-                                  .build();
+        var newState = state().toBuilder()
+                .setStatus(Project.Status.STARTED)
+                .build();
         builder().mergeFrom(newState);
     }
 
@@ -131,7 +131,7 @@ public class TestProcessManager
         keep(command);
         checkNotArchived(command);
 
-        ProjectId projectId = command.getProjectId();
+        var projectId = command.getProjectId();
         PmAddTask.Builder addTask = builderForType(PmAddTask.class);
         addTask.setProjectId(projectId);
         PmDoNothing.Builder doNothing = builderForType(PmDoNothing.class);
@@ -142,8 +142,7 @@ public class TestProcessManager
     private void checkNotArchived(PmStartProject command) throws PmCannotStartArchivedProject {
         if (isArchived()) {
             setDeleted(true);
-            PmCannotStartArchivedProject rejection = PmCannotStartArchivedProject
-                    .newBuilder()
+            var rejection = PmCannotStartArchivedProject.newBuilder()
                     .setProjectId(command.getProjectId())
                     .build();
             throw rejection;
@@ -154,8 +153,7 @@ public class TestProcessManager
     PmProjectArchived handle(PmArchiveProject command) {
         keep(command);
         setArchived(true);
-        PmProjectArchived event = PmProjectArchived
-                .newBuilder()
+        var event = PmProjectArchived.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
         return event;
@@ -165,8 +163,7 @@ public class TestProcessManager
     PmProjectDeleted handle(PmDeleteProject command) {
         keep(command);
         setDeleted(true);
-        PmProjectDeleted event = PmProjectDeleted
-                .newBuilder()
+        var event = PmProjectDeleted.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
         return event;
@@ -175,8 +172,7 @@ public class TestProcessManager
     @Assign
     PmNothingDone handle(PmDoNothing command, CommandContext ignored) {
         keep(command);
-        return PmNothingDone
-                .newBuilder()
+        return PmNothingDone.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -184,8 +180,7 @@ public class TestProcessManager
     @Assign
     List<EventMessage> handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
         keep(command);
-        throw EntityAlreadyArchived
-                .newBuilder()
+        throw EntityAlreadyArchived.newBuilder()
                 .setEntityId(pack(command.getProjectId()))
                 .build();
     }
@@ -205,7 +200,7 @@ public class TestProcessManager
     Nothing on(PmTaskAdded event) {
         keep(event);
 
-        Task task = event.getTask();
+        var task = event.getTask();
         handleTaskAdded(task);
         return nothing();
     }

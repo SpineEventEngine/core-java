@@ -38,8 +38,8 @@ public final class SetTestProcessId
 
     @Override
     public Project apply(Project project) {
-        ProjectId id = id();
-        Project result = project
+        var id = id();
+        var result = project
                 .toBuilder()
                 .setIdString(id.toString())
                 .vBuild();

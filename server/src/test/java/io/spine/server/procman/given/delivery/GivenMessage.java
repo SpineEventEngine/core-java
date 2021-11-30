@@ -46,36 +46,36 @@ public class GivenMessage {
     }
 
     public static Command createProject() {
-        ProjectId projectId = projectId();
-        Command command = createCommand(PmCreateProject.newBuilder()
-                                                       .setProjectId(projectId)
-                                                       .build());
+        var projectId = projectId();
+        var command = createCommand(PmCreateProject.newBuilder()
+                                            .setProjectId(projectId)
+                                            .build());
         return command;
     }
 
     public static Event projectStarted() {
-        ProjectId projectId = projectId();
-        TestEventFactory eventFactory =
+        var projectId = projectId();
+        var eventFactory =
                 TestEventFactory.newInstance(AnyPacker.pack(projectId),
                                              GivenMessage.class
                 );
 
-        PmProjectStarted msg = PmProjectStarted.newBuilder()
-                                               .setProjectId(projectId)
-                                               .build();
+        var msg = PmProjectStarted.newBuilder()
+                .setProjectId(projectId)
+                .build();
 
-        Event result = eventFactory.createEvent(msg);
+        var result = eventFactory.createEvent(msg);
         return result;
     }
 
     private static ProjectId projectId() {
         return ProjectId.newBuilder()
-                        .setId(Identifier.newUuid())
-                        .build();
+                .setId(Identifier.newUuid())
+                .build();
     }
 
     private static Command createCommand(CommandMessage cmdMessage) {
-        Command result = requestFactory.createCommand(cmdMessage);
+        var result = requestFactory.createCommand(cmdMessage);
         return result;
     }
 }

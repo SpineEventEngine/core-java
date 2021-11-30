@@ -153,7 +153,7 @@ class ProcessManagerClassTest {
         @DisplayName("generated rejections")
         void rejections() {
             Class<? extends RejectionMessage> cls = StandardRejections.EntityAlreadyArchived.class;
-            EventClass rejectionClass = EventClass.from(cls);
+            var rejectionClass = EventClass.from(cls);
             assertThat(processManagerClass.rejections())
                     .containsExactly(rejectionClass);
         }

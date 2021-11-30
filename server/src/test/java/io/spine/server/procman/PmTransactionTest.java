@@ -25,7 +25,6 @@
  */
 package io.spine.server.procman;
 
-import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -75,8 +74,7 @@ class PmTransactionTest
                           PmState.Builder>
     createTx(ProcessManager<Id, PmState, PmState.Builder> entity,
              TransactionListener<Id> listener) {
-        PmTransaction<Id, PmState, PmState.Builder> transaction =
-                new PmTransaction<>(entity);
+        var transaction = new PmTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
@@ -89,24 +87,25 @@ class PmTransactionTest
     @Override
     protected PmState newState() {
         return PmState.newBuilder()
-                      .setId(id())
-                      .setName("The new project name for procman tx tests")
-                      .build();
+                .setId(id())
+                .setName("The new project name for procman tx tests")
+                .build();
     }
 
     @Override
     protected void
     checkEventReceived(ProcessManager<Id, PmState, PmState.Builder> entity, Event event) {
-        TxProcessManager aggregate = (TxProcessManager) entity;
-        Message actualMessage = unpack(event.getMessage());
+        var aggregate = (TxProcessManager) entity;
+        var actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
     }
 
     @Override
+    @SuppressWarnings("rawtypes") /* Avoiding the looong list of generics. */
     protected DispatchOutcome applyEvent(Transaction tx, Event event) {
-        PmTransaction cast = (PmTransaction) tx;
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var cast = (PmTransaction) tx;
+        var envelope = EventEnvelope.of(event);
         return cast.dispatchEvent(envelope);
     }
 }

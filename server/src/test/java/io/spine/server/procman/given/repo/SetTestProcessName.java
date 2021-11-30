@@ -40,7 +40,7 @@ public final class SetTestProcessName
 
     @Override
     public Project apply(Project project) {
-        Project newState = project
+        var newState = project
                 .toBuilder()
                 .clear()
                 .setId(id())

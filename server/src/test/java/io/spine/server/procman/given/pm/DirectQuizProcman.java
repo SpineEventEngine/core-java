@@ -31,7 +31,6 @@ import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOf3;
-import io.spine.test.procman.quiz.PmAnswer;
 import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.PmQuiz;
 import io.spine.test.procman.quiz.PmQuizId;
@@ -42,8 +41,6 @@ import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuestionFailed;
 import io.spine.test.procman.quiz.event.PmQuestionSolved;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
-
-import java.util.List;
 
 /**
  * A quiz is started using {@link PmStartQuiz Start Quiz command} which defines a question set, and 
@@ -71,32 +68,29 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder>
     @Assign
     EitherOf3<PmQuestionSolved, PmQuestionFailed, PmQuestionAlreadySolved>
     handle(PmAnswerQuestion command) {
-        PmAnswer answer = command.getAnswer();
-        PmQuizId examId = command.getQuizId();
-        PmQuestionId questionId = answer.getQuestionId();
+        var answer = command.getAnswer();
+        var examId = command.getQuizId();
+        var questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
-            PmQuestionAlreadySolved event = PmQuestionAlreadySolved
-                    .newBuilder()
+            var event = PmQuestionAlreadySolved.newBuilder()
                     .setQuizId(examId)
                     .setQuestionId(questionId)
                     .build();
             return EitherOf3.withC(event);
         }
 
-        boolean answerIsCorrect = answer.getCorrect();
+        var answerIsCorrect = answer.getCorrect();
         if (answerIsCorrect) {
-            PmQuestionSolved reaction =
-                    PmQuestionSolved
-                            .newBuilder()
+            var reaction =
+                    PmQuestionSolved.newBuilder()
                             .setQuizId(examId)
                             .setQuestionId(questionId)
                             .build();
             return EitherOf3.withA(reaction);
         } else {
-            PmQuestionFailed reaction =
-                    PmQuestionFailed
-                            .newBuilder()
+            var reaction =
+                    PmQuestionFailed.newBuilder()
                             .setQuizId(examId)
                             .setQuestionId(questionId)
                             .build();
@@ -105,8 +99,8 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder>
     }
 
     private boolean questionIsClosed(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = builder().getOpenQuestionList();
-        boolean containedInOpenQuestions = openQuestions.contains(questionId);
+        var openQuestions = builder().getOpenQuestionList();
+        var containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
 
@@ -118,7 +112,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder>
 
     @React
     Nothing on(PmQuestionSolved event) {
-        PmQuestionId questionId = event.getQuestionId();
+        var questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         builder().addSolvedQuestion(questionId);
         return nothing();
@@ -126,16 +120,16 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder>
 
     @React
     Nothing on(PmQuestionFailed event) {
-        PmQuestionId questionId = event.getQuestionId();
+        var questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         builder().addFailedQuestion(questionId);
         return nothing();
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        PmQuiz.Builder builder = builder();
-        List<PmQuestionId> openQuestions = builder.getOpenQuestionList();
-        int index = openQuestions.indexOf(questionId);
+        var builder = builder();
+        var openQuestions = builder.getOpenQuestionList();
+        var index = openQuestions.indexOf(questionId);
         builder.removeOpenQuestion(index);
     }
 }
