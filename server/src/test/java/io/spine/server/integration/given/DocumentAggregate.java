@@ -29,7 +29,6 @@ package io.spine.server.integration.given;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.External;
-import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -45,7 +44,6 @@ import io.spine.server.integration.OpenOfficeDocumentUploaded;
 import io.spine.server.integration.PaperDocumentScanned;
 import io.spine.server.integration.TextEdited;
 import io.spine.server.tuple.Pair;
-import io.spine.time.LocalDateTime;
 import io.spine.time.Now;
 
 /**
@@ -67,15 +65,13 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
 
     @Assign
     TextEdited handle(EditText command, CommandContext context) {
-        Edit edit = Edit
-                .newBuilder()
+        var edit = Edit.newBuilder()
                 .setEditor(context.actor())
                 .setPosition(command.getPosition())
                 .setTextAdded(command.getNewText())
                 .setCharsDeleted(command.getCharsToDelete())
                 .build();
-        return TextEdited
-                .newBuilder()
+        return TextEdited.newBuilder()
                 .setId(command.getId())
                 .setEdit(edit)
                 .vBuild();
@@ -101,23 +97,20 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
 
     @React
     Pair<DocumentCreated, TextEdited> on(DocumentImported event) {
-        DocumentId documentId = event.getId();
-        UserId user = event.getOwner();
-        LocalDateTime when = event.getWhenUploaded();
-        DocumentCreated created = DocumentCreated
-                .newBuilder()
+        var documentId = event.getId();
+        var user = event.getOwner();
+        var when = event.getWhenUploaded();
+        var created = DocumentCreated.newBuilder()
                 .setId(documentId)
                 .setWhenCreated(when)
                 .setOwner(user)
                 .vBuild();
-        Edit edit = Edit
-                .newBuilder()
+        var edit = Edit.newBuilder()
                 .setEditor(user)
                 .setPosition(0)
                 .setTextAdded(event.getText())
                 .build();
-        TextEdited edited = TextEdited
-                .newBuilder()
+        var edited = TextEdited.newBuilder()
                 .setId(documentId)
                 .setEdit(edit)
                 .vBuild();
@@ -138,18 +131,17 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
 
     @Apply
     private void event(TextEdited e) {
-        Edit edit = e.getEdit();
-        String text = builder().getText();
-        int position = edit.getPosition();
-        String start = text.substring(0, position);
-        String end = text.substring(position);
-        int deletedCount = edit.getCharsDeleted();
+        var edit = e.getEdit();
+        var text = builder().getText();
+        var position = edit.getPosition();
+        var start = text.substring(0, position);
+        var end = text.substring(position);
+        var deletedCount = edit.getCharsDeleted();
         if (deletedCount > 0) {
             end = end.substring(deletedCount);
         }
-        String resultText = start + edit.getTextAdded() + end;
-        builder()
-                .setText(resultText);
+        var resultText = start + edit.getTextAdded() + end;
+        builder().setText(resultText);
     }
 
     @Apply(allowImport = true)
