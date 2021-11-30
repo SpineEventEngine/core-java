@@ -27,7 +27,6 @@
 package io.spine.system.server.given.diagnostics;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Subscribe;
 import io.spine.core.Where;
@@ -37,9 +36,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.system.server.ConstraintViolated;
 import io.spine.system.server.test.InvalidText;
 import io.spine.system.server.test.WatchId;
-import io.spine.validate.ConstraintViolation;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -58,13 +54,13 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
             @Where(field = LAST_MESSAGE_TYPE_PATH,
                    equals = "type.spine.io/spine.system.server.test.TextValidated")
             ConstraintViolated event) {
-        List<ConstraintViolation> violations = event.getViolationList();
+        var violations = event.getViolationList();
         checkArgument(violations.size() == 1);
-        ConstraintViolation violation = violations.get(0);
-        Message value = unpack(violation.getFieldValue());
+        var violation = violations.get(0);
+        var value = unpack(violation.getFieldValue());
         checkArgument(value instanceof StringValue);
         @SuppressWarnings("OverlyStrongTypeCast") // OrBuilder
-        String stringValue = ((StringValue) value).getValue();
+        var stringValue = ((StringValue) value).getValue();
         builder().setInvalidText(stringValue);
     }
 
@@ -73,9 +69,9 @@ public final class ViolationsWatch extends Projection<WatchId, InvalidText, Inva
             @Where(field = LAST_MESSAGE_TYPE_PATH,
                    equals = "type.spine.io/spine.system.server.test.StartVerification")
             ConstraintViolated event) {
-        List<ConstraintViolation> violations = event.getViolationList();
+        var violations = event.getViolationList();
         checkArgument(violations.size() == 1);
-        ConstraintViolation violation = violations.get(0);
+        var violation = violations.get(0);
         builder().setErrorMessage(violation.getMsgFormat());
     }
 

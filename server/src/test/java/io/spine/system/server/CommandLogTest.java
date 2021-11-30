@@ -27,9 +27,7 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
@@ -39,13 +37,9 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.Event;
-import io.spine.core.MessageId;
-import io.spine.core.UserId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.DefaultRepository;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.system.server.event.CommandAcknowledged;
 import io.spine.system.server.event.CommandDispatched;
 import io.spine.system.server.event.CommandErrored;
@@ -76,7 +70,7 @@ import static io.spine.system.server.given.command.CompanyNameProcman.FAULTY_NAM
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("CommandLog should")
+@DisplayName("`CommandLog` should")
 class CommandLogTest {
 
     private static final TestActorRequestFactory requestFactory =
@@ -87,16 +81,13 @@ class CommandLogTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContextName contextName = BoundedContextName
-                .newBuilder()
+        var contextName = BoundedContextName.newBuilder()
                 .setValue(EntityEventsTest.class.getSimpleName())
                 .build();
-        context = BoundedContext
-                .singleTenant(contextName.getValue())
-                .build();
+        context = BoundedContext.singleTenant(contextName.getValue()).build();
         system = systemOf(context);
 
-        BoundedContext.InternalAccess ctx = context.internalAccess();
+        var ctx = context.internalAccess();
         ctx.register(DefaultRepository.of(CompanyAggregate.class));
         ctx.register(new CompanyNameProcmanRepo());
     }
@@ -123,12 +114,11 @@ class CommandLogTest {
         @Test
         @DisplayName("is processed successfully")
         void successful() {
-            EstablishCompany successfulCommand = EstablishCompany
-                    .newBuilder()
+            var successfulCommand = EstablishCompany.newBuilder()
                     .setId(id)
                     .setFinalName("Good company name")
                     .build();
-            CommandId commandId = postCommand(successfulCommand);
+            var commandId = postCommand(successfulCommand);
             checkReceived(successfulCommand);
             checkAcknowledged(commandId);
             checkDispatched(commandId);
@@ -139,26 +129,25 @@ class CommandLogTest {
         @Test
         @DisplayName("is filtered out")
         void invalid() {
-            Command invalidCommand = buildInvalidCommand();
-            CommandId actualId = postBuiltCommand(invalidCommand);
+            var invalidCommand = buildInvalidCommand();
+            var actualId = postBuiltCommand(invalidCommand);
 
             checkReceived(unpack(invalidCommand.getMessage()));
-            CommandId expectedId = invalidCommand.getId();
+            var expectedId = invalidCommand.getId();
             assertEquals(expectedId, actualId);
 
-            Error error = checkErrored(actualId);
+            var error = checkErrored(actualId);
             assertTrue(isNotDefault(error.getValidationError()));
         }
 
         @Test
         @DisplayName("is rejected by handler")
         void rejected() {
-            EstablishCompany rejectedCommand = EstablishCompany
-                    .newBuilder()
+            var rejectedCommand = EstablishCompany.newBuilder()
                     .setId(id)
                     .setFinalName(CompanyAggregate.TAKEN_NAME)
                     .build();
-            CommandId commandId = postCommand(rejectedCommand);
+            var commandId = postCommand(rejectedCommand);
             checkReceived(rejectedCommand);
 
             eventAccumulator.assertReceivedEvent(CommandAcknowledged.class);
@@ -172,11 +161,10 @@ class CommandLogTest {
         @DisplayName("causes a runtime exception")
         @MuteLogging
         void errored() {
-            StartCompanyEstablishing start = StartCompanyEstablishing
-                    .newBuilder()
+            var start = StartCompanyEstablishing.newBuilder()
                     .setId(id)
                     .build();
-            CommandId startId = postCommand(start);
+            var startId = postCommand(start);
 
             eventAccumulator.assertEventCount(5);
 
@@ -188,12 +176,11 @@ class CommandLogTest {
 
             eventAccumulator.forgetEvents();
 
-            ProposeCompanyName propose = ProposeCompanyName
-                    .newBuilder()
+            var propose = ProposeCompanyName.newBuilder()
                     .setId(id)
                     .setName(FAULTY_NAME)
                     .build();
-            CommandId proposeId = postCommand(propose);
+            var proposeId = postCommand(propose);
 
             eventAccumulator.assertEventCount(5);
 
@@ -201,26 +188,23 @@ class CommandLogTest {
             checkAcknowledged(proposeId);
             checkDispatched(proposeId);
             checkTargetAssigned(proposeId, CompanyNameProcman.TYPE);
-            Error error = checkHandlerFailed(proposeId);
+            var error = checkHandlerFailed(proposeId);
             assertThat(error.getType())
                     .isEqualTo(IllegalArgumentException.class.getCanonicalName());
         }
 
         private Command buildInvalidCommand() {
-            EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
-            UserId actor = GivenUserId.newUuid();
-            Timestamp now = Time.currentTime();
-            ActorContext actorContext = ActorContext
-                    .newBuilder()
+            var invalidCommand = EstablishCompany.getDefaultInstance();
+            var actor = GivenUserId.newUuid();
+            var now = Time.currentTime();
+            var actorContext = ActorContext.newBuilder()
                     .setTimestamp(now)
                     .setActor(actor)
                     .build();
-            CommandContext context = CommandContext
-                    .newBuilder()
+            var context = CommandContext.newBuilder()
                     .setActorContext(actorContext)
                     .build();
-            Command command = Command
-                    .newBuilder()
+            var command = Command.newBuilder()
                     .setId(CommandId.generate())
                     .setMessage(AnyPacker.pack(invalidCommand))
                     .setContext(context)
@@ -229,48 +213,48 @@ class CommandLogTest {
         }
 
         private void checkReceived(Message expectedCommand) {
-            CommandReceived received = eventAccumulator.assertReceivedEvent(CommandReceived.class);
-            Message actualCommand = unpack(received.getPayload().getMessage());
+            var received = eventAccumulator.assertReceivedEvent(CommandReceived.class);
+            var actualCommand = unpack(received.getPayload().getMessage());
             assertEquals(expectedCommand, actualCommand);
         }
 
         private void checkAcknowledged(CommandId commandId) {
-            CommandAcknowledged acknowledged = eventAccumulator.assertReceivedEvent(CommandAcknowledged.class);
+            var acknowledged = eventAccumulator.assertReceivedEvent(CommandAcknowledged.class);
             assertEquals(commandId, acknowledged.getId());
         }
 
         private void checkDispatched(CommandId commandId) {
-            CommandDispatched dispatched = eventAccumulator.assertReceivedEvent(CommandDispatched.class);
+            var dispatched = eventAccumulator.assertReceivedEvent(CommandDispatched.class);
             assertEquals(commandId, dispatched.getId());
         }
 
         private void checkTargetAssigned(CommandId commandId, TypeUrl entityType) {
-            TargetAssignedToCommand assigned =
+            var assigned =
                     eventAccumulator.assertReceivedEvent(TargetAssignedToCommand.class);
-            CommandTarget target = assigned.getTarget();
-            Any actualId = target.getEntityId().getId();
+            var target = assigned.getTarget();
+            var actualId = target.getEntityId().getId();
             assertEquals(commandId, assigned.getId());
             assertEquals(id, Identifier.unpack(actualId));
             assertEquals(entityType.value(), target.getTypeUrl());
         }
 
         private void checkHandled(CommandId commandId) {
-            CommandHandled handled = eventAccumulator.assertReceivedEvent(CommandHandled.class);
+            var handled = eventAccumulator.assertReceivedEvent(CommandHandled.class);
             assertEquals(commandId, handled.getId());
         }
 
         @CanIgnoreReturnValue
         private Error checkErrored(CommandId commandId) {
-            CommandErrored errored = eventAccumulator.assertReceivedEvent(CommandErrored.class);
+            var errored = eventAccumulator.assertReceivedEvent(CommandErrored.class);
             assertEquals(commandId, errored.getId());
             return errored.getError();
         }
 
         @CanIgnoreReturnValue
         private Error checkHandlerFailed(CommandId commandId) {
-            HandlerFailedUnexpectedly errored =
+            var errored =
                     eventAccumulator.assertReceivedEvent(HandlerFailedUnexpectedly.class);
-            MessageId signalId = errored.getHandledSignal();
+            var signalId = errored.getHandledSignal();
             assertTrue(signalId.isCommand());
             assertEquals(commandId, signalId.asCommandId());
             return errored.getError();
@@ -278,21 +262,21 @@ class CommandLogTest {
 
         private void checkRejected(CommandId commandId,
                                    Class<? extends Message> expectedRejectionClass) {
-            CommandRejected rejected = eventAccumulator.assertReceivedEvent(CommandRejected.class);
+            var rejected = eventAccumulator.assertReceivedEvent(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
-            Event rejectionEvent = rejected.getRejectionEvent();
-            TypeUrl rejectionType = rejectionEvent.enclosedTypeUrl();
-            TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
+            var rejectionEvent = rejected.getRejectionEvent();
+            var rejectionType = rejectionEvent.enclosedTypeUrl();
+            var expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }
 
         private CommandId postCommand(CommandMessage commandMessage) {
-            Command command = requestFactory.createCommand(commandMessage);
+            var command = requestFactory.createCommand(commandMessage);
             return postBuiltCommand(command);
         }
 
         private CommandId postBuiltCommand(Command command) {
-            CommandBus commandBus = context.commandBus();
+            var commandBus = context.commandBus();
             commandBus.post(command, noOpObserver());
             return command.getId();
         }

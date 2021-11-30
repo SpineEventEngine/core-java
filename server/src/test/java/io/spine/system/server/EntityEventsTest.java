@@ -27,12 +27,10 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.core.Command;
 import io.spine.core.MessageId;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
@@ -84,9 +82,9 @@ class EntityEventsTest {
     void setUp() {
         context = BoundedContextBuilder.assumingTests(false)
                                        .build();
-        BoundedContext system = systemOf(context);
+        var system = systemOf(context);
 
-        BoundedContext.InternalAccess ctx = context.internalAccess();
+        var ctx = context.internalAccess();
         ctx.register(DefaultRepository.of(PersonAggregate.class));
         ctx.register(DefaultRepository.of(PersonProjection.class));
         ctx.register(DefaultRepository.of(PersonNamePart.class));
@@ -140,8 +138,7 @@ class EntityEventsTest {
         hidePerson();
         eventAccumulator.forgetEvents();
 
-        ExposePerson command = ExposePerson
-                .newBuilder()
+        var command = ExposePerson.newBuilder()
                 .setId(id)
                 .build();
         postCommand(command);
@@ -186,26 +183,25 @@ class EntityEventsTest {
 
         eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
         checkEntityCreated(PROCESS_MANAGER, PersonProcman.TYPE);
-        EntityStateChanged stateChanged =
+        var stateChanged =
                 eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         assertId(stateChanged.getEntity());
-        PersonCreation startedState = unpack(stateChanged.getNewState(),
-                                             PersonCreation.class);
+        var startedState = unpack(stateChanged.getNewState(),
+                                  PersonCreation.class);
         assertFalse(startedState.getCreated());
         eventAccumulator.forgetEvents();
 
-        CommandMessage domainCommand = CompletePersonCreation
-                .newBuilder()
+        var domainCommand = CompletePersonCreation.newBuilder()
                 .setId(id)
                 .build();
         postCommand(domainCommand);
 
         eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
-        EntityStateChanged stateChangedAgain =
+        var stateChangedAgain =
                 eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         assertId(stateChangedAgain.getEntity());
-        PersonCreation completedState = unpack(stateChangedAgain.getNewState(),
-                                               PersonCreation.class);
+        var completedState = unpack(stateChangedAgain.getNewState(),
+                                    PersonCreation.class);
         assertTrue(completedState.getCreated());
     }
 
@@ -218,21 +214,21 @@ class EntityEventsTest {
         eventAccumulator.assertReceivedEvent(EntityCreated.class);
         eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
 
-        EventDispatchedToReactor dispatchedToReactor =
+        var dispatchedToReactor =
                 eventAccumulator.assertReceivedEvent(EventDispatchedToReactor.class);
         assertId(dispatchedToReactor.getReceiver());
 
-        TypeUrl expectedType = TypeUrl.of(PersonNameCreated.class);
-        TypeUrl actualType = TypeUrl.ofEnclosed(dispatchedToReactor.getPayload()
-                                                                   .getMessage());
+        var expectedType = TypeUrl.of(PersonNameCreated.class);
+        var actualType = TypeUrl.ofEnclosed(dispatchedToReactor.getPayload()
+                                                               .getMessage());
         assertEquals(expectedType, actualType);
 
         checkEntityCreated(PROCESS_MANAGER, PersonProcman.TYPE);
 
-        EntityStateChanged stateChanged =
+        var stateChanged =
                 eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
-        PersonCreation processState = unpack(stateChanged.getNewState(),
-                                             PersonCreation.class);
+        var processState = unpack(stateChanged.getNewState(),
+                                  PersonCreation.class);
         assertEquals(id, processState.getId());
         assertTrue(processState.getCreated());
     }
@@ -244,8 +240,7 @@ class EntityEventsTest {
         createPersonName();
         eventAccumulator.forgetEvents();
 
-        RenamePerson domainCommand = RenamePerson
-                .newBuilder()
+        var domainCommand = RenamePerson.newBuilder()
                 .setId(id)
                 .setNewFirstName("Paul")
                 .build();
@@ -254,18 +249,17 @@ class EntityEventsTest {
         eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
         eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
 
-        EventDispatchedToReactor dispatched =
+        var dispatched =
                 eventAccumulator.assertReceivedEvent(EventDispatchedToReactor.class);
         assertId(dispatched.getReceiver());
-        TypeUrl expectedType = TypeUrl.of(PersonRenamed.class);
-        TypeUrl actualType = TypeUrl.ofEnclosed(dispatched.getPayload()
-                                                          .getMessage());
+        var expectedType = TypeUrl.of(PersonRenamed.class);
+        var actualType = TypeUrl.ofEnclosed(dispatched.getPayload()
+                                                      .getMessage());
         assertEquals(expectedType, actualType);
     }
 
     private void createPerson() {
-        CreatePerson command = CreatePerson
-                .newBuilder()
+        var command = CreatePerson.newBuilder()
                 .setId(id)
                 .build();
         postCommand(command);
@@ -273,8 +267,7 @@ class EntityEventsTest {
 
     @CanIgnoreReturnValue
     private HidePerson hidePerson() {
-        HidePerson command = HidePerson
-                .newBuilder()
+        var command = HidePerson.newBuilder()
                 .setId(id)
                 .build();
         postCommand(command);
@@ -283,8 +276,7 @@ class EntityEventsTest {
 
     @CanIgnoreReturnValue
     private CreatePersonName createPersonName() {
-        CreatePersonName domainCommand = CreatePersonName
-                .newBuilder()
+        var domainCommand = CreatePersonName.newBuilder()
                 .setId(id)
                 .setFirstName("Ringo")
                 .build();
@@ -293,7 +285,7 @@ class EntityEventsTest {
     }
 
     private void assertCommandDispatched(Message command) {
-        CommandDispatchedToHandler event =
+        var event =
                 eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
         assertId(event.getReceiver());
         Message commandMessage = event.getPayload()
@@ -303,26 +295,26 @@ class EntityEventsTest {
 
     private void checkEntityCreated(EntityOption.Kind entityKind,
                                     TypeUrl entityType) {
-        EntityCreated event = eventAccumulator.assertReceivedEvent(EntityCreated.class);
-        MessageId entityId = event.getEntity();
+        var event = eventAccumulator.assertReceivedEvent(EntityCreated.class);
+        var entityId = event.getEntity();
         assertId(entityId);
         assertEquals(entityType.value(), entityId.getTypeUrl());
         assertEquals(entityKind, event.getKind());
     }
 
     private void checkEventDispatchedToSubscriber() {
-        EventDispatchedToSubscriber event =
+        var event =
                 eventAccumulator.assertReceivedEvent(EventDispatchedToSubscriber.class);
-        MessageId receiver = event.getReceiver();
-        PersonCreated payload = (PersonCreated) event.getPayload()
-                                                     .enclosedMessage();
+        var receiver = event.getReceiver();
+        var payload = (PersonCreated) event.getPayload()
+                                           .enclosedMessage();
         assertId(receiver);
         assertEquals(PersonProjection.TYPE.value(), receiver.getTypeUrl());
         assertEquals(id, payload.getId());
     }
 
-    private void checkEntityStateChanged(EntityState state) {
-        EntityStateChanged event = eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
+    private void checkEntityStateChanged(EntityState<?> state) {
+        var event = eventAccumulator.assertReceivedEvent(EntityStateChanged.class);
         assertId(event.getEntity());
         assertEquals(state, unpack(event.getNewState()));
         assertFalse(event.getSignalIdList()
@@ -330,10 +322,10 @@ class EntityEventsTest {
     }
 
     private void checkCommandDispatchedToAggregateHandler() {
-        CommandDispatchedToHandler commandDispatchedEvent =
+        var commandDispatchedEvent =
                 eventAccumulator.assertReceivedEvent(CommandDispatchedToHandler.class);
-        MessageId receiver = commandDispatchedEvent.getReceiver();
-        CreatePerson payload = (CreatePerson)
+        var receiver = commandDispatchedEvent.getReceiver();
+        var payload = (CreatePerson)
                 commandDispatchedEvent.getPayload()
                                       .enclosedMessage();
         assertId(receiver);
@@ -342,45 +334,44 @@ class EntityEventsTest {
     }
 
     private void checkEntityArchived() {
-        EntityArchived event = eventAccumulator.assertReceivedEvent(EntityArchived.class);
-        MessageId entityId = event.getEntity();
+        var event = eventAccumulator.assertReceivedEvent(EntityArchived.class);
+        var entityId = event.getEntity();
         assertEquals(PersonAggregate.TYPE.value(),
                      entityId.getTypeUrl());
         assertId(entityId);
     }
 
     private void checkEntityDeleted() {
-        EntityDeleted event = eventAccumulator.assertReceivedEvent(EntityDeleted.class);
-        MessageId entityId = event.getEntity();
+        var event = eventAccumulator.assertReceivedEvent(EntityDeleted.class);
+        var entityId = event.getEntity();
         assertEquals(PersonProjection.TYPE.value(),
                      entityId.getTypeUrl());
         assertId(entityId);
     }
 
     private void checkEntityExtracted() {
-        EntityUnarchived event =
-                eventAccumulator.assertReceivedEvent(EntityUnarchived.class);
-        MessageId entityId = event.getEntity();
+        var event = eventAccumulator.assertReceivedEvent(EntityUnarchived.class);
+        var entityId = event.getEntity();
         assertEquals(PersonAggregate.TYPE.value(),
                      entityId.getTypeUrl());
         assertId(entityId);
     }
 
     private void checkEntityRestored() {
-        EntityRestored event = eventAccumulator.assertReceivedEvent(EntityRestored.class);
-        MessageId entityId = event.getEntity();
+        var event = eventAccumulator.assertReceivedEvent(EntityRestored.class);
+        var entityId = event.getEntity();
         assertEquals(PersonProjection.TYPE.value(),
                      entityId.getTypeUrl());
         assertId(entityId);
     }
 
     private void assertId(MessageId entityId) {
-        Any idValue = entityId.getId();
+        var idValue = entityId.getId();
         assertEquals(id, Identifier.unpack(idValue));
     }
 
     private void postCommand(CommandMessage commandMessage) {
-        Command command = requestFactory.createCommand(commandMessage);
+        var command = requestFactory.createCommand(commandMessage);
         context.commandBus()
                .post(command, noOpObserver());
     }

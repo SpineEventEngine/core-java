@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.system.server.WriteSideFunction.delegatingTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("TenantAwareSystemWriteSide should")
+@DisplayName("`TenantAwareSystemWriteSide` should")
 class TenantAwareSystemWriteSideTest {
 
     private static final String POST_EVENTS = "post system events";
@@ -87,7 +87,7 @@ class TenantAwareSystemWriteSideTest {
 
     private void postEventAndCheck(TenantId tenantId) {
         EventMessage event = Sample.messageOfType(PersonNameCreated.class);
-        SystemWriteSide writeSide = delegatingTo(delegate).get(tenantId);
+        var writeSide = delegatingTo(delegate).get(tenantId);
         writeSide.postEvent(event);
 
         assertEquals(event, delegate.lastSeenEvent().message());

@@ -26,7 +26,6 @@
 
 package io.spine.system.server.given.entity;
 
-import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -105,10 +104,8 @@ public class PersonAggregate extends Aggregate<PersonId, Person, Person.Builder>
 
     @Apply
     private void on(PersonRenamed event) {
-        Person.Builder builder = builder();
-        PersonName newName = builder
-                .getName()
-                .toBuilder()
+        var builder = builder();
+        var newName = builder.getName().toBuilder()
                 .setGivenName(event.getNewFirstName())
                 .build();
         builder.setName(newName);

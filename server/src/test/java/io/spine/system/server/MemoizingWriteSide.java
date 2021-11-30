@@ -80,14 +80,14 @@ public final class MemoizingWriteSide implements SystemWriteSide {
      */
     @Override
     public Event postEvent(EventMessage systemEvent, Origin origin) {
-        TenantId tenantId = currentTenant();
+        var tenantId = currentTenant();
         lastSeenEvent = new MemoizedSystemMessage(systemEvent, tenantId);
         return Event.getDefaultInstance();
     }
 
     /** Obtains the ID of the current tenant. */
     private TenantId currentTenant() {
-        TenantId result = new TenantFunction<TenantId>(multitenant) {
+        var result = new TenantFunction<TenantId>(multitenant) {
             @Override
             public TenantId apply(TenantId id) {
                 return id;

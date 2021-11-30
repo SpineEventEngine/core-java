@@ -48,15 +48,15 @@ public final class TestCommandScheduler extends CommandScheduler {
 
     public void assertScheduled(Command command) {
         // System properties are modified by the framework.
-        boolean found = scheduledCommands.stream()
-                                         .map(cmd -> cmd.toBuilder()
-                                                        .clearSystemProperties()
-                                                        .build())
-                                         .anyMatch(command::equals);
-        String scheduledCommands = this.scheduledCommands.stream()
-                                                         .map(Command::getMessage)
-                                                         .map(Any::getTypeUrl)
-                                                         .collect(joining(", "));
+        var found = scheduledCommands.stream()
+                .map(cmd -> cmd.toBuilder()
+                        .clearSystemProperties()
+                        .build())
+                .anyMatch(command::equals);
+        var scheduledCommands = this.scheduledCommands.stream()
+                .map(Command::getMessage)
+                .map(Any::getTypeUrl)
+                .collect(joining(", "));
         assertTrue(found,
                    format("Command is not scheduled. " +
                                   "%n expected command:%n%s%nActually scheduled:%n%s",

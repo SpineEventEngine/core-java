@@ -62,7 +62,7 @@ public abstract class AbstractEventAccumulator implements EventDispatcher {
     @CanIgnoreReturnValue
     @Override
     public final void dispatch(EventEnvelope event) {
-        EventMessage msg = event.message();
+        var msg = event.message();
         remember(msg);
     }
 
@@ -107,14 +107,13 @@ public abstract class AbstractEventAccumulator implements EventDispatcher {
     @CanIgnoreReturnValue
     public <E extends Message> E assertReceivedEvent(Class<E> eventType) {
         assertFalse(nonCheckedEvents.isEmpty(), errorMessage());
-        EventMessage event = nonCheckedEvents
-                .stream()
+        var event = nonCheckedEvents.stream()
                 .filter(eventType::isInstance)
                 .findFirst()
                 .orElseGet(() -> fail(errorMessage()));
         nonCheckedEvents.remove(event);
         @SuppressWarnings("unchecked")
-        E result = (E) event;
+        var result = (E) event;
         return result;
     }
 
@@ -124,9 +123,10 @@ public abstract class AbstractEventAccumulator implements EventDispatcher {
     }
 
     private String errorMessage() {
-        return format("Actual events are: %s", events.stream()
-                                                     .map(Object::getClass)
-                                                     .map(Class::getSimpleName)
-                                                     .collect(joining(" -> ")));
+        return format("Actual events are: %s",
+                      events.stream()
+                              .map(Object::getClass)
+                              .map(Class::getSimpleName)
+                              .collect(joining(" -> ")));
     }
 }

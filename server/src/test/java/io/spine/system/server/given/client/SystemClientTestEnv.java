@@ -43,19 +43,19 @@ public class SystemClientTestEnv {
     }
 
     public static BoundedContext contextWithSystemProjection() {
-        BoundedContext context = BoundedContextBuilder.assumingTests().build();
-        BoundedContext systemContext = systemOf(context);
+        var context = BoundedContextBuilder.assumingTests().build();
+        var systemContext = systemOf(context);
         systemContext.internalAccess()
                      .register(new MealOrderRepository());
         return context;
     }
 
     public static MealOrderProjection findProjection(OrderId projectionId, BoundedContext context) {
-        MealOrderRepository repository = (MealOrderRepository)
+        var repository = (MealOrderRepository)
                 context.internalAccess()
                        .findRepository(MealOrder.class)
                        .orElseGet(() -> fail("Projection repository should be visible."));
-        MealOrderProjection projection =
+        var projection =
                 repository.find(projectionId)
                           .orElseGet(() -> fail("Projection should be present."));
         return projection;

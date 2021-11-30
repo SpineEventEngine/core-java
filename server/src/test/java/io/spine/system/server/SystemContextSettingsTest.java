@@ -33,7 +33,6 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventFilter;
@@ -66,12 +65,10 @@ class SystemContextSettingsTest {
     @Test
     @DisplayName("not store events by default")
     void notStoreEvents() {
-        BoundedContext domain = BoundedContextBuilder
-                .assumingTests()
-                .build();
-        BoundedContext system = systemOf(domain);
-        Event event = createEvent();
-        MemoizingObserver<Event> observer = postSystemEvent(system.eventBus(), event);
+        var domain = BoundedContextBuilder.assumingTests().build();
+        var system = systemOf(domain);
+        var event = createEvent();
+        var observer = postSystemEvent(system.eventBus(), event);
         assertTrue(observer.isCompleted());
         assertThat(observer.responses()).isEmpty();
     }
@@ -79,13 +76,13 @@ class SystemContextSettingsTest {
     @Test
     @DisplayName("store events if required")
     void storeEvents() {
-        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
+        var contextBuilder = BoundedContextBuilder.assumingTests();
         contextBuilder.systemSettings()
                       .persistEvents();
-        BoundedContext domain = contextBuilder.build();
-        BoundedContext system = systemOf(domain);
-        Event event = createEvent();
-        MemoizingObserver<Event> observer = postSystemEvent(system.eventBus(), event);
+        var domain = contextBuilder.build();
+        var system = systemOf(domain);
+        var event = createEvent();
+        var observer = postSystemEvent(system.eventBus(), event);
         assertTrue(observer.isCompleted());
         assertThat(observer.responses()).containsExactly(event);
     }
@@ -93,40 +90,37 @@ class SystemContextSettingsTest {
     @Test
     @DisplayName("not store domain commands")
     void notStoreDomainCommands() {
-        BoundedContext domain = BoundedContextBuilder
-                .assumingTests()
-                .build();
-        BoundedContext system = systemOf(domain);
+        var domain = BoundedContextBuilder.assumingTests().build();
+        var system = systemOf(domain);
         assertFalse(system.hasEntitiesWithState(CommandLog.class));
     }
 
     @Test
     @DisplayName("store domain commands if required")
     void storeDomainCommands() {
-        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
+        var contextBuilder = BoundedContextBuilder.assumingTests();
         contextBuilder.systemSettings()
                       .enableCommandLog();
-        BoundedContext domain = contextBuilder.build();
-        BoundedContext system = systemOf(domain);
+        var domain = contextBuilder.build();
+        var system = systemOf(domain);
         assertTrue(system.hasEntitiesWithState(CommandLog.class));
     }
 
     @Test
     @DisplayName("post system events in parallel")
     void asyncEvents() {
-        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
+        var contextBuilder = BoundedContextBuilder.assumingTests();
         contextBuilder.systemSettings()
                       .enableParallelPosting();
-        BoundedContext domain = contextBuilder.build();
-        BoundedContext system = systemOf(domain);
-        HistoryEventWatcher watcher = new HistoryEventWatcher();
+        var domain = contextBuilder.build();
+        var system = systemOf(domain);
+        var watcher = new HistoryEventWatcher();
         system.eventBus().register(watcher);
-        MessageId messageId = MessageId.newBuilder()
-                                       .setTypeUrl(TypeUrl.of(Empty.class).value())
-                                       .setId(Identifier.pack(newUuid()))
-                                       .build();
-        EntityCreated event = EntityCreated
-                .newBuilder()
+        var messageId = MessageId.newBuilder()
+                .setTypeUrl(TypeUrl.of(Empty.class).value())
+                .setId(Identifier.pack(newUuid()))
+                .build();
+        var event = EntityCreated.newBuilder()
                 .setEntity(messageId)
                 .setKind(ENTITY)
                 .build();
@@ -139,13 +133,11 @@ class SystemContextSettingsTest {
 
     private static MemoizingObserver<Event> postSystemEvent(EventBus systemBus, Event event) {
         systemBus.post(event);
-        EventFilter filter = EventFilter
-                .newBuilder()
+        var filter = EventFilter.newBuilder()
                 .setEventType(event.enclosedTypeUrl()
                                    .toTypeName().value())
                 .vBuild();
-        EventStreamQuery query = EventStreamQuery
-                .newBuilder()
+        var query = EventStreamQuery.newBuilder()
                 .addFilter(filter)
                 .vBuild();
         MemoizingObserver<Event> observer = memoizingObserver();
@@ -155,8 +147,7 @@ class SystemContextSettingsTest {
     }
 
     private static Event createEvent() {
-        EntityStateChanged eventMessage = EntityStateChanged
-                .newBuilder()
+        var eventMessage = EntityStateChanged.newBuilder()
                 .setEntity(MessageId.newBuilder()
                                     .setId(Identifier.pack(42))
                                     .setTypeUrl(TypeUrl.of(EmptyEntityState.class)
@@ -168,7 +159,7 @@ class SystemContextSettingsTest {
                                       .setTypeUrl(TypeUrl.of(EntityStateChanged.class)
                                                          .value()))
                 .vBuild();
-        Event event = events.createEvent(eventMessage);
+        var event = events.createEvent(eventMessage);
         return event;
     }
 }
