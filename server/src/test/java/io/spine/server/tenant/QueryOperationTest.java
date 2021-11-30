@@ -27,8 +27,6 @@
 package io.spine.server.tenant;
 
 import io.spine.client.Query;
-import io.spine.client.QueryFactory;
-import io.spine.client.QueryId;
 import io.spine.server.test.shared.EmptyAggregate;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
@@ -57,10 +55,9 @@ class QueryOperationTest {
     @Test
     @DisplayName("return query")
     void returnQuery() {
-        Query query = Query.newBuilder()
-                           .build();
+        var query = Query.getDefaultInstance();
 
-        QueryOperation op = new QueryOperation(query) {
+        var op = new QueryOperation(query) {
             @Override
             public void run() {
                 // Do nothing.
@@ -73,16 +70,15 @@ class QueryOperationTest {
     @Test
     @DisplayName("return query ID")
     void returnQueryId() {
-        QueryFactory factory = new TestActorRequestFactory(getClass()).query();
-        Query query = factory.all(EmptyAggregate.class);
-        QueryId id = query.getId();
-        QueryOperation op = new QueryOperation(query) {
+        var factory = new TestActorRequestFactory(getClass()).query();
+        var query = factory.all(EmptyAggregate.class);
+        var id = query.getId();
+        var op = new QueryOperation(query) {
             @Override
             public void run() {
                 // Do nothing.
             }
         };
-
         assertEquals(id, op.queryId());
     }
 }
