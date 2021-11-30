@@ -28,7 +28,6 @@ package io.spine.server.log.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -65,16 +64,14 @@ public final class CardAggregate
 
     @Assign
     BooksBorrowed handle(BorrowBooks command) throws UnknownBook {
-        BooksBorrowed.Builder event = BooksBorrowed
-                .newBuilder()
-                .setCard(id());
+        var event = BooksBorrowed.newBuilder().setCard(id());
         List<Isbn> unknownBooks = new ArrayList<>();
-        for (Isbn bookId : command.getBookIdList()) {
-            Book book = knownBooks.get(bookId);
+        for (var bookId : command.getBookIdList()) {
+            var book = knownBooks.get(bookId);
             if (book != null) {
                 event.addBook(book);
-                List<PersonName> authors = book.getAuthorList();
-                PersonName firstAuthor = authors.get(0);
+                var authors = book.getAuthorList();
+                var firstAuthor = authors.get(0);
                 _fine().log("Adding to order: %s by %s %s",
                             book.getTitle(),
                             firstAuthor.getGivenName(),
@@ -85,8 +82,7 @@ public final class CardAggregate
             }
         }
         if (!unknownBooks.isEmpty()) {
-            throw UnknownBook
-                    .newBuilder()
+            throw UnknownBook.newBuilder()
                     .addAllBook(unknownBooks)
                     .build();
         } else {
@@ -96,19 +92,17 @@ public final class CardAggregate
 
     @Assign
     BookReturned handle(ReturnBook command) throws UnknownBook {
-        Isbn isbn = command.getBook();
-        Book book = knownBooks.get(isbn);
+        var isbn = command.getBook();
+        var book = knownBooks.get(isbn);
         if (book == null) {
-            UnknownBook rejection = UnknownBook
-                    .newBuilder()
+            var rejection = UnknownBook.newBuilder()
                     .addAllBook(ImmutableList.of(isbn))
                     .build();
             _error().withCause(rejection)
                     .log("Cannot return an unknown book. ISBN: `%s`", isbn.getValue());
             throw rejection;
         } else {
-            return BookReturned
-                    .newBuilder()
+            return BookReturned.newBuilder()
                     .setCard(id())
                     .setBook(book)
                     .vBuild();
@@ -122,9 +116,9 @@ public final class CardAggregate
 
     @Apply
     private void on(BookReturned event) {
-        List<Book> list = builder().getBookList();
-        Book book = event.getBook();
-        int bookIndex = list.indexOf(book);
+        var list = builder().getBookList();
+        var book = event.getBook();
+        var bookIndex = list.indexOf(book);
         builder().removeBook(bookIndex);
     }
 }
