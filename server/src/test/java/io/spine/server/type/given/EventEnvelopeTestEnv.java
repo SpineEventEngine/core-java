@@ -52,62 +52,62 @@ public class EventEnvelopeTestEnv {
     }
 
     public static Event event(Message eventMessage, EventContext eventContext) {
-        EventId.Builder eventIdBuilder = EventId.newBuilder()
-                                                .setValue(newUuid());
+        var eventIdBuilder = EventId.newBuilder()
+                .setValue(newUuid());
         return Event.newBuilder()
-                    .setId(eventIdBuilder)
-                    .setMessage(AnyPacker.pack(eventMessage))
-                    .setContext(eventContext)
-                    .build();
+                .setId(eventIdBuilder)
+                .setMessage(AnyPacker.pack(eventMessage))
+                .setContext(eventContext)
+                .build();
     }
 
     public static CommandContext commandContext() {
         return CommandContext.newBuilder()
-                             .setActorContext(actorContext())
-                             .build();
+                .setActorContext(actorContext())
+                .build();
     }
 
     public static ActorContext actorContext() {
-        TenantId tenantId = TenantId.newBuilder()
-                                    .setValue(Identifier.newUuid())
-                                    .build();
+        var tenantId = TenantId.newBuilder()
+                .setValue(Identifier.newUuid())
+                .build();
         return ActorContext.newBuilder()
-                           .setTenantId(tenantId)
-                           .build();
+                .setTenantId(tenantId)
+                .build();
     }
 
     public static ProjectCreated eventMessage() {
-        ProjectId projectId = ProjectId.newBuilder()
-                                       .setId(newUuid())
-                                       .build();
+        var projectId = ProjectId.newBuilder()
+                .setId(newUuid())
+                .build();
         return ProjectCreated.newBuilder()
-                             .setProjectId(projectId)
-                             .build();
+                .setProjectId(projectId)
+                .build();
     }
 
     @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(CommandContext commandContext) {
         return EventContext.newBuilder()
-                           .setCommandContext(commandContext)
-                           .build();
+                .setCommandContext(commandContext)
+                .build();
     }
 
     @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(EventContext eventContext) {
         return EventContext.newBuilder()
-                           .setEventContext(eventContext)
-                           .build();
+                .setEventContext(eventContext)
+                .build();
     }
 
     public static EventContext eventContext(Origin previousMessage) {
         return EventContext.newBuilder()
-                           .setPastMessage(previousMessage)
-                           .build();
+                .setPastMessage(previousMessage)
+                .build();
     }
 
     public static EventContext eventContext(ActorContext importContext) {
         return EventContext.newBuilder()
-                           .setImportContext(importContext)
-                           .build();
+                .setImportContext(importContext)
+                .build();
     }
 }

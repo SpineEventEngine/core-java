@@ -53,22 +53,22 @@ public final class GivenEvent {
     }
 
     public static EventContext context() {
-        Event event = eventFactory.createEvent(message(), someVersion());
+        var event = eventFactory.createEvent(message(), someVersion());
         return event.context();
     }
 
     public static Event occurredMinutesAgo(int minutesAgo) {
-        Event result = eventFactory.createEvent(message(), someVersion(), minutesAgo(minutesAgo));
+        var result = eventFactory.createEvent(message(), someVersion(), minutesAgo(minutesAgo));
         return result;
     }
 
     public static Event withMessage(EventMessage message) {
-        Event event = eventFactory.createEvent(message, someVersion());
+        var event = eventFactory.createEvent(message, someVersion());
         return event;
     }
 
     public static Event withMessageAndVersion(EventMessage message, Version version) {
-        Event event = eventFactory.createEvent(message, version);
+        var event = eventFactory.createEvent(message, version);
         return event;
     }
 
@@ -81,18 +81,17 @@ public final class GivenEvent {
     }
 
     public static Event withVersion(Version version) {
-        Event event = eventFactory.createEvent(message(), version);
+        var event = eventFactory.createEvent(message(), version);
         return event;
     }
 
     public static Event withDisabledEnrichmentOf(EventMessage message) {
-        Event event = withMessage(message);
-        Event.Builder builder =
-                event.toBuilder()
-                     .setContext(event.context()
-                                      .toBuilder()
-                                      .setEnrichment(Enrichment.newBuilder()
-                                                               .setDoNotEnrich(true)));
+        var event = withMessage(message);
+        var builder = event.toBuilder()
+                .setContext(event.context()
+                                    .toBuilder()
+                                    .setEnrichment(Enrichment.newBuilder()
+                                                           .setDoNotEnrich(true)));
         return builder.build();
     }
 

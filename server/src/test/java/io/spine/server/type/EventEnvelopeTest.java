@@ -27,8 +27,6 @@
 package io.spine.server.type;
 
 import com.google.protobuf.Message;
-import io.spine.core.ActorContext;
-import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Origin;
@@ -43,13 +41,13 @@ import static io.spine.server.type.given.EventEnvelopeTestEnv.eventContext;
 import static io.spine.server.type.given.EventEnvelopeTestEnv.eventMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("EventEnvelope should")
+@DisplayName("`EventEnvelope` should")
 class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventClass> {
 
     @Override
     protected Event outerObject() {
         Message eventMessage = eventMessage();
-        Event event = event(eventMessage);
+        var event = event(eventMessage);
         return event;
     }
 
@@ -70,46 +68,45 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
         @Test
         @DisplayName("command context")
         void fromCommandContext() {
-            CommandContext commandContext = commandContext();
-            EventContext context = eventContext(commandContext);
-            EventEnvelope envelope = envelope(context);
+            var commandContext = commandContext();
+            var context = eventContext(commandContext);
+            var envelope = envelope(context);
             assertEquals(commandContext.actorContext(), envelope.actorContext());
         }
 
         @Test
         @DisplayName("command context of the origin event")
         void fromCommandContextOfOrigin() {
-            CommandContext commandContext = commandContext();
-            EventContext originContext = eventContext(commandContext);
-            EventContext context = eventContext(originContext);
-            EventEnvelope envelope = envelope(context);
+            var commandContext = commandContext();
+            var originContext = eventContext(commandContext);
+            var context = eventContext(originContext);
+            var envelope = envelope(context);
             assertEquals(commandContext.actorContext(), envelope.actorContext());
         }
 
         @Test
         @DisplayName("origin message info")
         void fromPastMessage() {
-            ActorContext actor = actorContext();
-            Origin pastMessage = Origin
-                    .newBuilder()
+            var actor = actorContext();
+            var pastMessage = Origin.newBuilder()
                     .setActorContext(actor)
                     .buildPartial();
-            EventContext context = eventContext(pastMessage);
-            EventEnvelope envelope = envelope(context);
+            var context = eventContext(pastMessage);
+            var envelope = envelope(context);
             assertEquals(actor, envelope.actorContext());
         }
 
         @Test
         @DisplayName("import context")
         void fromImportContext() {
-            EventContext context = eventContext(actorContext());
-            EventEnvelope envelope = envelope(context);
-            ActorContext expectedImportContext = context.getImportContext();
+            var context = eventContext(actorContext());
+            var envelope = envelope(context);
+            var expectedImportContext = context.getImportContext();
             assertEquals(expectedImportContext, envelope.actorContext());
         }
 
         private EventEnvelope envelope(EventContext context) {
-            Event event = event(eventMessage(), context);
+            var event = event(eventMessage(), context);
             return toEnvelope(event);
         }
     }

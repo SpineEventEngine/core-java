@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("CommandEnvelope should")
+@DisplayName("`CommandEnvelope` should")
 class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
@@ -64,8 +64,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     @Test
     @DisplayName("obtain command context")
     void getCommandContext() {
-        Command command = outerObject();
-        CommandEnvelope envelope = toEnvelope(command);
+        var command = outerObject();
+        var envelope = toEnvelope(command);
         assertThat(envelope.context())
                 .isEqualTo(command.context());
         assertThat(envelope.context())
@@ -75,8 +75,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     @Test
     @DisplayName("obtain actor context")
     void getActorContext() {
-        Command command = outerObject();
-        CommandEnvelope envelope = toEnvelope(command);
+        var command = outerObject();
+        var envelope = toEnvelope(command);
 
         assertThat(envelope.actorContext())
                 .isEqualTo(command.actorContext());
@@ -85,10 +85,10 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     @Test
     @DisplayName("obtain type of given command")
     void getCommandType() {
-        Command command = requestFactory.generateCommand();
+        var command = requestFactory.generateCommand();
 
-        TypeName typeName = CommandEnvelope.of(command)
-                                           .messageTypeName();
+        var typeName = CommandEnvelope.of(command)
+                                      .messageTypeName();
         assertThat(typeName)
                 .isEqualTo(TypeName.of(TestCommandMessage.class));
     }
@@ -102,12 +102,11 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
                 .newBuilder()
                 .setId(Identifier.newUuid())
                 .build();
-        Command command = factory.command()
-                                 .create(message);
+        var command = factory.command().create(message);
 
-        TypeUrl typeUrl = CommandEnvelope.of(command)
-                                         .messageTypeName()
-                                         .toUrl();
+        var typeUrl = CommandEnvelope.of(command)
+                                     .messageTypeName()
+                                     .toUrl();
 
         assertEquals(TypeUrl.of(TestCommandMessage.class), typeUrl);
     }

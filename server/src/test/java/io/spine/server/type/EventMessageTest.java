@@ -26,7 +26,6 @@
 
 package io.spine.server.type;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
@@ -50,52 +49,47 @@ class EventMessageTest {
     @Test
     @DisplayName("valid")
     void valid() {
-        TaskAssigned msg = TaskAssigned
-                .newBuilder()
+        var msg = TaskAssigned.newBuilder()
                 .setId(newTaskId())
                 .setProjectId(newProjectId())
                 .setUserName("John Doe")
                 .build();
-        Event event = event(msg);
+        var event = event(msg);
         checkValid(event);
     }
 
     @Test
     @DisplayName("not be invalid")
     void invalid() {
-        TaskAssigned msg = TaskAssigned
-                .newBuilder()
+        var msg = TaskAssigned.newBuilder()
                 .setId(newTaskId())
                 .setProjectId(newProjectId())
                 .build();
-        Event event = event(msg);
+        var event = event(msg);
         assertThrows(ValidationException.class, () -> checkValid(event));
     }
 
     private static TaskId newTaskId() {
         return TaskId.newBuilder()
-                     .setId(Identifier.newUuid())
-                     .build();
+                .setId(Identifier.newUuid())
+                .build();
     }
 
     private static ProjectId newProjectId() {
         return ProjectId.newBuilder()
-                        .setId(Identifier.newUuid())
-                        .build();
+                .setId(Identifier.newUuid())
+                .build();
     }
 
     private static Event event(Message message) {
-        EventId id = EventId
-                .newBuilder()
+        var id = EventId.newBuilder()
                 .setValue(Identifier.newUuid())
                 .build();
-        Any wrappedMessage = AnyPacker.pack(message);
-        EventContext context = EventContext
-                .newBuilder()
+        var wrappedMessage = AnyPacker.pack(message);
+        var context = EventContext.newBuilder()
                 .setTimestamp(Time.currentTime())
                 .build();
-        Event result = Event
-                .newBuilder()
+        var result = Event.newBuilder()
                 .setId(id)
                 .setMessage(wrappedMessage)
                 .setContext(context)

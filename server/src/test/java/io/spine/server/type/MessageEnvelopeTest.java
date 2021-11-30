@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 public abstract class MessageEnvelopeTest<O extends Message,
                                           E extends MessageEnvelope<?, O, ?>,
-                                          C extends MessageClass> {
+                                          C extends MessageClass<?>> {
 
     protected abstract O outerObject();
 
@@ -52,13 +52,13 @@ public abstract class MessageEnvelopeTest<O extends Message,
     protected abstract C getMessageClass(O obj);
 
     @Test
-    @DisplayName("not accept nulls on construction")
+    @DisplayName("not accept `null`s on construction")
     void notAcceptNullsOnConstruction() {
-        O obj = outerObject();
+        var obj = outerObject();
         @SuppressWarnings("unchecked") // Due to generics.
-        Class<O> objectClass = (Class<O>) obj.getClass();
+        var objectClass = (Class<O>) obj.getClass();
         @SuppressWarnings("unchecked") // Due to generics.
-        Class<E> envelopeClass = (Class<E>) toEnvelope(obj).getClass();
+        var envelopeClass = (Class<E>) toEnvelope(obj).getClass();
         new NullPointerTester()
                 .setDefault(objectClass, obj)
                 .testAllPublicStaticMethods(envelopeClass);
@@ -67,16 +67,16 @@ public abstract class MessageEnvelopeTest<O extends Message,
     @Test
     @DisplayName("obtain outer object")
     void getOuterObject() {
-        O obj = outerObject();
-        E envelope = toEnvelope(obj);
+        var obj = outerObject();
+        var envelope = toEnvelope(obj);
         assertEquals(obj, envelope.outerObject());
     }
 
     @Test
     @DisplayName("extract message")
     void extractMessage() {
-        E envelope = toEnvelope(outerObject());
-        Message commandMessage = envelope.message();
+        var envelope = toEnvelope(outerObject());
+        var commandMessage = envelope.message();
         assertNotNull(commandMessage);
         assertFalse(isDefault(commandMessage));
     }
@@ -84,19 +84,19 @@ public abstract class MessageEnvelopeTest<O extends Message,
     @Test
     @DisplayName("obtain message class")
     void getMessageClass() {
-        O obj = outerObject();
-        E envelope = toEnvelope(obj);
+        var obj = outerObject();
+        var envelope = toEnvelope(obj);
         assertEquals(getMessageClass(obj), envelope.messageClass());
     }
 
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        O oneMessage = outerObject();
-        O anotherMessage = outerObject();
+        var oneMessage = outerObject();
+        var anotherMessage = outerObject();
 
-        E oneEnvelope = toEnvelope(oneMessage);
-        E anotherEnvelope = toEnvelope(anotherMessage);
+        var oneEnvelope = toEnvelope(oneMessage);
+        var anotherEnvelope = toEnvelope(anotherMessage);
 
         new EqualsTester().addEqualityGroup(oneEnvelope)
                           .addEqualityGroup(anotherEnvelope)
