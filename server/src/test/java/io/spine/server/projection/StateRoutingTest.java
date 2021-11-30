@@ -26,14 +26,12 @@
 
 package io.spine.server.projection;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.route.given.sur.ArtistMood;
 import io.spine.server.route.given.sur.ArtistMoodRepo;
-import io.spine.server.route.given.sur.ArtistName;
 import io.spine.server.route.given.sur.Gallery;
 import io.spine.server.route.given.sur.MagazineAggregate;
 import io.spine.server.route.given.sur.Manifesto;
@@ -50,7 +48,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.route.given.sur.Surrealism.BRETON;
 import static io.spine.server.route.given.sur.Surrealism.GOLL;
 
-@DisplayName("ProjectionRepository state routing should")
+@DisplayName("`ProjectionRepository` state routing should")
 class StateRoutingTest {
 
     private BlackBox context;
@@ -90,11 +88,10 @@ class StateRoutingTest {
     @Test
     @DisplayName("route state by the first field matching the ID type")
     void implicit() {
-        ArtistName artist = Surrealism.name("André Masson");
-        Any automaticDrawing = AnyPacker.pack(StringValue.of("Automatic Drawing"));
+        var artist = Surrealism.name("André Masson");
+        var automaticDrawing = AnyPacker.pack(StringValue.of("Automatic Drawing"));
         context.receivesEvent(
-                PieceOfArtCreated
-                        .newBuilder()
+                PieceOfArtCreated.newBuilder()
                         .setUuid(Identifier.newUuid())
                         .setArtist(artist)
                         .setContent(automaticDrawing)

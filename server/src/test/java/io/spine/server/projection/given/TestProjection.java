@@ -57,7 +57,7 @@ public class TestProjection
     }
 
     public static boolean processed(Message eventMessage) {
-        boolean result = eventMessagesDelivered.containsValue(eventMessage);
+        var result = eventMessagesDelivered.containsValue(eventMessage);
         return result;
     }
 
@@ -68,7 +68,7 @@ public class TestProjection
      */
     public static Set<ProjectId> whoProcessed(Message eventMessage) {
         ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
-        for (ProjectId projectId : eventMessagesDelivered.keySet()) {
+        for (var projectId : eventMessagesDelivered.keySet()) {
             if (eventMessagesDelivered.get(projectId).contains(eventMessage)) {
                 builder.add(projectId);
             }
@@ -89,11 +89,11 @@ public class TestProjection
         // Keep the event message for further inspection in tests.
         keep(event);
 
-        Project newState = state().toBuilder()
-                                  .setId(event.getProjectId())
-                                  .setStatus(Project.Status.CREATED)
-                                  .setName(event.getName())
-                                  .build();
+        var newState = state().toBuilder()
+                .setId(event.getProjectId())
+                .setStatus(Project.Status.CREATED)
+                .setName(event.getName())
+                .build();
         builder().mergeFrom(newState);
     }
 
@@ -113,12 +113,11 @@ public class TestProjection
      *         can have two parameters
      */
     @Subscribe
-    void on(PrjProjectStarted event,
-                   @SuppressWarnings("UnusedParameters") EventContext ignored) {
+    void on(PrjProjectStarted event, @SuppressWarnings("UnusedParameters") EventContext ignored) {
         keep(event);
-        Project newState = state().toBuilder()
-                                  .setStatus(Project.Status.STARTED)
-                                  .build();
+        var newState = state().toBuilder()
+                .setStatus(Project.Status.STARTED)
+                .build();
         builder().mergeFrom(newState);
     }
 

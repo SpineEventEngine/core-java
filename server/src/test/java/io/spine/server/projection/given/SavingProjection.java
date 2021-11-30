@@ -44,25 +44,25 @@ public final class SavingProjection
 
     @Subscribe
     void on(StringImported event) {
-        SavedString newState = createNewState("stringState", event.getValue());
+        var newState = createNewState("stringState", event.getValue());
         builder().mergeFrom(newState);
     }
 
     @Subscribe
     void on(Int32Imported event) {
-        SavedString newState = createNewState("integerState",
-                                              String.valueOf(event.getValue()));
+        var newState = createNewState("integerState",
+                                      String.valueOf(event.getValue()));
         builder().mergeFrom(newState);
     }
 
     private SavedString createNewState(String type, String value) {
         // Get the current state within the transaction.
-        String currentState = builder().buildPartial()
-                                       .getValue();
-        String result = currentState + (currentState.length() > 0 ? " + " : "") +
+        var currentState = builder().buildPartial()
+                                    .getValue();
+        var result = currentState + (currentState.length() > 0 ? " + " : "") +
                 type + '(' + value + ')' + System.lineSeparator();
         return SavedString.newBuilder()
-                          .setValue(result)
-                          .build();
+                .setValue(result)
+                .build();
     }
 }

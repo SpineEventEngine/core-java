@@ -57,7 +57,7 @@ public class ProjectionEventDispatcher {
     public static void dispatch(Projection<?, ?, ?> projection, Event event) {
         checkNotNull(projection);
         checkNotNull(event);
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var envelope = EventEnvelope.of(event);
         TestProjectionEndpoint.dispatch(projection, envelope);
     }
 
@@ -72,7 +72,7 @@ public class ProjectionEventDispatcher {
         checkNotNull(eventMessage);
         checkNotNull(eventContext);
 
-        Event event = Event.newBuilder()
+        var event = Event.newBuilder()
                            .setId(Events.generateId())
                            .setMessage(pack(eventMessage))
                            .setContext(eventContext)
@@ -91,7 +91,7 @@ public class ProjectionEventDispatcher {
 
         private static <I, P extends Projection<I, S, ?>, S extends EntityState<I>> void
         dispatch(P projection, EventEnvelope event) {
-            TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(event);
+            var endpoint = new TestProjectionEndpoint<I, P, S>(event);
             endpoint.runTransactionFor(projection);
         }
     }

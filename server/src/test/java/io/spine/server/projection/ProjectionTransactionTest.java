@@ -25,10 +25,7 @@
  */
 package io.spine.server.projection;
 
-import com.google.protobuf.Descriptors.EnumValueDescriptor;
-import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
-import io.spine.code.proto.FieldDeclaration;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -39,7 +36,6 @@ import io.spine.server.entity.TransactionTest;
 import io.spine.server.entity.VersionIncrement;
 import io.spine.server.entity.given.tx.Id;
 import io.spine.server.entity.given.tx.ProjectionState;
-import io.spine.server.entity.given.tx.ProjectionState.ProjectionType;
 import io.spine.server.entity.given.tx.TxProjection;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.type.EventEnvelope;
@@ -95,8 +91,7 @@ class ProjectionTransactionTest
                           ProjectionState.Builder>
     createTx(Projection<Id, ProjectionState, ProjectionState.Builder> entity,
              TransactionListener<Id> listener) {
-        ProjectionTransaction<Id, ProjectionState, ProjectionState.Builder> transaction =
-                new ProjectionTransaction<>(entity);
+        var transaction = new ProjectionTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
@@ -108,9 +103,8 @@ class ProjectionTransactionTest
 
     @Override
     protected ProjectionState newState() {
-        String nameString = "The new name for the projection state in this tx";
-        return ProjectionState
-                .newBuilder()
+        var nameString = "The new name for the projection state in this tx";
+        return ProjectionState.newBuilder()
                 .setId(id())
                 .setName(nameString)
                 .setNameLength(nameString.length())
@@ -124,8 +118,8 @@ class ProjectionTransactionTest
             Projection<Id, ProjectionState, ProjectionState.Builder> entity,
             Event event) {
 
-        TxProjection aggregate = (TxProjection) entity;
-        Message actualMessage = unpack(event.getMessage());
+        var aggregate = (TxProjection) entity;
+        var actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.receivedEvents()
                             .contains(actualMessage));
     }
@@ -133,8 +127,8 @@ class ProjectionTransactionTest
     @SuppressWarnings("rawtypes") // For the brevity of the test.
     @Override
     protected DispatchOutcome applyEvent(Transaction tx, Event event) {
-        ProjectionTransaction cast = (ProjectionTransaction) tx;
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var cast = (ProjectionTransaction) tx;
+        var envelope = EventEnvelope.of(event);
         return cast.play(envelope);
     }
 
@@ -146,21 +140,20 @@ class ProjectionTransactionTest
      * {@link #advanceVersionFromEvent()}, which tested the behavior of
      * {@link VersionIncrement.IncrementFromEvent} strategy.
      */
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Can ignore value of play() in this test.
     @Test
     @DisplayName("increment version on event")
+    @SuppressWarnings({"CheckReturnValue",
+            "ResultOfMethodCallIgnored"} /* Can ignore value of `play()` in this test. */)
     void incrementVersionOnEvent() {
-        Projection<Id, ProjectionState, ProjectionState.Builder> entity = createEntity();
-        Version oldVersion = entity.version();
-        Version eventVersion = Version
-                .newBuilder()
+        var entity = createEntity();
+        var oldVersion = entity.version();
+        var eventVersion = Version.newBuilder()
                 .setNumber(42)
                 .setTimestamp(currentTime())
                 .build();
-        Event event = GivenEvent.withMessageAndVersion(createEventMessage(), eventVersion);
+        var event = GivenEvent.withMessageAndVersion(createEventMessage(), eventVersion);
         Projection.playOn(entity, singleton(event));
-        Version expected = Versions.increment(oldVersion);
+        var expected = Versions.increment(oldVersion);
 
         assertThat(entity.version()
                          .getNumber())
@@ -173,51 +166,48 @@ class ProjectionTransactionTest
     @Test
     @DisplayName("propagate column values to the entity state on commit")
     void propagateColumnValues() {
-        TxProjection entity = (TxProjection) createEntity(/* nullType = false */);
-        String name = "some-projection-name";
-        TxCreated txCreated = TxCreated
-                .newBuilder()
+        var entity = (TxProjection) createEntity(/* nullType = false */);
+        var name = "some-projection-name";
+        var txCreated = TxCreated.newBuilder()
                 .setId(id())
                 .setName(name)
                 .build();
-        Event event = GivenEvent.withMessage(txCreated);
+        var event = GivenEvent.withMessage(txCreated);
         Projection.playOn(entity, singleton(event));
 
-        int nameLength = entity.state()
+        var nameLength = entity.state()
                                .getNameLength();
         assertThat(nameLength).isEqualTo(calculateLength(name));
 
-        ProjectionType type = entity.state()
-                                    .getType();
+        var type = entity.state()
+                         .getType();
         assertThat(type).isEqualTo(typeValueOf(false));
     }
 
     @Test
     @DisplayName("propagate `null` column values as default values for the field")
     void propagateNullColumnValues() {
-        Id id = Id.newBuilder()
+        var id = Id.newBuilder()
                   .setId(newUuid())
                   .build();
-        TxProjection entity = new TxProjection(id, true);
+        var entity = new TxProjection(id, true);
 
-        String name = newUuid();
-        TxCreated txCreated = TxCreated
+        var name = newUuid();
+        var txCreated = TxCreated
                 .newBuilder()
                 .setId(id())
                 .setName(name)
                 .build();
-        Event event = GivenEvent.withMessage(txCreated);
+        var event = GivenEvent.withMessage(txCreated);
         Projection.playOn(entity, singleton(event));
 
-        ProjectionState state = entity.state();
-        MessageType messageType = new MessageType(state.getDescriptorForType());
-        FieldDeclaration field = messageType.field("type");
-        ProjectionType actualType = state.getType();
+        var state = entity.state();
+        var messageType = new MessageType(state.getDescriptorForType());
+        var field = messageType.field("type");
+        var actualType = state.getType();
 
-        EnumValueDescriptor actualTypeDescriptor =
-                ((ProtocolMessageEnum) actualType).getValueDescriptor();
-        Object defaultTypeDescriptor = field.descriptor()
-                                            .getDefaultValue();
+        var actualTypeDescriptor = ((ProtocolMessageEnum) actualType).getValueDescriptor();
+        var defaultTypeDescriptor = field.descriptor().getDefaultValue();
         assertThat(actualTypeDescriptor).isEqualTo(defaultTypeDescriptor);
 
         // Make sure the transaction wasn't rolled back.

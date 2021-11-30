@@ -37,7 +37,6 @@ import io.spine.client.ResponseFormat;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.TenantId;
-import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -61,17 +60,12 @@ import io.spine.server.projection.migration.UpdateProjectionState;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
-import io.spine.system.server.CannotDispatchDuplicateEvent;
 import io.spine.system.server.DiagnosticMonitor;
-import io.spine.system.server.RoutingFailed;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.Task;
-import io.spine.test.projection.event.PrjProjectArchived;
 import io.spine.test.projection.event.PrjProjectCreated;
-import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -85,7 +79,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -119,13 +112,13 @@ class ProjectionRepositoryTest
     private BoundedContext context;
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
-        TestActorRequestFactory requestFactory =
+        var requestFactory =
                 new TestActorRequestFactory(ProjectionRepositoryTest.class, tenantId);
         return newInstance(producerId, requestFactory);
     }
 
     private static Event createEvent(TenantId tenantId, EventMessage eventMessage, Timestamp when) {
-        Version version = Versions.increment(Versions.zero());
+        var version = Versions.increment(Versions.zero());
         return newEventFactory(tenantId, PRODUCER_ID).createEvent(eventMessage, version, when);
     }
 
@@ -134,7 +127,7 @@ class ProjectionRepositoryTest
      * in multi-tenant context.
      */
     private static void keepTenantIdFromEvent(BoundedContext context, Event event) {
-        TenantId tenantId = event.tenant();
+        var tenantId = event.tenant();
         if (context.isMultitenant()) {
             context.internalAccess()
                    .tenantIndex()
@@ -149,18 +142,17 @@ class ProjectionRepositoryTest
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
-        TestProjectionRepository repository = new TestProjectionRepository();
+        var repository = new TestProjectionRepository();
         repository.registerWith(context);
         return repository;
     }
 
     @Override
     protected TestProjection createEntity(ProjectId id) {
-        Project project = Project
-                .newBuilder()
+        var project = Project.newBuilder()
                 .setId(id)
                 .build();
-        TestProjection projection =
+        var projection =
                 Given.projectionOfClass(TestProjection.class)
                      .withId(id)
                      .withState(project)
@@ -172,9 +164,9 @@ class ProjectionRepositoryTest
     protected List<TestProjection> createEntities(int count) {
         List<TestProjection> projections = Lists.newArrayList();
 
-        for (int i = 0; i < count; i++) {
-            ProjectId id = createId(i);
-            TestProjection projection =
+        for (var i = 0; i < count; i++) {
+            var id = createId(i);
+            var projection =
                     Given.projectionOfClass(TestProjection.class)
                          .withId(id)
                          .withState(Project.newBuilder()
@@ -192,12 +184,12 @@ class ProjectionRepositoryTest
     protected List<TestProjection> createWithNames(int count, Supplier<String> nameSupplier) {
         List<TestProjection> projections = Lists.newArrayList();
 
-        for (int i = 0; i < count; i++) {
-            ProjectId id = createId(i);
-            TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                             .withId(id)
-                                             .withState(newProject(id, nameSupplier.get()))
-                                             .build();
+        for (var i = 0; i < count; i++) {
+            var id = createId(i);
+            var projection = Given.projectionOfClass(TestProjection.class)
+                                  .withId(id)
+                                  .withState(newProject(id, nameSupplier.get()))
+                                  .build();
             projections.add(projection);
         }
 
@@ -207,8 +199,8 @@ class ProjectionRepositoryTest
     @Override
     protected List<TestProjection> orderedByName(List<TestProjection> entities) {
         return entities.stream()
-                       .sorted(comparing(ProjectionRepositoryTest::entityName))
-                       .collect(toList());
+                .sorted(comparing(ProjectionRepositoryTest::entityName))
+                .collect(toList());
     }
 
     private static String entityName(TestProjection entity) {
@@ -218,16 +210,16 @@ class ProjectionRepositoryTest
 
     private static Project newProject(ProjectId id, String name) {
         return Project.newBuilder()
-                      .setId(id)
-                      .setName(name)
-                      .build();
+                .setId(id)
+                .setName(name)
+                .build();
     }
 
     @Override
     protected ProjectId createId(int i) {
         return ProjectId.newBuilder()
-                        .setId(format("test-projection-%s", i))
-                        .build();
+                .setId(format("test-projection-%s", i))
+                .build();
     }
 
     @Override
@@ -264,7 +256,7 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("event")
         void event() {
-            PrjProjectCreated msg = projectCreated();
+            var msg = projectCreated();
 
             // Ensure no instances are present in the repository now.
             assertFalse(repository().loadAll(ResponseFormat.getDefaultInstance())
@@ -275,16 +267,16 @@ class ProjectionRepositoryTest
 
             // Post an event message and grab the ID of the projection, which processed it.
             checkDispatchesEvent(msg);
-            Set<ProjectId> projectIds = TestProjection.whoProcessed(msg);
+            var projectIds = TestProjection.whoProcessed(msg);
             assertEquals(1, projectIds.size());
-            ProjectId receiverId = projectIds.iterator()
-                                             .next();
+            var receiverId = projectIds.iterator()
+                                       .next();
 
             // Check that the projection item has actually been stored and now can be loaded.
-            Iterator<TestProjection> allItems =
+            var allItems =
                     repository().loadAll(ResponseFormat.getDefaultInstance());
             assertTrue(allItems.hasNext());
-            TestProjection storedProjection = allItems.next();
+            var storedProjection = allItems.next();
             assertFalse(allItems.hasNext());
 
             // Check that the stored instance has the same ID as the instance handling the event.
@@ -303,17 +295,17 @@ class ProjectionRepositoryTest
         @DisplayName("event to archived projection")
         void eventToArchived() {
             checkDispatchesEvent(projectCreated());
-            PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
+            var projectArchived = GivenEventMessage.projectArchived();
             checkDispatchesEvent(projectArchived);
-            ProjectId projectId = projectArchived.getProjectId();
-            TestProjection projection = repository().findOrCreate(projectId);
+            var projectId = projectArchived.getProjectId();
+            var projection = repository().findOrCreate(projectId);
             assertTrue(projection.isArchived());
 
             // Dispatch an event to the archived projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.state()
-                                              .getTaskList();
+            var addedTasks = projection.state()
+                                       .getTaskList();
             assertFalse(addedTasks.isEmpty());
 
             // Check that the projection was not re-created before dispatching.
@@ -324,17 +316,17 @@ class ProjectionRepositoryTest
         @DisplayName("event to deleted projection")
         void eventToDeleted() {
             checkDispatchesEvent(projectCreated());
-            PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
+            var projectDeleted = GivenEventMessage.projectDeleted();
             checkDispatchesEvent(projectDeleted);
-            ProjectId projectId = projectDeleted.getProjectId();
-            TestProjection projection = repository().findOrCreate(projectId);
+            var projectId = projectDeleted.getProjectId();
+            var projection = repository().findOrCreate(projectId);
             assertTrue(projection.isDeleted());
 
             // Dispatch an event to the deleted projection.
             checkDispatchesEvent(GivenEventMessage.taskAdded());
             projection = repository().findOrCreate(projectId);
-            List<Task> addedTasks = projection.state()
-                                              .getTaskList();
+            var addedTasks = projection.state()
+                                       .getTaskList();
             assertTrue(projection.isDeleted());
 
             // Check that the projection was not re-created before dispatching.
@@ -346,54 +338,48 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("entity state update")
         void entityState() throws Exception {
-            PrjProjectCreated projectCreated = GivenEventMessage.projectCreated();
-            PrjTaskAdded taskAdded = GivenEventMessage.taskAdded();
-            ProjectId id = projectCreated.getProjectId();
-            TestEventFactory eventFactory = newInstance(id, ProjectionRepositoryTest.class);
-            TestProjection project = new TestProjection(id);
+            var projectCreated = GivenEventMessage.projectCreated();
+            var taskAdded = GivenEventMessage.taskAdded();
+            var id = projectCreated.getProjectId();
+            var eventFactory = newInstance(id, ProjectionRepositoryTest.class);
+            var project = new TestProjection(id);
             dispatch(project, eventFactory.createEvent(projectCreated));
-            Any oldState = pack(project.state());
+            var oldState = pack(project.state());
             dispatch(project, eventFactory.createEvent(taskAdded));
-            Any newState = pack(project.state());
-            MessageId entityId = MessageId
-                    .newBuilder()
+            var newState = pack(project.state());
+            var entityId = MessageId.newBuilder()
                     .setTypeUrl(newState.getTypeUrl())
                     .setId(pack(id))
                     .vBuild();
-            EntityStateChanged changedEvent = EntityStateChanged
-                    .newBuilder()
+            var changedEvent = EntityStateChanged.newBuilder()
                     .setEntity(entityId)
                     .setWhen(currentTime())
                     .setOldState(oldState)
                     .setNewState(newState)
                     .addSignalId(dispatchedEventId())
                     .build();
-            EntitySubscriberProjection.Repository repository =
-                    new EntitySubscriberProjection.Repository();
-            BoundedContext context = BoundedContextBuilder.assumingTests()
-                                                          .build();
+            var repository = new EntitySubscriberProjection.Repository();
+            var context = BoundedContextBuilder.assumingTests().build();
             context.internalAccess()
                    .register(repository);
-            EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
+            var envelope = EventEnvelope.of(eventFactory.createEvent(changedEvent));
             repository.dispatch(envelope);
-            ProjectTaskNames expectedValue = ProjectTaskNames
-                    .newBuilder()
+            var expectedValue = ProjectTaskNames.newBuilder()
                     .setProjectId(id)
                     .setProjectName(projectCreated.getName())
                     .addTaskName(taskAdded.getTask()
                                           .getTitle())
                     .build();
-            Optional<EntitySubscriberProjection> projection = repository.find(id);
+            var projection = repository.find(id);
             assertTrue(projection.isPresent());
-            assertEquals(expectedValue, projection.get()
-                                                  .state());
+            assertEquals(expectedValue, projection.get().state());
 
             context.close();
         }
 
         private void checkDispatchesEvent(EventMessage eventMessage) {
-            TestEventFactory eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
-            Event event = eventFactory.createEvent(eventMessage);
+            var eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
+            var event = eventFactory.createEvent(eventMessage);
 
             keepTenantIdFromEvent(context, event);
 
@@ -419,9 +405,9 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("events")
         void events() {
-            PrjProjectCreated msg = projectCreated();
-            TestEventFactory eventFactory = newEventFactory(tenantId(), pack(msg.getProjectId()));
-            Event event = eventFactory.createEvent(msg);
+            var msg = projectCreated();
+            var eventFactory = newEventFactory(tenantId(), pack(msg.getProjectId()));
+            var event = eventFactory.createEvent(msg);
 
             dispatchSuccessfully(event);
             dispatchDuplicate(event);
@@ -430,13 +416,13 @@ class ProjectionRepositoryTest
         @Test
         @DisplayName("different events with same ID")
         void differentEventsWithSameId() {
-            PrjProjectCreated created = projectCreated();
-            PrjProjectArchived archived = GivenEventMessage.projectArchived();
-            ProjectId id = created.getProjectId();
-            TestEventFactory eventFactory = newEventFactory(tenantId(), pack(id));
+            var created = projectCreated();
+            var archived = GivenEventMessage.projectArchived();
+            var id = created.getProjectId();
+            var eventFactory = newEventFactory(tenantId(), pack(id));
 
-            Event firstEvent = eventFactory.createEvent(created);
-            Event secondEvent = eventFactory.createEvent(archived)
+            var firstEvent = eventFactory.createEvent(created);
+            var secondEvent = eventFactory.createEvent(archived)
                                             .toBuilder()
                                             .setId(firstEvent.getId())
                                             .build();
@@ -447,15 +433,15 @@ class ProjectionRepositoryTest
         private void dispatchSuccessfully(Event event) {
             dispatchEvent(event);
             assertTrue(TestProjection.processed(event.enclosedMessage()));
-            List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
+            var events = monitor.duplicateEventEvents();
             assertThat(events).isEmpty();
         }
 
         private void dispatchDuplicate(Event event) {
             dispatchEvent(event);
-            List<CannotDispatchDuplicateEvent> events = monitor.duplicateEventEvents();
+            var events = monitor.duplicateEventEvents();
             assertThat(events).hasSize(1);
-            CannotDispatchDuplicateEvent systemEvent = events.get(0);
+            var systemEvent = events.get(0);
             assertThat(systemEvent.getDuplicateEvent())
                     .isEqualTo(event.messageId());
         }
@@ -469,16 +455,16 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("emit `RoutingFailed` when dispatching unknown event")
     void emitRoutingFailedOnUnknownEvent() {
-        Event event = GivenEvent.arbitrary();
-        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        var event = GivenEvent.arbitrary();
+        var monitor = new DiagnosticMonitor();
         context.internalAccess()
                .registerEventDispatcher(monitor);
 
         dispatchEvent(event);
 
-        List<RoutingFailed> failures = monitor.routingFailures();
+        var failures = monitor.routingFailures();
         assertThat(failures.size()).isEqualTo(1);
-        RoutingFailed failure = failures.get(0);
+        var failure = failures.get(0);
         assertThat(failure.getError()
                           .getMessage()).contains(repository().idClass()
                                                               .getName());
@@ -507,9 +493,9 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("convert null timestamp to default")
+    @DisplayName("convert `null` `Timestamp` to default")
     void convertNullTimestamp() {
-        Timestamp timestamp = currentTime();
+        var timestamp = currentTime();
         assertThat(nullToDefault(timestamp)).isEqualTo(timestamp);
         assertThat(nullToDefault(null)).isEqualTo(Timestamp.getDefaultInstance());
     }
@@ -518,14 +504,14 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("not create record if entity is not updated")
     void notCreateRecordForUnchanged() {
-        NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
+        var repo = new NoOpTaskNamesRepository();
         context.internalAccess()
                .register(repo);
 
         assertFalse(repo.loadAll(ResponseFormat.getDefaultInstance())
                         .hasNext());
 
-        Event event = createEvent(tenantId(), projectCreated(), currentTime());
+        var event = createEvent(tenantId(), projectCreated(), currentTime());
         repo.dispatch(EventEnvelope.of(event));
 
         Iterator<?> items = repo.loadAll(ResponseFormat.getDefaultInstance());
@@ -551,10 +537,8 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("check that its `Projection` class is subscribed to at least one message")
     void notRegisterIfSubscribedToNothing() {
-        SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
-        BoundedContext context = BoundedContextBuilder
-                .assumingTests()
-                .build();
+        var repo = new SensoryDeprivedProjectionRepository();
+        var context = BoundedContextBuilder.assumingTests().build();
 
         assertThrows(IllegalStateException.class, () ->
                 repo.registerWith(context));
@@ -564,33 +548,31 @@ class ProjectionRepositoryTest
     @DisplayName("update entity via a custom migration")
     void performCustomMigration() {
         // Store a new process manager instance in the repository.
-        ProjectId id = createId(42);
-        TestProjectionRepository repository = repository();
-        TestProjection projection = new TestProjection(id);
+        var id = createId(42);
+        var repository = repository();
+        var projection = new TestProjection(id);
         repository.store(projection);
 
         // Init filters by the `id_string` column.
-        Project.Query query =
+        var query =
                 Project.query()
                        .idString().is(id.toString())
                        .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProjection> found = repository.find(query);
+        var found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the migration.
         repository.applyMigration(id, new SetTestProjectionId());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProjection> afterMigration = repository.find(query);
+        var afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the new entity state has all fields updated as expected.
-        TestProjection entityWithColumns = afterMigration.next();
-        Project expectedState = projection
-                .state()
-                .toBuilder()
+        var entityWithColumns = afterMigration.next();
+        var expectedState = projection.state().toBuilder()
                 .setIdString(projection.getIdString())
                 .build();
         assertThat(entityWithColumns.state()).isEqualTo(expectedState);
@@ -600,33 +582,33 @@ class ProjectionRepositoryTest
     @DisplayName("update multiple entities via a custom migration")
     void performCustomMigrationForMultiple() {
         // Store three entities to the repository.
-        ProjectId id1 = createId(1);
-        ProjectId id2 = createId(2);
-        ProjectId id3 = createId(3);
-        TestProjectionRepository repository = repository();
-        TestProjection projection1 = new TestProjection(id1);
-        TestProjection projection2 = new TestProjection(id2);
-        TestProjection projection3 = new TestProjection(id3);
+        var id1 = createId(1);
+        var id2 = createId(2);
+        var id3 = createId(3);
+        var repository = repository();
+        var projection1 = new TestProjection(id1);
+        var projection2 = new TestProjection(id2);
+        var projection3 = new TestProjection(id3);
         repository.store(projection1);
         repository.store(projection2);
         repository.store(projection3);
 
         // Query by the `name` column.
-        Project.Query query = queryByName(NEW_NAME);
+        var query = queryByName(NEW_NAME);
 
         // Check nothing is found as the entity states were not yet updated.
-        Iterator<TestProjection> found = repository.find(query);
+        var found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the column update to two of the three entities.
         repository.applyMigration(ImmutableSet.of(id1, id2), new SetTestProjectionName());
 
         // Check the entities are now found by the provided filters.
-        Iterator<TestProjection> foundAfterMigration = repository.find(query);
+        var foundAfterMigration = repository.find(query);
 
-        ImmutableList<TestProjection> results = ImmutableList.copyOf(foundAfterMigration);
-        Project expectedState1 = expectedState(projection1, NEW_NAME);
-        Project expectedState2 = expectedState(projection2, NEW_NAME);
+        var results = ImmutableList.copyOf(foundAfterMigration);
+        var expectedState1 = expectedState(projection1, NEW_NAME);
+        var expectedState2 = expectedState(projection2, NEW_NAME);
         assertThat(results).hasSize(2);
         assertThat(results)
                 .comparingElementsUsing(entityState())
@@ -636,24 +618,24 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("replace the state of the migrated entity")
     void replaceState() {
-        ProjectId id = createId(42);
-        TestProjection entity = new TestProjection(id);
-        TestProjectionRepository repository = repository();
+        var id = createId(42);
+        var entity = new TestProjection(id);
+        var repository = repository();
         repository.store(entity);
         repository.applyMigration(id, new RandomFillProjection());
         // Query by the `name` column.
-        Project.Query byNewName = queryByName(NEW_NAME);
+        var byNewName = queryByName(NEW_NAME);
 
         // Ensure nothing found.
-        Iterator<TestProjection> expectedEmpty = repository.find(byNewName);
+        var expectedEmpty = repository.find(byNewName);
         assertThat(expectedEmpty.hasNext()).isFalse();
 
         repository.applyMigration(id, new SetTestProjectionName());
 
         // Now we should have found a single instance.
-        Iterator<TestProjection> shouldHaveOne = repository.find(byNewName);
-        Project expectedState = expectedState(entity, NEW_NAME);
-        ImmutableList<TestProjection> actualList = ImmutableList.copyOf(shouldHaveOne);
+        var shouldHaveOne = repository.find(byNewName);
+        var expectedState = expectedState(entity, NEW_NAME);
+        var actualList = ImmutableList.copyOf(shouldHaveOne);
         assertThat(actualList)
                 .comparingElementsUsing(entityState())
                 .containsExactly(expectedState);
@@ -663,33 +645,31 @@ class ProjectionRepositoryTest
     @DisplayName("update state through migration operation")
     void updateState() {
         // Store a new projection instance in the repository.
-        ProjectId id = createId(42);
-        TestProjectionRepository repository = repository();
-        TestProjection projection = new TestProjection(id);
+        var id = createId(42);
+        var repository = repository();
+        var projection = new TestProjection(id);
         repository.store(projection);
 
         // Init filters by the `id_string` column.
-        Project.Query query =
+        var query =
                 Project.query()
                        .idString().is(id.toString())
                        .build();
 
         // Check nothing is found as column now should be empty.
-        Iterator<TestProjection> found = repository.find(query);
+        var found = repository.find(query);
         assertThat(found.hasNext()).isFalse();
 
         // Apply the state update.
         repository.applyMigration(id, new UpdateProjectionState<>());
 
         // Check the entity is now found by the provided filters.
-        Iterator<TestProjection> afterMigration = repository.find(query);
+        var afterMigration = repository.find(query);
         assertThat(afterMigration.hasNext()).isTrue();
 
         // Check the column value is propagated to the entity state.
-        TestProjection entityWithColumns = afterMigration.next();
-        Project expectedState = projection
-                .state()
-                .toBuilder()
+        var entityWithColumns = afterMigration.next();
+        var expectedState = projection.state().toBuilder()
                 .setIdString(projection.getIdString())
                 .build();
         assertThat(entityWithColumns.state()).isEqualTo(expectedState);
@@ -699,13 +679,13 @@ class ProjectionRepositoryTest
     @DisplayName("update state of multiple entities")
     void updateStateForMultiple() {
         // Store three projections to the repository.
-        ProjectId id1 = createId(1);
-        ProjectId id2 = createId(2);
-        ProjectId id3 = createId(3);
-        TestProjectionRepository repository = repository();
-        TestProjection projection1 = new TestProjection(id1);
-        TestProjection projection2 = new TestProjection(id2);
-        TestProjection projection3 = new TestProjection(id3);
+        var id1 = createId(1);
+        var id2 = createId(2);
+        var id3 = createId(3);
+        var repository = repository();
+        var projection1 = new TestProjection(id1);
+        var projection2 = new TestProjection(id2);
+        var projection3 = new TestProjection(id3);
         repository.store(projection1);
         repository.store(projection2);
         repository.store(projection3);
@@ -714,23 +694,19 @@ class ProjectionRepositoryTest
         repository.applyMigration(ImmutableSet.of(id1, id2), new UpdateProjectionState<>());
 
         // Check that entities to which migration has been applied now have column values updated.
-        Project.Query query =
+        var query =
                 Project.query()
                        .either(p -> p.idString().is(id1.toString()),
                                p -> p.idString().is(id2.toString()),
                                p -> p.idString().is(id3.toString()))
                        .build();
-        Iterator<TestProjection> found = repository.find(query);
+        var found = repository.find(query);
 
-        ImmutableList<TestProjection> results = ImmutableList.copyOf(found);
-        Project expectedState1 = projection1
-                .state()
-                .toBuilder()
+        var results = ImmutableList.copyOf(found);
+        var expectedState1 = projection1.state().toBuilder()
                 .setIdString(projection1.getIdString())
                 .build();
-        Project expectedState2 = projection2
-                .state()
-                .toBuilder()
+        var expectedState2 = projection2.state().toBuilder()
                 .setIdString(projection2.getIdString())
                 .build();
         assertThat(results).hasSize(2);
@@ -742,13 +718,13 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("archive entity via migration")
     void archiveEntityViaMigration() {
-        ProjectId id = createId(42);
-        TestProjection projection = createEntity(id);
+        var id = createId(42);
+        var projection = createEntity(id);
         repository().store(projection);
 
         repository().applyMigration(id, new MarkProjectionArchived<>());
 
-        Optional<TestProjection> found = repository().find(id);
+        var found = repository().find(id);
         assertThat(found).isPresent();
         assertThat(found.get()
                         .isArchived()).isTrue();
@@ -757,13 +733,13 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("delete entity via migration")
     void deleteEntityViaMigration() {
-        ProjectId id = createId(42);
-        TestProjection projection = createEntity(id);
+        var id = createId(42);
+        var projection = createEntity(id);
         repository().store(projection);
 
         repository().applyMigration(id, new MarkProjectionDeleted<>());
 
-        Optional<TestProjection> found = repository().find(id);
+        var found = repository().find(id);
         assertThat(found).isPresent();
         assertThat(found.get()
                         .isDeleted()).isTrue();
@@ -772,13 +748,13 @@ class ProjectionRepositoryTest
     @Test
     @DisplayName("remove entity record via migration")
     void removeRecordViaMigration() {
-        ProjectId id = createId(42);
-        TestProjection projection = createEntity(id);
+        var id = createId(42);
+        var projection = createEntity(id);
         repository().store(projection);
 
         repository().applyMigration(id, new RemoveProjectionFromStorage<>());
 
-        Optional<TestProjection> found = repository().find(id);
+        var found = repository().find(id);
         assertThat(found).isEmpty();
     }
 
@@ -797,9 +773,7 @@ class ProjectionRepositoryTest
     }
 
     private static Project expectedState(TestProjection entity, String newName) {
-        return entity
-                .state()
-                .toBuilder()
+        return entity.state().toBuilder()
                 .setId(entity.id())
                 .setName(newName)
                 .setIdString(entity.getIdString())

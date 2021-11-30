@@ -30,7 +30,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
 import io.spine.core.Subscribe;
-import io.spine.core.UserId;
 import io.spine.server.given.organizations.OrganizationEstablished;
 import io.spine.server.given.organizations.OrganizationId;
 import io.spine.server.projection.Projection;
@@ -60,12 +59,10 @@ public class ProjectionRepositoryTestEnv {
      * Creates a new {@code DispatchedMessageId} with a random {@code EventId}.
      */
     public static MessageId dispatchedEventId() {
-        EventId eventId = EventId
-                .newBuilder()
+        var eventId = EventId.newBuilder()
                 .setValue(newUuid())
                 .build();
-        return MessageId
-                .newBuilder()
+        return MessageId.newBuilder()
                 .setId(pack(eventId))
                 .setTypeUrl("example.org/dispatched.Event")
                 .build();
@@ -139,32 +136,30 @@ public class ProjectionRepositoryTestEnv {
         }
 
         public static PrjTaskAdded taskAdded() {
-            Task task = Task
-                    .newBuilder()
+            var task = Task.newBuilder()
                     .setTitle("Test task " + randomString())
                     .build();
             return PrjTaskAdded.newBuilder()
-                               .setProjectId(ENTITY_ID)
-                               .setTask(task)
-                               .build();
+                    .setProjectId(ENTITY_ID)
+                    .setTask(task)
+                    .build();
         }
 
         public static PrjProjectArchived projectArchived() {
             return PrjProjectArchived.newBuilder()
-                                     .setProjectId(ENTITY_ID)
-                                     .build();
+                    .setProjectId(ENTITY_ID)
+                    .build();
         }
 
         public static PrjProjectDeleted projectDeleted() {
             return PrjProjectDeleted.newBuilder()
-                                    .setProjectId(ENTITY_ID)
-                                    .build();
+                    .setProjectId(ENTITY_ID)
+                    .build();
         }
 
         public static OrganizationEstablished organizationEstablished() {
-            UserId head = GivenUserId.generated();
-            return OrganizationEstablished
-                    .newBuilder()
+            var head = GivenUserId.generated();
+            return OrganizationEstablished.newBuilder()
                     .setId(OrganizationId.generate())
                     .setHead(head)
                     .setName("Share holders")
