@@ -42,8 +42,6 @@ import io.spine.test.event.model.SpeakersInvited;
 import io.spine.test.event.model.TalkSubmissionRequested;
 import io.spine.time.LocalDates;
 
-import java.time.LocalDate;
-
 /**
  * A test environment {@code EventReactor} class.
  *
@@ -58,10 +56,8 @@ public class ConferenceSetup implements EventReactor {
 
     @React // Just pretend that the event is external.
     SpeakersInvited invitationPolicy(@External ConferenceAnnounced event) {
-        LocalDate speakerSubmissionDeadline =
-                event.getDate().toJavaTime().plusWeeks(3);
-        return SpeakersInvited
-                .newBuilder()
+        var speakerSubmissionDeadline = event.getDate().toJavaTime().plusWeeks(3);
+        return SpeakersInvited.newBuilder()
                 .setConference(event.getConference())
                 .setDeadline(LocalDates.of(speakerSubmissionDeadline))
                 .vBuild();
@@ -69,10 +65,9 @@ public class ConferenceSetup implements EventReactor {
 
     @React
     TalkSubmissionRequested talkSubmissionPolicy(SpeakerJoined event, EventContext context) {
-        LocalDate eventDate = context.localDate();
-        LocalDate talkSubmissionDeadline = eventDate.plusWeeks(1);
-        return TalkSubmissionRequested
-                .newBuilder()
+        var eventDate = context.localDate();
+        var talkSubmissionDeadline = eventDate.plusWeeks(1);
+        return TalkSubmissionRequested.newBuilder()
                 .setConference(event.getConference())
                 .setSpeaker(event.getSpeaker())
                 .setDeadline(LocalDates.of(talkSubmissionDeadline))

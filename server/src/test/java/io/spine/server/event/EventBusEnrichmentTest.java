@@ -26,7 +26,6 @@
 
 package io.spine.server.event;
 
-import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.given.bus.GivenEvent;
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 
-@DisplayName("EventBus should manage event enrichment")
+@DisplayName("`EventBus` should manage event enrichment")
 class EventBusEnrichmentTest {
 
     private EventBus eventBus;
@@ -48,9 +47,7 @@ class EventBusEnrichmentTest {
 
     @BeforeEach
     void setUp() {
-        EventEnricher enricher = EventEnricher
-                .newBuilder()
-                .build();
+        var enricher = EventEnricher.newBuilder().build();
         subscriber = new RememberingSubscriber();
         context = BoundedContextBuilder
                 .assumingTests(true)
@@ -71,7 +68,7 @@ class EventBusEnrichmentTest {
     void forNonEnrichable() {
         eventBus.post(GivenEvent.projectCreated());
 
-        EventContext eventContext = subscriber.getEventContext();
+        var eventContext = subscriber.getEventContext();
         assertThat(eventContext.getEnrichment()
                                .getContainer()
                                .getItemsCount())

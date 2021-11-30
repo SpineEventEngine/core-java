@@ -27,9 +27,7 @@
 package io.spine.server.event.model;
 
 import io.spine.base.EventMessage;
-import io.spine.core.Event;
 import io.spine.core.UserId;
-import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.given.reactor.RcIterableReturn;
 import io.spine.server.event.model.given.reactor.RcOneParam;
@@ -58,8 +56,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.TestValues.randomString;
@@ -67,8 +63,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("`EventReactorMethod` should")
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("EventReactorMethod should")
 class EventReactorMethodTest {
 
     private static final EventReactorSignature signature = new EventReactorSignature();
@@ -90,14 +86,14 @@ class EventReactorMethodTest {
         @Test
         @DisplayName("one event message parameter")
         void oneParam() {
-            Method method = new RcOneParam().getMethod();
+            var method = new RcOneParam().getMethod();
             assertValid(method);
         }
 
         @Test
         @DisplayName("event message and context")
         void twoParams() {
-            Method method = new RcTwoParams().getMethod();
+            var method = new RcTwoParams().getMethod();
             assertValid(method);
         }
     }
@@ -109,25 +105,25 @@ class EventReactorMethodTest {
         @Test
         @DisplayName("in predicate")
         void predicate() {
-            Method method = new RcOneParam().getMethod();
+            var method = new RcOneParam().getMethod();
             assertValid(method);
         }
     }
 
     @Nested
-    @DisplayName("support Iterable return type")
+    @DisplayName("support `Iterable` return type")
     class ReturnValues {
 
         @Test
         @DisplayName("in predicate")
         void predicate() {
-            Method method = new RcIterableReturn().getMethod();
+            var method = new RcIterableReturn().getMethod();
             assertValid(method);
         }
     }
 
     @Nested
-    @DisplayName("support Optional return type")
+    @DisplayName("support `Optional` return type")
     class OptionalReturn {
 
         private EventReactor target;
@@ -156,16 +152,15 @@ class EventReactorMethodTest {
         @Test
         @DisplayName("when returning value")
         void returnValue() {
-            RefProjectCreated event = projectCreatedEvent();
+            var event = projectCreatedEvent();
 
-            DispatchOutcome outcome = method.invoke(target, envelope(event));
-            List<Event> events = outcome.getSuccess()
-                                        .getProducedEvents()
-                                        .getEventList();
+            var outcome = method.invoke(target, envelope(event));
+            var events = outcome.getSuccess()
+                                .getProducedEvents()
+                                .getEventList();
             assertThat(events).hasSize(1);
             assertThat(events.get(0).enclosedMessage())
-                    .isEqualTo(RefProjectStarted
-                                       .newBuilder()
+                    .isEqualTo(RefProjectStarted.newBuilder()
                                        .setProjectId(event.getProjectId())
                                        .build());
         }
@@ -174,18 +169,16 @@ class EventReactorMethodTest {
         @DisplayName("when returning Optional.empty()")
         void returnEmpty() {
             // Passing event without projectId should return `Optional.empty()`.
-            RefProjectCreated event = RefProjectCreated
-                    .newBuilder()
-                    .build();
+            var event = RefProjectCreated.getDefaultInstance();
 
-            DispatchOutcome outcome = method.invoke(target, envelope(event));
+            var outcome = method.invoke(target, envelope(event));
 
             assertThat(outcome.getSuccess().getProducedEvents().getEventList()).isEmpty();
         }
     }
 
     @Nested
-    @DisplayName("support Pair return type")
+    @DisplayName("support `Pair` return type")
     class PairReturn {
 
         private EventReactor target;
@@ -212,40 +205,38 @@ class EventReactorMethodTest {
         }
 
         @Test
-        @DisplayName("when returning Pair with two non-null values")
+        @DisplayName("when returning `Pair` with two non-null values")
         void returningNonNull() {
-            RefProjectCreated event = projectCreatedWithAssignee();
-            DispatchOutcome outcome = method.invoke(target, envelope(event));
-            List<Event> events = outcome.getSuccess()
-                                        .getProducedEvents()
-                                        .getEventList();
+            var event = projectCreatedWithAssignee();
+            var outcome = method.invoke(target, envelope(event));
+            var events = outcome.getSuccess()
+                                .getProducedEvents()
+                                .getEventList();
             assertThat(events).hasSize(2);
-            assertThat(events.get(0).enclosedMessage())
-                    .isEqualTo(RefProjectStarted
-                                       .newBuilder()
+            assertThat(events.get(0)
+                             .enclosedMessage())
+                    .isEqualTo(RefProjectStarted.newBuilder()
                                        .setProjectId(event.getProjectId())
                                        .build());
             assertThat(events.get(1).enclosedMessage())
-                    .isEqualTo(RefProjectAssigned
-                                       .newBuilder()
+                    .isEqualTo(RefProjectAssigned.newBuilder()
                                        .setProjectId(event.getProjectId())
                                        .setAssignee(event.getAssignee())
                                        .build());
         }
 
         @Test
-        @DisplayName("when returning Pair with null second value")
+        @DisplayName("when returning `Pair` with null second value")
         void returningSecondNull() {
-            RefProjectCreated event = projectCreatedEvent();
-            DispatchOutcome outcome = method.invoke(target, envelope(event));
+            var event = projectCreatedEvent();
+            var outcome = method.invoke(target, envelope(event));
 
-            List<Event> events = outcome.getSuccess()
-                                        .getProducedEvents()
-                                        .getEventList();
+            var events = outcome.getSuccess()
+                                .getProducedEvents()
+                                .getEventList();
             assertThat(events).hasSize(1);
             assertThat(events.get(0).enclosedMessage())
-                    .isEqualTo(RefProjectStarted
-                                       .newBuilder()
+                    .isEqualTo(RefProjectStarted.newBuilder()
                                        .setProjectId(event.getProjectId())
                                        .build());
         }
@@ -258,83 +249,78 @@ class EventReactorMethodTest {
         @Test
         @DisplayName("no annotation is provided")
         void noAnnotation() {
-            Method method = new RcWrongNoAnnotation().getMethod();
+            var method = new RcWrongNoAnnotation().getMethod();
             assertFalse(signature.matches(method));
         }
 
         @Test
         @DisplayName("wrong annotations provided")
         void wrongAnnotations() {
-            Method method = new RcWrongAnnotation().getMethod();
+            var method = new RcWrongAnnotation().getMethod();
             assertFalse(signature.matches(method));
         }
 
         @Test
         @DisplayName("it has no parameters")
         void noParameters() {
-            Method method = new RcWrongNoParam().getMethod();
+            var method = new RcWrongNoParam().getMethod();
             assertInvalid(method);
         }
 
         @Test
-        @DisplayName("the first parameter is not Message")
+        @DisplayName("the first parameter is not `Message`")
         void notMessageParam() {
-            Method method = new RcWrongFirstParam().getMethod();
+            var method = new RcWrongFirstParam().getMethod();
             assertInvalid(method);
         }
 
         @Test
-        @DisplayName("the second parameter is not EventContext")
+        @DisplayName("the second parameter is not `EventContext`")
         void notContextParam() {
-            Method method = new RcWrongSecondParam().getMethod();
+            var method = new RcWrongSecondParam().getMethod();
             assertInvalid(method);
         }
 
         @Test
         @DisplayName("it returns a `RejectionMessage`")
         void returnRejection() {
-            Method method = new RcReturnRejection().getMethod();
+            var method = new RcReturnRejection().getMethod();
             assertInvalid(method);
         }
 
         @Test
         @DisplayName("it returns an Iterable of `RejectionMessage`s")
         void returnRejectionIterable() {
-            Method method = new RcReturnRejectionIterable().getMethod();
+            var method = new RcReturnRejectionIterable().getMethod();
             assertInvalid(method);
         }
 
         @Test
         @DisplayName("it returns an Optional `RejectionMessage`")
         void returnOptionalRejection() {
-            Method method = new RcReturnOptionalRejection().getMethod();
+            var method = new RcReturnOptionalRejection().getMethod();
             assertInvalid(method);
         }
     }
 
     private static RefProjectCreated projectCreatedEvent() {
-        ProjectId projectId = ProjectId
-                .newBuilder()
+        var projectId = ProjectId.newBuilder()
                 .setId(randomString())
                 .build();
-        RefProjectCreated result = RefProjectCreated
-                .newBuilder()
+        var result = RefProjectCreated.newBuilder()
                 .setProjectId(projectId)
                 .build();
         return result;
     }
 
     private static RefProjectCreated projectCreatedWithAssignee() {
-        ProjectId projectId = ProjectId
-                .newBuilder()
+        var projectId = ProjectId.newBuilder()
                 .setId(randomString())
                 .build();
-        UserId userId = UserId
-                .newBuilder()
+        var userId = UserId.newBuilder()
                 .setValue(randomString())
                 .build();
-        RefProjectCreated result = RefProjectCreated
-                .newBuilder()
+        var result = RefProjectCreated.newBuilder()
                 .setProjectId(projectId)
                 .setAssignee(userId)
                 .build();
@@ -342,15 +328,15 @@ class EventReactorMethodTest {
     }
 
     private static EventReactorMethod createMethod(Method method) {
-        Optional<EventReactorMethod> found = signature.classify(method);
+        var found = signature.classify(method);
         assertTrue(found.isPresent());
         return found.get();
     }
 
     private static EventEnvelope envelope(EventMessage eventMessage) {
-        TestEventFactory factory = TestEventFactory.newInstance(EventReactorMethodTest.class);
-        Event event = factory.createEvent(eventMessage);
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var factory = TestEventFactory.newInstance(EventReactorMethodTest.class);
+        var event = factory.createEvent(eventMessage);
+        var envelope = EventEnvelope.of(event);
         return envelope;
     }
 }

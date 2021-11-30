@@ -31,7 +31,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.given.AbstractReactorTestEnv.AutoCharityDonor;
 import io.spine.server.event.given.AbstractReactorTestEnv.RestaurantNotifier;
 import io.spine.server.event.given.AbstractReactorTestEnv.ServicePerformanceTracker;
-import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +43,7 @@ import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderReady;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServedInTime;
 import static io.spine.server.event.given.AbstractReactorTestEnv.someOrderServedLate;
 
-@DisplayName("Abstract event reactor should")
+@DisplayName("`AbstractEventReactor` should")
 class AbstractEventReactorTest {
 
     private BlackBox restaurantContext;
@@ -56,7 +55,7 @@ class AbstractEventReactorTest {
     @BeforeEach
     void setUp() {
         performanceTracker = new ServicePerformanceTracker();
-        RestaurantNotifier notifier = new RestaurantNotifier();
+        var notifier = new RestaurantNotifier();
         restaurantContext = BlackBox.from(
                 BoundedContext.singleTenant("Restaurant")
                               .addEventDispatcher(performanceTracker)
@@ -70,17 +69,17 @@ class AbstractEventReactorTest {
         );
     }
 
-    @DisplayName("while dealing with domestic events")
     @Nested
+    @DisplayName("while dealing with domestic events")
     class DomesticEvents {
 
         @Test
         @DisplayName("receive one")
         void receive() {
-            OrderServed orderServed = someOrderServedInTime();
+            var orderServed = someOrderServedInTime();
             restaurantContext.receivesEvent(orderServed);
-            ImmutableList<OrderServed> ordersServed = performanceTracker.ordersServed();
-            ImmutableList<OrderServedLate> ordersServedLate = performanceTracker.ordersServedLate();
+            var ordersServed = performanceTracker.ordersServed();
+            var ordersServedLate = performanceTracker.ordersServedLate();
             assertThat(ordersServed).containsExactly(orderServed);
             assertThat(ordersServedLate).isEmpty();
         }
@@ -88,15 +87,14 @@ class AbstractEventReactorTest {
         @Test
         @DisplayName("receive several")
         void receiveSeveral() {
-            ImmutableList<OrderServed> eventsToEmit = ImmutableList.of(
+            var eventsToEmit = ImmutableList.of(
                     someOrderServedInTime(), someOrderServedInTime(), someOrderServedLate()
             );
             eventsToEmit.forEach(restaurantContext::receivesEvent);
-            ImmutableList<OrderServed> ordersServed = performanceTracker.ordersServed();
-            ImmutableList<OrderServedLate> ordersServedLate = performanceTracker.ordersServedLate();
+            var ordersServed = performanceTracker.ordersServed();
+            var ordersServedLate = performanceTracker.ordersServedLate();
             assertThat(ordersServed).hasSize(eventsToEmit.size());
-            long ordersInTime = ordersServed
-                    .stream()
+            var ordersInTime = ordersServed.stream()
                     .filter(orderServed -> !performanceTracker.servedLate(orderServed))
                     .count();
             assertThat(ordersInTime).isEqualTo(2);
@@ -106,7 +104,7 @@ class AbstractEventReactorTest {
         @Test
         @DisplayName("react with one")
         void react() {
-            OrderServed servedLate = someOrderServedLate();
+            var servedLate = someOrderServedLate();
             restaurantContext.receivesEvent(servedLate)
                              .assertEvents()
                              .withType(OrderServedLate.class)
@@ -116,7 +114,7 @@ class AbstractEventReactorTest {
         @Test
         @DisplayName("react with none")
         void reactWithNone() {
-            OrderServed orderServed = someOrderServedInTime();
+            var orderServed = someOrderServedInTime();
             restaurantContext.receivesEvent(orderServed)
                              .assertEvents()
                              .withType(OrderServedLate.class)
@@ -126,46 +124,44 @@ class AbstractEventReactorTest {
         @Test
         @DisplayName("react with several events")
         void reactWithSeveral() {
-            OrderReadyToBeServed orderIsReady = someOrderReady();
-            EventSubject assertEvents = restaurantContext
-                    .receivesEvent(orderIsReady)
-                    .assertEvents();
+            var orderIsReady = someOrderReady();
+            var assertEvents = restaurantContext.receivesEvent(orderIsReady)
+                                                .assertEvents();
             assertEvents.withType(CustomerNotified.class).hasSize(1);
             assertEvents.withType(DeliveryServiceNotified.class).hasSize(1);
         }
     }
 
-    @DisplayName("while dealing with external events")
     @Nested
+    @DisplayName("while dealing with external events")
     class ExternalEvents {
 
-        @DisplayName("receive one")
         @Test
+        @DisplayName("receive one")
         void receive() {
-            OrderPaidFor orderPaidFor = someOrderPaidFor();
+            var orderPaidFor = someOrderPaidFor();
             charityContext.receivesExternalEvent(orderPaidFor);
 
-            double orderCost = orderPaidFor.getOrder()
-                                           .getPriceInUsd();
-            double expectedDonationAmount = orderCost * 0.02;
+            var orderCost = orderPaidFor.getOrder().getPriceInUsd();
+            var expectedDonationAmount = orderCost * 0.02;
             assertThat(charityDonor.totalDonated()).isEqualTo(expectedDonationAmount);
         }
 
-        @DisplayName("react to one")
         @Test
+        @DisplayName("react to one")
         void reactToOne() {
-            OrderPaidFor orderPaidFor = someOrderPaidFor();
+            var orderPaidFor = someOrderPaidFor();
             charityContext.receivesExternalEvent(orderPaidFor)
                           .assertEvents()
                           .withType(DonationMade.class)
                           .hasSize(1);
         }
 
-        @DisplayName("react to several")
         @Test
+        @DisplayName("react to several")
         void reactToSeveral() {
-            OrderPaidFor paidInRestaurant = someOrderPaidFor();
-            OrderPaidFor paidToDelivery = someOrderPaidFor();
+            var paidInRestaurant = someOrderPaidFor();
+            var paidToDelivery = someOrderPaidFor();
 
             charityContext.receivesExternalEvent(paidToDelivery)
                           .receivesExternalEvent(paidInRestaurant)

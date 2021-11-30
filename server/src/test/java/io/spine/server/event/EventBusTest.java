@@ -28,13 +28,10 @@ package io.spine.server.event;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.bus.BareDispatcher;
 import io.spine.server.event.given.bus.EBExternalTaskAddedSubscriber;
@@ -46,7 +43,6 @@ import io.spine.server.event.given.bus.ProjectAggregate;
 import io.spine.server.event.given.bus.RememberingSubscriber;
 import io.spine.server.event.given.bus.TaskCreatedFilter;
 import io.spine.server.type.EventClass;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -65,12 +61,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContextBuilder.assumingTests;
 import static io.spine.server.event.given.bus.EventBusTestEnv.addTasks;
@@ -79,14 +73,15 @@ import static io.spine.server.event.given.bus.EventBusTestEnv.createProject;
 import static io.spine.server.event.given.bus.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.bus.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.bus.EventBusTestEnv.readEvents;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventBus should")
-public class EventBusTest {
+@DisplayName("`EventBus` should")
+class EventBusTest {
 
     private TestEventFactory eventFactory;
     private EventBus eventBus;
@@ -95,7 +90,7 @@ public class EventBusTest {
 
     private void setUp(@Nullable EventEnricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
-        BoundedContextBuilder builder = assumingTests(true)
+        var builder = assumingTests(true)
                 .addEventFilter(new TaskCreatedFilter())
                 .add(ProjectAggregate.class);
         if (enricher != null) {
@@ -118,9 +113,9 @@ public class EventBusTest {
                          .reset();
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("have builder")
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     void haveBuilder() {
         assertNotNull(EventBus.newBuilder());
     }
@@ -147,7 +142,7 @@ public class EventBusTest {
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
 
-            EventClass eventClass = EventClass.from(ProjectCreated.class);
+            var eventClass = EventClass.from(ProjectCreated.class);
             assertTrue(eventBus.hasDispatchers(eventClass));
 
             Collection<? extends EventDispatcher> dispatchers =
@@ -179,7 +174,7 @@ public class EventBusTest {
             AbstractEventSubscriber subscriberTwo = new RememberingSubscriber();
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
-            EventClass eventClass = EventClass.from(ProjectCreated.class);
+            var eventClass = EventClass.from(ProjectCreated.class);
 
             eventBus.unregister(subscriberOne);
 
@@ -202,12 +197,12 @@ public class EventBusTest {
         void eventDispatcher() {
             EventDispatcher dispatcherOne = new BareDispatcher();
             EventDispatcher dispatcherTwo = new BareDispatcher();
-            EventClass eventClass = EventClass.from(ProjectCreated.class);
+            var eventClass = EventClass.from(ProjectCreated.class);
             eventBus.register(dispatcherOne);
             eventBus.register(dispatcherTwo);
 
             eventBus.unregister(dispatcherOne);
-            Set<? extends EventDispatcher> dispatchers = eventBus.dispatchersOf(eventClass);
+            var dispatchers = eventBus.dispatchersOf(eventClass);
 
             // Check we don't have 1st dispatcher, but have 2nd.
             assertFalse(dispatchers.contains(dispatcherOne));
@@ -226,8 +221,8 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            RememberingSubscriber subscriber = new RememberingSubscriber();
-            Event event = GivenEvent.projectCreated();
+            var subscriber = new RememberingSubscriber();
+            var event = GivenEvent.projectCreated();
             eventBus.register(subscriber);
 
             eventBus.post(event);
@@ -242,7 +237,7 @@ public class EventBusTest {
         @Test
         @DisplayName("event dispatcher")
         void eventDispatcher() {
-            BareDispatcher dispatcher = new BareDispatcher();
+            var dispatcher = new BareDispatcher();
 
             eventBus.register(dispatcher);
 
@@ -262,7 +257,7 @@ public class EventBusTest {
 
         @BeforeEach
         void setUp() throws Exception {
-            BoundedContext context = assumingTests()
+            var context = assumingTests()
                     .addEventDispatcher(new BareDispatcher())
                     .addEventDispatcher(new RememberingSubscriber())
                     .build();
@@ -274,7 +269,7 @@ public class EventBusTest {
         @Test
         @DisplayName("unregister dispatchers")
         void unregisterDispatchers() {
-            EventClass eventClass = EventClass.from(ProjectCreated.class);
+            var eventClass = EventClass.from(ProjectCreated.class);
             assertThat(eventBus.dispatchersOf(eventClass))
                     .isEmpty();
         }
@@ -290,7 +285,7 @@ public class EventBusTest {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        EnvelopeValidator<EventEnvelope> validator = eventBus.validator();
+        var validator = eventBus.validator();
         assertNotNull(validator);
         assertSame(validator, eventBus.validator());
     }
@@ -302,22 +297,22 @@ public class EventBusTest {
         @Test
         @DisplayName("event")
         void event() {
-            Command command = command(createProject());
+            var command = command(createProject());
             eventBus.register(new EBProjectCreatedNoOpSubscriber());
             commandBus.post(command, StreamObservers.noOpObserver());
 
-            List<Event> events = readEvents(eventBus);
+            var events = readEvents(eventBus);
             assertThat(events).hasSize(1);
         }
 
         @Test
         @DisplayName("dead event")
         void deadEvent() {
-            Command command = command(createProject());
+            var command = command(createProject());
 
             commandBus.post(command, StreamObservers.noOpObserver());
 
-            List<Event> events = readEvents(eventBus);
+            var events = readEvents(eventBus);
             assertThat(events).hasSize(1);
         }
 
@@ -335,11 +330,11 @@ public class EventBusTest {
         @DisplayName("multiple events")
         void multipleEvents() {
             eventBus.register(new EBTaskAddedNoOpSubscriber());
-            Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
+            var command = command(addTasks(newTask(false), newTask(false), newTask(false)));
 
             commandBus.post(command, StreamObservers.noOpObserver());
 
-            List<Event> storedEvents = readEvents(eventBus);
+            var storedEvents = readEvents(eventBus);
             assertThat(storedEvents).hasSize(3);
         }
     }
@@ -351,23 +346,23 @@ public class EventBusTest {
         @Test
         @DisplayName("invalid event")
         void invalidEvent() {
-            Command command = command(invalidArchiveProject());
+            var command = command(invalidArchiveProject());
             eventBus.register(new EBProjectArchivedSubscriber());
 
             commandBus.post(command, StreamObservers.noOpObserver());
 
-            List<Event> events = readEvents(eventBus);
+            var events = readEvents(eventBus);
             assertThat(events).isEmpty();
         }
 
         @Test
         @DisplayName("invalid dead event")
         void invalidDeadEvent() {
-            Command command = command(invalidArchiveProject());
+            var command = command(invalidArchiveProject());
 
             commandBus.post(command, StreamObservers.noOpObserver());
 
-            List<Event> events = readEvents(eventBus);
+            var events = readEvents(eventBus);
             assertThat(events).isEmpty();
         }
 
@@ -385,11 +380,11 @@ public class EventBusTest {
         @DisplayName("multiple events failing filters")
         void multipleEventsFailingFilters() {
             eventBus.register(new EBTaskAddedNoOpSubscriber());
-            Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
+            var command = command(addTasks(newTask(true), newTask(true), newTask(true)));
 
             commandBus.post(command, StreamObservers.noOpObserver());
 
-            List<Event> storedEvents = readEvents(eventBus);
+            var storedEvents = readEvents(eventBus);
             assertThat(storedEvents).isEmpty();
         }
     }
@@ -409,42 +404,40 @@ public class EventBusTest {
     @DisplayName("store only events passing filters")
     void filterOutFailingEvents() {
         eventBus.register(new EBTaskAddedNoOpSubscriber());
-        Command command = command(addTasks(newTask(false), newTask(true), newTask(false),
-                                           newTask(true), newTask(true)));
+        var command = command(addTasks(newTask(false), newTask(true), newTask(false),
+                                       newTask(true), newTask(true)));
 
         commandBus.post(command, StreamObservers.noOpObserver());
 
-        List<Event> storedEvents = readEvents(eventBus);
+        var storedEvents = readEvents(eventBus);
         assertThat(storedEvents).hasSize(2);
 
-        for (Event event : storedEvents) {
-            EBTaskAdded contents = unpack(event.getMessage(), EBTaskAdded.class);
-            Task task = contents.getTask();
+        for (var event : storedEvents) {
+            var contents = unpack(event.getMessage(), EBTaskAdded.class);
+            var task = contents.getTask();
             assertFalse(task.getDone());
         }
     }
 
-    @MuteLogging
     @Test
     @DisplayName("not dispatch domestic event to external handler")
+    @MuteLogging
     void domesticEventToExternalMethod() {
-        EBExternalTaskAddedSubscriber subscriber = new EBExternalTaskAddedSubscriber();
+        var subscriber = new EBExternalTaskAddedSubscriber();
         eventBus.register(subscriber);
 
-        ProjectId projectId = Sample.messageOfType(ProjectId.class);
-        TaskId taskId = Sample.messageOfType(TaskId.class);
-        Task task = Task
-                .newBuilder()
+        var projectId = Sample.messageOfType(ProjectId.class);
+        var taskId = Sample.messageOfType(TaskId.class);
+        var task = Task.newBuilder()
                 .setTaskId(taskId)
                 .setTitle("Foo")
                 .setDescription("Foo bar")
                 .build();
-        EBTaskAdded eventMessage = EBTaskAdded
-                .newBuilder()
+        var eventMessage = EBTaskAdded.newBuilder()
                 .setProjectId(projectId)
                 .setTask(task)
                 .build();
-        Event event = eventFactory.createEvent(eventMessage);
+        var event = eventFactory.createEvent(eventMessage);
         eventBus.post(event, StreamObservers.noOpObserver());
         assertThat(EBExternalTaskAddedSubscriber.taskAddedEvent).isNull();
     }
@@ -462,26 +455,23 @@ public class EventBusTest {
      * <p>To make sure that the chain works fine (i.e. produces no exceptions), we invoke the
      * initialization multiple times from several threads.
      */
-    @SuppressWarnings({"MethodWithMultipleLoops", "BusyWait"}) // OK for such test case.
-    @SlowTest
     @Test
+    @SlowTest
     @DisplayName("store filters as expected if initialized concurrently")
-    void storeFiltersInConcurrentEnv() throws Exception {
-        int threadCount = 50;
-        @Validated DonationMade eventMessage = DonationMade
-                .newBuilder()
+    @SuppressWarnings("MethodWithMultipleLoops") /* OK for such test case. */
+    void storeFiltersInConcurrentEnv() {
+        var threadCount = 50;
+        @Validated DonationMade eventMessage = DonationMade.newBuilder()
                 .setUsdsDonated(3.14)
                 .vBuild();
-        Event event = eventFactory.createEvent(eventMessage);
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        var event = eventFactory.createEvent(eventMessage);
+        var executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.
-        for (int i = 0; i < 300; i++) {
-            BoundedContext context = BoundedContextBuilder
-                    .assumingTests()
-                    .build();
-            EventBus eventBus = context.eventBus();
+        for (var i = 0; i < 300; i++) {
+            var context = BoundedContextBuilder.assumingTests().build();
+            var eventBus = context.eventBus();
             StreamObserver<Ack> observer = StreamObservers.noOpObserver();
-            for (int j = 0; j < threadCount; j++) {
+            for (var j = 0; j < threadCount; j++) {
                 executor.execute(() -> {
                     if (eventBus.isOpen()) {
                         eventBus.post(event, observer);
@@ -489,7 +479,7 @@ public class EventBusTest {
                 });
             }
             // Let the system destroy all the native threads, clean up, etc.
-            Thread.sleep(100);
+            sleepUninterruptibly(100, MILLISECONDS);
         }
         executor.shutdownNow();
     }

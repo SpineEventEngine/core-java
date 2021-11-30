@@ -40,8 +40,8 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.testing.Assertions.assertNpe;
 import static io.spine.testing.TestValues.nullRef;
 
-@SuppressWarnings("ThrowableNotThrown") // in custom assertions
 @DisplayName("`EventBus.Builder` should")
+@SuppressWarnings("ThrowableNotThrown") // in custom assertions
 class EventBusBuilderTest
         extends BusBuilderTest<EventBus.Builder, EventEnvelope, Event> {
 
@@ -63,15 +63,15 @@ class EventBusBuilderTest
         @Test
         @DisplayName("assigning `noOpObserver()` if not assigned")
         void assigningDefault() {
-            EventBus bus = builder().build();
-            StreamObserver<Ack> observer = bus.observer();
+            var bus = builder().build();
+            var observer = bus.observer();
             assertThat(observer).isInstanceOf(noOpObserver().getClass());
         }
 
         @Test
         @DisplayName("assign custom observer")
         void customValue() {
-            StreamObserver<Ack> observer = new StreamObserver<Ack>() {
+            var observer = new StreamObserver<Ack>() {
                 @Override
                 public void onNext(Ack value) {
                 }
@@ -84,8 +84,7 @@ class EventBusBuilderTest
                 public void onCompleted() {
                 }
             };
-
-            EventBus bus = builder().setObserver(observer).build();
+            var bus = builder().setObserver(observer).build();
             assertThat(bus.observer()).isEqualTo(observer);
         }
     }

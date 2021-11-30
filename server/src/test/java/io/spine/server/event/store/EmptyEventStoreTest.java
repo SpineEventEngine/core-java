@@ -40,11 +40,11 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EmptyEventStore should")
+@DisplayName("`EmptyEventStore` should")
 class EmptyEventStoreTest {
 
     @Test
-    @DisplayName("do nothing on append(Event)")
+    @DisplayName("do nothing on `append(Event)`")
     void notAppend() {
         EventStore store = new EmptyEventStore();
         store.append(Event.getDefaultInstance());
@@ -52,7 +52,7 @@ class EmptyEventStoreTest {
     }
 
     @Test
-    @DisplayName("do nothing on appendAll(Iterable<Event>)")
+    @DisplayName("do nothing on `appendAll(Iterable<Event>)`")
     void notAppendAll() {
         EventStore store = new EmptyEventStore();
         store.appendAll(ImmutableList.of(Event.getDefaultInstance()));
@@ -69,8 +69,7 @@ class EmptyEventStoreTest {
     }
 
     private static void assertEmpty(EventStore store) {
-        EventStreamQuery query = EventStreamQuery
-                .newBuilder()
+        var query = EventStreamQuery.newBuilder()
                 .setAfter(Timestamp.getDefaultInstance())
                 .buildPartial();
         MemoizingObserver<Event> observer = memoizingObserver();

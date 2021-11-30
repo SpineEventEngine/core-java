@@ -34,14 +34,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@DisplayName("UnsupportedEventException should")
+@DisplayName("`UnsupportedEventException` should")
 class UnsupportedEventExceptionTest {
 
     @Test
     @DisplayName("have message and error")
     void haveMessageAndError() {
         EventMessage msg = ProjectCreated.getDefaultInstance();
-        UnsupportedEventException exception = new UnsupportedEventException(msg);
+        var exception = new UnsupportedEventException(msg);
 
         assertNotNull(exception.getMessage());
         assertNotNull(exception.asError());

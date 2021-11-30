@@ -38,17 +38,16 @@ public class RcReturnPair extends TestEventReactor {
 
     @React
     Pair<RefProjectStarted, Optional<RefProjectAssigned>> react(RefProjectCreated event) {
-        RefProjectStarted refProjectStarted = RefProjectStarted
-                .newBuilder()
+        var refProjectStarted = RefProjectStarted.newBuilder()
                 .setProjectId(event.getProjectId())
                 .build();
-        RefProjectAssigned refProjectAssigned = event.hasAssignee()
-                                                ? RefProjectAssigned
-                                                        .newBuilder()
-                                                        .setProjectId(event.getProjectId())
-                                                        .setAssignee(event.getAssignee())
-                                                        .build()
-                                                : null;
+        var refProjectAssigned =
+                event.hasAssignee()
+                ? RefProjectAssigned.newBuilder()
+                        .setProjectId(event.getProjectId())
+                        .setAssignee(event.getAssignee())
+                        .build()
+                : null;
 
         return Pair.withNullable(refProjectStarted, refProjectAssigned);
     }

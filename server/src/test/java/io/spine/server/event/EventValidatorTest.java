@@ -26,37 +26,33 @@
 
 package io.spine.server.event;
 
-import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventValidationError;
-import io.spine.server.MessageInvalid;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventValidator should")
+@DisplayName("`EventValidator` should")
 class EventValidatorTest {
 
     @Test
     @DisplayName("validate event messages")
     void validateEventMessages() {
-        Event eventWithDefaultMessage = Event
-                .newBuilder()
+        var eventWithDefaultMessage = Event.newBuilder()
                 .setMessage(pack(ProjectCreated.getDefaultInstance()))
                 .build();
-        EventValidator eventValidator = new EventValidator();
-        Optional<MessageInvalid> error = eventValidator.validate(
+        var eventValidator = new EventValidator();
+        var error = eventValidator.validate(
                 EventEnvelope.of(eventWithDefaultMessage)
         );
         assertTrue(error.isPresent());
-        Error actualError = error.get().asError();
-        assertEquals(EventValidationError.getDescriptor().getFullName(), actualError.getType());
+        var actualError = error.get().asError();
+        assertThat(EventValidationError.getDescriptor().getFullName())
+                .isEqualTo(actualError.getType());
     }
 }

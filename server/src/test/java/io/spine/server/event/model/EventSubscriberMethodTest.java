@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -52,9 +51,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("`EventSubscriberMethod` should")
 @SuppressWarnings({"DuplicateStringLiteralInspection", /* Common test display names. */
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */})
-@DisplayName("EventSubscriberMethod should")
 class EventSubscriberMethodTest {
 
     private static final SubscriberSignature signature = new SubscriberSignature();
@@ -62,7 +61,7 @@ class EventSubscriberMethodTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() throws NoSuchMethodException {
-        Method defaultMethod =
+        var defaultMethod =
                 ValidOneParam.class.getDeclaredMethod("handle", RefProjectCreated.class);
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
@@ -74,18 +73,17 @@ class EventSubscriberMethodTest {
     @Test
     @DisplayName("invoke subscriber method")
     void invokeSubscriberMethod() {
-        ValidTwoParams subscriberObject = new ValidTwoParams();
-        Optional<SubscriberMethod> createdMethod = signature.classify(subscriberObject.getMethod());
+        var subscriberObject = new ValidTwoParams();
+        var createdMethod = signature.classify(subscriberObject.getMethod());
         assertTrue(createdMethod.isPresent());
-        SubscriberMethod subscriber = createdMethod.get();
-        RefProjectCreated msg = Given.EventMessage.projectCreated();
+        var subscriber = createdMethod.get();
+        var msg = Given.EventMessage.projectCreated();
 
-        Event event = Event
-                .newBuilder()
+        var event = Event.newBuilder()
                 .setMessage(pack(msg))
                 .build();
 
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var envelope = EventEnvelope.of(event);
         subscriber.invoke(subscriberObject, envelope);
 
         assertThat(subscriberObject.handledMessages())
@@ -99,7 +97,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("no annotation")
         void noAnnotation() {
-            Method method = new InvalidNoAnnotation().getMethod();
+            var method = new InvalidNoAnnotation().getMethod();
             assertFalse(signature.matches(method));
         }
     }
@@ -123,20 +121,18 @@ class EventSubscriberMethodTest {
         }
 
         private void check(TestEventSubscriber subscriber, boolean external) {
-            Method method = subscriber.getMethod();
-            Optional<SubscriberMethod> created = signature.classify(method);
+            var method = subscriber.getMethod();
+            var created = signature.classify(method);
             assertTrue(created.isPresent());
-            SubscriberMethod modelMethod = created.get();
-            EventContext context = EventContext
-                    .newBuilder()
+            var modelMethod = created.get();
+            var context = EventContext.newBuilder()
                     .setExternal(external)
                     .build();
-            Event event = Event
-                    .newBuilder()
+            var event = Event.newBuilder()
                     .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                     .setContext(context)
                     .build();
-            EventEnvelope envelope = EventEnvelope.of(event);
+            var envelope = EventEnvelope.of(event);
             assertThrows(SignalOriginMismatchError.class,
                          () -> modelMethod.invoke(subscriber, envelope));
         }

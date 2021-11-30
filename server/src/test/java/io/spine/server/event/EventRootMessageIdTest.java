@@ -81,7 +81,7 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Event root message should")
+@DisplayName("`Event` root message should")
 public class EventRootMessageIdTest {
 
     private BoundedContext context;
@@ -91,12 +91,12 @@ public class EventRootMessageIdTest {
         context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
-        ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
-        TeamAggregateRepository teamRepository = new TeamAggregateRepository();
-        TeamCreationRepository teamCreationRepository = new TeamCreationRepository();
-        UserSignUpRepository userSignUpRepository = new UserSignUpRepository();
+        var projectRepository = new ProjectAggregateRepository();
+        var teamRepository = new TeamAggregateRepository();
+        var teamCreationRepository = new TeamCreationRepository();
+        var userSignUpRepository = new UserSignUpRepository();
 
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        var contextAccess = context.internalAccess();
         contextAccess.register(projectRepository);
         contextAccess.register(teamRepository);
         contextAccess.register(teamCreationRepository);
@@ -111,18 +111,16 @@ public class EventRootMessageIdTest {
     @Test
     @DisplayName("be equal to the event's own ID if event was imported")
     void noRoots() {
-        UserId actorId = UserId
-                .newBuilder()
+        var actorId = UserId.newBuilder()
                 .setValue(EventRootMessageIdTest.class.getSimpleName())
                 .build();
-        ActorContext actor = ActorContext
-                .newBuilder()
+        var actor = ActorContext.newBuilder()
                 .setTimestamp(Time.currentTime())
                 .setActor(actorId)
                 .setZoneId(ZoneIds.systemDefault())
                 .build();
-        EventFactory events = forImport(actor, Identifier.pack("test"));
-        Event event = events.createEvent(GivenEvent.message(), null);
+        var events = forImport(actor, Identifier.pack("test"));
+        var event = events.createEvent(GivenEvent.message(), null);
 
         assertThat(event.rootMessage())
                 .isEqualTo(event.messageId());
@@ -134,7 +132,7 @@ public class EventRootMessageIdTest {
     @MuteLogging
     @DisplayName("be equal to the event's own ID by default")
     void empty() {
-        Event invalidEvent = Event
+        var invalidEvent = Event
                 .newBuilder()
                 .setId(Events.generateId())
                 .setMessage(pack(GivenEvent.message()))
@@ -150,21 +148,21 @@ public class EventRootMessageIdTest {
         @Test
         @DisplayName("aggregate")
         void aggregate() {
-            Command command = command(createProject(projectId(), teamId()));
+            var command = command(createProject(projectId(), teamId()));
 
             postCommand(command);
 
-            List<Event> events = readEvents();
+            var events = readEvents();
             assertIsRootCommand(command, events.get(0));
         }
 
         @Test
         @DisplayName("aggregate in case command returns multiple events")
         void aggregateForMultipleEvents() {
-            Command command = command(addTasks(projectId(), 3));
+            var command = command(addTasks(projectId(), 3));
             postCommand(command);
 
-            List<Event> events = readEvents();
+            var events = readEvents();
             assertThat(events).hasSize(3);
             assertIsRootCommand(command, events.get(0));
             assertIsRootCommand(command, events.get(1));
@@ -174,10 +172,10 @@ public class EventRootMessageIdTest {
         @Test
         @DisplayName("process manager")
         void processManager() {
-            Command command = command(addTeamMember(teamId()));
+            var command = command(addTeamMember(teamId()));
             postCommand(command);
 
-            List<Event> events = readEvents();
+            var events = readEvents();
             assertThat(events).hasSize(1);
             assertIsRootCommand(command, events.get(0));
         }
@@ -185,10 +183,10 @@ public class EventRootMessageIdTest {
         @Test
         @DisplayName("process manager in case command returns multiple events")
         void processManagerForMultipleEvents() {
-            Command command = command(inviteTeamMembers(teamId(), 3));
+            var command = command(inviteTeamMembers(teamId(), 3));
             postCommand(command);
 
-            List<Event> events = readEvents();
+            var events = readEvents();
             assertThat(events).hasSize(3);
             assertIsRootCommand(command, events.get(0));
             assertIsRootCommand(command, events.get(1));
@@ -224,14 +222,14 @@ public class EventRootMessageIdTest {
         @Test
         @DisplayName("aggregate")
         void aggregate() {
-            Command command = command(createProject(projectId(), teamId()));
+            var command = command(createProject(projectId(), teamId()));
 
             postCommand(command);
 
-            List<Event> events = readEvents();
+            var events = readEvents();
             assertThat(events).hasSize(2);
 
-            Event reaction = events.get(1);
+            var reaction = events.get(1);
             assertThat(reaction.rootMessage())
                     .isEqualTo(command.messageId());
         }
@@ -252,14 +250,14 @@ public class EventRootMessageIdTest {
         @Test
         @DisplayName("process manager")
         void processManager() {
-            Command command = command(acceptInvitation(teamId()));
+            var command = command(acceptInvitation(teamId()));
 
             postCommand(command);
 
-            List<Event> events = readEvents();
+            var events = readEvents();
             assertThat(events).hasSize(2);
 
-            Event reaction = events.get(1);
+            var reaction = events.get(1);
             assertThat(reaction.rootMessage())
                     .isEqualTo(command.messageId());
 
@@ -270,22 +268,22 @@ public class EventRootMessageIdTest {
     @DisplayName("if the old format of `Event` is used")
     class OldFormat {
 
-        @SuppressWarnings("deprecation") // Backward compatibility test.
         @Test
         @DisplayName("match an ID from `root_command_id`")
+        @SuppressWarnings("deprecation") // Backward compatibility test.
         void fromRootCommandId() {
-            Event.Builder eventBuilder = GivenEvent.arbitrary()
+            var eventBuilder = GivenEvent.arbitrary()
                                                    .toBuilder();
-            CommandId commandId = CommandId.generate();
+            var commandId = CommandId.generate();
             eventBuilder.getContextBuilder()
                         .clearOrigin()
                         .setRootCommandId(commandId)
                         .setCommandContext(CommandContext.getDefaultInstance());
-            Event event = eventBuilder.buildPartial();
-            MessageId rootMessage = event.rootMessage();
+            var event = eventBuilder.buildPartial();
+            var rootMessage = event.rootMessage();
             assertThat(unpack(rootMessage.getId()))
                     .isEqualTo(commandId);
-            String typeUrl = rootMessage.getTypeUrl();
+            var typeUrl = rootMessage.getTypeUrl();
             assertThat(typeUrl)
                     .isNotEmpty();
             assertThrows(IllegalArgumentException.class, () -> TypeUrl.parse(typeUrl));
@@ -306,7 +304,7 @@ public class EventRootMessageIdTest {
         with(TENANT_ID).run(() -> context.eventBus()
                                          .eventStore()
                                          .read(allEventsQuery(), observer));
-        List<Event> results = observer.responses();
+        var results = observer.responses();
         return results;
     }
 }

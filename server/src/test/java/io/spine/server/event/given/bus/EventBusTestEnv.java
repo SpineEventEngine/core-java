@@ -33,7 +33,6 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.ProjectId;
@@ -58,7 +57,7 @@ public class EventBusTestEnv {
     static final ProjectId PROJECT_ID = projectId();
 
     public static final ActorRequestFactory requestFactory =
-            new TestActorRequestFactory(EventBusTest.class, TENANT_ID);
+            new TestActorRequestFactory(EventBusTestEnv.class, TENANT_ID);
 
     /** Prevent instantiation of this utility class. */
     private EventBusTestEnv() {
@@ -71,10 +70,10 @@ public class EventBusTestEnv {
     }
 
     private static TenantId tenantId() {
-        String value = EventBusTestEnv.class.getName();
-        TenantId id = TenantId.newBuilder()
-                              .setValue(value)
-                              .build();
+        var value = EventBusTestEnv.class.getName();
+        var id = TenantId.newBuilder()
+                .setValue(value)
+                .build();
         return id;
     }
 
@@ -88,10 +87,10 @@ public class EventBusTestEnv {
         EBAddTasks.Builder builder = builderForType(EBAddTasks.class);
         builder.setProjectId(PROJECT_ID)
                .clearTask();
-        for (Task task : tasks) {
+        for (var task : tasks) {
             builder.addTask(task);
         }
-        EBAddTasks command = builder.build();
+        var command = builder.build();
         return command;
     }
 
@@ -122,7 +121,7 @@ public class EventBusTestEnv {
      */
     public static List<Event> readEvents(EventBus eventBus) {
         MemoizingObserver<Event> observer = memoizingObserver();
-        TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
+        var operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
                 eventBus.eventStore()
@@ -131,7 +130,7 @@ public class EventBusTestEnv {
         };
         operation.execute();
 
-        List<Event> results = observer.responses();
+        var results = observer.responses();
         return results;
     }
 

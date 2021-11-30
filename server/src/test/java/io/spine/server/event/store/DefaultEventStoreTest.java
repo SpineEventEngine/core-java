@@ -27,9 +27,6 @@
 package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.IterableSubject;
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.Event;
@@ -110,100 +107,94 @@ public class DefaultEventStoreTest {
         @Test
         @DisplayName("time bounds")
         void timeBounds() {
-            Duration delta = seconds(111);
-            Timestamp present = currentTime();
-            Timestamp past = subtract(present, delta);
-            Timestamp future = add(present, delta);
+            var delta = seconds(111);
+            var present = currentTime();
+            var past = subtract(present, delta);
+            var future = add(present, delta);
 
-            Event eventInPast = projectCreated(past);
-            Event eventInPresent = projectCreated(present);
-            Event eventInFuture = projectCreated(future);
+            var eventInPast = projectCreated(past);
+            var eventInPresent = projectCreated(present);
+            var eventInFuture = projectCreated(future);
 
             eventStore.append(eventInPast);
             eventStore.append(eventInPresent);
             eventStore.append(eventInFuture);
 
-            EventStreamQuery query = EventStreamQuery
-                    .newBuilder()
+            var query = EventStreamQuery.newBuilder()
                     .setAfter(past)
                     .setBefore(future)
                     .build();
-            AtomicBoolean done = new AtomicBoolean(false);
-            ResponseObserver observer = new ResponseObserver(done);
+            var done = new AtomicBoolean(false);
+            var observer = new ResponseObserver(done);
             eventStore.read(query, observer);
             Collection<Event> resultEvents = observer.getEvents();
 
             assertDone(done);
             assertThat(resultEvents).hasSize(1);
-            Event event = resultEvents.iterator()
-                                      .next();
+            var event = resultEvents.iterator().next();
             assertEquals(eventInPresent, event);
         }
 
         @Test
         @DisplayName("time bounds and limit")
         void timeBoundsAndLimit() {
-            Duration delta = seconds(222);
-            Timestamp present = currentTime();
-            Timestamp past = subtract(present, delta);
-            Timestamp longPast = subtract(past, delta);
-            Timestamp future = add(present, delta);
+            var delta = seconds(222);
+            var present = currentTime();
+            var past = subtract(present, delta);
+            var longPast = subtract(past, delta);
+            var future = add(present, delta);
 
-            Event eventInPast = projectCreated(past);
-            Event eventInPresent = projectCreated(present);
-            Event eventInFuture = projectCreated(future);
+            var eventInPast = projectCreated(past);
+            var eventInPresent = projectCreated(present);
+            var eventInFuture = projectCreated(future);
 
             eventStore.append(eventInPast);
             eventStore.append(eventInPresent);
             eventStore.append(eventInFuture);
 
-            int expectedSize = 1;
-            EventStreamQuery query = EventStreamQuery
-                    .newBuilder()
+            var expectedSize = 1;
+            var query = EventStreamQuery.newBuilder()
                     .setAfter(longPast)
                     .setBefore(future)
                     .setLimit(limitOf(expectedSize))
                     .build();
-            AtomicBoolean done = new AtomicBoolean(false);
-            ResponseObserver observer = new ResponseObserver(done);
+            var done = new AtomicBoolean(false);
+            var observer = new ResponseObserver(done);
             eventStore.read(query, observer);
             Collection<Event> resultEvents = observer.getEvents();
 
             assertDone(done);
             assertThat(resultEvents).hasSize(expectedSize);
-            Event actualEvent = resultEvents.iterator()
-                                            .next();
+            var actualEvent = resultEvents.iterator().next();
             assertEquals(eventInPast, actualEvent);
         }
 
         @Test
         @DisplayName("type")
         void type() {
-            Timestamp now = currentTime();
+            var now = currentTime();
 
-            Event taskAdded1 = taskAdded(now);
-            Event projectCreated = projectCreated(now);
-            Event taskAdded2 = taskAdded(now);
+            var taskAdded1 = taskAdded(now);
+            var projectCreated = projectCreated(now);
+            var taskAdded2 = taskAdded(now);
 
             eventStore.append(taskAdded1);
             eventStore.append(projectCreated);
             eventStore.append(taskAdded2);
 
-            EventFilter taskAddedType = EventFilter
-                    .newBuilder()
+            var taskAddedType = EventFilter.newBuilder()
                     .setEventType(TypeName.of(TaskAdded.class)
                                           .value())
                     .build();
-            EventStreamQuery query = EventStreamQuery
-                    .newBuilder()
+            var query = EventStreamQuery.newBuilder()
                     .addFilter(taskAddedType)
                     .build();
-            AtomicBoolean done = new AtomicBoolean(false);
-            ResponseObserver observer = new ResponseObserver(done);
+            var done = new AtomicBoolean(false);
+            var observer = new ResponseObserver(done);
             eventStore.read(query, observer);
             assertDone(done);
 
-            IterableSubject assertResultEvents = assertThat(observer.getEvents());
+            var assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(2);
             assertResultEvents.containsExactly(taskAdded1, taskAdded2);
         }
@@ -211,34 +202,32 @@ public class DefaultEventStoreTest {
         @Test
         @DisplayName("type and limit")
         void typeAndLimit() {
-            Timestamp now = currentTime();
-            Timestamp future = add(now, seconds(1));
+            var now = currentTime();
+            var future = add(now, seconds(1));
 
-            Event taskAdded1 = taskAdded(now);
-            Event projectCreated = projectCreated(now);
-            Event taskAdded2 = taskAdded(future);
+            var taskAdded1 = taskAdded(now);
+            var projectCreated = projectCreated(now);
+            var taskAdded2 = taskAdded(future);
 
             eventStore.append(taskAdded1);
             eventStore.append(projectCreated);
             eventStore.append(taskAdded2);
 
-            EventFilter taskAddedType = EventFilter
-                    .newBuilder()
+            var taskAddedType = EventFilter.newBuilder()
                     .setEventType(TypeName.of(TaskAdded.class)
                                           .value())
                     .build();
-            int expectedSize = 1;
-            EventStreamQuery query = EventStreamQuery
-                    .newBuilder()
+            var expectedSize = 1;
+            var query = EventStreamQuery.newBuilder()
                     .addFilter(taskAddedType)
                     .setLimit(limitOf(expectedSize))
                     .build();
-            AtomicBoolean done = new AtomicBoolean(false);
-            ResponseObserver observer = new ResponseObserver(done);
+            var done = new AtomicBoolean(false);
+            var observer = new ResponseObserver(done);
             eventStore.read(query, observer);
             assertDone(done);
 
-            IterableSubject assertResultEvents = assertThat(observer.getEvents());
+            var assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(1);
             assertResultEvents.containsExactly(taskAdded1);
         }
@@ -246,35 +235,33 @@ public class DefaultEventStoreTest {
         @Test
         @DisplayName("time bounds and type")
         void timeBoundsAndType() {
-            Duration delta = seconds(111);
-            Timestamp present = currentTime();
-            Timestamp past = subtract(present, delta);
-            Timestamp future = add(present, delta);
+            var delta = seconds(111);
+            var present = currentTime();
+            var past = subtract(present, delta);
+            var future = add(present, delta);
 
-            Event eventInPast = taskAdded(past);
-            Event eventInPresent = projectCreated(present);
-            Event eventInFuture = taskAdded(future);
+            var eventInPast = taskAdded(past);
+            var eventInPresent = projectCreated(present);
+            var eventInFuture = taskAdded(future);
 
             eventStore.append(eventInPast);
             eventStore.append(eventInPresent);
             eventStore.append(eventInFuture);
 
-            EventFilter taskAddedType = EventFilter
-                    .newBuilder()
+            var taskAddedType = EventFilter.newBuilder()
                     .setEventType(TypeName.of(TaskAdded.class)
                                           .value())
                     .build();
-            EventStreamQuery query = EventStreamQuery
-                    .newBuilder()
+            var query = EventStreamQuery.newBuilder()
                     .setAfter(past)
                     .addFilter(taskAddedType)
                     .build();
-            AtomicBoolean done = new AtomicBoolean(false);
-            ResponseObserver observer = new ResponseObserver(done);
+            var done = new AtomicBoolean(false);
+            var observer = new ResponseObserver(done);
             eventStore.read(query, observer);
             assertDone(done);
 
-            IterableSubject assertResultEvents = assertThat(observer.getEvents());
+            var assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(1);
             assertResultEvents.containsExactly(eventInFuture);
         }
@@ -282,53 +269,50 @@ public class DefaultEventStoreTest {
         @Test
         @DisplayName("time bounds, type and limit")
         void timeBoundsTypeAndFuture() {
-            Duration delta = seconds(111);
-            Timestamp present = currentTime();
-            Timestamp past = subtract(present, delta);
-            Timestamp future = add(present, delta);
-            Timestamp distantFuture = add(future, delta);
+            var delta = seconds(111);
+            var present = currentTime();
+            var past = subtract(present, delta);
+            var future = add(present, delta);
+            var distantFuture = add(future, delta);
 
-            Event eventInPast = taskAdded(past);
-            Event eventInPresent = projectCreated(present);
-            Event eventInFuture = taskAdded(future);
-            Event eventInDistantFuture = taskAdded(distantFuture);
+            var eventInPast = taskAdded(past);
+            var eventInPresent = projectCreated(present);
+            var eventInFuture = taskAdded(future);
+            var eventInDistantFuture = taskAdded(distantFuture);
 
             eventStore.append(eventInPast);
             eventStore.append(eventInPresent);
             eventStore.append(eventInFuture);
             eventStore.append(eventInDistantFuture);
 
-            EventFilter taskAddedType = EventFilter
-                    .newBuilder()
+            var taskAddedType = EventFilter.newBuilder()
                     .setEventType(TypeName.of(TaskAdded.class)
                                           .value())
                     .build();
-            EventStreamQuery query = EventStreamQuery
-                    .newBuilder()
+            var query = EventStreamQuery.newBuilder()
                     .setAfter(past)
                     .addFilter(taskAddedType)
                     .setLimit(limitOf(1))
                     .build();
-            AtomicBoolean done = new AtomicBoolean(false);
-            ResponseObserver observer = new ResponseObserver(done);
+            var done = new AtomicBoolean(false);
+            var observer = new ResponseObserver(done);
             eventStore.read(query, observer);
             assertDone(done);
 
-            IterableSubject assertResultEvents = assertThat(observer.getEvents());
+            var assertResultEvents = assertThat(observer.getEvents());
             assertResultEvents.hasSize(1);
             assertResultEvents.containsExactly(eventInFuture);
         }
 
         private EventStreamQuery.Limit limitOf(int value) {
-            return EventStreamQuery.Limit
-                    .newBuilder()
+            return EventStreamQuery.Limit.newBuilder()
                     .setValue(value)
                     .vBuild();
         }
     }
 
     @Test
-    @DisplayName("do nothing when appending empty iterable")
+    @DisplayName("do nothing when appending empty `Iterable`")
     void processEmptyIterable() {
         eventStore.appendAll(Collections.emptySet());
     }
@@ -336,44 +320,34 @@ public class DefaultEventStoreTest {
     @Test
     @DisplayName("fail to store events of different tenants in single operation")
     void rejectEventsFromDifferentTenants() {
-        TenantId firstTenantId = TenantId
-                .newBuilder()
+        var firstTenantId = TenantId.newBuilder()
                 .setValue("abc")
                 .buildPartial();
-        TenantId secondTenantId = TenantId
-                .newBuilder()
+        var secondTenantId = TenantId.newBuilder()
                 .setValue("xyz")
                 .buildPartial();
-        ActorContext firstTenantActor = ActorContext
-                .newBuilder()
+        var firstTenantActor = ActorContext.newBuilder()
                 .setTenantId(firstTenantId)
                 .buildPartial();
-        ActorContext secondTenantActor = ActorContext
-                .newBuilder()
+        var secondTenantActor = ActorContext.newBuilder()
                 .setTenantId(secondTenantId)
                 .buildPartial();
-        Origin firstTenantOrigin = Origin
-                .newBuilder()
+        var firstTenantOrigin = Origin.newBuilder()
                 .setActorContext(firstTenantActor)
                 .buildPartial();
-        Origin secondTenantOrigin = Origin
-                .newBuilder()
+        var secondTenantOrigin = Origin.newBuilder()
                 .setActorContext(secondTenantActor)
                 .buildPartial();
-        EventContext firstTenantContext = EventContext
-                .newBuilder()
+        var firstTenantContext = EventContext.newBuilder()
                 .setPastMessage(firstTenantOrigin)
                 .buildPartial();
-        EventContext secondTenantContext = EventContext
-                .newBuilder()
+        var secondTenantContext = EventContext.newBuilder()
                 .setPastMessage(secondTenantOrigin)
                 .buildPartial();
-        Event firstTenantEvent = Event
-                .newBuilder()
+        var firstTenantEvent = Event.newBuilder()
                 .setContext(firstTenantContext)
                 .buildPartial();
-        Event secondTenantEvent = Event
-                .newBuilder()
+        var secondTenantEvent = Event.newBuilder()
                 .setContext(secondTenantContext)
                 .buildPartial();
         Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
@@ -385,13 +359,13 @@ public class DefaultEventStoreTest {
     @Test
     @DisplayName("be able to store events in parallel")
     void storeInParallel() {
-        int eventCount = 10_000;
-        CompletableFuture<?>[] futures =
+        var eventCount = 10_000;
+        var futures =
                 Stream.generate(GivenEvent::arbitrary)
                       .limit(eventCount)
                       .map(event -> runAsync(() -> waitAndStore(event), executor))
                       .toArray(CompletableFuture[]::new);
-        CompletableFuture<Void> allFutures = allOf(futures);
+        var allFutures = allOf(futures);
         allFutures.join();
         MemoizingObserver<Event> observer = memoizingObserver();
         eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
@@ -413,18 +387,16 @@ public class DefaultEventStoreTest {
         @Test
         @DisplayName("`EventContext`")
         void eventContext() {
-            Event event = projectCreated(Time.currentTime());
-            Event enriched = event.toBuilder()
-                                  .setContext(event.context()
-                                                   .toBuilder()
-                                                   .setEnrichment(withOneAttribute()))
-                                  .build();
+            var event = projectCreated(Time.currentTime());
+            var enriched = event.toBuilder()
+                    .setContext(event.context()
+                                        .toBuilder()
+                                        .setEnrichment(withOneAttribute()))
+                    .build();
             eventStore.append(enriched);
             MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-            EventContext context = observer.responses()
-                                           .get(0)
-                                           .context();
+            var context = observer.responses().get(0).context();
             assertTrue(isDefault(context.getEnrichment()));
         }
 
@@ -433,29 +405,27 @@ public class DefaultEventStoreTest {
         @Test
         @DisplayName("origin of `EventContext` type")
         void eventContextOrigin() {
-            Event event = projectCreated(Time.currentTime());
-            Origin pastMessage = event.context()
-                                      .getPastMessage();
-            EventContext originContext =
-                    EventContext.newBuilder()
-                                .setEnrichment(withOneAttribute())
-                                .setPastMessage(pastMessage)
-                                .setTimestamp(event.context()
-                                                   .getTimestamp())
-                                .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
-                                .build();
-            Event enriched = event.toBuilder()
-                                  .setContext(event.getContext()
-                                                   .toBuilder()
-                                                   .setEventContext(originContext))
-                                  .build();
+            var event = projectCreated(Time.currentTime());
+            var pastMessage = event.context().getPastMessage();
+            var originContext = EventContext.newBuilder()
+                    .setEnrichment(withOneAttribute())
+                    .setPastMessage(pastMessage)
+                    .setTimestamp(event.context()
+                                       .getTimestamp())
+                    .setProducerId(AnyPacker.pack(TestValues.newUuidValue()))
+                    .build();
+            var enriched = event.toBuilder()
+                    .setContext(event.getContext()
+                                        .toBuilder()
+                                        .setEventContext(originContext))
+                    .build();
             eventStore.append(enriched);
             MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-            EventContext loadedOriginContext = observer.responses()
-                                                       .get(0)
-                                                       .context()
-                                                       .getEventContext();
+            var loadedOriginContext = observer.responses()
+                                              .get(0)
+                                              .context()
+                                              .getEventContext();
             assertTrue(isDefault(loadedOriginContext.getEnrichment()));
         }
     }

@@ -28,11 +28,6 @@ package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.util.Timestamps;
-import io.spine.core.Event;
-import io.spine.core.EventId;
-import io.spine.query.QueryPredicate;
-import io.spine.query.RecordQuery;
-import io.spine.query.Subject;
 import io.spine.query.SubjectParameter;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStreamQuery;
@@ -56,13 +51,13 @@ class QueriesTest extends UtilityClassTest<Queries> {
     @Test
     @DisplayName("convert an empty query to an empty `RecordQuery`")
     void convertEmptyQuery() {
-        EventStreamQuery query = EventStreamQuery.newBuilder()
+        var query = EventStreamQuery.newBuilder()
                                                  .build();
-        RecordQuery<EventId, Event> result = convert(query);
-        Subject<EventId, Event> subject = result.subject();
-        assertThat(subject.id()
-                          .values()).isEmpty();
-        QueryPredicate<Event> rootPredicate = subject.predicate();
+        var result = convert(query);
+        var subject = result.subject();
+        assertThat(subject.id().values())
+                .isEmpty();
+        var rootPredicate = subject.predicate();
         assertThat(rootPredicate.allParams()).isEmpty();
         assertThat(rootPredicate.children()).isEmpty();
     }
@@ -70,14 +65,13 @@ class QueriesTest extends UtilityClassTest<Queries> {
     @Test
     @DisplayName("convert the time-constrained query to the corresponding `RecordQuery`")
     void convertTimeConstrainedQuery() {
-        EventStreamQuery query = EventStreamQuery
-                .newBuilder()
+        var query = EventStreamQuery.newBuilder()
                 .setAfter(Timestamps.MIN_VALUE)
                 .setBefore(Timestamps.MAX_VALUE)
                 .build();
-        RecordQuery<EventId, Event> result = convert(query);
-        Subject<EventId, Event> subject = result.subject();
-        QueryPredicate<Event> rootPredicate = subject.predicate();
+        var result = convert(query);
+        var subject = result.subject();
+        var rootPredicate = subject.predicate();
         assertThat(rootPredicate.children()).isEmpty();
 
         assertThat(rootPredicate.operator()).isEqualTo(AND);
@@ -87,38 +81,37 @@ class QueriesTest extends UtilityClassTest<Queries> {
     @Test
     @DisplayName("convert the event-type query to the corresponding `RecordQuery`")
     void convertEventTypeConstrainedQuery() {
-        String somethingHappened = " com.acme.SomethingHappened ";
-        String somethingElseHappened = "com.acme.SomethingElseHappened";
-        EventFilter firstFilter = filterForType(somethingHappened);
-        EventFilter secondFilter = filterForType(somethingElseHappened);
-        EventFilter invalidFilter = filterForType("   ");
-        EventStreamQuery query = EventStreamQuery
-                .newBuilder()
+        var somethingHappened = " com.acme.SomethingHappened ";
+        var somethingElseHappened = "com.acme.SomethingElseHappened";
+        var firstFilter = filterForType(somethingHappened);
+        var secondFilter = filterForType(somethingElseHappened);
+        var invalidFilter = filterForType("   ");
+        var query = EventStreamQuery.newBuilder()
                 .addFilter(firstFilter)
                 .addFilter(secondFilter)
                 .addFilter(invalidFilter)
                 .build();
-        RecordQuery<EventId, Event> result = convert(query);
+        var result = convert(query);
 
-        Subject<EventId, Event> subject = result.subject();
-        QueryPredicate<Event> root = subject.predicate();
+        var subject = result.subject();
+        var root = subject.predicate();
         assertThat(root.operator()).isEqualTo(OR);
 
-        ImmutableList<SubjectParameter<?, ?, ?>> params = root.allParams();
+        var params = root.allParams();
         assertParamValue(params, 0, somethingHappened.trim());
         assertParamValue(params, 1, somethingElseHappened);
     }
 
     private static void
     assertParamValue(ImmutableList<SubjectParameter<?, ?, ?>> params, int index, String expected) {
-        SubjectParameter<?, ?, ?> parameter = params.get(index);
+        var parameter = params.get(index);
         assertThat(parameter.value())
                 .isEqualTo(expected);
     }
 
     private static EventFilter filterForType(String typeName) {
         return EventFilter.newBuilder()
-                          .setEventType(typeName)
-                          .build();
+                .setEventType(typeName)
+                .build();
     }
 }

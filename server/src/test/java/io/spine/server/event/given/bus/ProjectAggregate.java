@@ -30,9 +30,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.Assign;
-import io.spine.server.type.EventClass;
 import io.spine.test.event.EBProjectCreated;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Project;
@@ -42,19 +40,12 @@ import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBCreateProject;
 
 import java.util.List;
-import java.util.Set;
 
 public final class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-    public static Set<EventClass> outgoingEvents() {
-        AggregateClass<?> modelClass = new ProjectAggregate().modelClass();
-        Set<EventClass> result = modelClass.outgoingEvents();
-        return result;
-    }
-
     @Assign
     EBProjectCreated on(EBCreateProject command, CommandContext ctx) {
-        EBProjectCreated event = projectCreated(command.getProjectId());
+        var event = projectCreated(command.getProjectId());
         return event;
     }
 
@@ -62,8 +53,8 @@ public final class ProjectAggregate extends Aggregate<ProjectId, Project, Projec
     List<EBTaskAdded> on(EBAddTasks command, CommandContext ctx) {
         ImmutableList.Builder<EBTaskAdded> events = ImmutableList.builder();
 
-        for (Task task : command.getTaskList()) {
-            EBTaskAdded event = taskAdded(command.getProjectId(), task);
+        for (var task : command.getTaskList()) {
+            var event = taskAdded(command.getProjectId(), task);
             events.add(event);
         }
 
@@ -84,14 +75,14 @@ public final class ProjectAggregate extends Aggregate<ProjectId, Project, Projec
 
     private static EBProjectCreated projectCreated(ProjectId projectId) {
         return EBProjectCreated.newBuilder()
-                               .setProjectId(projectId)
-                               .build();
+                .setProjectId(projectId)
+                .build();
     }
 
     private static EBTaskAdded taskAdded(ProjectId projectId, Task task) {
         return EBTaskAdded.newBuilder()
-                          .setProjectId(projectId)
-                          .setTask(task)
-                          .build();
+                .setProjectId(projectId)
+                .setTask(task)
+                .build();
     }
 }
