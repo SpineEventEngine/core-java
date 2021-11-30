@@ -26,7 +26,6 @@
 
 package io.spine.server.transport.memory;
 
-import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.integration.ExternalMessage;
@@ -39,7 +38,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 
-@DisplayName("SingleThreadInMemSubscriber should")
+@DisplayName("`SingleThreadInMemSubscriber` should")
 class SingleThreadInMemSubscriberTest {
 
     /**
@@ -51,15 +50,13 @@ class SingleThreadInMemSubscriberTest {
     @MuteLogging
     @DisplayName("not halt after observer throws an error")
     void recoverFromObserverError() throws InterruptedException {
-        SingleThreadInMemSubscriber subscriber =
-                new SingleThreadInMemSubscriber(ChannelId.getDefaultInstance());
+        var subscriber = new SingleThreadInMemSubscriber(ChannelId.getDefaultInstance());
 
-        ThrowingObserver throwingObserver = new ThrowingObserver();
+        var throwingObserver = new ThrowingObserver();
         subscriber.addObserver(throwingObserver);
 
-        Any id = Identifier.pack(newUuid());
-        ExternalMessage externalMessage = ExternalMessage
-                .newBuilder()
+        var id = Identifier.pack(newUuid());
+        var externalMessage = ExternalMessage.newBuilder()
                 .setId(id)
                 .build();
         subscriber.onMessage(externalMessage);
@@ -71,7 +68,7 @@ class SingleThreadInMemSubscriberTest {
 
         subscriber.removeObserver(throwingObserver);
 
-        MemoizingObserver<ExternalMessage> memoizingObserver = new MemoizingObserver<>();
+        var memoizingObserver = new MemoizingObserver<ExternalMessage>();
         subscriber.addObserver(memoizingObserver);
         subscriber.onMessage(externalMessage);
 
