@@ -34,7 +34,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
 import java.util.logging.Level;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
@@ -42,7 +41,7 @@ import static io.spine.server.model.given.MethodAccessCheckerTestEnv.publicMetho
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.lang.String.format;
 
-@DisplayName("MethodAccessChecker should")
+@DisplayName("`MethodAccessChecker` should")
 class MethodAccessCheckerTest {
 
     private static final String STUB_WARNING_MESSAGE = "Stub warning message %s";
@@ -65,8 +64,8 @@ class MethodAccessCheckerTest {
     void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodAccessChecker.class);
 
-        Method method = publicMethod();
-        MethodAccessChecker checker = forMethod(method);
+        var method = publicMethod();
+        var checker = forMethod(method);
         new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
 
@@ -74,13 +73,13 @@ class MethodAccessCheckerTest {
     @MuteLogging
     @DisplayName("log warning on incorrect access modifier")
     void warnOnIncorrectAccess() {
-        Method method = publicMethod();
-        MethodAccessChecker checker = forMethod(method);
+        var method = publicMethod();
+        var checker = forMethod(method);
 
         checker.checkPrivate(STUB_WARNING_MESSAGE);
 
-        String anyMethodName = ".*";
-        String expected = format(STUB_WARNING_MESSAGE, anyMethodName);
+        var anyMethodName = ".*";
+        var expected = format(STUB_WARNING_MESSAGE, anyMethodName);
         interceptor.assertLog()
                    .textOutput()
                    .containsMatch(expected);
@@ -89,8 +88,8 @@ class MethodAccessCheckerTest {
     @Test
     @DisplayName("not log warning on correct access modifier")
     void recognizeCorrectAccess() {
-        Method publicMethod = publicMethod();
-        MethodAccessChecker checker = forMethod(publicMethod);
+        var publicMethod = publicMethod();
+        var checker = forMethod(publicMethod);
         checker.checkPublic(STUB_WARNING_MESSAGE);
 
         interceptor.assertLog()

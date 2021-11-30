@@ -75,9 +75,8 @@ class MessageInterfaceResultTest {
     @Test
     @DisplayName("dispatch the command")
     void dispatching() {
-        int numberOfMoves = random(1, 5);
-        Start command = Start
-                .newBuilder()
+        var numberOfMoves = random(1, 5);
+        var command = Start.newBuilder()
                 .setBotId(random(1, 7))
                 .setNumberOfMoves(numberOfMoves)
                 .build();

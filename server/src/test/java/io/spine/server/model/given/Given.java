@@ -40,11 +40,11 @@ public class Given {
     private Given() {
     }
 
-    static ProjectId newProjectId() {
-        String uuid = newUuid();
+    private static ProjectId newProjectId() {
+        var uuid = newUuid();
         return ProjectId.newBuilder()
-                        .setId(uuid)
-                        .build();
+                .setId(uuid)
+                .build();
     }
 
     public static class EventMessage {
@@ -62,8 +62,8 @@ public class Given {
 
         public static RefProjectCreated projectCreated(ProjectId id) {
             return RefProjectCreated.newBuilder()
-                                    .setProjectId(id)
-                                    .build();
+                    .setProjectId(id)
+                    .build();
         }
     }
 
@@ -75,14 +75,14 @@ public class Given {
 
         public static RefCreateProject createProject() {
             return RefCreateProject.newBuilder()
-                                   .setProjectId(newProjectId())
-                                   .build();
+                    .setProjectId(newProjectId())
+                    .build();
         }
 
         public static RefStartProject startProject() {
             return RefStartProject.newBuilder()
-                                  .setProjectId(newProjectId())
-                                  .build();
+                    .setProjectId(newProjectId())
+                    .build();
         }
     }
 
@@ -101,9 +101,9 @@ public class Given {
         }
 
         private static InvalidProjectName invalidProjectName(ProjectId id) {
-            InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
-                                                                      .setProjectId(id)
-                                                                      .build();
+            var invalidProjectName = InvalidProjectName.newBuilder()
+                    .setProjectId(id)
+                    .build();
             return invalidProjectName;
         }
     }

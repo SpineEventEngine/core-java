@@ -47,8 +47,10 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
 
+    @SuppressWarnings("unused")   /* It is a method source. */
     protected abstract Stream<Method> validMethods();
 
+    @SuppressWarnings( "unused")   /* It is a method source. */
     protected abstract Stream<Method> invalidMethods();
 
     protected abstract S signature();
@@ -59,7 +61,7 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
     @MethodSource("validMethods")
     @SuppressWarnings("ReturnValueIgnored")
         // we ignore the result of `orElseGet()` because it throws `AssertionFailedError`.
-    protected final void testValid(Method method) {
+    final void testValid(Method method) {
         wrap(method).orElseGet(Assertions::fail);
     }
 
@@ -78,10 +80,9 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
     @DisplayName("not create handlers from invalid methods")
     @ParameterizedTest
     @MethodSource("invalidMethods")
-    @SuppressWarnings("rawtypes") // save on generic params of `HandlerMethod`.
     protected final void testInvalid(Method method) {
         try {
-            Optional<? extends HandlerMethod> result = wrap(method);
+            var result = wrap(method);
             if (result.isPresent()) {
                 fail(String.format(
                         "Handler method `%s` should have had an invalid signature.", method
@@ -103,7 +104,7 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
      */
     protected static ImmutableSet<Method>
     methodsAnnotatedWith(Class<? extends Annotation> annotationCls, Class<?> declaringCls) {
-        ImmutableSet<Method> result =
+        var result =
                 Stream.of(declaringCls.getDeclaredMethods())
                       .filter(m -> m.getDeclaredAnnotation(annotationCls) != null)
                       .collect(toImmutableSet());

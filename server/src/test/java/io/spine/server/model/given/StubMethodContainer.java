@@ -56,8 +56,7 @@ public final class StubMethodContainer {
     }
 
     private static void derivedException() throws DerivedThrowable {
-        Rejections.ModProjectAlreadyExists rejection = Rejections.ModProjectAlreadyExists
-                .newBuilder()
+        var rejection = Rejections.ModProjectAlreadyExists.newBuilder()
                 .setId(newUuid())
                 .build();
         throw new DerivedThrowable(rejection);

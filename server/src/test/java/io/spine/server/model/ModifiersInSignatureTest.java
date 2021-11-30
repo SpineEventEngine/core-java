@@ -39,9 +39,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.model.AccessModifier.PROTECTED_CONTRACT;
@@ -53,9 +50,9 @@ class ModifiersInSignatureTest {
     @Test
     @DisplayName("allow for protected methods which are overridden from a superclass")
     void validProtected() throws NoSuchMethodException {
-        Method method = ValidProtectedSubscriber.class
+        var method = ValidProtectedSubscriber.class
                 .getDeclaredMethod("overridingProtected", SigProjectCreated.class);
-        AccessModifier foundModifier = new SubscriberSignature()
+        var foundModifier = new SubscriberSignature()
                 .modifier()
                 .stream()
                 .filter(m -> m.test(method))
@@ -68,9 +65,9 @@ class ModifiersInSignatureTest {
     @Test
     @DisplayName("not allow for protected methods in general")
     void invalidProtected() throws NoSuchMethodException {
-        Method method = RougeProtectedSubscriber.class
+        var method = RougeProtectedSubscriber.class
                 .getDeclaredMethod("justForTheLols", SigProjectCreated.class);
-        Optional<AccessModifier> foundModifier = new SubscriberSignature()
+        var foundModifier = new SubscriberSignature()
                 .modifier()
                 .stream()
                 .filter(m -> m.test(method))
@@ -82,9 +79,9 @@ class ModifiersInSignatureTest {
     @Test
     @DisplayName("not allow for protected methods in with an invalid contract")
     void invalid() throws NoSuchMethodException {
-        Method method = InvalidProtectedSubscriber.class
+        var method = InvalidProtectedSubscriber.class
                 .getDeclaredMethod("plainWrong", SigProjectCreated.class);
-        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_CONTRACT.test(method));
+        var error = assertThrows(ModelError.class, () -> PROTECTED_CONTRACT.test(method));
         assertThat(error)
                 .hasMessageThat()
                 .endsWith("not marked with `@ContractFor`.");
@@ -93,9 +90,9 @@ class ModifiersInSignatureTest {
     @Test
     @DisplayName("not allow for protected contract methods in with a mismatched handler type")
     void mismatched() throws NoSuchMethodException {
-        Method method = MismatchedProtectedSubscriber.class
+        var method = MismatchedProtectedSubscriber.class
                 .getDeclaredMethod("reactor", SigProjectCreated.class);
-        ModelError error = assertThrows(ModelError.class, () -> PROTECTED_CONTRACT.test(method));
+        var error = assertThrows(ModelError.class, () -> PROTECTED_CONTRACT.test(method));
         assertThat(error)
                 .hasMessageThat()
                 .endsWith("not marked with `@React`.");
@@ -104,10 +101,9 @@ class ModifiersInSignatureTest {
     @Test
     @DisplayName("allow parameter type covariance")
     void covariance() throws NoSuchMethodException {
-        Method method = CovariantReactor.class
+        var method = CovariantReactor.class
                 .getDeclaredMethod("covariantReactor", SigTaskStarted.class);
-        AccessModifier foundModifier = EventReactorSignatures.createForTest()
-                .modifier()
+        var foundModifier = EventReactorSignatures.createForTest().modifier()
                 .stream()
                 .filter(m -> m.test(method))
                 .findFirst()

@@ -84,8 +84,7 @@ public final class HandlerReturnTypeTestEnv {
         public Pair<ModProjectCreated,
                 EitherOf2<ModProjectOwnerAssigned, ModCannotAssignOwnerToProject>>
         emitPair() {
-            ModProjectCreated projectCreated = ModProjectCreated
-                    .newBuilder()
+            var projectCreated = ModProjectCreated.newBuilder()
                     .setId(newUuid())
                     .build();
             EitherOf2<ModProjectOwnerAssigned, ModCannotAssignOwnerToProject> either =

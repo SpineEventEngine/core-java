@@ -131,8 +131,7 @@ class FilterTest {
         void prepareEnv() {
             storageFactory = new ModelTestStorageFactory(InMemoryStorageFactory.newInstance());
             inboxStorage = storageFactory.createInboxStorage(false);
-            Delivery delivery = Delivery
-                    .newBuilder()
+            var delivery = Delivery.newBuilder()
                     .setInboxStorage(inboxStorage)
                     .build();
             ServerEnvironment.when(Tests.class)
@@ -148,11 +147,10 @@ class FilterTest {
 
         @Test
         void beforeDelivery() {
-            BoundedContextBuilder context = BoundedContextBuilder
+            var context = BoundedContextBuilder
                     .assumingTests()
                     .add(new ProjectTasksRepository());
-            ModProjectCreated event = ModProjectCreated
-                    .newBuilder()
+            var event = ModProjectCreated.newBuilder()
                     .setId(newUuid()) // Not the value expected in `ProjectTasksProjection`.
                     .build();
             BlackBox.from(context)
@@ -177,10 +175,10 @@ class FilterTest {
     @SuppressWarnings({
             "ClassNewInstance", // We don't care about custom exceptions.
             "ResultOfMethodCallIgnored" // Call for side effect.
-    })
+            , "deprecation"})
     private static void triggerModelConstruction(Class<?> modelClass)
             throws InstantiationException, IllegalAccessException {
-        Object instance = modelClass.newInstance();
+        var instance = modelClass.newInstance();
         if (Entity.class.isAssignableFrom(modelClass)) {
             ((Entity<?, ?>) instance).modelClass();
         }

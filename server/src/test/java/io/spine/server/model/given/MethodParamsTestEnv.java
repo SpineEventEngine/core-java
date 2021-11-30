@@ -41,7 +41,6 @@ import io.spine.test.model.ModCreateProject;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Optional;
 
 import static io.spine.server.model.TypeMatcher.classImplementing;
 import static io.spine.server.model.TypeMatcher.exactly;
@@ -82,10 +81,10 @@ public class MethodParamsTestEnv {
     }
 
     private static Method findMethod(String methodName) {
-        Optional<Method> method = Arrays.stream(MethodParamsTestEnv.class.getDeclaredMethods())
-                                        .filter(m -> m.getName().equals(methodName))
-                                        .findFirst();
-        if (!method.isPresent()) {
+        var method = Arrays.stream(MethodParamsTestEnv.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals(methodName))
+                .findFirst();
+        if (method.isEmpty()) {
             throw newIllegalStateException("Test method `%s` is missing.", methodName);
         }
         return method.get();

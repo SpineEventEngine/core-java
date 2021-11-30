@@ -26,7 +26,6 @@
 
 package io.spine.server.model;
 
-import io.spine.core.BoundedContextName;
 import io.spine.server.model.given.ModelTestEnv.FaultyCommander;
 import io.spine.server.model.given.ModelTestEnv.MAggregate;
 import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
@@ -39,8 +38,6 @@ import org.junit.jupiter.api.Test;
 import tres.quattro.Counter;
 import uno.dos.Encounter;
 
-import java.util.Optional;
-
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
@@ -51,8 +48,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests of {@link Model}.
  */
-@SuppressWarnings("ErrorNotRethrown")
 @DisplayName("Model should")
+@SuppressWarnings("ErrorNotRethrown")
 class ModelTest {
 
     @BeforeEach
@@ -60,9 +57,9 @@ class ModelTest {
         Model.dropAllModels();
     }
 
-    @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
     @DisplayName("check for duplicated command handlers in command handler class")
+    @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     void checkDuplicateCmdHandler() {
         try {
             asAggregateClass(MAggregate.class);
@@ -75,9 +72,9 @@ class ModelTest {
         }
     }
 
-    @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
     @DisplayName("check for duplicated command handlers in process manager class")
+    @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     void checkDuplicateInProcman() {
         try {
             asAggregateClass(MAggregate.class);
@@ -113,8 +110,8 @@ class ModelTest {
     @Test
     @DisplayName("find BoundedContext package annotation")
     void findBoundedContextAnnotation() {
-        Optional<BoundedContextName> ctx1 = Model.findContext(Counter.class);
-        Optional<BoundedContextName> ctx2 = Model.findContext(Encounter.class);
+        var ctx1 = Model.findContext(Counter.class);
+        var ctx2 = Model.findContext(Encounter.class);
         assertTrue(ctx1.isPresent());
         assertEquals("Counting", ctx1.get()
                                      .getValue());
@@ -122,7 +119,7 @@ class ModelTest {
     }
 
     private static void assertContainsClassName(ModelError error, Class<?> cls) {
-        String errorMessage = error.getMessage();
+        var errorMessage = error.getMessage();
         assertTrue(errorMessage.contains(cls.getName()));
     }
 

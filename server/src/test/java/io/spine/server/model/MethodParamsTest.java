@@ -121,7 +121,7 @@ class MethodParamsTest {
     @Test
     @DisplayName("provide `equals()` and `hashCode()`")
     void equality() {
-        MethodParams oneParamMethod = MethodParams.of(singleParamCommand());
+        var oneParamMethod = MethodParams.of(singleParamCommand());
         new EqualsTester().addEqualityGroup(oneParamMethod, oneParamMethod,
                                             MethodParams.of(singleParamCommand()))
                           .addEqualityGroup(firstIsCommand(twoParamCommandAndCtx()))

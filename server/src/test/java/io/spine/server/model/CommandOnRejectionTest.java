@@ -26,7 +26,6 @@
 
 package io.spine.server.model;
 
-import io.spine.server.BoundedContext;
 import io.spine.server.model.contexts.tasks.TasksContext;
 import io.spine.test.model.contexts.tasks.TaskId;
 import io.spine.test.model.contexts.tasks.rejections.TaskRejections.TaskAlreadyExists;
@@ -37,7 +36,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.model.contexts.tasks.CreationRetry.retried;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("@Command on a Rejection")
+@DisplayName("`@Command` on a `Rejection`")
 class CommandOnRejectionTest {
 
     private static final TestEventFactory eventFactory =
@@ -46,15 +45,15 @@ class CommandOnRejectionTest {
     @Test
     @DisplayName("with the command context")
     void receive() {
-        BoundedContext context = TasksContext.newInstance();
-        TaskId proposedId = TaskId.generate();
+        var context = TasksContext.newInstance();
+        var proposedId = TaskId.generate();
         context.eventBus()
-               .post(eventFactory.createEvent(TaskAlreadyExists
-                                                      .newBuilder()
-                                                      .setId(proposedId)
-                                                      .setName("test task name")
-                                                      .setDescription("test task description")
-                                                      .vBuild()));
+               .post(eventFactory.createEvent(
+                       TaskAlreadyExists.newBuilder()
+                               .setId(proposedId)
+                               .setName("test task name")
+                               .setDescription("test task description")
+                               .vBuild()));
         assertTrue(retried(proposedId));
     }
 }

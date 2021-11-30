@@ -40,7 +40,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.model.MethodExceptionCheck.check;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("MethodExceptionChecker should")
+@DisplayName("`MethodExceptionChecker` should")
 class MethodExceptionCheckTest {
 
     @Test
@@ -48,8 +48,8 @@ class MethodExceptionCheckTest {
     void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodExceptionCheck.class);
 
-        Method method = method("noExceptions");
-        MethodExceptionCheck checker = check(method, null);
+        var method = method("noExceptions");
+        var checker = check(method, null);
         new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
 

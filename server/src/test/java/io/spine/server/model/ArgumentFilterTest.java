@@ -44,7 +44,7 @@ import static io.spine.server.model.given.filter.Legume.PEA;
 class ArgumentFilterTest {
 
     @Test
-    @DisplayName("pass null-tolerance check")
+    @DisplayName("pass `null`-tolerance check")
     void nullTolerance() {
         new NullPointerTester()
                 .setDefault(FieldPath.class, FieldPath.getDefaultInstance())
@@ -54,7 +54,7 @@ class ArgumentFilterTest {
     @Test
     @DisplayName("create instance for `@Where` annotation")
     void onWhere() {
-        ArgumentFilter filter = createFilter(onlyPeas());
+        var filter = createFilter(onlyPeas());
         assertThat(filter.acceptsAll())
                 .isFalse();
         assertThat(filter.pathLength())
@@ -70,7 +70,7 @@ class ArgumentFilterTest {
     @Test
     @DisplayName("create empty filter if not annotated")
     void emptyFilter() {
-        ArgumentFilter filter = createFilter(everythingElse());
+        var filter = createFilter(everythingElse());
         assertThat(filter.acceptsAll())
                 .isTrue();
         assertThat(filter.pathLength())
@@ -78,15 +78,13 @@ class ArgumentFilterTest {
     }
 
     private static EventMessage peasAdded() {
-        return BeanAdded
-                .newBuilder()
+        return BeanAdded.newBuilder()
                 .setKind(PEA)
                 .build();
     }
 
     private static EventMessage beansAdded() {
-        return BeanAdded
-                .newBuilder()
+        return BeanAdded.newBuilder()
                 .setKind(BEAN)
                 .build();
     }

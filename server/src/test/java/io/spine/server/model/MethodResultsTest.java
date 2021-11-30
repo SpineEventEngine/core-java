@@ -46,7 +46,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Set;
 
@@ -56,7 +55,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("ProducedTypeSet should")
+@DisplayName("`ProducedTypeSet` should")
 class MethodResultsTest extends UtilityClassTest<MethodResults> {
 
     MethodResultsTest() {
@@ -164,7 +163,7 @@ class MethodResultsTest extends UtilityClassTest<MethodResults> {
     private static void checkCollectedFor(String methodName,
                                           Collection<Class<? extends Message>> expectedTypes) {
         try {
-            Method method = MessageProducer.class.getMethod(methodName);
+            var method = MessageProducer.class.getMethod(methodName);
             Set<? extends MessageClass<?>> expectedClasses = expectedTypes
                     .stream()
                     .map(MethodResultsTest::toCommandOrEventClass)

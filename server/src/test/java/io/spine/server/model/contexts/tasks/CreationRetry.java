@@ -45,10 +45,9 @@ public final class CreationRetry extends AbstractCommander {
 
     @Command
     CreateTask on(TaskRejections.TaskAlreadyExists rejection) {
-        TaskId id = TaskId.generate();
+        var id = TaskId.generate();
         rejectedTasks.add(rejection.getId());
-        return CreateTask
-                .newBuilder()
+        return CreateTask.newBuilder()
                 .setId(id)
                 .setName(rejection.getName())
                 .setDescription(rejection.getDescription())
