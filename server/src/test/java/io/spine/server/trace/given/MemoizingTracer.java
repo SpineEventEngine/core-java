@@ -53,8 +53,7 @@ public final class MemoizingTracer extends AbstractTracer {
 
     public boolean isReceiver(Message entityId, TypeUrl entityStateType) {
         checkNotNull(entityId);
-        MessageId id = MessageId
-                .newBuilder()
+        var id = MessageId.newBuilder()
                 .setId(pack(entityId))
                 .setTypeUrl(entityStateType.value())
                 .vBuild();
@@ -64,8 +63,7 @@ public final class MemoizingTracer extends AbstractTracer {
     @Override
     public void processedBy(MessageId receiver, EntityTypeName receiverType) {
         checkNotNull(receiver);
-        MessageId idWithoutVersion = receiver
-                .toBuilder()
+        var idWithoutVersion = receiver.toBuilder()
                 .clearVersion()
                 .vBuild();
         receivers.add(idWithoutVersion);

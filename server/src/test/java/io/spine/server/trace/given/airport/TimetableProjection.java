@@ -35,7 +35,6 @@ import io.spine.test.trace.FlightRescheduled;
 import io.spine.test.trace.FlightScheduled;
 import io.spine.test.trace.Timetable;
 import io.spine.test.trace.Timetable.Schedule;
-import io.spine.time.ZonedDateTime;
 
 import java.util.List;
 
@@ -46,8 +45,7 @@ final class TimetableProjection extends Projection<AirportId, Timetable, Timetab
 
     @Subscribe
     void on(FlightScheduled event) {
-        Schedule schedule = Schedule
-                .newBuilder()
+        var schedule = Schedule.newBuilder()
                 .setFlight(event.getId())
                 .setDestination(event.getTo()
                                      .getId())
@@ -58,7 +56,7 @@ final class TimetableProjection extends Projection<AirportId, Timetable, Timetab
 
     @Subscribe
     void on(FlightRescheduled event) {
-        ZonedDateTime newDepartureTime = event.getScheduledDeparture();
+        var newDepartureTime = event.getScheduledDeparture();
         findFlight(event.getId())
                 .setScheduledDeparture(newDepartureTime);
     }
@@ -72,9 +70,8 @@ final class TimetableProjection extends Projection<AirportId, Timetable, Timetab
     }
 
     private Schedule.Builder findFlight(FlightId id) {
-        List<Schedule.Builder> schedules = builder().getScheduledFlightBuilderList();
-        Schedule.Builder flight = schedules
-                .stream()
+        var schedules = builder().getScheduledFlightBuilderList();
+        var flight = schedules.stream()
                 .filter(schedule -> schedule.getFlight()
                                             .equals(id))
                 .findAny()

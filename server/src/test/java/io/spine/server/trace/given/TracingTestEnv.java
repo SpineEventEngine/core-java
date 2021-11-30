@@ -34,14 +34,12 @@ import io.spine.test.trace.Flight;
 import io.spine.test.trace.FlightId;
 import io.spine.test.trace.ScheduleFlight;
 import io.spine.test.trace.Timetable;
-import io.spine.time.LocalDateTime;
 import io.spine.time.LocalDateTimes;
 import io.spine.time.LocalDates;
 import io.spine.time.LocalTimes;
 import io.spine.time.Month;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import io.spine.time.ZonedDateTime;
 import io.spine.time.ZonedDateTimes;
 import io.spine.type.TypeUrl;
 
@@ -54,18 +52,21 @@ public final class TracingTestEnv {
             .newBuilder()
             .setCode("KBP")
             .vBuild();
+
     private static final Airport FROM_AIRPORT = Airport
             .newBuilder()
             .setId(FROM)
             .setCity("Kyiv")
             .setCountry("Ukraine")
             .vBuild();
+
     private static final AirportId TO = AirportId
             .newBuilder()
             .setCode("HRK")
             .vBuild();
-    private static final Airport TO_AIRPORT = Airport
-            .newBuilder()
+
+    private static final Airport TO_AIRPORT = Airport.
+            newBuilder()
             .setId(TO)
             .setCity("Kharkiv")
             .setCountry("Ukraine")
@@ -83,18 +84,17 @@ public final class TracingTestEnv {
     }
 
     public static ScheduleFlight scheduleFlight() {
-        LocalDateTime localDepartureTime = LocalDateTimes.of(
+        var localDepartureTime = LocalDateTimes.of(
                 LocalDates.of(2019, Month.JUNE, 20),
                 LocalTimes.of(7, 30, 0)
         );
-        LocalDateTime.Builder builder = localDepartureTime.toBuilder();
+        var builder = localDepartureTime.toBuilder();
         builder.getTimeBuilder()
                .setHour(8);
-        LocalDateTime localArrivalTime = builder.vBuild();
-        ZonedDateTime departureTime = ZonedDateTimes.of(localDepartureTime, ZONE);
-        ZonedDateTime arrivalTime = ZonedDateTimes.of(localArrivalTime, ZONE);
-        return ScheduleFlight
-                .newBuilder()
+        var localArrivalTime = builder.vBuild();
+        var departureTime = ZonedDateTimes.of(localDepartureTime, ZONE);
+        var arrivalTime = ZonedDateTimes.of(localArrivalTime, ZONE);
+        return ScheduleFlight.newBuilder()
                 .setFrom(FROM_AIRPORT)
                 .setTo(TO_AIRPORT)
                 .setId(FLIGHT)
@@ -104,8 +104,7 @@ public final class TracingTestEnv {
     }
 
     public static CancelFlight cancelFlight() {
-        return CancelFlight
-                .newBuilder()
+        return CancelFlight.newBuilder()
                 .setId(FLIGHT)
                 .vBuild();
     }

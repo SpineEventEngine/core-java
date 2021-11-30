@@ -28,12 +28,10 @@ package io.spine.server.trace;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
-import io.spine.core.Command;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.trace.given.MemoizingTracer;
 import io.spine.server.trace.given.MemoizingTracerFactory;
 import io.spine.server.trace.given.airport.AirportContext;
 import io.spine.test.trace.BoardingCanceled;
@@ -76,9 +74,7 @@ class TracingTest {
         tracing = new MemoizingTracerFactory();
         ServerEnvironment.when(Tests.class)
                          .use(tracing);
-        context = AirportContext
-                .builder()
-                .build();
+        context = AirportContext.builder().build();
         spec = context.spec();
     }
 
@@ -91,7 +87,7 @@ class TracingTest {
     @DisplayName("trace actor commands")
     void traceCommands() {
         post(scheduleFlight());
-        MemoizingTracer tracer = tracing.tracer(spec, ScheduleFlight.class);
+        var tracer = tracing.tracer(spec, ScheduleFlight.class);
         assertTrue(tracer.isReceiver(FLIGHT, FLIGHT_TYPE));
     }
 
@@ -127,7 +123,7 @@ class TracingTest {
     }
 
     private void post(CommandMessage command) {
-        Command cmd = requests.command()
+        var cmd = requests.command()
                               .create(command);
         context.commandBus()
                .post(cmd, noOpObserver());

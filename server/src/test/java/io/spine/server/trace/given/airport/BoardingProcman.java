@@ -56,17 +56,16 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
 
     @React
     BoardingStarted on(FlightScheduled event) {
-        ZonedDateTime scheduledDeparture = event.getScheduledDeparture();
-        Duration twoHours = Duration.of(2, HOURS);
-        ZonedDateTime start = ZonedDateTimes.of(
+        var scheduledDeparture = event.getScheduledDeparture();
+        var twoHours = Duration.of(2, HOURS);
+        var start = ZonedDateTimes.of(
                 toJavaTime(scheduledDeparture).minus(twoHours)
         );
         builder().setFlight(event.getId())
                  .setScheduledStart(start)
                  .setScheduledEnd(scheduledDeparture)
                  .setStatus(NOT_STARTED);
-        return BoardingStarted
-                .newBuilder()
+        return BoardingStarted.newBuilder()
                 .setId(id())
                 .setWhen(Now.get(scheduledDeparture.getZone())
                             .asZonedDateTime())
@@ -82,10 +81,9 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
 
     @Assign
     BoardingCompleted handle(CompleteBoarding command, CommandContext context) {
-        ZonedDateTime whenCompleted = now(context);
+        var whenCompleted = now(context);
         builder().setWhenEnded(whenCompleted);
-        return BoardingCompleted
-                .newBuilder()
+        return BoardingCompleted.newBuilder()
                 .setId(command.getId())
                 .setWhen(whenCompleted)
                 .vBuild();
@@ -93,17 +91,15 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
 
     @Command
     CancelBoarding handle(FlightCanceled event) {
-        return CancelBoarding
-                .newBuilder()
+        return CancelBoarding.newBuilder()
                 .setId(event.getId())
                 .vBuild();
     }
 
     @Assign
     BoardingCanceled handle(CancelBoarding command, CommandContext context) {
-        ZonedDateTime whenCanceled = now(context);
-        return BoardingCanceled
-                .newBuilder()
+        var whenCanceled = now(context);
+        return BoardingCanceled.newBuilder()
                 .setId(command.getId())
                 .setWhen(whenCanceled)
                 .vBuild();

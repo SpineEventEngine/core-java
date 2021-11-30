@@ -49,8 +49,8 @@ public final class MemoizingTracerFactory implements TracerFactory {
     public Tracer trace(ContextSpec context, Signal<?, ?, ?> signalMessage) {
         Class<? extends Message> messageType = signalMessage.enclosedMessage()
                                                             .getClass();
-        MemoizingTracer tracer = tracers.computeIfAbsent(messageType,
-                                                         cls -> new MemoizingTracer(signalMessage));
+        var tracer = tracers.computeIfAbsent(messageType,
+                                             cls -> new MemoizingTracer(signalMessage));
         return tracer;
     }
 
@@ -66,7 +66,7 @@ public final class MemoizingTracerFactory implements TracerFactory {
 
     public MemoizingTracer tracer(@SuppressWarnings("unused") ContextSpec unused,
                                   Class<? extends Message> messageType) {
-        MemoizingTracer tracer = tracers.get(messageType);
+        var tracer = tracers.get(messageType);
         assertNotNull(tracer);
         return tracer;
     }
