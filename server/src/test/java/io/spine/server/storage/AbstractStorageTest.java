@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
@@ -136,9 +135,9 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
 
     /** Writes a record, reads it and asserts it is the same as the expected one. */
     private void writeAndReadRecordTest(I id) {
-        M expected = writeRecord(id);
+        var expected = writeRecord(id);
 
-        Optional<M> actual = storage.read(id);
+        var actual = storage.read(id);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
@@ -146,7 +145,7 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
 
     @CanIgnoreReturnValue
     private M writeRecord(I id) {
-        M expected = newStorageRecord(id);
+        var expected = newStorageRecord(id);
         storage.write(id, expected);
         return expected;
     }
@@ -154,7 +153,7 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     @Test
     @DisplayName("handle absence of record with passed ID")
     void handleAbsenceOfRecord() {
-        Optional<M> record = storage.read(newId());
+        var record = storage.read(newId());
         assertResultForMissingId(record);
     }
 
@@ -173,7 +172,7 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     @Test
     @DisplayName("re-write record if writing by the same ID")
     protected void rewriteRecord() {
-        I id = newId();
+        var id = newId();
         writeAndReadRecordTest(id);
         writeAndReadRecordTest(id);
     }
@@ -185,7 +184,7 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     @Test
     @DisplayName("return non-null `index()`")
     protected void nonNullIndex() {
-        Iterator<I> index = storage.index();
+        var index = storage.index();
         assertNotNull(index);
     }
 
@@ -197,7 +196,7 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     }
 
     protected void assertIndexImmutability() {
-        Iterator<I> index = storage.index();
+        var index = storage.index();
         assertTrue(index.hasNext());
         try {
             index.remove();
@@ -213,15 +212,15 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     @Test
     @DisplayName("have all IDs counted by `index()`")
     protected void indexCountingAllIds() {
-        int recordCount = 10;
+        var recordCount = 10;
         Set<I> ids = new HashSet<>(recordCount);
-        for (int i = 0; i < recordCount; i++) {
-            I id = newId();
+        for (var i = 0; i < recordCount; i++) {
+            var id = newId();
             writeRecord(id);
             ids.add(id);
         }
 
-        Iterator<I> index = storage.index();
+        var index = storage.index();
         Collection<I> indexValues = newHashSet(index);
 
         assertEquals(ids.size(), indexValues.size());
@@ -233,10 +232,10 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     @Test
     @DisplayName("return unique ID")
     void returnUniqueID() {
-        int checkCount = 10;
+        var checkCount = 10;
         Set<I> ids = newHashSet();
-        for (int i = 0; i < checkCount; i++) {
-            I newId = newId();
+        for (var i = 0; i < checkCount; i++) {
+            var newId = newId();
             if (ids.contains(newId)) {
                 fail("AbstractStorageTest.newId() should return unique IDs.");
             }
@@ -354,7 +353,7 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
         void write() {
             closeAndFailIfException(storage);
 
-            I id = newId();
+            var id = newId();
             assertThrows(IllegalStateException.class,
                          () -> storage.write(id, newStorageRecord(id)));
         }

@@ -37,12 +37,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`MultitenantStorage` should")
@@ -54,44 +53,40 @@ class MultitenantStorageTest {
 
     @BeforeEach
     void setUp() {
-        multitenantStorage =
-                new MultitenantStorage<TenantRecords<StgProjectId, EntityRecord>>(IS_MULTITENANT) {
-                    @Override
-                    TenantRecords<StgProjectId, EntityRecord> createSlice() {
-                        return new TenantRecords<>();
-                    }
-                };
+        multitenantStorage = new MultitenantStorage<>(IS_MULTITENANT) {
+            @Override
+            TenantRecords<StgProjectId, EntityRecord> createSlice() {
+                return new TenantRecords<>();
+            }
+        };
     }
 
     @Test
     @DisplayName("return same slice within single tenant and multitenant environment")
     void returnSameSlice()
             throws InterruptedException, ExecutionException {
-        int numberOfTasks = 1000;
+        var numberOfTasks = 1000;
         Collection<Callable<TenantRecords<StgProjectId, EntityRecord>>> tasks =
                 newArrayListWithExpectedSize(numberOfTasks);
 
-        for (int i = 0; i < numberOfTasks; i++) {
+        for (var i = 0; i < numberOfTasks; i++) {
             tasks.add(() -> {
-                TenantRecords<StgProjectId, EntityRecord> storage =
-                        multitenantStorage.currentSlice();
+                var storage = multitenantStorage.currentSlice();
                 return storage;
             });
         }
 
-        List<Future<TenantRecords<StgProjectId, EntityRecord>>> futures =
-                executeInMultithreadedEnvironment(tasks);
-        Set<TenantRecords<StgProjectId, EntityRecord>> tenantRecords =
-                convertFuturesToSetOfCompletedResults(futures);
+        var futures = executeInMultithreadedEnvironment(tasks);
+        var tenantRecords = convertFuturesToSetOfCompletedResults(futures);
 
-        int expected = 1;
+        var expected = 1;
         assertEquals(expected, tenantRecords.size());
     }
 
     private static <R> Set<R> convertFuturesToSetOfCompletedResults(List<Future<R>> futures)
             throws ExecutionException, InterruptedException {
         Set<R> tenantRecords = newHashSetWithExpectedSize(futures.size());
-        for (Future<R> future : futures) {
+        for (var future : futures) {
             tenantRecords.add(future.get());
         }
         return tenantRecords;
@@ -99,9 +94,9 @@ class MultitenantStorageTest {
 
     private static <R> List<Future<R>>
     executeInMultithreadedEnvironment(Collection<Callable<R>> tasks) throws InterruptedException {
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
-                                                                       .availableProcessors() * 2);
-        List<Future<R>> futures = executor.invokeAll(tasks);
+        var executor = newFixedThreadPool(
+                Runtime.getRuntime().availableProcessors() * 2);
+        var futures = executor.invokeAll(tasks);
         return futures;
     }
 }

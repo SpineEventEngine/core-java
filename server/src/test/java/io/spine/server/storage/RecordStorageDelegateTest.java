@@ -26,12 +26,9 @@
 
 package io.spine.server.storage;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
@@ -48,9 +45,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -101,9 +96,9 @@ public class RecordStorageDelegateTest
 
     @Override
     protected StgProjectStorage newStorage() {
-        StorageFactory factory = ServerEnvironment.instance()
-                                                  .storageFactory();
-        ContextSpec ctxSpec = ContextSpec.singleTenant(getClass().getName());
+        var factory = ServerEnvironment.instance()
+                                       .storageFactory();
+        var ctxSpec = ContextSpec.singleTenant(getClass().getName());
         return new StgProjectStorage(ctxSpec, factory);
     }
 
@@ -128,21 +123,21 @@ public class RecordStorageDelegateTest
                     .values();
             storage().writeBatch(records);
 
-            Iterator<StgProject> actualIterator = storage().readAll();
-            ImmutableList<StgProject> actualRecords = ImmutableList.copyOf(actualIterator);
+            var actualIterator = storage().readAll();
+            var actualRecords = ImmutableList.copyOf(actualIterator);
             assertThat(actualRecords).containsExactlyElementsIn(records);
         }
 
         @Test
         @DisplayName("batch of records, recalling them by their IDs")
         void allByIds() {
-            ImmutableMap<StgProjectId, StgProject> recordMap = dozenOfRecords();
+            var recordMap = dozenOfRecords();
             storage().writeBatch(recordMap.values());
 
-            ImmutableSet<StgProjectId> ids = recordMap.keySet();
-            ImmutableList<StgProjectId> partOfIds = RecordStorageDelegateTestEnv.halfDozenOf(ids);
-            Iterator<StgProject> actualIterator = storage().readAll(partOfIds);
-            ImmutableList<StgProject> actualRecords = ImmutableList.copyOf(actualIterator);
+            var ids = recordMap.keySet();
+            var partOfIds = RecordStorageDelegateTestEnv.halfDozenOf(ids);
+            var actualIterator = storage().readAll(partOfIds);
+            var actualRecords = ImmutableList.copyOf(actualIterator);
             RecordStorageDelegateTestEnv.assertHaveIds(actualRecords, partOfIds);
         }
     }
@@ -154,27 +149,25 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("a single record with the particular `FieldMask`")
         void singleRecordWithMask() {
-            StgProject record = newState(newId());
+            var record = newState(newId());
             storage().write(record);
 
-            Optional<StgProject> result = storage().read(record.getId(),
-                                                         idAndDueDate());
+            var result = storage().read(record.getId(), idAndDueDate());
             assertThat(result).isPresent();
-            StgProject actual = result.get();
+            var actual = result.get();
             assertOnlyIdAndDueDate(actual);
         }
 
         @Test
         @DisplayName("several records according to the query with the `FieldMask` set")
         void allByMask() {
-            ImmutableCollection<StgProject> records = dozenOfRecords().values();
+            var records = dozenOfRecords().values();
             storage().writeBatch(records);
 
-            RecordQuery<StgProjectId, StgProject> query = queryBuilder().withMask(idAndDueDate())
-                                                                        .build();
-            Iterator<StgProject> iterator = storage().readAll(query);
-            ImmutableList<StgProject> actualResults = ImmutableList.copyOf(iterator);
-            for (StgProject result : actualResults) {
+            var query = queryBuilder().withMask(idAndDueDate()).build();
+            var iterator = storage().readAll(query);
+            var actualResults = ImmutableList.copyOf(iterator);
+            for (var result : actualResults) {
                 assertOnlyIdAndDueDate(result);
             }
         }
@@ -182,19 +175,19 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("several records according to the given limit and ordering")
         void allRecordsWithLimitAndOrdering() {
-            StgProject oldest = newState(newId(), DONE, add(currentTime(), fromMinutes(0)));
-            StgProject older = newState(newId(), DONE, add(currentTime(), fromMinutes(1)));
-            StgProject almostNew = newState(newId(), DONE, add(currentTime(), fromMinutes(2)));
-            StgProject newest = newState(newId(), DONE, add(currentTime(), fromMinutes(3)));
+            var oldest = newState(newId(), DONE, add(currentTime(), fromMinutes(0)));
+            var older = newState(newId(), DONE, add(currentTime(), fromMinutes(1)));
+            var almostNew = newState(newId(), DONE, add(currentTime(), fromMinutes(2)));
+            var newest = newState(newId(), DONE, add(currentTime(), fromMinutes(3)));
 
             storage().writeBatch(ImmutableList.of(newest, older, oldest, almostNew));
 
-            int limit = 2;
-            RecordQuery<StgProjectId, StgProject> query = queryBuilder().sortAscendingBy(due_date)
-                              .limit(limit)
-                              .build();
-            Iterator<StgProject> iterator = storage().readAll(query);
-            ImmutableList<StgProject> actualRecords = ImmutableList.copyOf(iterator);
+            var limit = 2;
+            var query = queryBuilder().sortAscendingBy(due_date)
+                                      .limit(limit)
+                                      .build();
+            var iterator = storage().readAll(query);
+            var actualRecords = ImmutableList.copyOf(iterator);
             assertThat(actualRecords).hasSize(limit);
             assertThat(actualRecords.get(0)).isEqualTo(oldest);
             assertThat(actualRecords.get(1)).isEqualTo(older);
@@ -203,12 +196,12 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("several records by their IDs and the `FieldMask`")
         void allByIdsAndMask() {
-            ImmutableMap<StgProjectId, StgProject> recordMap = dozenOfRecords();
+            var recordMap = dozenOfRecords();
             storage().writeBatch(recordMap.values());
 
-            Iterator<StgProject> iterator = storage().readAll(recordMap.keySet(), idAndDueDate());
-            ImmutableList<StgProject> actualResults = ImmutableList.copyOf(iterator);
-            for (StgProject result : actualResults) {
+            var iterator = storage().readAll(recordMap.keySet(), idAndDueDate());
+            var actualResults = ImmutableList.copyOf(iterator);
+            for (var result : actualResults) {
                 assertOnlyIdAndDueDate(result);
             }
         }
@@ -216,15 +209,15 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("many records by a single column value only")
         void manyRecordsBySingleColumnWithDefaultResponseFormat() {
-            ImmutableCollection<StgProject> createdProjects = dozenOfRecords().values();
+            var createdProjects = dozenOfRecords().values();
             storage().writeBatch(createdProjects);
 
-            ImmutableList<StgProject> doneProjects = coupleOfDone(currentTime());
+            var doneProjects = coupleOfDone(currentTime());
             storage().writeBatch(doneProjects);
 
-            RecordQuery<StgProjectId, StgProject> query = queryDoneProjects().build();
-            Iterator<StgProject> iterator = storage().readAll(query);
-            ImmutableList<StgProject> actualProjects = ImmutableList.copyOf(iterator);
+            var query = queryDoneProjects().build();
+            var iterator = storage().readAll(query);
+            var actualProjects = ImmutableList.copyOf(iterator);
 
             assertThat(actualProjects).containsExactlyElementsIn(doneProjects);
         }
@@ -232,26 +225,24 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("many records by several columns only")
         void manyRecordsBySeveralColumnsWithDefaultResponseFormat() {
-            ImmutableCollection<StgProject> createdProjects = dozenOfRecords().values();
+            var createdProjects = dozenOfRecords().values();
             storage().writeBatch(createdProjects);
 
-            Timestamp now = currentTime();
-            ImmutableList<StgProject> doneDueToday = coupleOfDone(now);
+            var now = currentTime();
+            var doneDueToday = coupleOfDone(now);
             storage().writeBatch(doneDueToday);
 
-            ImmutableList<StgProject> doneDueYesterday = coupleOfDone(subtract(now, fromDays(1)));
+            var doneDueYesterday = coupleOfDone(subtract(now, fromDays(1)));
             storage().writeBatch(doneDueYesterday);
 
-            Timestamp aMinuteAgo = subtract(now, fromMinutes(1));
+            var aMinuteAgo = subtract(now, fromMinutes(1));
 
-            RecordQuery<StgProjectId, StgProject> query =
-                    queryDoneProjects()
-                            .where(due_date)
-                            .isLessThan(aMinuteAgo)
-                            .build();
+            var query = queryDoneProjects()
+                    .where(due_date).isLessThan(aMinuteAgo)
+                    .build();
 
-            Iterator<StgProject> iterator = storage().readAll(query);
-            ImmutableList<StgProject> actualProjects = ImmutableList.copyOf(iterator);
+            var iterator = storage().readAll(query);
+            var actualProjects = ImmutableList.copyOf(iterator);
 
             assertThat(actualProjects).containsExactlyElementsIn(doneDueYesterday);
         }
@@ -263,89 +254,83 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("many records by a single column with the limit and ordering")
         void manyRecordsBySingleColumnAndLimit() {
-            ImmutableCollection<StgProject> createdProjects = dozenOfRecords().values();
+            var createdProjects = dozenOfRecords().values();
             storage().writeBatch(createdProjects);
 
-            RecordQuery<StgProjectId, StgProject> queryDone =
-                    queryDoneProjects().sortAscendingBy(due_date)
-                                       .limit(10)
-                                       .build();
+            var queryDone = queryDoneProjects()
+                    .sortAscendingBy(due_date)
+                    .limit(10)
+                    .build();
 
-            Iterator<StgProject> iterator = storage().readAll(queryDone);
+            var iterator = storage().readAll(queryDone);
             assertThat(iterator.hasNext()).isFalse();
 
             List<StgProject> sortedByDueDate = new ArrayList<>(createdProjects);
             sortedByDueDate.sort((r1, r2) -> Timestamps.compare(r1.getDueDate(), r2.getDueDate()));
-            int limit = 2;
-            List<StgProject> expected = sortedByDueDate.subList(0, limit);
+            var limit = 2;
+            var expected = sortedByDueDate.subList(0, limit);
 
-            RecordQuery<StgProjectId, StgProject> queryCreated =
-                    queryBuilder()
-                              .where(status)
-                              .is(CREATED.name())
-                              .sortAscendingBy(due_date)
-                              .limit(limit)
-                              .build();
-            Iterator<StgProject> limitedIterator = storage().readAll(queryCreated);
-            ImmutableList<StgProject> actual = ImmutableList.copyOf(limitedIterator);
+            var queryCreated = queryBuilder()
+                    .where(status).is(CREATED.name())
+                    .sortAscendingBy(due_date)
+                    .limit(limit)
+                    .build();
+            var limitedIterator = storage().readAll(queryCreated);
+            var actual = ImmutableList.copyOf(limitedIterator);
             assertThat(actual).containsExactlyElementsIn(expected);
         }
 
         @Test
         @DisplayName("many records by several columns with the limit and ordering")
         void manyRecordsBySeveralColumnsAndLimit() {
-            Timestamp now = currentTime();
+            var now = currentTime();
 
-            ImmutableList<StgProject> doneLongAgo = coupleOfDone(subtract(now, fromDays(10)));
-            ImmutableList<StgProject> records =
-                    ImmutableList.<StgProject>builder()
-                            .addAll(doneLongAgo)
-                            .addAll(coupleOfDone(subtract(now, fromDays(1))))
-                            .addAll(coupleOfDone(now))
-                            .addAll(dozenOfRecords().values())  // in `CREATED` status.
-                            .build();
+            var doneLongAgo = coupleOfDone(subtract(now, fromDays(10)));
+            var records = ImmutableList.<StgProject>builder()
+                    .addAll(doneLongAgo)
+                    .addAll(coupleOfDone(subtract(now, fromDays(1))))
+                    .addAll(coupleOfDone(now))
+                    .addAll(dozenOfRecords().values())  // in `CREATED` status.
+                    .build();
             storage().writeBatch(records);
 
-            RecordQuery<StgProjectId, StgProject> query =
-                    queryDoneProjects().where(due_date)
-                                       .isLessThan(now)
-                                       .sortAscendingBy(due_date)
-                                       .limit(2)
-                                       .build();
+            var query = queryDoneProjects()
+                    .where(due_date).isLessThan(now)
+                    .sortAscendingBy(due_date)
+                    .limit(2)
+                    .build();
 
-            Iterator<StgProject> iterator = storage().readAll(query);
-            ImmutableList<StgProject> actual = ImmutableList.copyOf(iterator);
+            var iterator = storage().readAll(query);
+            var actual = ImmutableList.copyOf(iterator);
             assertThat(actual).containsExactlyElementsIn(doneLongAgo);
         }
 
         @Test
         @DisplayName("many records by several columns with the limit and the field mask")
         void manyRecordsBySeveralColumnsWithLimitAndMask() {
-            Timestamp now = currentTime();
+            var now = currentTime();
 
-            ImmutableList<StgProject> doneDueYesterday = coupleOfDone(subtract(now, fromDays(1)));
-            ImmutableList<StgProject> records =
-                    ImmutableList.<StgProject>builder()
-                            .addAll(coupleOfDone(subtract(now, fromDays(10))))
-                            .addAll(doneDueYesterday)
-                            .addAll(coupleOfDone(now))
-                            .addAll(dozenOfRecords().values())  // in `CREATED` status.
-                            .build();
+            var doneDueYesterday = coupleOfDone(subtract(now, fromDays(1)));
+            var records = ImmutableList.<StgProject>builder()
+                    .addAll(coupleOfDone(subtract(now, fromDays(10))))
+                    .addAll(doneDueYesterday)
+                    .addAll(coupleOfDone(now))
+                    .addAll(dozenOfRecords().values())  // in `CREATED` status.
+                    .build();
             storage().writeBatch(records);
 
-            RecordQuery<StgProjectId, StgProject> doneAndDueBeforeNow =
-                    queryDoneProjects().where(due_date)
-                                       .isLessThan(now)
-                                       .withMask(idAndDueDate())
-                                       .sortDescendingBy(due_date)
-                                       .limit(2)
-                                       .build();
+            var doneAndDueBeforeNow = queryDoneProjects()
+                    .where(due_date).isLessThan(now)
+                    .withMask(idAndDueDate())
+                    .sortDescendingBy(due_date)
+                    .limit(2)
+                    .build();
 
-            Iterator<StgProject> iterator = storage().readAll(doneAndDueBeforeNow);
-            ImmutableList<StgProject> actual = ImmutableList.copyOf(iterator);
+            var iterator = storage().readAll(doneAndDueBeforeNow);
+            var actual = ImmutableList.copyOf(iterator);
             RecordStorageDelegateTestEnv.assertHaveIds(actual, toIds(doneDueYesterday));
 
-            for (StgProject readResult : actual) {
+            for (var readResult : actual) {
                 assertOnlyIdAndDueDate(readResult);
             }
         }
@@ -358,37 +343,37 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("a single record by its ID")
         void recordById() {
-            StgProject record = randomRecord();
+            var record = randomRecord();
             storage().write(record);
-            Optional<StgProject> readResult = storage().read(record.getId());
+            var readResult = storage().read(record.getId());
             assertThat(readResult).isPresent();
 
-            boolean deleted = storage().delete(record.getId());
+            var deleted = storage().delete(record.getId());
             assertThat(deleted).isTrue();
-            Optional<StgProject> anotherReadResult = storage().read(record.getId());
+            var anotherReadResult = storage().read(record.getId());
             assertThat(anotherReadResult).isEmpty();
         }
 
         @Test
         @DisplayName("several records by their IDs at once")
         void manyRecordByIds() {
-            ImmutableMap<StgProjectId, StgProject> recordMap = dozenOfRecords();
+            var recordMap = dozenOfRecords();
             storage().writeBatch(recordMap.values());
 
-            ImmutableSet<StgProjectId> ids = recordMap.keySet();
-            ImmutableList<StgProjectId> partOfIds = RecordStorageDelegateTestEnv.halfDozenOf(ids);
-            Iterator<StgProject> actualIterator = storage().readAll(partOfIds);
-            ImmutableList<StgProject> actualRecords = ImmutableList.copyOf(actualIterator);
+            var ids = recordMap.keySet();
+            var partOfIds = RecordStorageDelegateTestEnv.halfDozenOf(ids);
+            var actualIterator = storage().readAll(partOfIds);
+            var actualRecords = ImmutableList.copyOf(actualIterator);
 
             RecordStorageDelegateTestEnv.assertHaveIds(actualRecords, partOfIds);
 
             storage().deleteAll(partOfIds);
-            Iterator<StgProject> afterDeletion = storage().readAll(partOfIds);
+            var afterDeletion = storage().readAll(partOfIds);
             assertThat(afterDeletion.hasNext()).isFalse();
 
-            Iterator<StgProject> iterator = storage().readAll();
-            ImmutableList<StgProject> remainder = ImmutableList.copyOf(iterator);
-            Sets.SetView<StgProjectId> expectedRemainedIds =
+            var iterator = storage().readAll();
+            var remainder = ImmutableList.copyOf(iterator);
+            var expectedRemainedIds =
                     Sets.symmetricDifference(ids, ImmutableSet.copyOf(partOfIds));
             RecordStorageDelegateTestEnv.assertHaveIds(remainder, expectedRemainedIds);
         }
@@ -424,7 +409,7 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("`write(id, record)` method")
         void writeIdRecord() {
-            StgProject record = randomRecord();
+            var record = randomRecord();
             assertISE(() -> storage().write(record.getId(), record));
         }
 
@@ -443,7 +428,7 @@ public class RecordStorageDelegateTest
         @Test
         @DisplayName("`readAll(RecordQuery)` method")
         void readAllByQuery() {
-            RecordQuery<StgProjectId, StgProject> query = queryBuilder().build();
+            var query = queryBuilder().build();
             assertISE(() -> storage().readAll(query));
         }
 

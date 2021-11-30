@@ -26,17 +26,13 @@
 
 package io.spine.server.storage;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import io.spine.query.Column;
 import io.spine.query.RecordColumn;
 import io.spine.server.storage.given.StgColumn;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -56,7 +52,7 @@ class MessageRecordSpecTest {
     @Test
     @DisplayName("obtain a column by name")
     void obtainByName() {
-        MessageRecordSpec<StgProjectId, StgProject> spec = spec();
+        var spec = spec();
         StgColumn.definitions()
                  .forEach(column -> assertColumn(spec, column));
     }
@@ -64,29 +60,27 @@ class MessageRecordSpecTest {
     @Test
     @DisplayName("return all definitions of the columns")
     void returnAllColumns() {
-        ImmutableSet<Column<?, ?>> actualColumns = spec().columns();
+        var actualColumns = spec().columns();
         assertThat(actualColumns).containsExactlyElementsIn(StgColumn.definitions());
     }
 
     @Test
     @DisplayName("return ID value by the record")
     void returnIdValue() {
-        StgProjectId id = projectId();
-        StgProject project = project(id);
-        StgProjectId actual = spec().idFromRecord(project);
+        var id = projectId();
+        var project = project(id);
+        var actual = spec().idFromRecord(project);
         assertThat(actual).isEqualTo(id);
     }
 
     private static StgProject project(StgProjectId id) {
-        return StgProject
-                .newBuilder()
+        return StgProject.newBuilder()
                 .setId(id)
                 .vBuild();
     }
 
     private static StgProjectId projectId() {
-        return StgProjectId
-                .newBuilder()
+        return StgProjectId.newBuilder()
                 .setId("storage-project")
                 .vBuild();
     }
@@ -98,7 +92,7 @@ class MessageRecordSpecTest {
 
     private static void assertColumn(
             MessageRecordSpec<StgProjectId, StgProject> spec, RecordColumn<StgProject, ?> column) {
-        Optional<Column<?, ?>> found = spec.findColumn(column.name());
+        var found = spec.findColumn(column.name());
         assertThat(found).isPresent();
         assertThat(found.get()
                         .type()).isEqualTo(column.type());

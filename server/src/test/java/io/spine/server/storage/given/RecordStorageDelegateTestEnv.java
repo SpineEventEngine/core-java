@@ -113,7 +113,7 @@ public final class RecordStorageDelegateTestEnv {
 
     public static void assertHaveIds(Collection<StgProject> items, Collection<StgProjectId> ids) {
         assertThat(items).hasSize(ids.size());
-        List<StgProjectId> actualIds = toIds(items);
+        var actualIds = toIds(items);
         assertThat(actualIds).containsExactlyElementsIn(ids);
     }
 
@@ -136,7 +136,7 @@ public final class RecordStorageDelegateTestEnv {
         ImmutableMap.Builder<StgProjectId, StgProject> builder = ImmutableMap.builder();
         IntStream.range(0, 11)
                  .forEach((i) -> {
-                     StgProjectId id = generateId();
+                     var id = generateId();
                      builder.put(id, newState(id));
                  });
         return builder.build();

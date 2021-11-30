@@ -27,27 +27,18 @@
 package io.spine.server.storage.system;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Subject;
 import io.spine.environment.Environment;
 import io.spine.environment.Production;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.delivery.CatchUpStorage;
-import io.spine.server.delivery.InboxStorage;
-import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
 import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
 import io.spine.server.storage.system.given.TestAggregate;
-import io.spine.system.server.Company;
-import io.spine.system.server.CompanyId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +50,7 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("SystemAwareStorageFactory should")
+@DisplayName("`SystemAwareStorageFactory` should")
 class SystemAwareStorageFactoryTest {
 
     private static final ContextSpec CONTEXT = ContextSpec.multitenant("foo");
@@ -77,14 +68,14 @@ class SystemAwareStorageFactoryTest {
         Environment.instance()
                    .setTo(Production.class);
 
-        ServerEnvironment serverEnv = ServerEnvironment.instance();
+        var serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
         ServerEnvironment.when(Production.class)
                          .use(productionStorage);
-        StorageFactory storageFactory = serverEnv.storageFactory();
+        var storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory)
                 .isInstanceOf(SystemAwareStorageFactory.class);
-        SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
+        var systemAware = (SystemAwareStorageFactory) storageFactory;
         assertThat(systemAware.delegate())
                 .isEqualTo(productionStorage);
 
@@ -95,13 +86,13 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap test storage")
     void wrapTestStorage() {
-        ServerEnvironment serverEnv = ServerEnvironment.instance();
+        var serverEnv = ServerEnvironment.instance();
         StorageFactory testStorage = InMemoryStorageFactory.newInstance();
         ServerEnvironment.when(Tests.class)
                          .use(testStorage);
-        StorageFactory storageFactory = serverEnv.storageFactory();
+        var storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory).isInstanceOf(SystemAwareStorageFactory.class);
-        SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
+        var systemAware = (SystemAwareStorageFactory) storageFactory;
         assertThat(systemAware.delegate())
                 .isEqualTo(testStorage);
     }
@@ -109,10 +100,10 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate aggregate storage creation to given factory")
     void delegateAggregateStorage() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        Class<TestAggregate> aggregateClass = TestAggregate.class;
-        AggregateStorage<CompanyId, Company> storage =
+        var factory = new MemoizingStorageFactory();
+        var systemAware = SystemAwareStorageFactory.wrap(factory);
+        var aggregateClass = TestAggregate.class;
+        var storage =
                 systemAware.createAggregateStorage(CONTEXT, aggregateClass);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages())
@@ -122,13 +113,12 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate record storage creation to given factory")
     void delegateRecordStorage() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        Class<Project> recordType = Project.class;
-        MessageRecordSpec<ProjectId, Project> spec =
-                new MessageRecordSpec<>(ProjectId.class, Project.class,
-                                        i -> ProjectId.getDefaultInstance());
-        RecordStorage<ProjectId, Project> storage = systemAware.createRecordStorage(CONTEXT, spec);
+        var factory = new MemoizingStorageFactory();
+        var systemAware = SystemAwareStorageFactory.wrap(factory);
+        var recordType = Project.class;
+        var spec = new MessageRecordSpec<>(ProjectId.class, Project.class,
+                                           i -> ProjectId.getDefaultInstance());
+        var storage = systemAware.createRecordStorage(CONTEXT, spec);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages())
                 .containsExactly(recordType);
@@ -137,9 +127,9 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate inbox storage creation to given factory")
     void delegateInboxStorage() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        InboxStorage storage = systemAware.createInboxStorage(CONTEXT.isMultitenant());
+        var factory = new MemoizingStorageFactory();
+        var systemAware = SystemAwareStorageFactory.wrap(factory);
+        var storage = systemAware.createInboxStorage(CONTEXT.isMultitenant());
         assertThat(storage).isNull();
         assertTrue(factory.requestedInbox());
     }
@@ -147,9 +137,9 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate catch-up storage creation to given factory")
     void delegateCatchUpStorage() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        CatchUpStorage storage = systemAware.createCatchUpStorage(CONTEXT.isMultitenant());
+        var factory = new MemoizingStorageFactory();
+        var systemAware = SystemAwareStorageFactory.wrap(factory);
+        var storage = systemAware.createCatchUpStorage(CONTEXT.isMultitenant());
         assertThat(storage).isNull();
         assertTrue(factory.requestedCatchUp());
     }
@@ -157,9 +147,9 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("delegate EventStore creation to given factory")
     void delegateNormalEventStore() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        EventStore store = systemAware.createEventStore(CONTEXT);
+        var factory = new MemoizingStorageFactory();
+        var systemAware = SystemAwareStorageFactory.wrap(factory);
+        var store = systemAware.createEventStore(CONTEXT);
         assertThat(store).isNull();
         assertTrue(factory.requestedEventStore());
     }
@@ -167,18 +157,16 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("create `EmptyEventStore` if event persistence is disabled")
     void createEmptyEventStore() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory systemAware = SystemAwareStorageFactory.wrap(factory);
-        BoundedContextBuilder contextBuilder =
-                BoundedContext.multitenant(CONTEXT.name()
-                                                  .getValue());
-        BoundedContext context = contextBuilder.build();
-        BoundedContext systemContext = systemOf(context);
-        ContextSpec systemSpec = systemContext.spec();
+        var factory = new MemoizingStorageFactory();
+        var systemAware = SystemAwareStorageFactory.wrap(factory);
+        var contextBuilder = BoundedContext.multitenant(CONTEXT.name().getValue());
+        var context = contextBuilder.build();
+        var systemContext = systemOf(context);
+        var systemSpec = systemContext.spec();
         assertFalse(systemSpec.storesEvents());
-        EventStore store = systemAware.createEventStore(systemSpec);
+        var store = systemAware.createEventStore(systemSpec);
         assertFalse(factory.requestedEventStore());
-        Subject assertStore = assertThat(store);
+        var assertStore = assertThat(store);
         assertStore.isNotNull();
         assertStore.isInstanceOf(EmptyEventStore.class);
     }
@@ -186,9 +174,9 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("wrap other factories only once")
     void wrapIdempotently() {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory wrapped = SystemAwareStorageFactory.wrap(factory);
-        SystemAwareStorageFactory wrappedTwice = SystemAwareStorageFactory.wrap(wrapped);
+        var factory = new MemoizingStorageFactory();
+        var wrapped = SystemAwareStorageFactory.wrap(factory);
+        var wrappedTwice = SystemAwareStorageFactory.wrap(wrapped);
         assertThat(wrappedTwice).isEqualTo(wrapped);
         assertThat(wrappedTwice.delegate()).isEqualTo(factory);
     }
@@ -196,8 +184,8 @@ class SystemAwareStorageFactoryTest {
     @Test
     @DisplayName("close delegate")
     void close() throws Exception {
-        MemoizingStorageFactory factory = new MemoizingStorageFactory();
-        SystemAwareStorageFactory wrapped = SystemAwareStorageFactory.wrap(factory);
+        var factory = new MemoizingStorageFactory();
+        var wrapped = SystemAwareStorageFactory.wrap(factory);
         assertFalse(factory.isClosed());
         wrapped.close();
         assertTrue(factory.isClosed());

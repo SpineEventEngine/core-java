@@ -85,8 +85,8 @@ public final class RecordQueryMatcherTestEnv {
      * The {@link Any} value held by the corresponding {@linkplain #anyColumn() entity column}.
      */
     public static Any anyValue() {
-        StgProject someMessage = Sample.messageOfType(StgProject.class);
-        Any value = AnyPacker.pack(someMessage);
+        var someMessage = Sample.messageOfType(StgProject.class);
+        var value = AnyPacker.pack(someMessage);
         return value;
     }
 
