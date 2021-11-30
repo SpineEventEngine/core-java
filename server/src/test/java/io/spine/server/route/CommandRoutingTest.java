@@ -48,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /* OK as custom routes do not refer to the test suite. */
-@SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 @DisplayName("CommandRouting should")
 class CommandRoutingTest {
 
@@ -62,25 +61,10 @@ class CommandRoutingTest {
     private static final long CUSTOM_ANSWER = 100500L;
 
     /** A custom default route. */
-    private final CommandRoute<Long, CommandMessage> customDefault =
-            new CommandRoute<Long, CommandMessage>() {
-                private static final long serialVersionUID = 0L;
+    private final CommandRoute<Long, CommandMessage> customDefault = (msg, ctx) -> DEFAULT_ANSWER;
 
-                @Override
-                public Long apply(CommandMessage message, CommandContext context) {
-                    return DEFAULT_ANSWER;
-                }
-            };
     /** A custom command path for {@code StringValue} command messages. */
-    private final CommandRoute<Long, RegisterUser> customRoute =
-            new CommandRoute<Long, RegisterUser>() {
-                private static final long serialVersionUID = 0L;
-
-                @Override
-                public Long apply(RegisterUser message, CommandContext context) {
-                    return CUSTOM_ANSWER;
-                }
-            };
+    private final CommandRoute<Long, RegisterUser> customRoute = (msg, ctx) -> CUSTOM_ANSWER;
 
     /** The object under tests. */
     private CommandRouting<Long> commandRouting;
@@ -93,7 +77,7 @@ class CommandRoutingTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        NullPointerTester nullPointerTester = new NullPointerTester()
+        var nullPointerTester = new NullPointerTester()
                 .setDefault(CommandContext.class, CommandContext.getDefaultInstance());
 
         nullPointerTester.testAllPublicInstanceMethods(commandRouting);
@@ -154,11 +138,8 @@ class CommandRoutingTest {
                       // Have custom route too.
                       .route(RegisterUser.class, customRoute);
 
-        CmdCreateProject cmd = CmdCreateProject
-                .newBuilder()
-                .setId(newUuid())
-                .build();
-        CommandEnvelope command = CommandEnvelope.of(requestFactory.createCommand(cmd));
+        var cmd = CmdCreateProject.newBuilder().setId(newUuid()).build();
+        var command = CommandEnvelope.of(requestFactory.createCommand(cmd));
 
         long id = commandRouting.apply(command.message(), command.context());
 
@@ -168,10 +149,9 @@ class CommandRoutingTest {
     @Test
     @DisplayName("apply custom route")
     void applyCustomRoute() {
-        CommandEnvelope command = CommandEnvelope.of(
-                requestFactory.createCommand(RegisterUser.newBuilder()
-                                                         .setId(random(1, 100))
-                                                         .build())
+        var cmd = RegisterUser.newBuilder().setId(random(1, 100)).build();
+        var command = CommandEnvelope.of(
+                requestFactory.createCommand(cmd)
         );
         // Have custom route.
         commandRouting.route(RegisterUser.class, customRoute);

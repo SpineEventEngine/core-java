@@ -33,8 +33,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
 import io.spine.server.route.given.sur.event.ArticlePublished;
 
-import java.util.Optional;
-
 import static io.spine.server.route.given.sur.Surrealism.allTheseGentlemen;
 import static io.spine.server.route.given.sur.Surrealism.opponentOf;
 
@@ -53,7 +51,7 @@ public class ArtistMoodRepo
     protected void setupStateRouting(StateUpdateRouting<ArtistName> routing) {
         super.setupStateRouting(routing);
         routing.route(ArtistMood.class, (mood, context) -> {
-            Optional<ArtistName> opponent = opponentOf(mood.getName());
+            var opponent = opponentOf(mood.getName());
             return opponent.map(EventRoute::withId)
                            .orElseGet(EventRoute::noTargets);
         });

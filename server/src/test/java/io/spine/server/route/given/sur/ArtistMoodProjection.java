@@ -30,8 +30,6 @@ import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
 import io.spine.server.route.given.sur.event.ArticlePublished;
 
-import java.util.Optional;
-
 import static io.spine.server.route.given.sur.ArtistMood.Mood.ANGER;
 import static io.spine.server.route.given.sur.ArtistMood.Mood.CREATIVE;
 import static io.spine.server.route.given.sur.Surrealism.opponentOf;
@@ -48,13 +46,13 @@ final class ArtistMoodProjection
      */
     @Subscribe
     void on(ArticlePublished event) {
-        ArtistName self = id();
+        var self = id();
         builder().setName(self);
-        ArtistName author = event.getAuthor();
+        var author = event.getAuthor();
         if (self.equals(author)) {
             builder().setMood(CREATIVE);
         } else {
-            Optional<ArtistName> opponent = opponentOf(author);
+            var opponent = opponentOf(author);
             if (opponent.isPresent()) {
                 if (self.equals(opponent.get())) {
                     builder().setMood(ANGER);

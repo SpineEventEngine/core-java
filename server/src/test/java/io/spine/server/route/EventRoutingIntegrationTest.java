@@ -26,7 +26,6 @@
 
 package io.spine.server.route;
 
-import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.route.given.user.SessionProjection;
 import io.spine.server.route.given.user.SessionRepository;
@@ -55,21 +54,19 @@ class EventRoutingIntegrationTest {
     @Disabled       // See https://github.com/SpineEventEngine/core-java/issues/925.
     @DisplayName("only occur after the event origin has already been dispatched")
     void occurAfterOriginDispatched() {
-        UserId userId = GivenUserId.generated();
-        RSessionId sessionId = RSessionId.generate();
-        RUserSignedIn event = RUserSignedIn
-                .newBuilder()
+        var userId = GivenUserId.generated();
+        var sessionId = RSessionId.generate();
+        var event = RUserSignedIn.newBuilder()
                 .setUserId(userId)
                 .setSessionId(sessionId)
                 .build();
-        RSession session = RSession
-                .newBuilder()
+        var session = RSession.newBuilder()
                 .setId(sessionId)
                 .setUserId(userId)
                 .setUserConsentRequested(true)
                 .build();
 
-        BlackBox context = BlackBox.from(
+        var context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(new UserRepository())
                                      .add(new SessionRepository())

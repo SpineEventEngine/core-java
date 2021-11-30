@@ -38,8 +38,7 @@ public class UserAggregate extends Aggregate<UserId, RUser, RUser.Builder> {
 
     @React
     RUserConsentRequested on(RUserSignedIn event) {
-        RUserConsentRequested react = RUserConsentRequested
-                .newBuilder()
+        var react = RUserConsentRequested.newBuilder()
                 .setUserId(event.getUserId())
                 .build();
         return react;

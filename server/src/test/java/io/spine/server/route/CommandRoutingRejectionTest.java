@@ -26,16 +26,13 @@
 
 package io.spine.server.route;
 
-import com.google.common.truth.IterableSubject;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.Command;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.route.given.switchman.Log;
-import io.spine.server.route.given.switchman.LogState;
 import io.spine.server.route.given.switchman.SwitchId;
 import io.spine.server.route.given.switchman.SwitchPosition;
 import io.spine.server.route.given.switchman.Switchman;
@@ -49,7 +46,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.truth.Truth.assertThat;
@@ -62,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests that a command can be rejected within a {@linkplain CommandRoute routing function}.
  */
-@DisplayName("CommandRouting rejection should")
+@DisplayName("`CommandRouting` rejection should")
 class CommandRoutingRejectionTest {
 
     private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
@@ -76,7 +72,7 @@ class CommandRoutingRejectionTest {
     @BeforeEach
     void setUp() {
         context = BoundedContext.singleTenant("Railway Station").build();
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        var contextAccess = context.internalAccess();
         contextAccess.register(new SwitchmanBureau());
         switchmanObserver = new SwitchmanObserver();
         context.eventBus()
@@ -104,21 +100,21 @@ class CommandRoutingRejectionTest {
     @DisplayName("result in a rejected command")
     void resultInRejectedCommand() {
         // Post a successful command to make sure general case works.
-        String switchmanName = Switchman.class.getName();
-        Command command = requestFactory.createCommand(
+        var switchmanName = Switchman.class.getName();
+        var command = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchId(generateSwitchId())
                          .setSwitchmanName(switchmanName)
                          .setPosition(RIGHT)
                          .build()
         );
-        IterableSubject assertObservedEvents = assertThat(switchmanObserver.events);
+        var assertObservedEvents = assertThat(switchmanObserver.events);
         assertObservedEvents.isEmpty();
         commandBus.post(command, observer);
         assertObservedEvents.hasSize(1);
 
         // Post a command with the argument which causes rejection in routing.
-        Command commandToReject = requestFactory.createCommand(
+        var commandToReject = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchmanName(MISSING_SWITCHMAN_NAME)
                          .setSwitchId(generateSwitchId())
@@ -127,9 +123,9 @@ class CommandRoutingRejectionTest {
         );
 
         commandBus.post(commandToReject, observer);
-        Optional<Log> foundLog = logRepository.find(Log.ID);
+        var foundLog = logRepository.find(Log.ID);
         assertTrue(foundLog.isPresent());
-        LogState log = foundLog.get().state();
+        var log = foundLog.get().state();
         assertTrue(log.containsCounters(switchmanName));
         assertThat(log.getMissingSwitchmanList())
                 .contains(MISSING_SWITCHMAN_NAME);
@@ -137,8 +133,8 @@ class CommandRoutingRejectionTest {
 
     private static SwitchId generateSwitchId() {
         return SwitchId.newBuilder()
-                       .setId(newUuid())
-                       .build();
+                .setId(newUuid())
+                .build();
     }
 
     private static class SwitchmanObserver extends AbstractEventSubscriber {
