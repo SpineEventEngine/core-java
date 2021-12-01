@@ -64,15 +64,13 @@ class GrpcContainerTest {
     @DisplayName("add and remove parameters from builder")
     void setParamsInBuilder() {
         var port = 60;
-        var builder = GrpcContainer
-                .atPort(port);
+        var builder = GrpcContainer.atPort(port);
 
         assertThat(builder.port()).hasValue(port);
 
         var count = 3;
         for (var i = 0; i < count; i++) {
-            BindableService service = CommandService.newBuilder()
-                                                    .build();
+            var service = CommandService.newBuilder().build();
             builder.addService(service);
         }
 
