@@ -35,6 +35,7 @@ import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -85,9 +86,8 @@ abstract class SchemaFn<M extends Message, C extends EnrichableMessageContext>
                      EnrichmentFn<?, ?, ?> function) {
         requireNonNull(
                 output,
-                String.format(
-                        "`%s` produced `null` for the source message `%s` (context: `%s`).",
-                        function, sourceMessage, context)
+                format("`%s` produced `null` for the source message `%s` (context: `%s`).",
+                       function, sourceMessage, context)
         );
     }
 }
