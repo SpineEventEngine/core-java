@@ -25,31 +25,19 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
-import io.spine.client.QueryFactory;
 import io.spine.client.QueryResponse;
-import io.spine.client.ResponseFormat;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
-import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
-import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
-import io.spine.core.MessageId;
-import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Given.CustomerAggregate;
 import io.spine.server.Given.CustomerAggregateRepository;
@@ -62,7 +50,6 @@ import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.commandservice.customer.Customer;
-import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.test.integration.OrderId;
@@ -72,8 +59,6 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.tenant.TenantAwareTest;
-import io.spine.type.TypeUrl;
-import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -83,9 +68,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -127,9 +110,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// It's OK for this test.
-@SuppressWarnings("OverlyCoupledClass")
+
 @DisplayName("Stand should")
+@SuppressWarnings("OverlyCoupledClass")  // It's OK for this test.
 class StandTest extends TenantAwareTest {
 
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
@@ -167,26 +150,24 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("projection repositories")
         void projectionRepositories() {
-            boolean multitenant = isMultitenant();
-            BoundedContext boundedContext = BoundedContextBuilder
+            var multitenant = isMultitenant();
+            var boundedContext = BoundedContextBuilder
                     .assumingTests(multitenant)
                     .build();
-            Stand stand = boundedContext.stand();
+            var stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
 
-            StandTestProjectionRepository standTestProjectionRepo =
-                    new StandTestProjectionRepository();
+            var standTestProjectionRepo = new StandTestProjectionRepository();
             stand.registerTypeSupplier(standTestProjectionRepo);
             checkHasExactlyOne(stand.exposedTypes(), Project.getDescriptor());
 
-            ImmutableSet<TypeUrl> knownAggregateTypes = stand.exposedAggregateTypes();
+            var knownAggregateTypes = stand.exposedAggregateTypes();
             // As we registered a projection repo, known aggregate types should be still empty.
             assertTrue(knownAggregateTypes.isEmpty(),
                        "For some reason an aggregate type was registered");
 
-            StandTestProjectionRepository anotherTestProjectionRepo =
-                    new StandTestProjectionRepository();
+            var anotherTestProjectionRepo = new StandTestProjectionRepository();
             stand.registerTypeSupplier(anotherTestProjectionRepo);
             checkHasExactlyOne(stand.exposedTypes(), Project.getDescriptor());
         }
@@ -194,21 +175,20 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("aggregate repositories")
         void aggregateRepositories() {
-            BoundedContext boundedContext = BoundedContextBuilder.assumingTests()
-                                                                 .build();
-            Stand stand = boundedContext.stand();
+            var boundedContext = BoundedContextBuilder.assumingTests().build();
+            var stand = boundedContext.stand();
 
             checkTypesEmpty(stand);
 
-            CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository();
+            var customerAggregateRepo = new CustomerAggregateRepository();
             stand.registerTypeSupplier(customerAggregateRepo);
 
-            Descriptor customerEntityDescriptor = Customer.getDescriptor();
+            var customerEntityDescriptor = Customer.getDescriptor();
             checkHasExactlyOne(stand.exposedTypes(), customerEntityDescriptor);
             checkHasExactlyOne(stand.exposedAggregateTypes(), customerEntityDescriptor);
 
             @SuppressWarnings("LocalVariableNamingConvention")
-            CustomerAggregateRepository anotherCustomerAggregateRepo =
+            var anotherCustomerAggregateRepo =
                     new CustomerAggregateRepository();
             stand.registerTypeSupplier(anotherCustomerAggregateRepo);
             checkHasExactlyOne(stand.exposedTypes(), customerEntityDescriptor);
@@ -223,8 +203,7 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("on read all when empty")
         void onReadAllWhenEmpty() {
-            Query readAllCustomers = requestFactory.query()
-                                                   .all(Customer.class);
+            var readAllCustomers = requestFactory.query().all(Customer.class);
             checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
         }
 
@@ -232,7 +211,7 @@ class StandTest extends TenantAwareTest {
         @DisplayName("on read by IDs when empty")
         void onReadByIdWhenEmpty() {
 
-            Query readCustomersById =
+            var readCustomersById =
                     requestFactory.query()
                                   .byIds(Customer.class,
                                          newHashSet(customerIdFor(1), customerIdFor(2)));
@@ -241,12 +220,12 @@ class StandTest extends TenantAwareTest {
         }
 
         private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
-            Stand stand = createStand();
+            var stand = createStand();
 
-            MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+            var responseObserver = new MemoizeQueryResponseObserver();
             stand.execute(readCustomersQuery, responseObserver);
 
-            List<EntityStateWithVersion> messageList = checkAndGetMessageList(responseObserver);
+            var messageList = checkAndGetMessageList(responseObserver);
             assertTrue(
                     messageList.isEmpty(),
                     "Query returned a non-empty response message list though the target had " +
@@ -286,28 +265,28 @@ class StandTest extends TenantAwareTest {
         }
 
         private void checkReadingByIdAndMask(io.spine.base.Field... maskingFields) {
-            StandTestProjectionRepository repository = new StandTestProjectionRepository();
-            Stand stand = createStand(repository);
+            var repository = new StandTestProjectionRepository();
+            var stand = createStand(repository);
 
-            int querySize = 2;
-            int projectVersion = 1;
+            var querySize = 2;
+            var projectVersion = 1;
 
             Set<ProjectId> ids = new HashSet<>();
-            for (int i = 0; i < querySize; i++) {
-                ProjectId id = projectIdFor(i);
+            for (var i = 0; i < querySize; i++) {
+                var id = projectIdFor(i);
                 storeSampleProject(repository, id, String.valueOf(i), projectVersion);
                 ids.add(id);
             }
 
-            QueryFactory queryFactory = requestFactory.query();
-            Project.QueryBuilder builder =
+            var queryFactory = requestFactory.query();
+            var builder =
                     Project.query()
                            .id().in(ids)
                            .withMask(maskingFields);
             @SuppressWarnings("OptionalGetWithoutIsPresent")    // The value just set above.
-            FieldMask fieldMask = builder.whichMask()
-                                         .get();
-            Query query = builder.build(transformWith(queryFactory));
+            var fieldMask = builder.whichMask()
+                                   .get();
+            var query = builder.build(transformWith(queryFactory));
 
             MemoizeQueryResponseObserver observer =
                     new AssertProjectQueryResults(ids, projectVersion, fieldMask);
@@ -326,20 +305,19 @@ class StandTest extends TenantAwareTest {
         @DisplayName("upon update of aggregate")
         void uponUpdateOfAggregate() {
             // Subscribe to changes of Customer aggregate.
-            CustomerAggregateRepository repository = new CustomerAggregateRepository();
-            Stand stand = createStand(repository);
-            Topic allCustomers = requestFactory.topic()
-                                               .allOf(Customer.class);
+            var repository = new CustomerAggregateRepository();
+            var stand = createStand(repository);
+            var allCustomers = requestFactory.topic().allOf(Customer.class);
 
-            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            var callback = new MemoizeSubscriptionCallback();
             subscribeAndActivate(stand, allCustomers, callback);
             assertNull(callback.newEntityState());
 
             // Post a new entity state.
-            Customer customer = einCustomer();
-            CustomerId customerId = customer.getId();
-            int version = 1;
-            CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+            var customer = einCustomer();
+            var customerId = customer.getId();
+            var version = 1;
+            var entity = aggregateOfClass(CustomerAggregate.class)
                     .withId(customerId)
                     .withState(customer)
                     .withVersion(version)
@@ -348,7 +326,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(customerId));
 
             // Check the callback is called with the correct value.
-            Any packedState = AnyPacker.pack(customer);
+            var packedState = AnyPacker.pack(customer);
             assertEquals(packedState, callback.newEntityState());
         }
 
@@ -356,20 +334,19 @@ class StandTest extends TenantAwareTest {
         @DisplayName("upon update of projection")
         void uponUpdateOfProjection() {
             // Subscribe to changes of StandTest projection.
-            StandTestProjectionRepository repository = new StandTestProjectionRepository();
-            Stand stand = createStand(repository);
-            Topic allProjects = requestFactory.topic()
-                                              .allOf(Project.class);
+            var repository = new StandTestProjectionRepository();
+            var stand = createStand(repository);
+            var allProjects = requestFactory.topic().allOf(Project.class);
 
-            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            var callback = new MemoizeSubscriptionCallback();
             subscribeAndActivate(stand, allProjects, callback);
             assertNull(callback.newEntityState());
 
             // Post a new entity state.
-            Project project = einProject();
-            ProjectId projectId = project.getId();
-            int version = 1;
-            StandTestProjection entity = projectionOfClass(StandTestProjection.class)
+            var project = einProject();
+            var projectId = project.getId();
+            var version = 1;
+            var entity = projectionOfClass(StandTestProjection.class)
                     .withId(projectId)
                     .withState(project)
                     .withVersion(version)
@@ -377,7 +354,7 @@ class StandTest extends TenantAwareTest {
             stand.post(entity, repository.lifecycleOf(projectId));
 
             // Check the callback is called with the correct value.
-            Any packedState = AnyPacker.pack(project);
+            var packedState = AnyPacker.pack(project);
             assertThat(packedState).isEqualTo(callback.newEntityState());
         }
 
@@ -386,39 +363,35 @@ class StandTest extends TenantAwareTest {
         @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.
         void uponEventFromEntity() {
             // Subscribe to Customer aggregate updates.
-            CustomerAggregateRepository repository = new CustomerAggregateRepository();
-            Stand stand = createStand(repository);
-            Topic topic = requestFactory.topic()
-                                        .allOf(CustomerCreated.class);
-            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            var repository = new CustomerAggregateRepository();
+            var stand = createStand(repository);
+            var topic = requestFactory.topic().allOf(CustomerCreated.class);
+            var callback = new MemoizeSubscriptionCallback();
             subscribeAndActivate(stand, topic, callback);
 
             // Send a command creating a new Customer and triggering a CustomerCreated event.
-            Customer customer = einCustomer();
-            CustomerId customerId = customer.getId();
-            CreateCustomer createCustomer = CreateCustomer
-                    .newBuilder()
+            var customer = einCustomer();
+            var customerId = customer.getId();
+            var createCustomer = CreateCustomer.newBuilder()
                     .setCustomerId(customerId)
                     .setCustomer(customer)
                     .build();
-            Command command = requestFactory.command()
-                                            .create(createCustomer);
-            CommandEnvelope cmd = CommandEnvelope.of(command);
+            var command = requestFactory.command().create(createCustomer);
+            var cmd = CommandEnvelope.of(command);
             repository.dispatch(cmd);
 
             // Check the callback is called with the correct event.
-            Event event = callback.newEvent();
+            var event = callback.newEvent();
             assertNotNull(event);
 
-            EventContext context = event.context();
-            MessageId origin = context.getPastMessage()
-                                      .messageId();
+            var context = event.context();
+            var origin = context.getPastMessage().messageId();
             assertThat(origin.asCommandId()).isEqualTo(cmd.id());
             assertThat(origin.getTypeUrl()).isEqualTo(cmd.command()
                                                          .enclosedTypeUrl()
                                                          .value());
-            Any packedMessage = event.getMessage();
-            CustomerCreated eventMessage = unpack(packedMessage, CustomerCreated.class);
+            var packedMessage = event.getMessage();
+            var eventMessage = unpack(packedMessage, CustomerCreated.class);
 
             assertThat(eventMessage.getCustomerId())
                     .isEqualTo(customerId);
@@ -430,25 +403,22 @@ class StandTest extends TenantAwareTest {
         @DisplayName("upon receiving the event of observed type, " +
                 "when event is produced by a standalone command handler")
         void uponEventFromStandaloneHandler() {
-            AloneWaiter waiter = new AloneWaiter();
-            BoundedContext context =
+            var waiter = new AloneWaiter();
+            var context =
                     BoundedContextBuilder.assumingTests(isMultitenant())
                                          .addCommandDispatcher(waiter)
                                          .build();
-            Stand stand = context.stand();
-            Topic topic = requestFactory.topic()
-                                        .allOf(OrderPlaced.class);
+            var stand = context.stand();
+            var topic = requestFactory.topic().allOf(OrderPlaced.class);
 
-            MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
+            var callback = new MemoizeSubscriptionCallback();
             subscribeAndActivate(stand, topic, callback);
 
-            OrderId orderId = OrderId.generate();
-            PlaceOrder placeOrder =
-                    PlaceOrder.newBuilder()
-                              .setId(orderId)
-                              .vBuild();
-            Command command = requestFactory.command()
-                                            .create(placeOrder);
+            var orderId = OrderId.generate();
+            var placeOrder = PlaceOrder.newBuilder()
+                    .setId(orderId)
+                    .vBuild();
+            var command = requestFactory.command().create(placeOrder);
 
             assertThat(waiter.ordersPlaced()).isEqualTo(0);
             context.commandBus().post(command, noOpObserver());
@@ -456,10 +426,9 @@ class StandTest extends TenantAwareTest {
 
             @Nullable Event observed = callback.newEvent();
             assertThat(observed).isNotNull();
-            OrderPlaced expected =
-                    OrderPlaced.newBuilder()
-                               .setId(orderId)
-                               .vBuild();
+            var expected = OrderPlaced.newBuilder()
+                    .setId(orderId)
+                    .vBuild();
             assertThat(observed.enclosedMessage()).isEqualTo(expected);
         }
     }
@@ -467,30 +436,30 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("trigger subscription callbacks matching by ID")
     void triggerSubscriptionsMatchingById() {
-        CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        Stand stand = createStand(repository);
+        var repository = new CustomerAggregateRepository();
+        var stand = createStand(repository);
 
-        Collection<Customer> sampleCustomers = generateCustomers(10);
+        var sampleCustomers = generateCustomers(10);
 
-        Topic someCustomers = requestFactory.topic()
-                                            .select(Customer.class)
-                                            .byId(ids(sampleCustomers))
-                                            .build();
+        var someCustomers = requestFactory.topic()
+                                          .select(Customer.class)
+                                          .byId(ids(sampleCustomers))
+                                          .build();
         Collection<Customer> callbackStates = newHashSet();
-        MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback() {
+        var callback = new MemoizeSubscriptionCallback() {
             @Override
             public void accept(SubscriptionUpdate update) {
                 super.accept(update);
-                Customer customerInCallback = (Customer) update.state(0);
+                var customerInCallback = (Customer) update.state(0);
                 callbackStates.add(customerInCallback);
             }
         };
         subscribeAndActivate(stand, someCustomers, callback);
 
-        for (Customer customer : sampleCustomers) {
-            CustomerId customerId = customer.getId();
-            int version = 1;
-            CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+        for (var customer : sampleCustomers) {
+            var customerId = customer.getId();
+            var version = 1;
+            var entity = aggregateOfClass(CustomerAggregate.class)
                     .withId(customerId)
                     .withState(customer)
                     .withVersion(version)
@@ -504,23 +473,19 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("allow cancelling subscriptions")
     void cancelSubscriptions() {
-        CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        Stand stand = createStand(repository);
-        Topic allCustomers = requestFactory.topic()
-                                           .allOf(Customer.class);
+        var repository = new CustomerAggregateRepository();
+        var stand = createStand(repository);
+        var allCustomers = requestFactory.topic().allOf(Customer.class);
 
-        MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
-        Subscription subscription =
-                subscribeAndActivate(stand, allCustomers, callback);
+        var callback = new MemoizeSubscriptionCallback();
+        var subscription = subscribeAndActivate(stand, allCustomers, callback);
 
         stand.cancel(subscription, noOpObserver());
 
-        Customer customer = generateCustomers(1)
-                .iterator()
-                .next();
-        CustomerId customerId = customer.getId();
-        int version = 1;
-        CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+        var customer = generateCustomers(1).iterator().next();
+        var customerId = customer.getId();
+        var version = 1;
+        var entity = aggregateOfClass(CustomerAggregate.class)
                 .withId(customerId)
                 .withState(customer)
                 .withVersion(version)
@@ -533,9 +498,8 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("fail if cancelling non-existent subscription")
     void notCancelNonExistent() {
-        Stand stand = createStand();
-        Subscription nonExistingSubscription = Subscription
-                .newBuilder()
+        var stand = createStand();
+        var nonExistingSubscription = Subscription.newBuilder()
                 .setId(Subscriptions.generateId())
                 .build();
         assertThrows(InvalidSubscriptionException.class,
@@ -546,32 +510,32 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("trigger each subscription callback once for multiple subscriptions")
     void triggerSubscriptionCallbackOnce() {
-        CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        Stand stand = createStand(repository);
-        Target allCustomers = Targets.allOf(Customer.class);
+        var repository = new CustomerAggregateRepository();
+        var stand = createStand(repository);
+        var allCustomers = Targets.allOf(Customer.class);
 
         Set<MemoizeSubscriptionCallback> callbacks = newHashSet();
-        int totalCallbacks = 100;
+        var totalCallbacks = 100;
 
-        for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
-            MemoizeSubscriptionCallback callback = subscribeWithCallback(stand, allCustomers);
+        for (var callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
+            var callback = subscribeWithCallback(stand, allCustomers);
             callbacks.add(callback);
         }
 
-        Customer customer = generateCustomers(1)
+        var customer = generateCustomers(1)
                 .iterator()
                 .next();
-        CustomerId customerId = customer.getId();
-        int version = 1;
-        CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+        var customerId = customer.getId();
+        var version = 1;
+        var entity = aggregateOfClass(CustomerAggregate.class)
                 .withId(customerId)
                 .withState(customer)
                 .withVersion(version)
                 .build();
         stand.post(entity, repository.lifecycleOf(customerId));
 
-        Any packedState = AnyPacker.pack(customer);
-        for (MemoizeSubscriptionCallback callback : callbacks) {
+        var packedState = AnyPacker.pack(customer);
+        for (var callback : callbacks) {
             assertEquals(packedState, callback.newEntityState());
             assertEquals(1, callback.countAcceptedUpdates());
         }
@@ -580,15 +544,15 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("not trigger subscription callbacks in case of another type criterion mismatch")
     void notTriggerOnTypeMismatch() {
-        CustomerAggregateRepository repository = new CustomerAggregateRepository();
-        StandTestProjectionRepository projectionRepository = new StandTestProjectionRepository();
-        Stand stand = createStand(repository, projectionRepository);
-        Target allProjects = Targets.allOf(Project.class);
-        MemoizeSubscriptionCallback callback = subscribeWithCallback(stand, allProjects);
-        Customer customer = einCustomer();
-        CustomerId customerId = customer.getId();
-        int version = 1;
-        CustomerAggregate entity = aggregateOfClass(CustomerAggregate.class)
+        var repository = new CustomerAggregateRepository();
+        var projectionRepository = new StandTestProjectionRepository();
+        var stand = createStand(repository, projectionRepository);
+        var allProjects = Targets.allOf(Project.class);
+        var callback = subscribeWithCallback(stand, allProjects);
+        var customer = einCustomer();
+        var customerId = customer.getId();
+        var version = 1;
+        var entity = aggregateOfClass(CustomerAggregate.class)
                 .withId(customerId)
                 .withState(customer)
                 .withVersion(version)
@@ -599,9 +563,9 @@ class StandTest extends TenantAwareTest {
     }
 
     private MemoizeSubscriptionCallback subscribeWithCallback(Stand stand, Target target) {
-        MemoizeSubscriptionCallback callback = new MemoizeSubscriptionCallback();
-        Topic topic = requestFactory.topic()
-                                    .forTarget(target);
+        var callback = new MemoizeSubscriptionCallback();
+        var topic = requestFactory.topic()
+                                  .forTarget(target);
         subscribeAndActivate(stand, topic, callback);
 
         assertNull(callback.newEntityState());
@@ -611,28 +575,27 @@ class StandTest extends TenantAwareTest {
     @Test
     @DisplayName("query `AggregateRepository` for aggregate states")
     void readAggregates() {
-        boolean multitenant = isMultitenant();
-        Stand stand = Stand
-                .newBuilder()
+        var multitenant = isMultitenant();
+        var stand = Stand.newBuilder()
                 .setMultitenant(multitenant)
                 .build();
-        CustomerAggregateRepository repository = new CustomerAggregateRepository();
+        var repository = new CustomerAggregateRepository();
         BoundedContextBuilder.assumingTests()
                              .add(repository)
                              .build();
         stand.registerTypeSupplier(repository);
-        QueryFactory queryFactory = getRequestFactory().query();
-        Query query =
+        var queryFactory = getRequestFactory().query();
+        var query =
                 Customer.query()
                         .firstName().is("George")
                         .build(transformWith(queryFactory));
         stand.execute(query, noOpObserver());
 
-        Optional<TargetFilters> actualFilter = repository.memoizedFilters();
+        var actualFilter = repository.memoizedFilters();
         assertThat(actualFilter).isPresent();
         assertThat(actualFilter.get()).isEqualTo(query.filters());
 
-        Optional<ResponseFormat> actualFormat = repository.memoizedFormat();
+        var actualFormat = repository.memoizedFormat();
         assertThat(actualFormat).isPresent();
         assertThat(actualFormat.get()).isEqualTo(query.getFormat());
     }
@@ -641,31 +604,31 @@ class StandTest extends TenantAwareTest {
     @MuteLogging
     @DisplayName("handle mistakes in query silently")
     void handleMistakesInQuery() {
-        StandTestProjectionRepository repository = new StandTestProjectionRepository();
-        Stand stand = createStand(repository);
-        int projectVersion = storeSampleProject(repository);
+        var repository = new StandTestProjectionRepository();
+        var stand = createStand(repository);
+        var projectVersion = storeSampleProject(repository);
 
-        String thirdField = Project.getDescriptor()
-                                   .getFields()
-                                   .get(2)
-                                   .getFullName();
-        QueryFactory queryFactory = requestFactory.query();
+        var thirdField = Project.getDescriptor()
+                                .getFields()
+                                .get(2)
+                                .getFullName();
+        var queryFactory = requestFactory.query();
 
         // FieldMask with invalid field paths.
-        FieldMask mask = FieldMask.newBuilder()
-                                  .addPaths("invalid_field_path_example")
-                                  .addPaths(thirdField)
-                                  .build();
-        Query query = Project.query()
-                             .withMask(mask)
-                             .build(transformWith(queryFactory));
-        MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
+        var mask = FieldMask.newBuilder()
+                .addPaths("invalid_field_path_example")
+                .addPaths(thirdField)
+                .build();
+        var query = Project.query()
+                           .withMask(mask)
+                           .build(transformWith(queryFactory));
+        var observer = new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse response) {
                 super.onNext(response);
                 assertFalse(response.isEmpty());
 
-                Project project = (Project) response.state(0);
+                var project = (Project) response.state(0);
 
                 assertNotNull(project);
                 assertFalse(project.hasId());
@@ -673,7 +636,7 @@ class StandTest extends TenantAwareTest {
                 assertEquals(UNDEFINED, project.getStatus());
                 assertThat(project.getTaskList()).isEmpty();
 
-                Version version = response.version(0);
+                var version = response.version(0);
                 assertThat(version.getNumber()).isEqualTo(projectVersion);
             }
         };
@@ -682,22 +645,22 @@ class StandTest extends TenantAwareTest {
     }
 
     @Nested
-    @DisplayName("throw invalid query exception packed as IAE")
+    @DisplayName("throw invalid query exception packed as `IAE`")
     class ThrowInvalidQueryEx {
 
         @Test
         @DisplayName("if querying unknown type")
         void ifQueryingUnknownType() {
-            Stand stand = Stand.newBuilder()
-                               .setMultitenant(isMultitenant())
-                               .build();
+            var stand = Stand.newBuilder()
+                    .setMultitenant(isMultitenant())
+                    .build();
             checkTypesEmpty(stand);
 
             // Customer type was NOT registered.
             // So create a query for an unknown type.
-            Query readAllCustomers = requestFactory.query()
-                                                   .all(Customer.class);
-            InvalidQueryException exception =
+            var readAllCustomers = requestFactory.query()
+                                                 .all(Customer.class);
+            var exception =
                     assertThrows(InvalidQueryException.class,
                                  () -> stand.execute(readAllCustomers, noOpObserver()));
             assertEquals(readAllCustomers, exception.getRequest());
@@ -710,10 +673,10 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if invalid query message is passed")
         void ifInvalidQueryMessagePassed() {
-            Stand stand = createStand();
-            Query invalidQuery = Query.getDefaultInstance();
+            var stand = createStand();
+            var invalidQuery = Query.getDefaultInstance();
 
-            InvalidQueryException exception =
+            var exception =
                     assertThrows(InvalidQueryException.class,
                                  () -> stand.execute(invalidQuery, noOpObserver()));
             assertEquals(invalidQuery, exception.getRequest());
@@ -721,29 +684,28 @@ class StandTest extends TenantAwareTest {
             assertEquals(INVALID_QUERY.getNumber(),
                          exception.asError()
                                   .getCode());
-            ValidationError validationError = exception.asError()
-                                                       .getValidationError();
+            var validationError = exception.asError()
+                                           .getValidationError();
             assertTrue(isNotDefault(validationError));
         }
     }
 
     @Nested
-    @DisplayName("throw invalid topic exception packed as IAE")
+    @DisplayName("throw invalid topic exception packed as `IAE`")
     class ThrowInvalidTopicEx {
 
         @Test
         @DisplayName("if subscribing to unknown type changes")
         void ifSubscribingToUnknownType() {
-            Stand stand = Stand.newBuilder()
-                               .setMultitenant(isMultitenant())
-                               .build();
+            var stand = Stand.newBuilder()
+                    .setMultitenant(isMultitenant())
+                    .build();
             checkTypesEmpty(stand);
 
             // Project type was NOT registered.
             // So create a topic for an unknown type.
-            Topic allProjectsTopic = requestFactory.topic()
-                                                   .allOf(Project.class);
-            InvalidTopicException exception =
+            var allProjectsTopic = requestFactory.topic().allOf(Project.class);
+            var exception =
                     assertThrows(InvalidTopicException.class,
                                  () -> stand.subscribe(allProjectsTopic, noOpObserver()));
             assertEquals(allProjectsTopic, exception.getRequest());
@@ -756,9 +718,9 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if invalid topic message is passed")
         void ifInvalidTopicMessagePassed() {
-            Stand stand = createStand();
-            Topic invalidTopic = Topic.getDefaultInstance();
-            InvalidTopicException exception =
+            var stand = createStand();
+            var invalidTopic = Topic.getDefaultInstance();
+            var exception =
                     assertThrows(InvalidTopicException.class,
                                  () -> stand.subscribe(invalidTopic, noOpObserver()));
             assertEquals(invalidTopic, exception.getRequest());
@@ -767,23 +729,23 @@ class StandTest extends TenantAwareTest {
                          exception.asError()
                                   .getCode());
 
-            ValidationError validationError = exception.asError()
-                                                       .getValidationError();
+            var validationError = exception.asError()
+                                           .getValidationError();
             assertTrue(isNotDefault(validationError));
         }
     }
 
     @Nested
-    @DisplayName("throw invalid subscription exception packed as IAE")
+    @DisplayName("throw invalid subscription exception packed as `IAE`")
     class ThrowInvalidSubscriptionEx {
 
         @Test
         @DisplayName("if activating subscription with unsupported target")
         void ifActivateWithUnsupportedTarget() {
-            Stand stand = createStand();
-            Subscription subscription = subscriptionWithUnknownTopic();
+            var stand = createStand();
+            var subscription = subscriptionWithUnknownTopic();
 
-            InvalidSubscriptionException exception =
+            var exception =
                     assertThrows(InvalidSubscriptionException.class,
                                  () -> stand.activate(subscription,
                                                       emptyUpdateCallback(),
@@ -794,10 +756,10 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if cancelling subscription with unsupported target")
         void ifCancelWithUnsupportedTarget() {
-            Stand stand = createStand();
-            Subscription subscription = subscriptionWithUnknownTopic();
+            var stand = createStand();
+            var subscription = subscriptionWithUnknownTopic();
 
-            InvalidSubscriptionException exception =
+            var exception =
                     assertThrows(InvalidSubscriptionException.class,
                                  () -> stand.cancel(subscription, noOpObserver()));
             verifyUnknownSubscription(subscription, exception);
@@ -806,10 +768,10 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if invalid subscription message is passed on activation")
         void ifActivateWithInvalidMessage() {
-            Stand stand = createStand();
-            Subscription invalidSubscription = Subscription.getDefaultInstance();
+            var stand = createStand();
+            var invalidSubscription = Subscription.getDefaultInstance();
 
-            InvalidSubscriptionException exception =
+            var exception =
                     assertThrows(InvalidSubscriptionException.class,
                                  () -> stand.activate(invalidSubscription,
                                                       emptyUpdateCallback(),
@@ -821,10 +783,10 @@ class StandTest extends TenantAwareTest {
         @Test
         @DisplayName("if invalid subscription message is passed on cancel")
         void ifCancelWithInvalidMessage() {
-            Stand stand = createStand();
-            Subscription invalidSubscription = Subscription.getDefaultInstance();
+            var stand = createStand();
+            var invalidSubscription = Subscription.getDefaultInstance();
 
-            InvalidSubscriptionException exception =
+            var exception =
                     assertThrows(InvalidSubscriptionException.class,
                                  () -> stand.cancel(invalidSubscription, noOpObserver()));
             verifyInvalidSubscription(invalidSubscription, exception);
@@ -838,8 +800,7 @@ class StandTest extends TenantAwareTest {
                          exception.asError()
                                   .getCode());
 
-            ValidationError validationError = exception.asError()
-                                                       .getValidationError();
+            var validationError = exception.asError().getValidationError();
             assertTrue(isNotDefault(validationError));
         }
 
@@ -853,12 +814,11 @@ class StandTest extends TenantAwareTest {
         }
 
         private Subscription subscriptionWithUnknownTopic() {
-            Topic allCustomersTopic = requestFactory.topic()
-                                                    .allOf(Customer.class);
+            var allCustomersTopic = requestFactory.topic().allOf(Customer.class);
             return Subscription.newBuilder()
-                               .setId(Subscriptions.generateId())
-                               .setTopic(allCustomersTopic)
-                               .build();
+                    .setId(Subscriptions.generateId())
+                    .setTopic(allCustomersTopic)
+                    .build();
         }
     }
 
@@ -876,32 +836,32 @@ class StandTest extends TenantAwareTest {
         Map<ProjectId, Project> sampleProjects = new HashMap<>();
         appendWithGeneratedProjects(sampleProjects, numberOfProjects);
 
-        StandTestProjectionRepository projectionRepository = new StandTestProjectionRepository();
+        var projectionRepository = new StandTestProjectionRepository();
         setupExpectedFindAllBehaviour(projectionRepository, sampleProjects);
 
-        Stand stand = standWithRepo(projectionRepository);
+        var stand = standWithRepo(projectionRepository);
 
-        QueryFactory queryFactory = requestFactory.query();
-        Query readMultipleProjects =
+        var queryFactory = requestFactory.query();
+        var readMultipleProjects =
                 Project.query()
                        .id().in(sampleProjects.keySet())
                        .build(transformWith(queryFactory));
 
-        MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        var responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
 
-        List<EntityStateWithVersion> messageList = checkAndGetMessageList(responseObserver);
+        var messageList = checkAndGetMessageList(responseObserver);
         assertEquals(sampleProjects.size(), messageList.size());
-        Collection<Project> allCustomers = sampleProjects.values();
-        for (EntityStateWithVersion singleRecord : messageList) {
-            Any state = singleRecord.getState();
-            Project unpackedSingleResult = unpack(state, Project.class);
+        var allCustomers = sampleProjects.values();
+        for (var singleRecord : messageList) {
+            var state = singleRecord.getState();
+            var unpackedSingleResult = unpack(state, Project.class);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
     }
 
     private Stand standWithRepo(ProjectionRepository<?, ?, ?> projectionRepository) {
-        Stand stand = createStand();
+        var stand = createStand();
         assertNotNull(stand);
         stand.registerTypeSupplier(projectionRepository);
         return stand;

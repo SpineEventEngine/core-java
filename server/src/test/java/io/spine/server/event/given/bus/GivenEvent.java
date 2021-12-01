@@ -28,9 +28,7 @@ package io.spine.server.event.given.bus;
 
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import io.spine.test.event.ProjectStarted;
 import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.server.event.given.bus.EventBusTestEnv.PROJECT_ID;
@@ -52,14 +50,14 @@ public class GivenEvent {
     }
 
     public static Event projectStarted() {
-        ProjectStarted msg = GivenEventMessage.projectStarted();
-        Event event = eventFactory().createEvent(msg);
+        var msg = GivenEventMessage.projectStarted();
+        var event = eventFactory().createEvent(msg);
         return event;
     }
 
     public static Event projectCreated(ProjectId projectId) {
-        ProjectCreated msg = GivenEventMessage.projectCreated(projectId);
-        Event event = eventFactory().createEvent(msg);
+        var msg = GivenEventMessage.projectCreated(projectId);
+        var event = eventFactory().createEvent(msg);
         return event;
     }
 }

@@ -31,7 +31,6 @@ import io.spine.server.event.React;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOf3;
-import io.spine.test.procman.quiz.PmAnswer;
 import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.PmQuiz;
 import io.spine.test.procman.quiz.PmQuizId;
@@ -41,8 +40,6 @@ import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuestionFailed;
 import io.spine.test.procman.quiz.event.PmQuestionSolved;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
-
-import java.util.List;
 
 /**
  * A quiz is started using {@link PmStartQuiz Start Quiz command} which defines a question set, and 
@@ -58,18 +55,17 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
     PmQuizStarted handle(PmStartQuiz command) {
         builder().setId(command.getQuizId());
         return PmQuizStarted.newBuilder()
-                            .setQuizId(command.getQuizId())
-                            .addAllQuestion(command.getQuestionList())
-                            .build();
+                .setQuizId(command.getQuizId())
+                .addAllQuestion(command.getQuestionList())
+                .build();
     }
 
     @Assign
     PmQuestionAnswered handle(PmAnswerQuestion command) {
-        PmQuestionAnswered event =
-                PmQuestionAnswered.newBuilder()
-                                  .setQuizId(command.getQuizId())
-                                  .setAnswer(command.getAnswer())
-                                  .build();
+        var event = PmQuestionAnswered.newBuilder()
+                .setQuizId(command.getQuizId())
+                .setAnswer(command.getAnswer())
+                .build();
         return event;
     }
 
@@ -81,41 +77,39 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     @React
     EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> on(PmQuestionAnswered event) {
-        PmAnswer answer = event.getAnswer();
-        PmQuizId examId = event.getQuizId();
-        PmQuestionId questionId = answer.getQuestionId();
+        var answer = event.getAnswer();
+        var examId = event.getQuizId();
+        var questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
             return EitherOf3.withC(nothing());
         }
 
-        boolean answerIsCorrect = answer.getCorrect();
+        var answerIsCorrect = answer.getCorrect();
         if (answerIsCorrect) {
-            PmQuestionSolved reaction =
-                    PmQuestionSolved.newBuilder()
-                                    .setQuizId(examId)
-                                    .setQuestionId(questionId)
-                                    .build();
+            var reaction = PmQuestionSolved.newBuilder()
+                    .setQuizId(examId)
+                    .setQuestionId(questionId)
+                    .build();
             return EitherOf3.withA(reaction);
         } else {
-            PmQuestionFailed reaction =
-                    PmQuestionFailed.newBuilder()
-                                    .setQuizId(examId)
-                                    .setQuestionId(questionId)
-                                    .build();
+            var reaction = PmQuestionFailed.newBuilder()
+                    .setQuizId(examId)
+                    .setQuestionId(questionId)
+                    .build();
             return EitherOf3.withB(reaction);
         }
     }
 
     private boolean questionIsClosed(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = builder().getOpenQuestionList();
-        boolean containedInOpenQuestions = openQuestions.contains(questionId);
+        var openQuestions = builder().getOpenQuestionList();
+        var containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
 
     @React
     Nothing on(PmQuestionSolved event) {
-        PmQuestionId questionId = event.getQuestionId();
+        var questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         builder().addSolvedQuestion(questionId);
         return nothing();
@@ -123,15 +117,15 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     @React
     Nothing on(PmQuestionFailed event) {
-        PmQuestionId questionId = event.getQuestionId();
+        var questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         builder().addFailedQuestion(questionId);
         return nothing();
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        List<PmQuestionId> openQuestions = builder().getOpenQuestionList();
-        int index = openQuestions.indexOf(questionId);
+        var openQuestions = builder().getOpenQuestionList();
+        var index = openQuestions.indexOf(questionId);
         builder().removeOpenQuestion(index);
     }
 }

@@ -61,8 +61,8 @@ public final class GivenStorageProject {
      * @return the unique {@code EntityState}
      */
     public static StgProject newState(StgProjectId id) {
-        Status status = Status.CREATED;
-        Timestamp dueDate = Timestamps.add(currentTime(), Durations.fromDays(1));
+        var status = Status.CREATED;
+        var dueDate = Timestamps.add(currentTime(), Durations.fromDays(1));
         return newState(id, status, dueDate);
     }
 
@@ -78,9 +78,8 @@ public final class GivenStorageProject {
      * @return a new instance of {@code StgProject}
      */
     public static StgProject newState(StgProjectId id, Status status, Timestamp dueDate) {
-        String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
-        StgProject project = StgProject
-                .newBuilder()
+        var uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
+        var project = StgProject.newBuilder()
                 .setId(id)
                 .setStatus(status)
                 .setName(uniqueName)

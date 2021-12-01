@@ -38,9 +38,8 @@ public final class SetTestProjectionId
 
     @Override
     public Project apply(Project project) {
-        ProjectId id = id();
-        Project result = project
-                .toBuilder()
+        var id = id();
+        var result = project.toBuilder()
                 .setIdString(id.toString())
                 .vBuild();
         return result;

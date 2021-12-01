@@ -37,24 +37,20 @@ import io.spine.net.InternetDomain;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.integration.given.DocumentAggregate;
 import io.spine.server.integration.given.DocumentRepository;
-import io.spine.server.integration.given.EditHistoryProjection;
 import io.spine.server.integration.given.EditHistoryRepository;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -106,12 +102,11 @@ class ThirdPartyContextTest {
     @Test
     @DisplayName("if multitenant, require a tenant ID for each event")
     void requireTenant() {
-        ActorContext noTenantContext = ActorContext
-                .newBuilder()
+        var noTenantContext = ActorContext.newBuilder()
                 .setActor(UserId.newBuilder().setValue("42"))
                 .setTimestamp(Time.currentTime())
                 .vBuild();
-        ThirdPartyContext calendar = ThirdPartyContext.multitenant("Calendar");
+        var calendar = ThirdPartyContext.multitenant("Calendar");
         assertThrows(IllegalArgumentException.class,
                      () -> calendar.emittedEvent(GivenEvent.message(), noTenantContext));
     }
@@ -119,13 +114,12 @@ class ThirdPartyContextTest {
     @Test
     @DisplayName("if single-tenant, fail if a tenant ID is supplied")
     void noTenant() {
-        ActorContext actorWithTenant = ActorContext
-                .newBuilder()
+        var actorWithTenant = ActorContext.newBuilder()
                 .setActor(UserId.newBuilder().setValue("42"))
                 .setTimestamp(Time.currentTime())
                 .setTenantId(TenantId.newBuilder().setValue("AcmeCorp"))
                 .vBuild();
-        ThirdPartyContext calendar = ThirdPartyContext.singleTenant("Notes");
+        var calendar = ThirdPartyContext.singleTenant("Notes");
         assertThrows(IllegalArgumentException.class,
                      () -> calendar.emittedEvent(GivenEvent.message(), actorWithTenant));
     }
@@ -133,14 +127,13 @@ class ThirdPartyContextTest {
     @Test
     @DisplayName("deliver to external reactors")
     void externalReactor() {
-        UserId johnDoe = userId();
-        OpenOfficeDocumentUploaded importEvent = OpenOfficeDocumentUploaded
-                .newBuilder()
+        var johnDoe = GivenUserId.newUuid();
+        var importEvent = OpenOfficeDocumentUploaded.newBuilder()
                 .setId(DocumentId.generate())
                 .setText("The scary truth about gluten")
                 .build();
         postForSingleTenant(johnDoe, importEvent);
-        Optional<DocumentAggregate> foundDoc = documentRepository.find(importEvent.getId());
+        var foundDoc = documentRepository.find(importEvent.getId());
         assertThat(foundDoc).isPresent();
         assertThat(foundDoc.get()
                            .state()
@@ -151,30 +144,26 @@ class ThirdPartyContextTest {
     @Test
     @DisplayName("not deliver to domestic reactors")
     void domesticReactor() {
-        UserId johnDoe = userId();
-        DocumentImported importEvent = DocumentImported
-                .newBuilder()
+        var johnDoe = GivenUserId.newUuid();
+        var importEvent = DocumentImported.newBuilder()
                 .setId(DocumentId.generate())
                 .setText("Annual report")
                 .build();
         postForSingleTenant(johnDoe, importEvent);
-        Optional<DocumentAggregate> foundDoc = documentRepository.find(importEvent.getId());
+        var foundDoc = documentRepository.find(importEvent.getId());
         assertThat(foundDoc).isEmpty();
     }
 
     @Test
     @DisplayName("and deliver to external subscribers")
     void externalSubscriber() {
-        UserId johnDoe = userId();
-        TestActorRequestFactory requests =
-                new TestActorRequestFactory(johnDoe);
-        DocumentId documentId = DocumentId.generate();
-        CreateDocument crete = CreateDocument
-                .newBuilder()
+        var johnDoe = GivenUserId.newUuid();
+        var requests = new TestActorRequestFactory(johnDoe);
+        var documentId = DocumentId.generate();
+        var crete = CreateDocument.newBuilder()
                 .setId(documentId)
                 .vBuild();
-        EditText edit = EditText
-                .newBuilder()
+        var edit = EditText.newBuilder()
                 .setId(documentId)
                 .setPosition(0)
                 .setNewText("Fresh new document")
@@ -182,16 +171,15 @@ class ThirdPartyContextTest {
         context.commandBus()
                .post(ImmutableList.of(requests.createCommand(crete), requests.createCommand(edit)),
                      noOpObserver());
-        EditHistoryProjection historyAfterEdit = editHistoryRepository
+        var historyAfterEdit = editHistoryRepository
                 .find(documentId)
                 .orElseGet(Assertions::fail);
         assertThat(historyAfterEdit.state().getEditList())
                 .isNotEmpty();
-        postForSingleTenant(johnDoe, UserDeleted
-                .newBuilder()
+        postForSingleTenant(johnDoe, UserDeleted.newBuilder()
                 .setUser(johnDoe)
                 .vBuild());
-        EditHistoryProjection historyAfterDeleted = editHistoryRepository
+        var historyAfterDeleted = editHistoryRepository
                 .find(documentId)
                 .orElseGet(Assertions::fail);
         assertThat(historyAfterDeleted.state().getEditList())
@@ -201,55 +189,51 @@ class ThirdPartyContextTest {
     @Test
     @DisplayName("and ignore domestic subscribers")
     void domesticSubscriber() {
-        DocumentId documentId = DocumentId.generate();
-        TextEdited event = TextEdited
-                .newBuilder()
+        var documentId = DocumentId.generate();
+        var event = TextEdited.newBuilder()
                 .setId(documentId)
                 .vBuild();
-        postForSingleTenant(userId(), event);
+        postForSingleTenant(GivenUserId.newUuid(), event);
         assertThat(editHistoryRepository.find(documentId)).isEmpty();
     }
 
     @Test
     @DisplayName("in a multitenant environment")
     void multitenant() {
-        DocumentRepository documentRepository = new DocumentRepository();
+        var documentRepository = new DocumentRepository();
         BoundedContextBuilder
                 .assumingTests(true)
                 .add(documentRepository)
                 .build();
-        UserId johnDoe = userId();
-        TenantId acmeCorp = TenantId
-                .newBuilder()
+        var johnDoe = GivenUserId.newUuid();
+        var acmeCorp = TenantId.newBuilder()
                 .setDomain(InternetDomain.newBuilder()
                                          .setValue("acme.com"))
                 .build();
-        TenantId cyberdyne = TenantId
-                .newBuilder()
+        var cyberdyne = TenantId.newBuilder()
                 .setDomain(InternetDomain.newBuilder()
-                                         .setValue("cyberdyne.com"))
+                                   .setValue("cyberdyne.com"))
                 .build();
-        DocumentId documentId = DocumentId.generate();
-        OpenOfficeDocumentUploaded importEvent = OpenOfficeDocumentUploaded
-                .newBuilder()
+        var documentId = DocumentId.generate();
+        var importEvent = OpenOfficeDocumentUploaded.newBuilder()
                 .setId(documentId)
                 .setText("Daily report")
                 .build();
         postForTenant(acmeCorp, johnDoe, importEvent);
 
-        Optional<DocumentAggregate> acmeDailyReport = TenantAwareRunner
+        var acmeDailyReport = TenantAwareRunner
                 .with(acmeCorp)
                 .evaluate(() -> documentRepository.find(documentId));
         assertThat(acmeDailyReport).isPresent();
 
-        Optional<DocumentAggregate> cyberdyneDailyReport = TenantAwareRunner
+        var cyberdyneDailyReport = TenantAwareRunner
                 .with(cyberdyne)
                 .evaluate(() -> documentRepository.find(documentId));
         assertThat(cyberdyneDailyReport).isEmpty();
     }
 
     private static void postForSingleTenant(UserId actor, EventMessage event) {
-        try (ThirdPartyContext uploads = ThirdPartyContext.singleTenant("Imports")) {
+        try (var uploads = ThirdPartyContext.singleTenant("Imports")) {
             uploads.emittedEvent(event, actor);
         } catch (Exception e) {
             fail(e);
@@ -257,9 +241,8 @@ class ThirdPartyContextTest {
     }
 
     private static void postForTenant(TenantId tenantId, UserId actor, EventMessage event) {
-        try (ThirdPartyContext uploads = ThirdPartyContext.multitenant("Exports")) {
-            ActorContext actorContext = ActorContext
-                    .newBuilder()
+        try (var uploads = ThirdPartyContext.multitenant("Exports")) {
+            var actorContext = ActorContext.newBuilder()
                     .setActor(actor)
                     .setTenantId(tenantId)
                     .setTimestamp(currentTime())
@@ -268,12 +251,5 @@ class ThirdPartyContextTest {
         } catch (Exception e) {
             fail(e);
         }
-    }
-
-    private static UserId userId() {
-        return UserId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
     }
 }

@@ -82,8 +82,7 @@ class NoOpEventFilterTest {
     }
 
     private static Stream<Event> events() {
-        var projectId = ProjectId
-                .newBuilder()
+        var projectId = ProjectId.newBuilder()
                 .setId(newUuid())
                 .build();
         var result =

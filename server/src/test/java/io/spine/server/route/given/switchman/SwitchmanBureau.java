@@ -42,21 +42,21 @@ public final class SwitchmanBureau extends AggregateRepository<String, Switchman
     /** The ID of the aggregate for which a {@link SetSwitch command} would be rejected. */
     public static final String MISSING_SWITCHMAN_NAME = "Petrovich";
 
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     protected void setupCommandRouting(CommandRouting<String> routing) {
         super.setupCommandRouting(routing);
-        routing.route(SetSwitch.class, new CommandRoute<String, SetSwitch>() {
+        routing.route(SetSwitch.class, new CommandRoute<>() {
             private static final long serialVersionUID = 0L;
 
             @Override
             public String apply(SetSwitch cmd, CommandContext context) {
-                String switchmanName = cmd.getSwitchmanName();
+                var switchmanName = cmd.getSwitchmanName();
                 if (switchmanName.equals(MISSING_SWITCHMAN_NAME)) {
-                    throw new RuntimeException(SwitchmanUnavailable
-                                                       .newBuilder()
-                                                       .setSwitchmanName(switchmanName)
-                                                       .build());
+                    throw new RuntimeException(
+                            SwitchmanUnavailable.newBuilder()
+                                    .setSwitchmanName(switchmanName)
+                                    .build());
                 }
                 return switchmanName;
             }

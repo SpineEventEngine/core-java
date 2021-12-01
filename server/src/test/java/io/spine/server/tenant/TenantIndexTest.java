@@ -35,14 +35,14 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("TenantIndex should")
+@DisplayName("`TenantIndex` should")
 class TenantIndexTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        ContextSpec spec = ContextSpec.singleTenant(getClass().getSimpleName());
-        InMemoryStorageFactory storageFactory = InMemoryStorageFactory.newInstance();
+        var spec = ContextSpec.singleTenant(getClass().getSimpleName());
+        var storageFactory = InMemoryStorageFactory.newInstance();
         new NullPointerTester()
                 .setDefault(StorageFactory.class, storageFactory)
                 .testAllPublicStaticMethods(TenantIndex.class);

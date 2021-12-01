@@ -51,9 +51,7 @@ class DomesticEventPublisherTest {
 
     @BeforeEach
     void initBus() {
-        context = BoundedContextBuilder
-                .assumingTests()
-                .build();
+        context = BoundedContextBuilder.assumingTests().build();
         broker = context.internalAccess()
                         .broker();
     }
@@ -75,7 +73,7 @@ class DomesticEventPublisherTest {
     @Test
     @DisplayName("dispatch only one event type")
     void dispatchSingleEvent() {
-        DomesticEventPublisher publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
+        var publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
         Set<EventClass> classes = publisher.messageClasses();
         assertThat(classes).containsExactly(EVENT_CLASS);
     }
@@ -83,7 +81,7 @@ class DomesticEventPublisherTest {
     @Test
     @DisplayName("dispatch no external events")
     void dispatchNoExternalEvents() {
-        DomesticEventPublisher publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
+        var publisher = new DomesticEventPublisher(broker, EVENT_CLASS);
         Set<EventClass> classes = publisher.externalEventClasses();
         assertThat(classes).isEmpty();
     }

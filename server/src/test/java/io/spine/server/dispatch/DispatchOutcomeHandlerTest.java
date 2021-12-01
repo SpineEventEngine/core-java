@@ -132,8 +132,7 @@ public final class DispatchOutcomeHandlerTest {
                                                  .addCommand(command)
                                                  .build())
                     .build();
-            var outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setSuccess(success)
                     .build();
             List<Command> commands = new ArrayList<>();
@@ -152,8 +151,7 @@ public final class DispatchOutcomeHandlerTest {
             var error = Success.newBuilder()
                     .setRejection(rejection)
                     .build();
-            var outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setSuccess(error)
                     .build();
             List<Event> rejections = new ArrayList<>();

@@ -53,8 +53,7 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
         if (limit > 0) {
             var orderByMissing = format.getOrderByCount() == 0;
             if (orderByMissing) {
-                var limitValue = Value
-                        .newBuilder()
+                var limitValue = Value.newBuilder()
                         .setNumberValue(limit)
                         .build();
                 @SuppressWarnings("DuplicateStringLiteralInspection") // "limit" is used in tests.

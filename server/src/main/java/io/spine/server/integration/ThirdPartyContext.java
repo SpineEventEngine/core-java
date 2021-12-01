@@ -146,8 +146,7 @@ public final class ThirdPartyContext implements Closeable {
     public void emittedEvent(EventMessage eventMessage, UserId userId) {
         checkNotNull(userId);
         checkNotNull(eventMessage);
-        var context = ActorContext
-                .newBuilder()
+        var context = ActorContext.newBuilder()
                 .setActor(userId)
                 .setTimestamp(currentTime())
                 .vBuild();

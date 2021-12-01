@@ -38,9 +38,12 @@ import io.spine.validate.ValidatingBuilder;
 /**
  * Utility class for building test {@code Projection}s.
  *
- * @param <P> the type of the projection to build
- * @param <I> the type of projection IDs
- * @param <S> the type of the projection state
+ * @param <P>
+ *         the type of the projection to build
+ * @param <I>
+ *         the type of projection IDs
+ * @param <S>
+ *         the type of the projection state
  */
 @VisibleForTesting
 public class ProjectionBuilder<P extends Projection<I, S, B>,
@@ -64,8 +67,7 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        TestProjectionTransaction transaction =
-                new TestProjectionTransaction(result, state, version);
+        var transaction = new TestProjectionTransaction(result, state, version);
         transaction.commit();
     }
 

@@ -30,10 +30,12 @@ import io.spine.core.Subscribe;
 import io.spine.server.event.model.given.subscriber.InvalidSubscriber;
 import io.spine.server.event.model.given.subscriber.ValidSubscriber;
 import io.spine.server.model.MethodSignatureTest;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
+@DisplayName("`EventSubscriberSignature` should")
 class EventSubscriberSignatureTest extends MethodSignatureTest<SubscriberSignature> {
 
     @Override

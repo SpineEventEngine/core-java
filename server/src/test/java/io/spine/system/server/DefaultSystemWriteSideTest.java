@@ -27,7 +27,6 @@
 package io.spine.system.server;
 
 import io.spine.server.BoundedContext;
-import io.spine.system.server.given.client.MealOrderProjection;
 import io.spine.test.system.server.MealOrder;
 import io.spine.test.system.server.OrderId;
 import io.spine.test.system.server.OrderPlaced;
@@ -77,14 +76,13 @@ class DefaultSystemWriteSideTest {
         @Test
         @DisplayName("events")
         void events() {
-            OrderPlaced event = OrderPlaced
-                    .newBuilder()
+            var event = OrderPlaced.newBuilder()
                     .setId(projectionId)
                     .addItem("Pizza")
                     .vBuild();
             systemWriteSide.postEvent(event);
 
-            MealOrder order = projectionState();
+            var order = projectionState();
             assertThat(order.getWhenPlaced())
                     .isNotEqualToDefaultInstance();
             assertThat(order.getItemList())
@@ -92,7 +90,7 @@ class DefaultSystemWriteSideTest {
         }
 
         private MealOrder projectionState() {
-            MealOrderProjection aggregate = findProjection(projectionId, systemContext);
+            var aggregate = findProjection(projectionId, systemContext);
             return aggregate.state();
         }
     }

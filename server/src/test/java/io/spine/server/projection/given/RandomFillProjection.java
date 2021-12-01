@@ -43,8 +43,7 @@ public final class RandomFillProjection
 
     @Override
     public Project apply(Project project) {
-        Project result = project
-                .toBuilder()
+        var result = project.toBuilder()
                 .setId(project.getId())
                 .setName(newUuid())
                 .setStatus(CREATED)

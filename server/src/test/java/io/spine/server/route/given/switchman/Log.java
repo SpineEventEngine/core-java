@@ -73,9 +73,9 @@ public final class Log extends Aggregate<Long, LogState, LogState.Builder> {
 
     @Apply
     private void event(SwitchWorkRecorded event) {
-        String switchmanName = event.getSwitchmanName();
-        Integer currentCount = state().getCountersMap()
-                                      .get(switchmanName);
+        var switchmanName = event.getSwitchmanName();
+        var currentCount = state().getCountersMap()
+                                  .get(switchmanName);
         builder().putCounters(switchmanName,
                               currentCount == null ? 1 : currentCount + 1);
     }

@@ -54,8 +54,8 @@ final class CatchUpMessages {
     static CatchUpStarted started(CatchUpId id) {
         checkNotNull(id);
         return CatchUpStarted.newBuilder()
-                             .setId(id)
-                             .vBuild();
+                .setId(id)
+                .vBuild();
     }
 
     /**
@@ -64,8 +64,8 @@ final class CatchUpMessages {
      */
     static EventStreamQuery.Limit limitOf(int value) {
         return EventStreamQuery.Limit.newBuilder()
-                                     .setValue(value)
-                                     .vBuild();
+                .setValue(value)
+                .vBuild();
     }
 
     /**
@@ -74,8 +74,8 @@ final class CatchUpMessages {
     static HistoryEventsRecalled recalled(CatchUpId id) {
         checkNotNull(id);
         return HistoryEventsRecalled.newBuilder()
-                                    .setId(id)
-                                    .vBuild();
+                .setId(id)
+                .vBuild();
     }
 
     /**
@@ -84,8 +84,8 @@ final class CatchUpMessages {
     static HistoryFullyRecalled fullyRecalled(CatchUpId id) {
         checkNotNull(id);
         return HistoryFullyRecalled.newBuilder()
-                                   .setId(id)
-                                   .vBuild();
+                .setId(id)
+                .vBuild();
     }
 
     /**
@@ -94,11 +94,10 @@ final class CatchUpMessages {
     static ImmutableList<EventFilter> toFilters(ProtocolStringList rawEventTypes) {
         checkNotNull(rawEventTypes);
         return rawEventTypes.stream()
-                            .map(type -> EventFilter
-                                    .newBuilder()
-                                    .setEventType(type)
-                                    .build())
-                            .collect(toImmutableList());
+                .map(type -> EventFilter.newBuilder()
+                        .setEventType(type)
+                        .build())
+                .collect(toImmutableList());
     }
 
     /**
@@ -107,8 +106,8 @@ final class CatchUpMessages {
     static LiveEventsPickedUp liveEventsPickedUp(CatchUpId id) {
         checkNotNull(id);
         return LiveEventsPickedUp.newBuilder()
-                                 .setId(id)
-                                 .vBuild();
+                .setId(id)
+                .vBuild();
     }
 
     /**
@@ -117,8 +116,8 @@ final class CatchUpMessages {
     static CatchUpCompleted catchUpCompleted(CatchUpId id) {
         checkNotNull(id);
         return CatchUpCompleted.newBuilder()
-                               .setId(id)
-                               .vBuild();
+                .setId(id)
+                .vBuild();
     }
 
     /**
@@ -127,8 +126,7 @@ final class CatchUpMessages {
      */
     static ShardProcessingRequested shardProcessingRequested(CatchUpId id, ShardIndex shardIndex) {
         checkNotNull(shardIndex);
-        return ShardProcessingRequested
-                .newBuilder()
+        return ShardProcessingRequested.newBuilder()
                 .setIndex(shardIndex)
                 .setProcess(id)
                 .vBuild();

@@ -41,7 +41,7 @@ import static io.spine.testing.TestValues.newUuidValue;
 import static io.spine.testing.TestValues.nullRef;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EventFactory should")
+@DisplayName("`EventFactory` should")
 class EventFactoryTest {
 
     private final TestActorRequestFactory requestFactory = new TestActorRequestFactory(getClass());
@@ -71,7 +71,7 @@ class EventFactoryTest {
     @Test
     @DisplayName("validate event messages before creation")
     void validateCreatedMessages() {
-        EventFactory factory = EventFactory.on(origin, producerId);
+        var factory = EventFactory.on(origin, producerId);
         assertThrows(ValidationException.class,
                      () -> factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null));
     }

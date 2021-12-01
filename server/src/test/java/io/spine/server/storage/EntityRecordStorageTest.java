@@ -30,14 +30,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.core.Version;
-import io.spine.query.RecordQuery;
-import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -58,7 +55,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -106,9 +102,9 @@ public class EntityRecordStorageTest
 
     @Override
     protected EntityRecordStorage<StgProjectId, StgProject> newStorage() {
-        StorageFactory factory = ServerEnvironment.instance()
-                                                  .storageFactory();
-        ContextSpec ctxSpec = singleTenant(EntityRecordStorageTest.class.getName());
+        var factory = ServerEnvironment.instance()
+                                       .storageFactory();
+        var ctxSpec = singleTenant(EntityRecordStorageTest.class.getName());
         return new EntityRecordStorage<>(ctxSpec, factory, TestCounterEntity.class);
     }
 
@@ -127,15 +123,13 @@ public class EntityRecordStorageTest
     @Test
     @DisplayName("retrieve empty iterator if storage is empty")
     void retrieveEmptyIterator() {
-        FieldMask nonEmptyFieldMask = FieldMask
-                .newBuilder()
+        var nonEmptyFieldMask = FieldMask.newBuilder()
                 .addPaths("invalid-path")
                 .build();
         EntityRecordStorage<StgProjectId, ?> storage = storage();
-        RecordQuery<StgProjectId, EntityRecord> query =
-                storage.queryBuilder()
-                       .withMask(nonEmptyFieldMask)
-                       .build();
+        var query = storage.queryBuilder()
+                           .withMask(nonEmptyFieldMask)
+                           .build();
         Iterator<?> empty = storage.readAll(query);
 
         assertNotNull(empty);
@@ -145,9 +139,9 @@ public class EntityRecordStorageTest
     @Test
     @DisplayName("delete record")
     void deleteRecord() {
-        EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-        StgProjectId id = newId();
-        EntityRecord record = newStorageRecord(id);
+        var storage = storage();
+        var id = newId();
+        var record = newStorageRecord(id);
 
         // Write the record.
         storage.write(id, record);
@@ -160,15 +154,15 @@ public class EntityRecordStorageTest
                            .isPresent());
     }
 
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection" /* Storing of generated objects and
-                                                                checking via #contains(Object). */)
     @Test
     @DisplayName("create unique states for same ID")
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection" /* Storing of generated objects and
+                                                                checking via #contains(Object). */)
     void createUniqueStatesForSameId() {
-        int checkCount = 10;
-        StgProjectId id = newId();
+        var checkCount = 10;
+        var id = newId();
         Set<EntityState<StgProjectId>> states = newHashSet();
-        for (int i = 0; i < checkCount; i++) {
+        for (var i = 0; i < checkCount; i++) {
             EntityState<StgProjectId> newState = newState(id);
             if (states.contains(newState)) {
                 fail("RecordStorageTest.newState() should return unique messages.");
@@ -183,43 +177,42 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("single record according to the specific field mask")
         void singleRecord() {
-            StgProjectId id = newId();
-            EntityRecord record = newStorageRecord(id);
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            var id = newId();
+            var record = newStorageRecord(id);
+            var storage = storage();
             storage.write(id, record);
 
             EntityState<StgProjectId> state = newState(id);
-            FieldMask idMask = fromFieldNumbers(state.getClass(), 1);
+            var idMask = fromFieldNumbers(state.getClass(), 1);
 
-            Optional<EntityRecord> optional = storage.read(id, idMask);
+            var optional = storage.read(id, idMask);
             assertTrue(optional.isPresent());
-            EntityRecord entityRecord = optional.get();
+            var entityRecord = optional.get();
 
-            Message unpacked = unpack(entityRecord.getState());
+            var unpacked = unpack(entityRecord.getState());
             assertFalse(isDefault(unpacked));
         }
 
         @Test
         @DisplayName("multiple records according to the given field mask")
         void multipleRecords() {
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            int recordCount = 10;
-            ImmutableList<StgProjectId> ids =
+            var storage = storage();
+            var recordCount = 10;
+            var ids =
                     range(0, recordCount).mapToObj(i -> newId())
                                          .collect(toImmutableList());
-            @SuppressWarnings("rawtypes")
-            Class<? extends EntityState> stateClass = writeRandomRecords(storage, ids);
+            var stateClass = writeRandomRecords(storage, ids);
 
-            int halfSize = recordCount / 2;
+            var halfSize = recordCount / 2;
             List<StgProjectId> halfOfIds = ids.subList(0, halfSize);
 
-            FieldMask fieldMask = fromFieldNumbers(stateClass, 2);
-            Iterator<EntityRecord> iterator = storage.readAll(halfOfIds, fieldMask);
+            var fieldMask = fromFieldNumbers(stateClass, 2);
+            var iterator = storage.readAll(halfOfIds, fieldMask);
             List<EntityRecord> actualRecords = ImmutableList.copyOf(iterator);
 
             assertThat(actualRecords).hasSize(halfSize);
-            for (EntityRecord record : actualRecords) {
-                Message state = unpack(record.getState());
+            for (var record : actualRecords) {
+                var state = unpack(record.getState());
                 assertMatchesMask(state, fieldMask);
             }
         }
@@ -229,12 +222,12 @@ public class EntityRecordStorageTest
         writeRandomRecords(EntityRecordStorage<StgProjectId, StgProject> storage,
                            List<StgProjectId> ids) {
             Class<? extends EntityState> stateClass = null;
-            for (StgProjectId id : ids) {
+            for (var id : ids) {
                 EntityState<StgProjectId> state = newState(id);
                 if (stateClass == null) {
                     stateClass = state.getClass();
                 }
-                EntityRecord record = newRecord(id, state);
+                var record = newRecord(id, state);
                 storage.write(id, record);
             }
             return stateClass;
@@ -243,27 +236,22 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("archived records if specified")
         void archivedRecords() {
-            StgProjectId activeRecordId = newId();
-            StgProjectId archivedRecordId = newId();
+            var activeRecordId = newId();
+            var archivedRecordId = newId();
 
-            EntityRecord activeRecord =
-                    buildStorageRecord(activeRecordId, newState(activeRecordId));
-            EntityRecord archivedRecord =
-                    buildStorageRecord(archivedRecordId, newState(archivedRecordId));
+            var activeRecord = buildStorageRecord(activeRecordId, newState(activeRecordId));
+            var archivedRecord = buildStorageRecord(archivedRecordId, newState(archivedRecordId));
             TransactionalEntity<StgProjectId, ?, ?> activeEntity = newEntity(activeRecordId);
             TransactionalEntity<StgProjectId, ?, ?> archivedEntity = newEntity(archivedRecordId);
 
             archive(archivedEntity);
 
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            var storage = storage();
 
             storage.write(recordWithCols(activeEntity, activeRecord));
             storage.write(recordWithCols(archivedEntity, archivedRecord));
 
-            StgProject.Query query =
-                    StgProject.query()
-                              .where(ArchivedColumn.is(), true)
-                              .build();
+            var query = StgProject.query().where(ArchivedColumn.is(), true).build();
             assertQueryHasSingleResult(query, archivedRecord, storage);
         }
     }
@@ -275,16 +263,16 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("by columns")
         void byColumns() {
-            StgProject.Status done = DONE;
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            var done = DONE;
+            var storage = storage();
 
-            StgProjectId idMatching = newId();
-            StgProjectId idWrong1 = newId();
-            StgProjectId idWrong2 = newId();
+            var idMatching = newId();
+            var idWrong1 = newId();
+            var idWrong2 = newId();
 
-            TestCounterEntity matchingEntity = newEntity(idMatching);
-            TestCounterEntity wrong1 = newEntity(idWrong1);
-            TestCounterEntity wrong2 = newEntity(idWrong2);
+            var matchingEntity = newEntity(idMatching);
+            var wrong1 = newEntity(idWrong1);
+            var wrong2 = newEntity(idWrong2);
 
             // 2 of 3 have required values
 
@@ -297,15 +285,14 @@ public class EntityRecordStorageTest
 
             // After the mutation above the single matching record is the one
             // under the `idMatching` ID
-            EntityRecord fineRecord = writeRecord(storage, idMatching, matchingEntity);
+            var fineRecord = writeRecord(storage, idMatching, matchingEntity);
             writeRecord(storage, idWrong1, wrong1);
             writeRecord(storage, idWrong2, wrong2);
 
-            StgProject.Query query =
-                    StgProject.query()
-                              .projectStatusValue().is(DONE_VALUE)
-                              .projectVersion().is(projectVersion())
-                              .build();
+            var query = StgProject.query()
+                                  .projectStatusValue().is(DONE_VALUE)
+                                  .projectVersion().is(projectVersion())
+                                  .build();
             assertQueryHasSingleResult(query, fineRecord, storage);
         }
 
@@ -313,15 +300,14 @@ public class EntityRecordStorageTest
         private EntityRecord writeRecord(EntityRecordStorage<StgProjectId, StgProject> storage,
                                          StgProjectId id,
                                          TestCounterEntity entity) {
-            EntityRecord record = buildStorageRecord(id, newState(id));
-            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(entity, record);
+            var record = buildStorageRecord(id, newState(id));
+            var withCols = recordWithCols(entity, record);
             storage.write(withCols);
             return record;
         }
 
         private Version projectVersion() {
-            Version versionValue = Version
-                    .newBuilder()
+            var versionValue = Version.newBuilder()
                     .setNumber(0)
                     .setTimestamp(PROJECT_VERSION_TIMESTAMP)
                     .build();
@@ -331,11 +317,11 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("both by columns and IDs")
         void byColumnsAndId() {
-            StgProjectId targetId = newId();
-            TestCounterEntity targetEntity = newEntity(targetId);
-            TestCounterEntity noMatchEntity = newEntity(newId());
-            TestCounterEntity noMatchIdEntity = newEntity(newId());
-            TestCounterEntity deletedEntity = newEntity(newId());
+            var targetId = newId();
+            var targetEntity = newEntity(targetId);
+            var noMatchEntity = newEntity(newId());
+            var noMatchIdEntity = newEntity(newId());
+            var deletedEntity = newEntity(newId());
 
             targetEntity.assignStatus(CANCELLED);
             deletedEntity.assignStatus(CANCELLED);
@@ -351,20 +337,19 @@ public class EntityRecordStorageTest
             write(noMatchIdEntity);
             write(deletedEntity);
 
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            var storage = storage();
 
-            StgProject.Query query =
-                    StgProject.query()
-                              .id().is(targetId)
-                              .projectStatusValue().is(CANCELLED_VALUE)
-                              .where(ArchivedColumn.is(), false)
-                              .where(DeletedColumn.is(), false)
-                              .build();
+            var query = StgProject.query()
+                                  .id().is(targetId)
+                                  .projectStatusValue().is(CANCELLED_VALUE)
+                                  .where(ArchivedColumn.is(), false)
+                                  .where(DeletedColumn.is(), false)
+                                  .build();
 
-            Iterator<EntityRecord> read = storage.findAll(query);
+            var read = storage.findAll(query);
             List<EntityRecord> readRecords = newArrayList(read);
             assertEquals(1, readRecords.size());
-            EntityRecord readRecord = readRecords.get(0);
+            var readRecord = readRecords.get(0);
             assertEquals(targetEntity.state(), unpack(readRecord.getState()));
             assertEquals(targetId, Identifier.unpack(readRecord.getEntityId()));
         }
@@ -372,17 +357,16 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("by ID and without using the columns")
         void byIdAndNoColumns() {
-            StgProjectId matchingId = newId();
+            var matchingId = newId();
 
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecord matchingRecord = writeRecord(matchingId, storage);
+            var storage = storage();
+            var matchingRecord = writeRecord(matchingId, storage);
             writeRecord(newId(), storage);
             writeRecord(newId(), storage);
 
-            StgProject.Query query =
-                    StgProject.query()
-                              .id().is(matchingId)
-                              .build();
+            var query = StgProject.query()
+                                  .id().is(matchingId)
+                                  .build();
             assertQueryHasSingleResult(query, matchingRecord, storage);
         }
 
@@ -390,8 +374,8 @@ public class EntityRecordStorageTest
         private EntityRecord writeRecord(StgProjectId id,
                                          EntityRecordStorage<StgProjectId, StgProject> storage) {
             Entity<StgProjectId, ?> entity = newEntity(id);
-            EntityRecord record = buildStorageRecord(id, newState(id));
-            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(entity, record);
+            var record = buildStorageRecord(id, newState(id));
+            var withCols = recordWithCols(entity, record);
             storage.write(withCols);
             return record;
         }
@@ -399,23 +383,23 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("excluding inactive records by default")
         void emptyQueryExcludesInactive() {
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            StgProjectId activeId = newId();
+            var storage = storage();
+            var activeId = newId();
 
-            EntityRecord activeRecord = writeRecord(activeId, storage);
+            var activeRecord = writeRecord(activeId, storage);
             writeRecordAndArchive(newId(), storage);
             writeRecordAndDelete(newId(), storage);
 
-            Iterator<EntityRecord> read = storage.readAll();
+            var read = storage.readAll();
             assertSingleRecord(activeRecord, read);
         }
 
         @CanIgnoreReturnValue
         private EntityRecord writeRecordAndDelete(
                 StgProjectId deletedId, EntityRecordStorage<StgProjectId, StgProject> storage) {
-            TestCounterEntity deletedEntity = newEntity(deletedId);
+            var deletedEntity = newEntity(deletedId);
             delete(deletedEntity);
-            EntityRecord deletedRecord = buildStorageRecord(deletedEntity);
+            var deletedRecord = buildStorageRecord(deletedEntity);
             storage.write(recordWithCols(deletedEntity, deletedRecord));
             return deletedRecord;
         }
@@ -423,9 +407,9 @@ public class EntityRecordStorageTest
         @CanIgnoreReturnValue
         private EntityRecord writeRecordAndArchive
                 (StgProjectId archivedId, EntityRecordStorage<StgProjectId, StgProject> storage) {
-            TestCounterEntity archivedEntity = newEntity(archivedId);
+            var archivedEntity = newEntity(archivedId);
             archive(archivedEntity);
-            EntityRecord archivedRecord = buildStorageRecord(archivedEntity);
+            var archivedRecord = buildStorageRecord(archivedEntity);
             storage.write(recordWithCols(archivedEntity, archivedRecord));
             return archivedRecord;
         }
@@ -434,51 +418,44 @@ public class EntityRecordStorageTest
         @DisplayName("including inactive records when reading " +
                 "by a query with explicit `archived` and `deleted` flags set to true")
         void explicitFlags() {
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            var storage = storage();
             // Writing the active record.
             writeRecord(newId(), storage);
-            EntityRecord expectedArchived = writeRecordAndArchive(newId(), storage);
-            EntityRecord expectedDeleted = writeRecordAndDelete(newId(), storage);
+            var expectedArchived = writeRecordAndArchive(newId(), storage);
+            var expectedDeleted = writeRecordAndDelete(newId(), storage);
 
-            StgProject.Query queryArchived =
-                    StgProject.query()
-                              .where(ArchivedColumn.is(), true)
-                              .build();
+            var queryArchived = StgProject.query().where(ArchivedColumn.is(), true).build();
             assertQueryHasSingleResult(queryArchived, expectedArchived, storage);
 
-            StgProject.Query queryDeleted =
-                    StgProject.query()
-                              .where(DeletedColumn.is(), true)
-                              .build();
+            var queryDeleted = StgProject.query().where(DeletedColumn.is(), true).build();
             assertQueryHasSingleResult(queryDeleted, expectedDeleted, storage);
         }
 
         @Test
         @DisplayName("including inactive records on bulk read by IDs by default")
         void filterByIdByDefaultInBulk() {
-            StgProjectId activeId = newId();
-            StgProjectId archivedId = newId();
-            StgProjectId deletedId = newId();
+            var activeId = newId();
+            var archivedId = newId();
+            var deletedId = newId();
 
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecord activeRecord = writeRecord(activeId, storage);
-            EntityRecord archivedRecord = writeRecordAndArchive(archivedId, storage);
-            EntityRecord deletedRecord = writeRecordAndDelete(deletedId, storage);
+            var storage = storage();
+            var activeRecord = writeRecord(activeId, storage);
+            var archivedRecord = writeRecordAndArchive(archivedId, storage);
+            var deletedRecord = writeRecordAndDelete(deletedId, storage);
 
-            StgProject.Query query =
-                    StgProject.query()
-                              .id().in(activeId, archivedId, deletedId)
-                              .build();
-            Iterator<EntityRecord> actual = storage.findAll(query);
+            var query = StgProject.query()
+                                  .id().in(activeId, archivedId, deletedId)
+                                  .build();
+            var actual = storage.findAll(query);
 
             assertThat(ImmutableSet.copyOf(actual))
                     .containsExactly(activeRecord, archivedRecord, deletedRecord);
         }
 
         private void write(Entity<StgProjectId, ?> entity) {
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecord record = buildStorageRecord(entity.id(), entity.state(),
-                                                     entity.lifecycleFlags());
+            var storage = storage();
+            var record = buildStorageRecord(entity.id(), entity.state(),
+                                            entity.lifecycleFlags());
             storage.write(recordWithCols(entity, record));
         }
     }
@@ -490,14 +467,14 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("a record with no custom columns")
         void withoutColumns() {
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            StgProjectId id = newId();
-            EntityRecord expected = newStorageRecord(id);
+            var storage = storage();
+            var id = newId();
+            var expected = newStorageRecord(id);
             storage.write(id, expected);
 
-            Optional<EntityRecord> optional = storage.read(id);
+            var optional = storage.read(id);
             assertTrue(optional.isPresent());
-            EntityRecord actual = optional.get();
+            var actual = optional.get();
 
             assertEquals(expected, actual);
             close(storage);
@@ -506,14 +483,14 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("a record with custom columns")
         void withColumns() {
-            StgProjectId id = newId();
-            EntityRecord record = newStorageRecord(id);
+            var id = newId();
+            var record = newStorageRecord(id);
             Entity<StgProjectId, ?> testEntity = newEntity(id);
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(testEntity, record);
+            var storage = storage();
+            var withCols = recordWithCols(testEntity, record);
             storage.write(withCols);
 
-            Optional<EntityRecord> readRecord = storage.read(id);
+            var readRecord = storage.read(id);
             assertTrue(readRecord.isPresent());
             assertEquals(record, readRecord.get());
         }
@@ -521,20 +498,20 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("several records which did not exist in storage")
         void severalNewRecords() {
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            int bulkSize = 5;
+            var storage = storage();
+            var bulkSize = 5;
 
             Map<StgProjectId, EntityRecordWithColumns<StgProjectId>> initial =
                     new HashMap<>(bulkSize);
 
-            for (int i = 0; i < bulkSize; i++) {
-                StgProjectId id = newId();
-                EntityRecord record = newStorageRecord(id);
+            for (var i = 0; i < bulkSize; i++) {
+                var id = newId();
+                var record = newStorageRecord(id);
                 initial.put(id, newRecord(id, record));
             }
             storage.writeAll(initial.values());
 
-            Iterator<@Nullable EntityRecord> records = storage.readAll(initial.keySet());
+            var records = storage.readAll(initial.keySet());
             Collection<@Nullable EntityRecord> actual = newArrayList(records);
 
             Collection<@Nullable EntityRecord> expected =
@@ -552,18 +529,18 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("several records which previously existed in storage and rewrite them")
         void rewritingExisting() {
-            int recordCount = 3;
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
+            var recordCount = 3;
+            var storage = storage();
 
             Map<StgProjectId, EntityRecord> v1Records = new HashMap<>(recordCount);
             Map<StgProjectId, EntityRecord> v2Records = new HashMap<>(recordCount);
 
-            for (int i = 0; i < recordCount; i++) {
-                StgProjectId id = newId();
-                EntityRecord record = newStorageRecord(id);
+            for (var i = 0; i < recordCount; i++) {
+                var id = newId();
+                var record = newStorageRecord(id);
 
                 // Some records are changed and some are not.
-                EntityRecord alternateRecord = (i % 2 == 0)
+                var alternateRecord = (i % 2 == 0)
                                                ? record
                                                : newStorageRecord(id);
                 v1Records.put(id, record);
@@ -571,11 +548,11 @@ public class EntityRecordStorageTest
             }
 
             storage.writeAll(EntityRecordStorageTestEnv.recordsWithColumnsFrom(v1Records));
-            Iterator<EntityRecord> firstRevision = storage.readAll();
+            var firstRevision = storage.readAll();
             assertIteratorsEqual(v1Records.values()
                                           .iterator(), firstRevision);
             storage.writeAll(EntityRecordStorageTestEnv.recordsWithColumnsFrom(v2Records));
-            Iterator<EntityRecord> secondRevision = storage.readAll();
+            var secondRevision = storage.readAll();
             assertIteratorsEqual(v2Records.values()
                                           .iterator(), secondRevision);
         }
@@ -583,26 +560,26 @@ public class EntityRecordStorageTest
         @Test
         @DisplayName("a record and update its column values")
         void updateColumnValues() {
-            EntityRecordStorage<StgProjectId, StgProject> storage = storage();
-            StgProjectId id = newId();
-            TestCounterEntity entity = newEntity(id);
-            EntityRecord record = buildStorageRecord(id, newState(id));
+            var storage = storage();
+            var id = newId();
+            var entity = newEntity(id);
+            var record = buildStorageRecord(id, newState(id));
 
             // Write with `DONE` status at first.
-            StgProject.Status initialStatus = DONE;
+            var initialStatus = DONE;
             record = writeWithStatus(entity, initialStatus, record, storage);
-            StgProject.Query query =
+            var query =
                     StgProject.query()
                               .projectStatusValue().is(initialStatus.getNumber())
                               .build();
-            Iterator<EntityRecord> recordsBefore = storage.findAll(query);
+            var recordsBefore = storage.findAll(query);
             assertSingleRecord(record, recordsBefore);
 
             // Update the column status with `CANCELLED` value.
-            StgProject.Status statusAfterUpdate = CANCELLED;
+            var statusAfterUpdate = CANCELLED;
             writeWithStatus(entity, statusAfterUpdate, record, storage);
 
-            Iterator<EntityRecord> recordsAfter = storage.findAll(query);
+            var recordsAfter = storage.findAll(query);
             assertFalse(recordsAfter.hasNext());
         }
 
@@ -613,7 +590,7 @@ public class EntityRecordStorageTest
                         EntityRecord record,
                         EntityRecordStorage<StgProjectId, StgProject> storage) {
             entity.assignStatus(status);
-            EntityRecordWithColumns<StgProjectId> withCols = recordWithCols(entity, record);
+            var withCols = recordWithCols(entity, record);
             storage.write(withCols);
             return record;
         }

@@ -43,7 +43,7 @@ public final class RandomFillProcess
 
     @Override
     public Project apply(Project project) {
-        Project newState = project
+        var newState = project
                 .toBuilder()
                 .setId(project.getId())
                 .setName(newUuid())

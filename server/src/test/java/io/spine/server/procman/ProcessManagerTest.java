@@ -34,18 +34,15 @@ import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.model.Nothing;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.procman.given.pm.TestProcessManagerRepo;
-import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -70,15 +67,12 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.test.procman.quiz.PmQuestionId;
-import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.mute.MuteLogging;
-import io.spine.testing.server.CommandSubject;
-import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.model.ModelTests;
@@ -153,34 +147,33 @@ class ProcessManagerTest {
 
     @CanIgnoreReturnValue
     private List<? extends Message> testDispatchEvent(EventMessage eventMessage) {
-        Event event = eventFactory.createEvent(eventMessage);
-        List<Event> result = dispatch(processManager, EventEnvelope.of(event))
+        var event = eventFactory.createEvent(eventMessage);
+        var result = dispatch(processManager, EventEnvelope.of(event))
                 .getSuccess()
                 .getProducedEvents()
                 .getEventList();
-        Any expected = pack(eventMessage);
+        var expected = pack(eventMessage);
         assertState().isEqualTo(expected);
         return result;
     }
 
     private Subject assertState() {
-        Any pmState = processManager.state()
-                                    .getAny();
-        Subject assertState = assertThat(pmState);
+        var pmState = processManager.state().getAny();
+        var assertState = assertThat(pmState);
         return assertState;
     }
 
     @CanIgnoreReturnValue
     private List<Event> testDispatchCommand(CommandMessage commandMsg) {
-        Command command =
+        var command =
                 requestFactory.command()
                               .create(commandMsg);
-        CommandEnvelope envelope = CommandEnvelope.of(command);
-        List<Event> events = dispatch(processManager, envelope)
+        var envelope = CommandEnvelope.of(command);
+        var events = dispatch(processManager, envelope)
                 .getSuccess()
                 .getProducedEvents()
                 .getEventList();
-        Any expected = pack(commandMsg);
+        var expected = pack(commandMsg);
         assertState().isEqualTo(expected);
         return events;
     }
@@ -198,8 +191,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("event")
         void event() {
-            List<? extends Message> eventMessages =
-                    testDispatchEvent(messageOfType(PmProjectStarted.class));
+            var eventMessages = testDispatchEvent(messageOfType(PmProjectStarted.class));
 
             assertThat(eventMessages)
                     .hasSize(1);
@@ -268,13 +260,13 @@ class ProcessManagerTest {
     @Test
     @DisplayName("dispatch command and return events")
     void dispatchCommandAndReturnEvents() {
-        List<Event> events = testDispatchCommand(createProject());
+        var events = testDispatchCommand(createProject());
 
         assertThat(events)
                 .hasSize(1);
-        Event event = events.get(0);
+        var event = events.get(0);
         assertNotNull(event);
-        PmProjectCreated message = unpack(event.getMessage(), PmProjectCreated.class);
+        var message = unpack(event.getMessage(), PmProjectCreated.class);
         assertThat(message.getProjectId())
                 .isEqualTo(TestProcessManager.ID);
     }
@@ -286,21 +278,18 @@ class ProcessManagerTest {
         @Test
         @DisplayName("rejection message only")
         void rejectionMessage() {
-            EventEnvelope re = entityAlreadyArchived(PmDontHandle.class);
+            var re = entityAlreadyArchived(PmDontHandle.class);
             dispatch(processManager, re);
-            Event rejection = re.outerObject();
+            var rejection = re.outerObject();
             assertReceived(rejection.getMessage());
         }
 
         @Test
         @DisplayName("rejection and command message")
         void rejectionAndCommandMessage() {
-            EventEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
+            var rejection = entityAlreadyArchived(PmAddTask.class);
             dispatch(processManager, rejection);
-            Command command =
-                    rejection.context()
-                             .getRejection()
-                             .getCommand();
+            var command = rejection.context().getRejection().getCommand();
             assertReceived(command.getMessage());
         }
 
@@ -446,8 +435,8 @@ class ProcessManagerTest {
             @Test
             @DisplayName("when splitting incoming command")
             void splitCommand() {
-                CommandSubject assertCommands = context.receivesCommand(cancelIteration())
-                                                       .assertCommands();
+                var assertCommands = context.receivesCommand(cancelIteration())
+                                            .assertCommands();
                 assertCommands.withType(PmScheduleRetrospective.class)
                               .hasSize(1);
                 assertCommands.withType(PmPlanIteration.class)
@@ -485,7 +474,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("command")
         void command() {
-            CommandEnvelope envelope = CommandEnvelope.of(
+            var envelope = CommandEnvelope.of(
                     requestFactory.createCommand(PmDontHandle.getDefaultInstance())
             );
             assertThrows(IllegalStateException.class,
@@ -500,9 +489,9 @@ class ProcessManagerTest {
         @Test
         @DisplayName("event")
         void event() {
-            EventEnvelope envelope = EventEnvelope.of(GivenEvent.arbitrary());
+            var envelope = EventEnvelope.of(GivenEvent.arbitrary());
 
-            DispatchOutcome outcome = dispatch(processManager, envelope);
+            var outcome = dispatch(processManager, envelope);
             assertTrue(outcome.hasIgnored());
         }
     }
@@ -535,16 +524,16 @@ class ProcessManagerTest {
         @Test
         @DisplayName("for an either of three event reaction")
         void afterEmittingEitherOfThreeOnEventReaction() {
-            PmQuizId quizId = newQuizId();
+            var quizId = newQuizId();
             Iterable<PmQuestionId> questions = newArrayList();
-            PmStartQuiz startQuiz = startQuiz(quizId, questions);
-            PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
+            var startQuiz = startQuiz(quizId, questions);
+            var answerQuestion = answerQuestion(quizId, newAnswer());
 
-            BlackBox context = BlackBox.from(
+            var context = BlackBox.from(
                     BoundedContextBuilder.assumingTests()
                                          .add(new QuizProcmanRepository())
             );
-            EventSubject assertEvents = context
+            var assertEvents = context
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertEvents();
             assertEvents.hasSize(2);
@@ -563,7 +552,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("produced commands")
         void producedCommands() {
-            ProcessManagerClass<TestProcessManager> pmClass =
+            var pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<CommandClass> commands = pmClass.outgoingCommands();
             assertCommandClassesExactly(commands,
@@ -578,7 +567,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("produced events")
         void producedEvents() {
-            ProcessManagerClass<TestProcessManager> pmClass =
+            var pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> events = pmClass.outgoingEvents();
             assertEventClassesExactly(events,
@@ -593,7 +582,7 @@ class ProcessManagerTest {
         @Test
         @DisplayName("handled external event classes")
         void handledExternalEvents() {
-            ProcessManagerClass<TestProcessManager> pmClass =
+            var pmClass =
                     asProcessManagerClass(TestProcessManager.class);
             Set<EventClass> externalEvents = pmClass.externalEvents();
             assertEventClassesExactly(externalEvents,

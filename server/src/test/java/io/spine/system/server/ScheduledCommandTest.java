@@ -27,20 +27,16 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.RecordBasedRepository;
-import io.spine.server.entity.Repository;
 import io.spine.system.server.given.command.CompanyAggregate;
 import io.spine.system.server.given.schedule.TestCommandScheduler;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -48,8 +44,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -60,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("ScheduledCommand should")
+@DisplayName("`ScheduledCommand` should")
 class ScheduledCommandTest {
 
     private static final TestActorRequestFactory requestFactory =
@@ -75,19 +69,18 @@ class ScheduledCommandTest {
         scheduler = new TestCommandScheduler();
         ServerEnvironment.instance()
                          .scheduleCommandsUsing(() -> scheduler);
-        BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
+        var contextBuilder = BoundedContextBuilder.assumingTests();
         contextBuilder.systemSettings()
                       .enableCommandLog();
         context = contextBuilder.build();
         context.internalAccess()
                .register(DefaultRepository.of(CompanyAggregate.class));
-        BoundedContext system = systemOf(this.context);
-        Optional<Repository<?, ?>> found =
-                system.internalAccess()
-                      .findRepository(ScheduledCommandRecord.class);
+        var system = systemOf(this.context);
+        var found = system.internalAccess()
+                          .findRepository(ScheduledCommandRecord.class);
         assertTrue(found.isPresent());
         @SuppressWarnings("unchecked") // @Internal API. OK for tests.
-        RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> repository =
+        var repository =
                 (RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord>)
                         found.get();
         this.repository = repository;
@@ -101,25 +94,25 @@ class ScheduledCommandTest {
     @Test
     @DisplayName("be created when a command is scheduled")
     void created() {
-        Command scheduled = createAndSchedule();
+        var scheduled = createAndSchedule();
         checkScheduled(scheduled);
     }
 
     @Test
     @DisplayName("be deleted when a command is dispatched")
     void deleted() {
-        Command scheduled = createAndSchedule();
+        var scheduled = createAndSchedule();
         checkScheduled(scheduled);
 
         scheduler.postScheduled();
 
-        Optional<ScheduledCommand> command = repository.findActive(scheduled.getId());
+        var command = repository.findActive(scheduled.getId());
         assertThat(command).isEmpty();
 
-        Optional<ScheduledCommand> optional = repository.find(scheduled.getId());
+        var optional = repository.find(scheduled.getId());
         assertTrue(optional.isPresent());
-        ScheduledCommand deletedCommand = optional.get();
-        LifecycleFlags flags = deletedCommand.lifecycleFlags();
+        var deletedCommand = optional.get();
+        var flags = deletedCommand.lifecycleFlags();
 
         assertThat(flags.getDeleted()).isTrue();
         assertThat(flags.getArchived()).isFalse();
@@ -128,52 +121,51 @@ class ScheduledCommandTest {
     @Test
     @DisplayName("not be created for a non-scheduled command")
     void skipped() {
-        Command command = createCommand();
+        var command = createCommand();
         post(command);
 
-        CommandId commandId = command.getId();
+        var commandId = command.getId();
 
-        Optional<ScheduledCommand> found = repository.find(commandId);
+        var found = repository.find(commandId);
         assertThat(found).isEmpty();
     }
 
     private void checkScheduled(Command scheduled) {
-        Optional<ScheduledCommand> found = repository.find(scheduled.getId());
+        var found = repository.find(scheduled.getId());
         assertTrue(found.isPresent());
-        ScheduledCommandRecord scheduledCommand = found.get().state();
+        var scheduledCommand = found.get().state();
 
         assertFalse(isDefault(scheduledCommand.getSchedulingTime()));
-        Command savedCommand = scheduledCommand.getCommand();
+        var savedCommand = scheduledCommand.getCommand();
         assertEquals(scheduled, savedCommand);
         scheduler.assertScheduled(savedCommand);
     }
 
     @CanIgnoreReturnValue
     private Command createAndSchedule() {
-        Command raw = createCommand();
-        Schedule schedule = createSchedule(5_000);
-        Command scheduled = schedule(raw, schedule);
+        var raw = createCommand();
+        var schedule = createSchedule(5_000);
+        var scheduled = schedule(raw, schedule);
         post(scheduled);
         return scheduled;
     }
 
     private static Schedule createSchedule(long delayMillis) {
-        Duration delay = Durations.fromMillis(delayMillis);
-        Schedule result = Schedule
-                .newBuilder()
+        var delay = Durations.fromMillis(delayMillis);
+        var result = Schedule.newBuilder()
                 .setDelay(delay)
                 .build();
         return result;
     }
 
     private static Command schedule(Command command, Schedule schedule) {
-        CommandContext sourceContext = command.context();
-        CommandContext newContext = sourceContext.toBuilder()
-                                                 .setSchedule(schedule)
-                                                 .build();
-        Command result = command.toBuilder()
-                                .setContext(newContext)
-                                .build();
+        var sourceContext = command.context();
+        var newContext = sourceContext.toBuilder()
+                .setSchedule(schedule)
+                .build();
+        var result = command.toBuilder()
+                .setContext(newContext)
+                .build();
         return result;
     }
 
@@ -183,18 +175,17 @@ class ScheduledCommandTest {
     }
 
     private static Command createCommand() {
-        CommandMessage commandMessage = createCommandMessage();
-        Command command = requestFactory.command()
-                                        .create(commandMessage);
+        var commandMessage = createCommandMessage();
+        var command = requestFactory.command().create(commandMessage);
         return command;
     }
 
     private static CommandMessage createCommandMessage() {
-        String name = ScheduledCommandTest.class.getSimpleName();
-        EstablishCompany result = EstablishCompany.newBuilder()
-                                                  .setId(CompanyId.generate())
-                                                  .setFinalName(name)
-                                                  .build();
+        var name = ScheduledCommandTest.class.getSimpleName();
+        var result = EstablishCompany.newBuilder()
+                .setId(CompanyId.generate())
+                .setFinalName(name)
+                .build();
         return result;
     }
 }

@@ -57,7 +57,7 @@ public final class Surrealism {
     }
 
     static Optional<ArtistName> opponentOf(ArtistName name) {
-        ArtistName opponent = opponents.get(name);
+        var opponent = opponents.get(name);
         return Optional.ofNullable(opponent);
     }
 

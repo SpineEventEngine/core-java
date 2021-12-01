@@ -35,8 +35,6 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.Task;
 
-import java.util.List;
-
 import static io.spine.server.route.EventRoute.withId;
 import static java.util.stream.Collectors.toList;
 
@@ -49,11 +47,9 @@ public final class EntitySubscriberProjection
 
     @Subscribe
     void onUpdate(Project aggregateState) {
-        List<String> taskNames =
-                aggregateState.getTaskList()
-                              .stream()
-                              .map(Task::getTitle)
-                              .collect(toList());
+        var taskNames = aggregateState.getTaskList().stream()
+                .map(Task::getTitle)
+                .collect(toList());
         builder().setProjectId(aggregateState.getId())
                  .setProjectName(aggregateState.getName())
                  .clearTaskName()

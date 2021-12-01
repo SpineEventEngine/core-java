@@ -119,7 +119,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     public Command generateCommand() {
         @SuppressWarnings("MagicNumber")
         var randomSuffix = String.format("%04d", TestValues.random(10_000));
-        var msg = TestCommandMessage .newBuilder()
+        var msg = TestCommandMessage.newBuilder()
                 .setId("random-number-" + randomSuffix)
                 .build();
         return createCommand(msg);

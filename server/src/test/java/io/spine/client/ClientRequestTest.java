@@ -27,7 +27,6 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.server.BoundedContextBuilder;
@@ -68,8 +67,7 @@ class ClientRequestTest extends AbstractClientTest {
         @Test
         @DisplayName("`CommandRequest`")
         void command() {
-            CommandMessage msg = LogInUser
-                    .newBuilder()
+            var msg = LogInUser.newBuilder()
                     .setUser(GivenUserId.generated())
                     .build();
 

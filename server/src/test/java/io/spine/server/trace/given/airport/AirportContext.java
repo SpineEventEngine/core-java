@@ -44,9 +44,8 @@ public final class AirportContext {
     }
 
     public static BoundedContextBuilder builder() {
-        FlightRepository flights = new FlightRepository();
-        EventEnricher enricher = EventEnricher
-                .newBuilder()
+        var flights = new FlightRepository();
+        var enricher = EventEnricher.newBuilder()
                 .add(FlightRescheduled.class, AirportId.class,
                      (event, context) -> flights.departureAirport(event.getId()))
                 .add(FlightCanceled.class, AirportId.class,

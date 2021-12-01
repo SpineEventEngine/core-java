@@ -27,7 +27,6 @@
 package io.spine.server.type;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.given.rejection.PhoneNotFound;
@@ -61,38 +60,35 @@ class EventClassTest {
         @Test
         @DisplayName("from `TypeUrl` instance")
         void fromTypeUrl() {
-            TypeUrl typeUrl = TypeUrl.from(ProjectCreated.getDescriptor());
-            EventClass eventClass = EventClass.from(typeUrl);
+            var typeUrl = TypeUrl.from(ProjectCreated.getDescriptor());
+            var eventClass = EventClass.from(typeUrl);
             assertThat(eventClass.value()).isEqualTo(ProjectCreated.class);
         }
 
         @Test
         @DisplayName("from `Event` instance")
         void fromEvent() {
-            ProjectId id = ProjectId
-                    .newBuilder()
+            var id = ProjectId.newBuilder()
                     .setId(newUuid())
                     .build();
-            ProjectCreated projectCreated = ProjectCreated
-                    .newBuilder()
+            var projectCreated = ProjectCreated.newBuilder()
                     .setProjectId(id)
                     .build();
-            Any any = AnyPacker.pack(projectCreated);
-            Event event = Event
-                    .newBuilder()
+            var any = AnyPacker.pack(projectCreated);
+            var event = Event.newBuilder()
                     .setMessage(any)
                     .build();
-            EventClass eventClass = EventClass.from(event);
+            var eventClass = EventClass.from(event);
             assertThat(eventClass.value()).isEqualTo(ProjectCreated.class);
         }
     }
 
-    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})
-    // Method called to throw exception.
+
     @Test
-    @DisplayName("throw IAE when constructing from non-event type URL")
+    @DisplayName("throw `IAE` when constructing from non-event type URL")
+    @SuppressWarnings({"CheckReturnValue", "ResultOfMethodCallIgnored"})  /* Intentionally. */
     void throwOnNonEventType() {
-        TypeUrl typeUrl = TypeUrl.from(ProjectId.getDescriptor());
+        var typeUrl = TypeUrl.from(ProjectId.getDescriptor());
         assertThrows(IllegalArgumentException.class, () -> EventClass.from(typeUrl));
     }
 

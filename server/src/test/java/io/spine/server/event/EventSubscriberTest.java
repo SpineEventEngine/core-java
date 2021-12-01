@@ -26,15 +26,11 @@
 
 package io.spine.server.event;
 
-import com.google.protobuf.Any;
 import io.spine.base.Identifier;
-import io.spine.core.Event;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.DiagnosticMonitor;
-import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.test.event.FailRequested;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.TestEventFactory;
@@ -42,13 +38,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventSubscriber should")
+@DisplayName("`EventSubscriber` should")
 class EventSubscriberTest {
 
     private final TestEventFactory factory = TestEventFactory.newInstance(getClass());
@@ -61,30 +55,28 @@ class EventSubscriberTest {
     }
 
     @Test
-    @MuteLogging
     @DisplayName("catch exceptions caused by methods")
+    @MuteLogging
     void catchMethodExceptions() {
         // Create event which should fail.
-        EventEnvelope eventEnvelope = createEvent(false);
+        var eventEnvelope = createEvent(false);
 
-        BoundedContext context = BoundedContextBuilder
-                .assumingTests()
-                .build();
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        var context = BoundedContextBuilder.assumingTests().build();
+        var contextAccess = context.internalAccess();
         contextAccess.registerEventDispatcher(subscriber);
-        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        var monitor = new DiagnosticMonitor();
         contextAccess.registerEventDispatcher(monitor);
         subscriber.dispatch(eventEnvelope);
 
         assertTrue(subscriber.isMethodCalled());
-        List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
+        var systemEvents = monitor.handlerFailureEvents();
         assertThat(systemEvents)
                 .hasSize(1);
-        HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
+        var systemEvent = systemEvents.get(0);
         assertThat(systemEvent.getHandledSignal())
                 .isEqualTo(eventEnvelope.messageId());
         assertThat(systemEvent.getError()).isNotEqualToDefaultInstance();
-        Any expectedId = Identifier.pack(subscriber.getClass()
+        var expectedId = Identifier.pack(subscriber.getClass()
                                                    .getName());
         assertThat(systemEvent.getEntity().getId())
                 .isEqualTo(expectedId);
@@ -93,7 +85,7 @@ class EventSubscriberTest {
     @Test
     @DisplayName("dispatch event")
     void dispatchEvent() {
-        EventEnvelope eventEnvelope = createEvent(true);
+        var eventEnvelope = createEvent(true);
 
         subscriber.dispatch(eventEnvelope);
         assertTrue(subscriber.isMethodCalled());
@@ -114,9 +106,9 @@ class EventSubscriberTest {
     }
 
     private EventEnvelope createEvent(boolean shouldFail) {
-        Event event = factory.createEvent(FailRequested.newBuilder()
-                                                       .setShouldFail(shouldFail)
-                                                       .build());
+        var event = factory.createEvent(FailRequested.newBuilder()
+                                                .setShouldFail(shouldFail)
+                                                .build());
         return EventEnvelope.of(event);
     }
 }

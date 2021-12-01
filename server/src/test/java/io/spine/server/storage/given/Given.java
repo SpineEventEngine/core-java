@@ -40,13 +40,6 @@ public class Given {
     private Given() {
     }
 
-    static StgProjectId newProjectId() {
-        String uuid = newUuid();
-        return StgProjectId.newBuilder()
-                           .setId(uuid)
-                           .build();
-    }
-
     public static class EventMessage {
 
         private EventMessage() {
@@ -54,8 +47,8 @@ public class Given {
 
         public static StgProjectCreated projectCreated(StgProjectId id) {
             return StgProjectCreated.newBuilder()
-                                    .setProjectId(id)
-                                    .build();
+                    .setProjectId(id)
+                    .build();
         }
     }
 
@@ -66,26 +59,33 @@ public class Given {
 
         public static StgCreateProject createProject() {
             return StgCreateProject.newBuilder()
-                                   .setProjectId(newProjectId())
-                                   .build();
+                    .setProjectId(newProjectId())
+                    .build();
         }
 
         public static StgCreateProject createProject(StgProjectId id) {
             return StgCreateProject.newBuilder()
-                                   .setProjectId(id)
-                                   .build();
+                    .setProjectId(id)
+                    .build();
         }
 
         public static StgAddTask addTask(StgProjectId id) {
             return StgAddTask.newBuilder()
-                             .setProjectId(id)
-                             .build();
+                    .setProjectId(id)
+                    .build();
         }
 
         public static StgStartProject startProject(StgProjectId id) {
             return StgStartProject.newBuilder()
-                                  .setProjectId(id)
-                                  .build();
+                    .setProjectId(id)
+                    .build();
+        }
+
+        private static StgProjectId newProjectId() {
+            var uuid = newUuid();
+            return StgProjectId.newBuilder()
+                    .setId(uuid)
+                    .build();
         }
     }
 }

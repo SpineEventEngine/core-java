@@ -30,10 +30,12 @@ import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.command.model.given.handler.InvalidHandler;
 import io.spine.server.command.model.given.handler.ValidHandler;
 import io.spine.server.model.MethodSignatureTest;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
+@DisplayName("`CommandHandlerSignature` should")
 class CommandHandlerSignatureTest extends MethodSignatureTest<CommandHandlerSignature> {
 
     @Override

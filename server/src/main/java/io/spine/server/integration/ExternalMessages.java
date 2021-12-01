@@ -101,8 +101,7 @@ final class ExternalMessages {
         var packedId = Identifier.pack(id);
         var packedMessage = AnyPacker.pack(message);
 
-        var result = ExternalMessage
-                .newBuilder()
+        var result = ExternalMessage.newBuilder()
                 .setId(packedId)
                 .setOriginalMessage(packedMessage)
                 .setBoundedContextName(origin)

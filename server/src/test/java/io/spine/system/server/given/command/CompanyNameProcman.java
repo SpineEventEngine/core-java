@@ -60,27 +60,26 @@ public class CompanyNameProcman
         builder().setId(command.getId());
 
         return CompanyEstablishingStarted.newBuilder()
-                                         .setId(command.getId())
-                                         .build();
+                .setId(command.getId())
+                .build();
     }
 
     @Assign
     CompanyNameRethought handle(ProposeCompanyName command) {
-        String name = command.getName();
+        var name = command.getName();
         checkArgument(!name.equals(FAULTY_NAME));
         builder().setProposedName(name);
 
         return CompanyNameRethought.newBuilder()
-                                   .setId(command.getId())
-                                   .setName(command.getName())
-                                   .build();
+                .setId(command.getId())
+                .setName(command.getName())
+                .build();
     }
 
     @Command
     EstablishCompany transform(FinalizeCompanyName command, CommandContext context) {
-        String name = builder().getProposedName();
-        EstablishCompany establishCommand = EstablishCompany
-                .newBuilder()
+        var name = builder().getProposedName();
+        var establishCommand = EstablishCompany.newBuilder()
                 .setId(builder().getId())
                 .setFinalName(name)
                 .build();

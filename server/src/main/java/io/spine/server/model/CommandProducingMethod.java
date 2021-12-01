@@ -26,12 +26,9 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.CommandFactory;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.server.dispatch.ProducedCommands;
 import io.spine.server.dispatch.Success;
@@ -75,24 +72,19 @@ public interface CommandProducingMethod<T,
      */
     @Override
     default Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal) {
-        MethodResult result = MethodResult.from(rawResult);
+        var result = MethodResult.from(rawResult);
         if (result.isEmpty()) {
             return fromEmpty(handledSignal);
         }
-        ActorContext actorContext =
-                handledSignal.asMessageOrigin()
-                             .getActorContext();
-        CommandFactory commandFactory = ActorRequestFactory
-                .fromContext(actorContext)
-                .command();
-        ProducedCommands.Builder signals = ProducedCommands.newBuilder();
-        ImmutableList<CommandMessage> messages = result.messages(CommandMessage.class);
-        for (CommandMessage msg : messages) {
-            Command command = commandFactory.create(msg);
+        var actorContext = handledSignal.asMessageOrigin().getActorContext();
+        var commandFactory = ActorRequestFactory.fromContext(actorContext).command();
+        var signals = ProducedCommands.newBuilder();
+        var messages = result.messages(CommandMessage.class);
+        for (var msg : messages) {
+            var command = commandFactory.create(msg);
             signals.addCommand(command);
         }
-        return Success
-                .newBuilder()
+        return Success.newBuilder()
                 .setProducedCommands(signals)
                 .build();
     }

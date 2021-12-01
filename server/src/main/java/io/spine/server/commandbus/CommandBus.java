@@ -187,13 +187,12 @@ public final class CommandBus
                                                   StreamObserver<Ack> source) {
         var wrappedSource = super.prepareObserver(commands, source);
         var tenant = tenantOf(commands);
-        StreamObserver<Ack> commandAckMonitor = CommandAckMonitor
-                .newBuilder()
+        var commandAckMonitor = CommandAckMonitor.newBuilder()
                 .setTenantId(tenant)
                 .setPostedCommands(ImmutableSet.copyOf(commands))
                 .setSystemWriteSide(systemWriteSide)
                 .build();
-        StreamObserver<Ack> result = new CompositeObserver<>(ImmutableList.of(
+        var result = new CompositeObserver<>(ImmutableList.of(
                 wrappedSource,
                 immediateRejectionObserver,
                 commandAckMonitor

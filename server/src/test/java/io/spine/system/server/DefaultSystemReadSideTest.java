@@ -29,7 +29,6 @@ package io.spine.system.server;
 import com.google.common.testing.NullPointerTester;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EventMessage;
-import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -51,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("SystemReadSide should")
+@DisplayName("`SystemReadSide` should")
 class DefaultSystemReadSideTest {
 
     private static final TestEventFactory events =
@@ -62,9 +61,7 @@ class DefaultSystemReadSideTest {
 
     @BeforeEach
     void setUp() {
-        domainContext = BoundedContextBuilder
-                .assumingTests()
-                .build();
+        domainContext = BoundedContextBuilder.assumingTests().build();
         systemReadSide = domainContext.systemClient().readSide();
     }
 
@@ -74,7 +71,7 @@ class DefaultSystemReadSideTest {
     }
 
     @Test
-    @DisplayName("not allow nulls on construction")
+    @DisplayName("not allow `null`s on construction")
     void notAllowNullsOnConstruction() {
         new NullPointerTester()
                 .setDefault(EventBus.class, EventBus.newBuilder().build())
@@ -82,7 +79,7 @@ class DefaultSystemReadSideTest {
     }
 
     @Test
-    @DisplayName("not allow nulls")
+    @DisplayName("not allow `null`s")
     void notAllowNulls() {
         new NullPointerTester()
                 .testAllPublicInstanceMethods(systemReadSide);
@@ -94,37 +91,36 @@ class DefaultSystemReadSideTest {
         @Test
         @DisplayName("pass system events to the domain")
         void passSystemEvents() {
-            ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+            var subscriber = new ProjectCreatedSubscriber();
             systemReadSide.register(subscriber);
 
-            EventMessage systemEvent = postSystemEvent();
-            Optional<EventMessage> receivedEvent = subscriber.lastEvent();
+            var systemEvent = postSystemEvent();
+            var receivedEvent = subscriber.lastEvent();
             assertTrue(receivedEvent.isPresent());
-            EventMessage actualEvent = receivedEvent.get();
+            var actualEvent = receivedEvent.get();
             assertEquals(systemEvent, actualEvent);
         }
 
         @Test
         @DisplayName("unregister dispatchers")
         void unregisterDispatchers() {
-            ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+            var subscriber = new ProjectCreatedSubscriber();
             systemReadSide.register(subscriber);
             systemReadSide.unregister(subscriber);
 
             postSystemEvent();
-            Optional<EventMessage> receivedEvent = subscriber.lastEvent();
+            var receivedEvent = subscriber.lastEvent();
             assertFalse(receivedEvent.isPresent());
         }
 
         @CanIgnoreReturnValue
         private EventMessage postSystemEvent() {
-            BoundedContext systemContext = systemOf(domainContext);
-            EventMessage systemEvent = SMProjectCreated
-                    .newBuilder()
+            var systemContext = systemOf(domainContext);
+            EventMessage systemEvent = SMProjectCreated.newBuilder()
                     .setUuid(newUuid())
                     .setName("System Bus test project")
                     .build();
-            Event event = events.createEvent(systemEvent);
+            var event = events.createEvent(systemEvent);
             systemContext.eventBus().post(event);
             return systemEvent;
         }

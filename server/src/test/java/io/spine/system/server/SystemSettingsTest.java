@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@DisplayName("SystemFeatures should")
+@DisplayName("`SystemFeatures` should")
 class SystemSettingsTest {
 
     @Nested
@@ -55,14 +55,14 @@ class SystemSettingsTest {
         @Test
         @DisplayName("disable command log")
         void commands() {
-            SystemSettings features = SystemSettings.defaults();
+            var features = SystemSettings.defaults();
             assertFalse(features.includeCommandLog());
         }
 
         @Test
         @DisplayName("disable event store")
         void events() {
-            SystemSettings features = SystemSettings.defaults();
+            var features = SystemSettings.defaults();
             assertFalse(features.includePersistentEvents());
         }
 
@@ -92,7 +92,7 @@ class SystemSettingsTest {
         @Test
         @DisplayName("disallow parallel posting of system events in the test environment")
         void disallowParallelPostingForTest() {
-            Environment env = Environment.instance();
+            var env = Environment.instance();
             assumeTrue(env.is(Tests.class));
             assertFalse(SystemSettings.defaults()
                                       .postEventsInParallel());
@@ -106,27 +106,21 @@ class SystemSettingsTest {
         @Test
         @DisplayName("command log")
         void commands() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .enableCommandLog();
+            var features = SystemSettings.defaults().enableCommandLog();
             assertTrue(features.includeCommandLog());
         }
 
         @Test
         @DisplayName("event store")
         void events() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .persistEvents();
+            var features = SystemSettings.defaults().persistEvents();
             assertTrue(features.includePersistentEvents());
         }
 
         @Test
-        @DisplayName("system events to be posted in synch")
+        @DisplayName("system events to be posted in sync")
         void parallelism() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .disableParallelPosting();
+            var features = SystemSettings.defaults().disableParallelPosting();
             assertFalse(features.postEventsInParallel());
         }
     }

@@ -28,7 +28,6 @@ package io.spine.server.tuple;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
@@ -39,8 +38,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
-
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,17 +45,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("`EitherOfThree` should")
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
         "DuplicateStringLiteralInspection" /* Common test display names. */,
         "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
-@DisplayName("EitherOfThree should")
 class EitherOf3Test {
 
     private final StringValue a = TestValues.newUuidValue();
-    private final UInt32Value b = UInt32Value.newBuilder()
-                                             .setValue(42)
-                                             .build();
+    private final UInt32Value b = UInt32Value.newBuilder().setValue(42).build();
     private final Timestamp c = Time.currentTime();
 
     private EitherOf3<StringValue, UInt32Value, Timestamp> eitherWithA;
@@ -122,17 +117,17 @@ class EitherOf3Test {
     @Test
     @DisplayName("return only one value in iteration")
     void provideProperIterator() {
-        Iterator<Message> iteratorA = eitherWithA.iterator();
+        var iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
         assertFalse(iteratorA.hasNext());
 
-        Iterator<Message> iteratorB = eitherWithB.iterator();
+        var iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
         assertFalse(iteratorB.hasNext());
 
-        Iterator<Message> iteratorC = eitherWithC.iterator();
+        var iteratorC = eitherWithC.iterator();
 
         assertEquals(c, iteratorC.next());
         assertFalse(iteratorC.hasNext());

@@ -480,9 +480,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @BeforeEach
         void setUp() {
-            enricher = EventEnricher
-                    .newBuilder()
-                    .build();
+            enricher = EventEnricher.newBuilder().build();
             commandDispatcher = new BbCommandDispatcher(commandClass);
             eventDispatcher = new BbEventDispatcher();
         }
@@ -668,8 +666,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         var queryFactory = context.requestFactory().query();
         var query = queryFactory.all(BbProject.class);
 
-        var expected = BbProject
-                .newBuilder()
+        var expected = BbProject.newBuilder()
                 .setId(id)
                 .build();
         context.assertQueryResult(query)

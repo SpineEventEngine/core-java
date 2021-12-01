@@ -48,37 +48,33 @@ class QueryValidatorTest {
     @Test
     @DisplayName("now allow `limit` without `order_by`")
     void limit() {
-        ResponseFormat format = ResponseFormat
-                .newBuilder()
+        var format = ResponseFormat.newBuilder()
                 .setLimit(42)
                 .build();
-        Query query = Query
-                .newBuilder()
+        var query = Query.newBuilder()
                 .setContext(buildActorContext())
                 .setId(queryId())
                 .setTarget(buildTarget())
                 .setFormat(format)
                 .vBuild();
-        TypeRegistry typeRegistry = InMemoryTypeRegistry.newInstance();
+        var typeRegistry = InMemoryTypeRegistry.newInstance();
         typeRegistry.register(new MenuRepository());
-        QueryValidator validator = new QueryValidator(typeRegistry);
+        var validator = new QueryValidator(typeRegistry);
         assertThrows(InvalidRequestException.class, () -> validator.validate(query));
     }
 
     private static ActorContext buildActorContext() {
-        return ActorContext
-                    .newBuilder()
-                    .setActor(userId())
-                    .setTimestamp(Time.currentTime())
-                    .build();
+        return ActorContext.newBuilder()
+                .setActor(userId())
+                .setTimestamp(Time.currentTime())
+                .build();
     }
 
     private static Target buildTarget() {
         return Target.newBuilder()
-                     .setIncludeAll(true)
-                     .setType(TypeUrl.of(Menu.class)
-                                     .value())
-                     .build();
+                .setIncludeAll(true)
+                .setType(TypeUrl.of(Menu.class).value())
+                .build();
     }
 
     private static QueryId queryId() {

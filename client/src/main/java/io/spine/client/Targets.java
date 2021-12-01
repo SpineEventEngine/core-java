@@ -160,8 +160,7 @@ public final class Targets {
     @SafeVarargs
     public static <I> TargetFilters acceptingOnly(I... id) {
         var idFilter = toIdFilter(id);
-        var result = TargetFilters
-                .newBuilder()
+        var result = TargetFilters.newBuilder()
                 .setIdFilter(idFilter)
                 .build();
         return result;

@@ -27,8 +27,6 @@
 package io.spine.server.event.model;
 
 import io.spine.base.Error;
-import io.spine.core.Event;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.model.given.reactor.RcHandlerFailedSubscriber;
 import io.spine.server.event.model.given.reactor.RcReactWithRejection;
@@ -47,21 +45,19 @@ class MethodOutcomeTest {
     @Test
     @DisplayName("be an error when the method returns a rejection")
     void returnRejection() {
-        RcHandlerFailedSubscriber diagnosticSubscriber = new RcHandlerFailedSubscriber();
-        BoundedContext context = BoundedContextBuilder
+        var diagnosticSubscriber = new RcHandlerFailedSubscriber();
+        var context = BoundedContextBuilder
                 .assumingTests()
                 .addEventDispatcher(new RcReactWithRejection())
                 .addEventDispatcher(diagnosticSubscriber)
                 .build();
-        ModProjectCreated event = ModProjectCreated
-                .newBuilder()
+        var event = ModProjectCreated.newBuilder()
                 .setId(newUuid())
                 .build();
-        Event e = TestEventFactory.newInstance(MethodOutcomeTest.class)
-                                  .createEvent(event);
+        var e = TestEventFactory.newInstance(MethodOutcomeTest.class)
+                                .createEvent(event);
         context.eventBus().post(e);
-        Error partialExpectedError = Error
-                .newBuilder()
+        var partialExpectedError = Error.newBuilder()
                 .setType(IllegalOutcomeException.class.getCanonicalName())
                 .buildPartial();
         assertThat(diagnosticSubscriber.events())

@@ -52,9 +52,9 @@ import static io.spine.server.model.TypeMatcher.matches;
 class TypeMatcherTest {
 
     @Test
-    @DisplayName("not accept nulls in package-private static methods")
+    @DisplayName("not accept `null`s in package-private static methods")
     void nullCheckStaticMethods() {
-        NullPointerTester tester = new NullPointerTester();
+        var tester = new NullPointerTester();
         tester.setDefault(TypeToken.class, TypeToken.of(TypeMatcherTest.class));
         tester.testStaticMethods(TypeMatcher.class, NullPointerTester.Visibility.PACKAGE);
     }

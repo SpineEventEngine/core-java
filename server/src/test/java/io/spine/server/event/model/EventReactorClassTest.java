@@ -26,7 +26,6 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.Event;
 import io.spine.server.event.model.given.classes.ConferenceSetup;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.model.Conference;
@@ -90,16 +89,14 @@ class EventReactorClassTest {
     @Test
     @DisplayName("obtain the method by the event")
     void reactorOf() {
-        TestEventFactory factory = TestEventFactory.newInstance(EventSubscriberClassTest.class);
-        Event event = factory.createEvent(ConferenceAnnounced
-                                                  .newBuilder()
-                                                  .setConference(Conference.newBuilder()
-                                                                           .setName("ES Conf"))
-                                                  .setDate(LocalDates.of(2021, JULY, 29))
-                                                  .vBuild());
-        EventReactorMethod method = reactorClass.reactorOf(
-                EventEnvelope.of(event)
-        ).orElseGet(Assertions::fail);
+        var factory = TestEventFactory.newInstance(EventSubscriberClassTest.class);
+        var event = factory.createEvent(
+                ConferenceAnnounced.newBuilder()
+                        .setConference(Conference.newBuilder().setName("ES Conf"))
+                        .setDate(LocalDates.of(2021, JULY, 29))
+                        .vBuild());
+        var method = reactorClass.reactorOf(EventEnvelope.of(event))
+                                 .orElseGet(Assertions::fail);
         assertThat(method.rawMethod())
             .isEqualTo(ModelTests.getMethod(ConferenceSetup.class, "invitationPolicy"));
     }

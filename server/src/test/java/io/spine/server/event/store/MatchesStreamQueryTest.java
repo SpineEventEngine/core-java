@@ -45,7 +45,7 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("MatchesStreamQuery should")
+@DisplayName("`MatchesStreamQuery` should")
 class MatchesStreamQueryTest {
 
     private static final String FIELD_NAME = "spine.test.event.ProjectCreated.project_id";
@@ -56,8 +56,7 @@ class MatchesStreamQueryTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        MatchesStreamQuery predicate = new MatchesStreamQuery(
-                EventStreamQuery.getDefaultInstance());
+        var predicate = new MatchesStreamQuery(EventStreamQuery.getDefaultInstance());
 
         new NullPointerTester()
                 .setDefault(Event.class, Event.getDefaultInstance())
@@ -67,56 +66,51 @@ class MatchesStreamQueryTest {
     @Test
     @DisplayName("match proper records")
     void matchProperRecords() {
-        ProjectId properValue = generate();
-        Event event = eventWith(properValue);
-        MatchesStreamQuery predicate = queryWith(FIELD_NAME, properValue);
+        var properValue = generate();
+        var event = eventWith(properValue);
+        var predicate = queryWith(FIELD_NAME, properValue);
         assertTrue(predicate.test(event));
     }
 
     @Test
     @DisplayName("not match improper records")
     void notMatchImproperRecords() {
-        ProjectId properField = generate();
-        ProjectId wrongValue = ProjectId.getDefaultInstance();
-        Event event = eventWith(wrongValue);
-        MatchesStreamQuery predicate = queryWith(FIELD_NAME, properField);
+        var properField = generate();
+        var wrongValue = ProjectId.getDefaultInstance();
+        var event = eventWith(wrongValue);
+        var predicate = queryWith(FIELD_NAME, properField);
         assertFalse(predicate.test(event));
     }
 
     private static MatchesStreamQuery queryWith(String fieldPath, Message field) {
-        FieldFilter filter = FieldFilter
-                .newBuilder()
+        var filter = FieldFilter.newBuilder()
                 .setFieldPath(fieldPath)
                 .addValue(AnyPacker.pack(field))
                 .build();
-        EventFilter eventFilter = EventFilter
-                .newBuilder()
+        var eventFilter = EventFilter.newBuilder()
                 .addEventFieldFilter(filter)
                 .build();
-        EventStreamQuery query = EventStreamQuery
-                .newBuilder()
+        var query = EventStreamQuery.newBuilder()
                 .addFilter(eventFilter)
                 .build();
-        MatchesStreamQuery predicate = new MatchesStreamQuery(query);
+        var predicate = new MatchesStreamQuery(query);
         return predicate;
     }
 
     private static Event eventWith(ProjectId fieldValue) {
-        ProjectCreated eventMsg = eventMessage(fieldValue);
+        var eventMsg = eventMessage(fieldValue);
         return eventFactory.createEvent(eventMsg);
     }
 
     private static ProjectCreated eventMessage(ProjectId value) {
-        return ProjectCreated
-                .newBuilder()
+        return ProjectCreated.newBuilder()
                 .setProjectId(value)
                 .build();
     }
 
     private static ProjectId generate() {
         return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+                .setId(newUuid())
+                .build();
     }
-
 }

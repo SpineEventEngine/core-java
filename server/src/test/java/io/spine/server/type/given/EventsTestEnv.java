@@ -42,26 +42,26 @@ public class EventsTestEnv {
     }
 
     public static CommandContext commandContext(TenantId id) {
-        ActorContext actorContext = ActorContext.newBuilder()
-                                                .setTenantId(id)
-                                                .build();
-        CommandContext result = CommandContext.newBuilder()
-                                              .setActorContext(actorContext)
-                                              .build();
+        var actorContext = ActorContext.newBuilder()
+                .setTenantId(id)
+                .build();
+        var result = CommandContext.newBuilder()
+                .setActorContext(actorContext)
+                .build();
         return result;
     }
 
     public static TenantId tenantId() {
-        String value = EventsTestEnv.class.getName();
+        var value = EventsTestEnv.class.getName();
         return TenantId.newBuilder()
-                       .setValue(value)
-                       .build();
+                .setValue(value)
+                .build();
     }
 
     public static Event event(EventContext context) {
         return Event.newBuilder()
-                    .setMessage(pack(message()))
-                    .setContext(context)
-                    .build();
+                .setMessage(pack(message()))
+                .setContext(context)
+                .build();
     }
 }

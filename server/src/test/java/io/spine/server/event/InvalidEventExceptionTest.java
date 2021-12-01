@@ -36,8 +36,8 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@DisplayName("`InvalidEventException` should")
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-@DisplayName("InvalidEventException should")
 class InvalidEventExceptionTest {
 
     @Test
@@ -45,7 +45,7 @@ class InvalidEventExceptionTest {
     void createWithViolations() {
         EventMessage msg = ProjectCreated.getDefaultInstance();
 
-        InvalidEventException exception = InvalidEventException.onConstraintViolations(
+        var exception = InvalidEventException.onConstraintViolations(
                 msg,
                 singletonList(ConstraintViolation.getDefaultInstance()));
 

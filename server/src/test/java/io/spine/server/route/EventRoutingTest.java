@@ -28,12 +28,9 @@ package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.OptionalSubject;
 import com.google.common.truth.Truth8;
 import io.spine.base.EventMessage;
-import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.server.route.MessageRouting.Match;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.test.route.AccountSuspended;
@@ -47,18 +44,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-import java.util.Set;
-
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.random;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/* OK as custom routes do not refer to the test suite. */
-@SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-@DisplayName("EventRouting should")
+@DisplayName("`EventRouting` should")
 class EventRoutingTest {
 
     /** The set of IDs returned by the {@link #defaultRoute}. */
@@ -74,15 +66,12 @@ class EventRoutingTest {
     private EventRouting<Long> eventRouting;
 
     /** The default route to be used by the routing under the test. */
-    @SuppressWarnings("UnnecessaryLambda")
     private final EventRoute<Long, EventMessage> defaultRoute = (event, context) -> DEFAULT_ROUTE;
 
     /** A custom route. */
-    @SuppressWarnings("UnnecessaryLambda")
     private final EventRoute<Long, UserEvent> customRoute = (event, context) -> CUSTOM_ROUTE;
 
     /** Another custom route. */
-    @SuppressWarnings("UnnecessaryLambda")
     private final EventRoute<Long, UserEvent> alternativeRoute = (event, context) -> ALT_ROUTE;
 
     @BeforeEach
@@ -93,7 +82,7 @@ class EventRoutingTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        NullPointerTester nullPointerTester = new NullPointerTester()
+        var nullPointerTester = new NullPointerTester()
                 .setDefault(EventContext.class, EventContext.getDefaultInstance());
 
         nullPointerTester.testAllPublicInstanceMethods(eventRouting);
@@ -109,15 +98,7 @@ class EventRoutingTest {
     @Test
     @DisplayName("allow replacing default route")
     void allowReplacingDefaultRoute() {
-        EventRoute<Long, EventMessage> newDefault = new EventRoute<Long, EventMessage>() {
-
-            private static final long serialVersionUID = 0L;
-
-            @Override
-            public Set<Long> apply(EventMessage message, EventContext context) {
-                return ImmutableSet.of(10L, 20L);
-            }
-        };
+        EventRoute<Long, EventMessage> newDefault = (msg, ctx) ->  ImmutableSet.of(10L, 20L);
 
         assertThat(eventRouting.replaceDefault(newDefault))
                 .isSameInstanceAs(eventRouting);
@@ -131,9 +112,9 @@ class EventRoutingTest {
         assertThat(eventRouting.route(UserRegistered.class, customRoute))
                 .isSameInstanceAs(eventRouting);
 
-        Optional<EventRoute<Long, UserRegistered>> route = eventRouting.get(UserRegistered.class);
+        var route = eventRouting.get(UserRegistered.class);
 
-        OptionalSubject assertRoute = Truth8.assertThat(route);
+        var assertRoute = Truth8.assertThat(route);
         assertRoute.isPresent();
         assertRoute.hasValue(customRoute);
     }
@@ -158,7 +139,7 @@ class EventRoutingTest {
     }
 
     @Test
-    @DisplayName("throw ISE on removal if route is not set")
+    @DisplayName("throw `ISE` on removal if route is not set")
     void notRemoveIfRouteNotSet() {
         assertThrows(IllegalStateException.class, () -> eventRouting.remove(UserRegistered.class));
     }
@@ -169,8 +150,8 @@ class EventRoutingTest {
         // Have custom route too.
         eventRouting.route(UserRegistered.class, customRoute);
 
-        Event event = GivenEvent.arbitrary();
-        Set<Long> ids = eventRouting.apply(event.enclosedMessage(), event.context());
+        var event = GivenEvent.arbitrary();
+        var ids = eventRouting.apply(event.enclosedMessage(), event.context());
 
         assertThat(ids)
                 .isEqualTo(DEFAULT_ROUTE);
@@ -181,13 +162,12 @@ class EventRoutingTest {
     void applyCustomRoute() {
         eventRouting.route(UserRegistered.class, customRoute);
 
-        UserRegistered eventMessage = UserRegistered
-                .newBuilder()
+        var eventMessage = UserRegistered.newBuilder()
                 .setId(random(1, 100))
                 .build();
-        EventEnvelope event = EventEnvelope.of(GivenEvent.withMessage(eventMessage));
+        var event = EventEnvelope.of(GivenEvent.withMessage(eventMessage));
 
-        Set<Long> ids = eventRouting.apply(event.message(), event.context());
+        var ids = eventRouting.apply(event.message(), event.context());
         assertThat(ids)
                 .isEqualTo(CUSTOM_ROUTE);
     }
@@ -198,7 +178,7 @@ class EventRoutingTest {
         eventRouting.route(UserLoggedOut.class, alternativeRoute)
                     .route(LoginEvent.class, customRoute);
 
-        EventContext ctx = EventContext.getDefaultInstance();
+        var ctx = EventContext.getDefaultInstance();
 
         // Check routing via common interface `LoginEvent`.
         assertThat(eventRouting.apply(UserLoggedIn.getDefaultInstance(), ctx))
@@ -223,7 +203,7 @@ class EventRoutingTest {
     void cacheInterfaceRouting() {
         eventRouting.route(LoginEvent.class, customRoute);
 
-        Match firstMatch = eventRouting.routeFor(UserLoggedIn.class);
+        var firstMatch = eventRouting.routeFor(UserLoggedIn.class);
 
         assertThat(firstMatch.found())
                 .isTrue();
@@ -231,7 +211,7 @@ class EventRoutingTest {
                 .isEqualTo(LoginEvent.class);
 
 
-        Match secondMatch = eventRouting.routeFor(UserLoggedIn.class);
+        var secondMatch = eventRouting.routeFor(UserLoggedIn.class);
 
         assertThat(secondMatch.found())
                 .isTrue();
@@ -245,13 +225,13 @@ class EventRoutingTest {
         eventRouting.route(UserAccountEvent.class, alternativeRoute);
 
         // Obtain a match for the type from another “branch” of events.
-        Match match = eventRouting.routeFor(UserLoggedIn.class);
+        var match = eventRouting.routeFor(UserLoggedIn.class);
 
         assertThat(match.found())
                 .isFalse();
 
-        Set<Long> route = eventRouting.apply(UserLoggedIn.getDefaultInstance(),
-                                             EventContext.getDefaultInstance());
+        var route = eventRouting.apply(UserLoggedIn.getDefaultInstance(),
+                                       EventContext.getDefaultInstance());
         assertThat(route)
                 .isEqualTo(DEFAULT_ROUTE);
     }

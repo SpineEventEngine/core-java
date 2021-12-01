@@ -36,7 +36,6 @@ import io.spine.server.route.given.user.event.RUserSignedIn;
 import io.spine.test.event.RSession;
 import io.spine.test.event.RSessionId;
 
-import java.util.Iterator;
 import java.util.Set;
 
 public class SessionRepository
@@ -53,12 +52,12 @@ public class SessionRepository
     }
 
     private Set<RSessionId> findByUserId(UserId id) {
-        RSession.Query query =
+        var query =
                 RSession.query()
                         .userId().is(id)
                         .build();
-        Iterator<RSessionId> identifiers = recordStorage().index(query);
-        ImmutableSet<RSessionId> result = ImmutableSet.copyOf(identifiers);
+        var identifiers = recordStorage().index(query);
+        var result = ImmutableSet.copyOf(identifiers);
         return result;
     }
 }

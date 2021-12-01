@@ -40,8 +40,7 @@ public final class SetTestProjectionName
 
     @Override
     public Project apply(Project project) {
-        Project result = project
-                .toBuilder()
+        var result = project.toBuilder()
                 .clear()
                 .setId(id())
                 .setName(NEW_NAME)

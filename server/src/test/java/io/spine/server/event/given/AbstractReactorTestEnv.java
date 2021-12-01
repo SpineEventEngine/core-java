@@ -73,13 +73,12 @@ public class AbstractReactorTestEnv {
 
     /** Obtains an event that signifies that some order was sered late. */
     public static OrderServed someOrderServedLate() {
-        Timestamp twoHoursAfter = add(now(), fromHours(2));
+        var twoHoursAfter = add(now(), fromHours(2));
         return someOrderServedOn(twoHoursAfter);
     }
 
     private static OrderServed someOrderServedOn(Timestamp timeServed) {
-        OrderServed result = OrderServed
-                .newBuilder()
+        var result = OrderServed.newBuilder()
                 .setServedOn(timeServed)
                 .setOrder(someOrder())
                 .build();
@@ -87,8 +86,7 @@ public class AbstractReactorTestEnv {
     }
 
     private static Order someOrder() {
-        Order result = Order
-                .newBuilder()
+        var result = Order.newBuilder()
                 .setOrderId(newUuid())
                 .setPriceInUsd(somePrice())
                 .setTimePlaced(now())
@@ -98,17 +96,16 @@ public class AbstractReactorTestEnv {
 
     private static double somePrice() {
         @SuppressWarnings("UnsecureRandomNumberGeneration") /* Does not matter for this test case.*/
-        Random random = new Random();
-        double min = 10.0d;
-        double max = 100.0d;
-        double result = min + (max - min) * random.nextDouble();
+        var random = new Random();
+        var min = 10.0d;
+        var max = 100.0d;
+        var result = min + (max - min) * random.nextDouble();
         return result;
     }
 
     /** Obtains an event that signifies that some order got paid for. */
     public static OrderPaidFor someOrderPaidFor() {
-        OrderPaidFor result = OrderPaidFor
-                .newBuilder()
+        var result = OrderPaidFor.newBuilder()
                 .setOrder(someOrder())
                 .build();
         return result;
@@ -128,12 +125,11 @@ public class AbstractReactorTestEnv {
 
         @React
         DonationMade donateToCharity(@External OrderPaidFor orderPaidFor) {
-            Order order = orderPaidFor.getOrder();
-            double orderPrice = order.getPriceInUsd();
-            double donationAmount = orderPrice * DONATION_PERCENTAGE;
+            var order = orderPaidFor.getOrder();
+            var orderPrice = order.getPriceInUsd();
+            var donationAmount = orderPrice * DONATION_PERCENTAGE;
             totalDonated += donationAmount;
-            DonationMade result = DonationMade
-                    .newBuilder()
+            var result = DonationMade.newBuilder()
                     .setUsdsDonated(donationAmount)
                     .build();
             return result;
@@ -163,9 +159,8 @@ public class AbstractReactorTestEnv {
         Optional<OrderServedLate> accept(OrderServed served) {
             ordersServed.add(served);
             if (servedLate(served)) {
-                Order servedOrder = served.getOrder();
-                OrderServedLate result = OrderServedLate
-                        .newBuilder()
+                var servedOrder = served.getOrder();
+                var result = OrderServedLate.newBuilder()
                         .setOrder(servedOrder)
                         .setServedOn(now())
                         .build();
@@ -181,10 +176,10 @@ public class AbstractReactorTestEnv {
          * order, {@code false} otherwise.
          */
         public boolean servedLate(OrderServed orderServed) {
-            Timestamp now = now();
-            Timestamp servedOn = orderServed.getServedOn();
-            Duration timeToServe = Timestamps.between(now, servedOn);
-            boolean servedLate = isGreaterThan(timeToServe, BEFORE_SERVED_LATE);
+            var now = now();
+            var servedOn = orderServed.getServedOn();
+            var timeToServe = Timestamps.between(now, servedOn);
+            var servedLate = isGreaterThan(timeToServe, BEFORE_SERVED_LATE);
             return servedLate;
         }
 
@@ -201,9 +196,9 @@ public class AbstractReactorTestEnv {
     }
 
     private static Timestamp now() {
-        Instant currentInstant = Instant.now();
-        Timestamp result = InstantConverter.instance()
-                                           .convert(currentInstant);
+        var currentInstant = Instant.now();
+        var result = InstantConverter.instance()
+                                     .convert(currentInstant);
         return result;
     }
 
@@ -215,22 +210,20 @@ public class AbstractReactorTestEnv {
      */
     public static class RestaurantNotifier extends AbstractEventReactor {
 
-        private final NotificationMethod notificationMethod = SMS;
+        private static final NotificationMethod notificationMethod = SMS;
 
         @React
-        Pair<CustomerNotified, DeliveryServiceNotified>
+        static Pair<CustomerNotified, DeliveryServiceNotified>
         notifyAboutOrder(OrderReadyToBeServed orderReady) {
-            Order order = orderReady.getOrder();
-            CustomerNotified customerNotified = notifyCustomer(order);
-            DeliveryServiceNotified deliveryNotified = notifyDelivery(order);
-            Pair<CustomerNotified, DeliveryServiceNotified> result =
-                    Pair.of(customerNotified, deliveryNotified);
+            var order = orderReady.getOrder();
+            var customerNotified = notifyCustomer(order);
+            var deliveryNotified = notifyDelivery(order);
+            var result = Pair.of(customerNotified, deliveryNotified);
             return result;
         }
 
-        private CustomerNotified notifyCustomer(Order order) {
-            CustomerNotified result = CustomerNotified
-                    .newBuilder()
+        private static CustomerNotified notifyCustomer(Order order) {
+            var result = CustomerNotified.newBuilder()
                     .setOrder(order)
                     .setNotificationMethod(notificationMethod)
                     .build();
@@ -238,9 +231,8 @@ public class AbstractReactorTestEnv {
         }
 
         private static DeliveryServiceNotified notifyDelivery(Order order) {
-            String messageFormat = "Order %s is ready to be delivered.";
-            DeliveryServiceNotified result = DeliveryServiceNotified
-                    .newBuilder()
+            var messageFormat = "Order %s is ready to be delivered.";
+            var result = DeliveryServiceNotified.newBuilder()
                     .setMessage(format(messageFormat, order.getOrderId()))
                     .setOrder(order)
                     .build();
@@ -252,8 +244,7 @@ public class AbstractReactorTestEnv {
      * Obtains an event that signifies that some order is ready to be served.
      */
     public static OrderReadyToBeServed someOrderReady() {
-        OrderReadyToBeServed result = OrderReadyToBeServed
-                .newBuilder()
+        var result = OrderReadyToBeServed.newBuilder()
                 .setOrder(someOrder())
                 .build();
         return result;

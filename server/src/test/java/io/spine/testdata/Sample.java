@@ -29,8 +29,6 @@ package io.spine.testdata;
 import com.google.common.base.Charsets;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
@@ -41,7 +39,6 @@ import io.spine.type.TypeUrl;
 
 import java.security.SecureRandom;
 import java.util.Collection;
-import java.util.List;
 import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -80,15 +77,15 @@ public class Sample {
      *         type {@code <M>} corresponds to the builder type {@code <B>}.
      * @see #valueFor(FieldDescriptor)
      */
-    @SuppressWarnings("TypeParameterUnusedInFormals") // See apiNote.
+    @SuppressWarnings("TypeParameterUnusedInFormals") // See `apiNote`.
     public static <M extends Message, B extends Message.Builder> B builderForType(Class<M> clazz) {
         checkClass(clazz);
         @SuppressWarnings("unchecked") // We cast here for brevity of the test code.
-        B builder = (B) builderFor(clazz);
-        Descriptor builderDescriptor = builder.getDescriptorForType();
+        var builder = (B) builderFor(clazz);
+        var builderDescriptor = builder.getDescriptorForType();
         Collection<FieldDescriptor> fields = builderDescriptor.getFields();
-        for (FieldDescriptor field : fields) {
-            Object value = valueFor(field);
+        for (var field : fields) {
+            var value = valueFor(field);
             if (field.isRepeated()) {
                 builder.addRepeatedField(field, value);
             } else {
@@ -117,15 +114,15 @@ public class Sample {
         checkClass(clazz);
 
         if (Any.class.equals(clazz)) {
-            Any any = Any.getDefaultInstance();
+            var any = Any.getDefaultInstance();
             @SuppressWarnings("unchecked") //
-            M result = (M) AnyPacker.pack(any);
+            var result = (M) AnyPacker.pack(any);
             return result;
         }
 
-        Message.Builder builder = builderForType(clazz);
+        var builder = builderForType(clazz);
         @SuppressWarnings("unchecked") // Checked cast
-        M result = (M) builder.build();
+        var result = (M) builder.build();
 
         return result;
     }
@@ -148,8 +145,8 @@ public class Sample {
      */
     @SuppressWarnings({"OverlyComplexMethod", "BadImport" /* Use `Type` for brevity. */})
     private static Object valueFor(FieldDescriptor field) {
-        FieldDescriptor.Type type = field.getType();
-        FieldDescriptor.JavaType javaType = type.getJavaType();
+        var type = field.getType();
+        var javaType = type.getJavaType();
         Random random = new SecureRandom();
         switch (javaType) {
             case INT:
@@ -163,11 +160,11 @@ public class Sample {
             case BOOLEAN:
                 return random.nextBoolean();
             case STRING:
-                byte[] bytes = new byte[8];
+                var bytes = new byte[8];
                 random.nextBytes(bytes);
                 return new String(bytes, Charsets.UTF_8);
             case BYTE_STRING:
-                byte[] bytesPrimitive = new byte[8];
+                var bytesPrimitive = new byte[8];
                 random.nextBytes(bytesPrimitive);
                 return ByteString.copyFrom(bytesPrimitive);
             case ENUM:
@@ -180,8 +177,8 @@ public class Sample {
     }
 
     private static Object enumValueFor(FieldDescriptor field, Random random) {
-        Descriptors.EnumDescriptor descriptor = field.getEnumType();
-        List<Descriptors.EnumValueDescriptor> enumValues = descriptor.getValues();
+        var descriptor = field.getEnumType();
+        var enumValues = descriptor.getValues();
         if (enumValues.isEmpty()) {
             throw newIllegalStateException(
                     "There must be at least one `Enum` value for field `%s`.", field
@@ -190,15 +187,15 @@ public class Sample {
 
         // Value under index 0 is usually used to store `undefined` option
         // Use values with indexes from 1 to n
-        int index = random.nextInt(enumValues.size() - 1) + 1;
-        Descriptors.EnumValueDescriptor enumValue = descriptor.findValueByNumber(index);
+        var index = random.nextInt(enumValues.size() - 1) + 1;
+        var enumValue = descriptor.findValueByNumber(index);
         return enumValue;
     }
 
     private static Message messageValueFor(FieldDescriptor field) {
-        TypeUrl messageType = TypeUrl.from(field.getMessageType());
+        var messageType = TypeUrl.from(field.getMessageType());
         Class<? extends Message> javaClass = messageType.getMessageClass();
-        Message fieldValue = messageOfType(javaClass);
+        var fieldValue = messageOfType(javaClass);
         return fieldValue;
     }
 }

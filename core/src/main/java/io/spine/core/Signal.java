@@ -151,8 +151,7 @@ public interface Signal<I extends SignalId,
      */
     @Internal
     default MessageId.Builder identityBuilder() {
-        return MessageId
-                .newBuilder()
+        return MessageId.newBuilder()
                 .setId(pack(id()))
                 .setTypeUrl(enclosedTypeUrl().value());
     }
@@ -163,8 +162,7 @@ public interface Signal<I extends SignalId,
      * <p>This origin is assigned to any signal message produced as a reaction to this one.
      */
     default Origin asMessageOrigin() {
-        var originBuilder = Origin
-                .newBuilder()
+        var originBuilder = Origin.newBuilder()
                 .setActorContext(actorContext())
                 .setMessage(messageId());
         origin().ifPresent(originBuilder::setGrandOrigin);

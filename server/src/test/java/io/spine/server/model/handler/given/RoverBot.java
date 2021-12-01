@@ -51,8 +51,8 @@ public class RoverBot extends Aggregate<Integer, Position, Position.Builder> {
     @Assign
     List<MovingEvent> handle(Start command) {
         ImmutableList.Builder<MovingEvent> events = ImmutableList.builder();
-        int numberOfMoves = command.getNumberOfMoves();
-        for (int i = 0; i < numberOfMoves; i++) {
+        var numberOfMoves = command.getNumberOfMoves();
+        for (var i = 0; i < numberOfMoves; i++) {
             events.add(nextMove());
         }
         return events.build();
@@ -60,25 +60,25 @@ public class RoverBot extends Aggregate<Integer, Position, Position.Builder> {
 
     /** Generates a random move event. */
     private MovingEvent nextMove() {
-        int nextMove = TestValues.random(4);
-        Integer id = id();
+        var nextMove = TestValues.random(4);
+        var id = id();
         switch (nextMove) {
             case 0:
                 return MovedNorth.newBuilder()
-                                 .setBotId(id)
-                                 .vBuild();
+                        .setBotId(id)
+                        .vBuild();
             case 1:
                 return MovedEast.newBuilder()
-                                .setBotId(id)
-                                .vBuild();
+                        .setBotId(id)
+                        .vBuild();
             case 2:
                 return MovedSouth.newBuilder()
-                                 .setBotId(id)
-                                 .vBuild();
+                        .setBotId(id)
+                        .vBuild();
             case 3:
                 return MovedWest.newBuilder()
-                                .setBotId(id)
-                                .vBuild();
+                        .setBotId(id)
+                        .vBuild();
             default:
                 throw newIllegalStateException("Unable to create a move event for %d.", nextMove);
         }

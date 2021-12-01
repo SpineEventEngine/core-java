@@ -45,11 +45,10 @@ final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus
 
     @Assign
     Pair<UserLoggedIn, UserAccountCreated> on(LogInUser c) throws UserAlreadyLoggedIn {
-        UserId user = c.getUser();
-        LoginStatus state = state();
+        var user = c.getUser();
+        var state = state();
         if (state.getUser().equals(user) && state.getLoggedIn()) {
-            throw UserAlreadyLoggedIn
-                    .newBuilder()
+            throw UserAlreadyLoggedIn.newBuilder()
                     .setUser(user)
                     .build();
         }
@@ -57,12 +56,10 @@ final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus
                  .setLoggedIn(true)
                  .setUserId(user.getValue());
         return Pair.of(
-                UserLoggedIn
-                        .newBuilder()
+                UserLoggedIn.newBuilder()
                         .setUser(user)
                         .vBuild(),
-                UserAccountCreated
-                        .newBuilder()
+                UserAccountCreated.newBuilder()
                         .setUser(user)
                         .vBuild()
         );
@@ -71,8 +68,7 @@ final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus
     @Assign
     UserLoggedOut on(LogOutUser c) {
         builder().setLoggedIn(false);
-        return UserLoggedOut
-                .newBuilder()
+        return UserLoggedOut.newBuilder()
                 .setUser(c.getUser())
                 .vBuild();
     }

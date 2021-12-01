@@ -40,7 +40,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
@@ -50,17 +49,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("`Triplet` should")
 @SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
         /* Short vars are OK for tuple tests. */
         "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
-@DisplayName("Triplet should")
 class TripletTest {
 
     private final StringValue a = TestValues.newUuidValue();
     private final BoolValue b = BoolValue.of(true);
-    private final UInt32Value c = UInt32Value.newBuilder()
-                                             .setValue(128)
-                                             .build();
+    private final UInt32Value c = UInt32Value.newBuilder().setValue(128).build();
 
     private Triplet<StringValue, BoolValue, UInt32Value> triplet;
 
@@ -150,8 +147,7 @@ class TripletTest {
         @Test
         @DisplayName("present")
         void present() {
-            Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
-                    Triplet.withNullable2(a, b, c);
+            var optTriplet = Triplet.withNullable2(a, b, c);
 
             assertEquals(a, optTriplet.getA());
             assertEquals(Optional.of(b), optTriplet.getB());
@@ -177,7 +173,7 @@ class TripletTest {
         @Test
         @DisplayName("ordinary values")
         void ordinary() {
-            Iterator<Message> iterator = triplet.iterator();
+            var iterator = triplet.iterator();
 
             assertEquals(a, iterator.next());
             assertEquals(b, iterator.next());
@@ -191,7 +187,7 @@ class TripletTest {
             Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
                     Triplet.withNullable2(a, null, null);
 
-            Iterator<Message> iterator = optTriplet.iterator();
+            var iterator = optTriplet.iterator();
 
             assertEquals(a, iterator.next());
             assertEquals(Empty.getDefaultInstance(), iterator.next());
@@ -202,10 +198,9 @@ class TripletTest {
         @Test
         @DisplayName("Optional values")
         void optional() {
-            Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
-                    Triplet.withNullable2(a, b, c);
+            var optTriplet = Triplet.withNullable2(a, b, c);
 
-            Iterator<Message> iterator = optTriplet.iterator();
+            var iterator = optTriplet.iterator();
 
             assertEquals(a, iterator.next());
             assertEquals(b, iterator.next());

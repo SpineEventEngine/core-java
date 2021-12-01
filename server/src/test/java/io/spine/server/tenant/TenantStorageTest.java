@@ -26,10 +26,8 @@
 
 package io.spine.server.tenant;
 
-import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.storage.StorageFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,7 +46,7 @@ class TenantStorageTest {
 
     @BeforeEach
     void setUp() {
-        StorageFactory storageFactory = ServerEnvironment.instance().storageFactory();
+        var storageFactory = ServerEnvironment.instance().storageFactory();
         storage = new DefaultTenantStorage(storageFactory);
         BoundedContextBuilder
                 .assumingTests(true)
@@ -59,7 +57,7 @@ class TenantStorageTest {
     @Test
     @DisplayName("cache passed value")
     void cachePassedValue() {
-        TenantId tenantId = generate();
+        var tenantId = generate();
         storage.keep(tenantId);
 
         Optional<?> optional = storage.read(tenantId);
@@ -70,7 +68,7 @@ class TenantStorageTest {
     @Test
     @DisplayName("evict from cache")
     void evictFromCache() {
-        TenantId tenantId = generate();
+        var tenantId = generate();
 
         storage.keep(tenantId);
         assertTrue(storage.unCache(tenantId));
@@ -80,7 +78,7 @@ class TenantStorageTest {
     @Test
     @DisplayName("clear cache")
     void clearCache() {
-        TenantId tenantId = generate();
+        var tenantId = generate();
 
         storage.keep(tenantId);
 

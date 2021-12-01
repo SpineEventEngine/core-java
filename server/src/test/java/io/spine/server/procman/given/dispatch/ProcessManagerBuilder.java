@@ -37,9 +37,12 @@ import io.spine.validate.ValidatingBuilder;
 /**
  * Utility class for building test instances of {@code ProcessManager}.
  *
- * @param <P> the type of process managers
- * @param <I> the type of process manager identifier
- * @param <S> the type of the process manager state
+ * @param <P>
+ *         the type of process managers
+ * @param <I>
+ *         the type of process manager identifier
+ * @param <S>
+ *         the type of the process manager state
  */
 @VisibleForTesting
 public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
@@ -65,7 +68,7 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        TestPmTransaction<I, S, B> transaction = new TestPmTransaction<>(result, state, version);
+        var transaction = new TestPmTransaction<>(result, state, version);
         transaction.commit();
     }
 }

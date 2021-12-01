@@ -52,18 +52,18 @@ public class EventStoreTestEnv {
     }
 
     public static Event projectCreated(Timestamp when) {
-        ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
+        var msg = Sample.messageOfType(ProjectCreated.class);
         return eventFactory.createEvent(msg, null, when);
     }
 
     public static Event taskAdded(Timestamp when) {
-        TaskAdded msg = Sample.messageOfType(TaskAdded.class);
+        var msg = Sample.messageOfType(TaskAdded.class);
         return eventFactory.createEvent(msg, null, when);
     }
 
     public static void assertDone(AtomicBoolean done) {
         if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
+            fail("Please use the `MoreExecutors.directExecutor` in `EventStore` for tests.");
         }
     }
 

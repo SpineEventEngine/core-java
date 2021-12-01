@@ -26,8 +26,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableSetMultimap;
-import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.event.model.SubscriberSignature;
 import io.spine.server.model.given.map.ARejectionSubscriber;
 import io.spine.server.model.given.map.FilteredSubscription;
@@ -40,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.model.MethodScan.findMethodsBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`MethodScan` should")
 class MethodScanTest {
@@ -57,11 +54,10 @@ class MethodScanTest {
     @Test
     @DisplayName("provide a map with filter-less keys")
     void noFiltersInKeys() {
-        ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
-                findMethodsBy(FilteredSubscription.class, new SubscriberSignature());
+        var map = findMethodsBy(FilteredSubscription.class, new SubscriberSignature());
         assertThat(map)
                 .hasSize(2);
-        for (DispatchKey key : map.keySet()) {
+        for (var key : map.keySet()) {
             assertThat(key)
                     .isEqualTo(key.withoutFilter());
         }
@@ -70,8 +66,7 @@ class MethodScanTest {
     @Test
     @DisplayName("allow multiple subscriptions to the same rejection with different causes")
     void multipleRejectionSubscriptions() {
-        ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
-                findMethodsBy(ARejectionSubscriber.class, new SubscriberSignature());
+        var map = findMethodsBy(ARejectionSubscriber.class, new SubscriberSignature());
         assertThat(map.keys())
                 .hasSize(2);
     }
@@ -79,7 +74,7 @@ class MethodScanTest {
     @Test
     @DisplayName("not include bridge methods")
     void bridgeMethods() {
-        ImmutableSetMultimap<DispatchKey, SubscriberMethod> map =
+        var map =
                 findMethodsBy(Int32ImportedTypedSubscriber.class, new SubscriberSignature());
         assertThat(map.keys())
                 .hasSize(1);

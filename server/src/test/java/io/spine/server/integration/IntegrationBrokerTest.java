@@ -79,8 +79,8 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("another BC")
             void toAnotherBc() {
-                try (BlackBox publishingPhotosBc = photosBc();
-                     BlackBox subscribedBillingBc = subscribedBillingBc()
+                try (var publishingPhotosBc = photosBc();
+                     var subscribedBillingBc = subscribedBillingBc()
                 ) {
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
@@ -92,9 +92,9 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("multiple other BCs")
             void toMultipleOtherBc() {
-                try (BlackBox publishingPhotosBc = photosBc();
-                     BlackBox subscribedBillingBc = subscribedBillingBc();
-                     BlackBox subscribedStatisticsBc = subscribedStatisticsBc()
+                try (var publishingPhotosBc = photosBc();
+                     var subscribedBillingBc = subscribedBillingBc();
+                     var subscribedStatisticsBc = subscribedStatisticsBc()
                 ) {
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
@@ -107,9 +107,9 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("multiple other BCs with different needs")
             void toMultipleOtherBcWithDifferentNeeds() {
-                try (BlackBox publishingPhotosBc = photosBc();
-                     BlackBox subscribedBillingBc = subscribedBillingBc();
-                     BlackBox subscribedWarehouseBc = subscribedWarehouseBc()
+                try (var publishingPhotosBc = photosBc();
+                     var subscribedBillingBc = subscribedBillingBc();
+                     var subscribedWarehouseBc = subscribedWarehouseBc()
                 ) {
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
@@ -129,8 +129,8 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("the subscribed BC is registered before the publishing one")
             void whenSubscribedBcRegisteredBeforePublishing() {
-                try (BlackBox subscribedBillingBc = subscribedBillingBc();
-                     BlackBox publishingPhotosBc = photosBc()
+                try (var subscribedBillingBc = subscribedBillingBc();
+                     var publishingPhotosBc = photosBc()
                 ) {
                     publishingPhotosBc.receivesCommand(UploadPhotos.generate());
                     publishingPhotosBc.assertEvent(PhotosUploaded.class);
@@ -142,8 +142,8 @@ class IntegrationBrokerTest {
             @Test
             @DisplayName("they are subscribed to each other")
             void whenSubscribedToEachOther() {
-                try (BlackBox subscribedPhotosBc = subscribedPhotosBc();
-                     BlackBox subscribedBillingBc = subscribedBillingBc()
+                try (var subscribedPhotosBc = subscribedPhotosBc();
+                     var subscribedBillingBc = subscribedBillingBc()
                 ) {
                     subscribedPhotosBc.receivesCommand(UploadPhotos.generate());
                     subscribedPhotosBc.assertEvent(PhotosUploaded.class);
@@ -162,8 +162,8 @@ class IntegrationBrokerTest {
         @Test
         @DisplayName("internal events in another BC")
         void ofInternalEventsInAnotherBc() {
-            try (BlackBox projectsBc = photosBc();
-                 BlackBox billingBc = billingBc()
+            try (var projectsBc = photosBc();
+                 var billingBc = billingBc()
             ) {
                 projectsBc.receivesCommand(UploadPhotos.generate());
 
@@ -176,7 +176,7 @@ class IntegrationBrokerTest {
         @Test
         @DisplayName("external events in the same BC")
         void ofExternalEventInTheSameBc() {
-            try (BlackBox photosBcAndBillingBc = photosBcAndSubscribedBillingBc()) {
+            try (var photosBcAndBillingBc = photosBcAndSubscribedBillingBc()) {
 
                 photosBcAndBillingBc.receivesCommand(UploadPhotos.generate());
                 photosBcAndBillingBc.assertEvent(PhotosUploaded.class);

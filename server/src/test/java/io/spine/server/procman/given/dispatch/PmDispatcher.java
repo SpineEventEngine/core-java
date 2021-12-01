@@ -51,9 +51,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A test utility for dispatching commands and events to a {@code ProcessManager} in test purposes.
  */
-@SuppressWarnings("rawtypes") // to simplify signatures this test env. class
 @VisibleForTesting
 @CanIgnoreReturnValue
+@SuppressWarnings("rawtypes") // to simplify signatures this test env. class
 public final class PmDispatcher {
 
     private static final
@@ -79,8 +79,8 @@ public final class PmDispatcher {
     public static DispatchOutcome dispatch(ProcessManager<?, ?, ?> pm, MessageEnvelope envelope) {
         checkNotNull(pm);
         checkNotNull(envelope);
-        EndpointFn fn = endpoints.get(envelope.getClass());
-        DispatchOutcome events = fn.apply(pm, envelope);
+        var fn = endpoints.get(envelope.getClass());
+        var events = fn.apply(pm, envelope);
         return events;
     }
 
@@ -97,9 +97,12 @@ public final class PmDispatcher {
      * A test-only implementation of an {@link PmCommandEndpoint}, that dispatches
      * commands to an instance of {@code ProcessManager} and returns the list of events.
      *
-     * @param <I> the type of {@code ProcessManager} identifier
-     * @param <P> the type of {@code ProcessManager}
-     * @param <S> the type of {@code ProcessManager} state object
+     * @param <I>
+     *         the type of {@code ProcessManager} identifier
+     * @param <P>
+     *         the type of {@code ProcessManager}
+     * @param <S>
+     *         the type of {@code ProcessManager} state object
      */
     private static class TestPmCommandEndpoint<I,
                                                P extends ProcessManager<I, S, ?>,
@@ -112,7 +115,7 @@ public final class PmDispatcher {
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends EntityState<I>>
         DispatchOutcome dispatch(P manager, CommandEnvelope envelope) {
-            TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(envelope);
+            var endpoint = new TestPmCommandEndpoint<I, P, S>(envelope);
             return endpoint.runTransactionFor(manager);
         }
     }
@@ -139,7 +142,7 @@ public final class PmDispatcher {
 
         private static <I, P extends ProcessManager<I, S, ?>, S extends EntityState<I>>
         DispatchOutcome dispatch(P manager, EventEnvelope event) {
-            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(event);
+            var endpoint = new TestPmEventEndpoint<I, P, S>(event);
             return endpoint.runTransactionFor(manager);
         }
     }
@@ -167,5 +170,4 @@ public final class PmDispatcher {
             return NoOpLifecycle.instance();
         }
     }
-
 }

@@ -151,8 +151,7 @@ abstract class RequestValidator<M extends Message> {
         if (violations.isEmpty()) {
             return null;
         }
-        var validationError = ValidationError
-                .newBuilder()
+        var validationError = ValidationError.newBuilder()
                 .addAllConstraintViolation(violations)
                 .build();
         var errorCode = invalidMessageErrorCode();

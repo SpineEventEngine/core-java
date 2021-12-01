@@ -38,7 +38,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
@@ -48,10 +47,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("`Pair` should")
 @SuppressWarnings({"LocalVariableNamingConvention" /* OK for tuple element values. */,
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-@DisplayName("Pair should")
 class PairTest {
 
     @Test
@@ -65,12 +64,12 @@ class PairTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        StringValue v1 = TestValues.newUuidValue();
-        StringValue v2 = TestValues.newUuidValue();
+        var v1 = TestValues.newUuidValue();
+        var v2 = TestValues.newUuidValue();
 
-        Pair<StringValue, StringValue> p1 = Pair.of(v1, v2);
-        Pair<StringValue, StringValue> p1a = Pair.of(v1, v2);
-        Pair<StringValue, StringValue> p2 = Pair.of(v2, v1);
+        var p1 = Pair.of(v1, v2);
+        var p1a = Pair.of(v1, v2);
+        var p2 = Pair.of(v2, v1);
 
         new EqualsTester().addEqualityGroup(p1, p1a)
                           .addEqualityGroup(p2)
@@ -118,10 +117,10 @@ class PairTest {
     @Test
     @DisplayName("return values")
     void returnValues() {
-        StringValue a = TestValues.newUuidValue();
-        BoolValue b = BoolValue.of(true);
+        var a = TestValues.newUuidValue();
+        var b = BoolValue.of(true);
 
-        Pair<StringValue, BoolValue> pair = Pair.of(a, b);
+        var pair = Pair.of(a, b);
 
         assertEquals(a, pair.getA());
         assertEquals(b, pair.getB());
@@ -130,10 +129,10 @@ class PairTest {
     @Test
     @DisplayName("tell both values are present, if B isn't `Optional`")
     void tellBothValuesPresent() {
-        StringValue a = TestValues.newUuidValue();
-        BoolValue b = BoolValue.of(true);
+        var a = TestValues.newUuidValue();
+        var b = BoolValue.of(true);
 
-        Pair<StringValue, BoolValue> pair = Pair.of(a, b);
+        var pair = Pair.of(a, b);
 
         assertThat(pair.hasA()).isTrue();
         assertThat(pair.hasB()).isTrue();
@@ -146,7 +145,7 @@ class PairTest {
         @Test
         @DisplayName("empty")
         void empty() {
-            StringValue a = TestValues.newUuidValue();
+            var a = TestValues.newUuidValue();
             Optional<BoolValue> b = Optional.empty();
 
             Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
@@ -160,10 +159,10 @@ class PairTest {
         @Test
         @DisplayName("present")
         void present() {
-            StringValue a = TestValues.newUuidValue();
-            Optional<BoolValue> b = Optional.of(BoolValue.of(true));
+            var a = TestValues.newUuidValue();
+            var b = Optional.of(BoolValue.of(true));
 
-            Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, b.get());
+            var pair = Pair.withNullable(a, b.get());
 
             assertEquals(a, pair.getA());
             assertEquals(b, pair.getB());
@@ -174,10 +173,10 @@ class PairTest {
         @Test
         @DisplayName("via `Optional`")
         void viaOptional() {
-            StringValue a = TestValues.newUuidValue();
-            Optional<BoolValue> b = Optional.of(BoolValue.of(true));
+            var a = TestValues.newUuidValue();
+            var b = Optional.of(BoolValue.of(true));
 
-            Pair<StringValue, Optional<BoolValue>> pair = Pair.withOptional(a, b);
+            var pair = Pair.withOptional(a, b);
 
             assertEquals(a, pair.getA());
             assertEquals(b, pair.getB());
@@ -187,10 +186,10 @@ class PairTest {
     @Test
     @DisplayName("return Empty for empty Optional in iterator")
     void getAbsentInIterator() {
-        StringValue a = TestValues.newUuidValue();
+        var a = TestValues.newUuidValue();
         Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
 
-        Iterator<Message> iterator = pair.iterator();
+        var iterator = pair.iterator();
 
         assertEquals(a, iterator.next());
         assertEquals(Empty.getDefaultInstance(), iterator.next());
@@ -200,8 +199,8 @@ class PairTest {
     @Test
     @DisplayName("be serializable")
     void serialize() {
-        StringValue a = TestValues.newUuidValue();
-        BoolValue b = BoolValue.of(true);
+        var a = TestValues.newUuidValue();
+        var b = BoolValue.of(true);
 
         reserializeAndAssert(Pair.of(a, b));
         reserializeAndAssert(Pair.withNullable(a, b));

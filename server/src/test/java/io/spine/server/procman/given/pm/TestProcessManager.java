@@ -92,8 +92,7 @@ public class TestProcessManager
     @Assign
     PmProjectCreated handle(PmCreateProject command) {
         remember(command);
-        return PmProjectCreated
-                .newBuilder()
+        return PmProjectCreated.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -101,8 +100,7 @@ public class TestProcessManager
     @Assign
     PmTaskAdded handle(PmAddTask command) {
         remember(command);
-        return PmTaskAdded
-                .newBuilder()
+        return PmTaskAdded.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -110,8 +108,7 @@ public class TestProcessManager
     @Assign
     PmNotificationSent handle(PmReviewBacklog command) {
         remember(command);
-        return PmNotificationSent
-                .newBuilder()
+        return PmNotificationSent.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -119,8 +116,7 @@ public class TestProcessManager
     @Assign
     PmNotificationSent handle(PmScheduleRetrospective command) {
         remember(command);
-        return PmNotificationSent
-                .newBuilder()
+        return PmNotificationSent.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -128,8 +124,7 @@ public class TestProcessManager
     @Assign
     PmIterationPlanned handle(PmPlanIteration command) {
         remember(command);
-        return PmIterationPlanned
-                .newBuilder()
+        return PmIterationPlanned.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -137,8 +132,7 @@ public class TestProcessManager
     @Assign
     PmIterationStarted handle(PmStartIteration command) {
         remember(command);
-        return PmIterationStarted
-                .newBuilder()
+        return PmIterationStarted.newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -146,8 +140,7 @@ public class TestProcessManager
     @Assign
     List<EventMessage> handle(PmThrowEntityAlreadyArchived command) throws EntityAlreadyArchived {
         remember(command);
-        throw EntityAlreadyArchived
-                .newBuilder()
+        throw EntityAlreadyArchived.newBuilder()
                 .setEntityId(Identifier.pack(command.getProjectId()))
                 .build();
     }
@@ -165,8 +158,7 @@ public class TestProcessManager
     @Command
     PmAddTask transform(PmStartProject command) {
         remember(command);
-        PmAddTask addTask = ((PmAddTask.Builder)
-                builderForType(PmAddTask.class))
+        var addTask = ((PmAddTask.Builder) builderForType(PmAddTask.class))
                 .setProjectId(command.getProjectId())
                 .build();
         return addTask;
@@ -185,13 +177,11 @@ public class TestProcessManager
     @Command
     Pair<PmScheduleRetrospective, PmPlanIteration> split(PmCancelIteration command) {
         remember(command);
-        ProjectId pid = command.getProjectId();
-        return Pair.of(PmScheduleRetrospective
-                               .newBuilder()
+        var pid = command.getProjectId();
+        return Pair.of(PmScheduleRetrospective.newBuilder()
                                .setProjectId(pid)
                                .build(),
-                       PmPlanIteration
-                               .newBuilder()
+                       PmPlanIteration.newBuilder()
                                .setProjectId(pid)
                                .build());
     }
@@ -199,13 +189,11 @@ public class TestProcessManager
     @Command
     Pair<PmScheduleRetrospective, PmPlanIteration> on(PmIterationCompleted event) {
         remember(event);
-        ProjectId pid = event.getProjectId();
-        return Pair.of(PmScheduleRetrospective
-                               .newBuilder()
+        var pid = event.getProjectId();
+        return Pair.of(PmScheduleRetrospective.newBuilder()
                                .setProjectId(pid)
                                .build(),
-                       PmPlanIteration
-                               .newBuilder()
+                       PmPlanIteration.newBuilder()
                                .setProjectId(pid)
                                .build());
     }
@@ -219,8 +207,8 @@ public class TestProcessManager
         remember(event);
         if (event.getBudgetAllocated()) {
             return Optional.of(PmStartIteration.newBuilder()
-                                               .setProjectId(event.getProjectId())
-                                               .build());
+                                       .setProjectId(event.getProjectId())
+                                       .build());
         }
         return Optional.empty();
     }

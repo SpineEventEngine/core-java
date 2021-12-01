@@ -32,13 +32,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@DisplayName("MatchFilter should")
+@DisplayName("`MatchFilter` should")
 class MatchFilterTest {
 
     @Test
-    @DisplayName("not allow null events to pass")
+    @DisplayName("not allow `null` events to pass")
     void notAllowNullEvents() {
-        MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
+        var filter = new MatchFilter(EventFilter.getDefaultInstance());
         assertFalse(filter.test(null));
     }
 }

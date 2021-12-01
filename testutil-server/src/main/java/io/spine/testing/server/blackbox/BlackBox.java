@@ -667,8 +667,7 @@ public abstract class BlackBox implements Logging, Closeable {
     @SuppressWarnings("TestOnlyProblems")   /* `QueryResultSubject` is not test-only. */
     public QueryResultSubject assertQueryResult(Query query) {
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
-        var service = QueryService
-                .newBuilder()
+        var service = QueryService.newBuilder()
                 .add(context)
                 .build();
         service.read(query, observer);

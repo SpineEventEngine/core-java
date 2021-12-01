@@ -26,7 +26,6 @@
 
 package io.spine.server.stand.given;
 
-import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.client.Subscription;
 import io.spine.client.Target;
@@ -63,28 +62,25 @@ public final class SubscriptionRecordTestEnv {
 
     public static EventEnvelope
     stateChangedEnvelope(ProjectId id, AggProject oldState, AggProject newState, TypeUrl type) {
-        EntityStateChanged eventMessage = entityStateChanged(id, oldState, newState, type);
-        Any packedMessage = TypeConverter.toAny(eventMessage);
-        Event event = Event
-                .newBuilder()
+        var eventMessage = entityStateChanged(id, oldState, newState, type);
+        var packedMessage = TypeConverter.toAny(eventMessage);
+        var event = Event.newBuilder()
                 .setMessage(packedMessage)
                 .build();
-        EventEnvelope result = EventEnvelope.of(event);
+        var result = EventEnvelope.of(event);
         return result;
     }
 
     private static EntityStateChanged
     entityStateChanged(ProjectId id, AggProject oldState, AggProject newState, TypeUrl type) {
-        Any packedId = Identifier.pack(id);
-        MessageId entityId = MessageId
-                .newBuilder()
+        var packedId = Identifier.pack(id);
+        var entityId = MessageId.newBuilder()
                 .setTypeUrl(type.value())
                 .setId(packedId)
                 .build();
-        Any packedOldState = TypeConverter.toAny(oldState);
-        Any packedNewState = TypeConverter.toAny(newState);
-        EntityStateChanged result = EntityStateChanged
-                .newBuilder()
+        var packedOldState = TypeConverter.toAny(oldState);
+        var packedNewState = TypeConverter.toAny(newState);
+        var result = EntityStateChanged.newBuilder()
                 .setEntity(entityId)
                 .setOldState(packedOldState)
                 .setNewState(packedNewState)
@@ -98,60 +94,55 @@ public final class SubscriptionRecordTestEnv {
 
     public static EventEnvelope
     projectCreatedEnvelope(EventId eventId, ProjectCreated eventMessage) {
-        Any packedMessage = AnyPacker.pack(eventMessage);
-        Event event = Event
-                .newBuilder()
+        var packedMessage = AnyPacker.pack(eventMessage);
+        var event = Event.newBuilder()
                 .setId(eventId)
                 .setMessage(packedMessage)
                 .build();
-        EventEnvelope result = EventEnvelope.of(event);
+        var result = EventEnvelope.of(event);
         return result;
     }
 
     public static Subscription subscription() {
-        Target target = target();
-        Subscription subscription = subscription(target);
+        var target = target();
+        var subscription = subscription(target);
         return subscription;
     }
 
     public static Subscription subscription(ProjectId targetId) {
-        Target target = target(targetId);
-        Subscription subscription = subscription(target);
+        var target = target(targetId);
+        var subscription = subscription(target);
         return subscription;
     }
 
     public static Subscription subscription(Target target) {
-        Topic topic = Topic
-                .newBuilder()
+        var topic = Topic.newBuilder()
                 .setTarget(target)
                 .build();
-        Subscription result = Subscription
-                .newBuilder()
+        var result = Subscription.newBuilder()
                 .setTopic(topic)
                 .build();
         return result;
     }
 
     private static Target target() {
-        Target target = Targets.allOf(AggProject.class);
+        var target = Targets.allOf(AggProject.class);
         return target;
     }
 
     private static Target target(ProjectId targetId) {
-        Target target = Targets.someOf(AggProject.class, Collections.singleton(targetId));
+        var target = Targets.someOf(AggProject.class, Collections.singleton(targetId));
         return target;
     }
 
     public static AggProject projectWithName(String name) {
-        return AggProject
-                .newBuilder()
+        return AggProject.newBuilder()
                 .setName(name)
                 .build();
     }
 
     public static ProjectId projectId(String id) {
-        return ProjectId
-                .newBuilder()
+        return ProjectId.newBuilder()
                 .setUuid(id)
                 .build();
     }

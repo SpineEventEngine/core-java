@@ -113,12 +113,10 @@ class HandlerMapTest {
 
         @Test
         void handleThrownRejectionGracefully() {
-            ProjectId project = ProjectId
-                    .newBuilder()
+            var project = ProjectId.newBuilder()
                     .setId(Identifier.newUuid())
                     .vBuild();
-            SigCreateProject createProject = SigCreateProject
-                    .newBuilder()
+            var createProject = SigCreateProject.newBuilder()
                     .setId(project)
                     .vBuild();
             assertDoesNotThrow(() -> context().receivesCommand(createProject));

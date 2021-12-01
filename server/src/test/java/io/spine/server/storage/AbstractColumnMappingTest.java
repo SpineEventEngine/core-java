@@ -32,7 +32,6 @@ import io.spine.base.Time;
 import io.spine.server.storage.given.TestColumnMapping;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -59,24 +58,24 @@ class AbstractColumnMappingTest {
     @DisplayName("obtain a column type mapping for the given proto type")
     void obtainForType() {
         ColumnTypeMapping<?, ? extends String> rule = mapping.of(String.class);
-        String result = rule.applyTo("some-string");
+        var result = rule.applyTo("some-string");
         assertThat(result).isEqualTo(CONVERTED_STRING);
     }
 
     @Test
     @DisplayName("obtain a column type mapping of a supertype")
     void obtainForSupertype() {
-        Timestamp timestamp = Time.currentTime();
+        var timestamp = Time.currentTime();
         ColumnTypeMapping<?, ? extends String> rule = mapping.of(Timestamp.class);
-        String result = rule.applyTo(timestamp);
+        var result = rule.applyTo(timestamp);
         assertThat(result).isEqualTo(CONVERTED_MESSAGE);
     }
 
     @Test
     @DisplayName("obtain a mapping for `null`")
     void obtainForNull() {
-        ColumnTypeMapping<@Nullable ?, ? extends String> rule = mapping.ofNull();
-        String result = rule.apply(null);
+        var rule = mapping.ofNull();
+        var result = rule.apply(null);
         assertThat(result).isEqualTo(NULL_VALUE);
     }
 
@@ -92,31 +91,29 @@ class AbstractColumnMappingTest {
     @Test
     @DisplayName("allow to setup custom mapping in the derived classes")
     void allowToSetupCustomMapping() {
-        TaskView taskView = taskView();
+        var taskView = taskView();
         ColumnTypeMapping<?, ? extends String> rule = mapping.of(TaskView.class);
-        String result = rule.applyTo(taskView);
+        var result = rule.applyTo(taskView);
         assertThat(result).isEqualTo(taskView.getName());
     }
 
     @Test
     @DisplayName("consider supertypes when obtaining custom mapping")
     void obtainCustomForSupertype() {
-        TaskViewId id = taskViewId();
+        var id = taskViewId();
         ColumnTypeMapping<?, ? extends String> rule = mapping.of(TaskViewId.class);
-        String result = rule.applyTo(id);
+        var result = rule.applyTo(id);
         assertThat(result).isEqualTo(String.valueOf(id.getId()));
     }
 
     private static TaskView taskView() {
-        return TaskView
-                .newBuilder()
+        return TaskView.newBuilder()
                 .setId(taskViewId())
                 .build();
     }
 
     private static TaskViewId taskViewId() {
-        return TaskViewId
-                .newBuilder()
+        return TaskViewId.newBuilder()
                 .setId(42)
                 .build();
     }

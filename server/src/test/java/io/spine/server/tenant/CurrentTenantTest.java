@@ -30,8 +30,6 @@ import io.spine.core.TenantId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static io.spine.testing.Assertions.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.TestValues.nullRef;
@@ -66,11 +64,11 @@ class CurrentTenantTest {
     @Test
     @DisplayName("keep set value")
     void keepSetValue() {
-        TenantId expected = nameOf(getClass());
+        var expected = nameOf(getClass());
 
         CurrentTenant.set(expected);
 
-        Optional<TenantId> currentTenant = CurrentTenant.get();
+        var currentTenant = CurrentTenant.get();
         assertTrue(currentTenant.isPresent());
         assertEquals(expected, currentTenant.get());
     }
@@ -78,7 +76,7 @@ class CurrentTenantTest {
     @Test
     @DisplayName("clear set value")
     void clearSetValue() {
-        TenantId value = nameOf(getClass());
+        var value = nameOf(getClass());
         CurrentTenant.set(value);
 
         CurrentTenant.clear();

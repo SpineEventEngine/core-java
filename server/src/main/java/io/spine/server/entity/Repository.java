@@ -452,8 +452,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         var writeSide = context().systemClient()
                                  .writeSide();
         var eventFilter = eventFilter();
-        var lifecycle = EntityLifecycle
-                .newBuilder()
+        var lifecycle = EntityLifecycle.newBuilder()
                 .setEntityId(id)
                 .setEntityType(entityModelClass())
                 .setSystemWriteSide(writeSide)

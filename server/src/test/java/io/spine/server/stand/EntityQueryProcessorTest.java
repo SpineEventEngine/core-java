@@ -26,11 +26,8 @@
 
 package io.spine.server.stand;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.IterableSubject;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
@@ -52,8 +49,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Comparator;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
@@ -92,21 +87,21 @@ class EntityQueryProcessorTest {
     @Test
     @DisplayName("read all entities")
     void readAll() {
-        Query query = queries.all(Menu.class);
-        ImmutableCollection<EntityStateWithVersion> records = processor.process(query);
+        var query = queries.all(Menu.class);
+        var records = processor.process(query);
         assertThat(records).hasSize(MENU_COUNT);
     }
 
     @Test
     @DisplayName("read one by ID")
     void readById() {
-        DishAdded event = addDish();
-        MenuId id = event.getId();
-        Query query = queries.byIds(Menu.class, ImmutableSet.of(id));
-        ImmutableCollection<EntityStateWithVersion> records = processor.process(query);
+        var event = addDish();
+        var id = event.getId();
+        var query = queries.byIds(Menu.class, ImmutableSet.of(id));
+        var records = processor.process(query);
         assertThat(records).hasSize(1);
-        EntityStateWithVersion record = records.asList().get(0);
-        Menu menu = state(record);
+        var record = records.asList().get(0);
+        var menu = state(record);
         assertThat(menu.getId()).isEqualTo(id);
         assertThat(menu.getDishList()).containsExactly(event.getDish());
     }
@@ -114,15 +109,15 @@ class EntityQueryProcessorTest {
     @Test
     @DisplayName("read all entities and sort")
     void readAllAndSort() {
-        int limit = MENU_COUNT - 4;
-        Query query = queries.select(Menu.class)
-                             .orderBy(UUID_COLUMN, DESCENDING)
-                             .limit(limit)
-                             .build();
-        ImmutableCollection<EntityStateWithVersion> records = processor.process(query);
-        IterableSubject assertRecords = assertThat(records);
+        var limit = MENU_COUNT - 4;
+        var query = queries.select(Menu.class)
+                           .orderBy(UUID_COLUMN, DESCENDING)
+                           .limit(limit)
+                           .build();
+        var records = processor.process(query);
+        var assertRecords = assertThat(records);
         assertRecords.hasSize(limit);
-        Comparator<EntityStateWithVersion> uuidOrder = comparing(
+        var uuidOrder = comparing(
                 (EntityStateWithVersion record) -> state(record).getId().getUuid()
         );
         assertRecords.isInOrder(uuidOrder.reversed());
@@ -131,12 +126,10 @@ class EntityQueryProcessorTest {
     @Test
     @DisplayName("fail if the query does not specify filters and `include_all` is not set")
     void failOnInvalidQuery() {
-        Target target = Target
-                .newBuilder()
+        var target = Target.newBuilder()
                 .setType(TypeName.of(Mirror.class).value())
                 .buildPartial();
-        Query query = Query
-                .newBuilder()
+        var query = Query.newBuilder()
                 .setId(QueryId.newBuilder().setValue(newUuid()))
                 .setContext(factory.newActorContext())
                 .setTarget(target)
@@ -145,21 +138,19 @@ class EntityQueryProcessorTest {
     }
 
     private void fill() {
-        for (int i = 0; i < MENU_COUNT; i++) {
+        for (var i = 0; i < MENU_COUNT; i++) {
             addDish();
         }
     }
 
     @CanIgnoreReturnValue
     private DishAdded addDish() {
-        Dish dish = Dish
-                .newBuilder()
+        var dish = Dish.newBuilder()
                 .setTitle("Dead beef")
                 .setPrice(42)
                 .vBuild();
-        MenuId id = MenuId.generate();
-        DishAdded event = DishAdded
-                .newBuilder()
+        var id = MenuId.generate();
+        var event = DishAdded.newBuilder()
                 .setId(id)
                 .setDish(dish)
                 .vBuild();
@@ -168,8 +159,8 @@ class EntityQueryProcessorTest {
     }
 
     private static Menu state(EntityStateWithVersion record) {
-        Any state = record.getState();
-        Menu menu = unpack(state, Menu.class);
+        var state = record.getState();
+        var menu = unpack(state, Menu.class);
         return menu;
     }
 }

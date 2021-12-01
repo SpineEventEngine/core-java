@@ -26,7 +26,6 @@
 
 package io.spine.server.route.given.sur;
 
-import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.Aggregate;
@@ -55,15 +54,14 @@ public final class MagazineAggregate extends Aggregate<String, Magazine, Magazin
     }
 
     ArtistName author(PublishArticle cmd, CommandContext ctx) {
-        Message article = AnyPacker.unpack(cmd.getArticle());
+        var article = AnyPacker.unpack(cmd.getArticle());
         if (article instanceof Manifesto) {
-            Manifesto manifesto = (Manifesto) article;
+            var manifesto = (Manifesto) article;
             return manifesto.getAuthor();
         }
 
         return ArtistName.newBuilder()
-                         .setValue(ctx.actor()
-                                      .getValue())
-                         .vBuild();
+                .setValue(ctx.actor().getValue())
+                .vBuild();
     }
 }

@@ -56,7 +56,7 @@ final class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
 
     @Apply
     private void event(TaskCreated event) {
-        Task task = event.getTask();
+        var task = event.getTask();
         builder()
                 .setId(event.getId())
                 .setName(task.getName())
@@ -65,8 +65,7 @@ final class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
 
     @Assign
     TaskRenamed handle(RenameTask cmd) {
-        return TaskRenamed
-                .newBuilder()
+        return TaskRenamed.newBuilder()
                 .setId(cmd.getId())
                 .setNewName(cmd.getNewName())
                 .build();

@@ -52,11 +52,8 @@ public class StgProjectStorage extends RecordStorageUnderTest<StgProjectId, StgP
 
     private static MessageRecordSpec<StgProjectId, StgProject> spec() {
         @SuppressWarnings("ConstantConditions")     // Proto getters return non-{@code null} values.
-        MessageRecordSpec<StgProjectId, StgProject> spec =
-                new MessageRecordSpec<>(StgProjectId.class,
-                                        StgProject.class,
-                                        StgProject::getId,
-                                        StgColumn.definitions());
+        var spec = new MessageRecordSpec<>(StgProjectId.class, StgProject.class, StgProject::getId,
+                                           StgColumn.definitions());
         return spec;
     }
 }

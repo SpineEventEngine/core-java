@@ -42,8 +42,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
@@ -56,8 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("`AbstractHandlerMethod` should")
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-@DisplayName("AbstractHandlerMethod should")
 class AbstractHandlerMethodTest {
 
     private final OneParamSignature signature = new OneParamSignature();
@@ -77,7 +75,7 @@ class AbstractHandlerMethodTest {
     }
 
     @Test
-    @DisplayName("not accept null method")
+    @DisplayName("not accept `null` method")
     void notAcceptNullMethod() {
         assertThrows(NullPointerException.class, () -> new TwoParamMethod(nullRef(),
                                                                           TwoParamSpec.INSTANCE));
@@ -94,13 +92,13 @@ class AbstractHandlerMethodTest {
     class CheckAccess {
 
         @Test
-        @DisplayName(" public")
+        @DisplayName("public")
         void isPublic() {
             assertTrue(twoParamMethod.isPublic());
         }
 
         @Test
-        @DisplayName(" private")
+        @DisplayName("private")
         void isPrivate() {
             assertTrue(oneParamMethod.isPrivate());
         }
@@ -120,34 +118,30 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("with one parameter")
         void withOneParam() {
-            ModProjectStarted eventMessage = ModProjectStarted
-                    .newBuilder()
+            var eventMessage = ModProjectStarted.newBuilder()
                     .setId(newUuid())
                     .build();
-            Event event = Event
-                    .newBuilder()
+            var event = Event.newBuilder()
                     .setMessage(pack(eventMessage))
                     .build();
-            EventEnvelope envelope = EventEnvelope.of(event);
+            var envelope = EventEnvelope.of(event);
             oneParamMethod.invoke(target, envelope);
 
             assertTrue(((StubHandler) target).wasHandleInvoked());
         }
 
-        @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
         @Test
         @DisplayName("with two parameters")
+        @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
         void withTwoParams() {
-            ModProjectCreated eventMessage = ModProjectCreated
-                    .newBuilder()
+            var eventMessage = ModProjectCreated.newBuilder()
                     .setId(newUuid())
                     .build();
-            Event event = Event
-                    .newBuilder()
+            var event = Event.newBuilder()
                     .setMessage(pack(eventMessage))
                     .setContext(EventContext.getDefaultInstance())
                     .build();
-            EventEnvelope envelope = EventEnvelope.of(event);
+            var envelope = EventEnvelope.of(event);
             twoParamMethod.invoke(target, envelope);
 
             assertTrue(((StubHandler) target).wasOnInvoked());
@@ -171,7 +165,7 @@ class AbstractHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("instance is not equal to null")
+        @DisplayName("instance is not equal to `null`")
         void notEqualsToNull() {
             assertNotEquals(null, oneParamMethod);
         }
@@ -205,14 +199,14 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("checked exception")
         void checkedException() {
-            Optional<OneParamMethod> method = signature.classify(getMethodWithCheckedException());
+            var method = signature.classify(getMethodWithCheckedException());
             assertFalse(method.isPresent());
         }
 
         @Test
         @DisplayName("runtime exception")
         void runtimeException() {
-            Optional<OneParamMethod> method = signature.classify(getMethodWithRuntimeException());
+            var method = signature.classify(getMethodWithRuntimeException());
             assertFalse(method.isPresent());
         }
     }

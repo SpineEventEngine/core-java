@@ -95,7 +95,7 @@ class ProjectionClassTest {
 
         @BeforeEach
         void createProjection() {
-            ProjectId id = newId();
+            var id = newId();
             projection = Given.projectionOfClass(FilteringProjection.class)
                               .withId(id.getId())
                               .withVersion(42)
@@ -108,7 +108,7 @@ class ProjectionClassTest {
         void eventDelivery() {
             assertDispatched(event(SET_A), VALUE_A);
             assertDispatched(event(SET_B), VALUE_B);
-            String customText = "Pass this to no-filtering handler";
+            var customText = "Pass this to no-filtering handler";
             assertDispatched(event(customText), customText);
         }
 
@@ -121,7 +121,7 @@ class ProjectionClassTest {
 
         private void assertDispatched(EventMessage event, String expectedState) {
             dispatch(projection, eventFactory.createEvent(event));
-            String newState = projection.state().getValue();
+            var newState = projection.state().getValue();
             assertThat(newState).isEqualTo(expectedState);
         }
     }
@@ -145,8 +145,7 @@ class ProjectionClassTest {
     }
 
     private static ProjectId newId() {
-        return ProjectId
-                .newBuilder()
+        return ProjectId.newBuilder()
                 .setId(newUuid())
                 .build();
     }

@@ -29,7 +29,6 @@ package io.spine.server.projection;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.client.VersionColumn;
-import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.projection.given.SavedString;
@@ -38,12 +37,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth8.assertThat;
 
 @Nested
-@DisplayName("Projection should have columns")
+@DisplayName("`Projection` should have columns")
 class ProjectionColumnTest {
 
     private static final EntityRecordSpec<String, SavedString, SavingProjection> recordSpec =
@@ -63,7 +60,7 @@ class ProjectionColumnTest {
     }
 
     private static void assertHasColumn(ColumnName columnName) {
-        Optional<Column<?, ?>> result = recordSpec.findColumn(columnName);
+        var result = recordSpec.findColumn(columnName);
         assertThat(result).isPresent();
     }
 }

@@ -27,16 +27,11 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.StringSubject;
-import io.spine.base.Error;
 import io.spine.base.Identifier;
-import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.EventValidationError;
 import io.spine.core.MessageId;
-import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.entity.given.Given;
@@ -47,7 +42,6 @@ import io.spine.server.projection.given.SavingProjection;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.DiagnosticMonitor;
-import io.spine.system.server.HandlerFailedUnexpectedly;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -61,8 +55,6 @@ import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
@@ -91,7 +83,7 @@ class ProjectionTest {
 
     @BeforeEach
     void setUp() {
-        String id = newUuid();
+        var id = newUuid();
         projection = Given.projectionOfClass(SavingProjection.class)
                           .withId(id)
                           .withVersion(1)
@@ -105,21 +97,19 @@ class ProjectionTest {
     @Test
     @DisplayName("handle events")
     void handleEvents() {
-        StringImported stringEvent = StringImported
-                .newBuilder()
+        var stringEvent = StringImported.newBuilder()
                 .setValue(newUuid())
                 .build();
-        Event strEvt = eventFactory.createEvent(stringEvent);
+        var strEvt = eventFactory.createEvent(stringEvent);
         dispatch(projection, stringEvent, strEvt.context());
         assertTrue(projection.changed());
         assertThat(projection.state().getValue())
                 .contains(stringEvent.getValue());
 
-        Int32Imported integerEvent = Int32Imported
-                .newBuilder()
+        var integerEvent = Int32Imported.newBuilder()
                 .setValue(42)
                 .build();
-        Event intEvt = eventFactory.createEvent(integerEvent);
+        var intEvt = eventFactory.createEvent(integerEvent);
         dispatch(projection, integerEvent, intEvt.context());
         assertTrue(projection.changed());
         assertThat(projection.state().getValue())
@@ -129,37 +119,31 @@ class ProjectionTest {
     @Test
     @DisplayName("receive entity state updates")
     void handleStateUpdates() {
-        ProjectId id = newId();
-        TaskId taskId = TaskId
-                .newBuilder()
+        var id = newId();
+        var taskId = TaskId.newBuilder()
                 .setId(TestValues.random(1, 1_000))
                 .build();
-        Task task = Task
-                .newBuilder()
+        var task = Task.newBuilder()
                 .setTaskId(taskId)
                 .setTitle("test task " + random(42))
                 .build();
-        String projectName = "test project name " + randomString();
-        Project.Builder stateBuilder = Project
-                .newBuilder()
+        var projectName = "test project name " + randomString();
+        var stateBuilder = Project.newBuilder()
                 .setId(id)
                 .setName(projectName)
                 .setStatus(STARTED)
                 .addTask(task);
-        Project aggregateState = stateBuilder.build();
-        Project previousAggState = stateBuilder.setName("Old " + stateBuilder.getName()).build();
-        MessageId entityId = MessageId
-                .newBuilder()
+        var aggregateState = stateBuilder.build();
+        var previousAggState = stateBuilder.setName("Old " + stateBuilder.getName()).build();
+        var entityId = MessageId.newBuilder()
                 .setTypeUrl(aggregateState.typeUrl().value())
                 .setId(pack(id))
                 .setVersion(Versions.zero())
                 .build();
-        EventId eventId = EventId
-                .newBuilder()
+        var eventId = EventId.newBuilder()
                 .setValue(newUuid())
                 .build();
-        EntityStateChanged systemEvent = EntityStateChanged
-                .newBuilder()
+        var systemEvent = EntityStateChanged.newBuilder()
                 .setEntity(entityId)
                 .setOldState(pack(previousAggState))
                 .setNewState(pack(aggregateState))
@@ -168,11 +152,10 @@ class ProjectionTest {
                                       .setId(pack(eventId))
                                       .setTypeUrl("example.org/example.test.Event"))
                 .build();
-        EntitySubscriberProjection projection = new EntitySubscriberProjection(id);
+        var projection = new EntitySubscriberProjection(id);
         dispatch(projection, withMessage(systemEvent));
         assertThat(projection.state())
-                .isEqualTo(ProjectTaskNames
-                                   .newBuilder()
+                .isEqualTo(ProjectTaskNames.newBuilder()
                                    .setProjectId(id)
                                    .setProjectName(projectName)
                                    .addTaskName(task.getTitle())
@@ -180,35 +163,32 @@ class ProjectionTest {
     }
 
     @Test
-    @DisplayName("dispatch unexpected handler failure system rejection with `UNSUPPORTED_EVENT` cause")
+    @DisplayName("dispatch unexpected handler failure system rejection " +
+            "with `UNSUPPORTED_EVENT` cause")
     void dispatchUnsupportedEventFailure() {
         @SuppressWarnings({"unchecked", "RedundantSuppression"})
-        ProjectionRepository<String, SavingProjection, SavedString> repository =
-                (ProjectionRepository<String, SavingProjection, SavedString>)
-                        DefaultRepository.of(SavingProjection.class);
-        BoundedContext context = BoundedContextBuilder
-                .assumingTests()
-                .build();
-        final BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        var repository = (ProjectionRepository<String, SavingProjection, SavedString>)
+                DefaultRepository.of(SavingProjection.class);
+        var context = BoundedContextBuilder.assumingTests().build();
+        final var contextAccess = context.internalAccess();
         contextAccess.register(repository);
-        DiagnosticMonitor monitor = new DiagnosticMonitor();
+        var monitor = new DiagnosticMonitor();
         contextAccess.registerEventDispatcher(monitor);
-        Event event = GivenEvent.arbitrary();
-        EventEnvelope envelope = EventEnvelope.of(event);
-        ProjectionEndpoint<String, SavingProjection, SavedString> endpoint =
-                ProjectionEndpoint.of(repository, envelope);
+        var event = GivenEvent.arbitrary();
+        var envelope = EventEnvelope.of(event);
+        var endpoint = ProjectionEndpoint.of(repository, envelope);
 
         endpoint.dispatchTo(projection.id());
 
-        List<HandlerFailedUnexpectedly> systemEvents = monitor.handlerFailureEvents();
+        var systemEvents = monitor.handlerFailureEvents();
         assertThat(systemEvents)
                 .hasSize(1);
-        HandlerFailedUnexpectedly systemEvent = systemEvents.get(0);
+        var systemEvent = systemEvents.get(0);
         assertThat(systemEvent.getHandledSignal().asEventId())
              .isEqualTo(event.id());
         assertThat(systemEvent.getEntity().getId())
              .isEqualTo(Identifier.pack(projection.id()));
-        Error error = systemEvent.getError();
+        var error = systemEvent.getError();
         assertThat(error.getType())
                 .isEqualTo(EventValidationError.getDescriptor().getFullName());
         assertThat(error.getCode())
@@ -218,23 +198,21 @@ class ProjectionTest {
     @Test
     @DisplayName("expose `play events` operation to package")
     void exposePlayingEvents() {
-        StringImported stringImported = StringImported
-                .newBuilder()
+        var stringImported = StringImported.newBuilder()
                 .setValue("eins zwei drei")
                 .build();
-        Int32Imported integerImported = Int32Imported
-                .newBuilder()
+        var integerImported = Int32Imported.newBuilder()
                 .setValue(123)
                 .build();
-        Version nextVersion = Versions.increment(projection.version());
-        Event e1 = eventFactory.createEvent(stringImported, nextVersion);
-        Event e2 = eventFactory.createEvent(integerImported, Versions.increment(nextVersion));
+        var nextVersion = Versions.increment(projection.version());
+        var e1 = eventFactory.createEvent(stringImported, nextVersion);
+        var e2 = eventFactory.createEvent(integerImported, Versions.increment(nextVersion));
 
-        boolean projectionChanged = Projection.playOn(projection, ImmutableList.of(e1, e2));
+        var projectionChanged = Projection.playOn(projection, ImmutableList.of(e1, e2));
         assertTrue(projectionChanged);
 
-        String projectionState = projection.state().getValue();
-        StringSubject state = assertThat(projectionState);
+        var projectionState = projection.state().getValue();
+        var state = assertThat(projectionState);
         state.contains(stringImported.getValue());
         state.contains(String.valueOf(integerImported.getValue()));
     }
@@ -242,12 +220,11 @@ class ProjectionTest {
     @Test
     @DisplayName("not dispatch event if it does not match filters")
     void notDeliverIfNotFits() {
-        NoDefaultOptionProjection projection =
+        var projection =
                 Given.projectionOfClass(NoDefaultOptionProjection.class)
                      .withId(newUuid())
                      .build();
-        StringImported skipped = StringImported
-                .newBuilder()
+        var skipped = StringImported.newBuilder()
                 .setValue("BBB")
                 .build();
         dispatch(projection, eventFactory.createEvent(skipped));
@@ -257,8 +234,7 @@ class ProjectionTest {
                 .comparingExpectedFieldsOnly()
                 .isEqualTo(SavedString.getDefaultInstance());
 
-        StringImported dispatched = StringImported
-                .newBuilder()
+        var dispatched = StringImported.newBuilder()
                 .setValue(ACCEPTED_VALUE)
                 .build();
         dispatch(projection, eventFactory.createEvent(dispatched));
@@ -267,8 +243,7 @@ class ProjectionTest {
     }
 
     private static ProjectId newId() {
-        return ProjectId
-                .newBuilder()
+        return ProjectId.newBuilder()
                 .setId(newUuid())
                 .build();
     }

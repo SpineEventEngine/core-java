@@ -34,8 +34,6 @@ import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -46,32 +44,32 @@ final class RejectionDispatchKeysTest extends UtilityClassTest<RejectionDispatch
         super(RejectionDispatchKeys.class);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     @DisplayName("create a valid key")
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     void createValidKey() {
         assertDoesNotThrow(() -> {
-            Method method = ModelTests.getMethod(RejectionSubscriber.class, "rejectionWithCommand");
+            var method = ModelTests.getMethod(RejectionSubscriber.class, "rejectionWithCommand");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
         assertDoesNotThrow(() -> {
-            Method method = ModelTests.getMethod(RejectionSubscriber.class,
-                                                 "rejectionWithCommandAndCtx");
+            var method = ModelTests.getMethod(RejectionSubscriber.class,
+                                              "rejectionWithCommandAndCtx");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     @DisplayName("not create keys for rejections without a cause")
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     void notCreateKeyForRejectionsWithoutCause() {
         assertThrows(IllegalArgumentException.class, () -> {
-            Method method = ModelTests.getMethod(RejectionSubscriber.class,
-                                                 "rejectionWithoutCommand");
+            var method = ModelTests.getMethod(RejectionSubscriber.class,
+                                              "rejectionWithoutCommand");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            Method method = ModelTests.getMethod(RejectionSubscriber.class, "rejectionWithCtx");
+            var method = ModelTests.getMethod(RejectionSubscriber.class, "rejectionWithCtx");
             RejectionDispatchKeys.of(EventClass.from(SigCannotCreateProject.class), method);
         });
     }

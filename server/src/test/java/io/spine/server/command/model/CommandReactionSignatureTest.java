@@ -30,10 +30,12 @@ import io.spine.server.command.Command;
 import io.spine.server.command.model.given.reaction.InvalidCommander;
 import io.spine.server.command.model.given.reaction.ValidCommander;
 import io.spine.server.model.MethodSignatureTest;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
+@DisplayName("`CommandReactionSignature` should")
 class CommandReactionSignatureTest extends MethodSignatureTest<CommandReactionSignature> {
 
     @Override

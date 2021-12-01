@@ -76,9 +76,8 @@ public final class EntityRecordStorageTestEnv {
 
     public static EntityRecord buildStorageRecord(StgProjectId id,
                                                   EntityState<StgProjectId> state) {
-        Any wrappedState = pack(state);
-        EntityRecord record = EntityRecord
-                .newBuilder()
+        var wrappedState = pack(state);
+        var record = EntityRecord.newBuilder()
                 .setEntityId(pack(id))
                 .setState(wrappedState)
                 .setVersion(GivenVersion.withNumber(0))
@@ -89,9 +88,8 @@ public final class EntityRecordStorageTestEnv {
     public static EntityRecord buildStorageRecord(StgProjectId id,
                                                   EntityState<StgProjectId> state,
                                                   LifecycleFlags lifecycleFlags) {
-        Any wrappedState = pack(state);
-        EntityRecord record = EntityRecord
-                .newBuilder()
+        var wrappedState = pack(state);
+        var record = EntityRecord.newBuilder()
                 .setEntityId(pack(id))
                 .setState(wrappedState)
                 .setVersion(GivenVersion.withNumber(0))
@@ -101,9 +99,8 @@ public final class EntityRecordStorageTestEnv {
     }
 
     public static EntityRecord buildStorageRecord(TestCounterEntity entity) {
-        Any wrappedState = pack(entity.state());
-        EntityRecord record = EntityRecord
-                .newBuilder()
+        var wrappedState = pack(entity.state());
+        var record = EntityRecord.newBuilder()
                 .setEntityId(pack(entity.id()))
                 .setState(wrappedState)
                 .setVersion(GivenVersion.withNumber(0))
@@ -116,10 +113,10 @@ public final class EntityRecordStorageTestEnv {
      * Creates new instance of the test entity.
      */
     public static TestCounterEntity newEntity(StgProjectId id) {
-        TestCounterEntity entity = new TestCounterEntity(id);
+        var entity = new TestCounterEntity(id);
         injectState(entity, StgProject.newBuilder()
-                                      .setId(id)
-                                      .build(), Versions.zero());
+                .setId(id)
+                .build(), Versions.zero());
         return entity;
     }
 
@@ -132,21 +129,21 @@ public final class EntityRecordStorageTestEnv {
     }
 
     public static <I> EntityRecordWithColumns<I> withLifecycleColumns(I id, EntityRecord record) {
-        EntityRecordWithColumns<I> result = EntityRecordWithColumns.create(id, record);
+        var result = EntityRecordWithColumns.create(id, record);
         return result;
     }
 
     public static List<EntityRecordWithColumns<StgProjectId>>
     recordsWithColumnsFrom(Map<StgProjectId, EntityRecord> recordMap) {
         return recordMap.entrySet()
-                        .stream()
-                        .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
-                        .collect(toList());
+                .stream()
+                .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
+                .collect(toList());
     }
 
     public static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
         assertTrue(actual.hasNext());
-        EntityRecord singleRecord = actual.next();
+        var singleRecord = actual.next();
         assertFalse(actual.hasNext());
         assertEquals(expected, singleRecord);
     }
@@ -160,9 +157,8 @@ public final class EntityRecordStorageTestEnv {
     }
 
     public static EntityRecord newRecord(StgProjectId id, EntityState<StgProjectId> state) {
-        Any wrappedState = pack(state);
-        EntityRecord record = EntityRecord
-                .newBuilder()
+        var wrappedState = pack(state);
+        var record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(wrappedState)
                 .setVersion(GivenVersion.withNumber(0))
@@ -184,7 +180,7 @@ public final class EntityRecordStorageTestEnv {
             StgProject.Query query,
             EntityRecord expected,
             EntityRecordStorage<StgProjectId, StgProject> storage) {
-        Iterator<EntityRecord> actual = storage.findAll(query);
+        var actual = storage.findAll(query);
         assertSingleRecord(expected, actual);
     }
 
@@ -226,21 +222,20 @@ public final class EntityRecordStorageTestEnv {
 
         private static Timestamp dueDate() {
             return Timestamp.newBuilder()
-                            .setSeconds(42800)
-                            .setNanos(140000)
-                            .build();
+                    .setSeconds(42800)
+                    .setNanos(140000)
+                    .build();
         }
 
         private Version versionWithCounter() {
             return Version.newBuilder()
-                          .setNumber(counter)
-                          .setTimestamp(PROJECT_VERSION_TIMESTAMP)
-                          .build();
+                    .setNumber(counter)
+                    .setTimestamp(PROJECT_VERSION_TIMESTAMP)
+                    .build();
         }
 
         public void assignStatus(StgProject.Status status) {
-            StgProject newState = StgProject
-                    .newBuilder(state())
+            var newState = StgProject.newBuilder(state())
                     .setId(id())
                     .setStatus(status)
                     .build();
@@ -250,8 +245,7 @@ public final class EntityRecordStorageTestEnv {
         public void assignCounter(int counter) {
             this.counter = counter;
             // Manually inject state so the `project_version` storage field is populated.
-            StgProject newState = StgProject
-                    .newBuilder(state())
+            var newState = StgProject.newBuilder(state())
                     .setId(id())
                     .setProjectVersion(state().getProjectVersion())
                     .build();

@@ -26,7 +26,6 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.Event;
 import io.spine.people.PersonName;
 import io.spine.server.event.model.given.classes.ConferenceProgram;
 import io.spine.server.type.EventEnvelope;
@@ -37,8 +36,6 @@ import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -84,15 +81,12 @@ class EventSubscriberClassTest {
     @Test
     @DisplayName("obtain methods subscribed to events")
     void subscribersOf() {
-        TestEventFactory factory = TestEventFactory.newInstance(EventSubscriberClassTest.class);
-        Event event = factory.createEvent(SpeakerJoined
-                                                  .newBuilder()
-                                                  .setSpeaker(PersonName.newBuilder()
-                                                                      .setGivenName("Homer"))
-                                                  .vBuild());
-        Optional<SubscriberMethod> methods = subscriberClass.subscriberOf(
-                EventEnvelope.of(event)
-        );
+        var factory = TestEventFactory.newInstance(EventSubscriberClassTest.class);
+        var event = factory.createEvent(
+                SpeakerJoined.newBuilder()
+                        .setSpeaker(PersonName.newBuilder().setGivenName("Homer"))
+                        .vBuild());
+        var methods = subscriberClass.subscriberOf(EventEnvelope.of(event));
         assertThat(methods)
               .isPresent();
         assertThat(methods.get().rawMethod())

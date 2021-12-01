@@ -36,9 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
-// OK for the tests. We set right before we get().
-@DisplayName("TenantAwareOperation should")
+@DisplayName("`TenantAwareOperation` should")
+@SuppressWarnings("OptionalGetWithoutIsPresent") /* We set right before we `get()`. */
 class TenantAwareOperationTest {
 
     @Test
@@ -57,15 +56,14 @@ class TenantAwareOperationTest {
     @Test
     @DisplayName("remember and restore current tenant")
     void rememberCurrentTenant() {
-        TenantId previousTenant = generate();
+        var previousTenant = generate();
         CurrentTenant.set(previousTenant);
 
-        TenantId newTenant = generate();
+        var newTenant = generate();
         TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction of the operation does not change the current tenant.
-        assertEquals(previousTenant, CurrentTenant.get()
-                                                  .get());
+        assertEquals(previousTenant, CurrentTenant.get().get());
 
         op.execute();
 
@@ -73,8 +71,7 @@ class TenantAwareOperationTest {
         assertEquals(newTenant, getTenantFromRun(op));
 
         // Check that the current tenant is restored.
-        assertEquals(previousTenant, CurrentTenant.get()
-                                                  .get());
+        assertEquals(previousTenant, CurrentTenant.get().get());
     }
 
     @Test
@@ -84,7 +81,7 @@ class TenantAwareOperationTest {
         CurrentTenant.clear();
 
         // Create new operation.
-        TenantId newTenant = generate();
+        var newTenant = generate();
         TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction did not set the tenant.
@@ -104,7 +101,7 @@ class TenantAwareOperationTest {
     @Test
     @DisplayName("create instance for non-command execution context")
     void createForNonCommand() {
-        TenantId tenant = generate();
+        var tenant = generate();
         CurrentTenant.set(tenant);
 
         TenantAwareOperation op = createOperation();

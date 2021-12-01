@@ -48,13 +48,15 @@ public class QuintetTestEnv {
      */
     public static class QuintetFactory {
 
-        public static final InstrumentNumber NUM_1 = InstrumentNumber.newBuilder()
-                                                                     .setValue(1)
-                                                                     .build();
+        public static final InstrumentNumber NUM_1 = InstrumentNumber
+                .newBuilder()
+                .setValue(1)
+                .build();
 
-        public static final InstrumentNumber NUM_2 = InstrumentNumber.newBuilder()
-                                                                     .setValue(2)
-                                                                     .build();
+        public static final InstrumentNumber NUM_2 = InstrumentNumber
+                .newBuilder()
+                .setValue(2)
+                .build();
 
         /** Prevents instantiation of this utility class. */
         private QuintetFactory() {
@@ -87,41 +89,41 @@ public class QuintetTestEnv {
         }
 
         public static Violin newViolin(InstrumentNumber number) {
-            Violin result = Violin.newBuilder()
-                                  .setNumber(number)
-                                  .build();
+            var result = Violin.newBuilder()
+                    .setNumber(number)
+                    .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static Viola newViola() {
-            Viola result = Viola.newBuilder()
-                                .setSingle(true)
-                                .build();
+            var result = Viola.newBuilder()
+                    .setSingle(true)
+                    .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static Viola newViola(InstrumentNumber number) {
-            Viola result = Viola.newBuilder()
-                                .setNumber(number)
-                                .build();
+            var result = Viola.newBuilder()
+                    .setNumber(number)
+                    .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static ViolinCello newViolinCello(InstrumentNumber number) {
-            ViolinCello result = ViolinCello.newBuilder()
-                                            .setNumber(number)
-                                            .build();
+            var result = ViolinCello.newBuilder()
+                    .setNumber(number)
+                    .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static ViolinCello newViolinCello() {
-            ViolinCello result = ViolinCello.newBuilder()
-                                            .setSingle(true)
-                                            .build();
+            var result = ViolinCello.newBuilder()
+                    .setSingle(true)
+                    .build();
             Validate.checkValid(result);
             return result;
         }

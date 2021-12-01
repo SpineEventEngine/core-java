@@ -33,7 +33,6 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBox;
@@ -79,10 +78,10 @@ class LoggingEntityTest extends LoggingTest {
     @Test
     @DisplayName("log handler method name and parameters")
     void includeSignalName() {
-        UserId user = GivenUserId.generated();
-        BorrowBooks command = borrowBooks(user);
+        var user = GivenUserId.generated();
+        var command = borrowBooks(user);
         context().receivesCommand(command);
-        LogRecordSubject assertLog = assertLog().record();
+        var assertLog = assertLog().record();
         assertLog
                 .hasLevelThat()
                 .isEqualTo(FINE);
@@ -97,8 +96,8 @@ class LoggingEntityTest extends LoggingTest {
     @Test
     @DisplayName("log handler class name")
     void includeClassName() {
-        UserId user = GivenUserId.generated();
-        BorrowBooks command = borrowBooks(user);
+        var user = GivenUserId.generated();
+        var command = borrowBooks(user);
         context().receivesCommand(command);
         assertLog()
                 .record()
@@ -109,14 +108,13 @@ class LoggingEntityTest extends LoggingTest {
     @Test
     @DisplayName("pass the throwable unchanged")
     void withCause() {
-        UserId user = GivenUserId.generated();
-        ReturnBook command = ReturnBook
-                .newBuilder()
+        var user = GivenUserId.generated();
+        var command = ReturnBook.newBuilder()
                 .setCard(cardId(user))
                 .setBook(THE_HOBBIT)
                 .vBuild();
         context().receivesCommand(command);
-        LogRecordSubject assertRecord = assertLog().record();
+        var assertRecord = assertLog().record();
         assertRecord.isError();
         assertRecord.hasThrowableThat()
                     .isInstanceOf(UnknownBook.class);
@@ -130,9 +128,8 @@ class LoggingEntityTest extends LoggingTest {
     }
 
     private static BorrowBooks borrowBooks(UserId reader) {
-        LibraryCardId id = cardId(reader);
-        BorrowBooks command = BorrowBooks
-                .newBuilder()
+        var id = cardId(reader);
+        var command = BorrowBooks.newBuilder()
                 .setCard(id)
                 .addBookId(Books.BIG_RED_BOOK)
                 .vBuild();
@@ -140,8 +137,7 @@ class LoggingEntityTest extends LoggingTest {
     }
 
     private static LibraryCardId cardId(UserId reader) {
-        return LibraryCardId
-                    .newBuilder()
+        return LibraryCardId.newBuilder()
                     .setReader(reader)
                     .build();
     }
@@ -219,10 +215,9 @@ class LoggingEntityTest extends LoggingTest {
 
         private void testLevel(Function<Logging, FluentLogger.Api> underscoreFunc,
                                Level expectedLevel) {
-            CardAggregate aggregate = new CardAggregate();
+            var aggregate = new CardAggregate();
             underscoreFunc.apply(aggregate).log(message);
-            LogRecordSubject assertLog = assertLog()
-                    .record();
+            var assertLog = assertLog().record();
             assertLog.hasLevelThat()
                      .isEqualTo(expectedLevel);
             assertLog.hasMessageThat()
