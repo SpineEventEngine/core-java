@@ -109,10 +109,10 @@ final class PartFactory<A extends AggregatePart<?, ?, ?, ?>> extends AbstractEnt
     }
 
     private static ModelError noSuchConstructor(Class<?> partClass, Class<?> rootClass) {
-        var errMsg =
-                format("`%s` class must declare a constructor with one parameter of the `%s` type.",
-                       partClass.getName(),
-                       rootClass.getName());
+        var errMsg = format(
+                "`%s` class must declare a constructor with one parameter of the `%s` type.",
+                partClass.getName(),
+                rootClass.getName());
         var cause = new NoSuchMethodException(errMsg);
         throw new ModelError(cause);
     }
