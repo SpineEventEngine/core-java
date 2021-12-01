@@ -43,7 +43,7 @@ public interface WriteSideFunction extends Function<TenantId, SystemWriteSide> {
 
     static WriteSideFunction delegatingTo(SystemWriteSide delegate) {
         return (t) -> {
-            SystemWriteSide result = TenantAwareSystemWriteSide.forTenant(t, delegate);
+            var result = TenantAwareSystemWriteSide.forTenant(t, delegate);
             return result;
         };
     }

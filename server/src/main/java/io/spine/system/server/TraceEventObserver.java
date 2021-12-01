@@ -27,12 +27,9 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Signal;
 import io.spine.core.Subscribe;
-import io.spine.logging.Logging;
 import io.spine.server.ContextSpec;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.trace.Tracer;
 import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.event.CommandDispatchedToHandler;
 import io.spine.system.server.event.EventDispatchedToReactor;
@@ -46,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * An event subscriber which listens to {@linkplain SignalDispatchedMixin dispatching events}.
  */
 @Internal
-public final class TraceEventObserver extends AbstractEventSubscriber implements Logging {
+public final class TraceEventObserver extends AbstractEventSubscriber {
 
     private final ContextSpec context;
     private final TracerFactory tracing;
@@ -78,8 +75,8 @@ public final class TraceEventObserver extends AbstractEventSubscriber implements
     }
 
     private void trace(SignalDispatchedMixin<?> event) {
-        Signal<?, ?, ?> payload = event.getPayload();
-        try (Tracer tracer = tracing.trace(context, payload)) {
+        var payload = event.getPayload();
+        try (var tracer = tracing.trace(context, payload)) {
             tracer.processedBy(event.getReceiver(), event.getEntityType());
         } catch (Exception e) {
             _error().withCause(e)

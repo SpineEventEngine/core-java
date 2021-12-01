@@ -51,8 +51,8 @@ final class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
     public UnsupportedEventException handle(EventEnvelope event) {
         eventStore().append(event.outerObject());
 
-        EventMessage message = event.message();
-        UnsupportedEventException exception = new UnsupportedEventException(message);
+        var message = event.message();
+        var exception = new UnsupportedEventException(message);
         return exception;
     }
 

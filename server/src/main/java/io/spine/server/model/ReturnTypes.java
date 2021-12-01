@@ -96,17 +96,17 @@ public final class ReturnTypes {
      *         is {@code true} if the method can return {@link Nothing}
      */
     boolean matches(Method method, boolean mayReturnIgnored) {
-        TypeToken<?> actualReturnType = Invokable.from(method).getReturnType();
+        var actualReturnType = Invokable.from(method).getReturnType();
         if (!mayReturnIgnored && ignored(actualReturnType)) {
             return false;
         }
-        boolean conformsWhitelist = whitelist.stream()
-                                             .anyMatch(t -> conforms(t, actualReturnType));
+        var conformsWhitelist = whitelist.stream()
+                .anyMatch(t -> conforms(t, actualReturnType));
         if (!conformsWhitelist) {
             return false;
         }
-        boolean conformsBlacklist = blacklist.stream()
-                                             .noneMatch(t -> conforms(t, actualReturnType));
+        var conformsBlacklist = blacklist.stream()
+                .noneMatch(t -> conforms(t, actualReturnType));
         return conformsBlacklist;
     }
 
@@ -129,8 +129,8 @@ public final class ReturnTypes {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ReturnTypes types1 = (ReturnTypes) o;
-        return whitelist.equals(types1.whitelist);
+        var other = (ReturnTypes) o;
+        return whitelist.equals(other.whitelist);
     }
 
     @Override

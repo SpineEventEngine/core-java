@@ -63,11 +63,10 @@ public abstract class CommandHandlingEntityClass<E extends Entity<?, ?>>
 
     @Override
     public ImmutableSet<EventClass> rejections() {
-        ImmutableSet<EventClass> result =
-                commands.methods()
-                        .stream()
-                        .flatMap(m -> m.rejections().stream())
-                        .collect(toImmutableSet());
+        var result = commands.methods()
+                .stream()
+                .flatMap(m -> m.rejections().stream())
+                .collect(toImmutableSet());
         return result;
     }
 

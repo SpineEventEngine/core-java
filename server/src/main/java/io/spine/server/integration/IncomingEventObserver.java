@@ -58,7 +58,7 @@ final class IncomingEventObserver extends AbstractChannelObserver {
 
     @Override
     protected void handle(ExternalMessage message) {
-        Event event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
+        var event = AnyPacker.unpack(message.getOriginalMessage(), Event.class);
         bus.dispatch(event, noOpObserver());
     }
 }

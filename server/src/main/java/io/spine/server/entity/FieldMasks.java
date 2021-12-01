@@ -29,7 +29,6 @@ package io.spine.server.entity;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.util.FieldMaskUtil;
 
 import javax.annotation.Nonnull;
@@ -85,33 +84,33 @@ public final class FieldMasks {
                 .isEmpty()) {
             return message;
         }
-        M result = distill(message, mask);
+        var result = distill(message, mask);
         return result;
     }
 
     private static <M extends Message> M distill(M wholeMessage, FieldMask mask) {
-        Message.Builder builder = wholeMessage.newBuilderForType();
+        var builder = wholeMessage.newBuilderForType();
         FieldMaskUtil.merge(mask, wholeMessage, builder);
         @SuppressWarnings("unchecked") // safe as we got builder of `M`.
-                M result = (M) builder.build();
+        var result = (M) builder.build();
         return result;
     }
 
     private static <M extends Message>
     ImmutableList<M> doApplyMany(FieldMask mask, Collection<M> messages) {
-        ImmutableList<M> input = ImmutableList.copyOf(messages);
+        var input = ImmutableList.copyOf(messages);
         if (input.isEmpty()) {
             return input;
         }
 
-        ProtocolStringList filter = mask.getPathsList();
+        var filter = mask.getPathsList();
         if (filter.isEmpty()) {
             return input;
         }
 
         ImmutableList.Builder<M> filtered = ImmutableList.builder();
-        for (M wholeMessage : messages) {
-            M distilled = distill(wholeMessage, mask);
+        for (var wholeMessage : messages) {
+            var distilled = distill(wholeMessage, mask);
             filtered.add(distilled);
         }
         return filtered.build();

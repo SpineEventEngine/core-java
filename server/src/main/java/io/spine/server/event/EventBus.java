@@ -57,6 +57,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Dispatches incoming events to subscribers and provides ways for registering those subscribers.
@@ -131,7 +132,7 @@ public final class EventBus
     private EventBus(Builder builder) {
         super(builder);
         this.enricher = builder.enricher;
-        this.observer = checkNotNull(builder.observer);
+        this.observer = requireNonNull(builder.observer);
         this.deadMessageHandler = new DeadEventTap(this::eventStore);
     }
 
@@ -226,10 +227,10 @@ public final class EventBus
     }
 
     /**
-     * Obtains {@code Enricher} used by this Event Bus.
+     * Obtains the {@code EventEnricher} used by this Event Bus.
      */
     @VisibleForTesting
-    public final Optional<Enricher> enricher() {
+    public final Optional<EventEnricher> enricher() {
         return Optional.ofNullable(enricher);
     }
 
@@ -237,14 +238,14 @@ public final class EventBus
         if (enricher == null) {
             return event;
         }
-        EventEnvelope maybeEnriched = enricher.enrich(event);
+        var maybeEnriched = enricher.enrich(event);
         return maybeEnriched;
     }
 
     @Override
     protected void dispatch(EventEnvelope event) {
-        EventEnvelope enrichedEnvelope = enrich(event);
-        int dispatchersCalled = callDispatchers(enrichedEnvelope);
+        var enrichedEnvelope = enrich(event);
+        var dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
                    format("Message of type `%s` and ID `%s` has no dispatchers.",
                           event.messageClass(),
@@ -358,7 +359,7 @@ public final class EventBus
             if (observer == null) {
                 observer = noOpObserver();
             }
-            EventBus result = new EventBus(this);
+            var result = new EventBus(this);
             return result;
         }
 

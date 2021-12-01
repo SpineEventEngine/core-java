@@ -54,7 +54,7 @@ public abstract class ProjectionMigration<I,
     @Override
     @SuppressWarnings("unchecked") // Logically correct.
     protected Transaction<I, P, S, B> startTransaction(P entity) {
-        Transaction<I, P, S, B> tx = (Transaction<I, P, S, B>) ProjectionTransaction.start(entity);
+        var tx = (Transaction<I, P, S, B>) ProjectionTransaction.start(entity);
         return tx;
     }
 }

@@ -56,18 +56,16 @@ final class BatchDispatch {
      */
     void play(Event event) {
         if (successful) {
-            EventEnvelope eventEnvelope = EventEnvelope.of(event);
-            DispatchOutcome outcome = transaction.play(eventEnvelope);
+            var eventEnvelope = EventEnvelope.of(event);
+            var outcome = transaction.play(eventEnvelope);
             propagation.addOutcome(outcome);
             successful = !outcome.hasError();
             lastMessage = event.messageId();
         } else {
-            Interruption interruption = Interruption
-                    .newBuilder()
+            var interruption = Interruption.newBuilder()
                     .setStoppedAt(lastMessage)
                     .buildPartial();
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setPropagatedSignal(event.messageId())
                     .setInterrupted(interruption)
                     .vBuild();

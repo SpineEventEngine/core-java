@@ -76,7 +76,7 @@ public class PmTransaction<I,
      * @see ProcessManager#dispatchCommand(CommandEnvelope)
      */
     final DispatchOutcome perform(DispatchCommand<I> dispatch) {
-        VersionIncrement vi = createVersionIncrement();
+        var vi = createVersionIncrement();
         Phase<I> phase = new CommandDispatchingPhase<>(this, dispatch, vi);
         return propagate(phase);
     }

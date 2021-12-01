@@ -26,7 +26,6 @@
 
 package io.spine.server.integration;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.server.transport.ChannelId;
 import io.spine.type.TypeUrl;
 
@@ -73,7 +72,7 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
      * will be transmitted to other Bounded Contexts via this exchange.
      */
     void transmitRequestedEventsFrom(BusAdapter bus) {
-        ObserveWantedEvents observer = new ObserveWantedEvents(context(), bus);
+        var observer = new ObserveWantedEvents(context(), bus);
         subscriber().addObserver(observer);
         observers.add(observer);
     }
@@ -98,7 +97,7 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
      * <p>Sends out an instance of {@link ExternalEventsWanted} for that purpose.
      */
     void notifyTypesChanged() {
-        ImmutableSet<ExternalEventType> eventTypes = subscriptionChannels()
+        var eventTypes = subscriptionChannels()
                 .stream()
                 .map(ConfigExchange::typeOfTransmittedEvents)
                 .collect(toImmutableSet());

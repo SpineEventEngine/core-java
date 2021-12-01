@@ -53,7 +53,7 @@ final class CurrentTenant {
      *         the current thread works not in a multi-tenant context
      */
     static Optional<TenantId> get() {
-        TenantId result = threadLocal.get();
+        var result = threadLocal.get();
         return Optional.ofNullable(result);
     }
 
@@ -66,8 +66,8 @@ final class CurrentTenant {
      * @throws IllegalStateException if the is no current tenant ID set
      */
     static TenantId ensure() throws IllegalStateException {
-        Optional<TenantId> currentTenant = get();
-        if (!currentTenant.isPresent()) {
+        var currentTenant = get();
+        if (currentTenant.isEmpty()) {
             throw new IllegalStateException(
                     "No current `TenantId` set in multi-tenant execution context.");
         }

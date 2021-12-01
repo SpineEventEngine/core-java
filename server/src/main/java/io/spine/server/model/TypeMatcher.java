@@ -112,14 +112,14 @@ public interface TypeMatcher extends Predicate<Class<?>> {
             return true;
         }
 
-        Class<?> rawExpected = expected.getRawType();
-        Class<?> rawActual = actual.getRawType();
+        var rawExpected = expected.getRawType();
+        var rawActual = actual.getRawType();
         if (!rawExpected.isAssignableFrom(rawActual)) {
             return false;
         }
 
         TypeVariable<? extends Class<?>>[] expectedTypeParams = rawExpected.getTypeParameters();
-        int expectedParamCount = expectedTypeParams.length;
+        var expectedParamCount = expectedTypeParams.length;
         if (expectedParamCount == 0) {
             return true;
         }
@@ -127,7 +127,7 @@ public interface TypeMatcher extends Predicate<Class<?>> {
         TypeVariable<? extends Class<?>>[] actualTypeParams = rawActual.getTypeParameters();
 
         if (expectedParamCount == 1) {
-            TypeToken<?> expectedGenericType = expected.resolveType(expectedTypeParams[0]);
+            var expectedGenericType = expected.resolveType(expectedTypeParams[0]);
             return matchActualGenericsToOne(actual, expectedGenericType);
         } else if (expectedParamCount != actualTypeParams.length) {
             return false;
@@ -146,8 +146,8 @@ public interface TypeMatcher extends Predicate<Class<?>> {
     static TypeToken<?> resolve(TypeToken<?> type, TypeVariable<? extends Class<?>> param) {
         checkNotNull(type);
         checkNotNull(param);
-        TypeToken<?> actualGenericType = type.resolveType(param);
-        Class<?> rawType = actualGenericType.getRawType();
+        var actualGenericType = type.resolveType(param);
+        var rawType = actualGenericType.getRawType();
         TypeVariable<? extends Class<?>>[] parameters = rawType.getTypeParameters();
         if (Optional.class.isAssignableFrom(rawType) && parameters.length == 1) {
             actualGenericType = actualGenericType.resolveType(parameters[0]);
@@ -167,11 +167,11 @@ public interface TypeMatcher extends Predicate<Class<?>> {
     static boolean matchOneToOne(TypeToken<?> expected, TypeToken<?> actual) {
         checkNotNull(expected);
         checkNotNull(actual);
-        TypeVariable<? extends Class<?>>[] expectedTypeParams = genericTypesOf(expected);
-        TypeVariable<? extends Class<?>>[] actualTypeParams = genericTypesOf(actual);
-        for (int paramIndex = 0; paramIndex < expectedTypeParams.length; paramIndex++) {
-            TypeToken<?> expectedGeneric = resolve(expected, expectedTypeParams[paramIndex]);
-            TypeToken<?> actualGeneric = resolve(actual, actualTypeParams[paramIndex]);
+        var expectedTypeParams = genericTypesOf(expected);
+        var actualTypeParams = genericTypesOf(actual);
+        for (var paramIndex = 0; paramIndex < expectedTypeParams.length; paramIndex++) {
+            var expectedGeneric = resolve(expected, expectedTypeParams[paramIndex]);
+            var actualGeneric = resolve(actual, actualTypeParams[paramIndex]);
             if (differs(actualGeneric, expectedGeneric)) {
                 return false;
             }
@@ -189,10 +189,10 @@ public interface TypeMatcher extends Predicate<Class<?>> {
     matchActualGenericsToOne(TypeToken<?> whoseGenerics, TypeToken<?> expectedGenericType) {
         checkNotNull(whoseGenerics);
         checkNotNull(expectedGenericType);
-        TypeVariable<? extends Class<?>>[] actualTypeParams = genericTypesOf(whoseGenerics);
+        var actualTypeParams = genericTypesOf(whoseGenerics);
         if (actualTypeParams.length > 0) {
-            for (TypeVariable<? extends Class<?>> param : actualTypeParams) {
-                TypeToken<?> actualGenericType = resolve(whoseGenerics, param);
+            for (var param : actualTypeParams) {
+                var actualGenericType = resolve(whoseGenerics, param);
                 if (differs(actualGenericType, expectedGenericType)) {
                     return false;
                 }
@@ -211,7 +211,7 @@ public interface TypeMatcher extends Predicate<Class<?>> {
      */
     static ImmutableSet<Class<? extends Message>> messagesFitting(TypeToken<?> type) {
         checkNotNull(type);
-        Class<?> rawType = type.getRawType();
+        var rawType = type.getRawType();
         TypeVariable<? extends Class<?>>[] parameters = rawType.getTypeParameters();
         if (0 == parameters.length) {
             return type.isSubtypeOf(Message.class)
@@ -220,8 +220,8 @@ public interface TypeMatcher extends Predicate<Class<?>> {
         }
 
         ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
-        for (TypeVariable<? extends Class<?>> parameter : parameters) {
-            TypeToken<?> genericType = resolve(type, parameter);
+        for (var parameter : parameters) {
+            var genericType = resolve(type, parameter);
             if (genericType.isSubtypeOf(Message.class)) {
                 builder.add(asMessageType(genericType.getRawType()));
             }

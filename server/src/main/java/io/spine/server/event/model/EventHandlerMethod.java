@@ -72,7 +72,7 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
     @Override
     public MethodParams params() {
         if (RejectionHandler.super.handlesRejection()) {
-            MethodParams result = MethodParams.of(rawMethod());
+            var result = MethodParams.of(rawMethod());
             return result;
         }
         return super.params();
@@ -93,8 +93,7 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
      */
     @Override
     protected void checkAttributesMatch(EventEnvelope event) {
-        boolean external = event.context()
-                                .getExternal();
+        var external = event.context().getExternal();
         ensureExternalMatch(external);
     }
 }

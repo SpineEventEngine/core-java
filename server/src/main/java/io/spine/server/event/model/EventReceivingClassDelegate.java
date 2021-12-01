@@ -40,8 +40,6 @@ import io.spine.type.MessageClass;
 
 import java.util.Optional;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
-
 /**
  * Helper object for storing information about methods and handlers of an
  * {@linkplain EventReceiverClass event receiving class}.
@@ -154,18 +152,17 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * Obtains the classes of entity state messages from the passed handlers.
      */
     private ImmutableSet<StateClass<?>> extractStates(boolean external) {
-        EventClass updateEvent = StateClass.updateEvent();
+        var updateEvent = StateClass.updateEvent();
         if (!handlers.containsClass(updateEvent)) {
             return ImmutableSet.of();
         }
-        ImmutableSet<M> stateHandlers = handlers.handlersOf(updateEvent);
-        ImmutableSet<StateClass<?>> result =
-                stateHandlers.stream()
-                        .filter(h -> h instanceof StateSubscriberMethod)
-                        .map(h -> (StateSubscriberMethod) h)
-                        .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
-                        .map(StateSubscriberMethod::stateClass)
-                        .collect(toImmutableSet());
+        var stateHandlers = handlers.handlersOf(updateEvent);
+        var result = stateHandlers.stream()
+                .filter(h -> h instanceof StateSubscriberMethod)
+                .map(h -> (StateSubscriberMethod) h)
+                .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
+                .map(StateSubscriberMethod::stateClass)
+                .collect(ImmutableSet.<StateClass<?>>toImmutableSet());
         return result;
     }
 }

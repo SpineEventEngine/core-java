@@ -80,7 +80,7 @@ final class DomesticEventPublisher implements EventDispatcher, Logging {
         if (!(o instanceof DomesticEventPublisher)) {
             return false;
         }
-        DomesticEventPublisher publisher = (DomesticEventPublisher) o;
+        var publisher = (DomesticEventPublisher) o;
         return Objects.equal(eventClasses, publisher.eventClasses);
     }
 

@@ -43,7 +43,7 @@ final class ByContext<I> implements EventRoute<I, EventMessage> {
 
     @Override
     public Set<I> apply(EventMessage message, EventContext context) {
-        @SuppressWarnings("unchecked") I id = (I) context.producer();
+        @SuppressWarnings("unchecked") var id = (I) context.producer();
         return EventRoute.withId(id);
     }
 }

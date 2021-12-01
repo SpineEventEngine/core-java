@@ -26,11 +26,9 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import io.spine.core.Version;
 import io.spine.server.EventProducer;
 import io.spine.server.dispatch.ProducedEvents;
 import io.spine.server.dispatch.Success;
@@ -65,14 +63,14 @@ public interface EventProducingMethod<T extends EventProducer,
      */
     @Override
     default Success toSuccessfulOutcome(@Nullable Object rawResult, T target, E handledSignal) {
-        MethodResult result = MethodResult.from(rawResult);
-        EventFactory eventFactory = EventFactory.on(handledSignal, target.producerId());
-        Version version = target.version();
+        var result = MethodResult.from(rawResult);
+        var eventFactory = EventFactory.on(handledSignal, target.producerId());
+        var version = target.version();
 
-        ProducedEvents.Builder producedEvents = ProducedEvents.newBuilder();
-        ImmutableList<EventMessage> eventMessages = result.messages(EventMessage.class);
-        for (EventMessage msg : eventMessages) {
-            Event event = eventFactory.createEvent(msg, version);
+        var producedEvents = ProducedEvents.newBuilder();
+        var eventMessages = result.messages(EventMessage.class);
+        for (var msg : eventMessages) {
+            var event = eventFactory.createEvent(msg, version);
             producedEvents.addEvent(event);
         }
         return Success

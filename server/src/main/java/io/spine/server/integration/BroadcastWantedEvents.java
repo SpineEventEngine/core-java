@@ -31,8 +31,6 @@ import io.spine.core.BoundedContextName;
 import io.spine.server.transport.Publisher;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Identifier.pack;
 
 /**
  * Notifies other Bounded Contexts that this Bounded Context now requests some set of external
@@ -81,11 +79,10 @@ final class BroadcastWantedEvents {
      * it has {@code external} subscribers.
      */
     synchronized void send() {
-        ExternalEventsWanted request = ExternalEventsWanted
-                .newBuilder()
+        var request = ExternalEventsWanted.newBuilder()
                 .addAllType(wantedEvents)
                 .vBuild();
-        ExternalMessage wrapped = ExternalMessages.of(request, context);
+        var wrapped = ExternalMessages.of(request, context);
         publisher.publish(wrapped.getId(), wrapped);
     }
 }

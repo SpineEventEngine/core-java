@@ -32,9 +32,7 @@ import io.spine.client.EventUpdates;
 import io.spine.client.Filters;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.client.TargetFilters;
 import io.spine.core.Event;
-import io.spine.core.EventId;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
@@ -52,25 +50,25 @@ final class EventUpdateHandler extends UpdateHandler {
 
     @Override
     Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
-        boolean matches = typeMatches(event) && (includeAll() || matchByFilters(event));
+        var matches = typeMatches(event) && (includeAll() || matchByFilters(event));
         if (!matches) {
             return Optional.empty();
         }
-        SubscriptionUpdate update = createSubscriptionUpdate(event);
+        var update = createSubscriptionUpdate(event);
         return Optional.of(update);
     }
 
     @Override
     protected Any extractId(EventEnvelope event) {
-        EventId eventId = event.id();
-        Any result = Identifier.pack(eventId);
+        var eventId = event.id();
+        var result = Identifier.pack(eventId);
         return result;
     }
 
     @Override
     boolean typeMatches(EventEnvelope event) {
-        String expectedTypeUrl = target().getType();
-        String actualTypeUrl = event.typeUrl().value();
+        var expectedTypeUrl = target().getType();
+        var actualTypeUrl = event.typeUrl().value();
         return expectedTypeUrl.equals(actualTypeUrl);
     }
 
@@ -78,8 +76,8 @@ final class EventUpdateHandler extends UpdateHandler {
      * Matches an event to the subscription filters.
      */
     private boolean matchByFilters(EventEnvelope event) {
-        boolean idMatches = idMatches(event);
-        boolean eventMatches = eventMatches(event);
+        var idMatches = idMatches(event);
+        var eventMatches = eventMatches(event);
         return idMatches && eventMatches;
     }
 
@@ -87,9 +85,8 @@ final class EventUpdateHandler extends UpdateHandler {
      * Creates a subscription update with a single {@link Event} obtained from the envelope.
      */
     private SubscriptionUpdate createSubscriptionUpdate(EventEnvelope event) {
-        EventUpdates updates = extractEventUpdates(event);
-        SubscriptionUpdate result = SubscriptionUpdate
-                .newBuilder()
+        var updates = extractEventUpdates(event);
+        var result = SubscriptionUpdate.newBuilder()
                 .setSubscription(subscription())
                 .setResponse(ok())
                 .setEventUpdates(updates)
@@ -98,9 +95,8 @@ final class EventUpdateHandler extends UpdateHandler {
     }
 
     private static EventUpdates extractEventUpdates(EventEnvelope event) {
-        Event eventObject = event.outerObject();
-        EventUpdates result = EventUpdates
-                .newBuilder()
+        var eventObject = event.outerObject();
+        var result = EventUpdates.newBuilder()
                 .addEvent(eventObject)
                 .build();
         return result;
@@ -110,10 +106,9 @@ final class EventUpdateHandler extends UpdateHandler {
      * Checks if the event message matches the subscription filters.
      */
     private boolean eventMatches(EventEnvelope event) {
-        TargetFilters filters = target().getFilters();
-        Event evt = event.outerObject();
-        boolean result = filters
-                .getFilterList()
+        var filters = target().getFilters();
+        var evt = event.outerObject();
+        var result = filters.getFilterList()
                 .stream()
                 .map(Filters::toEventFilter)
                 .allMatch(f -> f.test(evt));

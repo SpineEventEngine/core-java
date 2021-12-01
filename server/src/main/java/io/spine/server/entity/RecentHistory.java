@@ -84,7 +84,7 @@ public final class RecentHistory {
      * @return an events iterator
      */
     public Iterator<Event> iterator() {
-        ImmutableList<Event> events = ImmutableList.copyOf(history);
+        var events = ImmutableList.copyOf(history);
         return events.iterator();
     }
 
@@ -97,7 +97,7 @@ public final class RecentHistory {
      * @return a stream of the recent events
      */
     public Stream<Event> stream() {
-        ImmutableList<Event> events = ImmutableList.copyOf(history);
+        var events = ImmutableList.copyOf(history);
         return events.stream();
     }
 
@@ -107,7 +107,7 @@ public final class RecentHistory {
      * @param events events in the chronological order
      */
     void addAll(Iterable<Event> events) {
-        for (Event event : events) {
+        for (var event : events) {
             history.addFirst(event);
         }
     }
@@ -125,7 +125,7 @@ public final class RecentHistory {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        RecentHistory other = (RecentHistory) obj;
+        var other = (RecentHistory) obj;
         return Objects.equals(this.history, other.history);
     }
 

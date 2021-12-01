@@ -84,18 +84,18 @@ final class ClassMap {
     ModelClass<T> get(Class<? extends T> rawClass,
                       Class<M> requestedClass,
                       Supplier<ModelClass<T>> supplier) {
-        String key = nameOf(rawClass);
+        var key = nameOf(rawClass);
         @SuppressWarnings("unchecked")
             /* The cast is protected by generic parameters of this method.
                We store the model class with the correct type, getting it from the supplier
                passed to this method. */
-        ModelClass<T> modelClass = (ModelClass<T>) classes.get(key);
+        var modelClass = (ModelClass<T>) classes.get(key);
         if (modelClass == null) {
             return setEntry(key, supplier);
         }
 
         @SuppressWarnings("unchecked")
-        Class<? extends ModelClass<?>> currentClass =
+        var currentClass =
                 (Class<? extends ModelClass<?>>) modelClass.getClass();
         if (currentClass.equals(requestedClass)) {
             return modelClass;
@@ -131,9 +131,9 @@ final class ClassMap {
         ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass<?, ?>> duplicates =
                 ImmutableMap.builder();
 
-        for (ModelClass<?> modelClass : classes.values()) {
+        for (var modelClass : classes.values()) {
             if (modelClass instanceof CommandHandlingClass) {
-                CommandHandlingClass<?, ?> commandHandler =
+                var commandHandler =
                         (CommandHandlingClass<?, ?>) modelClass;
                 Set<CommandClass> alreadyHandled = commandHandler.commands();
                 Set<CommandClass> intersection = intersection(alreadyHandled, candidateCommands);
@@ -143,8 +143,7 @@ final class ClassMap {
             }
         }
 
-        ImmutableMap<Set<CommandClass>, CommandHandlingClass<?, ?>> currentHandlers =
-                duplicates.build();
+        var currentHandlers = duplicates.build();
         if (!currentHandlers.isEmpty()) {
             throw new DuplicateCommandHandlerError(candidate, currentHandlers);
         }

@@ -31,8 +31,6 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.server.ContextSpec;
 
-import java.util.List;
-
 import static com.google.common.collect.Streams.stream;
 import static java.util.stream.Collectors.toList;
 
@@ -83,7 +81,7 @@ public abstract class MessageStorage<I, M extends Message> extends RecordStorage
      *         if the storage is already closed
      */
     protected void write(M message) {
-        RecordWithColumns<I, M> withCols = toRecord(message);
+        var withCols = toRecord(message);
         write(withCols);
     }
 
@@ -104,7 +102,7 @@ public abstract class MessageStorage<I, M extends Message> extends RecordStorage
      */
     @Override
     public synchronized void write(I id, M message) {
-        RecordWithColumns<I, M> record = RecordWithColumns.create(id, message, recordSpec());
+        var record = RecordWithColumns.create(id, message, recordSpec());
         write(record);
     }
 
@@ -120,8 +118,8 @@ public abstract class MessageStorage<I, M extends Message> extends RecordStorage
      *         if the storage is already closed
      */
     protected void writeBatch(Iterable<M> messages) {
-        List<RecordWithColumns<I, M>> records = stream(messages).map(this::toRecord)
-                                                                .collect(toList());
+        var records = stream(messages).map(this::toRecord)
+                                      .collect(toList());
         writeAll(records);
     }
 

@@ -125,11 +125,11 @@ class TransactionalEntity<I, S extends EntityState<I>, B extends ValidatingBuild
      */
     @Internal
     public final boolean changed() {
-        boolean lifecycleFlagsChanged = lifecycleFlagsChanged();
+        var lifecycleFlagsChanged = lifecycleFlagsChanged();
         Transaction<?, ?, ?, ?> tx = this.transaction;
-        boolean stateChanged = tx != null
-                               ? tx.stateChanged()
-                               : this.stateChanged;
+        var stateChanged = tx != null
+                           ? tx.stateChanged()
+                           : this.stateChanged;
         return stateChanged || lifecycleFlagsChanged;
     }
 
@@ -184,7 +184,7 @@ class TransactionalEntity<I, S extends EntityState<I>, B extends ValidatingBuild
     @Internal
     protected final boolean isTransactionInProgress() {
         Transaction<?, ?, ?, ?> tx = this.transaction;
-        boolean result = tx != null && tx.isActive();
+        var result = tx != null && tx.isActive();
         return result;
     }
 

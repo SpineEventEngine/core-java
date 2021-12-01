@@ -73,7 +73,7 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
     public <T> ColumnTypeMapping<T, ? extends R> of(Class<T> type) {
         checkNotNull(type);
         ColumnTypeMapping<?, ? extends R> result;
-        Optional<ColumnTypeMapping<?, ? extends R>> rule = customMappingFor(type);
+        var rule = customMappingFor(type);
         if (rule.isPresent()) {
             result = rule.get();
         } else {

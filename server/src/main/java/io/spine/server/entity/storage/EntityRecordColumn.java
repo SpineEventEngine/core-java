@@ -127,7 +127,7 @@ final class EntityRecordColumn {
      */
     static boolean isLifecycleColumn(Column<?, ?> column) {
         checkNotNull(column);
-        ColumnName name = column.name();
+        var name = column.name();
         return name.equals(archived.name()) || name.equals(deleted.name());
     }
 }

@@ -92,11 +92,11 @@ public interface EventFilter {
         ImmutableCollection<Event> filteredEvents = events
                 .stream()
                 .map(event -> {
-                    EventMessage eventMessage = event.enclosedMessage();
-                    Optional<? extends EventMessage> filtered = filter(eventMessage);
-                    Optional<Event> result = filtered.map(message -> event.toBuilder()
-                                                                          .setMessage(pack(message))
-                                                                          .build());
+                    var eventMessage = event.enclosedMessage();
+                    var filtered = filter(eventMessage);
+                    var result = filtered.map(message -> event.toBuilder()
+                            .setMessage(pack(message))
+                            .build());
                     return result;
                 })
                 .filter(Optional::isPresent)

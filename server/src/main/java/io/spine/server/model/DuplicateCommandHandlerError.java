@@ -60,16 +60,15 @@ public final class DuplicateCommandHandlerError extends ModelError {
         checkNotNull(duplicatingClass);
         checkNotNull(registeredHandlers);
         @SuppressWarnings("MagicNumber") // the buffer size that should cover most cases.
-        StringBuilder builder = new StringBuilder(512);
+        var builder = new StringBuilder(512);
 
         builder.append(format("The class `%s` declares handler ", duplicatingClass));
 
         // Do we have more than one command to report?
-        long totalDuplicatedCommands =
-                registeredHandlers.keySet()
-                                  .stream()
-                                  .mapToLong(Collection::size)
-                                  .sum();
+        var totalDuplicatedCommands = registeredHandlers.keySet()
+                .stream()
+                .mapToLong(Collection::size)
+                .sum();
         checkState(totalDuplicatedCommands >= 1);
         builder.append(
                 totalDuplicatedCommands == 1
@@ -87,28 +86,27 @@ public final class DuplicateCommandHandlerError extends ModelError {
                 : "other classes."
         );
 
-        String newLine = format("%n");
+        var newLine = format("%n");
         builder.append(newLine);
 
         // Now list the commands and their handlers.
-        for (Set<CommandClass> commandClasses : registeredHandlers.keySet()) {
+        for (var commandClasses : registeredHandlers.keySet()) {
             builder.append(newLine);
             if (commandClasses.size() > 1) {
                 builder.append(" Commands ");
-                String commandsBackTicked =
-                        commandClasses.stream()
-                                      .collect(toEnumerationBackticked());
+                var commandsBackTicked = commandClasses.stream()
+                        .collect(toEnumerationBackticked());
                 builder.append(commandsBackTicked);
                 builder.append(" are handled by ");
             } else {
                 // One command.
                 builder.append(" The command ");
-                CommandClass cmdClass = commandClasses.iterator()
-                                                      .next();
+                var cmdClass = commandClasses.iterator()
+                                             .next();
                 builder.append(backtick(cmdClass));
                 builder.append(" is handled by ");
             }
-            CommandHandlingClass<?, ?> handlingClass = registeredHandlers.get(commandClasses);
+            var handlingClass = registeredHandlers.get(commandClasses);
             builder.append(backtick(handlingClass));
             builder.append('.');
         }

@@ -26,14 +26,13 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
 import io.spine.core.EventContext;
 import io.spine.protobuf.Messages;
 
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -62,8 +61,7 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState<?>> 
     /**
      * Descriptors of fields matching the ID class by message type.
      */
-    private final ConcurrentHashMap<Class<? extends Message>, FieldDescriptor> fields =
-            new ConcurrentHashMap<>();
+    private final Map<Class<? extends Message>, FieldDescriptor> fields = new ConcurrentHashMap<>();
 
     private DefaultStateRoute(Class<I> idClass) {
         this.idClass = idClass;
@@ -81,9 +79,9 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState<?>> 
     }
 
     boolean supports(Class<? extends EntityState<?>> stateType) {
-        Descriptor type = Messages.defaultInstance(stateType)
-                                  .getDescriptorForType();
-        Optional<FieldDescriptor> idField = findField(idClass, type);
+        var type = Messages.defaultInstance(stateType)
+                           .getDescriptorForType();
+        var idField = findField(idClass, type);
         return idField.isPresent();
     }
 
@@ -109,25 +107,25 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState<?>> 
     public Set<I> apply(EntityState<?> state, EventContext ignored) {
         checkNotNull(state);
         checkNotNull(ignored);
-        Class<? extends EntityState> messageClass = state.getClass();
-        FieldDescriptor field = fields.get(messageClass);
+        var messageClass = state.getClass();
+        var field = fields.get(messageClass);
         if (field != null) {
             return fieldToSet(field, state);
         }
 
-        FieldDescriptor fd = findField(idClass, state.getDescriptorForType())
+        var fd = findField(idClass, state.getDescriptorForType())
                 .orElseThrow(() -> newIllegalStateException(
                         "Unable to find a field matching the type `%s`" +
                                 " in the message of the type `%s`.",
                         idClass, messageClass.getCanonicalName()));
         fields.put(messageClass, fd);
-        Set<I> result = fieldToSet(fd, state);
+        var result = fieldToSet(fd, state);
         return result;
     }
 
     private Set<I> fieldToSet(FieldDescriptor field, EntityState<?> state) {
-        Object fieldValue = state.getField(field);
-        I id = idClass.cast(fieldValue);
+        var fieldValue = state.getField(field);
+        var id = idClass.cast(fieldValue);
         return withId(id);
     }
 }

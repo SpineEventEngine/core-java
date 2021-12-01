@@ -27,7 +27,6 @@
 package io.spine.server.entity;
 
 import com.google.common.base.Converter;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
@@ -98,10 +97,9 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Enti
 
     @Override
     protected EntityRecord doForward(E entity) {
-        Any entityId = Identifier.pack(entity.id());
-        Any stateAny = pack(entity.state());
-        EntityRecord.Builder builder = EntityRecord
-                .newBuilder()
+        var entityId = Identifier.pack(entity.id());
+        var stateAny = pack(entity.state());
+        var builder = EntityRecord.newBuilder()
                 .setEntityId(entityId)
                 .setState(stateAny);
         updateBuilder(builder, entity);
@@ -112,10 +110,10 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Enti
             the type <E>, and forward conversion is performed on the entity of type <E>. */)
     @Override
     protected E doBackward(EntityRecord entityRecord) {
-        S unpacked = (S) unpack(entityRecord.getState());
-        S state = FieldMasks.applyMask(fieldMask(), unpacked);
-        I id = (I) Identifier.unpack(entityRecord.getEntityId());
-        E entity = entityFactory.create(id);
+        var unpacked = (S) unpack(entityRecord.getState());
+        var state = FieldMasks.applyMask(fieldMask(), unpacked);
+        var id = (I) Identifier.unpack(entityRecord.getEntityId());
+        var entity = entityFactory.create(id);
         checkState(entity != null, "`EntityFactory` produced `null` entity.");
         injectState(entity, state, entityRecord);
         return entity;
@@ -161,7 +159,7 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Enti
         if (!(obj instanceof StorageConverter)) {
             return false;
         }
-        StorageConverter<?, ?, ?> other = (StorageConverter<?, ?, ?>) obj;
+        var other = (StorageConverter<?, ?, ?>) obj;
         return Objects.equals(this.entityStateType, other.entityStateType)
                 && Objects.equals(this.entityFactory, other.entityFactory)
                 && Objects.equals(this.fieldMask, other.fieldMask);

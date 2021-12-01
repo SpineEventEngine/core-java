@@ -40,7 +40,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static io.spine.protobuf.AnyPacker.unpackFunc;
@@ -77,19 +76,19 @@ final class MatchFilter implements Predicate<Event> {
     }
 
     private static @Nullable TypeUrl getEventTypeUrl(EventFilter filter) {
-        String eventType = filter.getEventType();
-        TypeUrl result = eventType.isEmpty()
-                         ? null
-                         : TypeName.of(eventType)
-                                   .toUrl();
+        var eventType = filter.getEventType();
+        var result = eventType.isEmpty()
+                     ? null
+                     : TypeName.of(eventType)
+                               .toUrl();
         return result;
     }
 
     private static @Nullable List<Any> getAggregateIdentifiers(EventFilter filter) {
-        List<Any> aggregateIdList = filter.getAggregateIdList();
-        List<Any> result = aggregateIdList.isEmpty()
-                           ? null
-                           : aggregateIdList;
+        var aggregateIdList = filter.getAggregateIdList();
+        var result = aggregateIdList.isEmpty()
+                     ? null
+                     : aggregateIdList;
         return result;
     }
 
@@ -99,8 +98,8 @@ final class MatchFilter implements Predicate<Event> {
             return false;
         }
 
-        EventMessage eventMessage = event.enclosedMessage();
-        EventContext context = event.context();
+        var eventMessage = event.enclosedMessage();
+        var context = event.context();
 
         if (!checkEventType(eventMessage)) {
             return false;
@@ -114,7 +113,7 @@ final class MatchFilter implements Predicate<Event> {
             return false;
         }
 
-        boolean result = check(context, contextFieldFilters);
+        var result = check(context, contextFieldFilters);
         return result;
     }
 
@@ -122,13 +121,13 @@ final class MatchFilter implements Predicate<Event> {
         if (aggregateIds == null) {
             return true;
         }
-        Any aggregateId = context.getProducerId();
-        boolean result = aggregateIds.contains(aggregateId);
+        var aggregateId = context.getProducerId();
+        var result = aggregateIds.contains(aggregateId);
         return result;
     }
 
     private boolean checkEventType(EventMessage event) {
-        boolean result = (eventTypeUrl == null) || eventTypeUrl.equals(event.typeUrl());
+        var result = (eventTypeUrl == null) || eventTypeUrl.equals(event.typeUrl());
         return result;
     }
 
@@ -136,8 +135,8 @@ final class MatchFilter implements Predicate<Event> {
      * Tells if the passed message matches the filters.
      */
     private static boolean check(Message message, Collection<FieldFilter> filters) {
-        for (FieldFilter filter : filters) {
-            boolean matchesFilter = checkFields(message, filter);
+        for (var filter : filters) {
+            var matchesFilter = checkFields(message, filter);
             if (!matchesFilter) {
                 return false;
             }
@@ -146,21 +145,20 @@ final class MatchFilter implements Predicate<Event> {
     }
 
     private static boolean checkFields(Message object, FieldFilter filter) {
-        Field field = fieldFrom(filter);
-        Optional<Object> value = field.findValue(object);
-        if (!value.isPresent()) {
+        var field = fieldFrom(filter);
+        var value = field.findValue(object);
+        if (value.isEmpty()) {
             /* If there is no value in the field, return `true`
                when the list of required values is also empty. */
-            boolean nothingIsExpected = filter.getValueList().isEmpty();
+            var nothingIsExpected = filter.getValueList().isEmpty();
             return nothingIsExpected;
         }
-        Collection<Message> expectedValues =
-                filter.getValueList()
-                      .stream()
-                      .map(unpackFunc())
-                      .collect(toList());
-        Message msg = (Message) value.get();
-        boolean result = expectedValues.contains(msg);
+        var expectedValues = filter.getValueList()
+                .stream()
+                .map(unpackFunc())
+                .collect(toList());
+        var msg = (Message) value.get();
+        var result = expectedValues.contains(msg);
         return result;
     }
 
@@ -169,8 +167,8 @@ final class MatchFilter implements Predicate<Event> {
      * from the passed filter.
      */
     private static Field fieldFrom(FieldFilter filter) {
-        String path = filter.getFieldPath();
-        String fieldName = path.substring(path.lastIndexOf('.') + 1);
+        var path = filter.getFieldPath();
+        var fieldName = path.substring(path.lastIndexOf('.') + 1);
         if (fieldName.isEmpty()) {
             throw newIllegalArgumentException(
                     "Unable to get a field name from the field filter: `%s`.", filter);

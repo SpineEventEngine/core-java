@@ -27,7 +27,6 @@
 package io.spine.system.server;
 
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
 import io.spine.core.Responses;
@@ -72,7 +71,7 @@ final class CommandLogProjection
 
     @Subscribe
     void on(CommandScheduled event) {
-        Command updatedCommand = updateSchedule(event.getSchedule());
+        var updatedCommand = updateSchedule(event.getSchedule());
         timeline().setWhenScheduled(currentTime());
         builder().setCommand(updatedCommand);
     }
@@ -84,7 +83,7 @@ final class CommandLogProjection
 
     @Subscribe
     void on(TargetAssignedToCommand event) {
-        CommandTarget target = event.getTarget();
+        var target = event.getTarget();
         timeline().setWhenTargetAssigned(currentTime());
         builder().setTarget(target);
     }
@@ -98,8 +97,7 @@ final class CommandLogProjection
     void on(@Where(field = "handled_signal.id.type_url",
                    equals = "type.spine.io/spine.core.Command")
             HandlerFailedUnexpectedly event) {
-        Status status = Status
-                .newBuilder()
+        var status = Status.newBuilder()
                 .setError(event.getError())
                 .build();
         setStatus(status);
@@ -107,8 +105,7 @@ final class CommandLogProjection
 
     @Subscribe
     void on(CommandErrored event) {
-        Status status = Status
-                .newBuilder()
+        var status = Status.newBuilder()
                 .setError(event.getError())
                 .build();
         setStatus(status);
@@ -121,8 +118,7 @@ final class CommandLogProjection
      */
     @Subscribe
     void on(CommandRejected event) {
-        Status status = Status
-                .newBuilder()
+        var status = Status.newBuilder()
                 .setRejection(event.getRejectionEvent())
                 .build();
         setStatus(status);
@@ -130,8 +126,7 @@ final class CommandLogProjection
 
     @Subscribe
     void on(CommandTransformed event) {
-        Substituted substituted = Substituted
-                .newBuilder()
+        var substituted = Substituted.newBuilder()
                 .setCommand(event.getId())
                 .build();
         timeline().setSubstituted(substituted);
@@ -139,12 +134,10 @@ final class CommandLogProjection
 
     @Subscribe
     void on(CommandSplit event) {
-        Sequence sequence = Sequence
-                .newBuilder()
+        var sequence = Sequence.newBuilder()
                 .addAllItem(event.getProducedList())
                 .build();
-        Substituted substituted = Substituted
-                .newBuilder()
+        var substituted = Substituted.newBuilder()
                 .setSequence(sequence)
                 .build();
         timeline().setSubstituted(substituted);
@@ -152,16 +145,14 @@ final class CommandLogProjection
     }
 
     private Command updateSchedule(Schedule schedule) {
-        Command command = builder().getCommand();
-        CommandContext updatedContext =
-                command.context()
-                       .toBuilder()
-                       .setSchedule(schedule)
-                       .build();
-        Command updatedCommand =
-                command.toBuilder()
-                       .setContext(updatedContext)
-                       .build();
+        var command = builder().getCommand();
+        var updatedContext = command.context()
+                .toBuilder()
+                .setSchedule(schedule)
+                .build();
+        var updatedCommand = command.toBuilder()
+                .setContext(updatedContext)
+                .build();
         return updatedCommand;
     }
 

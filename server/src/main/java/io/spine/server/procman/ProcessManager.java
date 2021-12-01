@@ -32,25 +32,18 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.Commander;
-import io.spine.server.command.model.CommandHandlerMethod;
-import io.spine.server.command.model.CommandReactionMethod;
-import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
-import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.log.LoggingEntity;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
-
-import java.util.Optional;
 
 import static io.spine.server.Ignored.ignored;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
@@ -171,17 +164,17 @@ public abstract class ProcessManager<I,
     @Override
     protected DispatchOutcome dispatchCommand(CommandEnvelope command) {
         ProcessManagerClass<?> thisClass = thisClass();
-        CommandClass commandClass = command.messageClass();
+        var commandClass = command.messageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
-            CommandHandlerMethod method = thisClass.handlerOf(command);
-            DispatchOutcome outcome = method.invoke(this, command);
+            var method = thisClass.handlerOf(command);
+            var outcome = method.invoke(this, command);
             return outcome;
         }
 
         if (thisClass.substitutesCommand(commandClass)) {
-            CommandSubstituteMethod method = thisClass.commanderOf(command);
-            DispatchOutcome outcome = method.invoke(this, command);
+            var method = thisClass.commanderOf(command);
+            var outcome = method.invoke(this, command);
             return outcome;
         }
 
@@ -211,16 +204,16 @@ public abstract class ProcessManager<I,
      */
     DispatchOutcome dispatchEvent(EventEnvelope event) {
         ProcessManagerClass<?> thisClass = thisClass();
-        EventClass eventClass = event.messageClass();
-        Optional<EventReactorMethod> reactorMethod = thisClass.reactorOf(event);
+        var eventClass = event.messageClass();
+        var reactorMethod = thisClass.reactorOf(event);
         if (thisClass.reactsOnEvent(eventClass) && reactorMethod.isPresent()) {
-            DispatchOutcome outcome = reactorMethod.get().invoke(this, event);
+            var outcome = reactorMethod.get().invoke(this, event);
             return outcome;
         }
 
-        Optional<CommandReactionMethod> commanderMethod = thisClass.commanderOf(event);
+        var commanderMethod = thisClass.commanderOf(event);
         if (thisClass.producesCommandsOn(eventClass) && commanderMethod.isPresent()) {
-            DispatchOutcome outcome = commanderMethod.get().invoke(this, event);
+            var outcome = commanderMethod.get().invoke(this, event);
             return outcome;
         }
         _debug().log("Process manager %s filtered out and ignored event %s[ID: %s].",

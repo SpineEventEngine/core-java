@@ -50,21 +50,22 @@ public interface MessageChannel extends AutoCloseable {
      * Obtains the type of the messages transferred through this channel.
      */
     default TypeUrl targetType() {
-        ChannelId channelId = id();
+        var channelId = id();
         return TypeUrl.parse(channelId.getTargetType());
     }
 
     /**
      * Converts the given message type into a {@link ChannelId}.
      *
-     * @param messageType the type of messages transmitted through the channel
+     * @param messageType
+     *         the type of messages transmitted through the channel
      * @return channel ID
      */
     static ChannelId channelIdFor(TypeUrl messageType) {
         checkNotNull(messageType);
-        ChannelId channelId = ChannelId.newBuilder()
-                                       .setTargetType(messageType.value())
-                                       .build();
+        var channelId = ChannelId.newBuilder()
+                .setTargetType(messageType.value())
+                .build();
         return channelId;
     }
 }

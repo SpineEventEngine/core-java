@@ -25,14 +25,11 @@
  */
 package io.spine.server.stand;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
-import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.TopicValidationError;
-import io.spine.type.TypeUrl;
 
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
@@ -67,13 +64,13 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
 
     @Override
     protected boolean isSupported(Topic request) {
-        Target target = request.getTarget();
-        boolean supportedEntityTopic = typeRegistryContains(target) && visibilitySufficient(target);
+        var target = request.getTarget();
+        var supportedEntityTopic = typeRegistryContains(target) && visibilitySufficient(target);
         if (supportedEntityTopic) {
             return true;
         } else {
-            Class<Message> targetClass = target.type().getMessageClass();
-            boolean supportedEventTopic = EventMessage.class.isAssignableFrom(targetClass);
+            var targetClass = target.type().getMessageClass();
+            var supportedEventTopic = EventMessage.class.isAssignableFrom(targetClass);
             return supportedEventTopic;
         }
     }
@@ -81,13 +78,13 @@ final class TopicValidator extends AbstractTargetValidator<Topic> {
     @Override
     protected InvalidRequestException unsupportedException(Topic request,
                                                            Error error) {
-        String messageText = errorMessage(request);
+        var messageText = errorMessage(request);
         return new InvalidTopicException(messageText, request, error);
     }
 
     @Override
     protected String errorMessage(Topic request) {
-        TypeUrl targetType = getTypeOf(request.getTarget());
+        var targetType = getTypeOf(request.getTarget());
         return format("The topic target type is not supported: %s", targetType.toTypeName());
     }
 }

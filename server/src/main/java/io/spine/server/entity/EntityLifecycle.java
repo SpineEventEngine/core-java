@@ -29,7 +29,6 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
@@ -49,7 +48,6 @@ import io.spine.server.Identity;
 import io.spine.server.delivery.CatchUpId;
 import io.spine.server.delivery.event.EntityPreparedForCatchUp;
 import io.spine.server.dispatch.BatchDispatchOutcome;
-import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -80,7 +78,6 @@ import io.spine.type.TypeUrl;
 import io.spine.validate.ValidationError;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -157,8 +154,7 @@ public class EntityLifecycle {
      *         the kind of the created entity
      */
     public final void onEntityCreated(EntityOption.Kind entityKind) {
-        EntityCreated event = EntityCreated
-                .newBuilder()
+        var event = EntityCreated.newBuilder()
                 .setEntity(entityId)
                 .setKind(entityKind)
                 .vBuild();
@@ -173,17 +169,14 @@ public class EntityLifecycle {
      *         the ID of the command which should be handled by the entity
      */
     public final void onTargetAssignedToCommand(CommandId commandId) {
-        EntityId entityId = EntityId
-                .newBuilder()
+        var entityId = EntityId.newBuilder()
                 .setId(this.entityId.getId())
                 .buildPartial();
-        CommandTarget target = CommandTarget
-                .newBuilder()
+        var target = CommandTarget.newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(this.entityId.getTypeUrl())
                 .vBuild();
-        TargetAssignedToCommand event = TargetAssignedToCommand
-                .newBuilder()
+        var event = TargetAssignedToCommand.newBuilder()
                 .setId(commandId)
                 .setTarget(target)
                 .vBuild();
@@ -197,14 +190,13 @@ public class EntityLifecycle {
      *         the dispatched command
      */
     public final void onDispatchCommand(Command command) {
-        CommandDispatchedToHandler systemCommand = CommandDispatchedToHandler
-                .newBuilder()
+        var systemCommand = CommandDispatchedToHandler.newBuilder()
                 .setReceiver(entityId)
                 .setPayload(command)
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin systemEventOrigin = command.asMessageOrigin();
+        var systemEventOrigin = command.asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
 
@@ -215,11 +207,10 @@ public class EntityLifecycle {
      *         the handled command
      */
     public final void onCommandHandled(Command command) {
-        CommandHandled systemEvent = CommandHandled
-                .newBuilder()
+        var systemEvent = CommandHandled.newBuilder()
                 .setId(command.getId())
                 .vBuild();
-        Origin systemEventOrigin = command.asMessageOrigin();
+        var systemEventOrigin = command.asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -232,12 +223,11 @@ public class EntityLifecycle {
      *         the rejection event
      */
     public final void onCommandRejected(CommandId commandId, Event rejection) {
-        CommandRejected systemEvent = CommandRejected
-                .newBuilder()
+        var systemEvent = CommandRejected.newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
                 .vBuild();
-        Origin origin = rejection.asMessageOrigin();
+        var origin = rejection.asMessageOrigin();
         postEvent(systemEvent, origin);
     }
 
@@ -248,26 +238,24 @@ public class EntityLifecycle {
      *         the dispatched event
      */
     public final void onDispatchEventToSubscriber(Event event) {
-        EventDispatchedToSubscriber systemCommand = EventDispatchedToSubscriber
-                .newBuilder()
+        var systemCommand = EventDispatchedToSubscriber.newBuilder()
                 .setReceiver(entityId)
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin origin = event.asMessageOrigin();
+        var origin = event.asMessageOrigin();
         postEvent(systemCommand, origin);
     }
 
     public final void onEventImported(Event event) {
-        EventImported systemEvent = EventImported
-                .newBuilder()
+        var systemEvent = EventImported.newBuilder()
                 .setReceiver(entityId)
                 .setPayload(event)
                 .setWhenImported(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin systemEventOrigin = event.asMessageOrigin();
+        var systemEventOrigin = event.asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
 
@@ -278,14 +266,13 @@ public class EntityLifecycle {
      *         the dispatched event
      */
     public final void onDispatchEventToReactor(Event event) {
-        EventDispatchedToReactor systemCommand = EventDispatchedToReactor
-                .newBuilder()
+        var systemCommand = EventDispatchedToReactor.newBuilder()
                 .setReceiver(entityId)
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
                 .vBuild();
-        Origin origin = event.asMessageOrigin();
+        var origin = event.asMessageOrigin();
         postEvent(systemCommand, origin);
     }
 
@@ -320,8 +307,7 @@ public class EntityLifecycle {
      *         the IDs of handled messages that caused the deletion
      */
     public final void onRemovedFromStorage(Iterable<MessageId> signalIds) {
-        EntityDeleted event = EntityDeleted
-                .newBuilder()
+        var event = EntityDeleted.newBuilder()
                 .setEntity(entityId)
                 .addAllSignalId(ImmutableList.copyOf(signalIds))
                 .setRemovedFromStorage(true)
@@ -336,8 +322,7 @@ public class EntityLifecycle {
      *         {@link #eventFilter}
      */
     public final Optional<Event> onMigrationApplied() {
-        MigrationApplied systemEvent = MigrationApplied
-                .newBuilder()
+        var systemEvent = MigrationApplied.newBuilder()
                 .setEntity(entityId)
                 .setWhen(currentTime())
                 .build();
@@ -360,9 +345,8 @@ public class EntityLifecycle {
                                       MessageId root,
                                       ValidationError error,
                                       Version version) {
-        MessageId withNewVersion = entityId.withVersion(version);
-        ConstraintViolated event = ConstraintViolated
-                .newBuilder()
+        var withNewVersion = entityId.withVersion(version);
+        var event = ConstraintViolated.newBuilder()
                 .setEntity(withNewVersion)
                 .setLastMessage(lastMessage)
                 .setRootMessage(root)
@@ -385,7 +369,7 @@ public class EntityLifecycle {
     public final void onDispatchingFailed(SignalEnvelope<?, ?, ?> signal, Error error) {
         checkNotNull(signal);
         checkNotNull(error);
-        boolean duplicate = postIfDuplicate(signal, error);
+        var duplicate = postIfDuplicate(signal, error);
         if (!duplicate) {
             postHandlerFailed(signal.messageId(), error);
         }
@@ -394,8 +378,7 @@ public class EntityLifecycle {
     public void onDuplicateEvent(EventEnvelope event) {
         checkNotNull(event);
         @SuppressWarnings("deprecation") // Set the deprecated field for compatibility.
-        CannotDispatchDuplicateEvent systemEvent = CannotDispatchDuplicateEvent
-                .newBuilder()
+        var systemEvent = CannotDispatchDuplicateEvent.newBuilder()
                 .setEntity(entityId)
                 .setEvent(event.id())
                 .setDuplicateEvent(event.messageId())
@@ -410,9 +393,8 @@ public class EntityLifecycle {
      *         the ID of the catch-up process
      */
     public void onEntityPreparedForCatchUp(CatchUpId catchUpId) {
-        Any packedId = Identifier.pack(entityId);
-        EntityPreparedForCatchUp event =
-                EntityPreparedForCatchUp.newBuilder()
+        var packedId = Identifier.pack(entityId);
+        var event = EntityPreparedForCatchUp.newBuilder()
                         .setId(catchUpId)
                         .setInstanceId(packedId)
                         .vBuild();
@@ -422,8 +404,7 @@ public class EntityLifecycle {
     public void onDuplicateCommand(CommandEnvelope command) {
         checkNotNull(command);
         @SuppressWarnings("deprecation") // Set the deprecated field for compatibility.
-        CannotDispatchDuplicateCommand systemEvent = CannotDispatchDuplicateCommand
-                .newBuilder()
+        var systemEvent = CannotDispatchDuplicateCommand.newBuilder()
                 .setEntity(entityId)
                 .setCommand(command.id())
                 .setDuplicateCommand(command.messageId())
@@ -432,12 +413,12 @@ public class EntityLifecycle {
     }
 
     public void onCorruptedState(BatchDispatchOutcome outcome) {
-        List<DispatchOutcome> outcomes = outcome.getOutcomeList();
-        MessageId lastSuccessful = MessageId.getDefaultInstance();
+        var outcomes = outcome.getOutcomeList();
+        var lastSuccessful = MessageId.getDefaultInstance();
         MessageId erroneous = null;
         Error error = null;
-        int interruptedCount = 0;
-        for (DispatchOutcome dispatchOutcome : outcomes) {
+        var interruptedCount = 0;
+        for (var dispatchOutcome : outcomes) {
             if (dispatchOutcome.hasSuccess()) {
                 lastSuccessful = dispatchOutcome.getPropagatedSignal();
             } else if (dispatchOutcome.hasError()) {
@@ -453,8 +434,7 @@ public class EntityLifecycle {
         if (erroneous == null) {
             erroneous = MessageId.getDefaultInstance();
         }
-        AggregateHistoryCorrupted event = AggregateHistoryCorrupted
-                .newBuilder()
+        var event = AggregateHistoryCorrupted.newBuilder()
                 .setEntity(entityId)
                 .setEntityType(typeName)
                 .setLastSuccessfulEvent(lastSuccessful)
@@ -468,15 +448,14 @@ public class EntityLifecycle {
     private void postIfChanged(EntityRecordChange change,
                                Collection<? extends MessageId> messageIds,
                                Origin origin) {
-        Any oldState = change.getPreviousValue()
+        var oldState = change.getPreviousValue()
                              .getState();
-        Any newState = change.getNewValue()
+        var newState = change.getNewValue()
                              .getState();
         if (!oldState.equals(newState)) {
-            Version newVersion = change.getNewValue()
-                                       .getVersion();
-            EntityStateChanged event = EntityStateChanged
-                    .newBuilder()
+            var newVersion = change.getNewValue()
+                                   .getVersion();
+            var event = EntityStateChanged.newBuilder()
                     .setEntity(entityId)
                     .setOldState(oldState)
                     .setNewState(newState)
@@ -489,17 +468,16 @@ public class EntityLifecycle {
 
     private void postIfArchived(EntityRecordChange change,
                                 Collection<? extends MessageId> messageIds) {
-        boolean oldValue = change.getPreviousValue()
-                                 .getLifecycleFlags()
-                                 .getArchived();
-        boolean newValue = change.getNewValue()
-                                 .getLifecycleFlags()
-                                 .getArchived();
+        var oldValue = change.getPreviousValue()
+                             .getLifecycleFlags()
+                             .getArchived();
+        var newValue = change.getNewValue()
+                             .getLifecycleFlags()
+                             .getArchived();
         if (newValue && !oldValue) {
-            Version version = change.getNewValue()
-                                    .getVersion();
-            EntityArchived event = EntityArchived
-                    .newBuilder()
+            var version = change.getNewValue()
+                                .getVersion();
+            var event = EntityArchived.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
@@ -510,17 +488,16 @@ public class EntityLifecycle {
 
     private void postIfDeleted(EntityRecordChange change,
                                Collection<? extends MessageId> messageIds) {
-        boolean oldValue = change.getPreviousValue()
-                                 .getLifecycleFlags()
-                                 .getDeleted();
-        boolean newValue = change.getNewValue()
-                                 .getLifecycleFlags()
-                                 .getDeleted();
+        var oldValue = change.getPreviousValue()
+                             .getLifecycleFlags()
+                             .getDeleted();
+        var newValue = change.getNewValue()
+                             .getLifecycleFlags()
+                             .getDeleted();
         if (newValue && !oldValue) {
-            Version version = change.getNewValue()
-                                    .getVersion();
-            EntityDeleted event = EntityDeleted
-                    .newBuilder()
+            var version = change.getNewValue()
+                                .getVersion();
+            var event = EntityDeleted.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
@@ -532,17 +509,16 @@ public class EntityLifecycle {
 
     private void postIfExtracted(EntityRecordChange change,
                                  Collection<? extends MessageId> messageIds) {
-        boolean oldValue = change.getPreviousValue()
-                                 .getLifecycleFlags()
-                                 .getArchived();
-        boolean newValue = change.getNewValue()
-                                 .getLifecycleFlags()
-                                 .getArchived();
+        var oldValue = change.getPreviousValue()
+                             .getLifecycleFlags()
+                             .getArchived();
+        var newValue = change.getNewValue()
+                             .getLifecycleFlags()
+                             .getArchived();
         if (!newValue && oldValue) {
-            Version version = change.getNewValue()
-                                    .getVersion();
-            EntityUnarchived event = EntityUnarchived
-                    .newBuilder()
+            var version = change.getNewValue()
+                                .getVersion();
+            var event = EntityUnarchived.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
@@ -553,17 +529,16 @@ public class EntityLifecycle {
 
     private void postIfRestored(EntityRecordChange change,
                                 Collection<? extends MessageId> messageIds) {
-        boolean oldValue = change.getPreviousValue()
-                                 .getLifecycleFlags()
-                                 .getDeleted();
-        boolean newValue = change.getNewValue()
-                                 .getLifecycleFlags()
-                                 .getDeleted();
+        var oldValue = change.getPreviousValue()
+                             .getLifecycleFlags()
+                             .getDeleted();
+        var newValue = change.getNewValue()
+                             .getLifecycleFlags()
+                             .getDeleted();
         if (!newValue && oldValue) {
-            Version version = change.getNewValue()
-                                    .getVersion();
-            EntityRestored event = EntityRestored
-                    .newBuilder()
+            var version = change.getNewValue()
+                                .getVersion();
+            var event = EntityRestored.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
@@ -578,34 +553,33 @@ public class EntityLifecycle {
     }
 
     private boolean postIfDuplicateCommand(SignalEnvelope<?, ?, ?> handledSignal, Error error) {
-        String errorType = error.getType();
-        int errorCode = error.getCode();
-        boolean duplicateCommand =
+        var errorType = error.getType();
+        var errorCode = error.getCode();
+        var duplicateCommand =
                 errorType.equals(CommandValidationError.class.getSimpleName())
                         && errorCode == DUPLICATE_COMMAND_VALUE;
         if (duplicateCommand) {
-            CommandEnvelope asCommand = (CommandEnvelope) handledSignal;
+            var asCommand = (CommandEnvelope) handledSignal;
             onDuplicateCommand(asCommand);
         }
         return duplicateCommand;
     }
 
     private boolean postIfDuplicateEvent(SignalEnvelope<?, ?, ?> handledSignal, Error error) {
-        String errorType = error.getType();
-        int errorCode = error.getCode();
-        boolean duplicateEvent =
+        var errorType = error.getType();
+        var errorCode = error.getCode();
+        var duplicateEvent =
                 errorType.equals(EventValidationError.class.getSimpleName())
                         && errorCode == DUPLICATE_EVENT_VALUE;
         if (duplicateEvent) {
-            EventEnvelope asEvent = (EventEnvelope) handledSignal;
+            var asEvent = (EventEnvelope) handledSignal;
             onDuplicateEvent(asEvent);
         }
         return duplicateEvent;
     }
 
     private void postHandlerFailed(MessageId handledSignal, Error error) {
-        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
-                .newBuilder()
+        var systemEvent = HandlerFailedUnexpectedly.newBuilder()
                 .setEntity(entityId)
                 .setHandledSignal(handledSignal)
                 .setError(error)
@@ -625,8 +599,8 @@ public class EntityLifecycle {
      */
     @CanIgnoreReturnValue
     protected Optional<Event> postEvent(EventMessage event, Origin explicitOrigin) {
-        Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        Optional<Event> result =
+        var filtered = eventFilter.filter(event);
+        var result =
                 filtered.map(systemEvent -> systemWriteSide.postEvent(systemEvent, explicitOrigin));
         return result;
     }
@@ -641,8 +615,8 @@ public class EntityLifecycle {
      */
     @CanIgnoreReturnValue
     protected Optional<Event> postEvent(EventMessage event) {
-        Optional<? extends EventMessage> filtered = eventFilter.filter(event);
-        Optional<Event> result = filtered.map(systemWriteSide::postEvent);
+        var filtered = eventFilter.filter(event);
+        var result = filtered.map(systemWriteSide::postEvent);
         return result;
     }
 

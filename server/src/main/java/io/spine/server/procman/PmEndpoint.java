@@ -54,7 +54,7 @@ abstract class PmEndpoint<I,
 
     @Override
     protected boolean isModified(P processManager) {
-        boolean result = processManager.changed();
+        var result = processManager.changed();
         return result;
     }
 
@@ -74,7 +74,7 @@ abstract class PmEndpoint<I,
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
     public void dispatchTo(I id) {
-        P manager = repository().findOrCreate(id);
+        var manager = repository().findOrCreate(id);
         DispatchOutcomeHandler
                 .from(runTransactionFor(manager))
                 .onSuccess(success -> store(manager))
@@ -97,7 +97,7 @@ abstract class PmEndpoint<I,
 
     protected DispatchOutcome runTransactionFor(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        DispatchOutcome outcome = invokeDispatcher(processManager);
+        var outcome = invokeDispatcher(processManager);
         tx.commitIfActive();
         return outcome;
     }

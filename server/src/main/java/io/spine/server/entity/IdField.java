@@ -27,15 +27,12 @@
 package io.spine.server.entity;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.EntityState;
 import io.spine.code.proto.FieldDeclaration;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.option.Required;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -48,18 +45,16 @@ final class IdField {
     private final @Nullable FieldDeclaration declaration;
 
     static IdField of(EntityClass<?> entityClass) {
-        EntityState<?> defaultState = entityClass.defaultState();
-        List<FieldDescriptor> fields =
-                defaultState.getDescriptorForType()
-                            .getFields();
+        var defaultState = entityClass.defaultState();
+        var fields = defaultState.getDescriptorForType().getFields();
         if (fields.isEmpty()) {
             /* The entity state is an empty message.
                This is weird for production purposes, but can be used for test stubs. */
             return new IdField(null);
         } else {
-            FieldDescriptor firstField = fields.get(0);
-            Class<?> fieldClass = defaultState.getField(firstField)
-                                              .getClass();
+            var firstField = fields.get(0);
+            var fieldClass = defaultState.getField(firstField)
+                                         .getClass();
             @Nullable FieldDeclaration declaration =
                     fieldClass.equals(entityClass.idClass())
                     ? new FieldDeclaration(firstField)
@@ -91,9 +86,9 @@ final class IdField {
         if (!declared()) {
             return;
         }
-        FieldDescriptor idField = declaration.descriptor();
+        var idField = declaration.descriptor();
         @SuppressWarnings("Immutable") // all supported types of IDs are immutable.
-        Required required = Required.create(false);
+        var required = Required.create(false);
         boolean isRequired = required.valueFrom(idField)
                                      .orElse(true); // assume required, if not set to false
         if (isRequired) {

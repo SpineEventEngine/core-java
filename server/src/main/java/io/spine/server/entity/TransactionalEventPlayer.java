@@ -53,8 +53,8 @@ final class TransactionalEventPlayer implements EventPlayer {
     @Override
     public BatchDispatchOutcome play(Iterable<Event> events) {
         checkNotNull(events);
-        BatchDispatch process = new BatchDispatch(transaction);
-        for (Event event : events) {
+        var process = new BatchDispatch(transaction);
+        for (var event : events) {
             process.play(event);
         }
         return process.summary();

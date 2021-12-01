@@ -153,8 +153,7 @@ public final class EventRouting<I>
     EventRouting<I> route(Class<E> eventType, EventRoute<I, ? super E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        Route<EventMessage, EventContext, Set<I>> casted =
-                (Route<EventMessage, EventContext, Set<I>>) via;
+        var casted = (Route<EventMessage, EventContext, Set<I>>) via;
         addRoute(eventType, casted);
         return this;
     }
@@ -232,11 +231,11 @@ public final class EventRouting<I>
      * @return optionally available route
      */
     public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        Match match = routeFor(eventClass);
+        var match = routeFor(eventClass);
         if (match.found()) {
             @SuppressWarnings({"unchecked", "RedundantSuppression"})
             // protected by generic params of this class
-            Optional<EventRoute<I, M>> result = Optional.of((EventRoute<I, M>) match.route());
+            var result = Optional.of((EventRoute<I, M>) match.route());
             return result;
         }
         return Optional.empty();

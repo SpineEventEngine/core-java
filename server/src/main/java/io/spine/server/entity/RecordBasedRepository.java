@@ -30,9 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.Message;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
@@ -41,16 +39,13 @@ import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.client.TargetFilters;
 import io.spine.client.Targets;
-import io.spine.core.Event;
 import io.spine.core.Signal;
 import io.spine.query.EntityQuery;
-import io.spine.query.RecordQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
-import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -114,27 +109,27 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected EntityRecordStorage<I, S> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
-        EntityRecordStorage<I, S> storage = (EntityRecordStorage<I, S>) storage();
+        var storage = (EntityRecordStorage<I, S>) storage();
         return storage;
     }
 
     @OverridingMethodsMustInvokeSuper
     @Override
     public E create(I id) {
-        E result = entityFactory().create(id);
+        var result = entityFactory().create(id);
         return result;
     }
 
     @Override
     public void store(E entity) {
-        RecordWithColumns<I, EntityRecord> record = toRecord(entity);
-        EntityRecordStorage<I, S> storage = recordStorage();
+        var record = toRecord(entity);
+        var storage = recordStorage();
         storage.write(record);
     }
 
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
-        Iterator<E> allEntities = loadAll(ResponseFormat.getDefaultInstance());
+        var allEntities = loadAll(ResponseFormat.getDefaultInstance());
         Iterator<E> result = Iterators.filter(allEntities, filter::test);
         return result;
     }
@@ -168,7 +163,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(migration);
         checkEntityIsTransactional();
 
-        E entity = findOrThrow(id);
+        var entity = findOrThrow(id);
         migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
         if (migration.physicallyRemoveRecord()) {
             delete(id, migration);
@@ -204,16 +199,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(migration);
         checkEntityIsTransactional();
 
-        TargetFilters filters = Targets.someOf(entityModelClass().stateClass(), ids)
-                                       .getFilters();
-        Iterator<E> entities = find(filters, ResponseFormat.getDefaultInstance());
+        var filters = Targets.someOf(entityModelClass().stateClass(), ids)
+                             .getFilters();
+        var entities = find(filters, ResponseFormat.getDefaultInstance());
 
         Deque<E> migratedEntities = newLinkedList();
         while (entities.hasNext()) {
-            E entity = entities.next();
+            var entity = entities.next();
             migration.applyTo((T) entity, (RecordBasedRepository<I, T, S>) this);
             if (migration.physicallyRemoveRecord()) {
-                I id = entity.id();
+                var id = entity.id();
                 delete(id, migration);
             } else {
                 migratedEntities.add(entity);
@@ -225,9 +220,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     @Override
     protected EntityRecordStorage<I, S> createStorage() {
-        StorageFactory sf = defaultStorageFactory();
-        EntityRecordStorage<I, S> result =
-                sf.createEntityRecordStorage(context().spec(), entityClass());
+        var sf = defaultStorageFactory();
+        var result = sf.createEntityRecordStorage(context().spec(), entityClass());
         return result;
     }
 
@@ -240,10 +234,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         the {@linkplain Entity Entities} to store
      */
     public void store(Collection<E> entities) {
-        ImmutableList<RecordWithColumns<I, EntityRecord>> records =
-                entities.stream()
-                        .map(this::toRecord)
-                        .collect(toImmutableList());
+        var records = entities.stream()
+                .map(this::toRecord)
+                .collect(toImmutableList());
         recordStorage().writeAll(records);
     }
 
@@ -256,7 +249,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @Override
     public Optional<E> find(I id) {
-        Optional<EntityRecord> record = findRecord(id);
+        var record = findRecord(id);
         return record.map(this::toEntity);
     }
 
@@ -270,9 +263,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         or the entity is not active
      */
     public Optional<E> findActive(I id) {
-        Optional<EntityRecord> record = findRecord(id);
-        Optional<E> result = record.filter(WithLifecycle::isActive)
-                                   .map(this::toEntity);
+        var record = findRecord(id);
+        var result = record.filter(WithLifecycle::isActive)
+                           .map(this::toEntity);
         return result;
     }
 
@@ -281,12 +274,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * {@linkplain WithLifecycle#isActive() active}.
      */
     private Optional<EntityRecord> findRecord(I id) {
-        EntityRecordStorage<I, S> storage = recordStorage();
-        Optional<EntityRecord> found = storage.read(id);
-        if (!found.isPresent()) {
+        var storage = recordStorage();
+        var found = storage.read(id);
+        if (found.isEmpty()) {
             return Optional.empty();
         }
-        EntityRecord record = found.get();
+        var record = found.get();
         return Optional.of(record);
     }
 
@@ -302,17 +295,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return the entity with the specified ID
      */
     protected E findOrCreate(I id) {
-        Optional<EntityRecord> record = findRecord(id);
-        E result = record.map(this::toEntity)
-                         .orElseGet(() -> create(id));
+        var record = findRecord(id);
+        var result = record.map(this::toEntity)
+                           .orElseGet(() -> create(id));
         return result;
     }
 
     @VisibleForTesting
     public Iterator<E> loadAll(ResponseFormat format) {
-        Iterator<EntityRecord> records = findRecords(format);
+        var records = findRecords(format);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
-        Iterator<E> result = transform(records, toEntity::apply);
+        var result = transform(records, toEntity::apply);
         return result;
     }
 
@@ -347,10 +340,10 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
-        EntityRecordStorage<I, S> storage = recordStorage();
-        Iterator<EntityRecord> records = storage.readAll(ids, fieldMask);
+        var storage = recordStorage();
+        var records = storage.readAll(ids, fieldMask);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
-        Iterator<E> result = transform(records, toEntity::apply);
+        var result = transform(records, toEntity::apply);
         return result;
     }
 
@@ -374,9 +367,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public Iterator<EntityRecord> findRecords(ResponseFormat format) {
         checkNotNull(format);
-        EntityRecordStorage<I, S> storage = recordStorage();
-        RecordQuery<I, EntityRecord> query = QueryConverter.newQuery(storage.recordSpec(), format);
-        Iterator<EntityRecord> records = storage.readAll(query);
+        var storage = recordStorage();
+        var query = QueryConverter.newQuery(storage.recordSpec(), format);
+        var records = storage.readAll(query);
         return records;
     }
 
@@ -407,9 +400,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkValid(filters);
         checkNotNull(format);
 
-        Iterator<EntityRecord> records = findRecords(filters, format);
+        var records = findRecords(filters, format);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
-        Iterator<E> result = transform(records, toEntity::apply);
+        var result = transform(records, toEntity::apply);
         return result;
     }
 
@@ -424,17 +417,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> find(EntityQuery<I, S, ?> query) {
         checkNotNull(query);
-        Iterator<EntityRecord> records = findRecords(query);
+        var records = findRecords(query);
         Function<EntityRecord, E> toEntity = storageConverter().reverse();
-        Iterator<E> result = transform(records, toEntity::apply);
+        var result = transform(records, toEntity::apply);
         return result;
     }
 
     @Override
     public Iterator<S> findStates(EntityQuery<I, S, ?> query) {
         checkNotNull(query);
-        Iterator<EntityRecord> records = findRecords(query);
-        Iterator<S> stateIterator = transform(records, this::stateFrom);
+        var records = findRecords(query);
+        var stateIterator = transform(records, this::stateFrom);
         return stateIterator;
     }
 
@@ -445,15 +438,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkValid(filters);
         checkNotNull(format);
 
-        EntityRecordStorage<I, S> storage = recordStorage();
-        RecordQuery<I, EntityRecord> query =
+        var storage = recordStorage();
+        var query =
                 QueryConverter.convert(filters, format, storage.recordSpec());
-        Iterator<EntityRecord> records = storage.readAll(query);
+        var records = storage.readAll(query);
         return records;
     }
 
     private Iterator<EntityRecord> findRecords(EntityQuery<I, S, ?> query) {
-        RecordQuery<I, EntityRecord> recordQuery = ToEntityRecordQuery.transform(query);
+        var recordQuery = ToEntityRecordQuery.transform(query);
         return recordStorage().readAll(recordQuery);
     }
 
@@ -468,7 +461,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Removes an entity record with a passed ID from the storage.
      */
     private boolean delete(I id) {
-        boolean deleted = recordStorage().delete(id);
+        var deleted = recordStorage().delete(id);
         return deleted;
     }
 
@@ -481,7 +474,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *         the {@code Signal} which caused the deletion
      */
     private boolean deleteAndPostEvent(I id, Signal<?, ?, ?> deletionCause) {
-        boolean deleted = delete(id);
+        var deleted = delete(id);
         if (deleted) {
             lifecycleOf(id).onRemovedFromStorage(ImmutableList.of(deletionCause.messageId()));
         }
@@ -492,7 +485,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Deletes an entity record as a result of the {@link Migration} operation.
      */
     private void delete(I id, Migration<I, ?, S, ?> migration) {
-        Optional<Event> event = migration.systemEvent();
+        var event = migration.systemEvent();
         boolean deleted = event.map(value -> deleteAndPostEvent(id, value))
                                .orElseGet(() -> delete(id));
         if (!deleted) {
@@ -506,7 +499,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @VisibleForTesting
     RecordWithColumns<I, EntityRecord> toRecord(E entity) {
-        EntityRecord record = storageConverter().convert(entity);
+        var record = storageConverter().convert(entity);
         requireNonNull(record);
         RecordWithColumns<I, EntityRecord> result =
                 EntityRecordWithColumns.create(entity, record);
@@ -518,8 +511,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @OverridingMethodsMustInvokeSuper
     protected E toEntity(EntityRecord record) {
-        E result = storageConverter().reverse()
-                                     .convert(record);
+        var result = storageConverter().reverse().convert(record);
         requireNonNull(result);
         return result;
     }
@@ -551,22 +543,22 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         @Override
         public @Nullable I apply(EntityId input) {
             checkNotNull(input);
-            Any idAsAny = input.getId();
+            var idAsAny = input.getId();
 
-            TypeUrl typeUrl = TypeUrl.ofEnclosed(idAsAny);
-            Class<?> messageClass = typeUrl.toJavaClass();
+            var typeUrl = TypeUrl.ofEnclosed(idAsAny);
+            var messageClass = typeUrl.toJavaClass();
             checkIdClass(messageClass);
 
-            Message idAsMessage = unpack(idAsAny);
+            var idAsMessage = unpack(idAsAny);
 
             @SuppressWarnings("unchecked")
             // As the message class is the same as expected, the conversion is safe.
-            I id = (I) idAsMessage;
+            var id = (I) idAsMessage;
             return id;
         }
 
         private void checkIdClass(Class<?> messageClass) {
-            boolean classIsSame = expectedIdClass.equals(messageClass);
+            var classIsSame = expectedIdClass.equals(messageClass);
             if (!classIsSame) {
                 throw newIllegalStateException(
                         "Unexpected ID class encountered: `%s`. Expected: `%s`.",

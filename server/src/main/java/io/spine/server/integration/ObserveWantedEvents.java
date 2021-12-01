@@ -29,11 +29,9 @@ package io.spine.server.integration;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
@@ -74,23 +72,23 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
      */
     @Override
     public void handle(ExternalMessage message) {
-        BoundedContextName origin = message.getBoundedContextName();
+        var origin = message.getBoundedContextName();
         if (origin.equals(contextName())) {
             return;
         }
-        ExternalEventsWanted request = unpack(
+        var request = unpack(
                 message.getOriginalMessage(),
                 ExternalEventsWanted.class
         );
-        List<ExternalEventType> externalTypes = request.getTypeList();
+        var externalTypes = request.getTypeList();
         addNewSubscriptions(externalTypes, origin);
         clearStaleSubscriptions(externalTypes, origin);
     }
 
     private void addNewSubscriptions(Iterable<ExternalEventType> types,
                                      BoundedContextName origin) {
-        for (ExternalEventType newType : types) {
-            Collection<BoundedContextName> contextsWithSameRequest = requestedTypes.get(newType);
+        for (var newType : types) {
+            var contextsWithSameRequest = requestedTypes.get(newType);
             if (contextsWithSameRequest.isEmpty()) {
                 // This item has not been requested by anyone yet.
                 // Let's create a subscription.
@@ -101,19 +99,19 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
     }
 
     private void registerInAdapter(ExternalEventType type) {
-        Class<? extends Message> messageClass = type.asMessageClass();
+        var messageClass = type.asMessageClass();
         bus.register(messageClass);
     }
 
     private void clearStaleSubscriptions(Collection<ExternalEventType> types,
                                          BoundedContextName origin) {
-        Set<ExternalEventType> toRemove = findStale(types, origin);
-        for (ExternalEventType itemForRemoval : toRemove) {
-            boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
-                                                  .isEmpty();
+        var toRemove = findStale(types, origin);
+        for (var itemForRemoval : toRemove) {
+            var wereNonEmpty = !requestedTypes.get(itemForRemoval)
+                                              .isEmpty();
             requestedTypes.remove(itemForRemoval, origin);
-            boolean emptyNow = requestedTypes.get(itemForRemoval)
-                                             .isEmpty();
+            var emptyNow = requestedTypes.get(itemForRemoval)
+                                         .isEmpty();
             if (wereNonEmpty && emptyNow) {
                 unregisterInAdapter(itemForRemoval);
             }
@@ -121,7 +119,7 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
     }
 
     private void unregisterInAdapter(ExternalEventType type) {
-        Class<? extends Message> messageClass = type.asMessageClass();
+        var messageClass = type.asMessageClass();
         bus.unregister(messageClass);
     }
 
@@ -129,8 +127,8 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
                                              BoundedContextName origin) {
         ImmutableSet.Builder<ExternalEventType> result = ImmutableSet.builder();
 
-        for (ExternalEventType previouslyRequestedType : requestedTypes.keySet()) {
-            Collection<BoundedContextName> contextsThatRequested =
+        for (var previouslyRequestedType : requestedTypes.keySet()) {
+            var contextsThatRequested =
                     requestedTypes.get(previouslyRequestedType);
 
             if (contextsThatRequested.contains(origin) &&
@@ -156,7 +154,7 @@ final class ObserveWantedEvents extends AbstractChannelObserver implements AutoC
      */
     @Override
     public void close() {
-        for (ExternalEventType currentlyRequestedMessage : requestedTypes.keySet()) {
+        for (var currentlyRequestedMessage : requestedTypes.keySet()) {
             unregisterInAdapter(currentlyRequestedMessage);
         }
         requestedTypes.clear();

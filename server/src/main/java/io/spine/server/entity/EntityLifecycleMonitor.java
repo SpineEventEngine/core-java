@@ -35,7 +35,6 @@ import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.logging.Logging;
 import io.spine.validate.NonValidated;
-import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -100,7 +99,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     static <I> EntityLifecycleMonitor<I>
     withAcknowledgedMessage(Repository<I, ?> repository, I id, Signal<?, ?, ?> message) {
-        EntityLifecycleMonitor<I> monitor = newInstance(repository, id);
+        var monitor = newInstance(repository, id);
         monitor.lastMessage = message;
         monitor.acknowledgedMessages.add(message.messageId());
         return monitor;
@@ -125,8 +124,7 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onAfterPhase(Phase<I> phase) {
         checkSameEntity(phase.entityId());
-        MessageId messageId = phase.signal()
-                                   .messageId();
+        var messageId = phase.signal().messageId();
         acknowledgedMessages.add(messageId);
     }
 
@@ -159,10 +157,10 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
     @Override
     public void onTransactionFailed(Error cause, EntityRecord entityRecord) {
         if (cause.hasValidationError()) {
-            ValidationError error = cause.getValidationError();
+            var error = cause.getValidationError();
             checkState(lastMessage != null, "Transaction failed but no messages were propagated.");
-            MessageId causeMessage = lastMessage.messageId();
-            MessageId rootMessage = lastMessage.rootMessage();
+            var causeMessage = lastMessage.messageId();
+            var rootMessage = lastMessage.rootMessage();
             repository.lifecycleOf(entityId)
                       .onInvalidEntity(causeMessage,
                                        rootMessage,

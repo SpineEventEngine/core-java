@@ -47,20 +47,20 @@ final class ScheduledCommand
 
     @Subscribe
     void on(CommandScheduled event, EventContext context) {
-        Command command = context.get(Command.class);
-        Command commandWithSchedule = withSchedule(command, event.getSchedule());
+        var command = context.get(Command.class);
+        var commandWithSchedule = withSchedule(command, event.getSchedule());
         builder().setId(event.getId())
                  .setCommand(commandWithSchedule)
                  .setSchedulingTime(context.getTimestamp());
     }
 
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {
-        CommandContext updatedContext =
+        var updatedContext =
                 source.context()
                       .toBuilder()
                       .setSchedule(schedule)
                       .build();
-        Command updatedCommand =
+        var updatedCommand =
                 source.toBuilder()
                       .setContext(updatedContext)
                       .build();

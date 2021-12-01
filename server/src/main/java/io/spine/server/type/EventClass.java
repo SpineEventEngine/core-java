@@ -90,7 +90,7 @@ public final class EventClass extends MessageClass<EventMessage> {
             throw illegalStateWithCauseOf(e);
         }
         @SuppressWarnings("unchecked") // Safe as declared by `RejectionThrowable.messageThrown`.
-        Class<? extends RejectionMessage> returnType = (Class<? extends RejectionMessage>)
+        var returnType = (Class<? extends RejectionMessage>)
                 messageThrownMethod.getReturnType();
         return from(returnType);
     }
@@ -132,8 +132,8 @@ public final class EventClass extends MessageClass<EventMessage> {
      * @return new instance
      */
     public static EventClass of(Message eventOrMessage) {
-        EventMessage eventMessage = ensureMessage(eventOrMessage);
-        TypeUrl typeUrl = eventMessage.typeUrl();
+        var eventMessage = ensureMessage(eventOrMessage);
+        var typeUrl = eventMessage.typeUrl();
         return new EventClass(eventMessage.getClass(), typeUrl);
     }
 
@@ -142,7 +142,7 @@ public final class EventClass extends MessageClass<EventMessage> {
      */
     public static ImmutableSet<EventClass> setOf(Iterable<Class<? extends EventMessage>> classes) {
         ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
-        for (Class<? extends EventMessage> cls : classes) {
+        for (var cls : classes) {
             builder.add(from(cls));
         }
         return builder.build();

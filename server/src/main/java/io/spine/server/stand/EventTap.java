@@ -28,7 +28,6 @@ package io.spine.server.stand;
 
 import io.spine.server.bus.Listener;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -49,7 +48,7 @@ final class EventTap implements Listener<EventEnvelope> {
 
     @Override
     public void accept(EventEnvelope event) {
-        TypeUrl typeUrl = event.typeUrl();
+        var typeUrl = event.typeUrl();
         if (!event.isExternal() && subscriptionRegistry.hasType(typeUrl)) {
             subscriptionRegistry.byType(typeUrl)
                                 .stream()

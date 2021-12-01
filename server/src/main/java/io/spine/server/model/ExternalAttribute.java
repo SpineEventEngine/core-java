@@ -29,7 +29,6 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.core.External;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -77,12 +76,12 @@ enum ExternalAttribute implements Attribute<Boolean> {
     }
 
     private static boolean isExternal(Method method) {
-        Parameter[] params = method.getParameters();
+        var params = method.getParameters();
         if (params.length == 0) {
             return false;
         }
-        Parameter firstParam = params[0];
-        boolean hasAnnotation = firstParam.getAnnotation(External.class) != null;
+        var firstParam = params[0];
+        var hasAnnotation = firstParam.getAnnotation(External.class) != null;
         return hasAnnotation;
     }
 }

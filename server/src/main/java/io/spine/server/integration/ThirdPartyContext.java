@@ -29,10 +29,8 @@ package io.spine.server.integration;
 import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.core.ActorContext;
-import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Closeable;
 import io.spine.server.event.EventFactory;
 import io.spine.server.type.EventEnvelope;
@@ -87,13 +85,13 @@ public final class ThirdPartyContext implements Closeable {
     private static ThirdPartyContext newContext(String name, boolean multitenant) {
         checkNotEmptyOrBlank(name);
 
-        BoundedContextBuilder contextBuilder = multitenant
-                                 ? BoundedContext.multitenant(name)
-                                 : BoundedContext.singleTenant(name);
+        var contextBuilder = multitenant
+                             ? BoundedContext.multitenant(name)
+                             : BoundedContext.singleTenant(name);
         contextBuilder.systemSettings()
                .disableCommandLog()
                .forgetEvents();
-        BoundedContext context = contextBuilder.build();
+        var context = contextBuilder.build();
         return new ThirdPartyContext(context);
     }
 
@@ -122,9 +120,9 @@ public final class ThirdPartyContext implements Closeable {
         checkNotNull(eventMessage);
         checkTenant(actorContext, eventMessage);
 
-        EventFactory eventFactory = EventFactory.forImport(actorContext, producerId);
+        var eventFactory = EventFactory.forImport(actorContext, producerId);
         @SuppressWarnings("ConstantConditions")     /* No explicit version to be set. */
-        Event event = eventFactory.createEvent(eventMessage, null);
+                var event = eventFactory.createEvent(eventMessage, null);
         context.internalAccess()
                .broker()
                .publish(EventEnvelope.of(event));
@@ -148,7 +146,7 @@ public final class ThirdPartyContext implements Closeable {
     public void emittedEvent(EventMessage eventMessage, UserId userId) {
         checkNotNull(userId);
         checkNotNull(eventMessage);
-        ActorContext context = ActorContext
+        var context = ActorContext
                 .newBuilder()
                 .setActor(userId)
                 .setTimestamp(currentTime())
@@ -157,9 +155,9 @@ public final class ThirdPartyContext implements Closeable {
     }
 
     private void checkTenant(ActorContext actorContext, EventMessage event) {
-        boolean tenantSupplied = actorContext.hasTenantId();
-        String contextName = context.name().getValue();
-        String eventType = event.getClass().getName();
+        var tenantSupplied = actorContext.hasTenantId();
+        var contextName = context.name().getValue();
+        var eventType = event.getClass().getName();
         if (context.isMultitenant()) {
             checkArgument(tenantSupplied,
                           "Cannot post `%s` into a third-party multitenant context `%s`." +

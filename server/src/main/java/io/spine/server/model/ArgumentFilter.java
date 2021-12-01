@@ -30,7 +30,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.base.SignalMessage;
@@ -95,8 +94,8 @@ public final class ArgumentFilter implements Predicate<SignalMessage> {
     public static ArgumentFilter createFilter(Method method) {
         @Nullable Where where = filterAnnotationOf(method);
         if (where != null) {
-            String fieldPath = where.field();
-            String value = where.equals();
+            var fieldPath = where.field();
+            var value = where.equals();
             return createFilter(method, fieldPath, value);
         } else {
             return acceptingAll();
@@ -118,23 +117,23 @@ public final class ArgumentFilter implements Predicate<SignalMessage> {
      * Creates a filter for the method using string values found in the annotation for the method.
      */
     private static ArgumentFilter createFilter(Method method, String fieldPath, String value) {
-        Class<Message> paramType = firstParamType(method);
-        Field field = Field.parse(fieldPath);
-        Class<?> fieldType = field.findType(paramType).orElseThrow(() -> new ModelError(
+        var paramType = firstParamType(method);
+        var field = Field.parse(fieldPath);
+        var fieldType = field.findType(paramType).orElseThrow(() -> new ModelError(
                 "The message with the type `%s` does not have the field `%s`.",
                 paramType.getName(), field
         ));
-        Object expectedValue = fromString(value, fieldType);
+        var expectedValue = fromString(value, fieldType);
         return acceptingOnly(field.path(), expectedValue);
     }
 
     private static @Nullable Where filterAnnotationOf(Method method) {
-        Parameter firstParam = firstParameterOf(method);
+        var firstParam = firstParameterOf(method);
         return firstParam.getAnnotation(Where.class);
     }
 
     private static Parameter firstParameterOf(Method method) {
-        Parameter[] parameters = method.getParameters();
+        var parameters = method.getParameters();
         checkArgument(parameters.length >= 1,
                       "The method `%s.%s()` does not have parameters.",
                       method.getDeclaringClass().getName(), method.getName());
@@ -175,14 +174,14 @@ public final class ArgumentFilter implements Predicate<SignalMessage> {
         if (acceptsAll()) {
             return true;
         }
-        Object eventField = field.valueIn(msg);
-        boolean result = eventField.equals(expectedValue);
+        var eventField = field.valueIn(msg);
+        var result = eventField.equals(expectedValue);
         return result;
     }
 
     @Override
     public String toString() {
-        MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this);
+        var helper = MoreObjects.toStringHelper(this);
         if (acceptsAll()) {
             helper.add("acceptsAll", true);
         } else {
@@ -200,7 +199,7 @@ public final class ArgumentFilter implements Predicate<SignalMessage> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ArgumentFilter filter = (ArgumentFilter) o;
+        var filter = (ArgumentFilter) o;
         return Objects.equals(field, filter.field) &&
                 Objects.equals(expectedValue, filter.expectedValue);
     }

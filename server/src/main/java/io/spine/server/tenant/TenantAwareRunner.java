@@ -81,7 +81,7 @@ public final class TenantAwareRunner {
      */
     public <T> T evaluate(Supplier<T> operation) {
         checkNotNull(operation);
-        T result = new TenantAwareFunction0<T>(tenant) {
+        var result = new TenantAwareFunction0<T>(tenant) {
             @Override
             public T apply() {
                 return operation.get();

@@ -66,7 +66,7 @@ final class Element implements Serializable {
         } else if (value instanceof Optional) {
             this.type = Type.OPTIONAL;
         } else if (value instanceof GeneratedMessageV3) {
-            GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
+            var messageV3 = (GeneratedMessageV3) value;
             checkNotDefault(messageV3);
             this.type = Type.MESSAGE;
         } else {
@@ -84,7 +84,7 @@ final class Element implements Serializable {
     @SuppressWarnings("TypeParameterUnusedInFormals") // See Javadoc.
     static <T> T value(Tuple tuple, IndexOf index) {
         @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
-        T value = (T) tuple.get(index.value());
+        var value = (T) tuple.get(index.value());
         return value;
     }
 
@@ -110,9 +110,9 @@ final class Element implements Serializable {
             case EITHER:
                 return ((Either) value).value();
             case OPTIONAL: {
-                Optional<?> optional = (Optional<?>) value;
-                Message result = optional.map(o -> (Message) o)
-                                         .orElseGet(Empty::getDefaultInstance);
+                var optional = (Optional<?>) value;
+                var result = optional.map(o -> (Message) o)
+                                     .orElseGet(Empty::getDefaultInstance);
                 return result;
             }
             default:
@@ -131,7 +131,7 @@ final class Element implements Serializable {
             obj = (Serializable) value;
             out.writeObject(obj);
         } else /* (type == Type.OPTIONAL) */ {
-            Optional<?> optionalValue = (Optional<?>) value;
+            var optionalValue = (Optional<?>) value;
             obj = (Serializable) optionalValue.orElse(null);
         }
         out.writeObject(obj);
@@ -166,7 +166,7 @@ final class Element implements Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        Element other = (Element) obj;
+        var other = (Element) obj;
         return Objects.equals(this.value, other.value)
                 && this.type == other.type;
     }

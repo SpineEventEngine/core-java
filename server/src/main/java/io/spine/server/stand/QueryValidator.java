@@ -30,9 +30,6 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.client.Query;
 import io.spine.client.QueryValidationError;
-import io.spine.client.ResponseFormat;
-import io.spine.client.Target;
-import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
@@ -51,18 +48,17 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
 
     @Override
     protected @Nullable Error checkOwnRules(Query request) {
-        ResponseFormat format = request.getFormat();
-        int limit = format.getLimit();
+        var format = request.getFormat();
+        var limit = format.getLimit();
         if (limit > 0) {
-            boolean orderByMissing = format.getOrderByCount() == 0;
+            var orderByMissing = format.getOrderByCount() == 0;
             if (orderByMissing) {
-                Value limitValue = Value
+                var limitValue = Value
                         .newBuilder()
                         .setNumberValue(limit)
                         .build();
                 @SuppressWarnings("DuplicateStringLiteralInspection") // "limit" is used in tests.
-                Error error = Error
-                        .newBuilder()
+                var error = Error.newBuilder()
                         .setType(QueryValidationError.class.getSimpleName())
                         .setCode(INVALID_QUERY.getNumber())
                         .setMessage("Query limit cannot be set without ordering.")
@@ -92,19 +88,19 @@ final class QueryValidator extends AbstractTargetValidator<Query> {
 
     @Override
     protected boolean isSupported(Query request) {
-        Target target = request.getTarget();
+        var target = request.getTarget();
         return typeRegistryContains(target) && visibilitySufficient(target);
     }
 
     @Override
     protected InvalidRequestException unsupportedException(Query request, Error error) {
-        String message = errorMessage(request);
+        var message = errorMessage(request);
         return new InvalidQueryException(message, request, error);
     }
 
     @Override
     protected String errorMessage(Query request) {
-        TypeUrl targetType = getTypeOf(request.getTarget());
+        var targetType = getTypeOf(request.getTarget());
         return format("The query target type is not supported: %s", targetType.toTypeName());
     }
 }

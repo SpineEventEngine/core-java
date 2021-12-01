@@ -28,7 +28,6 @@ package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.RejectionThrowable;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandEnvelope;
@@ -71,7 +70,7 @@ public interface EventProducingRepository {
      * Filters the passed events and posts the result to the EventBus.
      */
     default void postEvents(Collection<Event> events) {
-        Iterable<Event> filtered = filter(events);
+        var filtered = filter(events);
         eventBus().post(filtered);
     }
 
@@ -83,8 +82,8 @@ public interface EventProducingRepository {
      */
     default void postIfCommandRejected(SignalEnvelope<?, ?, ?> signal, Throwable cause) {
         if (signal instanceof CommandEnvelope && cause instanceof RejectionThrowable) {
-            Command command = ((CommandEnvelope) signal).outerObject();
-            Event rejection = reject(command, cause);
+            var command = ((CommandEnvelope) signal).outerObject();
+            var rejection = reject(command, cause);
             postEvents(rejection.toSet());
         }
     }

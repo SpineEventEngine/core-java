@@ -46,7 +46,7 @@ abstract class SingleChannelExchange extends AbstractExchange {
      * Returns the subscriber of this exchange.
      */
     final Subscriber subscriber() {
-        Subscriber result = subscriber(channel());
+        var result = subscriber(channel());
         return result;
     }
 
@@ -54,7 +54,7 @@ abstract class SingleChannelExchange extends AbstractExchange {
      * Returns the publisher of this exchange.
      */
     final Publisher publisher() {
-        Publisher result = publisher(channel());
+        var result = publisher(channel());
         return result;
     }
 

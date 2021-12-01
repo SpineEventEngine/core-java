@@ -27,7 +27,6 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Streams;
 import com.google.common.graph.Traverser;
 import com.google.common.reflect.TypeToken;
 import io.spine.base.CommandMessage;
@@ -38,10 +37,10 @@ import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -80,16 +79,15 @@ final class MethodResults {
         are only used for convenience. */
     static <P extends MessageClass<?>> ImmutableSet<P> collectMessageClasses(Method method) {
         checkNotNull(method);
-        Type returnType = method.getGenericReturnType();
-        Iterable<Type> allTypes = Traverser.forTree(Types::resolveArguments)
-                                           .breadthFirst(returnType);
-        ImmutableSet<P> result =
-                Streams.stream(allTypes)
-                       .map(TypeToken::of)
-                       .map(TypeToken::getRawType)
-                       .filter(MethodResults::isCommandOrEvent)
-                       .map(c -> (P) toMessageClass(c))
-                       .collect(toImmutableSet());
+        var returnType = method.getGenericReturnType();
+        var allTypes = Traverser.forTree(Types::resolveArguments)
+                                .breadthFirst(returnType);
+        var result = stream(allTypes)
+                .map(TypeToken::of)
+                .map(TypeToken::getRawType)
+                .filter(MethodResults::isCommandOrEvent)
+                .map(c -> (P) toMessageClass(c))
+                .collect(toImmutableSet());
         return result;
     }
 
@@ -104,8 +102,8 @@ final class MethodResults {
         if (Nothing.class.equals(cls)) {
             return false;
         }
-        boolean isCommandOrEvent = CommandMessage.class.isAssignableFrom(cls)
-                                || EventMessage.class.isAssignableFrom(cls);
+        var isCommandOrEvent = CommandMessage.class.isAssignableFrom(cls)
+                || EventMessage.class.isAssignableFrom(cls);
         return isCommandOrEvent;
     }
 

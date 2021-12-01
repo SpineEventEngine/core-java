@@ -64,7 +64,7 @@ interface RejectionHandler<T, R extends MessageClass<?>>
     @Override
     default DispatchKey key() {
         if (handlesRejection()) {
-            DispatchKey dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
+            var dispatchKey = RejectionDispatchKeys.of(messageClass(), rawMethod());
             return dispatchKey;
         }
         return HandlerMethod.super.key();

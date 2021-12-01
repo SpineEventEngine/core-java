@@ -25,7 +25,6 @@
  */
 package io.spine.server.integration;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.annotation.Internal;
@@ -59,7 +58,7 @@ final class ExternalMessages {
         checkNotNull(event);
         checkNotNull(origin);
 
-        ExternalMessage result = of(event.getId(), event, origin);
+        var result = of(event.getId(), event, origin);
         return result;
     }
 
@@ -76,7 +75,7 @@ final class ExternalMessages {
         checkNotNull(request);
         checkNotNull(origin);
 
-        ExternalMessage result = of(generateId(), request, origin);
+        var result = of(generateId(), request, origin);
         return result;
     }
 
@@ -89,20 +88,20 @@ final class ExternalMessages {
      */
     static ExternalMessage of(BoundedContextOnline notification) {
         checkNotNull(notification);
-        ExternalMessage result = of(generateId(), notification, notification.getContext());
+        var result = of(generateId(), notification, notification.getContext());
         return result;
     }
 
     private static StringValue generateId() {
-        StringValue result = StringValue.of(Identifier.newUuid());
+        var result = StringValue.of(Identifier.newUuid());
         return result;
     }
 
     private static ExternalMessage of(Message id, Message message, BoundedContextName origin) {
-        Any packedId = Identifier.pack(id);
-        Any packedMessage = AnyPacker.pack(message);
+        var packedId = Identifier.pack(id);
+        var packedMessage = AnyPacker.pack(message);
 
-        ExternalMessage result = ExternalMessage
+        var result = ExternalMessage
                 .newBuilder()
                 .setId(packedId)
                 .setOriginalMessage(packedMessage)

@@ -31,10 +31,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.event.EventEnricher;
-import io.spine.server.trace.TracerFactory;
-
-import java.util.Optional;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -72,10 +68,10 @@ public final class SystemContext extends BoundedContext {
      * @return new {@code SystemBoundedContext}
      */
     public static SystemContext newInstance(BoundedContextBuilder builder) {
-        CommandLogRepository commandLog = new CommandLogRepository();
-        EventEnricher enricher = SystemEnricher.create(commandLog);
+        var commandLog = new CommandLogRepository();
+        var enricher = SystemEnricher.create(commandLog);
         builder.enrichEventsUsing(enricher);
-        SystemContext result = new SystemContext(builder);
+        var result = new SystemContext(builder);
         result.registerRepositories(commandLog);
         result.registerTracing();
         result.init();
@@ -90,7 +86,7 @@ public final class SystemContext extends BoundedContext {
     }
 
     private void registerTracing() {
-        Optional<TracerFactory> tracing = ServerEnvironment.instance().tracing();
+        var tracing = ServerEnvironment.instance().tracing();
         tracing.ifPresent(factory -> {
             EventDispatcher observer = new TraceEventObserver(spec(), factory);
             registerEventDispatcher(observer);

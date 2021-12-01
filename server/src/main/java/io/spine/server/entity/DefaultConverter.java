@@ -48,14 +48,14 @@ final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Entity
 
     static <I, E extends AbstractEntity<I, S>, S extends EntityState<I>>
     StorageConverter<I, E, S> forAllFields(TypeUrl stateType, EntityFactory<E> factory) {
-        FieldMask allFields = FieldMask.getDefaultInstance();
+        var allFields = FieldMask.getDefaultInstance();
         return new DefaultConverter<>(stateType, factory, allFields);
     }
 
     @Override
     public StorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
-        TypeUrl stateType = entityStateType();
-        EntityFactory<E> factory = entityFactory();
+        var stateType = entityStateType();
+        var factory = entityFactory();
         return new DefaultConverter<>(stateType, factory, fieldMask);
     }
 

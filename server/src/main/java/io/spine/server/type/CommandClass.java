@@ -77,8 +77,8 @@ public final class CommandClass extends MessageClass<CommandMessage> {
      * @return new instance
      */
     public static CommandClass of(Message commandOrMessage) {
-        CommandMessage commandMessage = Commands.ensureMessage(commandOrMessage);
-        TypeUrl typeUrl = TypeUrl.of(commandMessage.getDefaultInstanceForType());
+        var commandMessage = Commands.ensureMessage(commandOrMessage);
+        var typeUrl = TypeUrl.of(commandMessage.getDefaultInstanceForType());
         return new CommandClass(commandMessage.getClass(), typeUrl);
     }
 
@@ -87,7 +87,7 @@ public final class CommandClass extends MessageClass<CommandMessage> {
      */
     public static ImmutableSet<CommandClass> setOf(Iterable<Class<? extends CommandMessage>> classes) {
         ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
-        for (Class<? extends CommandMessage> cls : classes) {
+        for (var cls : classes) {
             builder.add(from(cls));
         }
         return builder.build();

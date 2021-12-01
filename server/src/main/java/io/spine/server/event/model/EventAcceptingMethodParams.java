@@ -77,7 +77,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
     ) {
         @Override
         public ExtractedArguments extractArguments(EventEnvelope event) {
-            RejectionEnvelope re = new RejectionEnvelope(event);
+            var re = new RejectionEnvelope(event);
             return ofTwo(re.rejectionMessage(), re.commandContext());
         }
     },
@@ -93,7 +93,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
         @Override
         public ExtractedArguments extractArguments(EventEnvelope event) {
-            RejectionEnvelope re = new RejectionEnvelope(event);
+            var re = new RejectionEnvelope(event);
             return ofTwo(re.rejectionMessage(), re.commandMessage());
         }
     },
@@ -110,7 +110,7 @@ enum EventAcceptingMethodParams implements ParameterSpec<EventEnvelope> {
 
         @Override
         public ExtractedArguments extractArguments(EventEnvelope event) {
-            RejectionEnvelope re = new RejectionEnvelope(event);
+            var re = new RejectionEnvelope(event);
             return ofTree(re.rejectionMessage(), re.commandMessage(), re.commandContext());
         }
     };

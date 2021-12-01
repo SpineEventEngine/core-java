@@ -68,15 +68,15 @@ final class MethodExceptionCheck {
      *         an empty list if the method does not declare such exceptions
      */
     ImmutableList<Class<? extends Throwable>> findProhibited() {
-        Class<?>[] thrownExceptions = method.getExceptionTypes();
+        var thrownExceptions = method.getExceptionTypes();
         if (thrownExceptions.length == 0) {
             return ImmutableList.of();
         }
         ImmutableList.Builder<Class<? extends Throwable>> result = ImmutableList.builder();
-        for (Class<?> exceptionType : thrownExceptions) {
+        for (var exceptionType : thrownExceptions) {
             if (allowedThrowable == null || !allowedThrowable.isAssignableFrom(exceptionType)) {
                 @SuppressWarnings("unchecked")  // As all exceptions extend `Throwable`.
-                Class<? extends Throwable> asThrowableCls =
+                var asThrowableCls =
                         (Class<? extends Throwable>) exceptionType;
                 result.add(asThrowableCls);
             }

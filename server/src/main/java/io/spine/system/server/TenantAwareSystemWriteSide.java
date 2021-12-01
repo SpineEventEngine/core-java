@@ -72,7 +72,7 @@ final class TenantAwareSystemWriteSide implements SystemWriteSide {
     @CanIgnoreReturnValue
     @Override
     public Event postEvent(EventMessage systemEvent, Origin origin) {
-        Event event = runner.evaluate(() -> delegate.postEvent(systemEvent, origin));
+        var event = runner.evaluate(() -> delegate.postEvent(systemEvent, origin));
         return event;
     }
 }

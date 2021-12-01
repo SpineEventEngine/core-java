@@ -54,7 +54,7 @@ public final class Security extends SecurityManager {
      */
     private Class previousCallerClass() {
         Class[] context = getClassContext();
-        Class result = context[3];
+        var result = context[3];
         return result;
     }
 
@@ -63,17 +63,17 @@ public final class Security extends SecurityManager {
      * the Spine Event Engine framework or its tests.
      */
     public static void allowOnlyFrameworkServer() {
-        Class callingClass = INSTANCE.previousCallerClass();
+        var callingClass = INSTANCE.previousCallerClass();
         if (!belongsToServer(callingClass)) {
             throw nonAllowedCaller(callingClass);
         }
     }
 
     private static boolean belongsToServer(Class callingClass) {
-        PackageName serverPackage = PackageName.of(Server.class);
-        PackageName systemServerPackage = PackageName.of(SystemContext.class);
-        String callingClassName = callingClass.getName();
-        boolean result =
+        var serverPackage = PackageName.of(Server.class);
+        var systemServerPackage = PackageName.of(SystemContext.class);
+        var callingClassName = callingClass.getName();
+        var result =
                 callingClassName.startsWith(serverPackage.value())
                 || callingClassName.startsWith(systemServerPackage.value())
                 || callingClassName.startsWith("io.spine.testing.server");
@@ -81,7 +81,7 @@ public final class Security extends SecurityManager {
     }
 
     private static SecurityException nonAllowedCaller(Class callingClass) {
-        String msg = format(
+        var msg = format(
                 "The class `%s` is not allowed to make this call.", callingClass.getName()
         );
         throw new SecurityException(msg);

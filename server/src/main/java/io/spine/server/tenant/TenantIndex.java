@@ -28,7 +28,6 @@ package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.storage.StorageFactory;
 
 import java.util.Set;
 
@@ -59,10 +58,10 @@ public interface TenantIndex extends AutoCloseable {
      * Creates default implementation of {@code TenantIndex} for a multi-tenant context.
      */
     static TenantIndex defaultMultitenant() {
-        StorageFactory factory = ServerEnvironment.instance()
-                                                  .storageFactory();
+        var factory = ServerEnvironment.instance()
+                                       .storageFactory();
         @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.
-        DefaultTenantStorage tenantRepo = new DefaultTenantStorage(factory);
+        var tenantRepo = new DefaultTenantStorage(factory);
         return tenantRepo;
     }
 

@@ -28,7 +28,6 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Error;
@@ -38,7 +37,6 @@ import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
-import io.spine.type.TypeUrl;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidatingBuilder;
 
@@ -200,12 +198,12 @@ public abstract class Transaction<I,
             S extends EntityState<I>,
             B extends ValidatingBuilder<S>>
     B toBuilder(E entity) {
-        S currentState = entity.state();
+        var currentState = entity.state();
         @SuppressWarnings("unchecked") // ensured by argument of <E>.
-                B result = (B) currentState.toBuilder();
+        var result = (B) currentState.toBuilder();
 
         if (currentState.equals(entity.defaultState())) {
-            IdField idField = IdField.of(entity.modelClass());
+            var idField = IdField.of(entity.modelClass());
             idField.initBuilder(result, entity.id());
         }
         return result;
@@ -252,9 +250,8 @@ public abstract class Transaction<I,
      * Obtains the {@link MessageId} of the entity under the transaction.
      */
     MessageId entityId() {
-        TypeUrl typeUrl = entity.state().typeUrl();
-        return MessageId
-                .newBuilder()
+        var typeUrl = entity.state().typeUrl();
+        return MessageId.newBuilder()
                 .setId(Identifier.pack(entity.id()))
                 .setTypeUrl(typeUrl.value())
                 .setVersion(entity.version())
@@ -291,9 +288,9 @@ public abstract class Transaction<I,
      */
     @CanIgnoreReturnValue
     protected final DispatchOutcome propagate(Phase<I> phase) {
-        TransactionListener<I> listener = listener();
+        var listener = listener();
         listener.onBeforePhase(phase);
-        DispatchOutcome outcome = propagateFailsafe(phase);
+        var outcome = propagateFailsafe(phase);
         phases.add(phase);
         listener.onAfterPhase(phase);
         return outcome;
@@ -311,17 +308,15 @@ public abstract class Transaction<I,
      */
     private DispatchOutcome propagateFailsafe(Phase<I> phase) {
         try {
-            DispatchOutcome outcome = phase.propagate();
-            return DispatchOutcomeHandler
-                    .from(outcome)
+            var outcome = phase.propagate();
+            return DispatchOutcomeHandler.from(outcome)
                     .onError(this::rollback)
                     .onRejection(this::rollback)
                     .handle();
         } catch (Throwable t) {
-            Error rootCause = causeOf(t);
+            var rootCause = causeOf(t);
             rollback(rootCause);
-            return DispatchOutcome
-                    .newBuilder()
+            return DispatchOutcome.newBuilder()
                     .setPropagatedSignal(phase.signal().messageId())
                     .setError(rootCause)
                     .vBuild();
@@ -341,10 +336,10 @@ public abstract class Transaction<I,
      */
     @SuppressWarnings("unchecked")
     final void incrementStateAndVersion(VersionIncrement increment) {
-        Version nextVersion = increment.nextVersion();
+        var nextVersion = increment.nextVersion();
         checkIsIncrement(version(), nextVersion);
         setVersion(nextVersion);
-        S newState = builder().build();
+        var newState = builder().build();
         builder = (B) newState.toBuilder();
         entity().updateState(newState, nextVersion);
     }
@@ -373,7 +368,7 @@ public abstract class Transaction<I,
     @VisibleForTesting
     public final void commit() throws InvalidEntityStateException, IllegalStateException {
         executeOnBeforeCommit();
-        S newState = builder().buildPartial();
+        var newState = builder().buildPartial();
         doCommit(newState);
     }
 
@@ -388,13 +383,13 @@ public abstract class Transaction<I,
      */
     private void doCommit(@NonValidated S newState) {
         try {
-            Version pendingVersion = version();
+            var pendingVersion = version();
             beforeCommit(newState, pendingVersion);
             updateState(newState);
             updateVersion();
             updateStateChanged();
             commitAttributeChanges();
-            EntityRecord newRecord = entityRecord();
+            var newRecord = entityRecord();
             afterCommit(newRecord);
         } catch (RuntimeException e) {
             rollback(causeOf(e));
@@ -416,7 +411,7 @@ public abstract class Transaction<I,
      * Propagates the version update to the entity.
      */
     private void updateVersion() {
-        Version pending = version();
+        var pending = version();
         if (!pending.equals(entity.version())) {
             entity.updateVersion(pending);
         }
@@ -446,9 +441,8 @@ public abstract class Transaction<I,
     }
 
     private void beforeCommit(S newState, Version newVersion) {
-        LifecycleFlags newFlags = lifecycleFlags();
-        @NonValidated EntityRecord record = EntityRecord
-                .newBuilder()
+        var newFlags = lifecycleFlags();
+        @NonValidated EntityRecord record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(entity.id()))
                 .setState(pack(newState))
                 .setLifecycleFlags(newFlags)
@@ -458,8 +452,7 @@ public abstract class Transaction<I,
     }
 
     private void afterCommit(EntityRecord newEntity) {
-        EntityRecordChange change = EntityRecordChange
-                .newBuilder()
+        var change = EntityRecordChange.newBuilder()
                 .setPreviousValue(entityBeforeTransaction)
                 .setNewValue(newEntity)
                 .build();
@@ -521,13 +514,12 @@ public abstract class Transaction<I,
      * @return new {@link EntityRecord}
      */
     private EntityRecord entityRecord() {
-        E entity = entity();
-        Any entityId = Identifier.pack(entity.id());
-        Version version = entity.version();
-        Any state = pack(entity.state());
-        LifecycleFlags lifecycleFlags = entity.lifecycleFlags();
-        return EntityRecord
-                .newBuilder()
+        var entity = entity();
+        var entityId = Identifier.pack(entity.id());
+        var version = entity.version();
+        var state = pack(entity.state());
+        var lifecycleFlags = entity.lifecycleFlags();
+        return EntityRecord.newBuilder()
                 .setEntityId(entityId)
                 .setVersion(version)
                 .setState(state)
@@ -553,7 +545,7 @@ public abstract class Transaction<I,
     }
 
     final void initAll(S state, Version version) {
-        B builder = builder();
+        var builder = builder();
         builder.clear();
         builder.mergeFrom(state);
         initVersion(version);
@@ -584,7 +576,7 @@ public abstract class Transaction<I,
     private void injectTo(E entity) {
         // Assigning `this` to a variable to explicitly specify
         // the generic bounds for Java compiler.
-        Transaction<I, E, S, B> tx = this;
+        var tx = this;
         entity.injectTransaction(tx);
     }
 
@@ -608,9 +600,9 @@ public abstract class Transaction<I,
     private void initVersion(Version version) {
         checkNotNull(version);
 
-        int versionNumber = this.version.getNumber();
+        var versionNumber = this.version.getNumber();
         if (versionNumber > 0) {
-            String errMsg = format(
+            var errMsg = format(
                     "initVersion() called on an entity with non-zero version number (%d).",
                     versionNumber
             );

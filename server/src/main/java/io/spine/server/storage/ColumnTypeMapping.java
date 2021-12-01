@@ -53,7 +53,7 @@ public interface ColumnTypeMapping<T, R> extends Function<T, R> {
     @Internal
     @SuppressWarnings("unchecked") // See doc.
     default R applyTo(Object object) {
-        T value = (T) object;
+        var value = (T) object;
         return apply(value);
     }
 

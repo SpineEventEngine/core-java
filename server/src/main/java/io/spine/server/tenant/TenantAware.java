@@ -30,8 +30,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.Messages.isDefault;
 
@@ -74,7 +72,7 @@ abstract class TenantAware {
      */
     @Internal
     public static boolean isTenantSet() {
-        Optional<TenantId> currentTenant = CurrentTenant.get();
+        var currentTenant = CurrentTenant.get();
         return currentTenant.isPresent();
     }
 

@@ -67,7 +67,7 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
     asReactorClass(Class<S> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        EventReactorClass<S> result = (EventReactorClass<S>)
+        var result = (EventReactorClass<S>)
                 get(cls, EventReactorClass.class, () -> new EventReactorClass<>(cls));
         return (result);
     }

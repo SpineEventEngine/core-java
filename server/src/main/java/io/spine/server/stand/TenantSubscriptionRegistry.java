@@ -61,22 +61,22 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
         lockAndRun(() -> {
             checkState(subscriptionToAttrs.containsKey(subscription),
                        "Cannot find the subscription in the registry.");
-            SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
+            var subscriptionRecord = subscriptionToAttrs.get(subscription);
             subscriptionRecord.activate(callback);
         });
     }
 
     @Override
     public Subscription add(Topic topic) {
-        Subscription subscription = Subscriptions.from(topic);
+        var subscription = Subscriptions.from(topic);
         add(subscription);
         return subscription;
     }
 
     @Override
     public void add(Subscription subscription) {
-        SubscriptionRecord record = SubscriptionRecord.of(subscription);
-        TypeUrl type = record.targetType();
+        var record = SubscriptionRecord.of(subscription);
+        var type = record.targetType();
         lockAndRun(() -> {
             typeToRecord.put(type, record);
             subscriptionToAttrs.put(subscription, record);
@@ -89,7 +89,7 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
             if (!subscriptionToAttrs.containsKey(subscription)) {
                 return;
             }
-            SubscriptionRecord record = subscriptionToAttrs.get(subscription);
+            var record = subscriptionToAttrs.get(subscription);
             typeToRecord.remove(record.targetType(), record);
             subscriptionToAttrs.remove(subscription);
         });
@@ -102,13 +102,13 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public boolean hasType(TypeUrl type) {
-        boolean result = typeToRecord.containsKey(type);
+        var result = typeToRecord.containsKey(type);
         return result;
     }
 
     @Override
     public boolean containsId(SubscriptionId subscriptionId) {
-        for (Subscription existingItem : subscriptionToAttrs.keySet()) {
+        for (var existingItem : subscriptionToAttrs.keySet()) {
             if (existingItem.getId().equals(subscriptionId)) {
                 return true;
             }

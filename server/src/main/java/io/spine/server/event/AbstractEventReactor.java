@@ -41,7 +41,6 @@ import io.spine.server.ContextAware;
 import io.spine.server.Identity;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.model.EventReactorClass;
-import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.EventClass;
@@ -51,7 +50,6 @@ import io.spine.system.server.NoOpSystemWriteSide;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
@@ -121,7 +119,7 @@ public abstract class AbstractEventReactor
     }
 
     private void reactAndPost(EventEnvelope event) {
-        Optional<EventReactorMethod> method = thisClass.reactorOf(event);
+        var method = thisClass.reactorOf(event);
         if (method.isPresent()) {
             DispatchOutcomeHandler
                     .from(method.get().invoke(this, event))
@@ -139,8 +137,7 @@ public abstract class AbstractEventReactor
     }
 
     private void postFailure(Error error, EventEnvelope event) {
-        HandlerFailedUnexpectedly systemEvent = HandlerFailedUnexpectedly
-                .newBuilder()
+        var systemEvent = HandlerFailedUnexpectedly.newBuilder()
                 .setEntity(eventAnchor())
                 .setHandledSignal(event.messageId())
                 .setError(error)

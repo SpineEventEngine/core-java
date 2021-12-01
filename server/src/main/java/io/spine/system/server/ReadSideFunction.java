@@ -43,7 +43,7 @@ public interface ReadSideFunction extends Function<TenantId, SystemReadSide> {
 
     static ReadSideFunction delegatingTo(SystemReadSide delegate) {
         return (t) -> {
-            SystemReadSide result = TenantAwareSystemReadSide.forTenant(t, delegate);
+            var result = TenantAwareSystemReadSide.forTenant(t, delegate);
             return result;
         };
     }

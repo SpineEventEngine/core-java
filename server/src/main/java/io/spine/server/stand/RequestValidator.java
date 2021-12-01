@@ -29,13 +29,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
 import io.spine.base.Error;
 import io.spine.type.TypeName;
-import io.spine.validate.ConstraintViolation;
 import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
 import io.spine.validate.diags.ViolationText;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.List;
 
 import static java.lang.String.format;
 
@@ -129,18 +126,17 @@ abstract class RequestValidator<M extends Message> {
             return null;
         }
 
-        ProtocolMessageEnum unsupportedErrorCode = unsupportedTargetErrorCode();
-        String errorMessage = errorMessage(request);
-        String errorTypeName = unsupportedErrorCode.getDescriptorForType()
-                                                   .getFullName();
-        Error error = Error
-                .newBuilder()
+        var unsupportedErrorCode = unsupportedTargetErrorCode();
+        var errorMessage = errorMessage(request);
+        var errorTypeName = unsupportedErrorCode.getDescriptorForType()
+                                                .getFullName();
+        var error = Error.newBuilder()
                 .setType(errorTypeName)
                 .setCode(unsupportedErrorCode.getNumber())
                 .setMessage(errorMessage)
                 .build();
 
-        InvalidRequestException exception = unsupportedException(request, error);
+        var exception = unsupportedException(request, error);
         return exception;
     }
 
@@ -151,34 +147,33 @@ abstract class RequestValidator<M extends Message> {
      * @return an instance of exception or null if the request message is valid.
      */
     private @Nullable InvalidRequestException validateMessage(M request) {
-        List<ConstraintViolation> violations = Validate.violationsOf(request);
+        var violations = Validate.violationsOf(request);
         if (violations.isEmpty()) {
             return null;
         }
-        ValidationError validationError = ValidationError
+        var validationError = ValidationError
                 .newBuilder()
                 .addAllConstraintViolation(violations)
                 .build();
-        ProtocolMessageEnum errorCode = invalidMessageErrorCode();
-        String typeName = errorCode.getDescriptorForType()
-                                   .getFullName();
-        String errorMessage = errorConstraintsViolated(request);
-        String violationsText = ViolationText.ofAll(violations);
-        String errorText = format("%s %s", errorMessage, violationsText);
-        Error error = Error
-                .newBuilder()
+        var errorCode = invalidMessageErrorCode();
+        var typeName = errorCode.getDescriptorForType()
+                                .getFullName();
+        var errorMessage = errorConstraintsViolated(request);
+        var violationsText = ViolationText.ofAll(violations);
+        var errorText = format("%s %s", errorMessage, violationsText);
+        var error = Error.newBuilder()
                 .setType(typeName)
                 .setCode(errorCode.getNumber())
                 .setValidationError(validationError)
                 .setMessage(errorText)
                 .build();
-        String exceptionMsg = formatExceptionMessage(request, error);
-        InvalidRequestException exception = invalidMessageException(exceptionMsg, request, error);
+        var exceptionMsg = formatExceptionMessage(request, error);
+        var exception = invalidMessageException(exceptionMsg, request, error);
         return exception;
     }
 
     private @Nullable InvalidRequestException validateOwnRules(M request) {
-        Error error = checkOwnRules(request);
+        var error = checkOwnRules(request);
         if (error == null) {
             return null;
         } else {

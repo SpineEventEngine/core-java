@@ -64,8 +64,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      */
     static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, H>
     findMethodsBy(Class<?> declaringClass, MethodSignature<H, ?> signature) {
-        MethodScan<H> operation = new MethodScan<>(declaringClass, signature);
-        ImmutableSetMultimap<DispatchKey, H> result = operation.perform();
+        var operation = new MethodScan<>(declaringClass, signature);
+        var result = operation.perform();
         return result;
     }
 
@@ -83,8 +83,8 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      * <p>Multiple calls to this method may cause {@link DuplicateHandlerMethodError}s.
      */
     private ImmutableSetMultimap<DispatchKey, H> perform() {
-        Method[] declaredMethods = declaringClass.getDeclaredMethods();
-        for (Method method : declaredMethods) {
+        var declaredMethods = declaringClass.getDeclaredMethods();
+        for (var method : declaredMethods) {
             if (!method.isBridge() && !method.isSynthetic()) {
                 scanMethod(method);
             }
@@ -104,12 +104,12 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void checkNotRemembered(H handler) {
-        DispatchKey key = handler.key();
+        var key = handler.key();
         if (seenMethods.containsKey(key)) {
-            Method alreadyPresent = seenMethods.get(key)
-                                               .rawMethod();
-            String methodName = alreadyPresent.getName();
-            String duplicateMethodName = handler.rawMethod().getName();
+            var alreadyPresent = seenMethods.get(key)
+                                            .rawMethod();
+            var methodName = alreadyPresent.getName();
+            var duplicateMethodName = handler.rawMethod().getName();
             throw new DuplicateHandlerMethodError(
                     declaringClass, key, methodName, duplicateMethodName
             );
@@ -119,15 +119,15 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
     }
 
     private void checkForFilterClashes(HandlerMethod<?, ?, ?, ?> handler) {
-        ArgumentFilter filter = handler.filter();
+        var filter = handler.filter();
         if (filter.acceptsAll()) {
             return;
         }
-        MessageClass<?> handledClass = handler.messageClass();
+        var handledClass = handler.messageClass();
 
         // It is OK to keep only the last filtering handler in the map (and not all of them)
         // because filtered fields are required to be the same.
-        HandlerMethod<?, ?, ?, ?> existingHandler = messageToHandler.put(handledClass, handler);
+        var existingHandler = messageToHandler.put(handledClass, handler);
         if (existingHandler != null && !filter.sameField(existingHandler.filter())) {
             // There is already a handler for this message class.
             // Check that the field which is used as the condition for filtering is the same.

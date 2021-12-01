@@ -49,7 +49,7 @@ final class ByFirstMessageField<I> implements EventRoute<I, EventMessage> {
 
     @Override
     public Set<I> apply(EventMessage message, EventContext context) {
-        I id = field.apply(message, context);
+        var id = field.apply(message, context);
         return EventRoute.withId(id);
     }
 }

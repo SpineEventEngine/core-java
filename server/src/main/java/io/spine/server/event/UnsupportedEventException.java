@@ -31,7 +31,6 @@ import io.spine.base.EventMessage;
 import io.spine.core.EventValidationError;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.type.EventClass;
-import io.spine.type.TypeName;
 
 import static java.lang.String.format;
 
@@ -48,9 +47,9 @@ public class UnsupportedEventException extends EventException implements Message
     }
 
     private static String messageFormat(Message eventMsg) {
-        EventClass eventClass = EventClass.of(eventMsg);
-        TypeName typeName = eventClass.typeName();
-        String result = format(
+        var eventClass = EventClass.of(eventMsg);
+        var typeName = eventClass.typeName();
+        var result = format(
                 "There is no registered handler or dispatcher for the event of the class: `%s` " +
                 " (proto type: `%s`).",
                 eventClass,
@@ -60,11 +59,10 @@ public class UnsupportedEventException extends EventException implements Message
 
     /** Creates an instance of unsupported event error. */
     private static Error unsupportedEventError(Message eventMessage) {
-        String type = eventMessage.getDescriptorForType()
-                                  .getFullName();
-        String errMsg = format("Events of the type `%s` are not supported.", type);
-        Error error = Error
-                .newBuilder()
+        var type = eventMessage.getDescriptorForType()
+                               .getFullName();
+        var errMsg = format("Events of the type `%s` are not supported.", type);
+        var error = Error.newBuilder()
                 .setType(EventValidationError.getDescriptor()
                                              .getFullName())
                 .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())

@@ -31,6 +31,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.core.UserId;
+import io.spine.core.Versions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -61,7 +62,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     public Event postEvent(EventMessage systemEvent, Origin origin) {
         checkNotNull(systemEvent);
         checkNotNull(origin);
-        Event event = event(systemEvent, origin);
+        var event = event(systemEvent, origin);
         if (system.config().postEventsInParallel()) {
             commonPool().execute(() -> postEvent(event));
         } else {
@@ -71,8 +72,8 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     }
 
     private Event event(EventMessage message, Origin origin) {
-        SystemEventFactory factory = forMessage(message, origin, system.isMultitenant());
-        Event event = factory.createEvent(message, null);
+        var factory = forMessage(message, origin, system.isMultitenant());
+        var event = factory.createEvent(message, Versions.zero());
         return event;
     }
 

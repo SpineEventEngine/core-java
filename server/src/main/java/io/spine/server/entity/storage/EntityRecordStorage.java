@@ -36,7 +36,6 @@ import io.spine.query.Query;
 import io.spine.query.QueryPredicate;
 import io.spine.query.RecordQuery;
 import io.spine.query.Subject;
-import io.spine.query.SubjectParameter;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -118,7 +117,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      *         if the storage is already closed
      */
     public Iterator<I> index(EntityQuery<I, S, ?> query) {
-        RecordQuery<I, EntityRecord> recordQuery = transform(query);
+        var recordQuery = transform(query);
         return index(recordQuery);
     }
 
@@ -140,7 +139,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public Iterator<EntityRecord> readAll(RecordQuery<I, EntityRecord> query) {
-        RecordQuery<I, EntityRecord> toExecute = onlyActive(query);
+        var toExecute = onlyActive(query);
         return super.readAll(toExecute);
     }
 
@@ -161,7 +160,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * <p>Only the records of active entities are returned.
      */
     public final Iterator<EntityRecord> findAll(EntityQuery<I, S, ?> query) {
-        RecordQuery<I, EntityRecord> result = transform(query);
+        var result = transform(query);
         return readAll(result);
     }
 
@@ -196,7 +195,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public synchronized void write(I id, EntityRecord record) {
-        EntityRecordWithColumns<I> wrapped = EntityRecordWithColumns.create(id, record);
+        var wrapped = EntityRecordWithColumns.create(id, record);
         write(wrapped);
     }
 
@@ -256,7 +255,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     }
 
     private RecordQuery<I, EntityRecord> onlyActive(RecordQuery<I, EntityRecord> query) {
-        RecordQuery<I, EntityRecord> result = query;
+        var result = query;
         if (hasNoIds(query) && hasNoLifecycleCols(query)) {
             result = query.and((r) -> r.where(archived).is(false)
                                        .where(deleted).is(false));
@@ -267,19 +266,18 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     private static <I> boolean hasNoLifecycleCols(Query<I, EntityRecord> query) {
         Subject<I, ?> subject = query.subject();
         QueryPredicate<?> predicate = subject.predicate();
-        boolean result = !hasLifecycleColumn(predicate);
+        var result = !hasLifecycleColumn(predicate);
         return result;
     }
 
     private static boolean hasLifecycleColumn(QueryPredicate<?> predicate) {
-        ImmutableList<SubjectParameter<?, ?, ?>> params = predicate.allParams();
-        boolean result =
-                params.stream()
-                      .anyMatch((param) -> isLifecycleColumn(param.column()));
+        var params = predicate.allParams();
+        var result = params.stream()
+                .anyMatch((param) -> isLifecycleColumn(param.column()));
         if (!result) {
             ImmutableList<? extends QueryPredicate<?>> children = predicate.children();
             for (QueryPredicate<?> child : children) {
-                boolean childResult = hasLifecycleColumn(child);
+                var childResult = hasLifecycleColumn(child);
                 if (childResult) {
                     return childResult;
                 }
@@ -289,11 +287,10 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     }
 
     private RecordQuery<I, EntityRecord> findActiveRecords() {
-        RecordQuery<I, EntityRecord> result =
-                RecordQuery.newBuilder(idType(), EntityRecord.class)
-                           .where(archived).is(false)
-                           .where(deleted).is(false)
-                           .build();
+        var result = RecordQuery.newBuilder(idType(), EntityRecord.class)
+                .where(archived).is(false)
+                .where(deleted).is(false)
+                .build();
         return result;
     }
 }

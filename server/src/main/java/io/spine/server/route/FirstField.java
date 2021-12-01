@@ -26,11 +26,8 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -60,8 +57,8 @@ final class FirstField<I, M extends Message, C extends Message> implements Unica
     @Override
     public I apply(M message, C context) {
         checkNotNull(message);
-        FieldDescriptor field = fieldIn(message);
-        I result = getValue(field, message);
+        var field = fieldIn(message);
+        var result = getValue(field, message);
         return result;
     }
 
@@ -73,13 +70,13 @@ final class FirstField<I, M extends Message, C extends Message> implements Unica
      *          the field is a repeated field or a map
      */
     private FieldDescriptor fieldIn(M message) {
-        Descriptor type = message.getDescriptorForType();
-        List<FieldDescriptor> fields = type.getFields();
+        var type = message.getDescriptorForType();
+        var fields = type.getFields();
         if (fields.isEmpty()) {
             throw error("Cannot use the type `%s` for routing: it does not declare any field.",
                         type.getFullName());
         }
-        FieldDescriptor field = fields.get(0);
+        var field = fields.get(0);
         if (field.isMapField()) {
             throw error("The field `%s` is a map and cannot be used for routing.",
                         field.getFullName());
@@ -102,8 +99,8 @@ final class FirstField<I, M extends Message, C extends Message> implements Unica
      * Obtains the value of first field making sure the value is of the expected type.
      */
     private I getValue(FieldDescriptor field, M message) {
-        Object value = message.getField(field);
-        Class<?> valueClass = value.getClass();
+        var value = message.getField(field);
+        var valueClass = value.getClass();
         if (!idClass.isAssignableFrom(valueClass)) {
             throw newIllegalStateException(
                     "The field `%s` has the type `%s` which is not assignable" +
@@ -113,7 +110,7 @@ final class FirstField<I, M extends Message, C extends Message> implements Unica
                     idClass.getName()
             );
         }
-        I result = idClass.cast(value);
+        var result = idClass.cast(value);
         return result;
     }
 }

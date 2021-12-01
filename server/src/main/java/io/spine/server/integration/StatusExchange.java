@@ -64,11 +64,10 @@ final class StatusExchange extends SingleChannelExchange {
      * and available for communication.
      */
     void declareOnlineStatus() {
-        BoundedContextOnline notification =
-                BoundedContextOnline.newBuilder()
-                        .setContext(context())
-                        .vBuild();
-        ExternalMessage message = ExternalMessages.of(notification);
+        var notification = BoundedContextOnline.newBuilder()
+                .setContext(context())
+                .vBuild();
+        var message = ExternalMessages.of(notification);
         publisher().publish(message.getId(), message);
     }
 
@@ -93,12 +92,12 @@ final class StatusExchange extends SingleChannelExchange {
 
         @Override
         protected void handle(ExternalMessage message) {
-            BoundedContextOnline msg = asOriginal(message);
+            var msg = asOriginal(message);
             callback.accept(msg);
         }
 
         private static BoundedContextOnline asOriginal(ExternalMessage message) {
-            BoundedContextOnline msg = unpack(message.getOriginalMessage(), TYPE);
+            var msg = unpack(message.getOriginalMessage(), TYPE);
             return msg;
         }
     }

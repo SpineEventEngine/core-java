@@ -88,7 +88,7 @@ public abstract class AbstractEntityFactory<E extends Entity<?, ?>> implements E
     @Override
     @SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
     public final Constructor<E> constructor() {
-        Constructor<E> result = constructor;
+        var result = constructor;
         if (result == null) {
             synchronized (this) {
                 result = constructor;
@@ -121,7 +121,7 @@ public abstract class AbstractEntityFactory<E extends Entity<?, ?>> implements E
         if (!(obj instanceof AbstractEntityFactory)) {
             return false;
         }
-        final AbstractEntityFactory<?> other = (AbstractEntityFactory<?>) obj;
+        final var other = (AbstractEntityFactory<?>) obj;
         return Objects.equals(this.idClass, other.idClass)
                 && Objects.equals(this.entityClass, other.entityClass);
     }

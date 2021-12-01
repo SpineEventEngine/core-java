@@ -70,7 +70,7 @@ public abstract class EventComparator implements Comparator<Event>, Serializable
 
         @Override
         public int compare(Event e1, Event e2) {
-            int result = Comparator
+            var result = Comparator
                     .comparing(Event::timestamp, Timestamps.comparator())
                     .thenComparing((e) -> e.getContext()
                                            .getVersion()

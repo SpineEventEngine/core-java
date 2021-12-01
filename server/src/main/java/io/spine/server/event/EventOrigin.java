@@ -65,7 +65,7 @@ public final class EventOrigin {
      */
     public static EventOrigin fromAnotherMessage(MessageEnvelope<?, ?, ?> envelope) {
         checkNotNull(envelope);
-        Origin origin = envelope.asMessageOrigin();
+        var origin = envelope.asMessageOrigin();
         return new EventOrigin(origin, null);
     }
 
@@ -98,7 +98,7 @@ public final class EventOrigin {
      * @return new {@code EventContext} builder
      */
     EventContext.Builder contextBuilder() {
-        EventContext.Builder builder = EventContext.newBuilder();
+        var builder = EventContext.newBuilder();
         if (otherMessage != null) {
             builder.setPastMessage(otherMessage)
                    .setTimestamp(Time.currentTime());

@@ -37,7 +37,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -104,8 +103,8 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
     EntityColumns<E> columns() {
         Set<Column<E, ?>> accumulator = new HashSet<>();
 
-        StateColumns<S> stateColumns = stateColumns();
-        for (EntityColumn<S, ?> stateCol : stateColumns) {
+        var stateColumns = stateColumns();
+        for (var stateCol : stateColumns) {
             Column<E, ?> wrapped = wrap(stateCol, (entity) -> stateCol.valueIn(entity.state()));
             accumulator.add(wrapped);
         }
@@ -114,7 +113,7 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
         accumulator.add(wrap(DeletedColumn.instance(), Entity::isDeleted));
         accumulator.add(wrap(VersionColumn.instance(), Entity::version));
 
-        EntityColumns<E> columns = new EntityColumns<>(accumulator);
+        var columns = new EntityColumns<>(accumulator);
         return columns;
     }
 
@@ -128,16 +127,15 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
     @VisibleForTesting
     @SuppressWarnings("OverlyBroadCatchBlock")   /* Treating all exceptions equally. */
     StateColumns<S> stateColumns() {
-        Class<? extends EntityState<?>> stateClass = entityClass.stateClass();
-        Class<?> columnClass = findColumnsClass(stateClass);
+        var stateClass = entityClass.stateClass();
+        var columnClass = findColumnsClass(stateClass);
         if (columnClass == null) {
             return StateColumns.none();
         }
         try {
-            Method getDefinitions = columnClass.getDeclaredMethod(COL_DEFS_METHOD_NAME);
+            var getDefinitions = columnClass.getDeclaredMethod(COL_DEFS_METHOD_NAME);
             @SuppressWarnings("unchecked")  // ensured by the Spine code generation.
-            Set<EntityColumn<S, ?>> columns =
-                    (Set<EntityColumn<S, ?>>) getDefinitions.invoke(null);
+            var columns = (Set<EntityColumn<S, ?>>) getDefinitions.invoke(null);
             return new StateColumns<>(columns);
         } catch (Exception e) {
             throw newIllegalStateException(
@@ -161,9 +159,9 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
      *         or {@code null} if the entity declares no columns
      */
     private static @Nullable Class<?> findColumnsClass(Class<? extends EntityState<?>> stateClass) {
-        Class<?>[] innerClasses = stateClass.getDeclaredClasses();
+        var innerClasses = stateClass.getDeclaredClasses();
         Class<?> columnClass = null;
-        for (Class<?> aClass : innerClasses) {
+        for (var aClass : innerClasses) {
             if (COLS_NESTED_CLASSNAME.equals(aClass.getSimpleName())) {
                 columnClass = aClass;
             }

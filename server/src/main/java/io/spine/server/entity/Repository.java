@@ -46,7 +46,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.RoutingFailed;
-import io.spine.system.server.SystemWriteSide;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -163,7 +162,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     public EntityClass<E> entityModelClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            Class<E> cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
+            var cast = (Class<E>) GenericParameter.ENTITY.argumentIn(getClass());
             entityClass = toModelClass(cast);
         }
         return entityClass;
@@ -213,7 +212,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Internal
     public void registerWith(BoundedContext context) {
         checkNotNull(context);
-        boolean sameValue = context.equals(this.context);
+        var sameValue = context.equals(this.context);
         if (hasContext() && !sameValue) {
             throw newIllegalStateException(
                     "The repository `%s` has the Bounded Context (`%s`) assigned." +
@@ -289,7 +288,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Initializes the storage of the repository.
      */
     protected final void open() {
-        Storage<I, ?> storage = storage();
+        var storage = storage();
         checkNotNull(storage, "Unable to initialize the storage.");
     }
 
@@ -380,12 +379,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     route(Route<M, C, R> routing, SignalEnvelope<?, ?, C> envelope) {
         try {
             @SuppressWarnings("unchecked")
-            M message = (M) envelope.message();
-            R result = routing.apply(message, envelope.context());
+            var message = (M) envelope.message();
+            var result = routing.apply(message, envelope.context());
             checkMatchesIdType(result);
             return Optional.of(result);
         } catch (RuntimeException e) {
-            Throwable cause = getRootCause(e);
+            var cause = getRootCause(e);
             onRoutingFailed(envelope, cause);
             return Optional.empty();
         }
@@ -402,8 +401,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     private void checkMatchesIdType(Object result) {
         Class<?> routingResultType = null;
         if (result instanceof Iterable) {
-            Iterable<?> asIterable = (Iterable<?>) result;
-            Object element = getFirst(asIterable, null);
+            var asIterable = (Iterable<?>) result;
+            var element = getFirst(asIterable, null);
             if (element != null) {
                 routingResultType = element.getClass();
             }
@@ -411,8 +410,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             routingResultType = result.getClass();
         }
         if (routingResultType != null) {
-            Class<I> idClass = idClass();
-            boolean corresponds = idClass.isAssignableFrom(routingResultType);
+            var idClass = idClass();
+            var corresponds = idClass.isAssignableFrom(routingResultType);
             checkArgument(corresponds, "Message routing failed in `%s` due to the type mismatch. " +
                                   "Expected ID type is `%s`, but was `%s`.",
                           getClass().getName(), idClass.getName(), routingResultType.getName());
@@ -428,8 +427,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @OverridingMethodsMustInvokeSuper
     @Internal
     protected void onRoutingFailed(SignalEnvelope<?, ?, ?> envelope, Throwable cause) {
-        RoutingFailed systemEvent = RoutingFailed
-                .newBuilder()
+        var systemEvent = RoutingFailed.newBuilder()
                 .setEntityType(entityModelClass().typeName())
                 .setHandledSignal(envelope.messageId())
                 .setError(fromThrowable(cause))
@@ -451,10 +449,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Internal
     public EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
-        SystemWriteSide writeSide = context().systemClient()
-                                             .writeSide();
-        EventFilter eventFilter = eventFilter();
-        EntityLifecycle lifecycle = EntityLifecycle
+        var writeSide = context().systemClient()
+                                 .writeSide();
+        var eventFilter = eventFilter();
+        var lifecycle = EntityLifecycle
                 .newBuilder()
                 .setEntityId(id)
                 .setEntityType(entityModelClass())
@@ -483,7 +481,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @SPI
     @Pure
     public EventFilter eventFilter() {
-        EntityClass<E> entityClass = entityModelClass();
+        var entityClass = entityModelClass();
         return EntityStateChangedFilter.forType(entityClass);
     }
 
@@ -534,20 +532,20 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         @Override
         public boolean hasNext() {
-            boolean result = index.hasNext();
+            var result = index.hasNext();
             return result;
         }
 
         @Override
         public E next() {
-            I id = index.next();
-            Optional<E> loaded = repository.find(id);
-            if (!loaded.isPresent()) {
-                String idStr = Identifier.toString(id);
+            var id = index.next();
+            var loaded = repository.find(id);
+            if (loaded.isEmpty()) {
+                var idStr = Identifier.toString(id);
                 throw newIllegalStateException("Unable to load entity with ID: `%s`.", idStr);
             }
 
-            E entity = loaded.get();
+            var entity = loaded.get();
             return entity;
         }
     }

@@ -52,7 +52,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the reactor identifiers
  * @param <S>
  *         the type of reactor states
- * @param <B>>
+ * @param <B>
  *         the type of the builders for the reactor states
  */
 public abstract class AbstractStatefulReactor<I, S extends Message, B extends ValidatingBuilder<S>>
@@ -75,8 +75,8 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
      */
     protected AbstractStatefulReactor(TypeUrl stateType) {
         super();
-        Delivery delivery = ServerEnvironment.instance()
-                                             .delivery();
+        var delivery = ServerEnvironment.instance()
+                                        .delivery();
         this.inbox = configureInbox(delivery, stateType);
     }
 
@@ -89,7 +89,7 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
     @Override
     public void dispatch(EventEnvelope event) {
         Set<I> targets = route(event);
-        for (I target : targets) {
+        for (var target : targets) {
             inbox.send(event)
                  .toReactor(target);
         }
@@ -121,7 +121,7 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
      * as-is.
      */
     protected final void flushState() {
-        S newState = builder().vBuild();
+        var newState = builder().vBuild();
         store(newState);
     }
 
@@ -181,7 +181,7 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
 
         @SuppressWarnings("unchecked")
         private void loadIntoBuilder(I id) {
-            Optional<S> existingState = load(id);
+            var existingState = load(id);
             AbstractStatefulReactor.this.builder =
                     existingState.isPresent()
                     ? (B) existingState.get()

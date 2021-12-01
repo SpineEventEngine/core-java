@@ -27,7 +27,6 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import io.spine.annotation.SPI;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
@@ -78,8 +77,8 @@ public final class EntityRecordWithColumns<I>
     EntityRecordWithColumns<I> create(E entity, EntityRecord record) {
         checkNotNull(entity);
         checkNotNull(record);
-        EntityRecordSpec<I, S, E> recordSpec = EntityRecordSpec.of(entity);
-        Map<ColumnName, @Nullable Object> storageFields = recordSpec.valuesIn(entity);
+        var recordSpec = EntityRecordSpec.of(entity);
+        var storageFields = recordSpec.valuesIn(entity);
         return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
     }
 
@@ -101,7 +100,7 @@ public final class EntityRecordWithColumns<I>
     public static <I> EntityRecordWithColumns<I> create(I id, EntityRecord record) {
         checkNotNull(id);
         checkNotNull(record);
-        ImmutableMap<ColumnName, Object> lifecycleValues = EntityRecordColumn.valuesIn(record);
+        var lifecycleValues = EntityRecordColumn.valuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 
@@ -171,7 +170,7 @@ public final class EntityRecordWithColumns<I>
             return false;
         }
 
-        EntityRecordWithColumns<?> other = (EntityRecordWithColumns<?>) o;
+        var other = (EntityRecordWithColumns<?>) o;
 
         return Objects.equals(id(), other.id()) &&
                 Objects.equals(record(), other.record()) &&

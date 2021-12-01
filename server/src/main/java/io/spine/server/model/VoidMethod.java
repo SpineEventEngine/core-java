@@ -54,7 +54,7 @@ public interface VoidMethod<T,
     @Override
     default Success toSuccessfulOutcome(@Nullable Object result, T target, E handledSignal) {
         if (result != null) {
-            String errorMessage = format(
+            var errorMessage = format(
                     "Method `%s` should NOT produce any result. Produced: `%s`.",
                     this,
                     result

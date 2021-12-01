@@ -61,7 +61,7 @@ public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMess
     @Override
     public I apply(CommandMessage message, CommandContext ignored) throws MessageFieldException {
         checkNotNull(message);
-        I result = field.apply(message, ignored);
+        var result = field.apply(message, ignored);
         return result;
     }
 
@@ -69,7 +69,7 @@ public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMess
      * Verifies of the passed command message potentially has a field with an entity ID.
      */
     public static boolean exists(CommandMessage commandMessage) {
-        boolean hasAtLeastOneField =
+        var hasAtLeastOneField =
                 !commandMessage.getDescriptorForType()
                                .getFields()
                                .isEmpty();

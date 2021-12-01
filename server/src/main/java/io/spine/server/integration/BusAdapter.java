@@ -59,12 +59,12 @@ final class BusAdapter {
     }
 
     void register(Class<? extends Message> messageClass) {
-        EventDispatcher dispatcher = createDispatcher(messageClass);
+        var dispatcher = createDispatcher(messageClass);
         targetBus.register(dispatcher);
     }
 
     void unregister(Class<? extends Message> messageClass) {
-        EventDispatcher dispatcher = createDispatcher(messageClass);
+        var dispatcher = createDispatcher(messageClass);
         targetBus.unregister(dispatcher);
     }
 
@@ -81,8 +81,8 @@ final class BusAdapter {
      */
     private EventDispatcher createDispatcher(Class<? extends Message> messageClass) {
         @SuppressWarnings("unchecked") // Logically checked.
-        Class<? extends EventMessage> eventClass = (Class<? extends EventMessage>) messageClass;
-        EventClass eventType = EventClass.from(eventClass);
+        var eventClass = (Class<? extends EventMessage>) messageClass;
+        var eventType = EventClass.from(eventClass);
         EventDispatcher result = new DomesticEventPublisher(broker, eventType);
         return result;
     }

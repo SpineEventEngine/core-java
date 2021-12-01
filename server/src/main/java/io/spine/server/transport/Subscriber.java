@@ -99,14 +99,14 @@ public abstract class Subscriber extends AbstractChannel {
     }
 
     protected final void callObservers(ExternalMessage message) {
-        for (StreamObserver<ExternalMessage> observer : observers()) {
+        for (var observer : observers()) {
             observer.onNext(message);
         }
     }
 
     @Override
     public void close() {
-        for (StreamObserver<ExternalMessage> observer : observers) {
+        for (var observer : observers) {
             observer.onCompleted();
         }
         observers.clear();

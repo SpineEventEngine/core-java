@@ -61,7 +61,7 @@ public final class SystemSettings implements SystemFeatures {
      * </ol>
      */
     public static SystemSettings defaults() {
-        SystemSettings settings = new SystemSettings()
+        var settings = new SystemSettings()
                 .disableCommandLog()
                 .forgetEvents();
         if (Environment.instance().is(Tests.class)) {
@@ -187,7 +187,7 @@ public final class SystemSettings implements SystemFeatures {
         if (!(o instanceof SystemSettings)) {
             return false;
         }
-        SystemSettings settings = (SystemSettings) o;
+        var settings = (SystemSettings) o;
         return commandLog == settings.commandLog &&
                 storeEvents == settings.storeEvents &&
                 parallelPosting == settings.parallelPosting;

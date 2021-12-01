@@ -73,7 +73,7 @@ final class AsEntityRecordColumn {
     apply(Column<?, ?> original, Class<V> typeOfValues, Function<EntityRecord, V> getter) {
         checkNotNull(original);
         checkNotNull(typeOfValues);
-        String columnName = columnName(original);
+        var columnName = columnName(original);
         return RecordColumn.create(columnName, typeOfValues, getter::apply);
     }
 

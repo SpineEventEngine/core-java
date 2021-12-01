@@ -124,8 +124,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
     CommandRouting<I> route(Class<M> commandType, CommandRoute<I, M> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        Route<CommandMessage, CommandContext, I> casted =
-                (Route<CommandMessage, CommandContext, I>) via;
+        var casted = (Route<CommandMessage, CommandContext, I>) via;
         addRoute(commandType, casted);
         return this;
     }
@@ -140,11 +139,11 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
      * @return optionally available route
      */
     public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
-        Match match = routeFor(commandClass);
+        var match = routeFor(commandClass);
         if (match.found()) {
             @SuppressWarnings({"unchecked", "RedundantSuppression"})
             // protected by generic params of this class
-            Optional<CommandRoute<I, M>> result = Optional.of((CommandRoute<I, M>) match.route());
+            var result = Optional.of((CommandRoute<I, M>) match.route());
             return result;
         }
         return Optional.empty();

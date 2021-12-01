@@ -130,7 +130,7 @@ public final class MethodAccessChecker implements Logging {
     }
 
     private String methodFullName() {
-        String result = method.getDeclaringClass().getName() + '.' + method.getName() + "()";
+        var result = method.getDeclaringClass().getName() + '.' + method.getName() + "()";
         return result;
     }
 
@@ -142,8 +142,8 @@ public final class MethodAccessChecker implements Logging {
      *         otherwise
      */
     private static boolean isPackagePrivate(Method method) {
-        int modifiers = method.getModifiers();
-        boolean result = !(Modifier.isPublic(modifiers)
+        var modifiers = method.getModifiers();
+        var result = !(Modifier.isPublic(modifiers)
                          || Modifier.isProtected(modifiers)
                          || Modifier.isPrivate(modifiers));
         return result;

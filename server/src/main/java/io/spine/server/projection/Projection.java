@@ -140,8 +140,7 @@ public abstract class Projection<I,
     }
 
     private DispatchOutcome unhandledEvent(EventEnvelope event) {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setType(EventValidationError.getDescriptor().getFullName())
                 .setCode(UNSUPPORTED_EVENT_VALUE)
                 .setMessage(format(
@@ -149,8 +148,7 @@ public abstract class Projection<I,
                         thisClass(), event.messageTypeName()
                 ))
                 .buildPartial();
-        return DispatchOutcome
-                .newBuilder()
+        return DispatchOutcome.newBuilder()
                 .setPropagatedSignal(event.outerObject().messageId())
                 .setError(error)
                 .vBuild();
@@ -158,7 +156,7 @@ public abstract class Projection<I,
 
     @Override
     public BatchDispatchOutcome play(Iterable<Event> events) {
-        EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
+        var eventPlayer = EventPlayer.forTransactionOf(this);
         return eventPlayer.play(events);
     }
 }

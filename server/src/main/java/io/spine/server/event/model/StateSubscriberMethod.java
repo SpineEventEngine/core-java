@@ -67,8 +67,8 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     }
 
     private void checkExternal() {
-        BoundedContextName originContext = contextOf(stateType());
-        boolean external = !originContext.equals(contextOfSubscriber);
+        var originContext = contextOf(stateType());
+        var external = !originContext.equals(contextOfSubscriber);
         ensureExternalMatch(external);
     }
 
@@ -88,7 +88,7 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
 
     @Override
     protected ArgumentFilter createFilter() {
-        TypeUrl targetType = TypeUrl.of(stateType);
+        var targetType = TypeUrl.of(stateType);
         return ArgumentFilter.acceptingOnly(ENTITY_TYPE_URL, targetType.value());
     }
 
@@ -103,8 +103,8 @@ public final class StateSubscriberMethod extends SubscriberMethod implements Log
     @SuppressWarnings("TestOnlyProblems")
     // Checks that the resulting context is not `AssumingTests` in production environment.
     private BoundedContextName contextOf(Class<?> cls) {
-        Model model = Model.inContextOf(cls);
-        BoundedContextName name = model.contextName();
+        var model = Model.inContextOf(cls);
+        var name = model.contextName();
         if (!Environment.instance().is(Tests.class) && name.equals(assumingTests())) {
             _warn().log(
                     "The class `%s` belongs to the Bounded Context named `%s`," +

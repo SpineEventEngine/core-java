@@ -36,8 +36,6 @@ import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordStorage;
 
-import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -72,9 +70,9 @@ public abstract class TenantStorage<T extends Message>
             return;
         }
 
-        Optional<T> optional = read(id);
-        if (!optional.isPresent()) {
-            T newRecord = create(id);
+        var optional = read(id);
+        if (optional.isEmpty()) {
+            var newRecord = create(id);
             write(id, newRecord);
         }
         cache(id);
@@ -102,7 +100,7 @@ public abstract class TenantStorage<T extends Message>
      * @return {@code true} if the value was cached before and removed, {@code false} otherwise
      */
     protected final boolean unCache(TenantId id) {
-        boolean result = cache.remove(id);
+        var result = cache.remove(id);
         return result;
     }
 
@@ -115,7 +113,7 @@ public abstract class TenantStorage<T extends Message>
 
     @Override
     public final Set<TenantId> all() {
-        Iterator<TenantId> index = index();
+        var index = index();
         Set<TenantId> result = ImmutableSet.copyOf(index);
         cache.addAll(result);
         return result;
