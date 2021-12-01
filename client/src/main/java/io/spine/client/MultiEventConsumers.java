@@ -222,8 +222,7 @@ final class MultiEventConsumers implements Logging {
         public void accept(MessageConsumer<E, ?> consumer, Throwable throwable) {
             @SuppressWarnings("unchecked")
             // The cast is protected by generic params of `EventConsumers`.
-            var cast =
-                    (MessageConsumer<EventMessage, EventContext>) consumer;
+            var cast = (MessageConsumer<EventMessage, EventContext>) consumer;
             delegate.accept(cast, throwable);
         }
     }
