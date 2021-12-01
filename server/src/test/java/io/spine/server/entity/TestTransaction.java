@@ -126,8 +126,7 @@ public class TestTransaction {
         }
 
         void dispatchForTest() {
-            var eventMessage = EntProjectCreated
-                    .newBuilder()
+            var eventMessage = EntProjectCreated.newBuilder()
                     .setProjectId(ProjectId.getDefaultInstance())
                     .buildPartial();
             var factory = TestEventFactory.newInstance(TestTransaction.class);
