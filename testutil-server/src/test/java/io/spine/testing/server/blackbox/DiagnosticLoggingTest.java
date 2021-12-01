@@ -86,8 +86,7 @@ abstract class DiagnosticLoggingTest {
      * Creates a random test entity ID of an {@link Empty} type.
      */
     protected static MessageId entity() {
-        return MessageId
-                .newBuilder()
+        return MessageId.newBuilder()
                 .setId(pack(newUuid()))
                 .setTypeUrl(TypeUrl.of(Empty.class).value())
                 .vBuild();
