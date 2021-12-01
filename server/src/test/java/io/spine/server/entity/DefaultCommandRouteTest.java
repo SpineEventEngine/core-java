@@ -48,15 +48,16 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.testing.TestValues.nullRef;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("DefaultCommandRoute should")
+@DisplayName("`DefaultCommandRoute` should")
 class DefaultCommandRouteTest {
 
     @Test
     @DisplayName("get ID from command message")
     void getIdFromCommand() {
-        EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
+        var msg = Sample.messageOfType(EntCreateProject.class);
 
         assertTrue(DefaultCommandRoute.exists(msg));
 
@@ -100,12 +101,12 @@ class DefaultCommandRouteTest {
 
         @Override
         public Parser<? extends Message> getParserForType() {
-            return null;
+            return nullRef();
         }
 
         @Override
         public ByteString toByteString() {
-            return null;
+            return nullRef();
         }
 
         @SuppressWarnings("ZeroLengthArrayAllocation")
@@ -126,17 +127,17 @@ class DefaultCommandRouteTest {
 
         @Override
         public Builder newBuilderForType() {
-            return null;
+            return nullRef();
         }
 
         @Override
         public Builder toBuilder() {
-            return null;
+            return nullRef();
         }
 
         @Override
         public Message getDefaultInstanceForType() {
-            return null;
+            return nullRef();
         }
 
         @Override
@@ -146,12 +147,12 @@ class DefaultCommandRouteTest {
 
         @Override
         public List<String> findInitializationErrors() {
-            return null;
+            return nullRef();
         }
 
         @Override
         public String getInitializationErrorString() {
-            return null;
+            return nullRef();
         }
 
         @Override
@@ -163,7 +164,7 @@ class DefaultCommandRouteTest {
 
         @Override
         public Map<Descriptors.FieldDescriptor, Object> getAllFields() {
-            return null;
+            return nullRef();
         }
 
         @Override
@@ -174,7 +175,7 @@ class DefaultCommandRouteTest {
         @Override
         public Descriptors.FieldDescriptor getOneofFieldDescriptor(
                 Descriptors.OneofDescriptor oneof) {
-            return null;
+            return nullRef();
         }
 
         @Override
@@ -184,7 +185,7 @@ class DefaultCommandRouteTest {
 
         @Override
         public Object getField(Descriptors.FieldDescriptor field) {
-            return null;
+            return nullRef();
         }
 
         @Override
@@ -194,12 +195,12 @@ class DefaultCommandRouteTest {
 
         @Override
         public Object getRepeatedField(Descriptors.FieldDescriptor field, int index) {
-            return null;
+            return nullRef();
         }
 
         @Override
         public UnknownFieldSet getUnknownFields() {
-            return null;
+            return nullRef();
         }
     }
 }

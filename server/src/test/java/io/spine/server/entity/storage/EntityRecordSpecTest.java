@@ -45,9 +45,6 @@ import io.spine.test.entity.TaskViewId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-import java.util.Optional;
-
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -74,8 +71,8 @@ class EntityRecordSpecTest {
     @DisplayName("be extracted from an entity class")
     void beExtractedFromEntityClass() {
         EntityRecordSpec<?, ?, ?> spec = EntityRecordSpec.of(TaskListViewProjection.class);
-        ColumnName columnName = ColumnName.of("description");
-        Optional<Column<?, ?>> descriptionColumn = spec.findColumn(columnName);
+        var columnName = ColumnName.of("description");
+        var descriptionColumn = spec.findColumn(columnName);
 
         assertThat(descriptionColumn).isPresent();
     }
@@ -89,8 +86,8 @@ class EntityRecordSpecTest {
     }
 
     private static void testFindAndCompare(EntityColumn<TaskView, ?> column) {
-        ColumnName columnName = column.name();
-        Class<?> type = column.type();
+        var columnName = column.name();
+        var type = column.type();
 
         assertThat(spec().get(columnName)
                          .type()).isEqualTo(type);
@@ -99,16 +96,16 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("return all definitions of the columns")
     void returnAllColumns() {
-        ImmutableSet<Column<?, ?>> columns = spec().columns();
-        ImmutableSet<ColumnName> actualNames = toNames(columns);
+        var columns = spec().columns();
+        var actualNames = toNames(columns);
 
-        ImmutableSet<? extends Column<?, ?>> expected =
-                ImmutableSet.<Column<?, ?>>builder()
-                        .addAll(declaredColumns())
-                        .add(ArchivedColumn.instance(), DeletedColumn.instance(),
-                             VersionColumn.instance())
-                        .build();
-        ImmutableSet<ColumnName> expectedNames = toNames(expected);
+        var expected = ImmutableSet.<Column<?, ?>>builder()
+                .addAll(declaredColumns())
+                .add(ArchivedColumn.instance(),
+                     DeletedColumn.instance(),
+                     VersionColumn.instance())
+                .build();
+        var expectedNames = toNames(expected);
 
         assertThat(actualNames).containsExactlyElementsIn(expectedNames);
     }
@@ -124,7 +121,7 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("throw `IAE` when the column with the specified name is not found")
     void throwOnColumnNotFound() {
-        ColumnName nonExistent = ColumnName.of("non-existent-column");
+        var nonExistent = ColumnName.of("non-existent-column");
 
         assertThrows(IllegalArgumentException.class, () -> spec().get(nonExistent));
     }
@@ -132,8 +129,8 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("search for a column by name")
     void searchByName() {
-        ColumnName existingColumn = ColumnName.of("name");
-        Optional<Column<?, ?>> column = spec().findColumn(existingColumn);
+        var existingColumn = ColumnName.of("name");
+        var column = spec().findColumn(existingColumn);
 
         assertThat(column).isPresent();
     }
@@ -141,8 +138,8 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("return empty `Optional` when searching for a non-existent column")
     void returnEmptyOptionalForNonExistent() {
-        ColumnName nonExistent = ColumnName.of("non-existent-column");
-        Optional<Column<?, ?>> result = spec().findColumn(nonExistent);
+        var nonExistent = ColumnName.of("non-existent-column");
+        var result = spec().findColumn(nonExistent);
 
         assertThat(result).isEmpty();
     }
@@ -150,19 +147,19 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("return the list of columns")
     void returnColumns() {
-        int lifecycleColumnCount = EntityRecordColumn.names()
+        var lifecycleColumnCount = EntityRecordColumn.names()
                                                      .size();
-        int protoColumnCount = 4;
+        var protoColumnCount = 4;
 
-        int expectedSize = lifecycleColumnCount + protoColumnCount;
+        var expectedSize = lifecycleColumnCount + protoColumnCount;
         assertThat(spec().columnCount()).isEqualTo(expectedSize);
     }
 
     @Test
     @DisplayName("extract values from entity")
     void extractColumnValues() {
-        TaskViewProjection projection = new TaskViewProjection();
-        Map<ColumnName, Object> values = spec().valuesIn(projection);
+        var projection = new TaskViewProjection();
+        var values = spec().valuesIn(projection);
 
         assertThat(values).containsExactly(
                 ColumnName.of("archived"), projection.isArchived(),
@@ -182,19 +179,17 @@ class EntityRecordSpecTest {
     @Test
     @DisplayName("extract ID value from `EntityRecord`")
     void extractIdValue() {
-        TaskViewProjection projection = new TaskViewProjection();
-        TaskView state = projection.state();
-        TaskViewId id =
-                TaskViewId.newBuilder()
-                        .setId(93)
-                        .vBuild();
-        EntityRecord record = EntityRecord
-                .newBuilder()
+        var projection = new TaskViewProjection();
+        var state = projection.state();
+        var id = TaskViewId.newBuilder()
+                .setId(93)
+                .vBuild();
+        var record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(AnyPacker.pack(state))
                 .setVersion(Versions.newVersion(3, currentTime()))
                 .vBuild();
-        TaskViewId actual = spec().idFromRecord(record);
+        var actual = spec().idFromRecord(record);
         assertThat(actual).isEqualTo(id);
     }
 }

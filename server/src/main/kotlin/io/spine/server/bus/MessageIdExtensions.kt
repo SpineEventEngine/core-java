@@ -28,6 +28,7 @@
 
 package io.spine.server.bus
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Message
 import io.spine.base.Error
 import io.spine.base.RejectionThrowable
@@ -57,7 +58,8 @@ public fun Message.acknowledge(): Ack = ackWithStatus(statusOk())
  * @param cause the error which prevented the message from being handled
  * @receiver the ID of the message which caused the error
  */
-internal fun Message.causedError(cause: Error): Ack = ackWithStatus(errorWith(cause))
+@VisibleForTesting
+public fun Message.causedError(cause: Error): Ack = ackWithStatus(errorWith(cause))
 
 /**
  * Reject a command with this ID with the passed rejection event.

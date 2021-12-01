@@ -25,7 +25,6 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -42,7 +41,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 
-@DisplayName("AggregateTransaction should")
+@DisplayName("`AggregateTransaction` should")
 class AggregateTransactionTest
         extends TransactionTest<Id,
                                 Aggregate<Id, AggregateState, AggregateState.Builder>,
@@ -76,8 +75,7 @@ class AggregateTransactionTest
                           AggregateState.Builder>
     createTx(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
              TransactionListener<Id> listener) {
-        AggregateTransaction<Id, AggregateState, AggregateState.Builder> transaction =
-                new AggregateTransaction<>(entity);
+        var transaction = new AggregateTransaction<>(entity);
         transaction.setListener(listener);
         return transaction;
     }
@@ -99,8 +97,8 @@ class AggregateTransactionTest
     @Override
     protected void checkEventReceived(Aggregate<Id, AggregateState, AggregateState.Builder> entity,
                                       Event event) {
-        TxAggregate aggregate = (TxAggregate) entity;
-        Message actualMessage = unpack(event.getMessage());
+        var aggregate = (TxAggregate) entity;
+        var actualMessage = unpack(event.getMessage());
 
         assertThat(aggregate.receivedEvents())
                 .contains(actualMessage);
@@ -109,8 +107,8 @@ class AggregateTransactionTest
     @SuppressWarnings("rawtypes")   // for simplicity.
     @Override
     protected DispatchOutcome applyEvent(Transaction tx, Event event) {
-        AggregateTransaction cast = (AggregateTransaction) tx;
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var cast = (AggregateTransaction) tx;
+        var envelope = EventEnvelope.of(event);
         return cast.play(envelope);
     }
 

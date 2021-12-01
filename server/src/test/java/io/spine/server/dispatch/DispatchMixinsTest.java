@@ -56,14 +56,12 @@ class DispatchMixinsTest {
     @Test
     @DisplayName("`DispatchOutcomeMixin` should provide a `hasRejection` shortcut")
     void dispatchOutcomeMixinHasRejectionShortcut() {
-        DispatchOutcome noRejectionOutcome = DispatchOutcome.getDefaultInstance();
+        var noRejectionOutcome = DispatchOutcome.getDefaultInstance();
         assertThat(noRejectionOutcome.hasRejection()).isFalse();
-        Success rejectionSuccessOutcome = Success
-                .newBuilder()
+        var rejectionSuccessOutcome = Success.newBuilder()
                 .setRejection(Given.rejectionEvent())
                 .build();
-        DispatchOutcome rejectionOutcome = DispatchOutcome
-                .newBuilder()
+        var rejectionOutcome = DispatchOutcome.newBuilder()
                 .setSuccess(rejectionSuccessOutcome)
                 .build();
         assertThat(rejectionOutcome.hasRejection()).isTrue();

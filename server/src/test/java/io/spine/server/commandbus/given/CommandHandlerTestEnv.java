@@ -41,7 +41,6 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.commandbus.ProjectId;
-import io.spine.test.commandbus.TaskId;
 import io.spine.test.commandbus.command.CmdBusAddTask;
 import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.test.commandbus.command.CmdBusCreateTask;
@@ -110,7 +109,7 @@ public class CommandHandlerTestEnv {
         @SuppressWarnings("CheckReturnValue")
         // Can ignore the returned ID of the command handler in these tests.
         public void handle(Command cmd) {
-            CommandEnvelope commandEnvelope = CommandEnvelope.of(cmd);
+            var commandEnvelope = CommandEnvelope.of(cmd);
             dispatch(commandEnvelope);
         }
 
@@ -144,31 +143,27 @@ public class CommandHandlerTestEnv {
         }
 
         private ImmutableList<EventMessage> createEventsOnStartProjectCmd() {
-            ProjectId id = ProjectId
-                    .newBuilder()
+            var id = ProjectId.newBuilder()
                     .setId(id())
                     .build();
-            CmdBusProjectStarted startedEvent = CmdBusProjectStarted
-                    .newBuilder()
+            var startedEvent = CmdBusProjectStarted.newBuilder()
                     .setProjectId(id)
                     .build();
-            CmdBusProjectStarted defaultEvent = CmdBusProjectStarted.getDefaultInstance();
+            var defaultEvent = CmdBusProjectStarted.getDefaultInstance();
             return ImmutableList.of(startedEvent, defaultEvent);
         }
 
         private static Pair<CmdBusTaskAssigned, Optional<CmdBusTaskStarted>>
         createEventsOnCreateTaskCmd(CmdBusCreateTask msg) {
-            TaskId taskId = msg.getTaskId();
-            CmdBusTaskAssigned cmdTaskAssigned = CmdBusTaskAssigned
-                    .newBuilder()
+            var taskId = msg.getTaskId();
+            var cmdTaskAssigned = CmdBusTaskAssigned.newBuilder()
                     .setTaskId(taskId)
                     .build();
-            CmdBusTaskStarted cmdTaskStarted = msg.getStart()
-                                               ? CmdBusTaskStarted
-                                                       .newBuilder()
-                                                       .setTaskId(taskId)
-                                                       .build()
-                                               : null;
+            var cmdTaskStarted = msg.getStart()
+                                 ? CmdBusTaskStarted.newBuilder()
+                                         .setTaskId(taskId)
+                                         .build()
+                                 : null;
             return Pair.withNullable(cmdTaskAssigned, cmdTaskStarted);
         }
     }

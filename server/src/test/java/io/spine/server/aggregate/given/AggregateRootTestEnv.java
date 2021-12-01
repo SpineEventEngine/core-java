@@ -63,10 +63,10 @@ public class AggregateRootTestEnv {
 
         @Assign
         AggProjectCreated handle(AggCreateProject msg) {
-            AggProjectCreated result = AggProjectCreated.newBuilder()
-                                                        .setProjectId(msg.getProjectId())
-                                                        .setName(msg.getName())
-                                                        .build();
+            var result = AggProjectCreated.newBuilder()
+                    .setProjectId(msg.getProjectId())
+                    .setName(msg.getName())
+                    .build();
             return result;
         }
 
@@ -95,9 +95,9 @@ public class AggregateRootTestEnv {
 
         @Assign
         AggProjectStarted handle(AggStartProject msg) {
-            AggProjectStarted result = AggProjectStarted.newBuilder()
-                                                        .setProjectId(msg.getProjectId())
-                                                        .build();
+            var result = AggProjectStarted.newBuilder()
+                    .setProjectId(msg.getProjectId())
+                    .build();
             return result;
         }
 

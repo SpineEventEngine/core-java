@@ -26,7 +26,6 @@
 
 package io.spine.server.aggregate.given.repo;
 
-import com.google.protobuf.Timestamp;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
@@ -63,7 +62,7 @@ class FailingAggregate extends Aggregate<Long, LongIdAggregate, LongIdAggregate.
 
     @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
     static long toId(FloatEncountered message) {
-        float floatValue = message.getNumber();
+        var floatValue = message.getNumber();
         return (long) Math.abs(floatValue);
     }
 
@@ -96,9 +95,9 @@ class FailingAggregate extends Aggregate<Long, LongIdAggregate, LongIdAggregate.
 
     @React
     NumberPassed on(FloatEncountered value) {
-        float floatValue = value.getNumber();
+        var floatValue = value.getNumber();
         if (floatValue < 0) {
-            long longValue = toId(value);
+            var longValue = toId(value);
             // Complain only if the passed value represents ID of this aggregate.
             // This would allow other aggregates react on this message.
             if (longValue == id()) {
@@ -110,7 +109,7 @@ class FailingAggregate extends Aggregate<Long, LongIdAggregate, LongIdAggregate.
 
     @Apply
     private void apply(NumberPassed event) {
-        int whichSecond = TimestampTemporal
+        var whichSecond = TimestampTemporal
                 .from(event.getWhen())
                 .toInstant()
                 .get(ChronoField.MILLI_OF_SECOND);
@@ -118,9 +117,8 @@ class FailingAggregate extends Aggregate<Long, LongIdAggregate, LongIdAggregate.
     }
 
     private static NumberPassed now() {
-        Timestamp time = Time.currentTime();
-        return NumberPassed
-                .newBuilder()
+        var time = Time.currentTime();
+        return NumberPassed.newBuilder()
                 .setWhen(time)
                 .build();
     }

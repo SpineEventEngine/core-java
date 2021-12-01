@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
@@ -51,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-@DisplayName("FieldMasks utility should")
+@DisplayName("`FieldMasks` utility should")
 class FieldMasksTest extends UtilityClassTest<FieldMasks> {
 
     FieldMasksTest() {
@@ -72,13 +71,12 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
         @Test
         @DisplayName("to single message")
         void toSingleMessage() {
-            FieldMask fieldMask =
-                    fromFieldNumbers(AggProject.class,
-                                     AggProject.ID_FIELD_NUMBER,
-                                     AggProject.NAME_FIELD_NUMBER);
-            AggProject original = Given.newProject("some-string-id");
+            var fieldMask = fromFieldNumbers(AggProject.class,
+                                             AggProject.ID_FIELD_NUMBER,
+                                             AggProject.NAME_FIELD_NUMBER);
+            var original = Given.newProject("some-string-id");
 
-            AggProject masked = FieldMasks.applyMask(fieldMask, original);
+            var masked = FieldMasks.applyMask(fieldMask, original);
 
             assertEquals(original.getId(), masked.getId());
             assertEquals(original.getName(), masked.getName());
@@ -89,26 +87,26 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
         @Test
         @DisplayName("to message collection")
         void toMessageCollections() {
-            FieldMask fieldMask = fromFieldNumbers(AggProject.class,
-                                                   AggProject.STATUS_FIELD_NUMBER,
-                                                   AggProject.TASK_FIELD_NUMBER);
-            int count = 5;
+            var fieldMask = fromFieldNumbers(AggProject.class,
+                                             AggProject.STATUS_FIELD_NUMBER,
+                                             AggProject.TASK_FIELD_NUMBER);
+            var count = 5;
 
             Collection<AggProject> original = newArrayListWithCapacity(count);
 
-            for (int i = 0; i < count; i++) {
-                AggProject project = Given.newProject(format("project-%s", i));
+            for (var i = 0; i < count; i++) {
+                var project = Given.newProject(format("project-%s", i));
                 original.add(project);
             }
 
-            Collection<AggProject> masked = FieldMasks.applyMask(fieldMask, original);
+            var masked = FieldMasks.applyMask(fieldMask, original);
 
             assertThat(masked).hasSize(original.size());
 
             // Collection references are not the same
             assertNotSame(original, masked);
 
-            for (AggProject project : masked) {
+            for (var project : masked) {
                 assertMatchesMask(project, fieldMask);
 
                 // Can't check repeated fields with assertMatchesMask
@@ -123,15 +121,15 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
     class NotApplyEmptyMask {
 
         @Test
-        @DisplayName("to single message")
+        @DisplayName("to single `Message`")
         void toSingleMessage() {
-            FieldMask emptyMask = Given.fieldMask();
+            var emptyMask = Given.fieldMask();
 
-            AggProject origin = Given.newProject("read_whole_message");
-            AggProject clone = AggProject.newBuilder(origin)
+            var origin = Given.newProject("read_whole_message");
+            var clone = AggProject.newBuilder(origin)
                                          .build();
 
-            AggProject processed = FieldMasks.applyMask(emptyMask, origin);
+            var processed = FieldMasks.applyMask(emptyMask, origin);
 
             // Check object itself was returned
             assertSame(processed, origin);
@@ -142,19 +140,19 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
 
         @SuppressWarnings("MethodWithMultipleLoops")
         @Test
-        @DisplayName("to message collection")
+        @DisplayName("to `Message` collection")
         void toMessageCollection() {
-            FieldMask emptyMask = Given.fieldMask();
+            var emptyMask = Given.fieldMask();
 
             Collection<AggProject> original = newLinkedList();
-            int count = 5;
+            var count = 5;
 
-            for (int i = 0; i < count; i++) {
-                AggProject project = Given.newProject(format("test-data--%s", i));
+            for (var i = 0; i < count; i++) {
+                var project = Given.newProject(format("test-data--%s", i));
                 original.add(project);
             }
 
-            Collection<AggProject> processed = FieldMasks.applyMask(emptyMask, original);
+            var processed = FieldMasks.applyMask(emptyMask, original);
 
             assertThat(processed).hasSize(original.size());
 
@@ -162,9 +160,9 @@ class FieldMasksTest extends UtilityClassTest<FieldMasks> {
             assertNotSame(original, processed);
 
             // A copy of the argument is returned (Collection type may differ)
-            Iterator<AggProject> processedProjects = processed.iterator();
+            var processedProjects = processed.iterator();
 
-            for (AggProject anOriginal : original) {
+            for (var anOriginal : original) {
                 assertEquals(processedProjects.next(), anOriginal);
             }
         }

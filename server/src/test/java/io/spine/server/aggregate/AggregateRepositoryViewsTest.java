@@ -27,7 +27,6 @@
 package io.spine.server.aggregate;
 
 import io.spine.client.ActorRequestFactory;
-import io.spine.core.Command;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
@@ -44,7 +43,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("AggregateRepository views should")
+@DisplayName("`AggregateRepository` views should")
 class AggregateRepositoryViewsTest {
 
     /** The Aggregate ID used in all tests. */
@@ -76,7 +75,7 @@ class AggregateRepositoryViewsTest {
      * for being processed by the repository.
      */
     private void postCommand(String cmd) {
-        Command command =
+        var command =
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
         context.commandBus()
@@ -89,7 +88,7 @@ class AggregateRepositoryViewsTest {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
-        AggregateWithLifecycle agg = aggregate.get();
+        var agg = aggregate.get();
         assertFalse(agg.isArchived());
         assertFalse(agg.isDeleted());
     }
@@ -102,7 +101,7 @@ class AggregateRepositoryViewsTest {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
-        AggregateWithLifecycle agg = aggregate.get();
+        var agg = aggregate.get();
         assertTrue(agg.isArchived());
         assertFalse(agg.isDeleted());
     }
@@ -115,7 +114,7 @@ class AggregateRepositoryViewsTest {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
-        AggregateWithLifecycle agg = aggregate.get();
+        var agg = aggregate.get();
         assertFalse(agg.isArchived());
         assertTrue(agg.isDeleted());
     }

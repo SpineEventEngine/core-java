@@ -39,7 +39,7 @@ class FilterChainTest {
     @Test
     @DisplayName("not allow closing twice")
     void notAllowClosingTwice() throws Exception {
-        FilterChain<EventEnvelope> chain = new FilterChain<>(ImmutableList.of());
+        var chain = new FilterChain<EventEnvelope>(ImmutableList.of());
 
         chain.close();
         assertThrows(IllegalStateException.class, chain::close);

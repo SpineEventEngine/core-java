@@ -40,16 +40,15 @@ public final class BeachCustomerFilter implements CommandFilter {
 
     @Override
     public Optional<Ack> filter(CommandEnvelope envelope) {
-        CmdBusAllocateTable command =
+        var command =
                 unpack(envelope.command()
                                .getMessage(), CmdBusAllocateTable.class);
-        boolean withOwnFood = command.getVisitors()
-                                     .getBringOwnFood();
+        var withOwnFood = command.getVisitors()
+                                 .getBringOwnFood();
         if (!withOwnFood) {
             return letPass();
         }
-        CmdBusEntryDenied rejection = CmdBusEntryDenied
-                .newBuilder()
+        var rejection = CmdBusEntryDenied.newBuilder()
                 .setId(command.getCaffetteria())
                 .setVisitorCount(command.getVisitors()
                                         .getCount())

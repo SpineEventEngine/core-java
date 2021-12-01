@@ -34,7 +34,6 @@ import io.spine.client.CommandFactory;
 import io.spine.client.DeletedColumn;
 import io.spine.client.Query;
 import io.spine.client.QueryFactory;
-import io.spine.core.Command;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.query.AggregateQueryingTestEnv.InvisibleSound;
@@ -43,7 +42,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.test.aggregate.query.MRPhoto;
 import io.spine.test.aggregate.query.MRPhotoId;
 import io.spine.test.aggregate.query.MRSoundRecord;
-import io.spine.test.aggregate.query.command.MRUploadPhoto;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +49,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -87,8 +84,7 @@ class AggregateQueryingTest {
         context = BoundedContextBuilder.assumingTests(false)
                                        .add(repository)
                                        .build();
-        TestActorRequestFactory requestFactory =
-                new TestActorRequestFactory(AggregateQueryingTest.class);
+        var requestFactory = new TestActorRequestFactory(AggregateQueryingTest.class);
         queries = requestFactory.query();
         commands = requestFactory.command();
         givenPhotos = givenPhotos();
@@ -101,13 +97,13 @@ class AggregateQueryingTest {
 
         @Override
         void checkRead(Query query, MRPhoto... expected) {
-            List<? extends EntityState<?>> readMessages = execute(query);
+            var readMessages = execute(query);
             assertThat(readMessages).containsExactlyElementsIn(expected);
         }
 
         @Override
         void checkReadsNothing(Query query) {
-            List<? extends EntityState<?>> readMessages = execute(query);
+            var readMessages = execute(query);
             assertThat(readMessages).isEmpty();
         }
 
@@ -118,9 +114,9 @@ class AggregateQueryingTest {
 
         @Override
         List<? extends EntityState<?>> execute(Query query) {
-            Iterator<EntityRecord> records = repository.findRecords(query.filters(),
-                                                                    query.responseFormat());
-            ImmutableList<EntityRecord> asList = ImmutableList.copyOf(records);
+            var records = repository.findRecords(query.filters(),
+                                                 query.responseFormat());
+            var asList = ImmutableList.copyOf(records);
             List<? extends EntityState<?>> result =
                     asList.stream()
                           .map(EntityRecord::getState)
@@ -137,13 +133,13 @@ class AggregateQueryingTest {
 
         @Override
         void checkRead(MRPhoto.Query query, MRPhoto... expected) {
-            List<? extends EntityState<?>> readMessages = execute(query);
+            var readMessages = execute(query);
             assertThat(readMessages).containsExactlyElementsIn(expected);
         }
 
         @Override
         void checkReadsNothing(MRPhoto.Query query) {
-            List<? extends EntityState<?>> readMessages = execute(query);
+            var readMessages = execute(query);
             assertThat(readMessages).isEmpty();
         }
 
@@ -154,8 +150,8 @@ class AggregateQueryingTest {
 
         @Override
         List<? extends EntityState<?>> execute(MRPhoto.Query query) {
-            Iterator<MRPhoto> records = repository.findStates(query);
-            ImmutableList<MRPhoto> result = ImmutableList.copyOf(records);
+            var records = repository.findStates(query);
+            var result = ImmutableList.copyOf(records);
             return result;
         }
     }
@@ -164,8 +160,8 @@ class AggregateQueryingTest {
     @DisplayName("throw `IllegalStateException` if an invisible Aggregate is queried" +
             " via Proto `Query`")
     void prohibitQueryingForInvisible() {
-        Query query = MRSoundRecord.query()
-                                   .build(transformWith(queries));
+        var query = MRSoundRecord.query()
+                                 .build(transformWith(queries));
         assertThrows(IllegalStateException.class,
                      () -> InvisibleSound.repository()
                                          .findRecords(query.filters(), query.responseFormat()));
@@ -175,8 +171,7 @@ class AggregateQueryingTest {
     @DisplayName("throw `IllegalStateException` if an invisible Aggregate " +
             "is queried via `EntityQuery`")
     void prohibitEntityQueryingForInvisible() {
-        MRSoundRecord.Query entityQuery = MRSoundRecord.query()
-                                                       .build();
+        var entityQuery = MRSoundRecord.query().build();
         assertThrows(IllegalStateException.class,
                      () -> InvisibleSound.repository()
                                          .findStates(entityQuery));
@@ -218,26 +213,25 @@ class AggregateQueryingTest {
         @Test
         @DisplayName("all instances")
         void includeAll() {
-            Query query = MRPhoto.query()
-                                 .build(transformWith(queries));
-            List<? extends EntityState<?>> readMessages = execute(query);
+            var query = MRPhoto.query().build(transformWith(queries));
+            var readMessages = execute(query);
             assertThat(readMessages).containsExactlyElementsIn(givenPhotos);
         }
 
         @Test
         @DisplayName("an instance by ID")
         void byId() {
-            MRPhoto target = onePhoto();
+            var target = onePhoto();
             readAndCheck(target);
         }
 
         @Test
         @DisplayName("an instance by its ID in case this aggregate instance is archived")
         void archivedInstance() {
-            MRPhoto target = onePhoto();
+            var target = onePhoto();
             archiveItem(target);
-            MRPhotoId targetId = target.getId();
-            Q query = toQuery(
+            var targetId = target.getId();
+            var query = toQuery(
                     MRPhoto.query()
                            .id().is(targetId)
                            .where(ArchivedColumn.is(), true));
@@ -247,10 +241,10 @@ class AggregateQueryingTest {
         @Test
         @DisplayName("an instance by its ID in case this aggregate instance is deleted")
         void deletedInstance() {
-            MRPhoto target = onePhoto();
+            var target = onePhoto();
             deleteItem(target);
-            MRPhotoId targetId = target.getId();
-            Q query = toQuery(
+            var targetId = target.getId();
+            var query = toQuery(
                     MRPhoto.query()
                            .id().is(targetId)
                            .where(DeletedColumn.is(), true));
@@ -260,11 +254,11 @@ class AggregateQueryingTest {
         @Test
         @DisplayName("all archived instances")
         void allArchived() {
-            MRPhoto firstPhoto = onePhoto();
-            MRPhoto secondPhoto = anotherPhoto();
+            var firstPhoto = onePhoto();
+            var secondPhoto = anotherPhoto();
             archiveItem(firstPhoto);
             archiveItem(secondPhoto);
-            Q query = toQuery(
+            var query = toQuery(
                     MRPhoto.query()
                            .where(ArchivedColumn.is(), true)
                            .where(DeletedColumn.is(), false));
@@ -274,11 +268,11 @@ class AggregateQueryingTest {
         @Test
         @DisplayName("all deleted instances")
         void allDeleted() {
-            MRPhoto firstPhoto = onePhoto();
-            MRPhoto secondPhoto = anotherPhoto();
+            var firstPhoto = onePhoto();
+            var secondPhoto = anotherPhoto();
             deleteItem(firstPhoto);
             deleteItem(secondPhoto);
-            Q query = toQuery(
+            var query = toQuery(
                     MRPhoto.query()
                            .where(ArchivedColumn.is(), false)
                            .where(DeletedColumn.is(), true));
@@ -288,12 +282,12 @@ class AggregateQueryingTest {
         @Test
         @DisplayName("instances matching them by the a single entity column")
         void bySingleEntityColumn() {
-            Q queryForNothing =
+            var queryForNothing =
                     toQuery(MRPhoto.query()
                                    .height().isLessThan(20));
             checkReadsNothing(queryForNothing);
 
-            Q queryForOneElement = toQuery(
+            var queryForOneElement = toQuery(
                     MRPhoto.query()
                            .height().isLessThan(201)
             );
@@ -303,7 +297,7 @@ class AggregateQueryingTest {
         @Test
         @DisplayName("instances matching them by the two entity columns joined with `AND`")
         void byTwoEntityColumnsWithAndOperator() {
-            Q query = toQuery(
+            var query = toQuery(
                     MRPhoto.query()
                            .height().isGreaterOrEqualTo(7000)
                            .width().isGreaterThan(6999)
@@ -314,7 +308,7 @@ class AggregateQueryingTest {
         @Test
         @DisplayName("instances matching them by the two entity columns joined with `OR`")
         void byTwoEntityColumnsWithOrOperator() {
-            Q query = toQuery(
+            var query = toQuery(
                     MRPhoto.query()
                            .either(q -> q.width().isLessOrEqualTo(200),
                                    q -> q.height().isGreaterThan(6999))
@@ -327,7 +321,7 @@ class AggregateQueryingTest {
                 "by the two parameters for the same columns with `OR` " +
                 "and by one more column joined with `AND`")
         void byCombinationAndOr() {
-            Q query = toQuery(
+            var query = toQuery(
                     MRPhoto.query()
                            .either(q -> q.sourceType().is(CROP_FRAME),
                                    q -> q.sourceType().is(FULL_FRAME))
@@ -340,7 +334,7 @@ class AggregateQueryingTest {
         @DisplayName("instances matching them by both entity and lifecycle columns")
         void byEntityAndLifecycleCols() {
             archiveItem(projectLogo1000by800());
-            Q query = toQuery(
+            var query = toQuery(
                     MRPhoto.query()
                            .either(q -> q.where(ArchivedColumn.is(), true),
                                    q -> q.height().isGreaterThan(1000))
@@ -351,21 +345,21 @@ class AggregateQueryingTest {
         }
 
         private void readAndCheck(MRPhoto target) {
-            MRPhotoId targetId = target.getId();
-            Q query = toQuery(MRPhoto.query()
-                                     .id().is(targetId));
+            var targetId = target.getId();
+            var query = toQuery(MRPhoto.query()
+                                       .id().is(targetId));
             checkRead(query, target);
         }
 
         private MRPhoto onePhoto() {
-            MRPhoto target = givenPhotos.stream()
+            var target = givenPhotos.stream()
                                         .findFirst()
                                         .orElseGet(() -> fail("No test data."));
             return target;
         }
 
         private MRPhoto anotherPhoto() {
-            MRPhoto target = givenPhotos.stream()
+            var target = givenPhotos.stream()
                                         .skip(1)
                                         .findFirst()
                                         .orElseGet(() -> fail(
@@ -383,9 +377,9 @@ class AggregateQueryingTest {
         }
 
         private List<? extends EntityState<?>> execute(Query query) {
-            Iterator<EntityRecord> records = repository.findRecords(query.filters(),
-                                                                    query.responseFormat());
-            ImmutableList<EntityRecord> asList = ImmutableList.copyOf(records);
+            var records = repository.findRecords(query.filters(),
+                                                 query.responseFormat());
+            var asList = ImmutableList.copyOf(records);
             List<? extends EntityState<?>> result =
                     asList.stream()
                           .map(EntityRecord::getState)
@@ -397,14 +391,14 @@ class AggregateQueryingTest {
     }
 
     private void prepareAggregates(Collection<MRPhoto> aggregateStates) {
-        for (MRPhoto state : aggregateStates) {
-            MRUploadPhoto upload = upload(state);
+        for (var state : aggregateStates) {
+            var upload = upload(state);
             dispatchCommand(upload);
         }
     }
 
     private void dispatchCommand(CommandMessage message) {
-        Command command = commands.create(message);
+        var command = commands.create(message);
         context.commandBus()
                .post(command, noOpObserver());
     }

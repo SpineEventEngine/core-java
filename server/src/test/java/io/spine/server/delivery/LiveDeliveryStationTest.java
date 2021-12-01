@@ -28,12 +28,8 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
@@ -61,23 +57,23 @@ class LiveDeliveryStationTest extends AbstractStationTest {
     @Test
     @DisplayName("run the delivery action for all the messages in `TO_DELIVER` status")
     void runDeliveryActionForToDeliver() {
-        InboxMessage toDeliver = toDeliver(targetOne, type);
-        InboxMessage anotherToDeliver = toDeliver(targetOne, type);
-        InboxMessage differentTarget = toDeliver(targetTwo, type);
-        InboxMessage alreadyDelivered = delivered(targetOne, type);
-        InboxMessage toCatchUp = catchingUp(targetOne, type);
+        var toDeliver = toDeliver(targetOne, type);
+        var anotherToDeliver = toDeliver(targetOne, type);
+        var differentTarget = toDeliver(targetTwo, type);
+        var alreadyDelivered = delivered(targetOne, type);
+        var toCatchUp = catchingUp(targetOne, type);
 
-        ImmutableList<InboxMessage> initialContents =
+        var initialContents =
                 ImmutableList.of(toDeliver, anotherToDeliver, differentTarget,
                                  alreadyDelivered, toCatchUp);
-        Conveyor conveyor = new Conveyor(initialContents, new DeliveredMessages());
+        var conveyor = new Conveyor(initialContents, new DeliveredMessages());
 
-        MemoizingAction action = MemoizingAction.empty();
+        var action = MemoizingAction.empty();
         Station station = new LiveDeliveryStation(action, noWindow());
-        Station.Result result = station.process(conveyor);
+        var result = station.process(conveyor);
 
         assertDeliveredCount(result, 3);
-        List<InboxMessage> passedToAction = checkNotNull(action.passedMessages());
+        var passedToAction = checkNotNull(action.passedMessages());
 
         assertContainsExactly(passedToAction,
                               // expected:
@@ -97,25 +93,25 @@ class LiveDeliveryStationTest extends AbstractStationTest {
     @Test
     @DisplayName("remove duplicates prior to dispatching")
     void removeDuplicates() {
-        InboxMessage toDeliver = toDeliver(targetOne, type);
-        InboxMessage duplicate = copyWithNewId(toDeliver);
-        InboxMessage anotherDuplicate = copyWithNewId(toDeliver);
-        InboxMessage alreadyDelivered = delivered(targetOne, type);
-        InboxMessage duplicateOfDelivered =
+        var toDeliver = toDeliver(targetOne, type);
+        var duplicate = copyWithNewId(toDeliver);
+        var anotherDuplicate = copyWithNewId(toDeliver);
+        var alreadyDelivered = delivered(targetOne, type);
+        var duplicateOfDelivered =
                 copyWithNewId(copyWithStatus(alreadyDelivered, TO_DELIVER));
-        InboxMessage toCatchUp = catchingUp(targetOne, type);
+        var toCatchUp = catchingUp(targetOne, type);
 
-        ImmutableList<InboxMessage> initialContents =
+        var initialContents =
                 ImmutableList.of(toDeliver, duplicate, anotherDuplicate,
                                  alreadyDelivered, duplicateOfDelivered, toCatchUp);
-        Conveyor conveyor = new Conveyor(initialContents, new DeliveredMessages());
+        var conveyor = new Conveyor(initialContents, new DeliveredMessages());
 
-        MemoizingAction action = MemoizingAction.empty();
+        var action = MemoizingAction.empty();
         Station station = new LiveDeliveryStation(action, noWindow());
-        Station.Result result = station.process(conveyor);
+        var result = station.process(conveyor);
 
         assertDeliveredCount(result, 1);
-        List<InboxMessage> passedToAction = checkNotNull(action.passedMessages());
+        var passedToAction = checkNotNull(action.passedMessages());
 
         assertContainsExactly(passedToAction,
                               // expected:
@@ -136,26 +132,26 @@ class LiveDeliveryStationTest extends AbstractStationTest {
     @Test
     @DisplayName("sort messages prior to dispatching")
     void sort() {
-        Timestamp now = currentTime();
-        Timestamp secondBefore = subtract(now, fromSeconds(1));
-        Timestamp twoSecondsBefore = subtract(now, fromSeconds(2));
-        Timestamp threeSecondsBefore = subtract(now, fromSeconds(3));
+        var now = currentTime();
+        var secondBefore = subtract(now, fromSeconds(1));
+        var twoSecondsBefore = subtract(now, fromSeconds(2));
+        var threeSecondsBefore = subtract(now, fromSeconds(3));
 
-        InboxMessage toDeliver1 = toDeliver(targetOne, type, threeSecondsBefore);
-        InboxMessage toDeliver2 = toDeliver(targetTwo, type, twoSecondsBefore);
-        InboxMessage toDeliver3 = toDeliver(targetOne, type, secondBefore);
-        InboxMessage toDeliver4 = toDeliver(targetTwo, type, now);
-        Conveyor conveyor = new Conveyor(
+        var toDeliver1 = toDeliver(targetOne, type, threeSecondsBefore);
+        var toDeliver2 = toDeliver(targetTwo, type, twoSecondsBefore);
+        var toDeliver3 = toDeliver(targetOne, type, secondBefore);
+        var toDeliver4 = toDeliver(targetTwo, type, now);
+        var conveyor = new Conveyor(
                 ImmutableList.of(toDeliver2, toDeliver3, toDeliver4, toDeliver1),
                 new DeliveredMessages()
         );
 
-        MemoizingAction action = MemoizingAction.empty();
+        var action = MemoizingAction.empty();
         Station station = new LiveDeliveryStation(action, noWindow());
-        Station.Result result = station.process(conveyor);
+        var result = station.process(conveyor);
         assertDeliveredCount(result, 4);
 
-        List<InboxMessage> deliveredMessages = checkNotNull(action.passedMessages());
+        var deliveredMessages = checkNotNull(action.passedMessages());
         assertThat(deliveredMessages).containsExactlyElementsIn(
                 ImmutableList.of(toDeliver1, toDeliver2, toDeliver3, toDeliver4)
         );
@@ -164,21 +160,21 @@ class LiveDeliveryStationTest extends AbstractStationTest {
     @Test
     @DisplayName("modify the messages and keep them for longer if the deduplication window is set")
     void keepMessagesForLongerIfDeduplicationWindowSet() {
-        InboxMessage toDeliver = toDeliver(targetOne, type);
-        InboxMessage differentTarget = toDeliver(targetTwo, type);
-        InboxMessage alreadyDelivered = delivered(targetOne, type);
-        InboxMessage toCatchUp = catchingUp(targetOne, type);
+        var toDeliver = toDeliver(targetOne, type);
+        var differentTarget = toDeliver(targetTwo, type);
+        var alreadyDelivered = delivered(targetOne, type);
+        var toCatchUp = catchingUp(targetOne, type);
 
-        ImmutableList<InboxMessage> initialContents =
+        var initialContents =
                 ImmutableList.of(toDeliver, differentTarget, alreadyDelivered, toCatchUp);
-        Conveyor conveyor = new Conveyor(initialContents, new DeliveredMessages());
+        var conveyor = new Conveyor(initialContents, new DeliveredMessages());
 
         Station station = new LiveDeliveryStation(MemoizingAction.empty(), fromSeconds(100));
-        Station.Result result = station.process(conveyor);
+        var result = station.process(conveyor);
 
         assertDeliveredCount(result, 2);
 
-        Map<InboxMessageId, InboxMessage> contentsById =
+        var contentsById =
                 stream(conveyor.iterator()).collect(toMap(InboxMessage::getId,msg -> msg));
         assertKeptForLonger(toDeliver.getId(), contentsById);
         assertKeptForLonger(differentTarget.getId(), contentsById);

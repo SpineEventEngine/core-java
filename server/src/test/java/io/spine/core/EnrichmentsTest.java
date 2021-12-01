@@ -45,8 +45,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
@@ -84,14 +82,11 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
      * for details.
      */
     private static EventContext givenContextEnrichedWith(Message enrichment) {
-        String enrichmentKey = TypeName.of(enrichment)
-                                       .value();
-        Enrichment.Builder enrichments = Enrichment
-                .newBuilder()
+        var enrichmentKey = TypeName.of(enrichment).value();
+        var enrichments = Enrichment.newBuilder()
                 .setContainer(Container.newBuilder()
-                                       .putItems(enrichmentKey, pack(enrichment)));
-        EventContext context = context()
-                .toBuilder()
+                                      .putItems(enrichmentKey, pack(enrichment)));
+        var context = context().toBuilder()
                 .setEnrichment(enrichments)
                 .build();
         return context;
@@ -99,13 +94,11 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
 
     @BeforeEach
     void setUp() {
-        String producerId = newUuid();
-        projectCreated = EtProjectCreated
-                .newBuilder()
+        var producerId = newUuid();
+        projectCreated = EtProjectCreated.newBuilder()
                 .setId(producerId)
                 .build();
-        projectInfo = EtProjectInfo
-                .newBuilder()
+        projectInfo = EtProjectInfo.newBuilder()
                 .setProjectName("Project info of " + getClass().getSimpleName())
                 .build();
         eventFactory = TestEventFactory.newInstance(Identifier.pack(producerId), getClass());
@@ -116,7 +109,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
     @Test
     @DisplayName("recognize if event enrichment is enabled")
     void recognizeEnrichmentEnabled() {
-        EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(projectCreated));
+        var event = EventEnvelope.of(eventFactory.createEvent(projectCreated));
 
         assertTrue(event.isEnrichmentEnabled());
     }
@@ -124,7 +117,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
     @Test
     @DisplayName("recognize if event enrichment is disabled")
     void recognizeEnrichmentDisabled() {
-        EventEnvelope event = EventEnvelope.of(GivenEvent.withDisabledEnrichmentOf(projectCreated));
+        var event = EventEnvelope.of(GivenEvent.withDisabledEnrichmentOf(projectCreated));
 
         assertFalse(event.isEnrichmentEnabled());
     }
@@ -132,7 +125,7 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
     @Test
     @DisplayName("verify if there are enrichments")
     void getAllEnrichments() {
-        EventContext context = givenContextEnrichedWith(projectInfo);
+        var context = givenContextEnrichedWith(projectInfo);
 
         assertThat(hasEnrichments(context))
                 .isTrue();
@@ -153,9 +146,9 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
     @Test
     @DisplayName("obtain specific event enrichment from context")
     void obtainSpecificEnrichment() {
-        EventContext context = givenContextEnrichedWith(projectInfo);
+        var context = givenContextEnrichedWith(projectInfo);
 
-        OptionalSubject assertEnrichment = assertEnrichment(context, projectInfo.getClass());
+        var assertEnrichment = assertEnrichment(context, projectInfo.getClass());
         assertEnrichment.isPresent();
         assertEnrichment.hasValue(projectInfo);
     }
@@ -170,11 +163,11 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
     @Test
     @DisplayName("return absent if there is no specified enrichment in context")
     void returnAbsentOnEnrichmentNotFound() {
-        EventContext context = givenContextEnrichedWith(
+        var context = givenContextEnrichedWith(
                 EtProjectDetails.newBuilder()
-                .setProjectDescription(TestValues.randomString())
-                .setLogoUrl("https://spine.io/img/spine-logo-white.svg")
-                .build()
+                        .setProjectDescription(TestValues.randomString())
+                        .setLogoUrl("https://spine.io/img/spine-logo-white.svg")
+                        .build()
         );
         assertEnrichment(context, EtProjectInfo.class)
               .isEmpty();
@@ -184,13 +177,13 @@ class EnrichmentsTest extends UtilityClassTest<Enrichments> {
      * Verifies if the passed event context has at least one enrichment.
      */
     private static boolean hasEnrichments(EventContext context) {
-        Optional<Container> optional = containerIn(context);
-        if (!optional.isPresent()) {
+        var optional = containerIn(context);
+        if (optional.isEmpty()) {
             return false;
         }
-        Container container = optional.get();
-        boolean result = !container.getItemsMap()
-                                   .isEmpty();
+        var container = optional.get();
+        var result = !container.getItemsMap()
+                               .isEmpty();
         return result;
     }
 }

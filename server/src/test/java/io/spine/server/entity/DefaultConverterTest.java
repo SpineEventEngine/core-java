@@ -28,11 +28,9 @@ package io.spine.server.entity;
 
 import com.google.common.testing.SerializableTester;
 import com.google.protobuf.FieldMask;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.given.organizations.Organization;
 import io.spine.server.given.organizations.OrganizationId;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,15 +45,12 @@ class DefaultConverterTest {
 
     @BeforeEach
     void setUp() {
-        BoundedContext context =
-                BoundedContextBuilder.assumingTests()
-                                     .build();
+        var context = BoundedContextBuilder.assumingTests().build();
         RecordBasedRepository<OrganizationId, TestEntity, Organization> repo = new TestRepository();
         context.internalAccess()
                .register(repo);
 
-        TypeUrl stateType = repo.entityModelClass()
-                                .stateTypeUrl();
+        var stateType = repo.entityModelClass().stateTypeUrl();
         converter = forAllFields(stateType, repo.entityFactory());
     }
 
@@ -66,20 +61,19 @@ class DefaultConverterTest {
     }
 
     @Test
-    @DisplayName("create instance with FieldMask")
+    @DisplayName("create instance with `FieldMask`")
     void createWithFieldMask() {
-        FieldMask fieldMask = FieldMask.newBuilder()
-                                       .addPaths("foo.bar")
-                                       .build();
+        var fieldMask = FieldMask.newBuilder()
+                .addPaths("foo.bar")
+                .build();
 
-        StorageConverter<OrganizationId, TestEntity, Organization> withMasks =
-                converter.withFieldMask(fieldMask);
+        var withMasks = converter.withFieldMask(fieldMask);
 
         assertEquals(fieldMask, withMasks.fieldMask());
     }
 
     private static TestEntity createEntity(OrganizationId id, Organization state) {
-        TestEntity result = new TestEntity(id);
+        var result = new TestEntity(id);
         result.setState(state);
         return result;
     }
@@ -87,17 +81,15 @@ class DefaultConverterTest {
     @Test
     @DisplayName("convert forward and backward")
     void convertForwardAndBackward() {
-        OrganizationId id = OrganizationId.generate();
-        Organization entityState = Organization
-                .newBuilder()
+        var id = OrganizationId.generate();
+        var entityState = Organization.newBuilder()
                 .setName("back and forth")
                 .setId(id)
                 .vBuild();
-        TestEntity entity = createEntity(id, entityState);
+        var entity = createEntity(id, entityState);
 
-        EntityRecord out = converter.convert(entity);
-        TestEntity back = converter.reverse()
-                                   .convert(out);
+        var out = converter.convert(entity);
+        var back = converter.reverse().convert(out);
         assertEquals(entity, back);
     }
 

@@ -58,7 +58,7 @@ import static io.spine.server.commandbus.Given.CommandMessage.addTask;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("ExecutorCommandScheduler should")
+@DisplayName("`ExecutorCommandScheduler` should")
 class ExecutorCommandSchedulerTest {
 
     private static final long DELAY_MS = 1100;
@@ -103,8 +103,7 @@ class ExecutorCommandSchedulerTest {
     @Test
     @DisplayName("schedule command if delay is set")
     void scheduleCmdIfDelaySet() {
-        Command command =
-                commandFactory.createBasedOnContext(createProjectMessage(), commandContext);
+        var command = commandFactory.createBasedOnContext(createProjectMessage(), commandContext);
         scheduler.schedule(command);
 
         assertScheduledExactly(command);
@@ -113,15 +112,15 @@ class ExecutorCommandSchedulerTest {
     @Test
     @DisplayName("not schedule command with same ID twice")
     void notScheduleCmdWithSameId() {
-        String id = newUuid();
+        var id = newUuid();
 
-        Command firstCommand = commandFactory.createBasedOnContext(createProjectMessage(id),
-                                                                   commandContext);
+        var firstCommand = commandFactory.createBasedOnContext(createProjectMessage(id),
+                                                               commandContext);
 
-        Command extraCommand = commandFactory.createBasedOnContext(addTask(id), commandContext)
-                                             .toBuilder()
-                                             .setId(firstCommand.getId())
-                                             .build();
+        var extraCommand = commandFactory.createBasedOnContext(addTask(id), commandContext)
+                .toBuilder()
+                .setId(firstCommand.getId())
+                .build();
 
         scheduler.schedule(firstCommand);
         scheduler.schedule(extraCommand);
@@ -135,15 +134,14 @@ class ExecutorCommandSchedulerTest {
     void recoverFromPostFail() throws Exception {
 
         // Inject a throwing executor service so the `post` operation fails.
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
-        ThrowingScheduledExecutor throwingExecutor = new ThrowingScheduledExecutor(service);
-        ExecutorCommandScheduler scheduler = new ExecutorCommandScheduler(throwingExecutor);
+        var service = Executors.newScheduledThreadPool(5);
+        var throwingExecutor = new ThrowingScheduledExecutor(service);
+        var scheduler = new ExecutorCommandScheduler(throwingExecutor);
 
         scheduler.setCommandBus(commandBus);
         scheduler.setWatcher(watcher);
 
-        Command cmd1 =
-                commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
+        var cmd1 = commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
         scheduler.schedule(cmd1);
 
         waitForCommandProcessed();
@@ -151,8 +149,7 @@ class ExecutorCommandSchedulerTest {
         assertThat(throwingExecutor.throwScheduled())
                 .isTrue();
 
-        Command cmd2 =
-                commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
+        var cmd2 = commandFactory.createBasedOnContext(createProjectMessage(), this.commandContext);
         scheduler.schedule(cmd2);
 
         assertScheduled(cmd2);
@@ -178,9 +175,9 @@ class ExecutorCommandSchedulerTest {
         assertThat(watcher.scheduled())
                 .hasSize(1);
 
-        Command scheduled = watcher.scheduled()
-                                   .get(0);
-        Command expectedCmd =
+        var scheduled = watcher.scheduled()
+                               .get(0);
+        var expectedCmd =
                 CommandScheduler.setSchedulingTime(expected, getSchedulingTime(scheduled));
         assertThat(scheduled)
                 .isEqualTo(expectedCmd);
@@ -189,7 +186,7 @@ class ExecutorCommandSchedulerTest {
     private void assertScheduled(Command expected) {
         BinaryPredicate<Command, Command> isScheduled =
                 ExecutorCommandSchedulerTest::isEqualToScheduled;
-        Correspondence<Command, Command> correspondence =
+        var correspondence =
                 Correspondence.from(isScheduled, "is the scheduled command");
         assertThat(watcher.scheduled())
                 .comparingElementsUsing(correspondence)
@@ -197,14 +194,14 @@ class ExecutorCommandSchedulerTest {
     }
 
     private static boolean isEqualToScheduled(Command scheduled, Command command) {
-        Command withSchedulingTime =
+        var withSchedulingTime =
                 CommandScheduler.setSchedulingTime(command, getSchedulingTime(scheduled));
         return withSchedulingTime.equals(scheduled);
     }
 
     private static Timestamp getSchedulingTime(Command cmd) {
-        Timestamp time = cmd.getSystemProperties()
-                            .getSchedulingTime();
+        var time = cmd.getSystemProperties()
+                      .getSchedulingTime();
         return time;
     }
 

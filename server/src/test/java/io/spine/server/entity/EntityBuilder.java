@@ -131,12 +131,12 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
 
     @Override
     public E build() {
-        I id = id();
-        E result = createEntity(id);
-        S state = state();
-        Timestamp timestamp = timestamp();
+        var id = id();
+        var result = createEntity(id);
+        var state = state();
+        var timestamp = timestamp();
 
-        Version version = Versions.newVersion(this.version, timestamp);
+        var version = Versions.newVersion(this.version, timestamp);
         setState(result, state, version);
         return result;
     }
@@ -161,7 +161,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
         }
         checkNotNull(entityClass, "Entity class is not set");
         @SuppressWarnings("unchecked") // The cast is preserved by generic params of this class.
-        S result = (S) entityClass.defaultState();
+        var result = (S) entityClass.defaultState();
         return result;
     }
 
@@ -176,7 +176,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
 
     @Override
     protected Constructor<E> constructor() {
-        Constructor<E> constructor = entityClass().constructor();
+        var constructor = entityClass().constructor();
         constructor.setAccessible(true);
         return constructor;
     }
@@ -185,7 +185,7 @@ public abstract class EntityBuilder<E extends AbstractEntity<I, S>, I, S extends
      * Creates an empty entity instance.
      */
     protected E createEntity(I id) {
-        E result = entityClass().create(id);
+        var result = entityClass().create(id);
         return result;
     }
 }

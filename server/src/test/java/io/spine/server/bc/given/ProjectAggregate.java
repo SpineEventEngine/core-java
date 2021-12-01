@@ -61,7 +61,7 @@ public class ProjectAggregate
 
     @Assign
     List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
-        BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
+        var message = Given.EventMessage.projectStarted(cmd.getProjectId());
         return Lists.newArrayList(message);
     }
 

@@ -37,7 +37,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -75,7 +74,7 @@ class EnvSettingTest {
         @DisplayName("using the `null` as the env value")
         @SuppressWarnings("ThrowableNotThrown")
         void forEnv() {
-            EnvSetting<StorageFactory> setting = new EnvSetting<>();
+            var setting = new EnvSetting<StorageFactory>();
             assertNpe(() -> setting.use(InMemoryStorageFactory.newInstance(), null));
         }
 
@@ -111,8 +110,8 @@ class EnvSettingTest {
         }
 
         private void testReturnsForEnv(Class<? extends EnvironmentType> type) {
-            InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+            var factory = InMemoryStorageFactory.newInstance();
+            var storageFactory = new EnvSetting<StorageFactory>();
             storageFactory.use(factory, type);
             assertThat(storageFactory.optionalValue(type))
                     .isPresent();
@@ -161,19 +160,19 @@ class EnvSettingTest {
             }
 
             void testAssignsDefaultForEnv(Class<? extends EnvironmentType> type) {
-                MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
-                EnvSetting<StorageFactory> storageFactory =
-                        new EnvSetting<>(type, () -> memoizingFactory);
+                var memoizingFactory = new MemoizingStorageFactory();
+                var storageFactory =
+                        new EnvSetting<StorageFactory>(type, () -> memoizingFactory);
                 assertThat(storageFactory.value(type))
                         .isSameInstanceAs(memoizingFactory);
             }
 
             void testRetainsDefaultForEnv(Class<? extends EnvironmentType> type) {
-                MemoizingStorageFactory defaultFactory = new MemoizingStorageFactory();
-                EnvSetting<StorageFactory> storageFactory =
-                        new EnvSetting<>(type, () -> defaultFactory);
+                var defaultFactory = new MemoizingStorageFactory();
+                var storageFactory =
+                        new EnvSetting<StorageFactory>(type, () -> defaultFactory);
 
-                MemoizingStorageFactory actualFactory = new MemoizingStorageFactory();
+                var actualFactory = new MemoizingStorageFactory();
                 storageFactory.use(actualFactory, type);
 
                 assertThat(storageFactory.value(type)).isSameInstanceAs(actualFactory);
@@ -204,16 +203,16 @@ class EnvSettingTest {
         }
 
         private void testLazyForEnv(Class<? extends EnvironmentType> type) {
-            InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
-            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-            AtomicBoolean resolved = new AtomicBoolean(false);
+            var factory = InMemoryStorageFactory.newInstance();
+            var storageFactory = new EnvSetting<StorageFactory>();
+            var resolved = new AtomicBoolean(false);
             storageFactory.lazyUse(() -> {
                 resolved.set(true);
                 return factory;
             }, type);
             assertThat(resolved.get()).isFalse();
 
-            Optional<StorageFactory> actual = storageFactory.optionalValue(type);
+            var actual = storageFactory.optionalValue(type);
             assertThat(actual)
                     .isPresent();
             assertThat(resolved.get()).isTrue();
@@ -224,11 +223,11 @@ class EnvSettingTest {
     @Test
     @DisplayName("reset the value for all environments")
     void resetTheValues() {
-        InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
-        MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
-        InMemoryStorageFactory localStorageFactory = InMemoryStorageFactory.newInstance();
+        var prodStorageFactory = InMemoryStorageFactory.newInstance();
+        var testingStorageFactory = new MemoizingStorageFactory();
+        var localStorageFactory = InMemoryStorageFactory.newInstance();
 
-        EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+        var storageFactory = new EnvSetting<StorageFactory>();
         storageFactory.use(prodStorageFactory, Production.class);
         storageFactory.use(testingStorageFactory, Tests.class);
         storageFactory.use(localStorageFactory, Local.class);
@@ -243,9 +242,9 @@ class EnvSettingTest {
     @Test
     @DisplayName("run an operation against a value if it's present")
     void runThrowableConsumer() throws Exception {
-        MemoizingStorageFactory storageFactory = new MemoizingStorageFactory();
+        var storageFactory = new MemoizingStorageFactory();
 
-        EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
+        var storageSetting = new EnvSetting<StorageFactory>();
 
         storageSetting.use(storageFactory, Production.class);
         storageSetting.ifPresentForEnvironment(Production.class, AutoCloseable::close);
@@ -256,11 +255,11 @@ class EnvSettingTest {
     @Test
     @DisplayName("run an operation for all present values")
     void runOperationForAll() throws Exception {
-        MemoizingStorageFactory prodStorageFactory = new MemoizingStorageFactory();
-        MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
-        MemoizingStorageFactory localStorageFactory = new MemoizingStorageFactory();
+        var prodStorageFactory = new MemoizingStorageFactory();
+        var testingStorageFactory = new MemoizingStorageFactory();
+        var localStorageFactory = new MemoizingStorageFactory();
 
-        EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
+        var storageSetting = new EnvSetting<StorageFactory>();
 
         storageSetting.use(prodStorageFactory, Production.class);
         storageSetting.use(testingStorageFactory, Tests.class);
@@ -271,6 +270,5 @@ class EnvSettingTest {
         assertThat(prodStorageFactory.isClosed()).isTrue();
         assertThat(testingStorageFactory.isClosed()).isTrue();
         assertThat(localStorageFactory.isClosed()).isTrue();
-
     }
 }

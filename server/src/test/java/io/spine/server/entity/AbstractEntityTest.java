@@ -39,7 +39,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -49,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("AbstractEntity should")
+@DisplayName("`AbstractEntity` should")
 class AbstractEntityTest {
 
     @Nested
@@ -63,9 +62,9 @@ class AbstractEntityTest {
         @Test
         @DisplayName("`updateState`")
         void updateState() throws NoSuchMethodException {
-            Method updateState =
+            var updateState =
                     AbstractEntity.class.getDeclaredMethod("updateState", EntityState.class);
-            int modifiers = updateState.getModifiers();
+            var modifiers = updateState.getModifiers();
             assertTrue(Modifier.isFinal(modifiers));
         }
 
@@ -76,9 +75,9 @@ class AbstractEntityTest {
         @Test
         @DisplayName("`validate`")
         void validate() throws NoSuchMethodException {
-            Method validate =
+            var validate =
                     AbstractEntity.class.getDeclaredMethod("validate", EntityState.class);
-            int modifiers = validate.getModifiers();
+            var modifiers = validate.getModifiers();
             assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
         }
     }
@@ -87,7 +86,7 @@ class AbstractEntityTest {
     @DisplayName("throw InvalidEntityStateException if state is invalid")
     void rejectInvalidState() {
         AbstractEntity<?, NaturalNumber> entity = new NaturalNumberEntity(0);
-        NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
+        var invalidNaturalNumber = newNaturalNumber(-1);
         try {
             // This should pass.
             entity.updateState(newNaturalNumber(1));
@@ -107,7 +106,7 @@ class AbstractEntityTest {
     @Test
     @DisplayName("not accept null to `checkEntityState`")
     void rejectNullState() {
-        AnEntity entity = new AnEntity(0L);
+        var entity = new AnEntity(0L);
 
         assertThrows(NullPointerException.class, () -> entity.checkEntityState(null));
     }
@@ -115,9 +114,8 @@ class AbstractEntityTest {
     @Test
     @DisplayName("allow valid state")
     void allowValidState() {
-        AnEntity entity = new AnEntity(0L);
-        LongIdAggregate state = LongIdAggregate
-                .newBuilder()
+        var entity = new AnEntity(0L);
+        var state = LongIdAggregate.newBuilder()
                 .setId(entity.id())
                 .build();
         assertTrue(entity.checkEntityState(state)
@@ -127,22 +125,22 @@ class AbstractEntityTest {
     @Test
     @DisplayName("return string ID")
     void returnStringId() {
-        AnEntity entity = new AnEntity(1_234_567L);
+        var entity = new AnEntity(1_234_567L);
 
         assertEquals("1234567", entity.idAsString());
         assertSame(entity.idAsString(), entity.idAsString());
     }
 
-    @SuppressWarnings("MagicNumber")
     @Test
     @DisplayName("support equality")
+    @SuppressWarnings("MagicNumber")
     void supportEquality() {
-        ProjectId id = AvEntity.projectId("88");
-        AvEntity entity = new AvEntity(id);
-        AvEntity similarEntity = new AvEntity(id);
+        var id = AvEntity.projectId("88");
+        var entity = new AvEntity(id);
+        var similarEntity = new AvEntity(id);
         similarEntity.updateState(entity.state(), entity.version());
 
-        AvEntity different = new AvEntity(AvEntity.projectId("42"));
+        var different = new AvEntity(AvEntity.projectId("42"));
         new EqualsTester().addEqualityGroup(entity, similarEntity)
                           .addEqualityGroup(different)
                           .testEquals();
@@ -151,12 +149,12 @@ class AbstractEntityTest {
     @Test
     @DisplayName("have `updateState` method visible to package only")
     void haveUpdateStatePackagePrivate() {
-        boolean methodFound = false;
+        var methodFound = false;
 
-        Method[] methods = AbstractEntity.class.getDeclaredMethods();
-        for (Method method : methods) {
+        var methods = AbstractEntity.class.getDeclaredMethods();
+        for (var method : methods) {
             if ("updateState".equals(method.getName())) {
-                Invokable<?, Object> updateState = Invokable.from(method);
+                var updateState = Invokable.from(method);
                 assertTrue(updateState.isPackagePrivate());
                 methodFound = true;
             }
@@ -174,14 +172,14 @@ class AbstractEntityTest {
 
         static ProjectId projectId(String value) {
             return ProjectId.newBuilder()
-                            .setId(value)
-                            .build();
+                    .setId(value)
+                    .build();
         }
     }
 
     static NaturalNumber newNaturalNumber(int value) {
         return NaturalNumber.newBuilder()
-                            .setValue(value)
-                            .build();
+                .setValue(value)
+                .build();
     }
 }

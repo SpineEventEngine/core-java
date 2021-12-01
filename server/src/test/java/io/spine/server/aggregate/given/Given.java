@@ -111,17 +111,17 @@ public class Given {
         public static Command createProject(UserId userId,
                                             ProjectId projectId,
                                             Timestamp when) {
-            AggCreateProject command = CommandMessage.createProject(projectId);
+            var command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
         public static Command addTask(ProjectId id) {
-            AggAddTask command = CommandMessage.addTask(id);
+            var command = CommandMessage.addTask(id);
             return create(command, USER_ID, currentTime());
         }
 
         public static Command startProject(ProjectId id) {
-            AggStartProject command = CommandMessage.startProject(id);
+            var command = CommandMessage.startProject(id);
             return create(command, USER_ID, currentTime());
         }
 
@@ -133,7 +133,7 @@ public class Given {
         public static Command create(io.spine.base.CommandMessage command,
                                      UserId userId,
                                      Timestamp when) {
-            Command result = new TestActorRequestFactory(userId).createCommand(command, when);
+            var result = new TestActorRequestFactory(userId).createCommand(command, when);
             return result;
         }
     }
@@ -144,33 +144,33 @@ public class Given {
         }
 
         public static AggCreateProject createProject(ProjectId id) {
-            AggCreateProject.Builder builder = AggCreateProject.newBuilder()
-                                                               .setProjectId(id)
-                                                               .setName(projectName(id));
+            var builder = AggCreateProject.newBuilder()
+                    .setProjectId(id)
+                    .setName(projectName(id));
             return builder.build();
         }
 
         public static AggPauseProject pauseProject(ProjectId id) {
-            AggPauseProject.Builder builder = AggPauseProject.newBuilder()
-                                                             .setProjectId(id);
+            var builder = AggPauseProject.newBuilder()
+                    .setProjectId(id);
             return builder.build();
         }
 
         public static AggCancelProject cancelProject(ProjectId id) {
-            AggCancelProject.Builder builder = AggCancelProject.newBuilder()
-                                                               .setProjectId(id);
+            var builder = AggCancelProject.newBuilder()
+                    .setProjectId(id);
             return builder.build();
         }
 
         public static AggAddTask addTask(ProjectId id) {
-            AggAddTask.Builder builder = AggAddTask.newBuilder()
-                                                   .setProjectId(id);
+            var builder = AggAddTask.newBuilder()
+                    .setProjectId(id);
             return builder.build();
         }
 
         public static AggStartProject startProject(ProjectId id) {
-            AggStartProject.Builder builder = AggStartProject.newBuilder()
-                                                             .setProjectId(id);
+            var builder = AggStartProject.newBuilder()
+                    .setProjectId(id);
             return builder.build();
         }
     }

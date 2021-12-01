@@ -46,14 +46,14 @@ public class TaskView extends Projection<String, DTaskView, DTaskView.Builder> {
 
     @Subscribe
     void to(DTaskCreated event) {
-        String rawId = event.getId();
+        var rawId = event.getId();
         creationEvents.put(rawId, event);
         builder().setId(rawId);
     }
 
     @Subscribe
     void to(DTaskAssigned event) {
-        String rawId = event.getId();
+        var rawId = event.getId();
         if (!creationEvents.containsKey(rawId)) {
             throw new IllegalStateException("`DTaskCreated` event was" +
                                                     " not dispatched before `DTaskAssigned`.");

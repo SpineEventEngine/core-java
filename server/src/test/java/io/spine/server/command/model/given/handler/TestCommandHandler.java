@@ -52,9 +52,7 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
 
     protected TestCommandHandler() {
         super();
-        BoundedContext context = BoundedContextBuilder
-                .assumingTests(true)
-                .build();
+        var context = BoundedContextBuilder.assumingTests(true).build();
         registerWith(context);
     }
 

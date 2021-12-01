@@ -54,13 +54,13 @@ public final class FailingAggregateRepository
         super.setupCommandRouting(routing);
         routing.replaceDefault(
                 // Simplistic routing function that takes absolute value as ID.
-                new CommandRoute<Long, CommandMessage>() {
+                new CommandRoute<>() {
                     private static final long serialVersionUID = 0L;
 
                     @Override
                     public Long apply(CommandMessage message, CommandContext context) {
                         if (message instanceof RejectNegativeInt) {
-                            RejectNegativeInt event = (RejectNegativeInt) message;
+                            var event = (RejectNegativeInt) message;
                             return (long) Math.abs(event.getNumber());
                         }
                         return 0L;
@@ -73,17 +73,18 @@ public final class FailingAggregateRepository
     protected void setupEventRouting(EventRouting<Long> routing) {
         super.setupEventRouting(routing);
         routing.replaceDefault(
-                new EventRoute<Long, EventMessage>() {
+                new EventRoute<>() {
                     private static final long serialVersionUID = 0L;
 
                     /**
                      * Returns several entity identifiers to check error isolation.
+                     *
                      * @see io.spine.server.aggregate.given.repo.FailingAggregate#on(io.spine.test.aggregate.number.FloatEncountered)
                      */
                     @Override
                     public Set<Long> apply(EventMessage message, EventContext context) {
                         if (message instanceof FloatEncountered) {
-                            long absValue = FailingAggregate.toId((FloatEncountered) message);
+                            var absValue = FailingAggregate.toId((FloatEncountered) message);
                             return ImmutableSet.of(absValue, absValue + 100, absValue + 200);
                         }
                         return ImmutableSet.of(1L, 2L);

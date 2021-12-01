@@ -44,8 +44,8 @@ final class AssertColumns {
     }
 
     static void assertContains(Iterable<? extends Column<?, ?>> columns, String columnName) {
-        ColumnName expectedName = ColumnName.of(columnName);
-        boolean contains = false;
+        var expectedName = ColumnName.of(columnName);
+        var contains = false;
         for (Column<?, ?> column : columns) {
             contains = contains || column.name().equals(expectedName);
         }

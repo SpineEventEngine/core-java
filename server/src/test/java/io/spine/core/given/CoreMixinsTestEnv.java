@@ -47,9 +47,8 @@ public final class CoreMixinsTestEnv {
     }
 
     public static MessageId messageId() {
-        Event event = event();
-        return MessageId
-                .newBuilder()
+        var event = event();
+        return MessageId.newBuilder()
                 .setId(pack(event.getId()))
                 .setTypeUrl(event.typeUrl().value())
                 .setVersion(event.getContext()
@@ -58,9 +57,8 @@ public final class CoreMixinsTestEnv {
     }
 
     public static Command command() {
-        TestActorRequestFactory factory = new TestActorRequestFactory(CoreMixinsTestEnv.class);
-        MixinCreateProject cmdMessage = MixinCreateProject
-                .newBuilder()
+        var factory = new TestActorRequestFactory(CoreMixinsTestEnv.class);
+        var cmdMessage = MixinCreateProject.newBuilder()
                 .setProjectId(newUuid().hashCode())
                 .setName("A Project")
                 .build();
@@ -68,9 +66,8 @@ public final class CoreMixinsTestEnv {
     }
 
     public static Event event() {
-        TestEventFactory factory = TestEventFactory.newInstance(CoreMixinsTestEnv.class);
-        StandardRejections.EntityAlreadyDeleted msg = StandardRejections.EntityAlreadyDeleted
-                .newBuilder()
+        var factory = TestEventFactory.newInstance(CoreMixinsTestEnv.class);
+        var msg = StandardRejections.EntityAlreadyDeleted.newBuilder()
                 .setEntityId(
                         pack(StringValue.of("deleted-entity-id")))
                 .build();

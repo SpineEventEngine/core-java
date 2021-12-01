@@ -26,7 +26,6 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.Task;
@@ -43,16 +42,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventFieldFilter should")
+@DisplayName("`EventFieldFilter` should")
 class EventFieldFilterTest {
 
     @Test
     @DisplayName("pass event if not specified otherwise")
     void allowByDefault() {
-        EventFieldFilter filter = EventFieldFilter
-                .newBuilder()
-                .build();
-        EntProjectCreated event = EntProjectCreated.getDefaultInstance();
+        var filter = EventFieldFilter.newBuilder().build();
+        var event = EntProjectCreated.getDefaultInstance();
         Optional<? extends Message> filtered = filter.filter(event);
         assertTrue(filtered.isPresent());
         assertEquals(event, filtered.get());
@@ -61,20 +58,17 @@ class EventFieldFilterTest {
     @Test
     @DisplayName("apply mask and pass")
     void applyFieldMask() {
-        FieldMask mask =
-                fromFieldNumbers(EntTaskAdded.class, EntTaskAdded.PROJECT_ID_FIELD_NUMBER);
-        EventFieldFilter filter = EventFieldFilter
-                .newBuilder()
+        var mask = fromFieldNumbers(EntTaskAdded.class, EntTaskAdded.PROJECT_ID_FIELD_NUMBER);
+        var filter = EventFieldFilter.newBuilder()
                 .putMask(EntTaskAdded.class, mask)
                 .build();
-        EntTaskAdded event = EntTaskAdded
-                .newBuilder()
+        var event = EntTaskAdded.newBuilder()
                 .setProjectId(Sample.messageOfType(ProjectId.class))
                 .setTask(Sample.messageOfType(Task.class))
                 .build();
         Optional<? extends Message> filtered = filter.filter(event);
         assertTrue(filtered.isPresent());
-        EntTaskAdded maskedEventMessage = (EntTaskAdded) filtered.get();
+        var maskedEventMessage = (EntTaskAdded) filtered.get();
         assertTrue(maskedEventMessage.hasProjectId());
         assertEquals(event.getProjectId(), maskedEventMessage.getProjectId());
         assertFalse(maskedEventMessage.hasTask());

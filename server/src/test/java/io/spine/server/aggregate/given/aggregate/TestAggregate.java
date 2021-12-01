@@ -87,14 +87,14 @@ public class TestAggregate
     @Assign
     AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
         createProjectCommandHandled = true;
-        AggProjectCreated event = projectCreated(cmd.getProjectId(), cmd.getName());
+        var event = projectCreated(cmd.getProjectId(), cmd.getName());
         return event;
     }
 
     @Assign
     AggTaskAdded handle(AggAddTask cmd) {
         addTaskCommandHandled = true;
-        AggTaskAdded event = taskAdded(cmd.getProjectId());
+        var event = taskAdded(cmd.getProjectId());
         return event.toBuilder()
                     .setTask(cmd.getTask())
                     .build();
@@ -103,7 +103,7 @@ public class TestAggregate
     @Assign
     List<AggProjectStarted> handle(AggStartProject cmd) {
         startProjectCommandHandled = true;
-        AggProjectStarted message = projectStarted(cmd.getProjectId());
+        var message = projectStarted(cmd.getProjectId());
         return ImmutableList.of(message);
     }
 
@@ -157,7 +157,7 @@ public class TestAggregate
 
     @VisibleForTesting
     public void dispatchCommands(Command... commands) {
-        for (Command cmd : commands) {
+        for (var cmd : commands) {
             AggregateMessageDispatcher.dispatchCommand(this, env(cmd));
         }
     }

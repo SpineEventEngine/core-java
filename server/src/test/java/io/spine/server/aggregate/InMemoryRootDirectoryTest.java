@@ -26,7 +26,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.truth.OptionalSubject;
 import io.spine.server.aggregate.given.part.TaskRepository;
 import io.spine.server.aggregate.given.part.TaskRoot;
 import io.spine.test.aggregate.task.AggTask;
@@ -38,7 +37,7 @@ import java.util.Optional;
 
 import static com.google.common.truth.Truth8.assertThat;
 
-@DisplayName("In memory AggregateRootDirectory should")
+@DisplayName("In-memory `AggregateRootDirectory` should")
 class InMemoryRootDirectoryTest {
 
     private AggregateRootDirectory directory;
@@ -56,7 +55,7 @@ class InMemoryRootDirectoryTest {
         directory.register(repository);
         Optional<? extends AggregatePartRepository<?, ?, ?, ?>> found =
                 directory.findPart(TaskRoot.class, AggTask.class);
-        OptionalSubject assertRepository = assertThat(found);
+        var assertRepository = assertThat(found);
         assertRepository.isPresent();
         assertRepository.hasValue(repository);
     }
@@ -66,7 +65,7 @@ class InMemoryRootDirectoryTest {
     void notFindRepository() {
         Optional<? extends AggregatePartRepository<?, ?, ?, ?>> found =
                 directory.findPart(TaskRoot.class, AggTask.class);
-        OptionalSubject assertRepository = assertThat(found);
+        var assertRepository = assertThat(found);
         assertRepository.isEmpty();
     }
 }

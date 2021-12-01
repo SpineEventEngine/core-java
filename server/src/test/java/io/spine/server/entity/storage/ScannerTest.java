@@ -31,12 +31,8 @@ import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.client.VersionColumn;
 import io.spine.query.Column;
-import io.spine.query.ColumnName;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.given.TaskListViewProjection;
 import io.spine.server.entity.storage.given.TaskViewProjection;
-import io.spine.test.entity.TaskListView;
-import io.spine.test.entity.TaskView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,14 +47,13 @@ class ScannerTest {
     @Test
     @DisplayName("include `Entity` lifecycle columns into the scan results")
     void extractSystemColumns() {
-        EntityClass<TaskViewProjection> entityClass = asEntityClass(TaskViewProjection.class);
-        Scanner<TaskView, TaskViewProjection> scanner = new Scanner<>(entityClass);
-        EntityColumns<TaskViewProjection> columns = scanner.columns();
+        var entityClass = asEntityClass(TaskViewProjection.class);
+        var scanner = new Scanner<>(entityClass);
+        var columns = scanner.columns();
 
-        ImmutableSet<ColumnName> names =
-                columns.stream()
-                       .map(Column::name)
-                       .collect(toImmutableSet());
+        var names = columns.stream()
+                .map(Column::name)
+                .collect(toImmutableSet());
 
         assertThat(names).containsAtLeastElementsIn(
                 ImmutableSet.of(
@@ -72,11 +67,10 @@ class ScannerTest {
     @Test
     @DisplayName("extract the columns declared with `(column)` option in the Protobuf message")
     void extractSimpleColumns() {
-        EntityClass<TaskListViewProjection> entityClass =
-                asEntityClass(TaskListViewProjection.class);
-        Scanner<TaskListView, TaskListViewProjection> scanner = new Scanner<>(entityClass);
+        var entityClass = asEntityClass(TaskListViewProjection.class);
+        var scanner = new Scanner<>(entityClass);
 
-        StateColumns<TaskListView> columns = scanner.stateColumns();
+        var columns = scanner.stateColumns();
 
         assertContains(columns, "description");
     }

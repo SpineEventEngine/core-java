@@ -35,7 +35,6 @@ import io.spine.server.entity.given.repository.TestRepo;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("Repository should")
+@DisplayName("`Repository` should")
 class RepositoryTest {
 
     private BoundedContext context;
@@ -63,8 +62,8 @@ class RepositoryTest {
 
     private static ProjectId createId(String value) {
         return ProjectId.newBuilder()
-                        .setId(value)
-                        .build();
+                .setId(value)
+                .build();
     }
 
     @BeforeEach
@@ -120,7 +119,7 @@ class RepositoryTest {
     @Test
     @DisplayName("provide default event filter")
     void provideDefaultEventFilter() {
-        EventFilter filter = repository.eventFilter();
+        var filter = repository.eventFilter();
         assertNotNull(filter);
     }
 
@@ -129,9 +128,9 @@ class RepositoryTest {
     class OverwritingContext {
 
         @Test
-        @DisplayName("throwing ISE")
+        @DisplayName("throwing `ISE`")
         void prohibit() {
-            BoundedContext anotherContext = BoundedContext
+            var anotherContext = BoundedContext
                     .singleTenant("Context-1")
                     .build();
             assertThrows(IllegalStateException.class, () ->
@@ -151,7 +150,7 @@ class RepositoryTest {
     @Test
     @DisplayName("close storage on close")
     void closeStorageOnClose() {
-        EntityRecordStorage<?, ?> storage = (EntityRecordStorage<?, ?>) repository.storage();
+        var storage = (EntityRecordStorage<?, ?>) repository.storage();
         repository.close();
 
         assertTrue(storage.isClosed());
@@ -169,7 +168,7 @@ class RepositoryTest {
      * Creates three entities in the repository.
      */
     private void createAndStoreEntities() {
-        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+        var op = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 createAndStore("Eins");
@@ -184,7 +183,7 @@ class RepositoryTest {
     @DisplayName("iterate over entities")
     void iterateOverEntities() {
         createAndStoreEntities();
-        int numEntities = size(iteratorAt(tenantId));
+        var numEntities = size(iteratorAt(tenantId));
         assertEquals(3, numEntities);
     }
 
@@ -192,20 +191,20 @@ class RepositoryTest {
     @DisplayName("not allow removal in entities iterator")
     void notAllowRemovalInIterator() {
         createAndStoreEntities();
-        Iterator<ProjectEntity> iterator = iteratorAt(tenantId);
+        var iterator = iteratorAt(tenantId);
         assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
     @Test
     @DisplayName("register with a bounded context")
     void registered() {
-        TestRepo repo = new TestRepo();
+        var repo = new TestRepo();
 
         assertFalse(repo.isRegistered());
         repo.checkNotRegistered();
         assertThrows(IllegalStateException.class, repo::checkRegistered);
 
-        BoundedContext context = BoundedContextBuilder
+        var context = BoundedContextBuilder
                 .assumingTests()
                 .build();
         repo.registerWith(context);
@@ -218,10 +217,10 @@ class RepositoryTest {
     @Test
     @DisplayName("register twice with the same context")
     void registerWithSameContext() {
-        TestRepo repo = new TestRepo();
+        var repo = new TestRepo();
 
-        String contextName = "test context";
-        BoundedContext context = BoundedContext.singleTenant(contextName).build();
+        var contextName = "test context";
+        var context = BoundedContext.singleTenant(contextName).build();
         repo.registerWith(context);
 
         assertTrue(repo.isRegistered());
@@ -233,24 +232,23 @@ class RepositoryTest {
     @DisplayName("not register in another context")
     void anotherContext() {
         assertTrue(repository.isRegistered());
-        BoundedContext anotherContext = BoundedContext.singleTenant("another").build();
+        var anotherContext = BoundedContext.singleTenant("another").build();
         assertThrows(IllegalStateException.class, () -> repository.registerWith(anotherContext));
     }
 
     private Iterator<ProjectEntity> iteratorAt(TenantId tenantId) {
-        Iterator<ProjectEntity> result =
-                TenantAwareRunner.with(tenantId)
-                                 .evaluate(() -> repository.iterator(entity -> true));
+        var result = TenantAwareRunner.with(tenantId)
+                                      .evaluate(() -> repository.iterator(entity -> true));
         return result;
     }
 
     private void createAndStore(String idValue) {
-        ProjectId id = createId(idValue);
-        ProjectEntity entity = repository.create(id);
-        Project stateWithVersion = entity.state()
-                                         .toBuilder()
-                                         .setId(id)
-                                         .vBuild();
+        var id = createId(idValue);
+        var entity = repository.create(id);
+        var stateWithVersion = entity.state()
+                .toBuilder()
+                .setId(id)
+                .vBuild();
         TestTransaction.injectState(entity, stateWithVersion, Versions.zero());
         repository.store(entity);
     }

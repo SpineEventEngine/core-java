@@ -45,8 +45,7 @@ public class EitEnricherSetup {
     public static EventEnricher createEnricher(EitUserRepository users,
                                                EitProjectRepository projects,
                                                EitTaskRepository tasks) {
-        EventEnricher enricher = EventEnricher
-                .newBuilder()
+        var enricher = EventEnricher.newBuilder()
                 .add(EitUserAccountCreated.class, EitUserAccount.class,
                      (e, c) -> find(users, e.getUser()))
                 .add(EitProjectCreated.class, EitProject.class,

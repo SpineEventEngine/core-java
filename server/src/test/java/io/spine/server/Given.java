@@ -72,7 +72,6 @@ import io.spine.test.subscriptionservice.command.SendReport;
 import io.spine.test.subscriptionservice.event.ReportSent;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.time.LocalDate;
 import io.spine.time.Now;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -96,20 +95,20 @@ public class Given {
 
         static AggTaskAdded taskAdded(ProjectId id) {
             return AggTaskAdded.newBuilder()
-                               .setProjectId(id)
-                               .build();
+                    .setProjectId(id)
+                    .build();
         }
 
         static AggProjectCreated projectCreated(ProjectId id) {
             return AggProjectCreated.newBuilder()
-                                    .setProjectId(id)
-                                    .build();
+                    .setProjectId(id)
+                    .build();
         }
 
         static AggProjectStarted projectStarted(ProjectId id) {
             return AggProjectStarted.newBuilder()
-                                    .setProjectId(id)
-                                    .build();
+                    .setProjectId(id)
+                    .build();
         }
     }
 
@@ -119,15 +118,13 @@ public class Given {
         }
 
         public static AggCreateProject createProject(ProjectId id) {
-            return AggCreateProject
-                    .newBuilder()
+            return AggCreateProject.newBuilder()
                     .setProjectId(id)
                     .build();
         }
 
         public static SendReport sendReport() {
-            return SendReport
-                    .newBuilder()
+            return SendReport.newBuilder()
                     .setId(ReportId.generate())
                     .vBuild();
         }
@@ -152,12 +149,11 @@ public class Given {
         private static Command create(io.spine.base.CommandMessage command,
                                       UserId userId,
                                       Timestamp when) {
-            TenantId generatedTenantId = TenantId.newBuilder()
-                                                 .setValue(newUuid())
-                                                 .build();
-            TestActorRequestFactory factory =
-                    new TestActorRequestFactory(userId, generatedTenantId);
-            Command result = factory.createCommand(command, when);
+            var generatedTenantId = TenantId.newBuilder()
+                    .setValue(newUuid())
+                    .build();
+            var factory = new TestActorRequestFactory(userId, generatedTenantId);
+            var result = factory.createCommand(command, when);
             return result;
         }
 
@@ -170,37 +166,32 @@ public class Given {
         }
 
         private static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
-            AggCreateProject command = CommandMessage.createProject(projectId);
+            var command = CommandMessage.createProject(projectId);
             return create(command, userId, when);
         }
 
         static Command createCustomer() {
-            LocalDate localDate = Now.get()
-                                     .asLocalDate();
-            CustomerId customerId = CustomerId
-                    .newBuilder()
+            var localDate = Now.get().asLocalDate();
+            var customerId = CustomerId.newBuilder()
                     .setRegistrationDate(localDate)
                     .setNumber(customerNumber.get())
                     .build();
             customerNumber.incrementAndGet();
-            PersonName personName = PersonName
-                    .newBuilder()
+            var personName = PersonName.newBuilder()
                     .setGivenName("Kreat")
                     .setFamilyName("C'Ustomer")
                     .setHonorificSuffix("Cmd")
                     .build();
-            Customer customer = Customer
-                    .newBuilder()
+            var customer = Customer.newBuilder()
                     .setId(customerId)
                     .setName(personName)
                     .build();
-            io.spine.base.CommandMessage msg = CreateCustomer
-                    .newBuilder()
+            io.spine.base.CommandMessage msg = CreateCustomer.newBuilder()
                     .setCustomerId(customerId)
                     .setCustomer(customer)
                     .build();
-            UserId userId = GivenUserId.of(Identifier.newUuid());
-            Command result = create(msg, userId, currentTime());
+            var userId = GivenUserId.of(Identifier.newUuid());
+            var result = create(msg, userId, currentTime());
             return result;
         }
 
@@ -219,14 +210,14 @@ public class Given {
 
         static Query readAllProjects() {
             // DO NOT replace the type name with another Project class.
-            Query result = requestFactory.query()
-                                         .all(io.spine.test.projection.Project.class);
+            var result = requestFactory.query()
+                                       .all(io.spine.test.projection.Project.class);
             return result;
         }
 
         static Query readUnknownType() {
-            Query result = requestFactory.query()
-                                         .all(Task.class);
+            var result = requestFactory.query()
+                                       .all(Task.class);
             return result;
         }
     }
@@ -260,7 +251,7 @@ public class Given {
 
         @Assign
         List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
-            AggProjectStarted message = EventMessage.projectStarted(cmd.getProjectId());
+            var message = EventMessage.projectStarted(cmd.getProjectId());
             return ImmutableList.of(message);
         }
 
@@ -341,8 +332,7 @@ public class Given {
 
         @Assign
         CustomerCreated handle(CreateCustomer cmd, CommandContext ctx) {
-            CustomerCreated event = CustomerCreated
-                    .newBuilder()
+            var event = CustomerCreated.newBuilder()
                     .setCustomerId(cmd.getCustomerId())
                     .setCustomer(cmd.getCustomer())
                     .build();
@@ -360,6 +350,8 @@ public class Given {
      ***************************************************/
 
     static final String PROJECTS_CONTEXT_NAME = "Projects";
+
+    static final String CUSTOMERS_CONTEXT_NAME = "Customers";
 
     static class ProjectDetailsRepository
             extends ProjectionRepository<io.spine.test.projection.ProjectId,

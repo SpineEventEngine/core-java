@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,15 +38,15 @@ class DeliveryFactoryTest {
     @DisplayName("create an instance of `Delivery` " +
             "which delivers the messages from their shards asynchronously")
     void createLocalAsync(){
-        Delivery delivery = Delivery.localAsync();
+        var delivery = Delivery.localAsync();
 
-        ImmutableList<ShardObserver> observers = delivery.shardObservers();
+        var observers = delivery.shardObservers();
         assertThat(observers).hasSize(1);
 
-        ShardObserver observer = observers.get(0);
+        var observer = observers.get(0);
         assertThat(observer).isInstanceOf(LocalDispatchingObserver.class);
 
-        LocalDispatchingObserver localObserver = (LocalDispatchingObserver) observer;
+        var localObserver = (LocalDispatchingObserver) observer;
         assertThat(localObserver.isAsync()).isTrue();
     }
 }

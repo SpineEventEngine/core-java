@@ -54,10 +54,9 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
 
     @Assign
     EngineStarted handle(StartEngine command) throws EngineAlreadyStarted {
-        EngineId id = command.getId();
+        var id = command.getId();
         if (state().getStatus() == STARTED) {
-            throw EngineAlreadyStarted
-                    .newBuilder()
+            throw EngineAlreadyStarted.newBuilder()
                     .setId(id)
                     .build();
         }
@@ -71,10 +70,9 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
 
     @Assign
     EngineStopped handle(StopEngine command) throws EngineAlreadyStopped {
-        EngineId id = command.getId();
+        var id = command.getId();
         if (state().getStatus() == STOPPED) {
-            throw EngineAlreadyStopped
-                    .newBuilder()
+            throw EngineAlreadyStopped.newBuilder()
                     .setId(id)
                     .build();
         }
@@ -151,14 +149,14 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
 
     private static EngineStarted start(EngineId id) {
         return EngineStarted.newBuilder()
-                            .setId(id)
-                            .build();
+                .setId(id)
+                .build();
     }
 
     private static EngineStopped stop(EngineId id) {
         return EngineStopped.newBuilder()
-                            .setId(id)
-                            .build();
+                .setId(id)
+                .build();
     }
 
     private void setStarted() {

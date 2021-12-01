@@ -55,7 +55,7 @@ public class Given {
     public static <A extends Aggregate<I, S, ?>, I, S extends EntityState<I>>
     AggregateBuilder<A, I, S> aggregateOfClass(Class<A> aggregateClass) {
         checkNotNull(aggregateClass);
-        AggregateBuilder<A, I, S> result = new AggregateBuilder<>();
+        var result = new AggregateBuilder<A, I, S>();
         result.setResultClass(aggregateClass);
         return result;
     }
@@ -69,7 +69,7 @@ public class Given {
                    R extends AggregateRoot<I>>
     AggregatePartBuilder<A, I, S, R> aggregatePartOfClass(Class<A> partClass) {
         checkNotNull(partClass);
-        AggregatePartBuilder<A, I, S, R> result = new AggregatePartBuilder<>();
+        var result = new AggregatePartBuilder<A, I, S, R>();
         result.setResultClass(partClass);
         return result;
     }
@@ -83,7 +83,7 @@ public class Given {
                    B extends ValidatingBuilder<S>>
     ProjectionBuilder<P, I, S, B> projectionOfClass(Class<P> projectionClass) {
         checkNotNull(projectionClass);
-        ProjectionBuilder<P, I, S, B> result = new ProjectionBuilder<>();
+        var result = new ProjectionBuilder<P, I, S, B>();
         result.setResultClass(projectionClass);
         return result;
     }

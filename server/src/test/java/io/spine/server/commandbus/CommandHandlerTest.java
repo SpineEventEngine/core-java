@@ -31,13 +31,11 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.given.CommandHandlerTestEnv.EventCatcher;
 import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
@@ -46,12 +44,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("CommandHandler should")
+@DisplayName("`CommandHandler` should")
 class CommandHandlerTest {
 
     private static final TestActorRequestFactory requestFactory =
@@ -64,7 +60,7 @@ class CommandHandlerTest {
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext context = BoundedContextBuilder
+        var context = BoundedContextBuilder
                 .assumingTests(true)
                 .build();
         commandBus = context.commandBus();
@@ -113,19 +109,19 @@ class CommandHandlerTest {
     }
 
     @Test
-    @DisplayName("post generated events to EventBus")
+    @DisplayName("post generated events to `EventBus`")
     void postGeneratedEventsToBus() {
-        Command cmd = Given.ACommand.startProject();
+        var cmd = Given.ACommand.startProject();
 
-        EventCatcher eventCatcher = new EventCatcher();
+        var eventCatcher = new EventCatcher();
         eventBus.register(eventCatcher);
 
         handler.handle(cmd);
 
         ImmutableList<? extends Message> expectedMessages = handler.getEventsOnStartProjectCmd();
-        List<EventEnvelope> actualEvents = eventCatcher.dispatched();
-        for (int i = 0; i < expectedMessages.size(); i++) {
-            Message expected = expectedMessages.get(i);
+        var actualEvents = eventCatcher.dispatched();
+        for (var i = 0; i < expectedMessages.size(); i++) {
+            var expected = expectedMessages.get(i);
             Message actual = actualEvents.get(i)
                                          .outerObject()
                                          .enclosedMessage();
@@ -135,35 +131,35 @@ class CommandHandlerTest {
     }
 
     @Nested
-    @DisplayName("post Pair of events")
+    @DisplayName("post `Pair` of events")
     class PostPair {
 
         @Test
-        @DisplayName("with two non-null values")
+        @DisplayName("with two non-`null` values")
         void withBothValues() {
-            Command cmd = Given.ACommand.createTask(true);
+            var cmd = Given.ACommand.createTask(true);
 
-            EventCatcher eventCatcher = new EventCatcher();
+            var eventCatcher = new EventCatcher();
             eventBus.register(eventCatcher);
 
             handler.handle(cmd);
 
-            List<EventEnvelope> dispatchedEvents = eventCatcher.dispatched();
+            var dispatchedEvents = eventCatcher.dispatched();
             assertThat(dispatchedEvents)
                     .hasSize(2);
         }
 
         @Test
-        @DisplayName("with null second value")
+        @DisplayName("with `null` second value")
         void withNullSecondValue() {
-            Command cmd = Given.ACommand.createTask(false);
+            var cmd = Given.ACommand.createTask(false);
 
-            EventCatcher eventCatcher = new EventCatcher();
+            var eventCatcher = new EventCatcher();
             eventBus.register(eventCatcher);
 
             handler.handle(cmd);
 
-            List<EventEnvelope> dispatchedEvents = eventCatcher.dispatched();
+            var dispatchedEvents = eventCatcher.dispatched();
             assertThat(dispatchedEvents)
                     .hasSize(1);
         }

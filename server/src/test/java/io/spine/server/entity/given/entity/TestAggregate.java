@@ -42,7 +42,7 @@ public class TestAggregate
     }
 
     public static TestAggregate copyOf(TestAggregate entity) {
-        TestAggregate result =
+        var result =
                 Given.aggregateOfClass(TestAggregate.class)
                      .withId(entity.id())
                      .withState(entity.state())
@@ -54,12 +54,11 @@ public class TestAggregate
     }
 
     public static TestAggregate withState() {
-        String id = newUuid();
-        EmptyAggregate state = EmptyAggregate
-                .newBuilder()
+        var id = newUuid();
+        var state = EmptyAggregate.newBuilder()
                 .setId(id)
                 .build();
-        TestAggregate result =
+        var result =
                 Given.aggregateOfClass(TestAggregate.class)
                      .withId(id)
                      .withState(state)

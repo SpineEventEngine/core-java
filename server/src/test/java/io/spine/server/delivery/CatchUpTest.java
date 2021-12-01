@@ -39,10 +39,7 @@ import io.spine.server.delivery.given.ConsecutiveProjection;
 import io.spine.server.delivery.given.CounterCatchUp;
 import io.spine.server.delivery.given.CounterView;
 import io.spine.server.delivery.given.WhatToCatchUp;
-import io.spine.server.entity.Repository;
-import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.EmitNextNumber;
-import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
@@ -53,9 +50,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.IntStream;
@@ -152,7 +147,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         @Test
         @DisplayName("if the event store is empty")
         void onEmptyEventStore() {
-            CounterCatchUp counterCatchUp = catchUpForCounter();
+            var counterCatchUp = catchUpForCounter();
             counterCatchUp.catchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
         }
 
@@ -160,7 +155,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         @DisplayName("of the same instance, if the previous catch-up is already completed")
         void ifPreviousCatchUpCompleted() {
             CounterCatchUp.addOngoingCatchUpRecord(catchUpAll(aMinuteAgo()), COMPLETED);
-            CounterCatchUp counterCatchUp = catchUpForCounter();
+            var counterCatchUp = catchUpForCounter();
             counterCatchUp.catchUp(WhatToCatchUp.catchUpAll(aMinuteAgo()));
         }
     }
@@ -175,8 +170,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
         @DisplayName("if catching up of all repository instances has started previously")
         void ifCatchUpAllStartedPreviously() {
             CounterCatchUp.addOngoingCatchUpRecord(catchUpAll(aMinuteAgo()));
-            CounterCatchUp counterCatchUp = catchUpForCounter();
-            for (String target : counterCatchUp.targets()) {
+            var counterCatchUp = catchUpForCounter();
+            for (var target : counterCatchUp.targets()) {
                 assertCatchUpAlreadyStarted(counterCatchUp, target);
             }
         }
@@ -185,7 +180,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         @DisplayName("of the same repository instances")
         void ofSameInstances() {
             CounterCatchUp.addOngoingCatchUpRecord(catchUpOf(TARGET_ID, aMinuteAgo()));
-            CounterCatchUp counterCatchUp = new CounterCatchUp(TARGET_ID);
+            var counterCatchUp = new CounterCatchUp(TARGET_ID);
 
             assertCatchUpAlreadyStarted(counterCatchUp, TARGET_ID);
         }
@@ -194,7 +189,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         @DisplayName("of all instances if at least one catch-up of an instance is in progress")
         void ofAllIfOneAlreadyStarted() {
             CounterCatchUp.addOngoingCatchUpRecord(catchUpOf(TARGET_ID, aMinuteAgo()));
-            CounterCatchUp counterCatchUp = new CounterCatchUp(TARGET_ID);
+            var counterCatchUp = new CounterCatchUp(TARGET_ID);
             try {
                 counterCatchUp.catchUp(catchUpAll(aMinuteAgo()));
                 fail("It must not be possible to start catching up all the instances," +
@@ -222,54 +217,54 @@ public class CatchUpTest extends AbstractDeliveryTest {
     private static void testCatchUpEmpty() {
         changeShardCountTo(17);
 
-        CounterCatchUp counterCatchUp = catchUpForCounter();
-        Timestamp aWhileAgo = subtract(currentTime(), Durations.fromHours(1));
-        String someTarget = "some-target";
+        var counterCatchUp = catchUpForCounter();
+        var aWhileAgo = subtract(currentTime(), Durations.fromHours(1));
+        var someTarget = "some-target";
         counterCatchUp.catchUp(WhatToCatchUp.catchUpOf(someTarget, aWhileAgo));
 
-        Optional<CounterView> actual = counterCatchUp.find(someTarget);
+        var actual = counterCatchUp.find(someTarget);
         assertThat(actual).isEmpty();
     }
 
     private static void testCatchUpByIds() throws InterruptedException {
         changeShardCountTo(2);
 
-        CounterCatchUp counterCatchUp = catchUpForCounter();
-        List<NumberAdded> events = counterCatchUp.generateEvents(200);
+        var counterCatchUp = catchUpForCounter();
+        var events = counterCatchUp.generateEvents(200);
 
-        Timestamp aWhileAgo = subtract(currentTime(), Durations.fromHours(1));
+        var aWhileAgo = subtract(currentTime(), Durations.fromHours(1));
         counterCatchUp.addHistory(aWhileAgo, events);
 
         // Round 1. Fight!
 
-        int initialWeight = 1;
+        var initialWeight = 1;
         CounterView.changeWeightTo(initialWeight);
 
         counterCatchUp.dispatch(events, 20);
 
-        String[] targets = counterCatchUp.targets();
-        int totalTargets = targets.length;
-        List<Integer> initialTotals = counterCatchUp.counterValues();
-        int sumInRound = events.size() / totalTargets * initialWeight;
-        IntStream sums = IntStream.iterate(sumInRound, i -> i)
-                                  .limit(totalTargets);
+        var targets = counterCatchUp.targets();
+        var totalTargets = targets.length;
+        var initialTotals = counterCatchUp.counterValues();
+        var sumInRound = events.size() / totalTargets * initialWeight;
+        var sums = IntStream.iterate(sumInRound, i -> i)
+                            .limit(totalTargets);
         assertThat(initialTotals).isEqualTo(sums.boxed()
                                                 .collect(toList()));
 
         // Round 2. Catch up the first and the second and fight!
 
-        int newWeight = 100;
+        var newWeight = 100;
         CounterView.changeWeightTo(newWeight);
         counterCatchUp
                 .dispatchWithCatchUp(events, 20,
                                      catchUpOf(targets[0], aWhileAgo),
                                      catchUpOf(targets[1], aMinuteAgo()));
 
-        List<Integer> totalsAfterCatchUp = counterCatchUp.counterValues();
+        var totalsAfterCatchUp = counterCatchUp.counterValues();
 
-        int firstSumExpected = sumInRound * newWeight / initialWeight * 3;
-        int secondSumExpected = sumInRound * newWeight / initialWeight * 2;
-        int untouchedSum = sumInRound + sumInRound * newWeight / initialWeight;
+        var firstSumExpected = sumInRound * newWeight / initialWeight * 3;
+        var secondSumExpected = sumInRound * newWeight / initialWeight * 2;
+        var untouchedSum = sumInRound + sumInRound * newWeight / initialWeight;
         List<Integer> expectedTotals =
                 ImmutableList.of(firstSumExpected, secondSumExpected, untouchedSum, untouchedSum);
 
@@ -280,33 +275,33 @@ public class CatchUpTest extends AbstractDeliveryTest {
     private static void testCatchUpAll() throws InterruptedException {
         ConsecutiveProjection.usePositives();
 
-        String[] ids = {"erste", "zweite", "dritte", "vierte"};
-        int totalCommands = 300;
-        List<EmitNextNumber> commands = generateEmissionCommands(totalCommands, ids);
+        var ids = new String[]{"erste", "zweite", "dritte", "vierte"};
+        var totalCommands = 300;
+        var commands = generateEmissionCommands(totalCommands, ids);
 
         changeShardCountTo(3);
-        ConsecutiveProjection.Repo projectionRepo = new ConsecutiveProjection.Repo();
-        Repository<String, ConsecutiveNumberProcess> pmRepo =
+        var projectionRepo = new ConsecutiveProjection.Repo();
+        var pmRepo =
                 DefaultRepository.of(ConsecutiveNumberProcess.class);
-        BlackBox ctx = BlackBox.from(
+        var ctx = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
                                      .add(projectionRepo)
                                      .add(pmRepo)
         );
-        List<Callable<Object>> jobs = asPostCommandJobs(ctx, commands);
+        var jobs = asPostCommandJobs(ctx, commands);
         post(jobs, 1);
 
-        int positiveExpected = totalCommands / ids.length;
+        var positiveExpected = totalCommands / ids.length;
         List<Integer> positiveValues =
                 ImmutableList.of(positiveExpected, positiveExpected,
                                  positiveExpected, positiveExpected);
 
-        List<Integer> actualLastValues = readLastValues(projectionRepo, ids);
+        var actualLastValues = readLastValues(projectionRepo, ids);
         assertThat(actualLastValues).isEqualTo(positiveValues);
 
         ConsecutiveProjection.useNegatives();
 
-        String excludedTarget = ids[0];
+        var excludedTarget = ids[0];
         projectionRepo.excludeFromRouting(excludedTarget);
 
         List<Callable<Object>> sameWithCatchUp =
@@ -319,17 +314,16 @@ public class CatchUpTest extends AbstractDeliveryTest {
                         .build();
         post(sameWithCatchUp, 20);
 
-        int negativeExpected = -1 * positiveExpected * 2;
+        var negativeExpected = -1 * positiveExpected * 2;
 
         assertThat(projectionRepo.find(excludedTarget))
                 .isEmpty();
-        for (int idIndex = 1; idIndex < ids.length; idIndex++) {
-            String identifier = ids[idIndex];
-            Optional<ConsecutiveProjection> maybeState = projectionRepo.find(identifier);
+        for (var idIndex = 1; idIndex < ids.length; idIndex++) {
+            var identifier = ids[idIndex];
+            var maybeState = projectionRepo.find(identifier);
             assertThat(maybeState).isPresent();
 
-            ConsecutiveNumberView state = maybeState.get()
-                                                    .state();
+            var state = maybeState.get().state();
             assertThat(state.getLastValue()).isEqualTo(negativeExpected);
         }
     }
@@ -347,12 +341,12 @@ public class CatchUpTest extends AbstractDeliveryTest {
     }
 
     private static List<EmitNextNumber> generateEmissionCommands(int howMany, String[] ids) {
-        Iterator<String> idIterator = Iterators.cycle(ids);
+        var idIterator = Iterators.cycle(ids);
         List<EmitNextNumber> commands = new ArrayList<>(howMany);
-        for (int i = 0; i < howMany; i++) {
+        for (var i = 0; i < howMany; i++) {
             commands.add(EmitNextNumber.newBuilder()
-                                       .setId(idIterator.next())
-                                       .vBuild());
+                                 .setId(idIterator.next())
+                                 .vBuild());
         }
         return commands;
     }
@@ -376,11 +370,11 @@ public class CatchUpTest extends AbstractDeliveryTest {
 
         @Override
         public Timestamp currentTime() {
-            Instant now = Instant.now();
-            Timestamp result = Timestamp.newBuilder()
-                                        .setSeconds(now.getEpochSecond())
-                                        .setNanos(now.getNano())
-                                        .build();
+            var now = Instant.now();
+            var result = Timestamp.newBuilder()
+                    .setSeconds(now.getEpochSecond())
+                    .setNanos(now.getNano())
+                    .build();
             return result;
         }
     }

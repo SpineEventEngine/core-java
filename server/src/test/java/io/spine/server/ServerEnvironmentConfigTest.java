@@ -77,9 +77,9 @@ class ServerEnvironmentConfigTest {
     }
 
     @Test
-    @DisplayName("reject `null` arguments")
+    @DisplayName("its parts rejecting `null` arguments")
     void nullCheck() {
-        ServerEnvironment.TypeConfigurator configurator = when(Tests.class);
+        var configurator = when(Tests.class);
         new NullPointerTester().testAllPublicInstanceMethods(configurator);
     }
 
@@ -154,7 +154,7 @@ class ServerEnvironmentConfigTest {
             @Test
             @DisplayName("returning a configured instance")
             void ok() {
-                InMemoryTransportFactory factory = InMemoryTransportFactory.newInstance();
+                var factory = InMemoryTransportFactory.newInstance();
                 when(Local.class).use(factory);
                 assertValue(factory);
             }
@@ -164,7 +164,7 @@ class ServerEnvironmentConfigTest {
         @DisplayName("via function")
         void viaFn() {
             TransportFactory factory = new StubTransportFactory();
-            ReturnValue<TransportFactory> fn = new ReturnValue<>(factory);
+            var fn = new ReturnValue<>(factory);
 
             when(Tests.class).useTransportFactory(fn);
 
@@ -200,14 +200,14 @@ class ServerEnvironmentConfigTest {
         @Test
         @DisplayName("to default back to `Local` if no delivery is set")
         void defaultsToLocal() {
-            Delivery delivery = serverEnvironment.delivery();
+            var delivery = serverEnvironment.delivery();
             assertThat(delivery).isNotNull();
         }
 
         @Test
         @DisplayName("to a custom mechanism")
         void customValue() {
-            Delivery customDelivery = customDelivery();
+            var customDelivery = customDelivery();
             when(currentType).use(customDelivery);
 
             assertValue(customDelivery);
@@ -216,8 +216,8 @@ class ServerEnvironmentConfigTest {
         @Test
         @DisplayName("via a function")
         void viaFn() {
-            Delivery valueFromFunction = customDelivery();
-            ReturnValue<Delivery> fn = new ReturnValue<>(valueFromFunction);
+            var valueFromFunction = customDelivery();
+            var fn = new ReturnValue<>(valueFromFunction);
             when(currentType).useDelivery(fn);
 
             assertValue(valueFromFunction);
@@ -227,8 +227,8 @@ class ServerEnvironmentConfigTest {
 
         private Delivery customDelivery() {
             return Delivery.newBuilder()
-                           .setStrategy(UniformAcrossAllShards.forNumber(42))
-                           .build();
+                    .setStrategy(UniformAcrossAllShards.forNumber(42))
+                    .build();
         }
     }
 
@@ -316,7 +316,7 @@ class ServerEnvironmentConfigTest {
         @DisplayName("via a function")
         void viaFn() {
             TracerFactory factory = new MemoizingTracerFactory();
-            ReturnValue<TracerFactory> fn = new ReturnValue<>(factory);
+            var fn = new ReturnValue<>(factory);
 
             when(Tests.class).useTracerFactory(fn);
             assertTracer(factory);
@@ -334,7 +334,7 @@ class ServerEnvironmentConfigTest {
         }
 
         private void assertDelegateIs(StorageFactory factory) {
-            StorageFactory delegate = systemAwareFactory().delegate();
+            var delegate = systemAwareFactory().delegate();
             assertThat(delegate)
                     .isEqualTo(factory);
         }
@@ -367,10 +367,10 @@ class ServerEnvironmentConfigTest {
             void testsFactory() {
                 environment.setTo(Tests.class);
 
-                StorageFactory factory = serverEnvironment.storageFactory();
+                var factory = serverEnvironment.storageFactory();
                 assertThat(factory)
                         .isInstanceOf(SystemAwareStorageFactory.class);
-                StorageFactory delegate = systemAwareFactory().delegate();
+                var delegate = systemAwareFactory().delegate();
                 assertThat(delegate)
                         .isInstanceOf(InMemoryStorageFactory.class);
             }
@@ -408,7 +408,7 @@ class ServerEnvironmentConfigTest {
             @Test
             @DisplayName("returning a configured wrapped instance")
             void returnConfiguredStorageFactory() {
-                InMemoryStorageFactory inMemory = InMemoryStorageFactory.newInstance();
+                var inMemory = InMemoryStorageFactory.newInstance();
                 when(Local.class).use(inMemory);
 
                 assertDelegateIs(inMemory);
@@ -419,7 +419,7 @@ class ServerEnvironmentConfigTest {
         @DisplayName("via a function")
         void viaFn() {
             StorageFactory factory = new MemoizingStorageFactory();
-            ReturnValue<StorageFactory> fn = new ReturnValue<>(factory);
+            var fn = new ReturnValue<>(factory);
 
             when(Tests.class).useStorageFactory(fn);
 

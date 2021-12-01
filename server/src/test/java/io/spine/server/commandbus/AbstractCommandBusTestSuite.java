@@ -26,21 +26,17 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Any;
 import io.spine.base.CommandMessage;
-import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
@@ -104,10 +100,10 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     static Command newCommandWithoutContext() {
-        Command cmd = createProject();
-        Command invalidCmd = cmd.toBuilder()
-                                .setContext(CommandContext.getDefaultInstance())
-                                .build();
+        var cmd = createProject();
+        var invalidCmd = cmd.toBuilder()
+                .setContext(CommandContext.getDefaultInstance())
+                .build();
         return invalidCmd;
     }
 
@@ -125,12 +121,12 @@ abstract class AbstractCommandBusTestSuite {
                                   CommandValidationError validationError,
                                   String errorType,
                                   Command cmd) {
-        Status status = sendingResult.getStatus();
+        var status = sendingResult.getStatus();
         assertEquals(status.getStatusCase(), Status.StatusCase.ERROR);
-        CommandId commandId = cmd.getId();
+        var commandId = cmd.getId();
         assertEquals(commandId, unpack(sendingResult.getMessageId()));
 
-        Error error = status.getError();
+        var error = status.getError();
         assertEquals(errorType,
                      error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
@@ -144,8 +140,8 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command newCommandWithoutTenantId() {
-        Command cmd = createProject();
-        Command.Builder commandBuilder = cmd.toBuilder();
+        var cmd = createProject();
+        var commandBuilder = cmd.toBuilder();
         commandBuilder
                 .getContextBuilder()
                 .getActorContextBuilder()
@@ -154,7 +150,7 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command clearTenantId(Command cmd) {
-        Command.Builder result = cmd.toBuilder();
+        var result = cmd.toBuilder();
         result.getContextBuilder()
               .getActorContextBuilder()
               .clearTenantId();
@@ -172,14 +168,13 @@ abstract class AbstractCommandBusTestSuite {
 
         context = createContext();
 
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        var contextAccess = context.internalAccess();
         tenantIndex = contextAccess.tenantIndex();
         systemWriteSide = NoOpSystemWriteSide.INSTANCE;
 
         eventBus = context.eventBus();
         watcher = new MemoizingCommandFlowWatcher();
-        commandBus = CommandBus
-                .newBuilder()
+        commandBus = CommandBus.newBuilder()
                 .setMultitenant(this.multitenant)
                 .injectContext(context)
                 .injectSystem(systemWriteSide)
@@ -196,12 +191,11 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     private BoundedContext createContext() {
-        Class<? extends AbstractCommandBusTestSuite> cls = getClass();
-        String name = cls.getSimpleName();
-        BoundedContextBuilder builder =
-                multitenant
-                ? BoundedContext.multitenant(name)
-                : BoundedContext.singleTenant(name);
+        var cls = getClass();
+        var name = cls.getSimpleName();
+        var builder = multitenant
+                      ? BoundedContext.multitenant(name)
+                      : BoundedContext.singleTenant(name);
         return builder.build();
     }
 
@@ -213,8 +207,8 @@ abstract class AbstractCommandBusTestSuite {
     @Test
     @DisplayName("post commands in bulk")
     void postCommandsInBulk() {
-        Command first = newCommand();
-        Command second = newCommand();
+        var first = newCommand();
+        var second = newCommand();
         List<Command> commands = newArrayList(first, second);
 
         // Some derived test suite classes may register the handler in setUp().
@@ -236,8 +230,8 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        Ack ack = observer.firstResponse();
-        Any messageId = ack.getMessageId();
+        var ack = observer.firstResponse();
+        var messageId = ack.getMessageId();
         assertEquals(cmd.getId(), Identifier.unpack(messageId));
     }
 

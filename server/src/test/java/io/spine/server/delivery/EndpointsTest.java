@@ -34,8 +34,6 @@ import io.spine.time.ZoneIds;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
 import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
@@ -46,21 +44,21 @@ class EndpointsTest {
     @Test
     @DisplayName("be empty by default")
     void beEmpty() {
-        Endpoints<String, CommandEnvelope> endpoints = new Endpoints<>();
+        var endpoints = new Endpoints<String, CommandEnvelope>();
         assertThat(endpoints.isEmpty()).isTrue();
     }
 
     @Test
     @DisplayName("allow to append endpoint providers and remember the last one per label")
     void appendEndpoint() {
-        Endpoints<String, CommandEnvelope> endpoints = new Endpoints<>();
+        var endpoints = new Endpoints<String, CommandEnvelope>();
 
-        MessageEndpoint<String, CommandEnvelope> first = noOpEndpoint();
-        MessageEndpoint<String, CommandEnvelope> second = noOpEndpoint();
+        var first = noOpEndpoint();
+        var second = noOpEndpoint();
         LazyEndpoint<String, CommandEnvelope> firstProvider = envelope -> first;
         LazyEndpoint<String, CommandEnvelope> secondProvider = envelope -> second;
 
-        InboxLabel label = HANDLE_COMMAND;
+        var label = HANDLE_COMMAND;
 
         endpoints.add(label, firstProvider);
         checkContains(endpoints, label, first);
@@ -72,8 +70,8 @@ class EndpointsTest {
     @Test
     @DisplayName("return `Optional.empty()` if no endpoint providers configured for the label")
     void returnEmpty() {
-        Endpoints<String, CommandEnvelope> endpoints = new Endpoints<>();
-        Optional<MessageEndpoint<String, CommandEnvelope>> result =
+        var endpoints = new Endpoints<String, CommandEnvelope>();
+        var result =
                 endpoints.get(REACT_UPON_EVENT, cmdEnvelope());
         assertThat(result.isPresent()).isFalse();
     }
@@ -82,15 +80,15 @@ class EndpointsTest {
     private static void checkContains(Endpoints<String, CommandEnvelope> endpoints,
                                       InboxLabel label,
                                       MessageEndpoint<String, CommandEnvelope> endpoint) {
-        CommandEnvelope someCmdEnvelope = cmdEnvelope();
-        Optional<MessageEndpoint<String, CommandEnvelope>> cmdEndpoint =
+        var someCmdEnvelope = cmdEnvelope();
+        var cmdEndpoint =
                 endpoints.get(label, someCmdEnvelope);
         assertThat(cmdEndpoint.isPresent()).isTrue();
         assertThat(cmdEndpoint.get()).isEqualTo(endpoint);
     }
 
     private static CommandEnvelope cmdEnvelope() {
-        TestActorRequestFactory commandFactory =
+        var commandFactory =
                 new TestActorRequestFactory(GivenUserId.generated(), ZoneIds.systemDefault());
         return CommandEnvelope.of(commandFactory.generateCommand());
     }

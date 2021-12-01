@@ -66,10 +66,10 @@ public abstract class BusBuilderTest<B extends BusBuilder<?, T, E, ?, ?>,
         BusFilter<E> first = new StubFilter<>();
         BusFilter<E> second = new StubFilter<>();
 
-        B builder = builder();
+        var builder = builder();
         builder.appendFilter(first)
                .appendFilter(second);
-        Iterable<BusFilter<E>> filters = builder.filters();
+        var filters = builder.filters();
 
         assertThat(filters)
                 .containsExactly(first, second);

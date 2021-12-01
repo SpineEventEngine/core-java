@@ -52,30 +52,30 @@ public class FieldMasksTestEnv {
         }
 
         public static AggProject newProject(String id) {
-            ProjectId projectId = ProjectId.newBuilder()
-                                           .setUuid(id)
-                                           .build();
-            Task first = Task.newBuilder()
-                             .setTaskId(TaskId.newBuilder()
-                                              .setId(1)
-                                              .build())
-                             .setTitle("First Task")
-                             .build();
+            var projectId = ProjectId.newBuilder()
+                    .setUuid(id)
+                    .build();
+            var first = Task.newBuilder()
+                    .setTaskId(TaskId.newBuilder()
+                                       .setId(1)
+                                       .build())
+                    .setTitle("First Task")
+                    .build();
 
-            Task second = Task.newBuilder()
-                              .setTaskId(TaskId.newBuilder()
-                                               .setId(2)
-                                               .build())
-                              .setTitle("Second Task")
-                              .build();
+            var second = Task.newBuilder()
+                    .setTaskId(TaskId.newBuilder()
+                                       .setId(2)
+                                       .build())
+                    .setTitle("Second Task")
+                    .build();
 
-            AggProject project = AggProject.newBuilder()
-                                           .setId(projectId)
-                                           .setName(format("Test project : %s", id))
-                                           .addTask(first)
-                                           .addTask(second)
-                                           .setStatus(Status.CREATED)
-                                           .build();
+            var project = AggProject.newBuilder()
+                    .setId(projectId)
+                    .setName(format("Test project : %s", id))
+                    .addTask(first)
+                    .addTask(second)
+                    .setStatus(Status.CREATED)
+                    .build();
             return project;
         }
 

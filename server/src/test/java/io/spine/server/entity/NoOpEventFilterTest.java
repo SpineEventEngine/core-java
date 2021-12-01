@@ -26,7 +26,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
@@ -40,7 +39,6 @@ import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -50,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("NoOpEventFilter should")
+@DisplayName("`NoOpEventFilter` should")
 class NoOpEventFilterTest {
 
     private final EventFilter filter = EventFilter.allowAll();
@@ -78,34 +76,31 @@ class NoOpEventFilterTest {
     @Test
     @DisplayName("allow any bulk of events")
     void allowAnyBulk() {
-        List<Event> events = events().collect(toList());
-        ImmutableCollection<Event> filtered = filter.filter(events);
+        var events = events().collect(toList());
+        var filtered = filter.filter(events);
         assertEquals(events, filtered);
     }
 
     private static Stream<Event> events() {
-        ProjectId projectId = ProjectId
+        var projectId = ProjectId
                 .newBuilder()
                 .setId(newUuid())
                 .build();
-        Stream<Event> result =
-                Stream.<EventMessage>of(EntProjectCreated
-                                                .newBuilder()
-                                                .setProjectId(projectId)
-                                                .build(),
-                                        EntProjectStarted
-                                                .newBuilder()
-                                                .setProjectId(projectId)
-                                                .build(),
-                                        EntTaskAdded
-                                                .newBuilder()
-                                                .setProjectId(projectId)
-                                                .build(),
-                                        StandardRejections.EntityAlreadyArchived
-                                                .newBuilder()
-                                                .setEntityId(AnyPacker.pack(projectId))
-                                                .build())
-                        .map(eventFactory::createEvent);
+        var result =
+                Stream.<EventMessage>of(
+                        EntProjectCreated.newBuilder()
+                                .setProjectId(projectId)
+                                .build(),
+                        EntProjectStarted.newBuilder()
+                                .setProjectId(projectId)
+                                .build(),
+                        EntTaskAdded.newBuilder()
+                                .setProjectId(projectId)
+                                .build(),
+                        StandardRejections.EntityAlreadyArchived.newBuilder()
+                                .setEntityId(AnyPacker.pack(projectId))
+                                .build())
+                      .map(eventFactory::createEvent);
         return result;
     }
 }

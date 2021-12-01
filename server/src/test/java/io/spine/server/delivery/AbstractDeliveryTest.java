@@ -52,7 +52,7 @@ abstract class AbstractDeliveryTest {
     }
 
     static void changeShardCountTo(int shards) {
-        Delivery newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
+        var newDelivery = Delivery.localWithShardsAndWindow(shards, Durations.ZERO);
         ServerEnvironment.when(Tests.class)
                          .use(newDelivery);
     }

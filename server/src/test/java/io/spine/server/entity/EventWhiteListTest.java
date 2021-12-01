@@ -38,7 +38,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -47,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventWhiteList should")
+@DisplayName("`EventWhiteList` should")
 class EventWhiteListTest {
 
     private static final TestEventFactory eventFactory =
@@ -72,10 +71,10 @@ class EventWhiteListTest {
     @Test
     @DisplayName("filter out non-allowed events")
     void filterOut() {
-        List<Event> events = Stream.<EventMessage>of(EntProjectStarted.getDefaultInstance(),
-                                                     EntTaskAdded.getDefaultInstance())
-                                   .map(eventFactory::createEvent)
-                                   .collect(toList());
+        var events = Stream.<EventMessage>of(EntProjectStarted.getDefaultInstance(),
+                                             EntTaskAdded.getDefaultInstance())
+                           .map(eventFactory::createEvent)
+                           .collect(toList());
         Collection<Event> filtered = whiteList.filter(events);
         assertEquals(1, filtered.size());
         assertTrue(events.contains(events.get(0)));
@@ -85,7 +84,7 @@ class EventWhiteListTest {
     @DisplayName("not allow events out from the white list")
     void denyEvents() {
         EventMessage event = EntTaskAdded.getDefaultInstance();
-        Optional<? extends EventMessage> result = whiteList.filter(event);
+        var result = whiteList.filter(event);
         assertFalse(result.isPresent());
     }
 }

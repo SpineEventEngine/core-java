@@ -91,7 +91,7 @@ public class AggregateMessageDispatcher {
     dispatchCommand(Aggregate<?, ?, ?> aggregate, Command command) {
         checkNotNull(aggregate);
         checkNotNull(command);
-        CommandEnvelope ce = CommandEnvelope.of(command);
+        var ce = CommandEnvelope.of(command);
         return AggregateTestSupport
                 .dispatchCommand(new TestAggregateRepository<>(), aggregate, ce);
     }
@@ -122,7 +122,7 @@ public class AggregateMessageDispatcher {
     dispatchEvent(Aggregate<?, ?, ?> aggregate, Event event) {
         checkNotNull(aggregate);
         checkNotNull(event);
-        EventEnvelope env = EventEnvelope.of(event);
+        var env = EventEnvelope.of(event);
         return AggregateTestSupport.dispatchEvent(new TestAggregateRepository<>(), aggregate, env);
     }
 

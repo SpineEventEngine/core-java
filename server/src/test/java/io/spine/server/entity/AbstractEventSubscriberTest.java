@@ -54,14 +54,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("AbstractEventSubscriber should")
+@DisplayName("`AbstractEventSubscriber` should")
 class AbstractEventSubscriberTest {
 
     private TestSubscriber subscriber;
@@ -70,12 +68,8 @@ class AbstractEventSubscriberTest {
 
     @BeforeEach
     void setUp() {
-        groupsContext = BoundedContext
-                .singleTenant("Groups")
-                .build();
-        organizationsContext = BoundedContext
-                .singleTenant("Organizations")
-                .build();
+        groupsContext = BoundedContext.singleTenant("Groups").build();
+        organizationsContext = BoundedContext.singleTenant("Organizations").build();
         subscriber = new TestSubscriber();
         groupsContext.internalAccess()
                      .registerEventDispatcher(subscriber);
@@ -90,16 +84,14 @@ class AbstractEventSubscriberTest {
     @Test
     @DisplayName("receive domestic entity state updates")
     void receiveEntityStateUpdates() {
-        Group.Builder builder = Group
-                .newBuilder()
+        var builder = Group.newBuilder()
                 .setId(GroupId.generate())
                 .setName("Admins")
                 .addParticipant(UserId.getDefaultInstance())
                 .addParticipant(UserId.getDefaultInstance());
-        Group newState = builder.build();
-        Group oldState = builder.setName("Old " + builder.getName()).build();
-        EntityStateChanged event = EntityStateChanged
-                .newBuilder()
+        var newState = builder.build();
+        var oldState = builder.setName("Old " + builder.getName()).build();
+        var event = EntityStateChanged.newBuilder()
                 .setEntity(messageIdWithType(Group.class))
                 .setWhen(Time.currentTime())
                 .setOldState(pack(oldState))
@@ -109,28 +101,26 @@ class AbstractEventSubscriberTest {
         SystemBoundedContexts.systemOf(groupsContext)
                              .eventBus()
                              .post(GivenEvent.withMessage(event));
-        Optional<Group> receivedState = subscriber.domestic();
+        var receivedState = subscriber.domestic();
         assertTrue(receivedState.isPresent());
         assertThat(receivedState)
-              .hasValue(newState);
+                .hasValue(newState);
         assertThat(subscriber.external())
-              .isEmpty();
+                .isEmpty();
     }
 
     @Test
     @DisplayName("receive external entity state updates")
     void receiveExternalEntityStateUpdates() {
-        Organization.Builder builder = Organization
-                .newBuilder()
+        var builder = Organization.newBuilder()
                 .setId(OrganizationId.generate())
                 .setName("Developers")
                 .setHead(UserId.getDefaultInstance())
                 .addMember(UserId.getDefaultInstance())
                 .addMember(UserId.getDefaultInstance());
-        Organization newState = builder.build();
-        Organization oldState = builder.setName("Old " + builder.getName()).build();
-        EntityStateChanged event = EntityStateChanged
-                .newBuilder()
+        var newState = builder.build();
+        var oldState = builder.setName("Old " + builder.getName()).build();
+        var event = EntityStateChanged.newBuilder()
                 .setEntity(messageIdWithType(Organization.class))
                 .setWhen(Time.currentTime())
                 .setOldState(pack(oldState))
@@ -140,7 +130,7 @@ class AbstractEventSubscriberTest {
         SystemBoundedContexts.systemOf(organizationsContext)
                              .eventBus()
                              .post(GivenEvent.withMessage(event));
-        Optional<Organization> receivedState = subscriber.external();
+        var receivedState = subscriber.external();
         assertThat(receivedState)
                 .hasValue(newState);
         assertThat(subscriber.domestic())
@@ -172,8 +162,7 @@ class AbstractEventSubscriberTest {
     }
 
     private static MessageId messageIdWithType(Class<? extends Message> type) {
-        MessageId historyId = MessageId
-                .newBuilder()
+        var historyId = MessageId.newBuilder()
                 .setId(pack(Empty.getDefaultInstance()))
                 .setTypeUrl(TypeUrl.of(type).value())
                 .build();
@@ -181,8 +170,7 @@ class AbstractEventSubscriberTest {
     }
 
     private static MessageId emptyEventId() {
-        return MessageId
-                .newBuilder()
+        return MessageId.newBuilder()
                 .setId(pack(EventId.getDefaultInstance()))
                 .setTypeUrl("example.org/test.Event")
                 .build();

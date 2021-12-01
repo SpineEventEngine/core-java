@@ -55,7 +55,7 @@ public final class CounterView extends Projection<String, DCounter, DCounter.Bui
     @Subscribe
     @SuppressWarnings("unused")
     void on(NumberAdded event, EventContext context) {
-        DCounter.Builder builder = builder();
+        var builder = builder();
         builder.setTotal(builder.getTotal() + weight);
     }
 

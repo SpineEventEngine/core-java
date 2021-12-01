@@ -71,8 +71,7 @@ class ApplyAllowImportTest {
     @Test
     @DisplayName("use event appliers in a traditional way")
     void normalApply() {
-        ObjectId id = ObjectId
-                .newBuilder()
+        var id = ObjectId.newBuilder()
                 .setValue("Луноход-1")
                 .build();
 
@@ -85,8 +84,7 @@ class ApplyAllowImportTest {
     @Test
     @DisplayName("use event appliers for import")
     void importingApply() {
-        ObjectId id = ObjectId
-                .newBuilder()
+        var id = ObjectId.newBuilder()
                 .setValue("LRV")
                 .build();
 

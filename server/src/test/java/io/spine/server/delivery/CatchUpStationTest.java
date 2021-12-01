@@ -28,7 +28,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Timestamp;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,8 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Streams.stream;
@@ -70,18 +67,18 @@ class CatchUpStationTest extends AbstractStationTest {
     @Test
     @DisplayName("remove live messages which correspond to a started `CatchUpJob`")
     void removeLiveMessagesIfCatchUpStarted() {
-        InboxMessage toDeliver = toDeliver(targetOne, type);
-        InboxMessage anotherToDeliver = copyWithNewId(toDeliver);
-        InboxMessage delivered = delivered(targetOne, type);
-        InboxMessage differentTarget = delivered(targetTwo, type);
-        Conveyor conveyor = new Conveyor(
+        var toDeliver = toDeliver(targetOne, type);
+        var anotherToDeliver = copyWithNewId(toDeliver);
+        var delivered = delivered(targetOne, type);
+        var differentTarget = delivered(targetTwo, type);
+        var conveyor = new Conveyor(
                 ImmutableList.of(toDeliver, anotherToDeliver, delivered, differentTarget),
                 new DeliveredMessages()
         );
 
-        CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
-        CatchUpStation station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
-        Station.Result result = station.process(conveyor);
+        var job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
+        var station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
+        var result = station.process(conveyor);
 
         assertDeliveredCount(result, 0);
 
@@ -98,20 +95,20 @@ class CatchUpStationTest extends AbstractStationTest {
     @DisplayName("deliver the messages in `CATCH_UP` status " +
             "which correspond to a started `CatchUpJob` and remove duplicates")
     void matchAndRunDeliveryAction() {
-        InboxMessage toCatchUp = catchingUp(targetOne, type);
-        InboxMessage duplicateCopy = copyWithNewId(toCatchUp);
-        InboxMessage anotherToCatchUp = catchingUp(targetOne, type);
-        InboxMessage alreadyDelivered = delivered(targetOne, type);
-        InboxMessage differentTarget = catchingUp(targetTwo, type);
+        var toCatchUp = catchingUp(targetOne, type);
+        var duplicateCopy = copyWithNewId(toCatchUp);
+        var anotherToCatchUp = catchingUp(targetOne, type);
+        var alreadyDelivered = delivered(targetOne, type);
+        var differentTarget = catchingUp(targetTwo, type);
 
-        ImmutableList<InboxMessage> initialContents =
+        var initialContents =
                 ImmutableList.of(toCatchUp, anotherToCatchUp, duplicateCopy,
                                  alreadyDelivered, differentTarget);
-        Conveyor conveyor = new Conveyor(initialContents, new DeliveredMessages());
+        var conveyor = new Conveyor(initialContents, new DeliveredMessages());
 
-        CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
-        CatchUpStation station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
-        Station.Result result = station.process(conveyor);
+        var job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
+        var station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
+        var result = station.process(conveyor);
 
         assertDeliveredCount(result, 2);
 
@@ -135,18 +132,18 @@ class CatchUpStationTest extends AbstractStationTest {
     @DisplayName("mark as `CATCH_UP` those live messages " +
             "which correspond to a finalizing `CatchUpJob`")
     void markLiveMessagesCatchUpIfJobFinalizing() {
-        InboxMessage toDeliver = toDeliver(targetOne, type);
-        InboxMessage anotherToDeliver = copyWithNewId(toDeliver);
-        InboxMessage delivered = delivered(targetOne, type);
-        InboxMessage differentTarget = delivered(targetTwo, type);
-        Conveyor conveyor = new Conveyor(
+        var toDeliver = toDeliver(targetOne, type);
+        var anotherToDeliver = copyWithNewId(toDeliver);
+        var delivered = delivered(targetOne, type);
+        var differentTarget = delivered(targetTwo, type);
+        var conveyor = new Conveyor(
                 ImmutableList.of(toDeliver, anotherToDeliver, delivered, differentTarget),
                 new DeliveredMessages()
         );
 
-        CatchUp job = catchUpJob(type, FINALIZING, currentTime(), ImmutableList.of(targetOne));
-        CatchUpStation station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
-        Station.Result result = station.process(conveyor);
+        var job = catchUpJob(type, FINALIZING, currentTime(), ImmutableList.of(targetOne));
+        var station = new CatchUpStation(MemoizingAction.empty(), ImmutableList.of(job));
+        var result = station.process(conveyor);
         assertDeliveredCount(result, 0);
 
         assertContainsExactly(conveyor.iterator(),
@@ -162,21 +159,21 @@ class CatchUpStationTest extends AbstractStationTest {
             "if the respective `CatchUpJob` is completed, " +
             "keeping the `CATCH_UP` messages in their storage for a bit longer")
     void deduplicateAndDeliverWhenJobCompleted() {
-        InboxMessage toCatchUp = catchingUp(targetOne, type);
-        InboxMessage moreToCatchUp = catchingUp(targetOne, type);
-        InboxMessage toDeliver = toDeliver(targetOne, type);
-        InboxMessage duplicateToCatchUp = copyWithNewId(toCatchUp);
-        InboxMessage duplicateToDeliver = copyWithStatus(copyWithNewId(toCatchUp), TO_DELIVER);
-        Conveyor conveyor = new Conveyor(
+        var toCatchUp = catchingUp(targetOne, type);
+        var moreToCatchUp = catchingUp(targetOne, type);
+        var toDeliver = toDeliver(targetOne, type);
+        var duplicateToCatchUp = copyWithNewId(toCatchUp);
+        var duplicateToDeliver = copyWithStatus(copyWithNewId(toCatchUp), TO_DELIVER);
+        var conveyor = new Conveyor(
                 ImmutableList.of(toCatchUp, moreToCatchUp, toDeliver,
                                  duplicateToCatchUp, duplicateToDeliver),
                 new DeliveredMessages()
         );
 
-        CatchUp job = catchUpJob(type, COMPLETED, currentTime(), ImmutableList.of(targetOne));
-        MemoizingAction action = MemoizingAction.empty();
-        CatchUpStation station = new CatchUpStation(action, ImmutableList.of(job));
-        Station.Result result = station.process(conveyor);
+        var job = catchUpJob(type, COMPLETED, currentTime(), ImmutableList.of(targetOne));
+        var action = MemoizingAction.empty();
+        var station = new CatchUpStation(action, ImmutableList.of(job));
+        var result = station.process(conveyor);
         assertDeliveredCount(result, 2);
 
         Collection<InboxMessage> deliveredMessages = checkNotNull(action.passedMessages());
@@ -186,7 +183,7 @@ class CatchUpStationTest extends AbstractStationTest {
                               moreToCatchUp
         );
 
-        Map<InboxMessageId, InboxMessage> remaindersById =
+        var remaindersById =
                 stream(conveyor.iterator()).collect(toMap(InboxMessage::getId, message -> message));
         assertThat(remaindersById).hasSize(3);
 
@@ -199,27 +196,27 @@ class CatchUpStationTest extends AbstractStationTest {
     @DisplayName("run the delivery action " +
             "for the messages in `CATCH_UP` status sorting them beforehand")
     void sortCatchUpMessagesBeforeCallingToAction() {
-        Timestamp now = currentTime();
-        Timestamp secondBefore = subtract(now, fromSeconds(1));
-        Timestamp twoSecondsBefore = subtract(now, fromSeconds(2));
-        Timestamp threeSecondsBefore = subtract(now, fromSeconds(3));
+        var now = currentTime();
+        var secondBefore = subtract(now, fromSeconds(1));
+        var twoSecondsBefore = subtract(now, fromSeconds(2));
+        var threeSecondsBefore = subtract(now, fromSeconds(3));
 
-        InboxMessage toCatchUp1 = catchingUp(targetOne, type, threeSecondsBefore);
-        InboxMessage toCatchUp2 = catchingUp(targetOne, type, twoSecondsBefore);
-        InboxMessage toCatchUp3 = catchingUp(targetOne, type, secondBefore);
-        InboxMessage toCatchUp4 = catchingUp(targetOne, type, now);
-        Conveyor conveyor = new Conveyor(
+        var toCatchUp1 = catchingUp(targetOne, type, threeSecondsBefore);
+        var toCatchUp2 = catchingUp(targetOne, type, twoSecondsBefore);
+        var toCatchUp3 = catchingUp(targetOne, type, secondBefore);
+        var toCatchUp4 = catchingUp(targetOne, type, now);
+        var conveyor = new Conveyor(
                 ImmutableList.of(toCatchUp3, toCatchUp2, toCatchUp4, toCatchUp1),
                 new DeliveredMessages()
         );
 
-        CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
-        MemoizingAction action = MemoizingAction.empty();
-        CatchUpStation station = new CatchUpStation(action, ImmutableList.of(job));
-        Station.Result result = station.process(conveyor);
+        var job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
+        var action = MemoizingAction.empty();
+        var station = new CatchUpStation(action, ImmutableList.of(job));
+        var result = station.process(conveyor);
         assertDeliveredCount(result, 4);
 
-        List<InboxMessage> deliveredMessages = checkNotNull(action.passedMessages());
+        var deliveredMessages = checkNotNull(action.passedMessages());
         assertThat(deliveredMessages).containsExactlyElementsIn(
                 ImmutableList.of(toCatchUp1, toCatchUp2, toCatchUp3, toCatchUp4)
         );
@@ -232,8 +229,8 @@ class CatchUpStationTest extends AbstractStationTest {
         @Test
         @DisplayName("by a particular target ID of the `CatchUpJob`")
         void byId() {
-            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
-            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
+            var messages = messagesToTargetOneOf(type);
+            var job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableList.of(targetOne));
             assertMatchesEvery(messages, job);
         }
 
@@ -241,13 +238,13 @@ class CatchUpStationTest extends AbstractStationTest {
         @DisplayName("when the `CatchUpJob` matches all the targets of type " +
                 "to which `InboxMessage` is dispatched")
         void allByType() {
-            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
-            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), null);
+            var messages = messagesToTargetOneOf(type);
+            var job = catchUpJob(type, IN_PROGRESS, currentTime(), null);
             assertMatchesEvery(messages, job);
         }
 
         private void assertMatchesEvery(ImmutableSet<InboxMessage> messages, CatchUp job) {
-            for (InboxMessage message : messages) {
+            for (var message : messages) {
                 assertThat(job.matches(message))
                         .isTrue();
             }
@@ -261,8 +258,8 @@ class CatchUpStationTest extends AbstractStationTest {
         @Test
         @DisplayName("when the target type of the `InboxMessage` and the `CatchUpJob` differs")
         void whenTargetTypeDiffers() {
-            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(anotherType);
-            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), null);
+            var messages = messagesToTargetOneOf(anotherType);
+            var job = catchUpJob(type, IN_PROGRESS, currentTime(), null);
             assertMatchesNone(messages, job);
         }
 
@@ -270,13 +267,13 @@ class CatchUpStationTest extends AbstractStationTest {
         @DisplayName("when the target ID of the `InboxMessage` " +
                 "does not match the IDs enumerated in the `CatchUpJob`")
         void whenIdDoesNotMatch() {
-            ImmutableSet<InboxMessage> messages = messagesToTargetOneOf(type);
-            CatchUp job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableSet.of(targetTwo));
+            var messages = messagesToTargetOneOf(type);
+            var job = catchUpJob(type, IN_PROGRESS, currentTime(), ImmutableSet.of(targetTwo));
             assertMatchesNone(messages, job);
         }
 
         private void assertMatchesNone(ImmutableSet<InboxMessage> messages, CatchUp job) {
-            for (InboxMessage message : messages) {
+            for (var message : messages) {
                 assertThat(job.matches(message))
                         .isFalse();
             }

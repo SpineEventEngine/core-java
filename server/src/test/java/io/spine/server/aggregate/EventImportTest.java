@@ -38,7 +38,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBox;
-import io.spine.testing.server.entity.EntitySubject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +51,7 @@ import static com.google.common.truth.Truth.assertThat;
 /**
  * Test support of event import in {@link AggregateRepository}.
  */
-@DisplayName("For event import AggregateRepository should")
+@DisplayName("For event import, `AggregateRepository` should")
 class EventImportTest {
 
     private EngineRepository repository;
@@ -97,22 +96,20 @@ class EventImportTest {
      * @return generated event wrapped into the envelope
      */
     EventEnvelope createEvent(EventMessage eventMessage, @Nullable EngineId producerId) {
-        TestEventFactory eventFactory = producerId == null
-                                        ? TestEventFactory.newInstance(getClass())
-                                        : TestEventFactory.newInstance(producerId, getClass());
-        EventEnvelope result = EventEnvelope.of(eventFactory.createEvent(eventMessage));
+        var eventFactory = producerId == null
+                           ? TestEventFactory.newInstance(getClass())
+                           : TestEventFactory.newInstance(producerId, getClass());
+        var result = EventEnvelope.of(eventFactory.createEvent(eventMessage));
         return result;
     }
-    
+
     @Test
     @DisplayName("Obtain importable event classes")
     void importableEventClasses() {
         createRepository(false);
-        Set<EventClass> importableEventClasses =
-                repository().importableEvents();
-        Set<EventClass> exposedByAggregateClass =
-                repository().aggregateClass()
-                            .importableEvents();
+        Set<EventClass> importableEventClasses = repository().importableEvents();
+        Set<EventClass> exposedByAggregateClass = repository().aggregateClass()
+                                                              .importableEvents();
         assertThat(importableEventClasses)
                 .isEqualTo(exposedByAggregateClass);
     }
@@ -134,7 +131,7 @@ class EventImportTest {
             createRepository(false);
 
             // Create event with producer ID, which is the target aggregate ID.
-            EventEnvelope event = createEvent(eventMessage, engineId);
+            var event = createEvent(eventMessage, engineId);
 
             assertImports(event);
         }
@@ -145,7 +142,7 @@ class EventImportTest {
             createRepository(true);
 
             // Create event with producer ID, which is NOT the target aggregate ID.
-            EventEnvelope event = createEvent(eventMessage, null);
+            var event = createEvent(eventMessage, null);
 
             assertImports(event);
         }
@@ -181,7 +178,7 @@ class EventImportTest {
             createRepository(false);
 
             // Create event with the producer ID of the target aggregate.
-            EventEnvelope event = createEvent(eventMessage, engineId);
+            var event = createEvent(eventMessage, engineId);
 
             // Apply routing to the generated event.
             assertRouted(event);
@@ -193,7 +190,7 @@ class EventImportTest {
             createRepository(true);
 
             // Create event with the producer ID, which is NOT the target aggregate ID.
-            EventEnvelope event = createEvent(eventMessage, null);
+            var event = createEvent(eventMessage, null);
 
             assertRouted(event);
         }
@@ -202,7 +199,7 @@ class EventImportTest {
          * Asserts that the import routing resulted in {@link #engineId}.
          */
         private void assertRouted(EventEnvelope event) {
-            EntitySubject assertEntity =
+            var assertEntity =
                     context().importsEvent(event.outerObject())
                              .assertEntity(engineId, EngineAggregate.class);
             assertEntity.exists();
@@ -214,12 +211,11 @@ class EventImportTest {
     void importUnsupported() {
         createRepository(false);
 
-        EngineId id = engineId("AGR");
-        UnsupportedEngineEvent eventMessage = UnsupportedEngineEvent
-                .newBuilder()
+        var id = engineId("AGR");
+        var eventMessage = UnsupportedEngineEvent.newBuilder()
                 .setId(id)
                 .build();
-        EventEnvelope unsupported = createEvent(eventMessage, id);
+        var unsupported = createEvent(eventMessage, id);
 
         context().importsEvent(unsupported.outerObject())
                  .assertEvents()

@@ -42,15 +42,15 @@ final class Dot extends Aggregate<ObjectId, Point, Point.Builder> {
     @Assign
     Moved on(Move command) {
         return Moved.newBuilder()
-                    .setObject(command.getObject())
-                    .setDirection(command.getDirection())
-                    .setCurrentPosition(move(state(), command.getDirection()))
-                    .build();
+                .setObject(command.getObject())
+                .setDirection(command.getDirection())
+                .setCurrentPosition(move(state(), command.getDirection()))
+                .build();
     }
 
     @Apply(allowImport = true)
     private void event(Moved event) {
-        Point newPosition = move(state(), event.getDirection());
+        var newPosition = move(state(), event.getDirection());
 
         builder().setId(event.getObject())
                  .setX(newPosition.getX())
@@ -58,8 +58,7 @@ final class Dot extends Aggregate<ObjectId, Point, Point.Builder> {
     }
 
     private static Point move(Point p, Direction direction) {
-        Point.Builder result = Point
-                .newBuilder()
+        var result = Point.newBuilder()
                 .setX(p.getX())
                 .setY(p.getY());
         switch (direction) {

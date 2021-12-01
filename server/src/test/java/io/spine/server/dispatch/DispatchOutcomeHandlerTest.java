@@ -45,22 +45,22 @@ import java.util.List;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("DispatchOutcomeHandler should")
+@DisplayName("`DispatchOutcomeHandler` should")
 public final class DispatchOutcomeHandlerTest {
 
     @Test
     @DisplayName("allow default doNothing handlers")
     void allowDefaultHandlers() {
-        DispatchOutcome outcome = DispatchOutcome.getDefaultInstance();
-        DispatchOutcomeHandler handler = DispatchOutcomeHandler.from(outcome);
+        var outcome = DispatchOutcome.getDefaultInstance();
+        var handler = DispatchOutcomeHandler.from(outcome);
         assertThat(handler.handle()).isEqualTo(outcome);
     }
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        DispatchOutcome outcome = DispatchOutcome.getDefaultInstance();
-        DispatchOutcomeHandler handler = DispatchOutcomeHandler.from(outcome);
+        var outcome = DispatchOutcome.getDefaultInstance();
+        var handler = DispatchOutcomeHandler.from(outcome);
         new NullPointerTester().testAllPublicInstanceMethods(handler);
     }
 
@@ -71,16 +71,14 @@ public final class DispatchOutcomeHandlerTest {
         @Test
         @DisplayName("error outcome")
         void error() {
-            Error error = Error
-                    .newBuilder()
+            var error = Error.newBuilder()
                     .setCode(1)
                     .build();
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setError(error)
                     .build();
             List<Error> errors = new ArrayList<>();
-            DispatchOutcome result = DispatchOutcomeHandler
+            var result = DispatchOutcomeHandler
                     .from(outcome)
                     .onError(errors::add)
                     .handle();
@@ -91,15 +89,12 @@ public final class DispatchOutcomeHandlerTest {
         @Test
         @DisplayName("success outcome")
         void success() {
-            Success success = Success
-                    .newBuilder()
-                    .build();
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var success = Success.getDefaultInstance();
+            var outcome = DispatchOutcome.newBuilder()
                     .setSuccess(success)
                     .build();
             List<Success> successes = new ArrayList<>();
-            DispatchOutcome result = DispatchOutcomeHandler
+            var result = DispatchOutcomeHandler
                     .from(outcome)
                     .onSuccess(successes::add)
                     .handle();
@@ -110,20 +105,17 @@ public final class DispatchOutcomeHandlerTest {
         @Test
         @DisplayName("produced events outcome")
         void events() {
-            Event event = Given.event();
-            Success success = Success
-                    .newBuilder()
-                    .setProducedEvents(ProducedEvents
-                                               .newBuilder()
+            var event = Given.event();
+            var success = Success.newBuilder()
+                    .setProducedEvents(ProducedEvents.newBuilder()
                                                .addEvent(event)
                                                .build())
                     .build();
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setSuccess(success)
                     .build();
             List<Event> events = new ArrayList<>();
-            DispatchOutcome result = DispatchOutcomeHandler
+            var result = DispatchOutcomeHandler
                     .from(outcome)
                     .onEvents(events::addAll)
                     .handle();
@@ -134,20 +126,18 @@ public final class DispatchOutcomeHandlerTest {
         @Test
         @DisplayName("produced commands outcome")
         void commands() {
-            Command command = Given.command();
-            Success success = Success
-                    .newBuilder()
-                    .setProducedCommands(ProducedCommands
-                                                 .newBuilder()
+            var command = Given.command();
+            var success = Success.newBuilder()
+                    .setProducedCommands(ProducedCommands.newBuilder()
                                                  .addCommand(command)
                                                  .build())
                     .build();
-            DispatchOutcome outcome = DispatchOutcome
+            var outcome = DispatchOutcome
                     .newBuilder()
                     .setSuccess(success)
                     .build();
             List<Command> commands = new ArrayList<>();
-            DispatchOutcome result = DispatchOutcomeHandler
+            var result = DispatchOutcomeHandler
                     .from(outcome)
                     .onCommands(commands::addAll)
                     .handle();
@@ -158,17 +148,16 @@ public final class DispatchOutcomeHandlerTest {
         @Test
         @DisplayName("rejection outcome")
         void rejection() {
-            Event rejection = Given.rejectionEvent();
-            Success error = Success
-                    .newBuilder()
+            var rejection = Given.rejectionEvent();
+            var error = Success.newBuilder()
                     .setRejection(rejection)
                     .build();
-            DispatchOutcome outcome = DispatchOutcome
+            var outcome = DispatchOutcome
                     .newBuilder()
                     .setSuccess(error)
                     .build();
             List<Event> rejections = new ArrayList<>();
-            DispatchOutcome result = DispatchOutcomeHandler
+            var result = DispatchOutcomeHandler
                     .from(outcome)
                     .onRejection(rejections::add)
                     .handle();
@@ -180,20 +169,17 @@ public final class DispatchOutcomeHandlerTest {
         @Test
         @DisplayName("interruption outcome")
         void interruption() {
-            MessageId messageId = MessageId
-                    .newBuilder()
+            var messageId = MessageId.newBuilder()
                     .setId(Identifier.pack(TestValues.randomString()))
                     .build();
-            Interruption interruption = Interruption
-                    .newBuilder()
+            var interruption = Interruption.newBuilder()
                     .setStoppedAt(messageId)
                     .build();
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setInterrupted(interruption)
                     .build();
             List<Interruption> interruptions = new ArrayList<>();
-            DispatchOutcome result = DispatchOutcomeHandler
+            var result = DispatchOutcomeHandler
                     .from(outcome)
                     .onInterruption(interruptions::add)
                     .handle();
@@ -204,16 +190,14 @@ public final class DispatchOutcomeHandlerTest {
         @Test
         @DisplayName("ignore outcome")
         void ignore() {
-            Ignore ignore = Ignore
-                    .newBuilder()
+            var ignore = Ignore.newBuilder()
                     .setReason(TestValues.randomString())
                     .build();
-            DispatchOutcome outcome = DispatchOutcome
-                    .newBuilder()
+            var outcome = DispatchOutcome.newBuilder()
                     .setIgnored(ignore)
                     .build();
             List<Ignore> ignored = new ArrayList<>();
-            DispatchOutcome result = DispatchOutcomeHandler
+            var result = DispatchOutcomeHandler
                     .from(outcome)
                     .onIgnored(ignored::add)
                     .handle();

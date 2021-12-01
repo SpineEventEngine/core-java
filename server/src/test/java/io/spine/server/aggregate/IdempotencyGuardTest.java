@@ -37,8 +37,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.aggregate.ProjectId;
@@ -63,7 +61,7 @@ import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProje
 import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.taskStarted;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("IdempotencyGuard should")
+@DisplayName("`IdempotencyGuard` should")
 class IdempotencyGuardTest {
 
     private BoundedContext context;
@@ -98,15 +96,15 @@ class IdempotencyGuardTest {
         @Test
         @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
         void throwExceptionForDuplicateCommand() {
-            Command createCommand = command(createProject(projectId));
+            var createCommand = command(createProject(projectId));
 
             post(createCommand);
 
-            IgTestAggregate aggregate = repository.loadAggregate(projectId);
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = check(guard, createCommand);
+            var aggregate = repository.loadAggregate(projectId);
+            var guard = new IdempotencyGuard(aggregate);
+            var error = check(guard, createCommand);
             assertTrue(error.isPresent());
-            Error actualError = error.get();
+            var actualError = error.get();
             assertThat(actualError.getType())
                     .isEqualTo(CommandValidationError.class.getSimpleName());
             assertThat(actualError.getCode()).isEqualTo(DUPLICATE_COMMAND_VALUE);
@@ -116,50 +114,50 @@ class IdempotencyGuardTest {
         @DisplayName("not throw exception when command was handled but snapshot was made")
         void notThrowForCommandHandledAfterSnapshot() {
             repository.setSnapshotTrigger(1);
-            Command createCommand = command(createProject(projectId));
+            var createCommand = command(createProject(projectId));
             post(createCommand);
 
-            IgTestAggregate aggregate = aggregate();
+            var aggregate = aggregate();
 
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = check(guard, createCommand);
+            var guard = new IdempotencyGuard(aggregate);
+            var error = check(guard, createCommand);
             assertThat(error).isEmpty();
         }
 
         @Test
         @DisplayName("not throw exception if command was not handled")
         void notThrowForCommandNotHandled() {
-            Command createCommand = command(createProject(projectId));
-            IgTestAggregate aggregate = new IgTestAggregate(projectId);
+            var createCommand = command(createProject(projectId));
+            var aggregate = new IgTestAggregate(projectId);
 
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = guard.check(CommandEnvelope.of(createCommand));
+            var guard = new IdempotencyGuard(aggregate);
+            var error = guard.check(CommandEnvelope.of(createCommand));
             assertThat(error).isEmpty();
         }
 
         @Test
         @DisplayName("not throw exception if another command was handled")
         void notThrowIfAnotherCommandHandled() {
-            Command createCommand = command(createProject(projectId));
-            Command startCommand = command(startProject(projectId));
+            var createCommand = command(createProject(projectId));
+            var startCommand = command(startProject(projectId));
 
             post(createCommand);
 
-            IgTestAggregate aggregate = aggregate();
+            var aggregate = aggregate();
 
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = check(guard, startCommand);
+            var guard = new IdempotencyGuard(aggregate);
+            var error = check(guard, startCommand);
             assertThat(error).isEmpty();
         }
 
         private void post(Command command) {
-            CommandBus commandBus = context.commandBus();
+            var commandBus = context.commandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(command, noOpObserver);
         }
 
         private Optional<Error> check(IdempotencyGuard guard, Command command) {
-            CommandEnvelope envelope = CommandEnvelope.of(command);
+            var envelope = CommandEnvelope.of(command);
             return guard.check(envelope);
         }
     }
@@ -177,14 +175,14 @@ class IdempotencyGuardTest {
         @Test
         @DisplayName("throw DuplicateEventException when event was handled since last snapshot")
         void throwExceptionForDuplicateCommand() {
-            Event event = event(taskStarted(projectId));
+            var event = event(taskStarted(projectId));
             post(event);
 
-            IgTestAggregate aggregate = repository.loadAggregate(projectId);
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = check(guard, event);
+            var aggregate = repository.loadAggregate(projectId);
+            var guard = new IdempotencyGuard(aggregate);
+            var error = check(guard, event);
             assertTrue(error.isPresent());
-            Error actualError = error.get();
+            var actualError = error.get();
             assertThat(actualError.getType()).isEqualTo(EventValidationError.class.getSimpleName());
         }
 
@@ -193,39 +191,39 @@ class IdempotencyGuardTest {
         void notThrowForCommandHandledAfterSnapshot() {
             repository.setSnapshotTrigger(1);
 
-            Event event = event(taskStarted(projectId));
+            var event = event(taskStarted(projectId));
             post(event);
 
-            IgTestAggregate aggregate = repository.loadAggregate(projectId);
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = check(guard, event);
+            var aggregate = repository.loadAggregate(projectId);
+            var guard = new IdempotencyGuard(aggregate);
+            var error = check(guard, event);
             assertThat(error).isEmpty();
         }
 
         @Test
         @DisplayName("not throw exception if event was not handled")
         void notThrowForCommandNotHandled() {
-            Event event = event(taskStarted(projectId));
-            IgTestAggregate aggregate = new IgTestAggregate(projectId);
+            var event = event(taskStarted(projectId));
+            var aggregate = new IgTestAggregate(projectId);
 
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = check(guard, event);
+            var guard = new IdempotencyGuard(aggregate);
+            var error = check(guard, event);
             assertThat(error).isEmpty();
         }
 
         @Test
         @DisplayName("not throw exception if another event was handled")
         void notThrowIfAnotherCommandHandled() {
-            Event taskEvent = event(taskStarted(projectId));
-            Event projectEvent = event(projectPaused(projectId));
+            var taskEvent = event(taskStarted(projectId));
+            var projectEvent = event(projectPaused(projectId));
 
-            EventBus eventBus = context.eventBus();
+            var eventBus = context.eventBus();
             eventBus.post(taskEvent);
 
-            IgTestAggregate aggregate = repository.loadAggregate(projectId);
+            var aggregate = repository.loadAggregate(projectId);
 
-            IdempotencyGuard guard = new IdempotencyGuard(aggregate);
-            Optional<Error> error = check(guard, projectEvent);
+            var guard = new IdempotencyGuard(aggregate);
+            var error = check(guard, projectEvent);
             assertThat(error).isEmpty();
         }
 
@@ -235,7 +233,7 @@ class IdempotencyGuardTest {
         }
 
         private Optional<Error> check(IdempotencyGuard guard, Event event) {
-            EventEnvelope envelope = EventEnvelope.of(event);
+            var envelope = EventEnvelope.of(event);
             return guard.check(envelope);
         }
     }

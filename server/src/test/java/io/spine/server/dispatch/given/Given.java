@@ -62,9 +62,9 @@ public final class Given {
     }
 
     public static Event rejectionEvent() {
-        Command cmd = commandFactory.create(createDispatch());
+        var cmd = commandFactory.create(createDispatch());
         RejectionThrowable throwable = new StubRejectionThrowable();
-        Event rejection = reject(cmd, throwable);
+        var rejection = reject(cmd, throwable);
         return rejection;
     }
 

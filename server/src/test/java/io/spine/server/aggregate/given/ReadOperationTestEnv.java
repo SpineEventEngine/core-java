@@ -63,18 +63,15 @@ public final class ReadOperationTestEnv {
     }
 
     private static Event newEvent() {
-        EventId id = EventId
-                .newBuilder()
+        var id = EventId.newBuilder()
                 .setValue(newUuid())
                 .build();
         version = increment(version);
-        EventContext context = EventContext
-                .newBuilder()
+        var context = EventContext.newBuilder()
                 .setTimestamp(currentTime())
                 .setVersion(version)
                 .build();
-        return Event
-                .newBuilder()
+        return Event.newBuilder()
                 .setId(id)
                 .setContext(context)
                 .setMessage(pack(StgProjectCreated.getDefaultInstance()))
@@ -83,8 +80,7 @@ public final class ReadOperationTestEnv {
 
     public static Snapshot snapshot() {
         version = increment(version);
-        return Snapshot
-                .newBuilder()
+        return Snapshot.newBuilder()
                 .setTimestamp(currentTime())
                 .setVersion(version)
                 .build();
@@ -92,6 +88,7 @@ public final class ReadOperationTestEnv {
 
     public static final class TestAggregate
             extends Aggregate<StgProjectId, StgProject, StgProject.Builder> {
+
         private TestAggregate(StgProjectId id) {
             super(id);
         }

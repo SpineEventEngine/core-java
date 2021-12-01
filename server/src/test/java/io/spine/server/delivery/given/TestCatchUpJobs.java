@@ -65,22 +65,19 @@ public final class TestCatchUpJobs {
                                      CatchUpStatus status,
                                      Timestamp sinceWhen,
                                      @Nullable Collection<Object> ids) {
-        CatchUpId catchUpId = CatchUpId
-                .newBuilder()
+        var catchUpId = CatchUpId.newBuilder()
                 .setUuid(Identifier.newUuid())
                 .setProjectionType(projectionType.value())
                 .build();
-        CatchUp.Request.Builder requestBuilder = CatchUp.Request.newBuilder()
-                                                                .setSinceWhen(sinceWhen);
+        var requestBuilder = CatchUp.Request.newBuilder().setSinceWhen(sinceWhen);
         if (ids != null) {
-            for (Object id : ids) {
+            for (var id : ids) {
                 requestBuilder.addTarget(Identifier.pack(id));
             }
         }
-        CatchUp.Request request = requestBuilder.build();
+        var request = requestBuilder.build();
 
-        CatchUp result = CatchUp
-                .newBuilder()
+        var result = CatchUp.newBuilder()
                 .setId(catchUpId)
                 .setStatus(status)
                 .setRequest(request)

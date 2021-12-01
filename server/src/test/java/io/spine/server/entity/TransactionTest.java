@@ -25,8 +25,6 @@
  */
 package io.spine.server.entity;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.EntityState;
 import io.spine.base.EventMessage;
 import io.spine.base.Identifier;
@@ -139,12 +137,12 @@ public abstract class TransactionTest<I,
         @Test
         @DisplayName("from entity")
         void fromEntity() {
-            E entity = createEntity();
-            B expectedBuilder = toBuilder(entity);
-            Version expectedVersion = entity.version();
-            LifecycleFlags expectedLifecycleFlags = entity.lifecycleFlags();
+            var entity = createEntity();
+            var expectedBuilder = toBuilder(entity);
+            var expectedVersion = entity.version();
+            var expectedLifecycleFlags = entity.lifecycleFlags();
 
-            Transaction<I, E, S, B> tx = createTx(entity);
+            var tx = createTx(entity);
             assertNotNull(tx);
 
             assertThat(tx.entity())
@@ -164,16 +162,16 @@ public abstract class TransactionTest<I,
         @Test
         @DisplayName("from entity, state, and version")
         void fromEntityStateAndVersion() {
-            E entity = createEntity();
-            S newState = newState();
-            Version newVersion = newVersion();
+            var entity = createEntity();
+            var newState = newState();
+            var newVersion = newVersion();
 
             assertThat(newState)
                     .isNotEqualTo(entity.state());
             assertThat(newVersion)
                     .isNotEqualTo(entity.version());
 
-            Transaction<I, E, S, B> tx = createTx(entity, newState, newVersion);
+            var tx = createTx(entity, newState, newVersion);
 
             assertThat(tx.builder().build())
                     .isEqualTo(newState);
@@ -197,10 +195,10 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("deliver events to handler methods")
     void propagateChangesToAppliers() {
-        E entity = createEntity();
-        Transaction<I, E, S, B> tx = createTx(entity);
+        var entity = createEntity();
+        var tx = createTx(entity);
 
-        Event event = withMessage(createEventMessage());
+        var event = withMessage(createEventMessage());
         applyEvent(tx, event);
 
         checkEventReceived(entity, event);
@@ -209,17 +207,16 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("create phase for each dispatched message")
     void createPhaseForAppliedEvent() {
-        E entity = createEntity();
-        Transaction<I, E, S, B> tx = createTx(entity);
+        var entity = createEntity();
+        var tx = createTx(entity);
 
-        Event event = withMessage(createEventMessage());
-        DispatchOutcome outcome = applyEvent(tx, event);
+        var event = withMessage(createEventMessage());
+        var outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
         assertThat(tx.phases())
                 .hasSize(1);
 
-        Phase<I> phase = tx.phases()
-                           .get(0);
+        var phase = tx.phases().get(0);
 
         assertThat(phase.messageId()).isEqualTo(event.id());
     }
@@ -227,18 +224,18 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("propagate changes to entity when phase is propagated")
     void propagateChangesToEntityOnCommit() {
-        E entity = createEntity();
+        var entity = createEntity();
 
-        S stateBeforePhase = entity.state();
-        Version versionBeforePhase = entity.version();
+        var stateBeforePhase = entity.state();
+        var versionBeforePhase = entity.version();
 
-        Transaction<I, E, S, B> tx = createTx(entity);
-        Event event = withMessage(createEventMessage());
+        var tx = createTx(entity);
+        var event = withMessage(createEventMessage());
 
         applyEvent(tx, event);
 
-        S modifiedState = entity.state();
-        Version modifiedVersion = entity.version();
+        var modifiedState = entity.state();
+        var modifiedVersion = entity.version();
 
         assertThat(modifiedState)
                 .isNotEqualTo(stateBeforePhase);
@@ -249,20 +246,20 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("not propagate changes to entity on rollback")
     void notPropagateChangesOnRollback() {
-        E entity = createEntity();
-        S stateBeforeRollback = entity.state();
-        Version versionBeforeRollback = entity.version();
+        var entity = createEntity();
+        var stateBeforeRollback = entity.state();
+        var versionBeforeRollback = entity.version();
 
-        Transaction<I, E, S, B> tx = createTx(entity);
+        var tx = createTx(entity);
 
-        Event event = withMessage(createEventMessage());
-        DispatchOutcome outcome = applyEvent(tx, event);
+        var event = withMessage(createEventMessage());
+        var outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
-        RuntimeException exception = new RuntimeException("that triggers rollback");
+        var exception = new RuntimeException("that triggers rollback");
         tx.rollback(fromThrowable(exception));
 
-        S stateAfterRollback = entity.state();
-        Version versionAfterRollback = entity.version();
+        var stateAfterRollback = entity.state();
+        var versionAfterRollback = entity.version();
 
         assertThat(stateAfterRollback)
                 .isEqualTo(stateBeforeRollback);
@@ -273,18 +270,18 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("set transaction entity version from event context")
     void setVersionFromEventContext() {
-        E entity = createEntity();
+        var entity = createEntity();
 
-        Transaction<I, E, S, B> tx = createTx(entity);
-        Event event = withMessage(createEventMessage());
+        var tx = createTx(entity);
+        var event = withMessage(createEventMessage());
 
-        Version ctxVersion = event.context()
-                                  .getVersion();
+        var ctxVersion = event.context()
+                              .getVersion();
         assertThat(ctxVersion)
                 .isNotEqualTo(tx.version());
 
         applyEvent(tx, event);
-        Version modifiedVersion = tx.version();
+        var modifiedVersion = tx.version();
         assertThat(tx.version())
                 .isEqualTo(modifiedVersion);
     }
@@ -292,18 +289,18 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("notify listener during transaction execution")
     void notifyListenerDuringExecution() {
-        MemoizingTransactionListener<I> listener = new MemoizingTransactionListener<>();
-        E entity = createEntity();
-        Transaction<I, E, S, B> tx = createTx(entity, listener);
-        Event event = withMessage(createEventMessage());
+        var listener = new MemoizingTransactionListener<I>();
+        var entity = createEntity();
+        var tx = createTx(entity, listener);
+        var event = withMessage(createEventMessage());
 
-        DispatchOutcome outcome = applyEvent(tx, event);
+        var outcome = applyEvent(tx, event);
         assertTrue(outcome.hasSuccess());
 
-        ImmutableList<Phase<I>> phases = listener.phasesOnAfter();
+        var phases = listener.phasesOnAfter();
         assertThat(phases)
                 .hasSize(1);
-        Phase<I> phase = phases.get(0);
+        var phase = phases.get(0);
         assertThat(phase.messageId())
                 .isEqualTo(event.getId());
     }
@@ -312,10 +309,10 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("not allow injecting state if entity has non-zero version already")
     void notInjectToEntityWithVersion() {
-        E entity = createEntity();
+        var entity = createEntity();
         entity.incrementVersion();
-        S newState = newState();
-        Version newVersion = newVersion();
+        var newState = newState();
+        var newVersion = newVersion();
 
         assertThrows(IllegalStateException.class,
                      () -> createTx(entity, newState, newVersion));
@@ -328,24 +325,24 @@ public abstract class TransactionTest<I,
         @Test
         @DisplayName("`IllegalStateException` on phase failure")
         void onPhaseFailure() {
-            E entity = createEntity();
+            var entity = createEntity();
 
-            Transaction<I, E, S, B> tx = createTx(entity);
+            var tx = createTx(entity);
 
-            Event event = withMessage(failingInHandler());
+            var event = withMessage(failingInHandler());
 
-            DispatchOutcome outcome = applyEvent(tx, event);
+            var outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
         }
 
         @Test
         @DisplayName("`InvalidEntityStateException` on state transition failure")
         void onCommitFailure() {
-            E entity = createEntity();
-            Transaction<I, E, S, B> tx = createTx(entity);
-            Event event = withMessage(failingStateTransition());
+            var entity = createEntity();
+            var tx = createTx(entity);
+            var event = withMessage(failingStateTransition());
 
-            DispatchOutcome outcome = applyEvent(tx, event);
+            var outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
         }
     }
@@ -357,14 +354,14 @@ public abstract class TransactionTest<I,
         @Test
         @DisplayName("on violation in message handler")
         void ifPhaseFailed() {
-            E entity = createEntity();
-            S originalState = entity.state();
-            Version originalVersion = entity.version();
+            var entity = createEntity();
+            var originalState = entity.state();
+            var originalVersion = entity.version();
 
-            Transaction<I, E, S, B> tx = createTx(entity);
+            var tx = createTx(entity);
 
-            Event event = withMessage(failingInHandler());
-            DispatchOutcome outcome = applyEvent(tx, event);
+            var event = withMessage(failingInHandler());
+            var outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }
@@ -372,23 +369,23 @@ public abstract class TransactionTest<I,
         @Test
         @DisplayName("on violation at state transition")
         void ifCommitFailed() {
-            E entity = createAndModify();
-            S originalState = entity.state();
-            Version originalVersion = entity.version();
+            var entity = createAndModify();
+            var originalState = entity.state();
+            var originalVersion = entity.version();
 
-            Transaction<I, E, S, B> tx = createTx(entity);
-            Version nextVersion = Versions.increment(entity.version());
-            Event event = withMessageAndVersion(failingStateTransition(), nextVersion);
+            var tx = createTx(entity);
+            var nextVersion = Versions.increment(entity.version());
+            var event = withMessageAndVersion(failingStateTransition(), nextVersion);
 
-            DispatchOutcome outcome = applyEvent(tx, event);
+            var outcome = applyEvent(tx, event);
             assertTrue(outcome.hasError());
             checkRollback(entity, originalState, originalVersion);
         }
 
         private E createAndModify() {
-            E entity = createEntity();
-            Transaction<I, E, S, B> tx = createTx(entity);
-            Event event = withMessage(createEventMessage());
+            var entity = createEntity();
+            var tx = createTx(entity);
+            var event = withMessage(createEventMessage());
             applyEvent(tx, event);
             tx.commit();
             return entity;
@@ -406,9 +403,9 @@ public abstract class TransactionTest<I,
     @Test
     @DisplayName("init builder with the entity ID, if the field is required or assumed required")
     void initBuilderWithId() {
-        E entity = createEntity();
-        Transaction<I, E, S, B> tx = createTx(entity);
-        FieldDescriptor firstField =
+        var entity = createEntity();
+        var tx = createTx(entity);
+        var firstField =
                 entity.state()
                       .getDescriptorForType()
                       .getFields()
@@ -425,15 +422,14 @@ public abstract class TransactionTest<I,
      * @implNote This method uses package-private API of the {@link Transaction} class.
      */
     protected final void advanceVersionFromEvent() {
-        E entity = createEntity();
-        Transaction<I, E, S, B> tx = createTx(entity);
+        var entity = createEntity();
+        var tx = createTx(entity);
         assertThat(tx.version())
                 .isEqualTo(entity.version());
 
-        Event event = withMessage(createEventMessage());
+        var event = withMessage(createEventMessage());
         applyEvent(tx, event);
-        Version versionFromEvent = event.context()
-                                        .getVersion();
+        var versionFromEvent = event.context().getVersion();
         assertThat(tx.version())
                 .isEqualTo(versionFromEvent);
         tx.commit();

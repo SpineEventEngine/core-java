@@ -27,7 +27,6 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Any;
 import io.spine.core.CommandContext;
@@ -35,10 +34,8 @@ import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
-import io.spine.server.dispatch.Success;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.MatchCriterion;
-import io.spine.server.model.SignatureMismatch;
 import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
@@ -50,8 +47,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -79,29 +74,27 @@ class ApplierTest {
     @Test
     @DisplayName("be properly created from signature")
     void beCreatedFromFactory() {
-        Method method = new ValidApplier().getMethod();
+        var method = new ValidApplier().getMethod();
 
-
-        Optional<Applier> actual = signature.classify(method);
+        var actual = signature.classify(method);
         assertTrue(actual.isPresent());
 
-        Applier expected = new Applier(method, EventApplierParams.MESSAGE);
+        var expected = new Applier(method, EventApplierParams.MESSAGE);
         assertEquals(expected, actual.get());
     }
 
     @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
-        ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.classify(applierObject.getMethod());
+        var applierObject = new ValidApplier();
+        var method = signature.classify(applierObject.getMethod());
         assertTrue(method.isPresent());
-        Applier applier = method.get();
-        RefProjectCreated eventMessage = Sample.messageOfType(RefProjectCreated.class);
-        Event event = Event
-                .newBuilder()
+        var applier = method.get();
+        var eventMessage = Sample.messageOfType(RefProjectCreated.class);
+        var event = Event.newBuilder()
                 .setMessage(pack(eventMessage))
                 .build();
-        EventEnvelope envelope = EventEnvelope.of(event);
+        var envelope = EventEnvelope.of(event);
         applier.invoke(applierObject, envelope);
 
         assertEquals(eventMessage, applierObject.eventApplied);
@@ -110,11 +103,11 @@ class ApplierTest {
     @Test
     @DisplayName("check method access modifier")
     void checkMethodAccessModifier() {
-        Method method = new ValidApplierButNotPackagePrivate().getMethod();
+        var method = new ValidApplierButNotPackagePrivate().getMethod();
 
-        Collection<SignatureMismatch> mismatches = signature.match(method);
+        var mismatches = signature.match(method);
         assertEquals(1, mismatches.size());
-        SignatureMismatch mismatch = mismatches.iterator().next();
+        var mismatch = mismatches.iterator().next();
         assertNotNull(mismatch);
         assertEquals(MatchCriterion.ACCESS_MODIFIER, mismatch.getUnmetCriterion());
     }
@@ -122,19 +115,18 @@ class ApplierTest {
     @Test
     @DisplayName("convert `null` result to Success")
     void convertToSuccess() {
-        ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.classify(applierObject.getMethod());
+        var applierObject = new ValidApplier();
+        var method = signature.classify(applierObject.getMethod());
         assertTrue(method.isPresent());
-        Applier applier = method.get();
+        var applier = method.get();
 
         Void result = null;
-        Event event = Event
-                .newBuilder()
+        var event = Event.newBuilder()
                 .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                 .build();
-        EventEnvelope envelope = EventEnvelope.of(event);
-        Success success = applier.toSuccessfulOutcome(result, applierObject, envelope);
-        ProtoSubject assertSuccess = ProtoTruth.assertThat(success);
+        var envelope = EventEnvelope.of(event);
+        var success = applier.toSuccessfulOutcome(result, applierObject, envelope);
+        var assertSuccess = ProtoTruth.assertThat(success);
         assertSuccess.isNotNull();
         assertSuccess.isEqualToDefaultInstance();
     }
@@ -142,18 +134,17 @@ class ApplierTest {
     @Test
     @DisplayName("throw on non-`null` return value")
     void failIfReturnsValue() {
-        ValidApplier applierObject = new ValidApplier();
-        Optional<Applier> method = signature.classify(applierObject.getMethod());
+        var applierObject = new ValidApplier();
+        var method = signature.classify(applierObject.getMethod());
         assertTrue(method.isPresent());
-        Applier applier = method.get();
+        var applier = method.get();
 
-        Event event = Event
-                .newBuilder()
+        var event = Event.newBuilder()
                 .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                 .build();
-        EventEnvelope envelope = EventEnvelope.of(event);
-        String result = "hello there";
-        IllegalOutcomeException exception =
+        var envelope = EventEnvelope.of(event);
+        var result = "hello there";
+        var exception =
                 assertThrows(IllegalOutcomeException.class,
                              () -> applier.toSuccessfulOutcome(result,
                                                                applierObject,
@@ -170,7 +161,7 @@ class ApplierTest {
         @Test
         @DisplayName("it has one message parameter")
         void hasOneMessageParameter() {
-            Method applier = new ValidApplier().getMethod();
+            var applier = new ValidApplier().getMethod();
 
             assertIsEventApplier(applier);
         }
@@ -179,7 +170,7 @@ class ApplierTest {
         @MuteLogging // Mute the warning about signature mismatch as it's expected.
         @DisplayName("it's not package-private")
         void isNotPrivate() {
-            Method method = new ValidApplierButNotPackagePrivate().getMethod();
+            var method = new ValidApplierButNotPackagePrivate().getMethod();
 
             assertIsEventApplier(method);
         }
@@ -196,7 +187,7 @@ class ApplierTest {
         @Test
         @DisplayName("it's not annotated")
         void isNotAnnotated() {
-            Method applier = new InvalidApplierNoAnnotation().getMethod();
+            var applier = new InvalidApplierNoAnnotation().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -204,7 +195,7 @@ class ApplierTest {
         @Test
         @DisplayName("it has no params")
         void hasNoParams() {
-            Method applier = new InvalidApplierNoParams().getMethod();
+            var applier = new InvalidApplierNoParams().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -212,7 +203,7 @@ class ApplierTest {
         @Test
         @DisplayName("it has too many params")
         void hasTooManyParams() {
-            Method applier = new InvalidApplierTooManyParams().getMethod();
+            var applier = new InvalidApplierTooManyParams().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -220,7 +211,7 @@ class ApplierTest {
         @Test
         @DisplayName("it has one param of invalid type")
         void hasOneInvalidParam() {
-            Method applier = new InvalidApplierOneNotMsgParam().getMethod();
+            var applier = new InvalidApplierOneNotMsgParam().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -228,7 +219,7 @@ class ApplierTest {
         @Test
         @DisplayName("it has non-void return type")
         void returnsNonVoidType() {
-            Method applier = new InvalidApplierNotVoid().getMethod();
+            var applier = new InvalidApplierNotVoid().getMethod();
 
             assertIsNotEventApplier(applier);
         }

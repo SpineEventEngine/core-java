@@ -73,7 +73,7 @@ class ClientRequestTest extends AbstractClientTest {
                     .setUser(GivenUserId.generated())
                     .build();
 
-            CommandRequest commandRequest = request.command(msg);
+            var commandRequest = request.command(msg);
             assertThat(commandRequest.message())
                     .isEqualTo(msg);
         }
@@ -82,7 +82,7 @@ class ClientRequestTest extends AbstractClientTest {
         @DisplayName("`SubscriptionRequest`")
         void subscription() {
             Class<? extends EntityState<?>> messageType = UserAccount.class;
-            SubscriptionRequest<? extends EntityState<?>> subscriptionRequest =
+            var subscriptionRequest =
                     request.subscribeTo(messageType);
 
             assertThat(subscriptionRequest.messageType())
@@ -93,7 +93,7 @@ class ClientRequestTest extends AbstractClientTest {
         @DisplayName("`EventSubscriptionRequest`")
         void eventSubscription() {
             Class<? extends EventMessage> eventType = UserLoggedIn.class;
-            EventSubscriptionRequest<? extends EventMessage> eventSubscriptionRequest =
+            var eventSubscriptionRequest =
                     request.subscribeToEvent(eventType);
 
             assertThat(eventSubscriptionRequest.messageType())
@@ -104,9 +104,8 @@ class ClientRequestTest extends AbstractClientTest {
     @Test
     @DisplayName("run `EntityQuery`")
     void runEntityQuery() {
-        ActiveUsers.Query query = ActiveUsers.query()
-                                             .build();
-        ImmutableList<ActiveUsers> results = request.run(query);
+        var query = ActiveUsers.query().build();
+        var results = request.run(query);
         assertThat(results).isNotNull();
     }
 }

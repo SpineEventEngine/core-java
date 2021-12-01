@@ -29,7 +29,6 @@ package io.spine.server.aggregate;
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
-import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
@@ -64,7 +63,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregatePartTestEnv.cre
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static java.util.stream.Collectors.toList;
 
-@DisplayName("AggregatePart should")
+@DisplayName("`AggregatePart` should")
 class AggregatePartTest {
 
     private static final TestActorRequestFactory factory =
@@ -86,7 +85,7 @@ class AggregatePartTest {
         taskCommentsPart = new TaskCommentsPart(root);
         taskRepository = new TaskRepository();
         taskCommentsRepository = new TaskCommentsRepository();
-        BoundedContext.InternalAccess contextAccess = context.internalAccess();
+        var contextAccess = context.internalAccess();
         contextAccess.register(taskRepository);
         contextAccess.register(taskCommentsRepository);
         prepareAggregatePart();
@@ -117,20 +116,19 @@ class AggregatePartTest {
     @DisplayName("return aggregate part state by class")
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
-        AggTask task = taskCommentsPart.partState(AggTask.class);
+        var task = taskCommentsPart.partState(AggTask.class);
         assertThat(task.getAssignee())
                 .isEqualTo(ASSIGNEE);
     }
 
     private void assertEntityCount(Class<? extends EntityState<?>> stateType, int expectedCount) {
-        Collection<? extends EntityState<?>> entityStates = queryEntities(stateType);
+        var entityStates = queryEntities(stateType);
         assertThat(entityStates).hasSize(expectedCount);
     }
 
     private Collection<? extends EntityState<?>>
     queryEntities(Class<? extends EntityState<?>> entityClass) {
-        Query query = factory.query()
-                             .all(entityClass);
+        var query = factory.query().all(entityClass);
         MemoizingObserver<QueryResponse> observer = memoizingObserver();
         context.stand()
                .execute(query, observer);
@@ -142,9 +140,9 @@ class AggregatePartTest {
     }
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
-        Constructor<AnAggregateRoot> constructor =
+        var constructor =
                 AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, ProjectId.class);
-        NullPointerTester tester = new NullPointerTester();
+        var tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, context)
               .setDefault(AggregateRoot.class, root);

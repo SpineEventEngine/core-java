@@ -40,7 +40,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.Repository;
 import io.spine.test.aggregate.query.MRPhoto;
 import io.spine.test.aggregate.query.MRPhotoId;
 import io.spine.test.aggregate.query.MRPhotoType;
@@ -108,16 +107,13 @@ public final class AggregateQueryingTestEnv {
                                     String altText,
                                     int width,
                                     int height) {
-        Url fullSizeUrl = Url
-                .newBuilder()
+        var fullSizeUrl = Url.newBuilder()
                 .setSpec(url)
                 .buildPartial();
-        Url thumbnail = Url
-                .newBuilder()
+        var thumbnail = Url.newBuilder()
                 .setSpec(url + "-thumbnail")
                 .buildPartial();
-        MRPhoto photo = MRPhoto
-                .newBuilder()
+        var photo = MRPhoto.newBuilder()
                 .setId(MRPhotoId.generate())
                 .setFullSizeUrl(fullSizeUrl)
                 .setThumbnailUrl(thumbnail)
@@ -130,12 +126,10 @@ public final class AggregateQueryingTestEnv {
     }
 
     public static MessageId cause() {
-        EventId causeOfChange = EventId
-                .newBuilder()
+        var causeOfChange = EventId.newBuilder()
                 .setValue("For tests")
                 .build();
-        MessageId messageId = MessageId
-                .newBuilder()
+        var messageId = MessageId.newBuilder()
                 .setId(AnyPacker.pack(causeOfChange))
                 .setVersion(Versions.zero())
                 .setTypeUrl("example.org/test.Type")
@@ -150,13 +144,12 @@ public final class AggregateQueryingTestEnv {
     // This suppression makes sense only to Error Prone.
     @SuppressWarnings("unchecked")  // as per declaration of the `DefaultRepository`;
     public static AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto> newPhotosRepository() {
-        Repository<MRPhotoId, PhotoAggregate> repo = DefaultRepository.of(PhotoAggregate.class);
+        var repo = DefaultRepository.of(PhotoAggregate.class);
         return (AggregateRepository<MRPhotoId, PhotoAggregate, MRPhoto>) repo;
     }
 
     public static MRUploadPhoto upload(MRPhoto state) {
-        return MRUploadPhoto
-                .newBuilder()
+        return MRUploadPhoto.newBuilder()
                 .setId(state.getId())
                 .setFullSizeUrl(state.getFullSizeUrl())
                 .setThumbnailUrl(state.getThumbnailUrl())
@@ -169,22 +162,21 @@ public final class AggregateQueryingTestEnv {
 
     public static MRArchivePhoto archive(MRPhoto photo) {
         return MRArchivePhoto.newBuilder()
-                             .setId(photo.getId())
-                             .vBuild();
+                .setId(photo.getId())
+                .vBuild();
     }
 
     public static MRDeletePhoto delete(MRPhoto photo) {
         return MRDeletePhoto.newBuilder()
-                            .setId(photo.getId())
-                            .vBuild();
+                .setId(photo.getId())
+                .vBuild();
     }
 
     public static class PhotoAggregate extends Aggregate<MRPhotoId, MRPhoto, MRPhoto.Builder> {
 
         @Assign
         MRPhotoUploaded handle(MRUploadPhoto cmd) {
-            MRPhotoUploaded event = MRPhotoUploaded
-                    .newBuilder()
+            var event = MRPhotoUploaded.newBuilder()
                     .setId(cmd.getId())
                     .setFullSizeUrl(cmd.getFullSizeUrl())
                     .setThumbnailUrl(cmd.getThumbnailUrl())
@@ -210,8 +202,8 @@ public final class AggregateQueryingTestEnv {
         @Assign
         MRPhotoArchived handle(MRArchivePhoto photo) {
             return MRPhotoArchived.newBuilder()
-                                  .setId(photo.getId())
-                                  .vBuild();
+                    .setId(photo.getId())
+                    .vBuild();
         }
 
         @Apply
@@ -222,8 +214,8 @@ public final class AggregateQueryingTestEnv {
         @Assign
         MRPhotoDeleted handle(MRDeletePhoto photo) {
             return MRPhotoDeleted.newBuilder()
-                                 .setId(photo.getId())
-                                 .vBuild();
+                    .setId(photo.getId())
+                    .vBuild();
         }
 
         @Apply
@@ -255,8 +247,8 @@ public final class AggregateQueryingTestEnv {
         @Assign
         MRSoundUploaded handle(MRUploadSound cmd) {
             return MRSoundUploaded.newBuilder()
-                                  .setId(cmd.getId())
-                                  .vBuild();
+                    .setId(cmd.getId())
+                    .vBuild();
         }
 
         @Apply

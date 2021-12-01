@@ -27,25 +27,17 @@
 package io.spine.server.bus;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
-import io.spine.core.Command;
-import io.spine.core.Event;
 import io.spine.core.Status.StatusCase;
 import io.spine.server.bus.given.BusFilters;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.EventEnvelope;
 import io.spine.test.bus.ShareId;
-import io.spine.test.bus.ShareTraded;
 import io.spine.test.bus.command.ShareCannotBeTraded;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -76,7 +68,7 @@ class BusFilterTest {
     @DisplayName("let the message pass the filter")
     void letPass() {
         BusFilter<CommandEnvelope> filter = new BusFilters.Accepting();
-        Optional<Ack> ack = filter.filter(commandEnvelope);
+        var ack = filter.filter(commandEnvelope);
         assertThat(ack).isEmpty();
     }
 
@@ -84,10 +76,10 @@ class BusFilterTest {
     @DisplayName("reject the message with the `OK` status")
     void rejectWithOk() {
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithOk();
-        Optional<Ack> ack = filter.filter(commandEnvelope);
+        var ack = filter.filter(commandEnvelope);
         assertThat(ack).isPresent();
 
-        Ack theAck = ack.get();
+        var theAck = ack.get();
         assertIdEquals(theAck);
         assertStatusEquals(theAck, OK);
     }
@@ -95,16 +87,15 @@ class BusFilterTest {
     @Test
     @DisplayName("reject the message with an error")
     void rejectWithError() {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setType(BusFilterTest.class.getCanonicalName())
                 .setMessage("Ignore this error.")
                 .build();
         BusFilter<CommandEnvelope> filter = new BusFilters.RejectingWithError(error);
-        Optional<Ack> ack = filter.filter(commandEnvelope);
+        var ack = filter.filter(commandEnvelope);
         assertThat(ack).isPresent();
 
-        Ack theAck = ack.get();
+        var theAck = ack.get();
         assertIdEquals(theAck);
         assertStatusEquals(theAck, ERROR);
         assertThat(theAck.getStatus()
@@ -114,27 +105,26 @@ class BusFilterTest {
     @Test
     @DisplayName("reject the message with a rejection")
     void rejectWithRejectionThrowable() {
-        ShareCannotBeTraded rejection = ShareCannotBeTraded
-                .newBuilder()
+        var rejection = ShareCannotBeTraded.newBuilder()
                 .setShare(ShareId.newBuilder().setValue(newUuid()).build())
                 .setReason("The test rejection.")
                 .build();
         BusFilter<CommandEnvelope> filter =
                 new BusFilters.RejectingWithRejectionThrowable(rejection);
-        Optional<Ack> ack = filter.filter(commandEnvelope);
+        var ack = filter.filter(commandEnvelope);
         assertThat(ack).isPresent();
 
-        Ack theAck = ack.get();
+        var theAck = ack.get();
         assertIdEquals(theAck);
         assertStatusEquals(theAck, REJECTION);
-        Message rejectionMessage = unpack(theAck.getStatus()
-                                                .getRejection()
-                                                .getMessage());
+        var rejectionMessage = unpack(theAck.getStatus()
+                                            .getRejection()
+                                            .getMessage());
         assertThat(rejectionMessage).isEqualTo(rejection.messageThrown());
     }
 
     private void assertIdEquals(Ack ack) {
-        Message id = unpack(ack.getMessageId());
+        var id = unpack(ack.getMessageId());
         assertThat(id).isEqualTo(commandEnvelope.id());
     }
 
@@ -143,23 +133,8 @@ class BusFilterTest {
     }
 
     private static CommandEnvelope commandEnvelope() {
-        TestActorRequestFactory requestFactory = new TestActorRequestFactory(BusFilterTest.class);
-        Command command = requestFactory.generateCommand();
+        var requestFactory = new TestActorRequestFactory(BusFilterTest.class);
+        var command = requestFactory.generateCommand();
         return CommandEnvelope.of(command);
-    }
-
-    private static EventEnvelope eventEnvelope() {
-        TestEventFactory eventFactory = TestEventFactory.newInstance(BusFilterTest.class);
-        ShareId id = ShareId
-                .newBuilder()
-                .setValue(newUuid())
-                .build();
-        ShareTraded eventMessage = ShareTraded
-                .newBuilder()
-                .setShare(id)
-                .setAmount(42)
-                .build();
-        Event event = eventFactory.createEvent(eventMessage);
-        return EventEnvelope.of(event);
     }
 }

@@ -36,13 +36,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("DeliveryErrors should")
+@DisplayName("`DeliveryErrors` should")
 class DeliveryErrorsTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void nulls() {
-        DeliveryErrors.Builder builder = DeliveryErrors.newBuilder();
+        var builder = DeliveryErrors.newBuilder();
         new NullPointerTester()
                 .testInstanceMethods(builder, PACKAGE);
     }
@@ -50,12 +50,12 @@ class DeliveryErrorsTest {
     @Test
     @DisplayName("accept model errors")
     void acceptErrors() {
-        DeliveryErrors.Builder builder = DeliveryErrors.newBuilder();
-        ModelError mockError = new ModelError("boo!");
+        var builder = DeliveryErrors.newBuilder();
+        var mockError = new ModelError("boo!");
         builder.addError(mockError);
-        DeliveryErrors errors = builder.build();
+        var errors = builder.build();
 
-        ModelError error = assertThrows(ModelError.class, errors::throwIfAny);
+        var error = assertThrows(ModelError.class, errors::throwIfAny);
         assertThat(error)
                 .isEqualTo(mockError);
     }
@@ -63,13 +63,13 @@ class DeliveryErrorsTest {
     @Test
     @DisplayName("accept runtime exceptions")
     void acceptExceptions() {
-        DeliveryErrors.Builder builder = DeliveryErrors.newBuilder();
+        var builder = DeliveryErrors.newBuilder();
         RuntimeException mockException = new IllegalArgumentException("42");
         builder.addException(mockException);
-        DeliveryErrors errors = builder.build();
+        var errors = builder.build();
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                                                          errors::throwIfAny);
+        var exception = assertThrows(IllegalArgumentException.class,
+                                     errors::throwIfAny);
         assertThat(exception)
                 .isEqualTo(mockException);
     }
@@ -77,16 +77,16 @@ class DeliveryErrorsTest {
     @Test
     @DisplayName("throw exceptions with suppressed throwables")
     void throwWithSuppressed() {
-        DeliveryErrors.Builder builder = DeliveryErrors.newBuilder();
-        ModelError mockError = new ModelError("model is wrong");
-        ModelError anotherMockError = new ModelError("completely");
+        var builder = DeliveryErrors.newBuilder();
+        var mockError = new ModelError("model is wrong");
+        var anotherMockError = new ModelError("completely");
         RuntimeException mockException = new IllegalArgumentException("3.14");
         builder.addError(mockError);
         builder.addError(anotherMockError);
         builder.addException(mockException);
 
-        DeliveryErrors errors = builder.build();
-        ModelError error = assertThrows(ModelError.class, errors::throwIfAny);
+        var errors = builder.build();
+        var error = assertThrows(ModelError.class, errors::throwIfAny);
         assertThat(error)
                 .isEqualTo(mockError);
         assertThat(error.getSuppressed())

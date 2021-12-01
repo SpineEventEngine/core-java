@@ -43,22 +43,20 @@ public final class ConsecutiveNumberProcess
 
     @Assign
     Pair<PositiveNumberEmitted, NegativeNumberEmitted> handle(EmitNextNumber cmd) {
-        String id = cmd.getId();
+        var id = cmd.getId();
         builder().setId(id);
-        int iteration = state().getIteration();
-        int nextValue = iteration + 1;
+        var iteration = state().getIteration();
+        var nextValue = iteration + 1;
         builder().setIteration(nextValue);
-        PositiveNumberEmitted positiveNumberEmitted =
-                PositiveNumberEmitted.newBuilder()
-                                     .setId(id)
-                                     .setValue(nextValue)
-                                     .vBuild();
+        var positiveNumberEmitted = PositiveNumberEmitted.newBuilder()
+                .setId(id)
+                .setValue(nextValue)
+                .vBuild();
 
-        NegativeNumberEmitted negativeNumberEmitted =
-                NegativeNumberEmitted.newBuilder()
-                                     .setId(id)
-                                     .setValue(-1 * nextValue)
-                                     .vBuild();
+        var negativeNumberEmitted = NegativeNumberEmitted.newBuilder()
+                .setId(id)
+                .setValue(-1 * nextValue)
+                .vBuild();
         return Pair.of(positiveNumberEmitted, negativeNumberEmitted);
     }
 }

@@ -50,12 +50,10 @@ public class TaskPart
 
     @Assign
     Pair<AggTaskCreated, AggTaskAssigned> handle(AggCreateTask command) {
-        AggTaskCreated created = AggTaskCreated
-                .newBuilder()
+        var created = AggTaskCreated.newBuilder()
                 .setTaskId(command.getTaskId())
                 .build();
-        AggTaskAssigned assigned = AggTaskAssigned
-                .newBuilder()
+        var assigned = AggTaskAssigned.newBuilder()
                 .setTaskId(command.getTaskId())
                 .setNewAssignee(command.getAssignee())
                 .build();

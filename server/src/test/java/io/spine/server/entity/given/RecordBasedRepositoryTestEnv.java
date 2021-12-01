@@ -27,7 +27,6 @@
 package io.spine.server.entity.given;
 
 import com.google.protobuf.FieldMask;
-import io.spine.base.EntityState;
 import io.spine.client.OrderBy;
 import io.spine.client.ResponseFormat;
 import io.spine.server.entity.AbstractEntity;
@@ -44,7 +43,7 @@ public final class RecordBasedRepositoryTestEnv {
 
     public static <E extends AbstractEntity<?, ?>>
     void assertMatches(E entity, FieldMask fieldMask) {
-        EntityState<?> state = entity.state();
+        var state = entity.state();
         assertMatchesMask(state, fieldMask);
     }
 
@@ -53,9 +52,9 @@ public final class RecordBasedRepositoryTestEnv {
      */
     public static OrderBy orderByName(OrderBy.Direction direction) {
         return OrderBy.newBuilder()
-                      .setColumn(ENTITY_NAME_COLUMN)
-                      .setDirection(direction)
-                      .build();
+                .setColumn(ENTITY_NAME_COLUMN)
+                .setDirection(direction)
+                .vBuild();
     }
 
     public static ResponseFormat emptyFormat() {

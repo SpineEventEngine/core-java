@@ -28,9 +28,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.client.CommandFactory;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.test.commandbus.ProjectId;
@@ -41,8 +39,6 @@ import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.test.commandbus.command.CmdBusCreateTask;
 import io.spine.test.commandbus.command.CmdBusRemoveTask;
 import io.spine.test.commandbus.command.CmdBusStartProject;
-import io.spine.test.commandbus.command.FirstCmdBusCreateProject;
-import io.spine.test.commandbus.command.SecondCmdBusStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.core.given.GivenUserId;
@@ -58,9 +54,8 @@ public class Given {
     }
 
     private static ProjectId newProjectId() {
-        String uuid = newUuid();
-        return ProjectId
-                .newBuilder()
+        var uuid = newUuid();
+        return ProjectId.newBuilder()
                 .setId(uuid)
                 .build();
     }
@@ -81,13 +76,11 @@ public class Given {
          */
         private static Command create(io.spine.base.CommandMessage command, UserId userId,
                                       Timestamp when) {
-            TenantId generatedTenantId = TenantId
-                    .newBuilder()
+            var generatedTenantId = TenantId.newBuilder()
                     .setValue(newUuid())
                     .build();
-            TestActorRequestFactory factory =
-                    new TestActorRequestFactory(userId, generatedTenantId);
-            Command result = factory.createCommand(command, when);
+            var factory = new TestActorRequestFactory(userId, generatedTenantId);
+            var result = factory.createCommand(command, when);
             return result;
         }
 
@@ -103,28 +96,18 @@ public class Given {
             return addTask(USER_ID, PROJECT_ID, currentTime());
         }
 
-        static Command secondStartProject() {
-            SecondCmdBusStartProject command = CommandMessage.secondStartProject(newProjectId());
-            return create(command, USER_ID, currentTime());
-        }
-
-        static Command firstCreateProject() {
-            FirstCmdBusCreateProject command = CommandMessage.firstCreateProject(newProjectId());
-            return create(command, USER_ID, currentTime());
-        }
-
         static Command createTask(TaskId taskId, UserId userId, boolean startTask) {
-            CmdBusCreateTask command = CommandMessage.createTask(taskId, userId, startTask);
+            var command = CommandMessage.createTask(taskId, userId, startTask);
             return create(command, userId, currentTime());
         }
 
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
-            CmdBusAddTask command = CommandMessage.addTask(projectId);
+            var command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
         }
 
         static Command removeTask() {
-            CmdBusRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
+            var command = CommandMessage.removeTask(PROJECT_ID);
             return create(command, USER_ID, currentTime());
         }
 
@@ -139,15 +122,15 @@ public class Given {
 
         static Command createProject(Duration delay) {
 
-            CmdBusCreateProject projectMessage = CommandMessage.createProjectMessage();
-            CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
-            CommandFactory commandFactory = new TestActorRequestFactory(ACommand.class).command();
-            Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
+            var projectMessage = CommandMessage.createProjectMessage();
+            var commandContext = GivenCommandContext.withScheduledDelayOf(delay);
+            var commandFactory = new TestActorRequestFactory(ACommand.class).command();
+            var cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
             return cmd;
         }
 
         static Command createProject(UserId userId, ProjectId projectId, Timestamp when) {
-            CmdBusCreateProject command = CommandMessage.createProjectMessage(projectId);
+            var command = CommandMessage.createProjectMessage(projectId);
             return create(command, userId, when);
         }
 
@@ -156,14 +139,13 @@ public class Given {
         }
 
         static Command startProject(UserId userId, ProjectId projectId, Timestamp when) {
-            CmdBusStartProject command = CommandMessage.startProject(projectId);
+            var command = CommandMessage.startProject(projectId);
             return create(command, userId, when);
         }
 
         private static TaskId newTaskId() {
-            int id = random(1, 100);
-            return TaskId
-                    .newBuilder()
+            var id = random(1, 100);
+            return TaskId.newBuilder()
                     .setId(id)
                     .build();
         }
@@ -176,13 +158,11 @@ public class Given {
         }
 
         static CmdBusCreateTask createTask(TaskId taskId, UserId userId, boolean startTask) {
-            Task task = Task
-                    .newBuilder()
+            var task = Task.newBuilder()
                     .setTaskId(taskId)
                     .setAssignee(userId)
                     .build();
-            return CmdBusCreateTask
-                    .newBuilder()
+            return CmdBusCreateTask.newBuilder()
                     .setTaskId(taskId)
                     .setTask(task)
                     .setStart(startTask)
@@ -191,20 +171,20 @@ public class Given {
 
         static CmdBusAddTask addTask(String projectId) {
             return addTask(ProjectId.newBuilder()
-                                    .setId(projectId)
-                                    .build());
+                                   .setId(projectId)
+                                   .build());
         }
 
         static CmdBusAddTask addTask(ProjectId id) {
             return CmdBusAddTask.newBuilder()
-                                .setProjectId(id)
-                                .build();
+                    .setProjectId(id)
+                    .build();
         }
 
         static CmdBusRemoveTask removeTask(ProjectId projectId) {
             return CmdBusRemoveTask.newBuilder()
-                                   .setProjectId(projectId)
-                                   .build();
+                    .setProjectId(projectId)
+                    .build();
         }
 
         public static CmdBusCreateProject createProjectMessage() {
@@ -220,28 +200,14 @@ public class Given {
 
         static CmdBusCreateProject createProjectMessage(String projectId) {
             return createProjectMessage(ProjectId.newBuilder()
-                                                 .setId(projectId)
-                                                 .build());
+                                                .setId(projectId)
+                                                .build());
         }
 
         static CmdBusStartProject startProject(ProjectId id) {
             return CmdBusStartProject
                     .newBuilder()
                     .setProjectId(id)
-                    .build();
-        }
-
-        static FirstCmdBusCreateProject firstCreateProject(ProjectId projectId) {
-            return FirstCmdBusCreateProject
-                    .newBuilder()
-                    .setId(projectId)
-                    .build();
-        }
-
-        static SecondCmdBusStartProject secondStartProject(ProjectId projectId) {
-            return SecondCmdBusStartProject
-                    .newBuilder()
-                    .setId(projectId)
                     .build();
         }
     }

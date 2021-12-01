@@ -36,7 +36,7 @@ public class IndecisiveEngineAggregate extends Aggregate<EngineId, Engine, Engin
 
     @Assign
     EngineStarted handle(StartEngine command) {
-        EngineId id = command.getId();
+        var id = command.getId();
         return EngineStarted.newBuilder()
                 .setId(id)
                 .build();

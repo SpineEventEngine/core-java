@@ -45,7 +45,7 @@ import org.junit.jupiter.api.function.Executable;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("Enricher Builder should")
+@DisplayName("`Enricher.Builder` should")
 class EnricherBuilderTest {
 
     private EventEnricher.Builder builder;
@@ -56,7 +56,7 @@ class EnricherBuilderTest {
     }
 
     @Nested
-    @DisplayName("build Enricher")
+    @DisplayName("build `Enricher`")
     class BuildEnricher {
 
         @Test
@@ -87,7 +87,7 @@ class EnricherBuilderTest {
                     (e, c) -> StringValue.getDefaultInstance())
                .add(EbtOrderCreated.class, BoolValue.class,
                     (e, c) -> BoolValue.of(true));
-        EventEnricher enricher = builder.build();
+        var enricher = builder.build();
         assertThat(enricher).isNotNull();
     }
 

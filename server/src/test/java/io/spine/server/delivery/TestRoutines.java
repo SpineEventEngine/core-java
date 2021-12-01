@@ -30,9 +30,7 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -48,15 +46,15 @@ public final class TestRoutines {
 
     public static <P extends Projection<String, ?, ?>> P
     findView(ProjectionRepository<String, P, ?> repo, String id) {
-        Optional<P> view = repo.find(id);
+        var view = repo.find(id);
         assertThat(view).isPresent();
         return view.get();
     }
 
     public static void post(List<Callable<Object>> jobs, int threads) throws InterruptedException {
-        ExecutorService service = newFixedThreadPool(threads);
+        var service = newFixedThreadPool(threads);
         service.invokeAll(jobs);
-        List<Runnable> leftovers = service.shutdownNow();
+        var leftovers = service.shutdownNow();
         assertThat(leftovers).isEmpty();
     }
 }

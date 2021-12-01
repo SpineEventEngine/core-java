@@ -28,42 +28,39 @@ package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
+import io.spine.server.entity.RecordBasedRepository.EntityIdFunction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.function.Function;
 
 import static io.spine.protobuf.TypeConverter.toAny;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EntityIdFunction should")
+@DisplayName("`EntityIdFunction` should")
 class EntityIdFunctionTest {
 
     @Test
     @DisplayName("not accept wrong ID type")
     void rejectWrongIdType() {
-        Function<EntityId, StringValue> func =
-                new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
+        var func = new EntityIdFunction<>(StringValue.class);
 
-        EntityId wrongType = EntityId.newBuilder()
-                                     .setId(toAny(100L))
-                                     .build();
+        var wrongType = EntityId.newBuilder()
+                .setId(toAny(100L))
+                .build();
         assertThrows(IllegalStateException.class, () -> func.apply(wrongType));
     }
 
     @Test
     @DisplayName("accept proper ID type")
     void acceptProperIdType() {
-        Function<EntityId, StringValue> func =
-                new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
+        var func = new EntityIdFunction<>(StringValue.class);
 
-        String value = "abcd";
-        EntityId type = EntityId.newBuilder()
-                                .setId(toAny(value))
-                                .build();
-        StringValue result = func.apply(type);
+        var value = "abcd";
+        var type = EntityId.newBuilder()
+                .setId(toAny(value))
+                .build();
+        var result = func.apply(type);
         assertNotNull(result);
         assertEquals(value, result.getValue());
     }

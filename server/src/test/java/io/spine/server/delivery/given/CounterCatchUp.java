@@ -30,17 +30,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
-import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpStatus;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.LocalDispatchingObserver;
-import io.spine.server.storage.StorageFactory;
 import io.spine.test.delivery.NumberAdded;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBox;
@@ -48,7 +44,6 @@ import io.spine.testing.server.blackbox.BlackBox;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -79,16 +74,16 @@ public class CounterCatchUp {
     }
 
     public void addHistory(Timestamp when, List<NumberAdded> events) {
-        TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        for (NumberAdded message : events) {
-            Event event = factory.createEvent(message, null);
-            EventContext context = event.getContext();
-            EventContext modifiedContext = context.toBuilder()
-                                                  .setTimestamp(when)
-                                                  .vBuild();
-            Event eventAtTime = event.toBuilder()
-                                     .setContext(modifiedContext)
-                                     .vBuild();
+        var factory = TestEventFactory.newInstance(getClass());
+        for (var message : events) {
+            var event = factory.createEvent(message, null);
+            var context = event.getContext();
+            var modifiedContext = context.toBuilder()
+                    .setTimestamp(when)
+                    .vBuild();
+            var eventAtTime = event.toBuilder()
+                    .setContext(modifiedContext)
+                    .vBuild();
             ctx.append(eventAtTime);
         }
     }
@@ -113,13 +108,13 @@ public class CounterCatchUp {
     }
 
     public List<NumberAdded> generateEvents(int howMany) {
-        Iterator<String> idIterator = Iterators.cycle(ids);
+        var idIterator = Iterators.cycle(ids);
         List<NumberAdded> events = new ArrayList<>(howMany);
-        for (int i = 0; i < howMany; i++) {
+        for (var i = 0; i < howMany; i++) {
             events.add(NumberAdded.newBuilder()
-                                  .setCalculatorId(idIterator.next())
-                                  .setValue(0)
-                                  .vBuild());
+                               .setCalculatorId(idIterator.next())
+                               .setValue(0)
+                               .vBuild());
         }
         return events;
     }
@@ -135,7 +130,7 @@ public class CounterCatchUp {
 
     private ImmutableList<Callable<Object>> asCallableJobs(WhatToCatchUp... whatToCatchUp) {
         ImmutableList.Builder<Callable<Object>> jobs = ImmutableList.builder();
-        for (WhatToCatchUp task : whatToCatchUp) {
+        for (var task : whatToCatchUp) {
             Callable<Object> callable = () -> {
                 catchUp(task);
                 return nullRef();
@@ -149,7 +144,7 @@ public class CounterCatchUp {
         if (task.shouldCatchUpAll()) {
             repo.catchUpAll(task.sinceWhen());
         } else {
-            String targetId = checkNotNull(task.id());
+            var targetId = checkNotNull(task.id());
             repo.catchUp(task.sinceWhen(), ImmutableSet.of(targetId));
         }
     }
@@ -166,20 +161,20 @@ public class CounterCatchUp {
     }
 
     public static void addOngoingCatchUpRecord(WhatToCatchUp target, CatchUpStatus status) {
-        StorageFactory factory = ServerEnvironment.instance()
-                                                  .storageFactory();
-        CatchUpStorage storage = new CatchUpStorage(factory,false);
+        var factory = ServerEnvironment.instance()
+                                       .storageFactory();
+        var storage = new CatchUpStorage(factory, false);
         Collection<Object> ids = null;
         if (!target.shouldCatchUpAll()) {
-            String identifier = checkNotNull(target.id());
+            var identifier = checkNotNull(target.id());
             ids = ImmutableList.of(identifier);
         }
-        CatchUp record = TestCatchUpJobs
-                .catchUpJob(CounterView.projectionType(), status, target.sinceWhen(), ids);
+        var record = TestCatchUpJobs.catchUpJob(
+                CounterView.projectionType(), status, target.sinceWhen(), ids);
         storage.write(record);
-        Delivery delivery = Delivery.newBuilder()
-                                    .setCatchUpStorage(storage)
-                                    .build();
+        var delivery = Delivery.newBuilder()
+                .setCatchUpStorage(storage)
+                .build();
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.when(Tests.class)
                          .use(delivery);

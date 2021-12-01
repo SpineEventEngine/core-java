@@ -109,7 +109,7 @@ public class DeliveryTestEnv {
 
         @Override
         protected void doStore(CalcAggregate aggregate) {
-            String id = aggregate.id();
+            var id = aggregate.id();
             incrementByKey(id, storeCalls);
             super.doStore(aggregate);
         }
@@ -157,8 +157,7 @@ public class DeliveryTestEnv {
                 packed = update.getEvent()
                                .getMessage();
             }
-            CalculatorSignal msg =
-                    (CalculatorSignal) AnyPacker.unpack(packed);
+            var msg = (CalculatorSignal) AnyPacker.unpack(packed);
             signals.put(msg.getCalculatorId(), msg);
         }
 

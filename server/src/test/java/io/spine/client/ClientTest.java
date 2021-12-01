@@ -27,7 +27,6 @@
 package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.core.UserId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.test.client.ClientTestContext;
 import io.spine.test.client.users.ActiveUsers;
@@ -70,7 +69,7 @@ class ClientTest extends AbstractClientTest {
     @Test
     @DisplayName("close upon request")
     void closing() {
-        Client client = client();
+        var client = client();
         client.close();
         assertFalse(client.isOpen());
     }
@@ -78,7 +77,7 @@ class ClientTest extends AbstractClientTest {
     @Test
     @DisplayName("have `shutdown()` alias method")
     void shutdown() {
-        Client client = client();
+        var client = client();
         client.shutdown();
         assertFalse(client.isOpen());
     }
@@ -86,8 +85,8 @@ class ClientTest extends AbstractClientTest {
     @Test
     @DisplayName("create requests on behalf of a user")
     void onBehalf() {
-        UserId expected = GivenUserId.generated();
-        ClientRequest request = client().onBehalfOf(expected);
+        var expected = GivenUserId.generated();
+        var request = client().onBehalfOf(expected);
         assertThat(request.user())
                 .isEqualTo(expected);
     }
@@ -95,7 +94,7 @@ class ClientTest extends AbstractClientTest {
     @Test
     @DisplayName("create requests for a guest user")
     void guestRequest() {
-        ClientRequest request = client().asGuest();
+        var request = client().asGuest();
         assertThat(request.user())
                 .isEqualTo(Client.DEFAULT_GUEST_ID);
     }
@@ -109,21 +108,21 @@ class ClientTest extends AbstractClientTest {
         @BeforeEach
         void createSubscriptions() {
             subscriptions = new ArrayList<>();
-            UserId currentUser = GivenUserId.generated();
-            Client client = client();
-            Subscription userLoggedIn =
+            var currentUser = GivenUserId.generated();
+            var client = client();
+            var userLoggedIn =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedIn.class)
                           .where(eq(UserLoggedIn.Field.user(), currentUser))
                           .observe((e) -> {})
                           .post();
-            Subscription userLoggedOut =
+            var userLoggedOut =
                     client.onBehalfOf(currentUser)
                           .subscribeToEvent(UserLoggedOut.class)
                           .where(eq(UserLoggedOut.Field.user(), currentUser))
                           .observe((e) -> {})
                           .post();
-            Subscription loginStatus =
+            var loginStatus =
                     client.onBehalfOf(currentUser)
                           .subscribeTo(LoginStatus.class)
                           .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
@@ -139,8 +138,8 @@ class ClientTest extends AbstractClientTest {
         @Test
         @DisplayName("remembering them until canceled")
         void remembering() {
-            Client client = client();
-            Subscriptions remembered = client.subscriptions();
+            var client = client();
+            var remembered = client.subscriptions();
             subscriptions.forEach(
                     (s) -> assertTrue(remembered.contains(s))
             );
@@ -155,8 +154,8 @@ class ClientTest extends AbstractClientTest {
         @Test
         @DisplayName("clear subscriptions when closing")
         void clearing() {
-            Client client = client();
-            Subscriptions subscriptions = client.subscriptions();
+            var client = client();
+            var subscriptions = client.subscriptions();
             this.subscriptions.forEach(
                     (s) -> assertTrue(subscriptions.contains(s))
             );
@@ -175,21 +174,19 @@ class ClientTest extends AbstractClientTest {
         @Test
         @DisplayName("entities by ID")
         void byId() {
-            Client client = client();
-            UserId user = GivenUserId.generated();
+            var client = client();
+            var user = GivenUserId.generated();
 
-            LogInUser command = LogInUser.newBuilder()
-                                         .setUser(user)
-                                         .build();
+            var command = LogInUser.newBuilder()
+                    .setUser(user)
+                    .build();
             client.asGuest()
                   .command(command)
                   .postAndForget();
-            ActiveUsers.Query query = ActiveUsers.query()
-                                                 .id().is(THE_ID)
-                                                 .build();
-            ImmutableList<ActiveUsers> users =
-                    client.onBehalfOf(user)
-                          .run(query);
+            var query= ActiveUsers.query()
+                                   .id().is(THE_ID)
+                                   .build();
+            var users = client.onBehalfOf(user).run(query);
             assertThat(users)
                     .comparingExpectedFieldsOnly()
                     .containsExactly(ActiveUsers.newBuilder()

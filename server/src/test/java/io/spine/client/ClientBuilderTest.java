@@ -132,7 +132,7 @@ class ClientBuilderTest {
         @Test
         @DisplayName("passing it to the created `Client`")
         void value() {
-            Client.Builder builder = usingChannel(channel);
+            var builder = usingChannel(channel);
 
             assertThat(builder.host())
                     .isNull();
@@ -154,8 +154,8 @@ class ClientBuilderTest {
         @Test
         @DisplayName("via value and unit")
         void valueAndUnit() {
-            int value = 100;
-            TimeUnit unit = TimeUnit.MILLISECONDS;
+            var value = 100;
+            var unit = TimeUnit.MILLISECONDS;
             builder.shutdownTimeout(value, unit);
 
             client = builder.build();
@@ -187,7 +187,7 @@ class ClientBuilderTest {
         @Test
         @DisplayName("which is non-null and not default")
         void correctValue() {
-            TenantId expected = GivenTenantId.generate();
+            var expected = GivenTenantId.generate();
             client = builder.forTenant(expected)
                             .build();
             assertThat(client.tenant()).hasValue(expected);
@@ -215,7 +215,7 @@ class ClientBuilderTest {
         @Test
         @DisplayName("which is non-null and not default")
         void correctValue() {
-            UserId expected = GivenUserId.generated();
+            var expected = GivenUserId.generated();
             client = builder.withGuestId(expected)
                             .build();
 
@@ -226,7 +226,7 @@ class ClientBuilderTest {
         @Test
         @DisplayName("which is not empty or a blank string")
         void correctStringValue() {
-            UserId expected = GivenUserId.generated();
+            var expected = GivenUserId.generated();
 
             client = builder.withGuestId(expected.getValue())
                             .build();

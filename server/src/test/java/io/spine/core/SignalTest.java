@@ -27,7 +27,6 @@
 package io.spine.core;
 
 import io.spine.base.CommandMessage;
-import io.spine.server.event.EventFactory;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.core.given.GivenUserId;
@@ -51,16 +50,16 @@ class SignalTest {
     @Test
     @DisplayName("produce correct origin")
     void produceOrigin() {
-        Event originalEvent = GivenEvent.arbitrary();
-        UserId producerEntityId = GivenUserId.generated();
-        EventFactory factory = on(EventEnvelope.of(originalEvent), pack(producerEntityId));
-        Event derivativeEvent = factory.createEvent(GivenEvent.message(), null);
-        Origin origin = derivativeEvent.getContext().getPastMessage();
+        var originalEvent = GivenEvent.arbitrary();
+        var producerEntityId = GivenUserId.generated();
+        var factory = on(EventEnvelope.of(originalEvent), pack(producerEntityId));
+        var derivativeEvent = factory.createEvent(GivenEvent.message(), null);
+        var origin = derivativeEvent.getContext().getPastMessage();
         assertThat(origin.getMessage())
                 .isEqualTo(originalEvent.messageId());
-        Origin grandOrigin = origin.getGrandOrigin();
-        TypeUrl grandOriginType = TypeUrl.parse(grandOrigin.getMessage()
-                                                           .getTypeUrl());
+        var grandOrigin = origin.getGrandOrigin();
+        var grandOriginType = TypeUrl.parse(grandOrigin.getMessage()
+                                                       .getTypeUrl());
         assertThat(grandOriginType.toJavaClass())
                 .isAssignableTo(CommandMessage.class);
         assertThat(grandOrigin.hasGrandOrigin())
