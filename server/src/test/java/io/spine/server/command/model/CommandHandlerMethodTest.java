@@ -113,8 +113,7 @@ class CommandHandlerMethodTest {
         void returningMessage() {
             var handlerObject = new ValidHandlerTwoParams();
 
-            var createdMethod =
-                    new CommandHandlerSignature().classify(handlerObject.method());
+            var createdMethod = new CommandHandlerSignature().classify(handlerObject.method());
             assertTrue(createdMethod.isPresent());
             var handler = createdMethod.get();
             var cmd = createProject();

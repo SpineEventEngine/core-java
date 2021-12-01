@@ -375,8 +375,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
                                                     .getProducerId());
         Subject assertProducer = assertThat(producer);
         assertProducer.isInstanceOf(BlackBoxId.class);
-        var expectedId = BlackBoxId
-                .newBuilder()
+        var expectedId = BlackBoxId.newBuilder()
                 .setContextName(context.name())
                 .build();
         assertProducer.isEqualTo(expectedId);

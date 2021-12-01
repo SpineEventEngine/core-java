@@ -106,8 +106,7 @@ public class AggregateRoot<I> {
                 () -> newIllegalStateException("Could not find repository for aggregate part `%s`.",
                                                stateClass.getName())
         );
-        var result =
-                (AggregatePartRepository<I, A, S, ?>) repository;
+        var result = (AggregatePartRepository<I, A, S, ?>) repository;
         return result;
     }
 }

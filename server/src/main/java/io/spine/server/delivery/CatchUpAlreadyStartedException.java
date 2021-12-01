@@ -33,6 +33,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
+import static java.lang.String.format;
+
 /**
  * An exception telling that the projection catch-up cannot be started, since some of the requested
  * entities are already catching up.
@@ -52,7 +54,7 @@ public final class CatchUpAlreadyStartedException extends IllegalStateException 
 
     @Override
     public String getMessage() {
-        var message = String.format(
+        var message = format(
                 "Cannot start the catch-up for the `%s` Projection, `%s`. " +
                         "Another catch-up is already in progress.",
                 projectionStateType, targetsAsString());

@@ -65,8 +65,7 @@ class TestClientTest {
 
     @BeforeEach
     void setUpAll() throws IOException {
-        var context = BoundedContext
-                .singleTenant("Tennis")
+        var context = BoundedContext.singleTenant("Tennis")
                 .add(new GameRepository());
         // Select a port randomly to avoid the intermittent hanging port under Windows.
         var port = random(DEFAULT_CLIENT_SERVICE_PORT, DEFAULT_CLIENT_SERVICE_PORT + 1000);

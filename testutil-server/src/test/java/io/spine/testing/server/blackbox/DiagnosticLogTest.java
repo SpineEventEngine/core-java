@@ -65,8 +65,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("log `CannotDispatchDuplicateCommand` event")
     void acceptCannotDispatchDuplicateCommand() {
-        var command = MessageId
-                .newBuilder()
+        var command = MessageId.newBuilder()
                 .setId(pack(CommandId.generate()))
                 .setTypeUrl(TypeUrl.of(BbCreateProject.class).value())
                 .vBuild();

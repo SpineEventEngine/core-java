@@ -169,19 +169,14 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
     }
 
     private Match findViaInterface(Class<? extends M> msgCls) {
-        var interfaceEntries =
-                routes.entrySet()
-                      .stream()
-                      .filter(e -> e.getKey()
-                                    .isInterface())
-                      .collect(toList());
-        for (var entry : interfaceEntries) {
-            var key = entry.getKey();
-            if (key.isAssignableFrom(msgCls)) {
-                return new Match(msgCls, key, entry.getValue());
-            }
-        }
-        return new Match(msgCls, null, null);
+        var result = routes.keySet()
+                .stream()
+                .filter(Class::isInterface)
+                .filter(iface -> iface.isAssignableFrom(msgCls))
+                .findFirst()
+                .map(iface -> new Match(msgCls, iface, routes.get(iface)))
+                .orElse(new Match(msgCls, null, null));
+        return result;
     }
 
     /**

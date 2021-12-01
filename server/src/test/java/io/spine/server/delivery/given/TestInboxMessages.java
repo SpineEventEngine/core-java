@@ -68,8 +68,8 @@ public final class TestInboxMessages {
      */
     public static InboxMessage copyWithNewId(InboxMessage original) {
         return original.toBuilder()
-                       .setId(InboxMessageMixin.generateIdWith(original.shardIndex()))
-                       .vBuild();
+                .setId(InboxMessageMixin.generateIdWith(original.shardIndex()))
+                .vBuild();
     }
 
     /**
@@ -77,8 +77,8 @@ public final class TestInboxMessages {
      */
     public static InboxMessage copyWithStatus(InboxMessage original, InboxMessageStatus newStatus) {
         return original.toBuilder()
-                       .setStatus(newStatus)
-                       .vBuild();
+                .setStatus(newStatus)
+                .vBuild();
     }
 
     /**
@@ -192,8 +192,7 @@ public final class TestInboxMessages {
         var index = DeliveryStrategy.newIndex(0, 1);
         var id = InboxMessageMixin.generateIdWith(index);
         var signalId = InboxSignalId.newBuilder()
-                                                      .setValue(command.getId()
-                                                                       .value());
+                .setValue(command.getId().value());
         var result = InboxMessage.newBuilder()
                 .setId(id)
                 .setStatus(status)

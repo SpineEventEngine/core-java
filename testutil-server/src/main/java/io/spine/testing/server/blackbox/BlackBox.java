@@ -580,8 +580,7 @@ public abstract class BlackBox implements Logging, Closeable {
     private <I, S extends EntityState<I>> @Nullable Entity<I, S>
     findByState(I id, Class<S> stateClass) {
         @SuppressWarnings("unchecked")
-        var repo =
-                (Repository<I, ? extends Entity<I, S>>) repositoryOf(stateClass);
+        var repo = (Repository<I, ? extends Entity<I, S>>) repositoryOf(stateClass);
         return readOperation(() -> (Entity<I, S>) repo.find(id)
                                                       .orElse(null));
     }

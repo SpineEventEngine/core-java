@@ -119,9 +119,9 @@ public class Model {
      */
     @VisibleForTesting
     static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
-        var clazzName = ClassName.of(rawClass);
+        var className = ClassName.of(rawClass);
         try {
-            return knownContexts.get(clazzName, () -> {
+            return knownContexts.get(className, () -> {
                 Optional<BoundedContextName> result;
 
                 var pkg = PackageInfo.of(rawClass);

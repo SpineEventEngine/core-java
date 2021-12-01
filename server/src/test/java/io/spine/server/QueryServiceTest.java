@@ -69,8 +69,8 @@ class QueryServiceTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        for (var boundedContext : boundedContexts) {
-            boundedContext.close();
+        for (var c : boundedContexts) {
+            c.close();
         }
     }
 
