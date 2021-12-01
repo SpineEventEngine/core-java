@@ -100,8 +100,7 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
 
     @Override
     public ImmutableSet<EventClass> externalEvents() {
-        var result =
-                union(reactorDelegate.externalEvents(), commanderDelegate.externalEvents());
+        var result = union(reactorDelegate.externalEvents(), commanderDelegate.externalEvents());
         return result.immutableCopy();
     }
 
