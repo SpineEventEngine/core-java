@@ -169,8 +169,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
     protected Optional<? extends D> getDispatcherForType(C messageClass) {
         var dispatchersOfClass = dispatchers.get(messageClass);
         checkNotMoreThanOne(dispatchersOfClass, messageClass);
-        var dispatcher = dispatchersOfClass.stream()
-                                                   .findFirst();
+        var dispatcher = dispatchersOfClass.stream().findFirst();
         return dispatcher;
     }
 
