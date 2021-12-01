@@ -124,7 +124,7 @@ class TracingTest {
 
     private void post(CommandMessage command) {
         var cmd = requests.command()
-                              .create(command);
+                .create(command);
         context.commandBus()
                .post(cmd, noOpObserver());
     }
