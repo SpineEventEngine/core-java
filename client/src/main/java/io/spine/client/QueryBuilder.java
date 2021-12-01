@@ -26,7 +26,6 @@
 
 package io.spine.client;
 
-import com.google.protobuf.FieldMask;
 import io.spine.base.EntityState;
 
 import java.util.Optional;
@@ -147,9 +146,9 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
             return Optional.empty();
         }
         var result = OrderBy.newBuilder()
-                                .setColumn(orderingColumn)
-                                .setDirection(direction)
-                                .build();
+                .setColumn(orderingColumn)
+                .setDirection(direction)
+                .build();
         return Optional.of(result);
     }
 
