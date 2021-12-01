@@ -80,8 +80,7 @@ final class MultiEventConsumers implements Logging {
     /** Obtains all the consumers grouped by type of consumed events. */
     ImmutableMap<Class<? extends EventMessage>, StreamObserver<Event>> toObservers() {
         @SuppressWarnings("ConstantConditions") // `null` values are prevented when gathering.
-        var observers =
-                Maps.transformValues(map, EventConsumers::toObserver);
+        var observers = Maps.transformValues(map, EventConsumers::toObserver);
         return ImmutableMap.copyOf(observers);
     }
 
