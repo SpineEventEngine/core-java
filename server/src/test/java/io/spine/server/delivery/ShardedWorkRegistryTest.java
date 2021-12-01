@@ -113,8 +113,7 @@ public abstract class ShardedWorkRegistryTest {
         registry.releaseExpiredSessions(expirationPeriod);
 
         // Pick up half of the shards and leave another half empty.
-        var newIndexes =
-                pickUp(registry, totalShards, totalShards / 2);
+        var newIndexes = pickUp(registry, totalShards, totalShards / 2);
         sleepUninterruptibly(ofSeconds(1));
         var releasedIndexes = registry.releaseExpiredSessions(expirationPeriod);
         assertThat(releasedIndexes).containsExactlyElementsIn(newIndexes);
