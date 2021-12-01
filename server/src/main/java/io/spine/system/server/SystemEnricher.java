@@ -57,8 +57,7 @@ final class SystemEnricher {
      */
     public static EventEnricher create(CommandLogRepository repo) {
         checkNotNull(repo);
-        var enricher = EventEnricher
-                .newBuilder()
+        var enricher = EventEnricher.newBuilder()
                 .add(CommandScheduled.class, Command.class, commandLookup(repo))
                 .build();
         return enricher;
