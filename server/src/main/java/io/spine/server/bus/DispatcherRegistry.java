@@ -140,8 +140,7 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
         checkNotNull(envelope);
         var dispatchers = dispatchersOf(envelope);
         checkNotMoreThanOne(dispatchers, classOf(envelope));
-        var result = dispatchers.stream()
-                                        .findFirst();
+        var result = dispatchers.stream().findFirst();
         return result;
     }
 
