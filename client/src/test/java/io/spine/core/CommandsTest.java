@@ -59,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  * <p>The test suite is located under the "client" module since actor request generation
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
  */
-@DisplayName("Commands utility should")
+@DisplayName("`Commands` utility should")
 class CommandsTest extends UtilityClassTest<Commands> {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
@@ -99,9 +99,9 @@ class CommandsTest extends UtilityClassTest<Commands> {
     @Test
     @DisplayName("sort given commands by timestamp")
     void sortByTimestamp() {
-        Command cmd1 = requestFactory.createCommand(createProject, minutesAgo(1));
-        Command cmd2 = requestFactory.createCommand(startProject, secondsAgo(30));
-        Command cmd3 = requestFactory.createCommand(stopProject, secondsAgo(5));
+        var cmd1 = requestFactory.createCommand(createProject, minutesAgo(1));
+        var cmd2 = requestFactory.createCommand(startProject, secondsAgo(30));
+        var cmd3 = requestFactory.createCommand(stopProject, secondsAgo(5));
         List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
         assertNotEquals(sortedCommands, commandsToSort);
@@ -114,10 +114,10 @@ class CommandsTest extends UtilityClassTest<Commands> {
     @Test
     @DisplayName("provide stringifier for command id")
     void provideStringifierForId() {
-        CommandId id = CommandId.generate();
+        var id = CommandId.generate();
 
-        String str = Stringifiers.toString(id);
-        CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
+        var str = Stringifiers.toString(id);
+        var convertedBack = Stringifiers.fromString(str, CommandId.class);
         assertThat(convertedBack)
                 .isEqualTo(id);
     }

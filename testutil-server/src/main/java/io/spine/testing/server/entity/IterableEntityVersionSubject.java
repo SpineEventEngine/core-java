@@ -120,7 +120,7 @@ public final class IterableEntityVersionSubject extends IterableOfProtosSubject<
             return ignoreCheck().about(entityVersion())
                                 .that(Version.getDefaultInstance());
         } else {
-            Version version = actual.iterator().next();
+            var version = actual.iterator().next();
             return assertVersion(version);
         }
     }

@@ -36,10 +36,10 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND_VALUE;
 import static io.spine.server.commandbus.CommandException.ATTR_COMMAND_TYPE_NAME;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -81,7 +81,7 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
      */
     @Override
     public boolean canDispatch(EventEnvelope eventEnvelope) {
-        CommandErrored event = (CommandErrored) eventEnvelope.message();
+        var event = (CommandErrored) eventEnvelope.message();
         return checkAndRemember(event);
     }
 
@@ -91,7 +91,7 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
      */
     @VisibleForTesting
     boolean checkAndRemember(CommandErrored event) {
-        Error error = event.getError();
+        var error = event.getError();
         if (!isUnsupportedError(error)) {
             return false;
         }
@@ -124,8 +124,8 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
      * {@link #commandType}.
      */
     private void failTest() {
-        checkNotNull(commandType);
-        String msg = format(
+        requireNonNull(commandType);
+        var msg = format(
                 "The command type `%s` does not have a handler in the context `%s`.",
                 commandType, context
         );

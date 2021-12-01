@@ -28,7 +28,6 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Int32Value;
-import io.spine.base.FieldPath;
 import io.spine.protobuf.AnyPacker;
 import io.spine.query.EntityColumn;
 import io.spine.test.client.TestEntity;
@@ -96,22 +95,22 @@ class QueryFilterTest {
         checkCreates(BiFunction<EntityColumn<?, Integer>, Integer, QueryFilter> factoryMethod,
                      Filter.Operator expectedOperator) {
             EntityColumn<?, Integer> column = TestEntity.Column.thirdField();
-            int value = 42;
-            QueryFilter queryFilter = factoryMethod.apply(column, value);
-            Filter filter = queryFilter.filter();
+            var value = 42;
+            var queryFilter = factoryMethod.apply(column, value);
+            var filter = queryFilter.filter();
 
-            FieldPath fieldPath = filter.getFieldPath();
-            int nameCount = fieldPath.getFieldNameCount();
+            var fieldPath = filter.getFieldPath();
+            var nameCount = fieldPath.getFieldNameCount();
             assertThat(nameCount).isEqualTo(1);
 
-            String fieldName = fieldPath.getFieldName(0);
-            String columnName = column.name()
-                                      .value();
+            var fieldName = fieldPath.getFieldName(0);
+            var columnName = column.name()
+                                   .value();
             assertThat(fieldName).isEqualTo(columnName);
 
             assertThat(filter.getOperator()).isEqualTo(expectedOperator);
 
-            Int32Value unpacked = AnyPacker.unpack(filter.getValue(), Int32Value.class);
+            var unpacked = AnyPacker.unpack(filter.getValue(), Int32Value.class);
             assertThat(unpacked.getValue()).isEqualTo(value);
         }
     }

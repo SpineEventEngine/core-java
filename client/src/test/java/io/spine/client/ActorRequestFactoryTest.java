@@ -41,7 +41,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Set;
 
@@ -75,7 +74,7 @@ class ActorRequestFactoryTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        NullPointerTester tester = new NullPointerTester();
+        var tester = new NullPointerTester();
         tester.setDefault(Message.class, TestEntity.getDefaultInstance())
                 .setDefault(new TypeToken<Class<? extends Message>>() {}.getRawType(),
                             TestEntity.class)
@@ -107,7 +106,7 @@ class ActorRequestFactoryTest {
     @Test
     @DisplayName("return values set in `Builder`")
     void returnValuesSetInBuilder() {
-        ActorRequestFactory.Builder builder = requestFactoryBuilder()
+        var builder = requestFactoryBuilder()
                 .setActor(ACTOR)
                 .setZoneId(ZONE_ID);
 
@@ -128,7 +127,7 @@ class ActorRequestFactoryTest {
         @Test
         @DisplayName("given user")
         void givenUser() {
-            ActorRequestFactory aFactory = requestFactoryBuilder()
+            var aFactory = requestFactoryBuilder()
                     .setActor(ACTOR)
                     .build();
 
@@ -150,10 +149,10 @@ class ActorRequestFactoryTest {
         @Test
         @DisplayName("by `ZoneId`")
         void byOffsetAndId() {
-            java.time.ZoneId id = java.time.ZoneId.of("Australia/Darwin");
-            ZoneId newZone = ZoneIds.of(id);
+            var id = java.time.ZoneId.of("Australia/Darwin");
+            var newZone = ZoneIds.of(id);
 
-            ActorRequestFactory movedFactory = factory.switchTimeZone(newZone);
+            var movedFactory = factory.switchTimeZone(newZone);
 
             assertThat(movedFactory.zoneId())
                     .isNotEqualTo(factory.zoneId());
@@ -164,10 +163,10 @@ class ActorRequestFactoryTest {
         @Test
         @DisplayName("by ZoneId")
         void byZoneId() {
-            java.time.ZoneId id = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
+            var id = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
 
-            ZoneId zoneId = ZoneIds.of(id);
-            ActorRequestFactory movedFactory = factory.switchTimeZone(zoneId);
+            var zoneId = ZoneIds.of(id);
+            var movedFactory = factory.switchTimeZone(zoneId);
 
             assertNotEquals(factory.zoneId(), movedFactory.zoneId());
             assertEquals(zoneId, movedFactory.zoneId());
@@ -193,12 +192,11 @@ class ActorRequestFactoryTest {
         @Test
         @DisplayName("when no set directly")
         void zoneIdAndOffset() {
-            ActorRequestFactory factory =
-                    ActorRequestFactory.newBuilder()
-                                       .setActor(ACTOR)
-                                       .build();
+            var factory = ActorRequestFactory.newBuilder()
+                    .setActor(ACTOR)
+                    .build();
 
-            ZoneId expected = ZoneIds.of(CustomTimeProvider.ZONE);
+            var expected = ZoneIds.of(CustomTimeProvider.ZONE);
             assertThat(factory.zoneId())
                     .isEqualTo(expected);
         }
@@ -210,8 +208,7 @@ class ActorRequestFactoryTest {
 
         @Override
         public Timestamp currentTime() {
-            Instant nowThere = ZonedDateTime.now(ZONE)
-                                           .toInstant();
+            var nowThere = ZonedDateTime.now(ZONE).toInstant();
             return Temporals.from(nowThere)
                             .toTimestamp();
         }

@@ -80,7 +80,7 @@ public class ActorRequestFactory {
      */
     public static ActorRequestFactory fromContext(ActorContext actorContext) {
         checkNotNull(actorContext);
-        Builder builder = newBuilder()
+        var builder = newBuilder()
                 .setActor(actorContext.getActor())
                 .setTenantId(actorContext.getTenantId())
                 .setZoneId(actorContext.getZoneId());
@@ -129,8 +129,7 @@ public class ActorRequestFactory {
     public ActorRequestFactory switchTimeZone(io.spine.time.ZoneOffset ignored, ZoneId zoneId) {
         checkNotNull(ignored);
         checkNotNull(zoneId);
-        ActorRequestFactory result =
-                newBuilder().setActor(actor())
+        var result = newBuilder().setActor(actor())
                             .setZoneId(zoneId)
                             .setTenantId(tenantId())
                             .build();
@@ -146,8 +145,7 @@ public class ActorRequestFactory {
      */
     public ActorRequestFactory switchTimeZone(ZoneId zoneId) {
         checkNotNull(zoneId);
-        ActorRequestFactory result =
-                newBuilder().setActor(actor())
+        var result = newBuilder().setActor(actor())
                             .setZoneId(zoneId)
                             .setTenantId(tenantId())
                             .build();
@@ -203,8 +201,7 @@ public class ActorRequestFactory {
     @Internal
     @SuppressWarnings("CheckReturnValue") // calling builder
     public final ActorContext newActorContext() {
-        ActorContext.Builder builder = ActorContext
-                .newBuilder()
+        var builder = ActorContext.newBuilder()
                 .setActor(actor)
                 .setTimestamp(currentTime())
                 .setZoneId(zoneId);
@@ -289,7 +286,7 @@ public class ActorRequestFactory {
          */
         public ActorRequestFactory build() {
             checkNotNull(actor, "`actor` must be defined");
-            java.time.ZoneId currentZone = Time.currentTimeZone();
+            var currentZone = Time.currentTimeZone();
             if (zoneId == null) {
                 setZoneId(ZoneIds.of(currentZone));
             }

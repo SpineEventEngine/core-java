@@ -47,7 +47,7 @@ class FilterMixinTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        Filter filter = Filters.eq("first_field", "column value");
+        var filter = Filters.eq("first_field", "column value");
         new NullPointerTester()
                 .testAllPublicInstanceMethods(filter);
     }
@@ -55,14 +55,14 @@ class FilterMixinTest {
     @Test
     @DisplayName("check the filter can be applied to the given target")
     void validateFilter() {
-        Filter filter = Filters.eq("first_field", "some entity column value");
+        var filter = Filters.eq("first_field", "some entity column value");
         filter.checkCanApplyTo(testEntityTarget());
     }
 
     @Test
     @DisplayName("consider the filter targeting a nested field of an event message valid")
     void validateFilterWithNested() {
-        Filter filter = Filters.eq("name.value", "a project name");
+        var filter = Filters.eq("name.value", "a project name");
         filter.checkCanApplyTo(createProjectTarget());
     }
 
@@ -73,7 +73,7 @@ class FilterMixinTest {
         @Test
         @DisplayName("when the field is not present in the target type")
         void whenFieldNotPresent() {
-            Filter filter = Filters.eq("non_existing_field", "some entity column value");
+            var filter = Filters.eq("non_existing_field", "some entity column value");
             assertNotApplies(filter, testEntityTarget());
         }
 
@@ -84,18 +84,18 @@ class FilterMixinTest {
             @Test
             @DisplayName("and the target field is not top-level")
             void whenFieldNotTopLevel() {
-                Filter filter = Filters.eq("name.value", "a test entity name");
+                var filter = Filters.eq("name.value", "a test entity name");
                 assertNotApplies(filter, testEntityTarget());
             }
 
             @Test
             @DisplayName("and the target field is not an entity column")
             void whenFieldIsNotColumn() {
-                TestEntityName name = TestEntityName
+                var name = TestEntityName
                         .newBuilder()
                         .setValue("the entity name")
                         .build();
-                Filter filter = Filters.eq("name", name);
+                var filter = Filters.eq("name", name);
                 assertNotApplies(filter, testEntityTarget());
             }
         }
@@ -110,8 +110,7 @@ class FilterMixinTest {
      * Returns a target enclosing the {@link TestEntity} type.
      */
     private static Target testEntityTarget() {
-        Target target = Target
-                .newBuilder()
+        var target = Target.newBuilder()
                 .setType(TEST_ENTITY_TYPE.value())
                 .build();
         return target;
@@ -121,8 +120,7 @@ class FilterMixinTest {
      * Returns a target enclosing the {@link ClCreateProject} type.
      */
     private static Target createProjectTarget() {
-        Target target = Target
-                .newBuilder()
+        var target = Target.newBuilder()
                 .setType(PROJECT_CREATED_TYPE.value())
                 .build();
         return target;

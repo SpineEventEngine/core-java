@@ -30,7 +30,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandMessage;
 import io.spine.client.ActorRequestFactory;
-import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
@@ -51,16 +50,14 @@ import java.time.Instant;
 public class TestActorRequestFactory extends ActorRequestFactory {
 
     public TestActorRequestFactory(UserId actor, ZoneId zoneId) {
-        super(ActorRequestFactory
-                      .newBuilder()
+        super(ActorRequestFactory.newBuilder()
                       .setActor(actor)
                       .setZoneId(zoneId)
         );
     }
 
     public TestActorRequestFactory(@Nullable TenantId tenantId, UserId actor, ZoneId zoneId) {
-        super(ActorRequestFactory
-                      .newBuilder()
+        super(ActorRequestFactory.newBuilder()
                       .setTenantId(tenantId)
                       .setActor(actor)
                       .setZoneId(zoneId)
@@ -91,30 +88,27 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /** Creates new command with the passed timestamp. */
     public Command createCommand(CommandMessage message, Timestamp timestamp) {
-        Command command = command().create(message);
+        var command = command().create(message);
         return withTimestamp(command, timestamp);
     }
 
     private static Command withTimestamp(Command command, Timestamp timestamp) {
-        CommandContext origin = command.context();
-        ActorContext withTime =
-                origin.getActorContext()
-                      .toBuilder()
-                      .setTimestamp(timestamp)
-                      .build();
-        CommandContext resultContext =
-                origin.toBuilder()
-                      .setActorContext(withTime)
-                      .build();
-        Command result =
-                command.toBuilder()
-                       .setContext(resultContext)
-                       .build();
+        var origin = command.context();
+        var withTime = origin.getActorContext()
+                .toBuilder()
+                .setTimestamp(timestamp)
+                .build();
+        var resultContext = origin.toBuilder()
+                .setActorContext(withTime)
+                .build();
+        var result = command.toBuilder()
+                .setContext(resultContext)
+                .build();
         return result;
     }
 
     public Command createCommand(CommandMessage message) {
-        Command command = command().create(message);
+        var command = command().create(message);
         return command;
     }
 
@@ -124,9 +118,8 @@ public class TestActorRequestFactory extends ActorRequestFactory {
      */
     public Command generateCommand() {
         @SuppressWarnings("MagicNumber")
-        String randomSuffix = String.format("%04d", TestValues.random(10_000));
-        TestCommandMessage msg = TestCommandMessage
-                .newBuilder()
+        var randomSuffix = String.format("%04d", TestValues.random(10_000));
+        var msg = TestCommandMessage .newBuilder()
                 .setId("random-number-" + randomSuffix)
                 .build();
         return createCommand(msg);
@@ -149,8 +142,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
      */
     @Deprecated
     public static io.spine.time.ZoneOffset toOffset(ZoneId zoneId) {
-        java.time.ZoneOffset offset =
-                ZoneIds.toJavaTime(zoneId)
+        var offset = ZoneIds.toJavaTime(zoneId)
                        .getRules()
                        .getOffset(Instant.now());
         return io.spine.time.ZoneOffsets.of(offset);

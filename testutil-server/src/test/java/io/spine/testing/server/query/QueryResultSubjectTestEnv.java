@@ -40,43 +40,38 @@ import static io.spine.testing.server.query.GivenResponseStatus.ok;
 
 final class QueryResultSubjectTestEnv {
 
-    public static final String TASK_1_TITLE = "Clean dishes";
-    public static final String TASK_1_DESCRIPTION = "Do clean all the dishes";
+    private static final String TASK_1_TITLE = "Clean dishes";
+    private static final String TASK_1_DESCRIPTION = "Do clean all the dishes";
 
-    public static final String TASK_2_TITLE = "Do the laundry";
-    public static final String TASK_2_DESCRIPTION = "Do the laundry very efficiently";
+    private static final String TASK_2_TITLE = "Do the laundry";
+    private static final String TASK_2_DESCRIPTION = "Do the laundry very efficiently";
 
     /** Prevents instantiation of this test env class. */
     private QueryResultSubjectTestEnv() {
     }
 
-    public static QueryResponse responseWithSingleEntity() {
-        EntityStateWithVersion stateWithVersion = EntityStateWithVersion
-                .newBuilder()
+    static QueryResponse responseWithSingleEntity() {
+        var stateWithVersion = EntityStateWithVersion.newBuilder()
                 .setState(pack(state1()))
                 .setVersion(version1())
                 .vBuild();
-        QueryResponse queryResponse = QueryResponse
-                .newBuilder()
+        var queryResponse = QueryResponse.newBuilder()
                 .setResponse(responseOk())
                 .addMessage(stateWithVersion)
                 .vBuild();
         return queryResponse;
     }
 
-    public static QueryResponse responseWithMultipleEntities() {
-        EntityStateWithVersion stateWithVersion1 = EntityStateWithVersion
-                .newBuilder()
+    static QueryResponse responseWithMultipleEntities() {
+        var stateWithVersion1 = EntityStateWithVersion.newBuilder()
                 .setState(pack(state1()))
                 .setVersion(version1())
                 .vBuild();
-        EntityStateWithVersion stateWithVersion2 = EntityStateWithVersion
-                .newBuilder()
+        var stateWithVersion2 = EntityStateWithVersion.newBuilder()
                 .setState(pack(state2()))
                 .setVersion(version2())
                 .vBuild();
-        QueryResponse queryResponse = QueryResponse
-                .newBuilder()
+        var queryResponse = QueryResponse.newBuilder()
                 .setResponse(responseOk())
                 .addMessage(stateWithVersion1)
                 .addMessage(stateWithVersion2)
@@ -84,13 +79,11 @@ final class QueryResultSubjectTestEnv {
         return queryResponse;
     }
 
-    public static BbTask state1() {
-        BbTaskId id = BbTaskId
-                .newBuilder()
+    private static BbTask state1() {
+        var id = BbTaskId.newBuilder()
                 .setUuid(newUuid())
                 .vBuild();
-        BbTask state = BbTask
-                .newBuilder()
+        var state = BbTask.newBuilder()
                 .setTaskId(id)
                 .setTitle(TASK_1_TITLE)
                 .setDescription(TASK_1_DESCRIPTION)
@@ -98,13 +91,11 @@ final class QueryResultSubjectTestEnv {
         return state;
     }
 
-    public static BbTask state2() {
-        BbTaskId id = BbTaskId
-                .newBuilder()
+    static BbTask state2() {
+        var id = BbTaskId.newBuilder()
                 .setUuid(newUuid())
                 .vBuild();
-        BbTask state = BbTask
-                .newBuilder()
+        var state = BbTask.newBuilder()
                 .setTaskId(id)
                 .setTitle(TASK_2_TITLE)
                 .setDescription(TASK_2_DESCRIPTION)
@@ -112,23 +103,23 @@ final class QueryResultSubjectTestEnv {
         return state;
     }
 
-    public static Version version1() {
+    private static Version version1() {
         return Version.newBuilder()
-                      .setNumber(15)
-                      .setTimestamp(currentTime())
-                      .vBuild();
+                .setNumber(15)
+                .setTimestamp(currentTime())
+                .vBuild();
     }
 
-    public static Version version2() {
+    static Version version2() {
         return Version.newBuilder()
-                      .setNumber(42)
-                      .setTimestamp(currentTime())
-                      .vBuild();
+                .setNumber(42)
+                .setTimestamp(currentTime())
+                .vBuild();
     }
 
     private static Response responseOk() {
         return Response.newBuilder()
-                       .setStatus(ok())
-                       .vBuild();
+                .setStatus(ok())
+                .vBuild();
     }
 }

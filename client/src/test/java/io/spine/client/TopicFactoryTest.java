@@ -25,16 +25,13 @@
  */
 package io.spine.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import io.spine.core.ActorContext;
 import io.spine.test.client.TestEntityId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -51,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests for {@link io.spine.client.TopicFactory}.
  */
-@DisplayName("Topic factory should")
+@DisplayName("`TopicFactory` should")
 class TopicFactoryTest {
 
     private ActorRequestFactory requestFactory;
@@ -70,8 +67,8 @@ class TopicFactoryTest {
         @Test
         @DisplayName("for all of a kind")
         void forAllOfKind() {
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .build();
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .build();
 
             verifyTargetAndContext(topic);
 
@@ -85,19 +82,19 @@ class TopicFactoryTest {
         @DisplayName("for objects with specified IDs")
         void forSomeOfKind() {
             Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
-            Topic topic = factory.select(TEST_ENTITY_TYPE)
-                                 .byId(ids)
-                                 .build();
+            var topic = factory.select(TEST_ENTITY_TYPE)
+                               .byId(ids)
+                               .build();
 
             verifyTargetAndContext(topic);
 
-            List<Any> actualIds = topic.getTarget()
-                                       .getFilters()
-                                       .getIdFilter()
-                                       .getIdList();
+            var actualIds = topic.getTarget()
+                                 .getFilters()
+                                 .getIdFilter()
+                                 .getIdList();
             assertEquals(ids.size(), actualIds.size());
-            for (Any actualId : actualIds) {
-                TestEntityId unpackedId = unpack(actualId, TestEntityId.class);
+            for (var actualId : actualIds) {
+                var unpackedId = unpack(actualId, TestEntityId.class);
                 assertTrue(ids.contains(unpackedId));
             }
         }
@@ -105,8 +102,8 @@ class TopicFactoryTest {
         @Test
         @DisplayName("for given target")
         void forTarget() {
-            Target givenTarget = Targets.allOf(TEST_ENTITY_TYPE);
-            Topic topic = factory.forTarget(givenTarget);
+            var givenTarget = Targets.allOf(TEST_ENTITY_TYPE);
+            var topic = factory.forTarget(givenTarget);
 
             verifyTargetAndContext(topic);
         }
@@ -119,7 +116,7 @@ class TopicFactoryTest {
                                                               .getType());
             assertEquals(FieldMask.getDefaultInstance(), topic.getFieldMask());
 
-            ActorContext actualContext = topic.getContext();
+            var actualContext = topic.getContext();
             verifyContext(requestFactory.newActorContext(), actualContext);
         }
     }

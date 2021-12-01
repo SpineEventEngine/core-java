@@ -26,7 +26,6 @@
 
 package io.spine.client;
 
-import com.google.protobuf.FieldMask;
 import io.spine.base.EntityState;
 
 import java.util.Optional;
@@ -128,9 +127,9 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
     @Override
     @SuppressWarnings("OptionalIsPresent")  // For better readability.
     public Query build() {
-        Optional<OrderBy> orderBy = orderBy();
-        Target target = buildTarget();
-        FieldMask mask = composeMask();
+        var orderBy = orderBy();
+        var target = buildTarget();
+        var mask = composeMask();
 
         if (limit > 0) {
             checkState(orderBy.isPresent(), "Limit cannot be set for unordered Queries.");
@@ -146,10 +145,10 @@ public final class QueryBuilder extends TargetBuilder<Query, QueryBuilder> {
         if (orderingColumn == null) {
             return Optional.empty();
         }
-        OrderBy result = OrderBy.newBuilder()
-                                .setColumn(orderingColumn)
-                                .setDirection(direction)
-                                .build();
+        var result = OrderBy.newBuilder()
+                .setColumn(orderingColumn)
+                .setDirection(direction)
+                .build();
         return Optional.of(result);
     }
 

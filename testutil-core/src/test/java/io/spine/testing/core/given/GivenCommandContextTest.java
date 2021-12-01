@@ -26,11 +26,8 @@
 package io.spine.testing.core.given;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.core.ActorContext;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.UserId;
 import io.spine.testing.UtilityClassTest;
@@ -63,27 +60,27 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     @Test
     @DisplayName("create CommandContext with random actor")
     void createWithRandomActor() {
-        CommandContext first = GivenCommandContext.withRandomActor();
-        CommandContext second = GivenCommandContext.withRandomActor();
+        var first = GivenCommandContext.withRandomActor();
+        var second = GivenCommandContext.withRandomActor();
 
         checkValid(first);
         checkValid(second);
 
-        ActorContext firstActorContext = first.actorContext();
-        ActorContext secondActorContext = second.actorContext();
+        var firstActorContext = first.actorContext();
+        var secondActorContext = second.actorContext();
         assertNotEquals(firstActorContext.getActor(), secondActorContext.getActor());
     }
 
     @Test
     @DisplayName("create CommandContext with actor and time")
     void createWithActorAndTime() {
-        UserId actorId = newUuid();
-        Timestamp when = add(currentTime(), minutes(100));
+        var actorId = newUuid();
+        var when = add(currentTime(), minutes(100));
 
-        CommandContext context = GivenCommandContext.withActorAndTime(actorId, when);
+        var context = GivenCommandContext.withActorAndTime(actorId, when);
         checkValid(context);
 
-        ActorContext actualActorContext = context.getActorContext();
+        var actualActorContext = context.getActorContext();
 
         assertEquals(actorId, actualActorContext.getActor());
         assertEquals(when, actualActorContext.getTimestamp());
@@ -92,16 +89,15 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     @Test
     @DisplayName("create CommandContext with scheduled delay")
     void createWithScheduledDelay() {
-        Duration delay = hours(42);
-        Schedule expectedSchedule = Schedule
-                .newBuilder()
+        var delay = hours(42);
+        var expectedSchedule = Schedule.newBuilder()
                 .setDelay(delay)
                 .build();
 
-        CommandContext context = GivenCommandContext.withScheduledDelayOf(delay);
+        var context = GivenCommandContext.withScheduledDelayOf(delay);
         checkValid(context);
 
-        Schedule actualSchedule = context.getSchedule();
+        var actualSchedule = context.getSchedule();
         assertEquals(expectedSchedule, actualSchedule);
     }
 }

@@ -37,25 +37,22 @@ final class GivenResponseStatus {
     private GivenResponseStatus() {
     }
 
-    public static Status ok() {
-        Status status = Status
-                .newBuilder()
+    static Status ok() {
+        var status = Status.newBuilder()
                 .setOk(Empty.getDefaultInstance())
                 .vBuild();
         return status;
     }
 
-    public static Status error() {
-        Status status = Status
-                .newBuilder()
+    static Status error() {
+        var status = Status.newBuilder()
                 .setError(Error.getDefaultInstance())
                 .vBuild();
         return status;
     }
 
-    public static Status rejection() {
-        Status status = Status
-                .newBuilder()
+    static Status rejection() {
+        var status = Status.newBuilder()
                 .setRejection(Event.getDefaultInstance())
                 .vBuild();
         return status;

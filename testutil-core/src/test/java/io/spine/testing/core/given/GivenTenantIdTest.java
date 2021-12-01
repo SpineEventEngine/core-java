@@ -43,7 +43,7 @@ class GivenTenantIdTest extends UtilityClassTest<GivenTenantId> {
     @Test
     @DisplayName("create TenantId by string value")
     void createByStringValue() {
-        String expected = Identifier.newUuid();
+        var expected = Identifier.newUuid();
 
         assertEquals(expected, GivenTenantId.of(expected)
                                             .getValue());

@@ -43,7 +43,7 @@ public interface EventObserver<E extends EventMessage>
     @Override
     default void onNext(Event value) {
         @SuppressWarnings("unchecked") // The type must be ensured when subscribing.
-        E eventMessage = (E) value.enclosedMessage();
+        var eventMessage = (E) value.enclosedMessage();
         accept(eventMessage, value.context());
     }
 }

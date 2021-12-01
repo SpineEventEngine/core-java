@@ -56,10 +56,8 @@ interface SubscriptionUpdateMixin {
      *         if the index is out of the range of entities returned by this update
      */
     default EntityState<?> state(int index) {
-        EntityStateUpdate stateUpdate =
-                getEntityUpdates().getUpdateList()
-                                  .get(index);
-        EntityState<?> result = (EntityState<?>) AnyPacker.unpack(stateUpdate.getState());
+        var stateUpdate = getEntityUpdates().getUpdateList().get(index);
+        var result = (EntityState<?>) AnyPacker.unpack(stateUpdate.getState());
         return result;
     }
 
@@ -67,13 +65,12 @@ interface SubscriptionUpdateMixin {
      * Obtains an immutable list of stored entity states.
      */
     default List<EntityState<?>> states() {
-        ImmutableList<EntityState<?>> result =
-                getEntityUpdates().getUpdateList()
-                                  .stream()
-                                  .map(EntityStateUpdate::getState)
-                                  .map(AnyPacker::unpack)
-                                  .map((s) -> (EntityState<?>) s)
-                                  .collect(toImmutableList());
+        var stateUpdates = getEntityUpdates().getUpdateList();
+        ImmutableList<EntityState<?>> result = stateUpdates.stream()
+                .map(EntityStateUpdate::getState)
+                .map(AnyPacker::unpack)
+                .map((s) -> (EntityState<?>) s)
+                .collect(toImmutableList());
         return result;
     }
 
@@ -84,7 +81,7 @@ interface SubscriptionUpdateMixin {
      *         if the index is out of the range of events returned by this update
      */
     default Event event(int index) {
-        Event result = getEventUpdates().getEvent(index);
+        var result = getEventUpdates().getEvent(index);
         return result;
     }
 
@@ -92,8 +89,8 @@ interface SubscriptionUpdateMixin {
      * Obtains an immutable list of stored events.
      */
     default List<Event> events() {
-        List<Event> events = getEventUpdates().getEventList();
-        ImmutableList<Event> result = ImmutableList.copyOf(events);
+        var events = getEventUpdates().getEventList();
+        var result = ImmutableList.copyOf(events);
         return result;
     }
 
@@ -101,12 +98,11 @@ interface SubscriptionUpdateMixin {
      * Obtains an immutable list of stored event messages.
      */
     default List<EventMessage> eventMessages() {
-        ImmutableList<EventMessage> result =
-                events().stream()
-                        .map(Event::getMessage)
-                        .map(AnyPacker::unpack)
-                        .map(EventMessage.class::cast)
-                        .collect(toImmutableList());
+        var result = events().stream()
+                .map(Event::getMessage)
+                .map(AnyPacker::unpack)
+                .map(EventMessage.class::cast)
+                .collect(toImmutableList());
         return result;
     }
 }

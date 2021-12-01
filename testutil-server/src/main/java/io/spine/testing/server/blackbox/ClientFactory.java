@@ -91,12 +91,12 @@ class ClientFactory implements Closeable {
      */
     Client create(@Nullable TenantId tenant) {
         ensureTenantMatch(tenant);
-        String serverName = ensureServer();
-        Client.Builder builder = Client.inProcess(serverName);
+        var serverName = ensureServer();
+        var builder = Client.inProcess(serverName);
         if(tenant != null) {
             builder.forTenant(tenant);
         }
-        Client client = builder.build();
+        var client = builder.build();
         clients.add(client);
         return client;
     }
@@ -129,12 +129,12 @@ class ClientFactory implements Closeable {
     }
 
     private void initServer() {
-        CommandService commandService = CommandService.withSingle(context);
-        QueryService queryService = QueryService.withSingle(context);
-        SubscriptionService subscriptionService = SubscriptionService.withSingle(context);
+        var commandService = CommandService.withSingle(context);
+        var queryService = QueryService.withSingle(context);
+        var subscriptionService = SubscriptionService.withSingle(context);
 
-        String serverName = "BlackBox-Server-" + Identifier.newUuid();
-        GrpcContainer grpcContainer = GrpcContainer
+        var serverName = "BlackBox-Server-" + Identifier.newUuid();
+        var grpcContainer = GrpcContainer
                 .inProcess(serverName)
                 .addService(commandService)
                 .addService(queryService)

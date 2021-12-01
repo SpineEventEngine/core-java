@@ -41,7 +41,6 @@ import io.spine.server.model.DuplicateCommandHandlerError;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.SignatureMismatchException;
 import io.spine.testing.TempDir;
-import io.spine.testing.logging.LogRecordSubject;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.mute.MuteLogging;
 import org.gradle.api.Project;
@@ -68,13 +67,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("ModelVerifier should")
+@DisplayName("`ModelVerifier` should")
 class ModelVerifierTest {
 
     private Project project = null;
 
     static Project actualProject() {
-        Project result = ProjectBuilder.builder().build();
+        var result = ProjectBuilder.builder().build();
         result.getPluginManager().apply("java");
         return result;
     }
@@ -87,13 +86,12 @@ class ModelVerifierTest {
     @Test
     @DisplayName("verify model from classpath")
     void verifyModel() {
-        ModelVerifier verifier = new ModelVerifier(project);
+        var verifier = new ModelVerifier(project);
 
-        String commandHandlerTypeName = UploadCommandHandler.class.getName();
-        String aggregateTypeName = EditAggregate.class.getName();
-        String procManTypeName = RenameProcMan.class.getName();
-        CommandHandlers spineModel = CommandHandlers
-                .newBuilder()
+        var commandHandlerTypeName = UploadCommandHandler.class.getName();
+        var aggregateTypeName = EditAggregate.class.getName();
+        var procManTypeName = RenameProcMan.class.getName();
+        var spineModel = CommandHandlers.newBuilder()
                 .addCommandHandlingType(commandHandlerTypeName)
                 .addCommandHandlingType(aggregateTypeName)
                 .addCommandHandlingType(procManTypeName)
@@ -105,9 +103,8 @@ class ModelVerifierTest {
     @DisplayName("throw when attempting to verify a model that declares an invalid command handler")
     @MethodSource("getBadHandlers")
     void throwOnSignatureMismatch(String badHandlerName) {
-        ModelVerifier verifier = new ModelVerifier(project);
-        CommandHandlers model = CommandHandlers
-                .newBuilder()
+        var verifier = new ModelVerifier(project);
+        var model = CommandHandlers.newBuilder()
                 .addCommandHandlingType(badHandlerName)
                 .build();
         assertThrows(SignatureMismatchException.class, () -> verifier.verify(model));
@@ -122,11 +119,11 @@ class ModelVerifierTest {
     @Test
     @DisplayName("fail on duplicate command handlers")
     void failOnDuplicateHandlers() {
-        ModelVerifier verifier = new ModelVerifier(project);
-        String firstType = UploadCommandHandler.class.getName();
-        String secondType = DuplicateCommandHandler.class.getName();
+        var verifier = new ModelVerifier(project);
+        var firstType = UploadCommandHandler.class.getName();
+        var secondType = DuplicateCommandHandler.class.getName();
 
-        CommandHandlers spineModel = CommandHandlers
+        var spineModel = CommandHandlers
                 .newBuilder()
                 .addCommandHandlingType(firstType)
                 .addCommandHandlingType(secondType)
@@ -137,10 +134,9 @@ class ModelVerifierTest {
     @Test
     @DisplayName("fail on command receiving methods marked as external")
     void failOnExternalCommandReceivers() {
-        ModelVerifier verifier = new ModelVerifier(project);
-        String invalidProcman = InvalidCommander.class.getName();
-        CommandHandlers spineModel = CommandHandlers
-                .newBuilder()
+        var verifier = new ModelVerifier(project);
+        var invalidProcman = InvalidCommander.class.getName();
+        var spineModel = CommandHandlers.newBuilder()
                 .addCommandHandlingType(invalidProcman)
                 .build();
         assertThrows(ExternalCommandReceiverMethodError.class, () -> verifier.verify(spineModel));
@@ -158,11 +154,10 @@ class ModelVerifierTest {
 
         @BeforeEach
         void verifyModel() {
-            ModelVerifier verifier = new ModelVerifier(project);
+            var verifier = new ModelVerifier(project);
             // Add handler here to avoid unnecessary logging.
             interceptLogging();
-            CommandHandlers model = CommandHandlers
-                    .newBuilder()
+            var model = CommandHandlers.newBuilder()
                     .addCommandHandlingType(aggregateClass.getName())
                     .build();
             verifier.verify(model);
@@ -176,7 +171,7 @@ class ModelVerifierTest {
         @Test
         @DisplayName("on `private` command handling methods")
         void onPrivateMethod() {
-            LogRecordSubject assertRecord = assertLog().record();
+            var assertRecord = assertLog().record();
             assertRecord.hasLevelThat()
                         .isEqualTo(level());
             assertRecord.hasMessageThat()
@@ -188,9 +183,8 @@ class ModelVerifierTest {
     @MuteLogging
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
-        String invalidClassname = "non.existing.class.Name";
-        CommandHandlers spineModel = CommandHandlers
-                .newBuilder()
+        var invalidClassname = "non.existing.class.Name";
+        var spineModel = CommandHandlers.newBuilder()
                 .addCommandHandlingType(invalidClassname)
                 .build();
         new ModelVerifier(project).verify(spineModel);
@@ -199,9 +193,8 @@ class ModelVerifierTest {
     @Test
     @DisplayName("not accept non-CommandHandler types")
     void rejectNonHandlerTypes() {
-        String invalidClassname = ModelVerifierTest.class.getName();
-        CommandHandlers spineModel = CommandHandlers
-                .newBuilder()
+        var invalidClassname = ModelVerifierTest.class.getName();
+        var spineModel = CommandHandlers.newBuilder()
                 .addCommandHandlingType(invalidClassname)
                 .build();
         assertThrows(IllegalArgumentException.class,
@@ -211,22 +204,22 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve compilation destination directory from task")
     void getCompilationDestDir() throws MalformedURLException {
-        JavaCompile compileTask = actualProject().getTasks()
-                                                 .withType(JavaCompile.class)
-                                                 .getByName(compileJava.name());
-        File dest = TempDir.forClass(getClass());
+        var compileTask = actualProject().getTasks()
+                                         .withType(JavaCompile.class)
+                                         .getByName(compileJava.name());
+        var dest = TempDir.forClass(getClass());
         compileTask.getDestinationDirectory().set(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
-        URL destUrl = dest.toURI().toURL();
+        var destUrl = dest.toURI().toURL();
         assertEquals(destUrl, func.apply(compileTask));
     }
 
     @Test
-    @DisplayName("retrieve null if destination directory is null")
+    @DisplayName("retrieve `null` if destination directory is null")
     void getNullDestDir() {
-        JavaCompile compileTask = actualProject().getTasks()
-                                                 .withType(JavaCompile.class)
-                                                 .getByName(compileJava.name());
+        var compileTask = actualProject().getTasks()
+                                         .withType(JavaCompile.class)
+                                         .getByName(compileJava.name());
         compileTask.getDestinationDirectory().set((File) null);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));

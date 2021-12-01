@@ -31,7 +31,6 @@ import io.spine.client.CompositeFilter.CompositeOperator;
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -62,8 +61,8 @@ interface CompositeMessageFilter<M extends Message> extends MessageFilter<M> {
     @Override
     @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // OK for Proto enum.
     default boolean test(M message) {
-        Stream<MessageFilter<M>> filters = filters().stream();
-        CompositeFilter.CompositeOperator operator = operator();
+        var filters = filters().stream();
+        var operator = operator();
         Predicate<MessageFilter<M>> passesFilter = f -> f.test(message);
         switch (operator) {
             case ALL:

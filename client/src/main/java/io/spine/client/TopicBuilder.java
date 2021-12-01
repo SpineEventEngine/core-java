@@ -26,7 +26,6 @@
 
 package io.spine.client;
 
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -75,10 +74,10 @@ public final class TopicBuilder extends TargetBuilder<Topic, TopicBuilder> {
      */
     @Override
     public Topic build() {
-        Target target = buildTarget();
+        var target = buildTarget();
         target.checkValid();
-        FieldMask mask = composeMask();
-        Topic topic = topicFactory.composeTopic(target, mask);
+        var mask = composeMask();
+        var topic = topicFactory.composeTopic(target, mask);
         return topic;
     }
 

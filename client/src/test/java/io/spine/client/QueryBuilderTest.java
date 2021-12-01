@@ -27,10 +27,7 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.IterableSubject;
-import com.google.common.truth.StringSubject;
 import com.google.protobuf.Any;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -85,7 +82,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@DisplayName("QueryBuilder should")
+@DisplayName("`QueryBuilder` should")
 class QueryBuilderTest {
 
     private QueryFactory factory;
@@ -102,7 +99,7 @@ class QueryBuilderTest {
         @Test
         @DisplayName(NOT_ACCEPT_NULLS)
         void notAcceptNulls() {
-            NullPointerTester tester = new NullPointerTester();
+            var tester = new NullPointerTester();
             tester.testAllPublicStaticMethods(QueryBuilder.class);
             tester.testAllPublicInstanceMethods(factory.select(TEST_ENTITY_TYPE));
         }
@@ -126,9 +123,9 @@ class QueryBuilderTest {
         @Test
         @DisplayName("throw IAE if order direction is not ASCENDING or DESCENDING")
         void notAcceptInvalidDirection() {
-            QueryBuilder select = factory.select(TEST_ENTITY_TYPE)
-                                         .orderBy(FIRST_FIELD, ASCENDING)
-                                         .orderBy(FIRST_FIELD, DESCENDING);
+            var select = factory.select(TEST_ENTITY_TYPE)
+                                .orderBy(FIRST_FIELD, ASCENDING)
+                                .orderBy(FIRST_FIELD, DESCENDING);
             assertThrows(IllegalArgumentException.class,
                          () -> select.orderBy(FIRST_FIELD, OD_UNKNOWN));
             assertThrows(IllegalArgumentException.class,
@@ -143,13 +140,13 @@ class QueryBuilderTest {
         @Test
         @DisplayName("by only entity type")
         void byType() {
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .build();
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .build();
             assertNotNull(query);
-            ResponseFormat format = query.getFormat();
+            var format = query.getFormat();
             assertFalse(format.hasFieldMask());
 
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
             assertThat(format.getOrderByCount()).isEqualTo(0);
@@ -161,19 +158,19 @@ class QueryBuilderTest {
         @Test
         @DisplayName("with order")
         void ordered() {
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderBy(FIRST_FIELD, ASCENDING)
-                                 .build();
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .orderBy(FIRST_FIELD, ASCENDING)
+                               .build();
             assertNotNull(query);
-            ResponseFormat format = query.getFormat();
+            var format = query.getFormat();
             assertFalse(format.hasFieldMask());
 
-            OrderBy expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
+            var expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
             assertEquals(expectedOrderBy, format.getOrderBy(0));
 
             assertThat(format.getLimit()).isEqualTo(0);
 
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
             assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
@@ -182,21 +179,21 @@ class QueryBuilderTest {
         @Test
         @DisplayName("with limit")
         void limited() {
-            int limit = 15;
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderBy(SECOND_FIELD, DESCENDING)
-                                 .limit(limit)
-                                 .build();
+            var limit = 15;
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .orderBy(SECOND_FIELD, DESCENDING)
+                               .limit(limit)
+                               .build();
             assertNotNull(query);
-            ResponseFormat format = query.getFormat();
+            var format = query.getFormat();
             assertFalse(format.hasFieldMask());
 
-            OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
+            var expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
             assertEquals(expectedOrderBy, format.getOrderBy(0));
 
             assertThat(format.getLimit()).isEqualTo(limit);
 
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
             assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
@@ -205,19 +202,19 @@ class QueryBuilderTest {
         @Test
         @DisplayName("by id")
         void byId() {
-            int id1 = 314;
-            int id2 = 271;
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .byId(id1, id2)
-                                 .build();
+            var id1 = 314;
+            var id2 = 271;
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .byId(id1, id2)
+                               .build();
             assertNotNull(query);
             assertFalse(query.getFormat().hasFieldMask());
 
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            TargetFilters entityFilters = target.getFilters();
-            IdFilter idFilter = entityFilters.getIdFilter();
+            var entityFilters = target.getFilters();
+            var idFilter = entityFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
@@ -232,18 +229,18 @@ class QueryBuilderTest {
         @Test
         @DisplayName("by field mask")
         void byFieldMask() {
-            String fieldName = "TestEntity.firstField";
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .withMask(fieldName)
-                                 .build();
+            var fieldName = "TestEntity.firstField";
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .withMask(fieldName)
+                               .build();
             assertNotNull(query);
-            ResponseFormat format = query.getFormat();
+            var format = query.getFormat();
             assertTrue(format.hasFieldMask());
 
-            FieldMask mask = format.getFieldMask();
+            var mask = format.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
 
-            IterableSubject assertFieldNames = assertThat(fieldNames);
+            var assertFieldNames = assertThat(fieldNames);
 
             assertFieldNames.hasSize(1);
             assertFieldNames.contains(fieldName);
@@ -252,59 +249,59 @@ class QueryBuilderTest {
         @Test
         @DisplayName("by column filter")
         void byFilter() {
-            String columnName = "myImaginaryColumn";
+            var columnName = "myImaginaryColumn";
             Object columnValue = 42;
 
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .where(eq(columnName, columnValue))
-                                 .build();
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .where(eq(columnName, columnValue))
+                               .build();
             assertNotNull(query);
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            TargetFilters entityFilters = target.getFilters();
-            List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
+            var entityFilters = target.getFilters();
+            var aggregatingFilters = entityFilters.getFilterList();
             assertThat(aggregatingFilters)
                  .hasSize(1);
-            CompositeFilter aggregatingFilter = aggregatingFilters.get(0);
+            var aggregatingFilter = aggregatingFilters.get(0);
             Collection<Filter> filters = aggregatingFilter.getFilterList();
             assertThat(filters)
                  .hasSize(1);
-            Any actualValue = findByName(filters, columnName).getValue();
+            var actualValue = findByName(filters, columnName).getValue();
             assertNotNull(columnValue);
-            Int32Value messageValue = unpack(actualValue, Int32Value.class);
-            int actualGenericValue = messageValue.getValue();
+            var messageValue = unpack(actualValue, Int32Value.class);
+            var actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }
 
         @Test
         @DisplayName("by multiple column filters")
         void byMultipleFilters() {
-            String columnName1 = "myColumn";
+            var columnName1 = "myColumn";
             Object columnValue1 = 42;
-            String columnName2 = "oneMore";
+            var columnName2 = "oneMore";
             Object columnValue2 = randomId();
 
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .where(eq(columnName1, columnValue1),
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .where(eq(columnName1, columnValue1),
                                         eq(columnName2, columnValue2))
-                                 .build();
+                               .build();
             assertNotNull(query);
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            TargetFilters entityFilters = target.getFilters();
-            List<CompositeFilter> aggregatingFilters = entityFilters.getFilterList();
+            var entityFilters = target.getFilters();
+            var aggregatingFilters = entityFilters.getFilterList();
             assertThat(aggregatingFilters)
                  .hasSize(1);
             Collection<Filter> filters = aggregatingFilters.get(0)
                                                            .getFilterList();
-            Any actualValue1 = findByName(filters, columnName1).getValue();
+            var actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
             int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(filters, columnName2).getValue();
+            var actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
             assertEquals(columnValue2, actualGenericValue2);
@@ -315,27 +312,27 @@ class QueryBuilderTest {
         @Test
         @DisplayName("by column filter grouping")
         void byFilterGrouping() {
-            String establishedTimeColumn = "establishedTime";
-            String companySizeColumn = "companySize";
-            String countryColumn = "country";
-            String countryName = "Ukraine";
+            var establishedTimeColumn = "establishedTime";
+            var companySizeColumn = "companySize";
+            var countryColumn = "country";
+            var countryName = "Ukraine";
 
-            Timestamp twoDaysAgo = subtract(currentTime(), fromHours(-48));
+            var twoDaysAgo = subtract(currentTime(), fromHours(-48));
 
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .where(all(ge(companySizeColumn, 50),
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .where(all(ge(companySizeColumn, 50),
                                             le(companySizeColumn, 1000)),
                                         either(gt(establishedTimeColumn, twoDaysAgo),
                                                eq(countryColumn, countryName)))
-                                 .build();
-            Target target = query.getTarget();
-            List<CompositeFilter> filters = target.getFilters()
-                                                  .getFilterList();
+                               .build();
+            var target = query.getTarget();
+            var filters = target.getFilters()
+                                .getFilterList();
             assertThat(filters)
                  .hasSize(2);
 
-            CompositeFilter firstFilter = filters.get(0);
-            CompositeFilter secondFilter = filters.get(1);
+            var firstFilter = filters.get(0);
+            var secondFilter = filters.get(1);
 
             List<Filter> allFilters;
             List<Filter> eitherFilters;
@@ -354,33 +351,33 @@ class QueryBuilderTest {
             assertThat(eitherFilters)
                  .hasSize(2);
 
-            Filter companySizeLowerBound = allFilters.get(0);
-            String columnName1 = companySizeLowerBound.getFieldPath()
-                                                      .getFieldName(0);
+            var companySizeLowerBound = allFilters.get(0);
+            var columnName1 = companySizeLowerBound.getFieldPath()
+                                                   .getFieldName(0);
             assertEquals(companySizeColumn, columnName1);
             assertEquals(50L,
                          (long) toObject(companySizeLowerBound.getValue(), int.class));
             assertEquals(GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
 
-            Filter companySizeHigherBound = allFilters.get(1);
-            String columnName2 = companySizeHigherBound.getFieldPath()
-                                                       .getFieldName(0);
+            var companySizeHigherBound = allFilters.get(1);
+            var columnName2 = companySizeHigherBound.getFieldPath()
+                                                    .getFieldName(0);
             assertEquals(companySizeColumn, columnName2);
             assertEquals(1000L,
                          (long) toObject(companySizeHigherBound.getValue(), int.class));
             assertEquals(LESS_OR_EQUAL, companySizeHigherBound.getOperator());
 
-            Filter establishedTimeFilter = eitherFilters.get(0);
-            String columnName3 = establishedTimeFilter.getFieldPath()
-                                                      .getFieldName(0);
+            var establishedTimeFilter = eitherFilters.get(0);
+            var columnName3 = establishedTimeFilter.getFieldPath()
+                                                   .getFieldName(0);
             assertEquals(establishedTimeColumn, columnName3);
             assertEquals(twoDaysAgo,
                          toObject(establishedTimeFilter.getValue(), Timestamp.class));
             assertEquals(GREATER_THAN, establishedTimeFilter.getOperator());
 
-            Filter countryFilter = eitherFilters.get(1);
-            String columnName4 = countryFilter.getFieldPath()
-                                              .getFieldName(0);
+            var countryFilter = eitherFilters.get(1);
+            var columnName4 = countryFilter.getFieldPath()
+                                           .getFieldName(0);
             assertEquals(countryColumn, columnName4);
             assertEquals(countryName,
                          toObject(countryFilter.getValue(), String.class));
@@ -392,36 +389,36 @@ class QueryBuilderTest {
         @Test
         @DisplayName("by all available arguments")
         void byAllArguments() {
-            int id1 = 314;
-            int id2 = 271;
-            int limit = 10;
-            String columnName1 = "column1";
+            var id1 = 314;
+            var id2 = 271;
+            var limit = 10;
+            var columnName1 = "column1";
             Object columnValue1 = 42;
-            String columnName2 = "column2";
+            var columnName2 = "column2";
             Object columnValue2 = randomId();
-            String fieldName = "TestEntity.secondField";
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .withMask(fieldName)
-                                 .byId(id1, id2)
-                                 .where(eq(columnName1, columnValue1),
+            var fieldName = "TestEntity.secondField";
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .withMask(fieldName)
+                               .byId(id1, id2)
+                               .where(eq(columnName1, columnValue1),
                                         eq(columnName2, columnValue2))
-                                 .orderBy(SECOND_FIELD, DESCENDING)
-                                 .limit(limit)
-                                 .build();
+                               .orderBy(SECOND_FIELD, DESCENDING)
+                               .limit(limit)
+                               .build();
             assertNotNull(query);
 
-            ResponseFormat format = query.getFormat();
-            FieldMask mask = format.getFieldMask();
+            var format = query.getFormat();
+            var mask = format.getFieldMask();
             Collection<String> fieldNames = mask.getPathsList();
-            IterableSubject assertFieldNames = assertThat(fieldNames);
+            var assertFieldNames = assertThat(fieldNames);
             assertFieldNames.hasSize(1);
             assertFieldNames.containsExactly(fieldName);
 
-            Target target = query.getTarget();
+            var target = query.getTarget();
             assertFalse(target.getIncludeAll());
-            TargetFilters entityFilters = target.getFilters();
+            var entityFilters = target.getFilters();
 
-            IdFilter idFilter = entityFilters.getIdFilter();
+            var idFilter = entityFilters.getIdFilter();
             Collection<Any> idValues = idFilter.getIdList();
             Collection<Integer> intIdValues = idValues
                     .stream()
@@ -433,7 +430,7 @@ class QueryBuilderTest {
             assertThat(intIdValues).containsAtLeast(id1, id2);
 
             // Check query params
-            List<CompositeFilter> aggregatingFilters =
+            var aggregatingFilters =
                     entityFilters.getFilterList();
 
             assertThat(aggregatingFilters)
@@ -443,24 +440,24 @@ class QueryBuilderTest {
             assertThat(filters)
                  .hasSize(2);
 
-            Any actualValue1 = findByName(filters, columnName1).getValue();
+            var actualValue1 = findByName(filters, columnName1).getValue();
             assertNotNull(actualValue1);
             int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            Any actualValue2 = findByName(filters, columnName2).getValue();
+            var actualValue2 = findByName(filters, columnName2).getValue();
             assertNotNull(actualValue2);
             Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
             assertEquals(columnValue2, actualGenericValue2);
 
-            OrderBy expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
+            var expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
             assertEquals(expectedOrderBy, format.getOrderBy(0));
 
             assertThat(format.getLimit()).isEqualTo(limit);
         }
 
         private Filter findByName(Iterable<Filter> filters, String name) {
-            for (Filter filter : filters) {
+            for (var filter : filters) {
                 if (filter.getFieldPath()
                           .getFieldName(0)
                           .equals(name)) {
@@ -483,20 +480,20 @@ class QueryBuilderTest {
             Iterable<?> genericIds = asList(newUuid(), -1, randomId());
             Long[] longIds = {1L, 2L, 3L};
             Message[] messageIds = {randomId(), randomId(), randomId()};
-            String[] stringIds = {newUuid(), newUuid(), newUuid()};
+            var stringIds = new String[]{newUuid(), newUuid(), newUuid()};
             Integer[] intIds = {4, 5, 6};
 
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .byId(genericIds)
-                                 .byId(longIds)
-                                 .byId(stringIds)
-                                 .byId(intIds)
-                                 .byId(messageIds)
-                                 .build();
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .byId(genericIds)
+                               .byId(longIds)
+                               .byId(stringIds)
+                               .byId(intIds)
+                               .byId(messageIds)
+                               .build();
             assertNotNull(query);
 
-            Target target = query.getTarget();
-            TargetFilters filters = target.getFilters();
+            var target = query.getTarget();
+            var filters = target.getFilters();
             Collection<Any> entityIds = filters.getIdFilter()
                                                .getIdList();
             assertThat(entityIds)
@@ -513,14 +510,14 @@ class QueryBuilderTest {
         @DisplayName("field mask")
         void lastFieldMask() {
             Iterable<String> iterableFields = singleton("TestEntity.firstField");
-            String[] arrayFields = {"TestEntity.secondField"};
+            var arrayFields = new String[]{"TestEntity.secondField"};
 
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .withMask(iterableFields)
-                                 .withMask(arrayFields)
-                                 .build();
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .withMask(iterableFields)
+                               .withMask(arrayFields)
+                               .build();
             assertNotNull(query);
-            FieldMask mask = query.getFormat().getFieldMask();
+            var mask = query.getFormat().getFieldMask();
 
             Collection<String> maskFields = mask.getPathsList();
             assertThat(maskFields)
@@ -532,13 +529,13 @@ class QueryBuilderTest {
         @Test
         @DisplayName("limit")
         void lastLimit() {
-            int expectedLimit = 10;
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderBy(FIRST_FIELD, ASCENDING)
-                                 .limit(2)
-                                 .limit(5)
-                                 .limit(expectedLimit)
-                                 .build();
+            var expectedLimit = 10;
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .orderBy(FIRST_FIELD, ASCENDING)
+                               .limit(2)
+                               .limit(5)
+                               .limit(expectedLimit)
+                               .build();
             assertNotNull(query);
             assertEquals(expectedLimit, query.getFormat().getLimit());
         }
@@ -546,12 +543,12 @@ class QueryBuilderTest {
         @Test
         @DisplayName("order")
         void lastOrder() {
-            Query query = factory.select(TEST_ENTITY_TYPE)
-                                 .orderBy(FIRST_FIELD, ASCENDING)
-                                 .orderBy(SECOND_FIELD, ASCENDING)
-                                 .orderBy(SECOND_FIELD, DESCENDING)
-                                 .orderBy(FIRST_FIELD, DESCENDING)
-                                 .build();
+            var query = factory.select(TEST_ENTITY_TYPE)
+                               .orderBy(FIRST_FIELD, ASCENDING)
+                               .orderBy(SECOND_FIELD, ASCENDING)
+                               .orderBy(SECOND_FIELD, DESCENDING)
+                               .orderBy(FIRST_FIELD, DESCENDING)
+                               .build();
             assertNotNull(query);
             assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getFormat().getOrderBy(0));
         }
@@ -560,22 +557,22 @@ class QueryBuilderTest {
     @Test
     @DisplayName("provide proper `toString()` method")
     void supportToString() {
-        int id1 = 314;
-        int id2 = 271;
-        String columnName1 = "column1";
+        var id1 = 314;
+        var id2 = 271;
+        var columnName1 = "column1";
         Object columnValue1 = 42;
-        String columnName2 = "column2";
+        var columnName2 = "column2";
         Message columnValue2 = randomId();
-        String fieldName = "TestEntity.secondField";
-        QueryBuilder builder =
+        var fieldName = "TestEntity.secondField";
+        var builder =
                 factory.select(TEST_ENTITY_TYPE)
                        .withMask(fieldName)
                        .byId(id1, id2)
                        .where(eq(columnName1, columnValue1),
                               eq(columnName2, columnValue2));
-        String stringRepr = builder.toString();
+        var stringRepr = builder.toString();
 
-        StringSubject assertOutput = assertThat(stringRepr);
+        var assertOutput = assertThat(stringRepr);
 
         assertOutput.contains(TEST_ENTITY_TYPE.getSimpleName());
         assertOutput.contains(String.valueOf(id1));

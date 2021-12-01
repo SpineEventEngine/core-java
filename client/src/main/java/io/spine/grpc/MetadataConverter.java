@@ -66,7 +66,7 @@ public final class MetadataConverter {
      */
     public static Metadata toMetadata(Error error) {
         checkNotNull(error);
-        Metadata metadata = new Metadata();
+        var metadata = new Metadata();
         metadata.put(KEY, error.toByteArray());
         return metadata;
     }
@@ -80,14 +80,14 @@ public final class MetadataConverter {
      */
     public static Optional<Error> toError(Metadata metadata) {
         checkNotNull(metadata);
-        byte[] bytes = metadata.get(KEY);
+        var bytes = metadata.get(KEY);
 
         if (bytes == null) {
             return Optional.empty();
         }
 
         try {
-            Error error = Error.parseFrom(bytes);
+            var error = Error.parseFrom(bytes);
             return Optional.of(error);
         } catch (InvalidProtocolBufferException e) {
             throw Exceptions.illegalStateWithCauseOf(e);

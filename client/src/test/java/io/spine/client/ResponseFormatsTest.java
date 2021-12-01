@@ -53,8 +53,8 @@ class ResponseFormatsTest extends UtilityClassTest<ResponseFormats> {
     @Test
     @DisplayName("create `ResponseFormat` with `OrderBy`")
     void createWithOrder() {
-        OrderBy orderBy = orderBy();
-        ResponseFormat format = responseFormat(null, orderBy, null);
+        var orderBy = orderBy();
+        var format = responseFormat(null, orderBy, null);
 
         assertThat(format.getFieldMask()).isEqualTo(FieldMask.getDefaultInstance());
         assertThat(format.getOrderByList()).containsExactly(orderBy);
@@ -64,8 +64,8 @@ class ResponseFormatsTest extends UtilityClassTest<ResponseFormats> {
     @Test
     @DisplayName("create `ResponseFormat` with `FieldMask`")
     void createWithFieldMast() {
-        FieldMask fieldMask = fieldMask();
-        ResponseFormat format = responseFormat(fieldMask, null, null);
+        var fieldMask = fieldMask();
+        var format = responseFormat(fieldMask, null, null);
 
         assertThat(format.getFieldMask()).isEqualTo(fieldMask);
         assertThat(format.getOrderByList()).isEmpty();
@@ -76,14 +76,14 @@ class ResponseFormatsTest extends UtilityClassTest<ResponseFormats> {
     @DisplayName("accept only positive limit values")
     @SuppressWarnings({"ResultOfMethodCallIgnored", "MethodWithMultipleLoops"})
     void acceptOnlyPositiveLimitValues() {
-        int[] inacceptableValues = {-42, -1, 0};
-        int[] acceptableValues = {2020, 17, 1};
-        for (int value : inacceptableValues) {
+        var inacceptableValues = new int[]{-42, -1, 0};
+        var acceptableValues = new int[]{2020, 17, 1};
+        for (var value : inacceptableValues) {
             assertThrows(IllegalArgumentException.class,
                          () -> responseFormat(null, null, value));
         }
-        for (int value : acceptableValues) {
-            ResponseFormat format = responseFormat(null, null, value);
+        for (var value : acceptableValues) {
+            var format = responseFormat(null, null, value);
             assertThat(format.getLimit()).isEqualTo(value);
         }
     }

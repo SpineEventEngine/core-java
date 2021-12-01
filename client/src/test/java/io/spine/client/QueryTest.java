@@ -27,7 +27,6 @@
 package io.spine.client;
 
 import io.spine.test.client.TestEntity;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -44,12 +43,11 @@ class QueryTest {
     @Test
     @DisplayName("obtain entity type url for known query target type")
     void returnTypeUrlForKnownType() {
-        Target target = Targets.allOf(TestEntity.class);
-        Query query = Query
-                .newBuilder()
+        var target = Targets.allOf(TestEntity.class);
+        var query = Query.newBuilder()
                 .setTarget(target)
                 .build();
-        TypeUrl type = query.targetType();
+        var type = query.targetType();
         assertNotNull(type);
         assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
     }
@@ -57,12 +55,10 @@ class QueryTest {
     @Test
     @DisplayName("throw `IllegalStateException` for unknown query target type")
     void throwErrorForUnknownType() {
-        Target target = Target
-                .newBuilder()
+        var target = Target.newBuilder()
                 .setType("nonexistent/message.type")
                 .build();
-        Query query = Query
-                .newBuilder()
+        var query = Query.newBuilder()
                 .setTarget(target)
                 .build();
         assertThrows(IllegalStateException.class, query::targetType);

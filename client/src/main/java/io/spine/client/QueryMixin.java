@@ -26,10 +26,10 @@
 
 package io.spine.client;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -47,7 +47,7 @@ public interface QueryMixin extends QueryOrBuilder {
      *         if the {@code Target} type is unknown to the application.
      */
     default TypeUrl targetType() {
-        TypeUrl typeUrl = getTarget().type();
+        var typeUrl = getTarget().type();
         checkState(KnownTypes.instance()
                              .contains(typeUrl),
                    "Unknown type URL: `%s`.", typeUrl.value());

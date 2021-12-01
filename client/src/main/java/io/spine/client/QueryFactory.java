@@ -72,7 +72,7 @@ public final class QueryFactory {
      */
     public QueryBuilder select(Class<? extends EntityState<?>> targetType) {
         checkNotNull(targetType);
-        QueryBuilder queryBuilder = new QueryBuilder(targetType, this);
+        var queryBuilder = new QueryBuilder(targetType, this);
         return queryBuilder;
     }
 
@@ -108,13 +108,13 @@ public final class QueryFactory {
         checkSpecified(entityClass);
         checkNotNull(ids);
         checkArgument(!ids.isEmpty(), "Entity ID set must not be empty.");
-        FieldMask fieldMask = fromPaths(maskPaths);
-        Query result = composeQuery(entityClass, ids, null, fieldMask);
+        var fieldMask = fromPaths(maskPaths);
+        var result = composeQuery(entityClass, ids, null, fieldMask);
         return result;
     }
 
     private static FieldMask fromPaths(String... maskPaths) {
-        FieldMask fieldMask = fromStringList(ImmutableList.copyOf(maskPaths));
+        var fieldMask = fromStringList(ImmutableList.copyOf(maskPaths));
         return fieldMask;
     }
 
@@ -165,8 +165,8 @@ public final class QueryFactory {
                              String... maskPaths) {
         checkSpecified(entityClass);
         checkNotNull(maskPaths);
-        FieldMask fieldMask = fromPaths(maskPaths);
-        Query result = composeQuery(entityClass, null, null, fieldMask);
+        var fieldMask = fromPaths(maskPaths);
+        var result = composeQuery(entityClass, null, null, fieldMask);
         return result;
     }
 
@@ -189,9 +189,9 @@ public final class QueryFactory {
                                @Nullable Set<?> ids,
                                @Nullable Set<CompositeFilter> filters,
                                @Nullable FieldMask fieldMask) {
-        ResponseFormat format = responseFormat(fieldMask, null, 0);
-        Query.Builder builder = queryBuilderFor(entityClass, ids, filters).setFormat(format);
-        Query query = newQuery(builder);
+        var format = responseFormat(fieldMask, null, 0);
+        var builder = queryBuilderFor(entityClass, ids, filters).setFormat(format);
+        var query = newQuery(builder);
         return query;
     }
 
@@ -202,8 +202,8 @@ public final class QueryFactory {
     private static Query.Builder queryBuilderFor(Class<? extends EntityState<?>> entityClass,
                                                  @Nullable Set<?> ids,
                                                  @Nullable Set<CompositeFilter> filters) {
-        Target target = composeTarget(entityClass, ids, filters);
-        Query.Builder builder = queryBuilderFor(target);
+        var target = composeTarget(entityClass, ids, filters);
+        var builder = queryBuilderFor(target);
         return builder;
     }
 
@@ -228,9 +228,9 @@ public final class QueryFactory {
                                int limit,
                                @Nullable OrderBy orderBy,
                                @Nullable FieldMask fieldMask) {
-        ResponseFormat format = responseFormat(fieldMask, orderBy, limit);
-        Query.Builder builder = queryBuilderFor(target).setFormat(format);
-        Query query = newQuery(builder);
+        var format = responseFormat(fieldMask, orderBy, limit);
+        var builder = queryBuilderFor(target).setFormat(format);
+        var query = newQuery(builder);
         return query;
     }
 
@@ -252,16 +252,15 @@ public final class QueryFactory {
     }
 
     private static QueryId newQueryId() {
-        String formattedId = format("query-%s", newUuid());
-        return QueryId
-                .newBuilder()
+        var formattedId = format("query-%s", newUuid());
+        return QueryId.newBuilder()
                 .setValue(formattedId)
                 .build();
     }
 
     private static ResponseFormat
     responseFormat(@Nullable FieldMask mask, @Nullable OrderBy ordering, int limit) {
-        ResponseFormat.Builder result = ResponseFormat.newBuilder();
+        var result = ResponseFormat.newBuilder();
         if (mask != null) {
             result.setFieldMask(mask);
         }

@@ -233,7 +233,7 @@ public final class Client implements AutoCloseable {
      */
     public ClientRequest onBehalfOf(UserId user) {
         checkNotDefaultArg(user);
-        ClientRequest request = new ClientRequest(user, this);
+        var request = new ClientRequest(user, this);
         if (streamingErrorHandler != null) {
             request.onStreamingError(streamingErrorHandler);
         }
@@ -296,7 +296,7 @@ public final class Client implements AutoCloseable {
      * Posts the command to the {@code CommandService}.
      */
     Ack post(Command c) {
-        Ack ack = commandService.post(c);
+        var ack = commandService.post(c);
         return ack;
     }
 
@@ -304,9 +304,7 @@ public final class Client implements AutoCloseable {
      * Queries the read-side with the specified query.
      */
     <S extends EntityState<?>> ImmutableList<S> read(Query query, Class<S> stateType) {
-        ImmutableList<S> result = queryService
-                .read(query)
-                .states(stateType);
+        var result = queryService.read(query).states(stateType);
         return result;
     }
 
@@ -368,17 +366,14 @@ public final class Client implements AutoCloseable {
         }
 
         private static ManagedChannel channelForTesting(String serverName) {
-            ManagedChannel result = InProcessChannelBuilder
-                    .forName(serverName)
+            var result = InProcessChannelBuilder.forName(serverName)
                     .directExecutor()
                     .build();
             return result;
         }
 
         private static ManagedChannel createChannel(String host, int port) {
-            ManagedChannel result = ManagedChannelBuilder
-                    .forAddress(host, port)
-                    .build();
+            var result = ManagedChannelBuilder.forAddress(host, port).build();
             return result;
         }
 

@@ -29,8 +29,6 @@ package io.spine.model.assemble;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,7 +43,7 @@ class AssignLookupTest extends SpineAnnotationProcessorTest {
     @Test
     @DisplayName("support `spineDirRoot` option")
     void supportSpineDirRoot() {
-        Set<String> opts = processor().getSupportedOptions();
+        var opts = processor().getSupportedOptions();
         assertEquals(1, opts.size());
 
         assertThat(opts).contains(AssignLookup.OUTPUT_OPTION_NAME);

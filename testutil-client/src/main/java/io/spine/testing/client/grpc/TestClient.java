@@ -32,14 +32,12 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
-import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.client.grpc.CommandServiceGrpc.CommandServiceBlockingStub;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.client.grpc.QueryServiceGrpc.QueryServiceBlockingStub;
 import io.spine.core.Ack;
-import io.spine.core.Command;
 import io.spine.core.UserId;
 import io.spine.grpc.StreamObservers;
 import io.spine.logging.Logging;
@@ -72,8 +70,7 @@ public class TestClient implements Logging {
         checkNotNull(userId);
         checkNotNull(host);
         this.requestFactory = new TestActorRequestFactory(userId);
-        this.channel = ManagedChannelBuilder
-                .forAddress(host, port)
+        this.channel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext()
                 .build();
         this.commandClient = CommandServiceGrpc.newBlockingStub(channel);
@@ -85,9 +82,9 @@ public class TestClient implements Logging {
      */
     @CanIgnoreReturnValue
     public Optional<Ack> post(CommandMessage domainCommand) {
-        Command command = requestFactory.command()
+        var command = requestFactory.command()
                                         .create(domainCommand);
-        TypeName commandType = TypeName.of(domainCommand);
+        var commandType = TypeName.of(domainCommand);
         Ack result = null;
         try {
             _debug().log("Sending command: `%s` ...", commandType);
@@ -108,13 +105,12 @@ public class TestClient implements Logging {
      * @return query response with the state of entities obtained from the server
      */
     public QueryResponse queryAll(Class<? extends EntityState<?>> messageType) {
-        Query query = requestFactory.query()
-                                    .all(messageType);
+        var query = requestFactory.query().all(messageType);
         try {
-            QueryResponse result = queryClient.read(query);
+            var result = queryClient.read(query);
             return result;
         } catch (StatusRuntimeException e) {
-            String message = e.getMessage();
+            var message = e.getMessage();
             _error().withCause(e)
                     .log("Error occurred when executing query: %s.",
                          StreamObservers.fromStreamError(e)

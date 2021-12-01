@@ -66,59 +66,36 @@ public class Given {
     }
 
     public static BbAddTask addTask(BbProjectId projectId) {
-        return BbAddTask
-                .newBuilder()
+        return BbAddTask.newBuilder()
                 .setProjectId(projectId)
                 .setTask(newTask())
                 .build();
     }
 
     public static BbTaskAdded taskAdded(BbProjectId projectId) {
-        return BbTaskAdded
-                .newBuilder()
+        return BbTaskAdded.newBuilder()
                 .setProjectId(projectId)
                 .setTask(newTask())
                 .build();
     }
 
     private static BbTask newTask() {
-        return BbTask
-                .newBuilder()
+        return BbTask.newBuilder()
                 .setTitle(newUuid())
                 .build();
     }
 
     public static BbCreateReport createReport(BbProjectId projectId) {
-        return BbCreateReport
-                .newBuilder()
+        return BbCreateReport.newBuilder()
                 .setReportId(newReportId())
                 .addProjectId(projectId)
                 .build();
     }
 
     private static BbReportId newReportId() {
-        return BbReportId
-                .newBuilder()
+        return BbReportId.newBuilder()
                 .setId(newUuid())
                 .build();
-    }
-
-    public static BbRegisterCommandDispatcher
-    registerCommandDispatcher(Class<? extends CommandDispatcher> dispatcherName) {
-        return BbRegisterCommandDispatcher
-                .newBuilder()
-                .setDispatcherName(dispatcherName.getName())
-                .build();
-    }
-
-    public static BbEventDispatcherRegistered
-    eventDispatcherRegistered(Class<? extends EventDispatcher> dispatcherClass) {
-        String name = dispatcherClass.getName();
-        BbEventDispatcherRegistered result = BbEventDispatcherRegistered
-                .newBuilder()
-                .setDispatcherName(name)
-                .build();
-        return result;
     }
 
     public static BbCreateProject createProject() {
@@ -127,27 +104,24 @@ public class Given {
 
     private static UserId generateUserId() {
         return UserId.newBuilder()
-                     .setValue(TestValues.randomString())
-                     .build();
+                .setValue(TestValues.randomString())
+                .build();
     }
 
     public static BbCreateProject createProject(BbProjectId id) {
-        return BbCreateProject
-                .newBuilder()
+        return BbCreateProject.newBuilder()
                 .setProjectId(id)
                 .build();
     }
 
     public static BbAssignSelf assignSelf(BbProjectId id) {
-        return BbAssignSelf
-                .newBuilder()
+        return BbAssignSelf.newBuilder()
                 .setProjectId(id)
                 .build();
     }
 
     public static BbInitProject initProject(BbProjectId id, boolean scrum) {
-        BbInitProject.Builder builder = BbInitProject
-                .newBuilder()
+        var builder = BbInitProject.newBuilder()
                 .setProjectId(id);
         // Generate a random team.
         IntStream.range(0, TestValues.random(1, 10))
@@ -159,60 +133,52 @@ public class Given {
     }
 
     public static BbStartProject startProject(BbProjectId id) {
-        return BbStartProject
-                .newBuilder()
+        return BbStartProject.newBuilder()
                 .setProjectId(id)
                 .build();
     }
 
     public static BbProject createdProjectState(BbCreateProject createProject) {
-        return BbProject
-                .newBuilder()
+        return BbProject.newBuilder()
                 .setId(createProject.getProjectId())
                 .setStatus(BbProject.Status.CREATED)
                 .build();
     }
 
     public static BbAssignProject addProjectAssignee(BbProjectId projectId, UserId id) {
-        return BbAssignProject
-                .newBuilder()
+        return BbAssignProject.newBuilder()
                 .setId(projectId)
                 .setUserId(id)
                 .build();
     }
 
     public static BbUserDeleted userDeleted(UserId id, BbProjectId... projectIds) {
-        return BbUserDeleted
-                .newBuilder()
+        return BbUserDeleted.newBuilder()
                 .setId(id)
                 .addAllProject(newArrayList(projectIds))
                 .build();
     }
 
     public static BbProjectDone projectDone(BbProjectId projectId) {
-        return BbProjectDone
-                .newBuilder()
+        return BbProjectDone.newBuilder()
                 .setId(projectId)
                 .build();
     }
 
     public static BbFinalizeProject finalizeProject(BbProjectId projectId) {
-        return BbFinalizeProject
-                .newBuilder()
+        return BbFinalizeProject.newBuilder()
                 .setProjectId(projectId)
                 .build();
     }
 
     public static BbFailProject failProject(BbProjectId projectId) {
-        return BbFailProject
-                .newBuilder()
+        return BbFailProject.newBuilder()
                 .setProjectId(projectId)
                 .build();
     }
 
     public static BbProjectFailed projectFailed(BbProjectId projectId) {
-        return BbProjectFailed
-                .newBuilder()
+        return BbProjectFailed.newBuilder()
                 .setProjectId(projectId)
                 .build();
     }

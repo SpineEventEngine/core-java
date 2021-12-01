@@ -28,7 +28,6 @@ package io.spine.testing.server.blackbox;
 
 import io.spine.client.Client;
 import io.spine.core.TenantId;
-import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -65,7 +64,7 @@ public final class BlackBoxClients {
      */
     public Client create(TenantId tenant) {
         checkNotNull(tenant);
-        Client result = supplier.create(tenant);
+        var result = supplier.create(tenant);
         return result;
     }
 
@@ -75,11 +74,10 @@ public final class BlackBoxClients {
      *
      * @return a new instance of {@code Client}
      */
-    @SuppressWarnings("TestOnlyProblems")  /* `TestActorRequestFactory` is not test-only. */
     public Client withMatchingTenant() {
-        TestActorRequestFactory requests = blackBox.requestFactory();
+        var requests = blackBox.requestFactory();
         @Nullable TenantId tenantId = requests.tenantId();
-        Client result = supplier.create(tenantId);
+        var result = supplier.create(tenantId);
         return result;
     }
 }

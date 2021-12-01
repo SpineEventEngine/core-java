@@ -29,13 +29,11 @@ package io.spine.testing.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.extensions.proto.ProtoSubject;
 import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.Signal;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.SerializableMessage;
@@ -46,6 +44,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Streams.stream;
 import static com.google.common.truth.Fact.fact;
 import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.extensions.proto.ProtoTruth.protos;
@@ -85,7 +84,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
         if (actual == null) {
             failWithoutActual(simpleFact("message list should not be equal to null"));
         } else {
-            int actualSize = size(actual);
+            var actualSize = size(actual);
             check("size()").that(actualSize).isEqualTo(expectedSize);
         }
     }
@@ -113,7 +112,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
         }
-        int size = size(messages());
+        var size = size(messages());
         if (index >= size(messages())) {
             failWithActual(
                     fact(MESSAGE_COUNT.value, size),
@@ -122,8 +121,8 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
             return ignoreCheck().about(protos())
                                 .that(Empty.getDefaultInstance());
         }
-        T outerObject = Iterables.get(messages(), index);
-        Message unpacked = AnyPacker.unpack(outerObject.getMessage());
+        var outerObject = Iterables.get(messages(), index);
+        var unpacked = AnyPacker.unpack(outerObject.getMessage());
         return ProtoTruth.assertThat(unpacked);
     }
 
@@ -142,17 +141,16 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
             return ignoreCheck().about(factory())
                                 .that(ImmutableList.of());
         } else {
-            List<T> filtered =
-                    Streams.stream(actual)
-                           .filter(m -> {
-                               @SuppressWarnings({"unchecked", "RedundantSuppression"})
+            List<T> filtered = stream(actual)
+                    .filter(m -> {
+                        @SuppressWarnings({"unchecked", "RedundantSuppression"})
                                /* avoid `unchecked` warning when calling raw instance
                                of `Signal` when filtering. This warning is given only
                                when compiling. Hence, the second suppression. */
-                               boolean match = m.is(messageClass);
-                               return match;
-                           })
-                           .collect(toImmutableList());
+                        var match = m.is(messageClass);
+                        return match;
+                    })
+                    .collect(toImmutableList());
             return check("withType(%s)", messageClass.getSimpleName())
                     .about(factory())
                     .that(filtered);
@@ -169,7 +167,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      * @return an immutable copy of the {@code actual} messages
      */
     public ImmutableList<T> actual() {
-        Iterable<T> messages = requireNonNull(actual);
+        var messages = requireNonNull(actual);
         return ImmutableList.copyOf(messages);
     }
 

@@ -30,7 +30,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.base.EventMessageField;
 import io.spine.base.Field;
-import io.spine.base.FieldPath;
 import io.spine.core.EventContext;
 import io.spine.core.EventContextField;
 import io.spine.protobuf.AnyPacker;
@@ -99,23 +98,22 @@ class EventFilterTest {
         private void
         checkCreates(BiFunction<EventMessageField, Object, EventFilter> factoryMethod,
                      Filter.Operator expectedOperator) {
-            EventMessageField field = ClProjectCreated.Field.id();
-            String value = "some-ID";
-            EventFilter eventFilter = factoryMethod.apply(field, value);
-            Filter filter = eventFilter.filter();
+            var field = ClProjectCreated.Field.id();
+            var value = "some-ID";
+            var eventFilter = factoryMethod.apply(field, value);
+            var filter = eventFilter.filter();
 
-            FieldPath fieldPath = filter.getFieldPath();
-            int nameCount = fieldPath.getFieldNameCount();
+            var fieldPath = filter.getFieldPath();
+            var nameCount = fieldPath.getFieldNameCount();
             assertThat(nameCount).isEqualTo(1);
 
-            String fieldName = fieldPath.getFieldName(0);
-            String expectedFieldName = field.getField()
-                                            .toString();
+            var fieldName = fieldPath.getFieldName(0);
+            var expectedFieldName = field.getField().toString();
             assertThat(fieldName).isEqualTo(expectedFieldName);
 
             assertThat(filter.getOperator()).isEqualTo(expectedOperator);
 
-            StringValue unpacked = AnyPacker.unpack(filter.getValue(), StringValue.class);
+            var unpacked = AnyPacker.unpack(filter.getValue(), StringValue.class);
             assertThat(unpacked.getValue()).isEqualTo(value);
         }
     }
@@ -157,24 +155,22 @@ class EventFilterTest {
         private void
         checkCreates(BiFunction<EventContextField, Object, EventFilter> factoryMethod,
                      Filter.Operator expectedOperator) {
-            EventContextField field = EventContext.Field.commandId()
-                                                        .uuid();
-            String value = "some-UUID";
-            EventFilter eventFilter = factoryMethod.apply(field, value);
-            Filter filter = eventFilter.filter();
+            var field = EventContext.Field.commandId().uuid();
+            var value = "some-UUID";
+            var eventFilter = factoryMethod.apply(field, value);
+            var filter = eventFilter.filter();
 
-            FieldPath fieldPath = filter.getFieldPath();
-            int nameCount = fieldPath.getFieldNameCount();
+            var fieldPath = filter.getFieldPath();
+            var nameCount = fieldPath.getFieldNameCount();
             assertThat(nameCount).isEqualTo(3);
 
-            String actualFieldPath = Field.withPath(fieldPath)
-                                          .toString();
-            String expectedFieldPath = format("context.%s", field.getField());
+            var actualFieldPath = Field.withPath(fieldPath).toString();
+            var expectedFieldPath = format("context.%s", field.getField());
             assertThat(actualFieldPath).isEqualTo(expectedFieldPath);
 
             assertThat(filter.getOperator()).isEqualTo(expectedOperator);
 
-            StringValue unpacked = AnyPacker.unpack(filter.getValue(), StringValue.class);
+            var unpacked = AnyPacker.unpack(filter.getValue(), StringValue.class);
             assertThat(unpacked.getValue()).isEqualTo(value);
         }
     }

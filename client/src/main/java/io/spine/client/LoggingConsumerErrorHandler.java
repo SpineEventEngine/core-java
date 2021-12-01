@@ -61,7 +61,7 @@ final class LoggingConsumerErrorHandler<M extends Message>
 
     @Override
     public void accept(MessageConsumer<M, ?> consumer, Throwable throwable) {
-        Object consumerToReport = toRealConsumer(consumer);
+        var consumerToReport = toRealConsumer(consumer);
         error(throwable).log(messageFormat(), consumerToReport, typeName());
     }
 }

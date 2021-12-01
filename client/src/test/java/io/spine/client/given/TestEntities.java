@@ -50,9 +50,9 @@ public final class TestEntities {
      * @return new random ID
      */
     public static TestEntityId randomId() {
-        int randomNumber = current().nextInt(1, 100_000_000);
+        var randomNumber = current().nextInt(1, 100_000_000);
         return TestEntityId.newBuilder()
-                           .setValue(randomNumber)
-                           .build();
+                .setValue(randomNumber)
+                .build();
     }
 }

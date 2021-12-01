@@ -80,8 +80,7 @@ final class BlackBoxSetup {
         this.eventBus = context.eventBus();
         this.importBus = context.importBus();
         this.requestFactory = checkNotNull(requestFactory);
-        BlackBoxId defaultProducer = BlackBoxId
-                .newBuilder()
+        var defaultProducer = BlackBoxId.newBuilder()
                 .setContextName(context.name())
                 .build();
         this.eventFactory = eventFactory(requestFactory, defaultProducer);
@@ -96,10 +95,9 @@ final class BlackBoxSetup {
      *         or {@linkplain Command commands}
      */
     List<Command> postCommands(Collection<CommandMessage> commandMessages) {
-        List<Command> commands =
-                commandMessages.stream()
-                               .map(commandOrMessage -> command(commandOrMessage, requestFactory))
-                               .collect(toList());
+        var commands = commandMessages.stream()
+                .map(commandOrMessage -> command(commandOrMessage, requestFactory))
+                .collect(toList());
         commandBus.post(commands, observer);
         return commands;
     }
@@ -112,7 +110,7 @@ final class BlackBoxSetup {
      * @return list of events posted to {@link EventBus}
      */
     List<Event> postEvents(Collection<EventMessage> eventMessages) {
-        List<Event> events = toEvents(eventMessages, eventFactory);
+        var events = toEvents(eventMessages, eventFactory);
         eventBus.post(events, observer);
         return events;
     }
@@ -129,9 +127,9 @@ final class BlackBoxSetup {
      * @return list of events posted to {@link EventBus}
      */
     List<Event> postEvents(Object producerId, EventMessage first, EventMessage... rest) {
-        List<EventMessage> eventMessages = asList(first, rest);
-        TestEventFactory customFactory = newEventFactory(producerId);
-        List<Event> events = toEvents(eventMessages, customFactory);
+        var eventMessages = asList(first, rest);
+        var customFactory = newEventFactory(producerId);
+        var events = toEvents(eventMessages, customFactory);
         eventBus.post(events, observer);
         return events;
     }
@@ -143,7 +141,7 @@ final class BlackBoxSetup {
      *         a list of {@linkplain EventMessage event messages} or {@linkplain Event events}
      */
     void postExternalEvents(Collection<EventMessage> domainEvents) {
-        List<Event> events = toEvents(domainEvents, eventFactory);
+        var events = toEvents(domainEvents, eventFactory);
         postExternal(events);
     }
 
@@ -153,7 +151,7 @@ final class BlackBoxSetup {
     }
 
     void postExternal(List<Event> events) {
-        ImmutableList<Event> external = Events.toExternal(events);
+        var external = Events.toExternal(events);
         eventBus.post(external);
     }
 
@@ -164,7 +162,7 @@ final class BlackBoxSetup {
      *         a list of events to import
      */
     void importEvents(Collection<EventMessage> domainEvents) {
-        List<Event> events = toEvents(domainEvents);
+        var events = toEvents(domainEvents);
         postImport(events);
     }
 
@@ -201,7 +199,7 @@ final class BlackBoxSetup {
         if (eventOrMessage instanceof Event) {
             return (Event) eventOrMessage;
         }
-        EventMessage message = (EventMessage) eventOrMessage;
+        var message = (EventMessage) eventOrMessage;
         return eventFactory.createEvent(message);
     }
 
@@ -225,7 +223,7 @@ final class BlackBoxSetup {
         if (commandOrMessage instanceof Command) {
             return (Command) commandOrMessage;
         }
-        CommandMessage message = (CommandMessage) commandOrMessage;
+        var message = (CommandMessage) commandOrMessage;
         return requestFactory.command()
                              .create(message);
     }
@@ -239,7 +237,7 @@ final class BlackBoxSetup {
      */
     private TestEventFactory newEventFactory(Object producerId) {
         checkNotNull(producerId);
-        Any id = producerId instanceof Any
+        var id = producerId instanceof Any
                  ? (Any) producerId
                  : Identifier.pack(producerId);
         return TestEventFactory.newInstance(id, requestFactory);

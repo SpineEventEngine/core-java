@@ -27,7 +27,6 @@
 package io.spine.model.assemble;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.ProtocolStringList;
 import io.spine.annotation.Internal;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.Assign;
@@ -84,17 +83,17 @@ public class AssignLookup extends SpineAnnotationProcessor {
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     protected void processElement(Element element) {
-        TypeElement enclosingTypeElement = (TypeElement) element.getEnclosingElement();
-        String typeName = enclosingTypeElement.getQualifiedName()
-                                              .toString();
+        var enclosingTypeElement = (TypeElement) element.getEnclosingElement();
+        var typeName = enclosingTypeElement.getQualifiedName()
+                                           .toString();
         commandHandlers.addCommandHandlingType(typeName);
     }
 
     @Override
     protected void onRoundFinished() {
-        String spineOutput = getOption(OUTPUT_OPTION_NAME).orElse(DEFAULT_OUTPUT_OPTION);
-        String fileName = spineOutput + '/' + DESTINATION_PATH;
-        File serializedModelStorage = new File(fileName);
+        var spineOutput = getOption(OUTPUT_OPTION_NAME).orElse(DEFAULT_OUTPUT_OPTION);
+        var fileName = spineOutput + '/' + DESTINATION_PATH;
+        var serializedModelStorage = new File(fileName);
         mergeOldHandlersFrom(serializedModelStorage);
         writeHandlersTo(serializedModelStorage);
     }
@@ -112,9 +111,9 @@ public class AssignLookup extends SpineAnnotationProcessor {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void mergeOldHandlersFrom(File file) {
-        boolean fileWithData = existsNonEmpty(file);
+        var fileWithData = existsNonEmpty(file);
         if (fileWithData) {
-            CommandHandlers preexistingModel = readExisting(file);
+            var preexistingModel = readExisting(file);
             commandHandlers.mergeFrom(preexistingModel);
         }
     }
@@ -133,9 +132,9 @@ public class AssignLookup extends SpineAnnotationProcessor {
     private void writeHandlersTo(File file) {
         ensureFile(file);
         removeDuplicates();
-        CommandHandlers serializedModel = commandHandlers.vBuild();
+        var serializedModel = commandHandlers.vBuild();
         if (!isDefault(serializedModel)) {
-            try (FileOutputStream out = new FileOutputStream(file)) {
+            try (var out = new FileOutputStream(file)) {
                 serializedModel.writeTo(out);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
@@ -151,7 +150,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void removeDuplicates() {
-        ProtocolStringList list = commandHandlers.getCommandHandlingTypeList();
+        var list = commandHandlers.getCommandHandlingTypeList();
         Set<String> types = newTreeSet(list);
         commandHandlers.clearCommandHandlingType()
                        .addAllCommandHandlingType(types);
@@ -174,7 +173,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
             return CommandHandlers.getDefaultInstance();
         } else {
             try (InputStream in = new FileInputStream(file)) {
-                CommandHandlers preexistingModel = CommandHandlers.parseFrom(in);
+                var preexistingModel = CommandHandlers.parseFrom(in);
                 return preexistingModel;
             } catch (IOException e) {
                 throw new IllegalStateException(e);

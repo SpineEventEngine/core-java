@@ -43,15 +43,13 @@ public final class GivenCommandError {
     }
 
     public static CommandErrored unsupportedError(String commandType) {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setType(CommandValidationError.getDescriptor()
                                                .getFullName())
                 .setCode(UNSUPPORTED_COMMAND_VALUE)
                 .putAttributes(ATTR_COMMAND_TYPE_NAME, Values.of(commandType))
                 .build();
-        CommandErrored result = CommandErrored
-                .newBuilder()
+        var result = CommandErrored.newBuilder()
                 .setId(CommandId.generate())
                 .setError(error)
                 .build();
@@ -59,14 +57,12 @@ public final class GivenCommandError {
     }
 
     public static CommandErrored duplicationError() {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setType(CommandValidationError.getDescriptor()
                                                .getFullName())
                 .setCode(DUPLICATE_COMMAND_VALUE)
                 .build();
-        CommandErrored result = CommandErrored
-                .newBuilder()
+        var result = CommandErrored.newBuilder()
                 .setId(CommandId.generate())
                 .setError(error)
                 .build();
@@ -74,13 +70,11 @@ public final class GivenCommandError {
     }
 
     public static CommandErrored nonValidationError() {
-        Error error = Error
-                .newBuilder()
+        var error = Error.newBuilder()
                 .setType("some random type")
                 .setCode(UNSUPPORTED_COMMAND_VALUE)
                 .build();
-        CommandErrored result = CommandErrored
-                .newBuilder()
+        var result = CommandErrored.newBuilder()
                 .setId(CommandId.generate())
                 .setError(error)
                 .build();

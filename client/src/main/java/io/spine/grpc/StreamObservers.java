@@ -119,7 +119,7 @@ public final class StreamObservers {
                    : MetadataConverter.toError(metadata);
         }
         if (throwable instanceof StatusException) {
-            Metadata metadata = ((StatusException) throwable).getTrailers();
+            var metadata = ((StatusException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);
         }
         return Optional.empty();

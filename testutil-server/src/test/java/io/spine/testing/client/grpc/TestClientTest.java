@@ -27,11 +27,9 @@
 package io.spine.testing.client.grpc;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.client.QueryResponse;
 import io.spine.core.Ack;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Server;
 import io.spine.testing.client.grpc.command.Ping;
 import io.spine.testing.client.grpc.given.GameRepository;
@@ -67,18 +65,16 @@ class TestClientTest {
 
     @BeforeEach
     void setUpAll() throws IOException {
-        BoundedContextBuilder context = BoundedContext
-                .singleTenant("Tennis")
+        var context = BoundedContext.singleTenant("Tennis")
                 .add(new GameRepository());
         // Select a port randomly to avoid the intermittent hanging port under Windows.
-        int port = random(DEFAULT_CLIENT_SERVICE_PORT, DEFAULT_CLIENT_SERVICE_PORT + 1000);
+        var port = random(DEFAULT_CLIENT_SERVICE_PORT, DEFAULT_CLIENT_SERVICE_PORT + 1000);
         server = Server
                 .atPort(port)
                 .add(context)
                 .build();
         server.start();
-        UserId userId = UserId
-                .newBuilder()
+        var userId = UserId.newBuilder()
                 .setValue(TestClientTest.class.getSimpleName())
                 .build();
         client = new TestClient(userId, "localhost", port);
@@ -94,7 +90,7 @@ class TestClientTest {
 
     @Test
     void post() {
-        Optional<Ack> optional = ping(LEFT);
+        var optional = ping(LEFT);
         assertOk(optional);
     }
 
@@ -108,11 +104,11 @@ class TestClientTest {
 
     @Test
     void queryAll() {
-        Optional<Ack> optional = ping(LEFT);
+        var optional = ping(LEFT);
         assertOk(optional);
 
         // Query the state of the Game Process Manager, which has Timestamp as its state.
-        QueryResponse response = client.queryAll(Table.class);
+        var response = client.queryAll(Table.class);
         assertFalse(response.isEmpty());
     }
 
@@ -130,7 +126,7 @@ class TestClientTest {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private static void assertOk(Optional<Ack> optional) {
         assertTrue(optional.isPresent());
-        Ack ack = optional.get();
+        var ack = optional.get();
         assertThat(ack.getStatus())
              .isEqualTo(statusOk());
     }

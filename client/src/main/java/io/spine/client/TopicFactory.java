@@ -67,7 +67,7 @@ public final class TopicFactory {
      */
     public TopicBuilder select(Class<? extends Message> targetType) {
         checkNotNull(targetType);
-        TopicBuilder builder = new TopicBuilder(targetType, this);
+        var builder = new TopicBuilder(targetType, this);
         return builder;
     }
 
@@ -81,8 +81,8 @@ public final class TopicFactory {
     public Topic allOf(Class<? extends Message> targetType) {
         checkNotNull(targetType);
 
-        TopicBuilder builder = new TopicBuilder(targetType, this);
-        Topic result = builder.build();
+        var builder = new TopicBuilder(targetType, this);
+        var result = builder.build();
         return result;
     }
 
@@ -99,11 +99,11 @@ public final class TopicFactory {
     @SuppressWarnings("CheckReturnValue")
     Topic composeTopic(Target target, @Nullable FieldMask fieldMask) {
         checkNotNull(target, "Target must be specified to compose a Topic.");
-        Topic.Builder builder = builderForTarget(target);
+        var builder = builderForTarget(target);
         if (fieldMask != null) {
             builder.setFieldMask(fieldMask);
         }
-        Topic query = builder.vBuild();
+        var query = builder.vBuild();
         return query;
     }
 
@@ -134,9 +134,8 @@ public final class TopicFactory {
     }
 
     private static TopicId generateId() {
-        String formattedId = format("t-%s", Identifier.newUuid());
-        return TopicId
-                .newBuilder()
+        var formattedId = format("t-%s", Identifier.newUuid());
+        return TopicId.newBuilder()
                 .setValue(formattedId)
                 .vBuild();
     }

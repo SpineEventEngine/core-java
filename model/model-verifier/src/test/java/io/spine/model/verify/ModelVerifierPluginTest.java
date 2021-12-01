@@ -33,9 +33,6 @@ import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.TaskName;
 import io.spine.tools.gradle.testing.GradleProject;
-import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.BuildTask;
-import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,21 +80,21 @@ class ModelVerifierPluginTest {
     @MuteLogging
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
-        GradleProject project = newProjectWithJava(
+        var project = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
                 "io/spine/model/verify/DuplicateCommandHandler.java"
         );
-        BuildResult result = project.executeAndFail(verifyModel);
-        BuildTask task = result.task(toPath(verifyModel));
+        var result = project.executeAndFail(verifyModel);
+        var task = result.task(toPath(verifyModel));
         assertNotNull(task, result.getOutput());
-        TaskOutcome generationResult = task.getOutcome();
+        var generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult, result.getOutput());
     }
 
     @Test
     @DisplayName("ignore duplicate entries in a Gradle project")
     void ignoreDuplicateEntries() {
-        GradleProject project = newProjectWithJava(VALID_AGGREGATE_JAVA);
+        var project = newProjectWithJava(VALID_AGGREGATE_JAVA);
         project.executeTask(verifyModel);
         project.executeTask(verifyModel);
     }
@@ -105,11 +102,11 @@ class ModelVerifierPluginTest {
     @Test
     @DisplayName("halt build on malformed command handling methods")
     void rejectMalformedHandlingMethods() {
-        BuildResult result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
+        var result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
                 .executeAndFail(verifyModel);
-        BuildTask task = result.task(toPath(verifyModel));
+        var task = result.task(toPath(verifyModel));
         assertNotNull(task, result.getOutput());
-        TaskOutcome generationResult = task.getOutcome();
+        var generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult, result.getOutput());
     }
 

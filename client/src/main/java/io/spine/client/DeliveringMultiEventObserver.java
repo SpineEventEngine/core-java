@@ -70,7 +70,7 @@ final class DeliveringMultiEventObserver implements StreamObserver<Event>, Loggi
 
     @Override
     public void onNext(Event e) {
-        StreamObserver<Event> observer = observers.get(e.type());
+        var observer = observers.get(e.type());
         observer.onNext(e);
     }
 

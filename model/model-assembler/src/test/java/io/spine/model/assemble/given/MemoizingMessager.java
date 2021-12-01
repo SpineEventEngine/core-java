@@ -72,7 +72,7 @@ public final class MemoizingMessager implements Messager {
     }
 
     private void addMessage(Diagnostic.Kind kind, CharSequence msg) {
-        MemoizedMessage message = new MemoizedMessage(kind, msg);
+        var message = new MemoizedMessage(kind, msg);
         messages.add(message);
     }
 

@@ -29,8 +29,6 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import io.grpc.Metadata;
-import io.grpc.StatusException;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
@@ -40,7 +38,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -59,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("ThrowableNotThrown") // in custom assertions
-@DisplayName("StreamObservers utility should")
+@DisplayName("`StreamObservers` utility should")
 class StreamObserversTest extends UtilityClassTest<StreamObservers> {
 
     StreamObserversTest() {
@@ -82,11 +79,11 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
     void createErrorForwardingObserver() {
         MemoizingObserver<?> delegate = new MemoizingObserver<>();
 
-        StreamObserver<Object> forwardingInstance = forwardErrorsOnly(delegate);
+        var forwardingInstance = forwardErrorsOnly(delegate);
 
         forwardingInstance.onNext(new Object());
         forwardingInstance.onCompleted();
-        RuntimeException errorToForward = new RuntimeException("Sample exception");
+        var errorToForward = new RuntimeException("Sample exception");
         forwardingInstance.onError(errorToForward);
 
         assertThat(delegate.getError()).isEqualTo(errorToForward);
@@ -97,7 +94,7 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
     @Test
     @DisplayName("create proper memoizing observer")
     void createMemoizingObserver() {
-        MemoizingObserver<Object> observer = memoizingObserver();
+        var observer = memoizingObserver();
 
         checkFirstResponse(observer);
         checkOnNext(observer);
@@ -113,18 +110,18 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
         assertTrue(observer.responses()
                            .isEmpty());
 
-        Object firstResponse = new Object();
+        var firstResponse = new Object();
         observer.onNext(firstResponse);
         assertEquals(firstResponse, observer.firstResponse());
 
-        ContiguousSet<Integer> sorted = ContiguousSet.create(Range.closed(1, 20),
-                                                             DiscreteDomain.integers());
+        var sorted = ContiguousSet.create(Range.closed(1, 20),
+                                          DiscreteDomain.integers());
         List<Integer> moreResponses = newArrayList(newHashSet(sorted));
 
-        for (Integer element : moreResponses) {
+        for (var element : moreResponses) {
             observer.onNext(element);
         }
-        List<Object> actualResponses = observer.responses();
+        var actualResponses = observer.responses();
 
         assertEquals(firstResponse, actualResponses.get(0));
         assertEquals(moreResponses.size() + 1, // as there was the first response
@@ -134,7 +131,7 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
 
     private static void checkOnError(MemoizingObserver<Object> observer) {
         assertNull(observer.getError());
-        RuntimeException exception = new RuntimeException("Sample error");
+        var exception = new RuntimeException("Sample error");
         observer.onError(exception);
         assertEquals(exception, observer.getError());
     }
@@ -152,12 +149,11 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
         @Test
         @DisplayName("from StatusRuntimeException metadata")
         void fromStatusRuntimeException() {
-            Error expectedError = Error.getDefaultInstance();
-            Metadata metadata = MetadataConverter.toMetadata(expectedError);
-            StatusRuntimeException statusRuntimeException =
-                    INVALID_ARGUMENT.asRuntimeException(metadata);
+            var expectedError = Error.getDefaultInstance();
+            var metadata = MetadataConverter.toMetadata(expectedError);
+            var statusRuntimeException = INVALID_ARGUMENT.asRuntimeException(metadata);
 
-            Optional<Error> optional = fromStreamError(statusRuntimeException);
+            var optional = fromStreamError(statusRuntimeException);
             assertTrue(optional.isPresent());
             assertEquals(expectedError, optional.get());
         }
@@ -165,11 +161,11 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
         @Test
         @DisplayName("from StatusException metadata")
         void fromStatusException() {
-            Error expectedError = Error.getDefaultInstance();
-            Metadata metadata = MetadataConverter.toMetadata(expectedError);
-            StatusException statusException = INVALID_ARGUMENT.asException(metadata);
+            var expectedError = Error.getDefaultInstance();
+            var metadata = MetadataConverter.toMetadata(expectedError);
+            var statusException = INVALID_ARGUMENT.asException(metadata);
 
-            Optional<Error> optional = fromStreamError(statusException);
+            var optional = fromStreamError(statusException);
             assertTrue(optional.isPresent());
             assertEquals(expectedError, optional.get());
         }
@@ -182,8 +178,8 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
         @Test
         @DisplayName("from Throwable which is not status exception")
         void fromGenericThrowable() {
-            String msg = "Neither a StatusException nor a StatusRuntimeException.";
-            Exception exception = new Exception(msg);
+            var msg = "Neither a StatusException nor a StatusRuntimeException.";
+            var exception = new Exception(msg);
 
             assertFalse(fromStreamError(exception).isPresent());
         }
@@ -191,7 +187,7 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
         @Test
         @DisplayName("from metadata without error")
         void fromMetadataWithoutError() {
-            Metadata emptyMetadata = new Metadata();
+            var emptyMetadata = new Metadata();
             Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
             assertFalse(fromStreamError(statusRuntimeEx).isPresent());

@@ -28,7 +28,6 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.Primitives;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
@@ -632,7 +631,7 @@ public final class Filters {
      * @return a new filter instance
      */
     static Filter createFilter(ColumnName columnName, Object value, Operator operator) {
-        String fieldPath = columnName.value();
+        var fieldPath = columnName.value();
         return createFilter(fieldPath, value, operator);
     }
 
@@ -650,7 +649,7 @@ public final class Filters {
      */
     static Filter createFilter(Field field, Object value, Operator operator) {
         checkNotNull(field);
-        FieldPath fieldPath = field.path();
+        var fieldPath = field.path();
         return createFilter(fieldPath, value, operator);
     }
 
@@ -670,10 +669,10 @@ public final class Filters {
         checkNotNull(field);
         checkNotNull(value);
         checkNotNull(operator);
-        FieldPath fieldPath = Event.Field.context()
-                                         .getField()
-                                         .nested(field)
-                                         .path();
+        var fieldPath = Event.Field.context()
+                                   .getField()
+                                   .nested(field)
+                                   .path();
         return createFilter(fieldPath, value, operator);
     }
 
@@ -691,8 +690,7 @@ public final class Filters {
     static CompositeFilter composeFilters(Iterable<Filter> filters, CompositeOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
-        CompositeFilter result = CompositeFilter
-                .newBuilder()
+        var result = CompositeFilter.newBuilder()
                 .addAllFilter(filters)
                 .setOperator(operator)
                 .build();
@@ -757,8 +755,8 @@ public final class Filters {
      */
     static void checkSupportedOrderingComparisonType(Class<?> cls) {
         checkNotNull(cls);
-        Class<?> dataType = Primitives.wrap(cls);
-        boolean supported = isSupportedNumber(dataType)
+        var dataType = Primitives.wrap(cls);
+        var supported = isSupportedNumber(dataType)
                 || Timestamp.class.isAssignableFrom(dataType)
                 || Version.class.isAssignableFrom(dataType)
                 || String.class.isAssignableFrom(dataType);
@@ -768,7 +766,7 @@ public final class Filters {
     }
 
     private static boolean isSupportedNumber(Class<?> wrapperClass) {
-        boolean result = (Number.class.isAssignableFrom(wrapperClass)
+        var result = (Number.class.isAssignableFrom(wrapperClass)
                 && Comparable.class.isAssignableFrom(wrapperClass));
         return result;
     }
@@ -790,9 +788,8 @@ public final class Filters {
         checkNotNull(path);
         checkNotNull(value);
         checkNotNull(operator);
-        Any wrappedValue = toAny(value);
-        Filter filter = Filter
-                .newBuilder()
+        var wrappedValue = toAny(value);
+        var filter = Filter.newBuilder()
                 .setFieldPath(path)
                 .setValue(wrappedValue)
                 .setOperator(operator)
@@ -801,7 +798,7 @@ public final class Filters {
     }
 
     private static Filter createFilter(String fieldPath, Object value, Operator operator) {
-        Field field = Field.parse(fieldPath);
+        var field = Field.parse(fieldPath);
         return createFilter(field, value, operator);
     }
 }

@@ -100,13 +100,13 @@ public abstract class TenantAwareTest {
     }
 
     private static TenantId currentTenant() {
-        TenantFunction<TenantId> fn = new TenantFunction<TenantId>(true) {
+        var fn = new TenantFunction<TenantId>(true) {
             @Override
             public TenantId apply(TenantId id) {
                 return id;
             }
         };
-        TenantId result = fn.execute();
+        var result = fn.execute();
         return requireNonNull(result);
     }
 }

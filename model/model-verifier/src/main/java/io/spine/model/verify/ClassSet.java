@@ -48,7 +48,7 @@ final class ClassSet {
         this.classLoader = classLoader;
         ImmutableSet.Builder<Class<?>> elements = ImmutableSet.builder();
         ImmutableSet.Builder<String> notFound = ImmutableSet.builder();
-        for (String className : classNames) {
+        for (var className : classNames) {
             Class<?> cls;
             try {
                 cls = createRawClass(className);

@@ -42,10 +42,9 @@ public interface SubscriptionMixin extends SubscriptionOrBuilder {
      * Obtains the URL of the target type.
      */
     default TypeUrl targetType() {
-        Topic topic = getTopic();
-        String typeAsString = topic.getTarget()
-                                   .getType();
-        TypeUrl result = TypeUrl.parse(typeAsString);
+        var topic = getTopic();
+        var typeAsString = topic.getTarget().getType();
+        var result = TypeUrl.parse(typeAsString);
         return result;
     }
 
@@ -53,9 +52,9 @@ public interface SubscriptionMixin extends SubscriptionOrBuilder {
      * Tells if the subscription target is events.
      */
     default boolean ofEvent() {
-        TypeUrl target = targetType();
-        Class<?> javaClass = target.toJavaClass();
-        boolean result = EventMessage.class.isAssignableFrom(javaClass);
+        var target = targetType();
+        var javaClass = target.toJavaClass();
+        var result = EventMessage.class.isAssignableFrom(javaClass);
         return result;
     }
 
@@ -68,10 +67,9 @@ public interface SubscriptionMixin extends SubscriptionOrBuilder {
      * @return a printable {@code String} with core subscription data
      */
     default String toShortString() {
-        String id = getId().getValue();
-        String type = getTopic().getTarget()
-                                .getType();
-        String result = format("(ID: %s, target: %s)", id, type);
+        var id = getId().getValue();
+        var type = getTopic().getTarget().getType();
+        var result = format("(ID: `%s`, target: `%s`)", id, type);
         return result;
     }
 }

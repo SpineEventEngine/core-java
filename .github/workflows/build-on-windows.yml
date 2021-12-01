@@ -11,7 +11,7 @@ jobs:
 
       - uses: actions/setup-java@v2
         with:
-          java-version: 8
+          java-version: 11
           distribution: zulu
           cache: gradle
 
@@ -20,4 +20,5 @@ jobs:
 
       - name: Build project and run tests
         shell: cmd
-        run: gradlew.bat build --stacktrace
+        # For the reason on `--no-daemon` see https://github.com/actions/cache/issues/454
+        run: gradlew.bat build --stacktrace --no-daemon

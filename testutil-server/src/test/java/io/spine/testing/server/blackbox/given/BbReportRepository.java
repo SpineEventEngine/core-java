@@ -59,14 +59,13 @@ public final class BbReportRepository
 
     @Override
     public BbReportAggregate create(BbReportId id) {
-        BbReportAggregate aggregate = super.create(id);
+        var aggregate = super.create(id);
         aggregates.add(aggregate);
         return aggregate;
     }
 
     private Set<BbReportId> getReportsContainingProject(BbProjectId projectId) {
-        return aggregates
-                .stream()
+        return aggregates.stream()
                 .filter(report -> reportContainsProject(report, projectId))
                 .map(AbstractEntity::id)
                 .collect(toSet());

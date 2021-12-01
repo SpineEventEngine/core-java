@@ -1,6 +1,6 @@
 
 
-# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -118,10 +118,6 @@
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -179,10 +175,6 @@
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.8.0.
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.errorprone. **Name** : javac. **Version** : 9+181-r4173-1.
-     * **Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
-     * **License:** [GNU General Public License, version 2, with the Classpath Exception](http://openjdk.java.net/legal/gplv2+ce.html)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.6.
      * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
@@ -243,7 +235,7 @@
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -267,7 +259,7 @@
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -320,7 +312,7 @@
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -338,7 +330,7 @@
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -384,6 +376,12 @@
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 13.0.
      * **Project URL:** [http://www.jetbrains.org](http://www.jetbrains.org)
@@ -499,15 +497,20 @@
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:16 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -585,10 +588,6 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -646,10 +645,6 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.8.0.
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.errorprone. **Name** : javac. **Version** : 9+181-r4173-1.
-     * **Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
-     * **License:** [GNU General Public License, version 2, with the Classpath Exception](http://openjdk.java.net/legal/gplv2+ce.html)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.6.
      * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
@@ -710,7 +705,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -734,7 +729,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -787,7 +782,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -805,7 +800,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -851,6 +846,12 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 13.0.
      * **Project URL:** [http://www.jetbrains.org](http://www.jetbrains.org)
@@ -966,15 +967,20 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:18 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine.tools:spine-model-assembler:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -1092,10 +1098,6 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1153,10 +1155,6 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.8.0.
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.errorprone. **Name** : javac. **Version** : 9+181-r4173-1.
-     * **Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
-     * **License:** [GNU General Public License, version 2, with the Classpath Exception](http://openjdk.java.net/legal/gplv2+ce.html)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.6.
      * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
@@ -1217,7 +1215,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -1241,7 +1239,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1294,7 +1292,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -1312,7 +1310,7 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -1358,6 +1356,12 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 13.0.
      * **Project URL:** [http://www.jetbrains.org](http://www.jetbrains.org)
@@ -1473,15 +1477,20 @@ This report was generated on **Tue Nov 23 17:49:39 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:19 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine.tools:spine-model-verifier:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 2.8.8.
@@ -1687,10 +1696,6 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1812,7 +1817,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -1836,7 +1841,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1889,7 +1894,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -1907,7 +1912,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -1953,6 +1958,12 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jboss.forge.roaster. **Name** : roaster-api. **Version** : 2.22.2.Final.
      * **License:** [Eclipse Public License version 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -2076,15 +2087,20 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:20 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2202,10 +2218,6 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2268,10 +2280,6 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.8.0.
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.errorprone. **Name** : javac. **Version** : 9+181-r4173-1.
-     * **Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
-     * **License:** [GNU General Public License, version 2, with the Classpath Exception](http://openjdk.java.net/legal/gplv2+ce.html)
-
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.6.
      * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
      * **License:** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2331,7 +2339,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -2355,7 +2363,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2412,7 +2420,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -2430,7 +2438,7 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -2476,6 +2484,12 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 13.0.
      * **Project URL:** [http://www.jetbrains.org](http://www.jetbrains.org)
@@ -2591,15 +2605,20 @@ This report was generated on **Tue Nov 23 17:49:40 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:21 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2769,10 +2788,6 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2830,10 +2845,6 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.8.0.
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.errorprone. **Name** : javac. **Version** : 9+181-r4173-1.
-     * **Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
-     * **License:** [GNU General Public License, version 2, with the Classpath Exception](http://openjdk.java.net/legal/gplv2+ce.html)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.6.
      * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
@@ -2894,7 +2905,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -2918,7 +2929,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2971,7 +2982,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -2989,7 +3000,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -3035,6 +3046,12 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 13.0.
      * **Project URL:** [http://www.jetbrains.org](http://www.jetbrains.org)
@@ -3150,15 +3167,20 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:22 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -3328,10 +3350,6 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3389,10 +3407,6 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.8.0.
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.errorprone. **Name** : javac. **Version** : 9+181-r4173-1.
-     * **Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
-     * **License:** [GNU General Public License, version 2, with the Classpath Exception](http://openjdk.java.net/legal/gplv2+ce.html)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.6.
      * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
@@ -3453,7 +3467,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -3477,7 +3491,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3530,7 +3544,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -3548,7 +3562,7 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -3594,6 +3608,12 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 13.0.
      * **Project URL:** [http://www.jetbrains.org](http://www.jetbrains.org)
@@ -3709,15 +3729,20 @@ This report was generated on **Tue Nov 23 17:49:41 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:23 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.81`
+# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.82`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -3887,10 +3912,6 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 ## Compile, tests, and tooling
-1.  **Group** : antlr. **Name** : antlr. **Version** : 2.7.7.
-     * **Project URL:** [http://www.antlr.org/](http://www.antlr.org/)
-     * **License:** [BSD License](http://www.antlr.org/license.html)
-
 1.  **Group** : com.beust. **Name** : jcommander. **Version** : 1.48.
      * **Project URL:** [http://beust.com/jcommander](http://beust.com/jcommander)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3948,10 +3969,6 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.8.0.
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.errorprone. **Name** : javac. **Version** : 9+181-r4173-1.
-     * **Project URL:** [https://github.com/google/error-prone-javac](https://github.com/google/error-prone-javac)
-     * **License:** [GNU General Public License, version 2, with the Classpath Exception](http://openjdk.java.net/legal/gplv2+ce.html)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.6.
      * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
@@ -4012,7 +4029,7 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.3.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 8.29.
+1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 9.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
 
@@ -4036,7 +4053,7 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://commons.apache.org/lang/](http://commons.apache.org/lang/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.1.4.
+1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.1.
      * **Project URL:** [http://picocli.info](http://picocli.info)
      * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4133,7 +4150,7 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 2.0.2.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 9.9.1-6.
+1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 10.6.
      * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
      * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
 
@@ -4151,7 +4168,7 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.8-1.
+1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.9.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
@@ -4197,6 +4214,12 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.7.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
+
+1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
+     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
+     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
+     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
+     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jetbrains. **Name** : annotations. **Version** : 13.0.
      * **Project URL:** [http://www.jetbrains.org](http://www.jetbrains.org)
@@ -4312,7 +4335,12 @@ This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-Lice
      * **Project URL:** [http://pcollections.org](http://pcollections.org)
      * **License:** [The MIT License](http://www.opensource.org/licenses/mit-license.php)
 
+1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
+     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
+     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [WTFPL](http://www.wtfpl.net/)
+
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Nov 23 17:49:42 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Fri Nov 26 19:09:24 EET 2021** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

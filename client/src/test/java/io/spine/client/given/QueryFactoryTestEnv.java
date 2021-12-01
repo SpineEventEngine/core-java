@@ -29,8 +29,6 @@ package io.spine.client.given;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import com.google.protobuf.ProtocolStringList;
-import io.spine.client.IdFilter;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.client.TargetFilters;
@@ -40,7 +38,6 @@ import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
@@ -81,32 +78,32 @@ public class QueryFactoryTestEnv {
     }
 
     public static void checkFieldMaskEmpty(Query query) {
-        FieldMask fieldMask = query.getFormat().getFieldMask();
+        var fieldMask = query.getFormat().getFieldMask();
         assertNotNull(fieldMask);
         assertEquals(FieldMask.getDefaultInstance(), fieldMask);
     }
 
     public static void checkFiltersEmpty(Query query) {
-        Target entityTarget = query.getTarget();
-        TargetFilters filters = entityTarget.getFilters();
+        var entityTarget = query.getTarget();
+        var filters = entityTarget.getFilters();
         assertNotNull(filters);
         assertEquals(TargetFilters.getDefaultInstance(), filters);
     }
 
     public static void verifyIdFilter(Set<TestEntityId> expectedIds, TargetFilters filters) {
         assertNotNull(filters);
-        IdFilter idFilter = filters.getIdFilter();
+        var idFilter = filters.getIdFilter();
         assertNotNull(idFilter);
-        List<Any> actualListOfIds = idFilter.getIdList();
-        for (TestEntityId testEntityId : expectedIds) {
-            Any expectedEntityId = AnyPacker.pack(testEntityId);
+        var actualListOfIds = idFilter.getIdList();
+        for (var testEntityId : expectedIds) {
+            var expectedEntityId = AnyPacker.pack(testEntityId);
             assertTrue(actualListOfIds.contains(expectedEntityId));
         }
     }
 
     @CanIgnoreReturnValue
     public static Target checkTargetIsTestEntity(Query query) {
-        Target entityTarget = query.getTarget();
+        var entityTarget = query.getTarget();
         assertNotNull(entityTarget);
 
         assertEquals(TEST_ENTITY_TYPE_URL.value(), entityTarget.getType());
@@ -114,10 +111,10 @@ public class QueryFactoryTestEnv {
     }
 
     public static void verifySinglePathInQuery(String expectedEntityPath, Query query) {
-        FieldMask fieldMask = query.getFormat().getFieldMask();
+        var fieldMask = query.getFormat().getFieldMask();
         assertEquals(1, fieldMask.getPathsCount()); // As we set the only path value.
 
-        String firstPath = fieldMask.getPaths(0);
+        var firstPath = fieldMask.getPaths(0);
         assertEquals(expectedEntityPath, firstPath);
     }
 
@@ -130,10 +127,10 @@ public class QueryFactoryTestEnv {
 
     public static void verifyMultiplePathsInQuery(String[] paths,
                                                   Query readAllWithPathFilteringQuery) {
-        FieldMask fieldMask = readAllWithPathFilteringQuery.getFormat().getFieldMask();
+        var fieldMask = readAllWithPathFilteringQuery.getFormat().getFieldMask();
         assertEquals(paths.length, fieldMask.getPathsCount());
-        ProtocolStringList pathsList = fieldMask.getPathsList();
-        for (String expectedPath : paths) {
+        var pathsList = fieldMask.getPathsList();
+        for (var expectedPath : paths) {
             assertTrue(pathsList.contains(expectedPath));
         }
     }
@@ -153,17 +150,17 @@ public class QueryFactoryTestEnv {
     public static void checkIdQueriesEqual(Query query1, Query query2) {
         assertNotEquals(query1.getId(), query2.getId());
 
-        Target factoryTarget = query1.getTarget();
-        Target builderTarget = query2.getTarget();
+        var factoryTarget = query1.getTarget();
+        var builderTarget = query2.getTarget();
 
-        TargetFilters factoryFilters = factoryTarget.getFilters();
-        TargetFilters builderFilters = builderTarget.getFilters();
+        var factoryFilters = factoryTarget.getFilters();
+        var builderFilters = builderTarget.getFilters();
 
         // Everything except filters is the same
         assertEquals(stripFilters(factoryTarget), stripFilters(builderTarget));
 
-        IdFilter factoryIdFilter = factoryFilters.getIdFilter();
-        IdFilter builderIdFilter = builderFilters.getIdFilter();
+        var factoryIdFilter = factoryFilters.getIdFilter();
+        var builderIdFilter = builderFilters.getIdFilter();
 
         // Everything except ID filter is the same
         assertEquals(stripIdFilter(factoryFilters), stripIdFilter(builderFilters));

@@ -26,7 +26,6 @@
 
 package io.spine.testing.server.query;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
 import io.spine.base.EntityState;
@@ -78,7 +77,7 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
     @Test
     @DisplayName("check the response status")
     void checkResponseStatus() {
-        AssertionError error = expectFailure(
+        var error = expectFailure(
                 () -> assertWithSubjectThat(responseWithSingleEntity())
                         .hasStatus(ERROR)
         );
@@ -91,15 +90,15 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
     @Test
     @DisplayName("return actual query results")
     void provideActualResults() {
-        QueryResponse response = responseWithMultipleEntities();
-        ImmutableList<EntityState<?>> actualEntities = assertWithSubjectThat(response).actual();
+        var response = responseWithMultipleEntities();
+        var actualEntities = assertWithSubjectThat(response).actual();
         assertThat(actualEntities).hasSize(2);
     }
 
     @Test
     @DisplayName("provide subject for the response status")
     void provideResponseStatusSubject() {
-        AssertionError error = expectFailure(
+        var error = expectFailure(
                 () -> assertWithSubjectThat(responseWithSingleEntity())
                         .hasStatusThat()
                         .isError()
@@ -115,14 +114,14 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
     @Test
     @DisplayName("check contains a single entity state")
     void checkSingleEntityState() {
-        AssertionError error = expectFailure(
+        var error = expectFailure(
                 () -> assertWithSubjectThat(responseWithMultipleEntities())
                         .containsSingleEntityStateThat()
         );
         assertThat(error).factValue(EXPECTED)
                          .contains("1");
 
-        String actualCount = String.valueOf(responseWithMultipleEntities().size());
+        var actualCount = String.valueOf(responseWithMultipleEntities().size());
         assertThat(error).factValue(BUT_WAS)
                          .contains(actualCount);
     }
@@ -141,14 +140,14 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
     @Test
     @DisplayName("check contains a single entity version")
     void checkSingleEntityVersion() {
-        AssertionError error = expectFailure(
+        var error = expectFailure(
                 () -> assertWithSubjectThat(responseWithMultipleEntities())
                         .containsSingleEntityVersionThat()
         );
         assertThat(error).factValue(EXPECTED)
                          .contains("1");
 
-        String actualCount = String.valueOf(responseWithMultipleEntities().size());
+        var actualCount = String.valueOf(responseWithMultipleEntities().size());
         assertThat(error).factValue(BUT_WAS)
                          .contains(actualCount);
     }
@@ -167,8 +166,8 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
     @Test
     @DisplayName("provide a subject for yielded entity versions when they are multiple")
     void provideIterableEntityVersionSubject() {
-        int expectedSize = 3;
-        AssertionError error = expectFailure(
+        var expectedSize = 3;
+        var error = expectFailure(
                 () -> assertWithSubjectThat(responseWithMultipleEntities())
                         .containsEntityVersionListThat()
                         .hasSize(expectedSize)
@@ -176,7 +175,7 @@ class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<En
         assertThat(error).factValue(EXPECTED)
                          .contains(String.valueOf(expectedSize));
 
-        String actualCount = String.valueOf(responseWithMultipleEntities().size());
+        var actualCount = String.valueOf(responseWithMultipleEntities().size());
         assertThat(error).factValue(BUT_WAS)
                          .contains(actualCount);
     }

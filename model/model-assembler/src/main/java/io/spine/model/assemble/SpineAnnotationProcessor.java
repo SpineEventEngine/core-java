@@ -129,7 +129,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public final Set<String> getSupportedAnnotationTypes() {
-        Set<String> names = singleton(getAnnotationType().getName());
+        var names = singleton(getAnnotationType().getName());
         return names;
     }
 
@@ -151,7 +151,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
 
     private void processAnnotation(Class<? extends Annotation> annotation,
                                    RoundEnvironment roundEnv) {
-        Set<? extends Element> annotated = roundEnv.getElementsAnnotatedWith(annotation);
+        var annotated = roundEnv.getElementsAnnotatedWith(annotation);
         for (Element element : annotated) {
             processElement(element);
         }
@@ -189,7 +189,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
      *         the option is not present in the processor or has no value (i.e. is a flag option)
      */
     protected final Optional<String> getOption(String optName) {
-        String optValue = options.get(optName);
+        var optValue = options.get(optName);
         return Optional.ofNullable(optValue);
     }
 

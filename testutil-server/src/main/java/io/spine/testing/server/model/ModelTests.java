@@ -36,8 +36,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * Utilities for tests that deal with {@link Model}.
  *
- * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
- *           string literal for security check.
+ * @implNote The full name of this class is used by {@link Model#dropAllModels()} via
+ *         a string literal for security check.
  */
 public final class ModelTests {
 
@@ -58,22 +58,23 @@ public final class ModelTests {
 
     /**
      * Obtains a method declared in the passed class with the given name.
-     * @throws IllegalStateException if the class does not have such a method.
+     *
+     * @throws IllegalStateException
+     *         if the class does not have such a method.
      */
     public static Method getMethod(Class<?> cls, String methodName) {
-        Method[] methods = cls.getDeclaredMethods();
+        var methods = cls.getDeclaredMethods();
 
-        Method result =
-                Arrays.stream(methods)
-                      .filter(method -> methodName.equals(method.getName()))
-                      .findFirst()
-                      .orElseThrow(
-                              () -> newIllegalStateException(
-                                      "No method named `%s` found in class `%s`.",
-                                      methodName,
-                                      cls.getName()
-                              )
-                      );
+        var result = Arrays.stream(methods)
+                .filter(method -> methodName.equals(method.getName()))
+                .findFirst()
+                .orElseThrow(
+                        () -> newIllegalStateException(
+                                "No method named `%s` found in class `%s`.",
+                                methodName,
+                                cls.getName()
+                        )
+                );
 
         return result;
     }

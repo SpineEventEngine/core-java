@@ -1,8 +1,12 @@
 # Welcome to Spine Event Engine
-[![Build Status](https://travis-ci.com/SpineEventEngine/core-java.svg?branch=master)](https://travis-ci.com/SpineEventEngine/core-java) &nbsp;
+
+[![Ubuntu build][ubuntu-build-badge]][gh-actions]
 [![codecov.io](https://codecov.io/github/SpineEventEngine/core-java/coverage.svg?branch=master)](https://codecov.io/github/SpineEventEngine/core-java?branch=master) &nbsp;
 [![license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Gitter chat](https://badges.gitter.im/SpineEventEngine.png)](https://gitter.im/SpineEventEngine)
+
+[gh-actions]: https://github.com/SpineEventEngine/core-java/actions
+[ubuntu-build-badge]: https://github.com/SpineEventEngine/core-java/actions/workflows/build-on-ubuntu.yml/badge.svg
 
 [Spine Event Engine][spine-site] is a Java framework for building Event Sourcing and CQRS
 applications that are accessed by clients built with JavaScript, Java Nano (Android), Dart, and Java.
@@ -33,9 +37,8 @@ the [Spine Examples][spine-examples] GitHub organization.
 
 ## Building from sources
 
-Building Spine modules and libraries requires JDK 8. 
-
-The migration of the codebase to JDK 11 is planned for the [version 2.0][v2] of the framework.
+Starting version `2.0.0-SNAPSHOT.82` building Spine modules requires JDK 11. Prior versions
+could be built with JDK 8 only.
 
 Gradle is used as a build and dependency management system.
 

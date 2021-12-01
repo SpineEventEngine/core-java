@@ -76,7 +76,7 @@ public class MemoizingObserver<T> implements StreamObserver<T> {
      * @return the first item responded
      */
     public T firstResponse() {
-        boolean noResponses = responses.isEmpty();
+        var noResponses = responses.isEmpty();
         if (noResponses) {
             throw new IllegalStateException("No responses have been received yet");
         }

@@ -34,15 +34,13 @@ import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.MetadataConverter.toError;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("`Metadata` converter should")
+@DisplayName("`MetadataConverter` should")
 class MetadataConverterTest extends UtilityClassTest<MetadataConverter> {
 
     MetadataConverterTest() {
@@ -53,19 +51,19 @@ class MetadataConverterTest extends UtilityClassTest<MetadataConverter> {
     @Test
     @DisplayName("convert `Error` to `Metadata`")
     void convertError() throws InvalidProtocolBufferException {
-        Error error = Error.getDefaultInstance();
-        Metadata metadata = MetadataConverter.toMetadata(error);
-        byte[] bytes = metadata.get(MetadataConverter.KEY);
+        var error = Error.getDefaultInstance();
+        var metadata = MetadataConverter.toMetadata(error);
+        var bytes = metadata.get(MetadataConverter.KEY);
         assertEquals(error, Error.parseFrom(bytes));
     }
 
     @Test
     @DisplayName("convert `Metadata` to `Error`")
     void convertMetadata() {
-        Error expectedError = Error.getDefaultInstance();
-        Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        var expectedError = Error.getDefaultInstance();
+        var metadata = MetadataConverter.toMetadata(expectedError);
 
-        Optional<Error> optional = toError(metadata);
+        var optional = toError(metadata);
         assertTrue(optional.isPresent());
         assertEquals(expectedError, optional.get());
     }
@@ -73,7 +71,7 @@ class MetadataConverterTest extends UtilityClassTest<MetadataConverter> {
     @Test
     @DisplayName("return absent when converting empty `Metadata`")
     void processEmptyMetadata() {
-        Metadata metadata = new Metadata();
+        var metadata = new Metadata();
 
         Truth8.assertThat(toError(metadata))
               .isEmpty();
@@ -82,10 +80,10 @@ class MetadataConverterTest extends UtilityClassTest<MetadataConverter> {
     @Test
     @DisplayName("throw wrapped `InvalidProtocolBufferException` when Metadata bytes are invalid")
     void throwOnInvalidBytes() {
-        Metadata metadata = new Metadata();
+        var metadata = new Metadata();
         metadata.put(MetadataConverter.KEY, new byte[]{(byte) 1});
 
-        IllegalStateException e = assertThrows(
+        var e = assertThrows(
                 IllegalStateException.class,
                 () -> toError(metadata), "`InvalidProtocolBufferException` was not thrown."
         );

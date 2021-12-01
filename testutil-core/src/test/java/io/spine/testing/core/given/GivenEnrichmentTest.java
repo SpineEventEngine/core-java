@@ -26,13 +26,9 @@
 
 package io.spine.testing.core.given;
 
-import com.google.protobuf.Any;
-import io.spine.core.Enrichment;
 import io.spine.testing.UtilityClassTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
@@ -47,9 +43,9 @@ class GivenEnrichmentTest extends UtilityClassTest<GivenEnrichment> {
     @Test
     @DisplayName("create enrichment with one attribute")
     void createWithOneAttribute() {
-        Enrichment enrichment = withOneAttribute();
-        Map<String, Any> enrichmentAttributes = enrichment.getContainer()
-                                                          .getItemsMap();
+        var enrichment = withOneAttribute();
+        var enrichmentAttributes = enrichment.getContainer()
+                                             .getItemsMap();
         assertThat(enrichmentAttributes).hasSize(1);
     }
 }

@@ -26,7 +26,6 @@
 
 package io.spine.testing.server.tenant;
 
-import io.spine.server.tenant.TenantIndex;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,7 @@ class TenantAwareTestTest {
         @Test
         @DisplayName("single-tenant context")
         void forSingleTenant() {
-            TenantIndex index = TenantAwareTest.createTenantIndex(false);
+            var index = TenantAwareTest.createTenantIndex(false);
 
             // Check that it already has one tenant. It's enough for the purpose of this test.
             assertThat(index.all())
@@ -53,7 +52,7 @@ class TenantAwareTestTest {
         @Test
         @DisplayName("multi-tenant context")
         void forMultiTenant() {
-            TenantIndex index = TenantAwareTest.createTenantIndex(true);
+            var index = TenantAwareTest.createTenantIndex(true);
 
             // Check that the index is empty. It's enough for the purpose of this test.
             assertThat(index.all())
