@@ -74,7 +74,6 @@ public class ProjectionTransaction<I,
                       B extends ValidatingBuilder<S>>
     ProjectionTransaction<I, S, B> start(Projection<I, S, B> projection) {
         checkNotNull(projection);
-
         var tx = new ProjectionTransaction<>(projection);
         return tx;
     }
