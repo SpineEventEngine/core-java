@@ -162,8 +162,7 @@ public final class StandTestEnv {
                                           ProjectId id,
                                           String name,
                                           int projectVersion) {
-        var project = Project
-                .newBuilder()
+        var project = Project.newBuilder()
                 .setId(id)
                 .setName(name)
                 .setStatus(STARTED)

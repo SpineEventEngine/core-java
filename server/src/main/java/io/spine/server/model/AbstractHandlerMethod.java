@@ -281,8 +281,7 @@ class AbstractHandlerMethod<T,
         checkNotNull(envelope);
         checkAttributesMatch(envelope);
         var signal = envelope.outerObject().messageId();
-        var outcome = DispatchOutcome
-                .newBuilder()
+        var outcome = DispatchOutcome.newBuilder()
                 .setPropagatedSignal(signal);
         var lifecycle = target instanceof HandlerLifecycle
                                             ? (HandlerLifecycle) target

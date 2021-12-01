@@ -28,7 +28,6 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoTruth;
-import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.core.UserId;
@@ -69,8 +68,7 @@ class EventSubscriptionRequestTest extends AbstractClientTest {
         counter.clear();
         rememberedContext = EventContext.getDefaultInstance();
         userId = GivenUserId.generated();
-        CommandMessage cmd = LogInUser
-                .newBuilder()
+        var cmd = LogInUser.newBuilder()
                 .setUser(userId)
                 .build();
         commandRequest =

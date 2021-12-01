@@ -69,10 +69,12 @@ class CommandsTest extends UtilityClassTest<Commands> {
             .newBuilder()
             .setId(Identifier.newUuid())
             .build();
+
     private static final CmdStartProject startProject = CmdStartProject
             .newBuilder()
             .setId(Identifier.newUuid())
             .build();
+
     private static final CmdStopProject stopProject = CmdStopProject
             .newBuilder()
             .setId(Identifier.newUuid())

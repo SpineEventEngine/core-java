@@ -339,8 +339,8 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     @Override
     public LifecycleFlags getLifecycleFlags() {
         var result = this.lifecycleFlags == null
-                                ? LifecycleFlags.getDefaultInstance()
-                                : this.lifecycleFlags;
+                     ? LifecycleFlags.getDefaultInstance()
+                     : this.lifecycleFlags;
         return result;
     }
 
@@ -359,8 +359,8 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     protected void setArchived(boolean archived) {
         setLifecycleFlags(lifecycleFlags().toBuilder()
-                                          .setArchived(archived)
-                                          .build());
+                                  .setArchived(archived)
+                                  .build());
     }
 
     /**
@@ -378,8 +378,8 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     protected void setDeleted(boolean deleted) {
         setLifecycleFlags(lifecycleFlags().toBuilder()
-                                          .setDeleted(deleted)
-                                          .build());
+                                  .setDeleted(deleted)
+                                  .build());
     }
 
     /**
@@ -393,8 +393,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (lifecycleFlags().getArchived()) {
             var packedId = Identifier.pack(id());
-            throw CannotModifyArchivedEntity
-                    .newBuilder()
+            throw CannotModifyArchivedEntity.newBuilder()
                     .setEntityId(packedId)
                     .build();
         }

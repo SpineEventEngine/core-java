@@ -265,13 +265,11 @@ public class EventTest extends UtilityClassTest<Events> {
                 .setDoNotEnrich(true)
                 .build();
         var grandOriginContext = context.toBuilder().setEnrichment(someEnrichment);
-        var originContext =
-                contextWithoutOrigin()
-                        .setEventContext(grandOriginContext);
-        var context =
-                contextWithoutOrigin()
-                        .setEventContext(originContext)
-                        .build();
+        var originContext = contextWithoutOrigin()
+                .setEventContext(grandOriginContext);
+        var context = contextWithoutOrigin()
+                .setEventContext(originContext)
+                .build();
         var event = event(context);
 
         var eventWithoutEnrichments = event.clearAllEnrichments();
@@ -289,8 +287,8 @@ public class EventTest extends UtilityClassTest<Events> {
 
     private static CommandMessage commandMessage() {
         return EtDoSomething.newBuilder()
-                            .setId(EventTest.class.getName())
-                            .build();
+                .setId(EventTest.class.getName())
+                .build();
     }
 
     private static class StubRejectionThrowable extends RejectionThrowable {
@@ -302,8 +300,7 @@ public class EventTest extends UtilityClassTest<Events> {
         }
 
         private static StandardRejections.EntityAlreadyArchived rejectionMessage() {
-            return StandardRejections.EntityAlreadyArchived
-                    .newBuilder()
+            return StandardRejections.EntityAlreadyArchived.newBuilder()
                     .setEntityId(pack(Time.currentTime()))
                     .build();
         }

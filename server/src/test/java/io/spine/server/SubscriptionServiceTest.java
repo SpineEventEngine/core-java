@@ -371,8 +371,7 @@ class SubscriptionServiceTest {
 
     @CanIgnoreReturnValue
     private ProjectId updateEntity() {
-        var projectId = ProjectId
-                .newBuilder()
+        var projectId = ProjectId.newBuilder()
                 .setUuid("some-id")
                 .build();
         var cmd = createProject(projectId);

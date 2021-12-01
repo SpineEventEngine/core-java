@@ -71,6 +71,7 @@ public final class TracingTestEnv {
             .setCity("Kharkiv")
             .setCountry("Ukraine")
             .vBuild();
+
     private static final ZoneId ZONE = ZoneIds.of(java.time.ZoneId.systemDefault());
     public static final FlightId FLIGHT = FlightId.generate();
     public static final TypeUrl FLIGHT_TYPE = TypeUrl.of(Flight.class);

@@ -28,10 +28,8 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
-import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
-import io.spine.base.RejectionThrowable;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -134,8 +132,7 @@ class CommandAckMonitorTest {
         @BeforeEach
         void setUp() {
             writeSide = MemoizingWriteSide.singleTenant();
-            monitor = CommandAckMonitor
-                    .newBuilder()
+            monitor = CommandAckMonitor.newBuilder()
                     .setSystemWriteSide(writeSide)
                     .setTenantId(TenantId.getDefaultInstance())
                     .setPostedCommands(ImmutableSet.of(mockCommand))
@@ -226,8 +223,7 @@ class CommandAckMonitorTest {
         var projectId = ProjectId.newBuilder()
                 .setId(commandId.getUuid())
                 .build();
-        CommandMessage commandMessage = CmdBusStartProject
-                .newBuilder()
+        var commandMessage = CmdBusStartProject.newBuilder()
                 .setProjectId(projectId)
                 .build();
         var command = Command.newBuilder()
@@ -242,9 +238,9 @@ class CommandAckMonitorTest {
 
     private static RuntimeException throwableCausedByRejection() {
         var entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
-        RejectionThrowable rt = CannotModifyArchivedEntity.newBuilder()
+        var rejection = CannotModifyArchivedEntity.newBuilder()
                 .setEntityId(entityId)
                 .build();
-        return new RuntimeException(rt);
+        return new RuntimeException(rejection);
     }
 }

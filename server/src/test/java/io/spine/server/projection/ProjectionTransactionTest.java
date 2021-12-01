@@ -188,13 +188,12 @@ class ProjectionTransactionTest
     @DisplayName("propagate `null` column values as default values for the field")
     void propagateNullColumnValues() {
         var id = Id.newBuilder()
-                  .setId(newUuid())
-                  .build();
+                .setId(newUuid())
+                .build();
         var entity = new TxProjection(id, true);
 
         var name = newUuid();
-        var txCreated = TxCreated
-                .newBuilder()
+        var txCreated = TxCreated.newBuilder()
                 .setId(id())
                 .setName(name)
                 .build();

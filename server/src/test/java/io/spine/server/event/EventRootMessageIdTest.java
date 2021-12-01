@@ -132,8 +132,7 @@ public class EventRootMessageIdTest {
     @MuteLogging
     @DisplayName("be equal to the event's own ID by default")
     void empty() {
-        var invalidEvent = Event
-                .newBuilder()
+        var invalidEvent = Event.newBuilder()
                 .setId(Events.generateId())
                 .setMessage(pack(GivenEvent.message()))
                 .buildPartial();

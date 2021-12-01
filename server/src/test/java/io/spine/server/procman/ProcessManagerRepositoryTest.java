@@ -575,8 +575,7 @@ class ProcessManagerRepositoryTest
                                    .value())
                 .setId(pack(projectId))
                 .vBuild();
-        EventMessage discardedEvent = EntityStateChanged
-                .newBuilder()
+        var discardedEvent = EntityStateChanged.newBuilder()
                 .setEntity(entityId)
                 .setOldState(oldState)
                 .setNewState(newState)

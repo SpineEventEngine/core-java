@@ -91,8 +91,7 @@ class FilterMixinTest {
             @Test
             @DisplayName("and the target field is not an entity column")
             void whenFieldIsNotColumn() {
-                var name = TestEntityName
-                        .newBuilder()
+                var name = TestEntityName.newBuilder()
                         .setValue("the entity name")
                         .build();
                 var filter = Filters.eq("name", name);

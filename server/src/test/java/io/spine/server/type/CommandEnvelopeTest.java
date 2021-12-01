@@ -26,7 +26,6 @@
 
 package io.spine.server.type;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
@@ -96,10 +95,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     @Test
     @DisplayName("obtain type url of given command")
     void getCommandTypeUrl() {
-        ActorRequestFactory factory =
-                new TestActorRequestFactory(CommandEnvelopeTest.class);
-        CommandMessage message = TestCommandMessage
-                .newBuilder()
+        var factory = new TestActorRequestFactory(CommandEnvelopeTest.class);
+        var message = TestCommandMessage.newBuilder()
                 .setId(Identifier.newUuid())
                 .build();
         var command = factory.command().create(message);

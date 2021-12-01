@@ -71,8 +71,7 @@ class TenantAwareSystemWriteSideTest {
         @BeforeEach
         void setUp() {
             delegate = MemoizingWriteSide.multitenant();
-            tenantId = TenantId
-                    .newBuilder()
+            tenantId = TenantId.newBuilder()
                     .setValue(TenantAwareSystemWriteSideTest.class.getName())
                     .build();
         }

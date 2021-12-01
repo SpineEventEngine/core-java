@@ -285,8 +285,7 @@ public final class Client implements AutoCloseable {
      * Creates a new request factory for the requests to be sent on behalf of the passed user.
      */
     ActorRequestFactory requestOf(UserId user) {
-        return ActorRequestFactory
-                .newBuilder()
+        return ActorRequestFactory.newBuilder()
                 .setTenantId(tenant)
                 .setActor(user)
                 .build();

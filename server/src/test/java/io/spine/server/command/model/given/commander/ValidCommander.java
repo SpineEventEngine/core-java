@@ -65,9 +65,7 @@ public final class ValidCommander extends AbstractCommander {
     @Command
     @SuppressWarnings("DoNotCallSuggester") // Not relevant in this case of to test data.
     SigSetProjectOwner declaredRejection(SigCreateProject command) throws SigCannotCreateProject {
-        throw SigCannotCreateProject
-                .newBuilder()
-                .build();
+        throw SigCannotCreateProject.newBuilder().build();
     }
 
     @Command

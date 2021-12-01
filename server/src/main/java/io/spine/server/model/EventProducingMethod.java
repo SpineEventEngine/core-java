@@ -73,8 +73,7 @@ public interface EventProducingMethod<T extends EventProducer,
             var event = eventFactory.createEvent(msg, version);
             producedEvents.addEvent(event);
         }
-        return Success
-                .newBuilder()
+        return Success.newBuilder()
                 .setProducedEvents(producedEvents)
                 .build();
     }

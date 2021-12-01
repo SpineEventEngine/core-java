@@ -126,8 +126,7 @@ public final class TopicFactory {
     }
 
     private Topic.Builder builderForTarget(Target target) {
-        return Topic
-                .newBuilder()
+        return Topic.newBuilder()
                 .setId(generateId())
                 .setContext(actorContext)
                 .setTarget(target);

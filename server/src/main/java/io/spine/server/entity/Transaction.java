@@ -483,8 +483,7 @@ public abstract class Transaction<I,
     }
 
     private void doRollback(Consumer<EntityRecord> recordConsumer) {
-        @NonValidated EntityRecord record = EntityRecord
-                .newBuilder()
+        @NonValidated EntityRecord record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(entity.id()))
                 .setState(pack(currentBuilderState()))
                 .setVersion(version)

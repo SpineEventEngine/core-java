@@ -67,8 +67,7 @@ class CommandRequestTest extends AbstractClientTest {
     @BeforeEach
     void createCommandRequest() {
         counter.clear();
-        CommandMessage cmd = LogInUser
-                .newBuilder()
+        var cmd = LogInUser.newBuilder()
                 .setUser(GivenUserId.generated())
                 .build();
         commandRequest = client().asGuest()

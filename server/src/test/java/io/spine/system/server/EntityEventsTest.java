@@ -175,8 +175,7 @@ class EntityEventsTest {
     @Test
     @DisplayName("command is dispatched to handler in procman")
     void commandToPm() {
-        CommandMessage startCommand = StartPersonCreation
-                .newBuilder()
+        var startCommand = StartPersonCreation.newBuilder()
                 .setId(id)
                 .build();
         postCommand(startCommand);

@@ -123,8 +123,7 @@ class ModelVerifierTest {
         var firstType = UploadCommandHandler.class.getName();
         var secondType = DuplicateCommandHandler.class.getName();
 
-        var spineModel = CommandHandlers
-                .newBuilder()
+        var spineModel = CommandHandlers.newBuilder()
                 .addCommandHandlingType(firstType)
                 .addCommandHandlingType(secondType)
                 .build();

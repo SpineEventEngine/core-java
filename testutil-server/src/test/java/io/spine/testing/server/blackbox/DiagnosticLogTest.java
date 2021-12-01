@@ -81,8 +81,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
     @Test
     @DisplayName("log `CannotDispatchDuplicateEvent` event")
     void acceptCannotDispatchDuplicateEvent() {
-        var event = MessageId
-                .newBuilder()
+        var event = MessageId.newBuilder()
                 .setId(pack(EventId.newBuilder()
                                    .setValue(newUuid())
                                    .build()))
