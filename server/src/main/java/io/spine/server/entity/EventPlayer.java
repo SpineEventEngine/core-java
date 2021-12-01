@@ -64,8 +64,7 @@ public interface EventPlayer {
     default DispatchOutcome play(Event event) {
         Collection<Event> events = singleton(event);
         var batchDispatchOutcome = play(events);
-        var outcome = batchDispatchOutcome.getOutcomeList()
-                                          .get(0);
+        var outcome = batchDispatchOutcome.getOutcomeList().get(0);
         return outcome;
     }
 

@@ -27,6 +27,8 @@
 package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Timestamp;
@@ -245,15 +247,19 @@ public abstract class ProjectionRepository<I,
                             .filter(c -> !routing.supports(c.typedValue()))
                             .collect(toImmutableList());
         if (!unsupported.isEmpty()) {
-            var moreThanOne = unsupported.size() > 1;
-            var fmt =
-                    "The repository `%s` does not provide routing for updates of the state " +
-                            (moreThanOne ? "classes" : "class") +
-                            " `%s` to which the class `%s` is subscribed.";
-            throw newIllegalStateException(
-                    fmt, this, (moreThanOne ? unsupported : unsupported.get(0)), cls
-            );
+            reportUnsupported(cls, unsupported);
         }
+    }
+
+    private void reportUnsupported(ProjectionClass<P> cls,
+                                   ImmutableList<StateClass<?>> unsupported) {
+        var moreThanOne = unsupported.size() > 1;
+        var fmt =
+                "The repository `%s` does not provide routing for updates of the state " +
+                        (moreThanOne ? "classes" : "class") +
+                        " — `%s` — to which the class `%s` is subscribed.";
+        var typesAsString = Joiner.on(", ").join(unsupported);
+        throw newIllegalStateException(fmt, this, typesAsString, cls);
     }
 
     /**

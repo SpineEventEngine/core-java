@@ -31,12 +31,12 @@ import io.spine.client.Topic;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -99,8 +99,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     private SubscriptionRegistry registrySlice() {
         var func = new TenantFunction<SubscriptionRegistry>(isMultitenant()) {
             @Override
-            public SubscriptionRegistry apply(@Nullable TenantId tenantId) {
-                requireNonNull(tenantId);
+            public SubscriptionRegistry apply(TenantId tenantId) {
+                checkNotNull(tenantId);
                 var slice = tenantSlices.computeIfAbsent(
                         tenantId,
                         id -> new TenantSubscriptionRegistry()

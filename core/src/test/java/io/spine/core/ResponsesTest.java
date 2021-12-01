@@ -60,11 +60,11 @@ class ResponsesTest extends UtilityClassTest<Responses> {
     @DisplayName("recognize not OK response")
     void recognizeNotOkResponse() {
         var status = Status.newBuilder()
-                              .setError(Error.getDefaultInstance())
-                              .build();
+                .setError(Error.getDefaultInstance())
+                .build();
         var error = Response.newBuilder()
-                                 .setStatus(status)
-                                 .build();
+                .setStatus(status)
+                .build();
         assertFalse(error.isOk());
         assertTrue(error.isError());
     }

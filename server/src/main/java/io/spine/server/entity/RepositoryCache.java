@@ -194,9 +194,7 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      *         the type of entity
      */
     @FunctionalInterface
-    public interface Load<I, E extends Entity<I, ?>> extends Function<I, E> {
-
-    }
+    public interface Load<I, E extends Entity<I, ?>> extends Function<I, E> {}
 
     /**
      * A function which stores the {@code Entity} to its real repository.
@@ -205,7 +203,5 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements Logging
      *         the type of entity
      */
     @FunctionalInterface
-    public interface Store<E extends Entity<?, ?>> extends Consumer<E> {
-
-    }
+    public interface Store<E extends Entity<?, ?>> extends Consumer<E> {}
 }
