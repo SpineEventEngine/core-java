@@ -71,7 +71,7 @@ public final class ContextSpec {
 
     private static ContextSpec createDomain(String name, boolean multitenant) {
         checkNotNull(name);
-        BoundedContextName contextName = newName(name);
+        var contextName = newName(name);
         return new ContextSpec(contextName, multitenant, true);
     }
 
@@ -123,7 +123,7 @@ public final class ContextSpec {
      */
     public ContextSpec toSingleTenant() {
         if (isMultitenant()) {
-            ContextSpec result = singleTenant(name.getValue());
+            var result = singleTenant(name.getValue());
             return result;
         }
         return this;
@@ -137,7 +137,7 @@ public final class ContextSpec {
         if (!(o instanceof ContextSpec)) {
             return false;
         }
-        ContextSpec spec = (ContextSpec) o;
+        var spec = (ContextSpec) o;
         return isMultitenant() == spec.isMultitenant() &&
                 storeEvents == spec.storeEvents &&
                 Objects.equal(name, spec.name);
@@ -150,9 +150,9 @@ public final class ContextSpec {
 
     @Override
     public String toString() {
-        String tenancy = multitenant
-                         ? "Multitenant"
-                         : "Single tenant";
+        var tenancy = multitenant
+                      ? "Multitenant"
+                      : "Single tenant";
         return String.format("%s context %s", tenancy, name.getValue());
     }
 }

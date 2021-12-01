@@ -29,10 +29,7 @@ package io.spine.server.commandbus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.Internal;
-import io.spine.base.CommandMessage;
-import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.TenantId;
 import io.spine.server.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.type.CommandEnvelope;
@@ -70,18 +67,18 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
 
     @Override
     public Optional<MessageInvalid> validate(CommandEnvelope envelope) {
-        Optional<MessageInvalid> tenantCheckResult = isTenantIdValid(envelope);
+        var tenantCheckResult = isTenantIdValid(envelope);
         if (tenantCheckResult.isPresent()) {
             return tenantCheckResult;
         }
-        Optional<MessageInvalid> commandValid = isCommandValid(envelope);
+        var commandValid = isCommandValid(envelope);
         return commandValid;
     }
 
     private Optional<MessageInvalid> isTenantIdValid(CommandEnvelope envelope) {
-        TenantId tenantId = envelope.tenantId();
-        boolean tenantSpecified = !isDefault(tenantId);
-        Command command = envelope.command();
+        var tenantId = envelope.tenantId();
+        var tenantSpecified = !isDefault(tenantId);
+        var command = envelope.command();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
                 MessageInvalid report = missingTenantId(command);
@@ -97,8 +94,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     private static Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
-        Command command = envelope.command();
-        List<ConstraintViolation> violations = inspect(envelope);
+        var command = envelope.command();
+        var violations = inspect(envelope);
         InvalidCommandException exception = null;
         if (!violations.isEmpty()) {
             exception = onConstraintViolations(command, violations);
@@ -115,7 +112,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
      */
     @VisibleForTesting
     static List<ConstraintViolation> inspect(CommandEnvelope envelope) {
-        ViolationCheck result = new ViolationCheck(envelope);
+        var result = new ViolationCheck(envelope);
         return result.build();
     }
 
@@ -138,7 +135,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
          */
         @Internal
         private static List<ConstraintViolation> validateId(CommandId id) {
-            List<ConstraintViolation> violations = Validate.violationsOf(id);
+            var violations = Validate.violationsOf(id);
             if (id.getUuid().isEmpty()) {
                 return ImmutableList.<ConstraintViolation>builder()
                         .addAll(violations)
@@ -158,18 +155,18 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateId() {
-            List<ConstraintViolation> violations = validateId(command.id());
+            var violations = validateId(command.id());
             if (!violations.isEmpty()) {
                 result.addAll(violations);
             }
         }
 
         private void validateMessage() {
-            CommandMessage message = command.message();
+            var message = command.message();
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
-            List<ConstraintViolation> messageViolations = Validate.violationsOf(message);
+            var messageViolations = Validate.violationsOf(message);
             result.addAll(messageViolations);
         }
 

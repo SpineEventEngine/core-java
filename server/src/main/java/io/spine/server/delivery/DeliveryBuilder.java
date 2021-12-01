@@ -287,7 +287,7 @@ public final class DeliveryBuilder {
             deduplicationWindow = Duration.getDefaultInstance();
         }
 
-        StorageFactory factory = storageFactory();
+        var factory = storageFactory();
         if (this.inboxStorage == null) {
             this.inboxStorage = factory.createInboxStorage(false);
         }
@@ -312,13 +312,13 @@ public final class DeliveryBuilder {
             catchUpPageSize = DEFAULT_CATCH_UP_PAGE_SIZE;
         }
 
-        Delivery delivery = new Delivery(this);
+        var delivery = new Delivery(this);
         return delivery;
     }
 
     private static StorageFactory storageFactory() {
-        ServerEnvironment serverEnvironment = ServerEnvironment.instance();
-        Optional<StorageFactory> currentStorageFactory = serverEnvironment.optionalStorageFactory();
+        var serverEnvironment = ServerEnvironment.instance();
+        var currentStorageFactory = serverEnvironment.optionalStorageFactory();
         return currentStorageFactory.orElseGet(InMemoryStorageFactory::newInstance);
     }
 }

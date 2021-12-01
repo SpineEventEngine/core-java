@@ -29,7 +29,6 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 
@@ -59,14 +58,13 @@ final class VersionSequence {
      * @see Aggregate#apply(List, int)
      */
     ImmutableList<Event> update(Collection<Event> originalEvents) {
-        Stream<Version> versions =
+        var versions =
                 Stream.iterate(start, Versions::increment)
                       .skip(1) // Skip current version
                       .limit(originalEvents.size());
-        Stream<Event> events = originalEvents.stream();
-        ImmutableList<Event> eventsToApply =
-                Streams.zip(events, versions,
-                            VersionSequence::substituteVersion)
+        var events = originalEvents.stream();
+        var eventsToApply =
+                Streams.zip(events, versions, VersionSequence::substituteVersion)
                        .collect(toImmutableList());
         return eventsToApply;
     }
@@ -81,15 +79,13 @@ final class VersionSequence {
      * @return the copy of the original event but with the new version
      */
     private static Event substituteVersion(Event event, Version newVersion) {
-        EventContext newContext =
-                event.context()
-                     .toBuilder()
-                     .setVersion(newVersion)
-                     .build();
-        Event result =
-                event.toBuilder()
-                     .setContext(newContext)
-                     .build();
+        var newContext = event.context()
+                .toBuilder()
+                .setVersion(newVersion)
+                .build();
+        var result = event.toBuilder()
+                .setContext(newContext)
+                .build();
         return result;
     }
 }

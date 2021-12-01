@@ -148,12 +148,12 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
         checkNotNull(messages);
         checkNotNull(observer);
         messages.forEach(message -> listeners.accept(toEnvelope(message)));
-        StreamObserver<Ack> wrappedObserver = prepareObserver(messages, observer);
+        var wrappedObserver = prepareObserver(messages, observer);
         filterAndPost(messages, wrappedObserver);
     }
 
     private void filterAndPost(Iterable<T> messages, StreamObserver<Ack> observer) {
-        Map<T, E> filteredMessages = filter(messages, observer);
+        var filteredMessages = filter(messages, observer);
         if (!filteredMessages.isEmpty()) {
             store(filteredMessages.keySet());
             Iterable<E> envelopes = filteredMessages.values();
@@ -273,9 +273,9 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
         checkNotNull(messages);
         checkNotNull(observer);
         Map<T, E> result = new LinkedHashMap<>();
-        for (T message : messages) {
-            E envelope = toEnvelope(message);
-            Optional<Ack> response = filter(envelope);
+        for (var message : messages) {
+            var envelope = toEnvelope(message);
+            var response = filter(envelope);
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -299,7 +299,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      * {@link Optional#empty()} otherwise
      */
     private Optional<Ack> filter(E message) {
-        Optional<Ack> filterOutput = filterChain().filter(message);
+        var filterOutput = filterChain().filter(message);
         return filterOutput;
     }
 
@@ -332,9 +332,9 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      */
     @SuppressWarnings("ProhibitedExceptionThrown") // Rethrow a caught exception.
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
-        for (E envelope : envelopes) {
-            SignalId signalId = envelope.id();
-            Ack ack = acknowledge(signalId);
+        for (var envelope : envelopes) {
+            var signalId = envelope.id();
+            var ack = acknowledge(signalId);
             observer.onNext(ack);
             onDispatchingStarted(signalId);
             try {
@@ -412,8 +412,8 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     }
 
     private FilterChain<E> createFilterChain(Iterable<BusFilter<E>> filters) {
-        Iterable<BusFilter<E>> possiblyModifiedFilters = setupFilters(filters);
-        FilterChain<E> result = new FilterChain<>(possiblyModifiedFilters);
+        var possiblyModifiedFilters = setupFilters(filters);
+        var result = new FilterChain<>(possiblyModifiedFilters);
         return result;
     }
 }

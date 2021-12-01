@@ -54,7 +54,6 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
-import io.spine.system.server.SystemReadSide;
 import io.spine.type.TypeName;
 
 import java.util.Optional;
@@ -160,7 +159,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     @SuppressWarnings("ClassReferencesSubclass")
     private void checkInheritance() {
-        Class<? extends BoundedContext> thisClass = getClass();
+        var thisClass = getClass();
         checkState(
                 DomainContext.class.equals(thisClass) ||
                         SystemContext.class.equals(thisClass),
@@ -170,8 +169,7 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     private static ImportBus buildImportBus(TenantIndex tenantIndex) {
-        ImportBus.Builder result = ImportBus
-                .newBuilder()
+        var result = ImportBus.newBuilder()
                 .injectTenantIndex(tenantIndex);
         return result.build();
     }
@@ -185,7 +183,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     public static BoundedContextBuilder singleTenant(String name) {
         checkNotNull(name);
-        ContextSpec spec = ContextSpec.singleTenant(name);
+        var spec = ContextSpec.singleTenant(name);
         return new BoundedContextBuilder(spec);
     }
 
@@ -198,7 +196,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     public static BoundedContextBuilder multitenant(String name) {
         checkNotNull(name);
-        ContextSpec spec = ContextSpec.multitenant(name);
+        var spec = ContextSpec.multitenant(name);
         return new BoundedContextBuilder(spec);
     }
 
@@ -237,7 +235,7 @@ public abstract class BoundedContext implements Closeable, Logging {
             commandBus().register(dispatcher);
         }
         if (dispatcher instanceof EventDispatcherDelegate) {
-            EventDispatcherDelegate eventDispatcher = (EventDispatcherDelegate) dispatcher;
+            var eventDispatcher = (EventDispatcherDelegate) dispatcher;
             registerEventDispatcher(eventDispatcher);
         }
     }
@@ -268,16 +266,16 @@ public abstract class BoundedContext implements Closeable, Logging {
         Security.allowOnlyFrameworkServer();
         registerIfAware(dispatcher);
         if (dispatcher.dispatchesEvents()) {
-            EventBus eventBus = eventBus();
+            var eventBus = eventBus();
             eventBus.register(dispatcher);
-            SystemReadSide systemReadSide = systemClient().readSide();
+            var systemReadSide = systemClient().readSide();
             systemReadSide.register(dispatcher);
         }
         if (dispatcher.dispatchesExternalEvents()) {
             broker.register(dispatcher);
         }
         if (dispatcher instanceof CommandDispatcherDelegate) {
-            CommandDispatcherDelegate commandDispatcher = (CommandDispatcherDelegate) dispatcher;
+            var commandDispatcher = (CommandDispatcherDelegate) dispatcher;
             registerCommandDispatcher(commandDispatcher);
         }
     }
@@ -289,7 +287,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     private void registerEventDispatcher(EventDispatcherDelegate dispatcher) {
         checkNotNull(dispatcher);
-        DelegatingEventDispatcher delegate = DelegatingEventDispatcher.of(dispatcher);
+        var delegate = DelegatingEventDispatcher.of(dispatcher);
         registerEventDispatcher(delegate);
     }
 
@@ -299,7 +297,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      */
     private void registerIfAware(Object contextPart) {
         if (contextPart instanceof ContextAware) {
-            ContextAware contextAware = (ContextAware) contextPart;
+            var contextAware = (ContextAware) contextPart;
             if (!contextAware.isRegistered()) {
                 contextAware.registerWith(this);
             }
@@ -310,7 +308,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      * Obtains a set of entity type names by their visibility.
      */
     public Set<TypeName> stateTypes(Visibility visibility) {
-        Set<TypeName> result = guard.entityStateTypes(visibility);
+        var result = guard.entityStateTypes(visibility);
         return result;
     }
 
@@ -318,7 +316,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      * Obtains the set of all entity type names.
      */
     public Set<TypeName> stateTypes() {
-        Set<TypeName> result = guard.allEntityTypes();
+        var result = guard.allEntityTypes();
         return result;
     }
 
@@ -328,8 +326,8 @@ public abstract class BoundedContext implements Closeable, Logging {
      * <p>This method does not take into account visibility of entity states.
      */
     public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
-        EntityClass<? extends Entity<?, ?>> cls = EntityClass.asEntityClass(entityClass);
-        boolean result = guard.hasRepository(cls.stateClass());
+        var cls = EntityClass.asEntityClass(entityClass);
+        var result = guard.hasRepository(cls.stateClass());
         return result;
     }
 
@@ -339,7 +337,7 @@ public abstract class BoundedContext implements Closeable, Logging {
      * <p>This method does not take into account visibility of entity states.
      */
     public boolean hasEntitiesWithState(Class<? extends EntityState<?>> stateClass) {
-        boolean result = guard.hasRepository(stateClass);
+        var result = guard.hasRepository(stateClass);
         return result;
     }
 
@@ -558,7 +556,7 @@ public abstract class BoundedContext implements Closeable, Logging {
                         stateCls.getName()
                 );
             }
-            Optional<Repository<?, ?>> repository = guard.repositoryFor(stateCls);
+            var repository = guard.repositoryFor(stateCls);
             return repository;
         }
 

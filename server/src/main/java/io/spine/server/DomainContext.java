@@ -63,7 +63,7 @@ final class DomainContext extends BoundedContext {
         checkNotNull(builder);
         checkNotNull(system);
 
-        DomainContext result = new DomainContext(builder, system);
+        var result = new DomainContext(builder, system);
         result.init();
         return result;
     }

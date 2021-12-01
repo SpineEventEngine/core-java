@@ -26,10 +26,8 @@
 package io.spine.server;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -37,7 +35,6 @@ import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.logging.Logging;
 import io.spine.server.model.UnknownEntityTypeException;
 import io.spine.server.stand.InvalidRequestException;
-import io.spine.server.stand.Stand;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
@@ -76,9 +73,7 @@ public final class QueryService
      */
     public static QueryService withSingle(BoundedContext context) {
         checkNotNull(context);
-        QueryService result = newBuilder()
-                .add(context)
-                .build();
+        var result = newBuilder().add(context).build();
         return result;
     }
 
@@ -89,8 +84,8 @@ public final class QueryService
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
         _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
 
-        TypeUrl type = query.targetType();
-        BoundedContext context = typeToContextMap.get(type);
+        var type = query.targetType();
+        var context = typeToContextMap.get(type);
         if (context == null) {
             handleUnsupported(type, responseObserver);
         } else {
@@ -101,12 +96,12 @@ public final class QueryService
     private void handleQuery(BoundedContext context,
                              Query query,
                              StreamObserver<QueryResponse> responseObserver) {
-        Stand stand = context.stand();
+        var stand = context.stand();
         try {
             stand.execute(query, responseObserver);
         } catch (InvalidRequestException e) {
             _error().log("Invalid request. `%s`", e.asError());
-            StatusRuntimeException exception = invalidArgumentWithCause(e);
+            var exception = invalidArgumentWithCause(e);
             responseObserver.onError(exception);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
@@ -116,7 +111,7 @@ public final class QueryService
     }
 
     private void handleUnsupported(TypeUrl type, StreamObserver<QueryResponse> observer) {
-        UnknownEntityTypeException exception = new UnknownEntityTypeException(type);
+        var exception = new UnknownEntityTypeException(type);
         _error().withCause(exception)
                 .log("Unknown type encountered.");
         observer.onError(exception);
@@ -161,17 +156,17 @@ public final class QueryService
          */
         public QueryService build() throws IllegalStateException {
             if (contexts.isEmpty()) {
-                String message = "Query service must have at least one `BoundedContext`.";
+                var message = "Query service must have at least one `BoundedContext`.";
                 throw new IllegalStateException(message);
             }
-            ImmutableMap<TypeUrl, BoundedContext> map = createMap();
-            QueryService result = new QueryService(map);
+            var map = createMap();
+            var result = new QueryService(map);
             return result;
         }
 
         private ImmutableMap<TypeUrl, BoundedContext> createMap() {
             ImmutableMap.Builder<TypeUrl, BoundedContext> map = ImmutableMap.builder();
-            for (BoundedContext context : contexts) {
+            for (var context : contexts) {
                 putExposedTypes(context, map);
             }
             return map.build();
@@ -179,9 +174,9 @@ public final class QueryService
 
         private static void putExposedTypes(BoundedContext context,
                                             ImmutableMap.Builder<TypeUrl, BoundedContext> map) {
-            Stand stand = context.stand();
-            ImmutableSet<TypeUrl> exposedTypes = stand.exposedTypes();
-            for (TypeUrl type : exposedTypes) {
+            var stand = context.stand();
+            var exposedTypes = stand.exposedTypes();
+            for (var type : exposedTypes) {
                 map.put(type, context);
             }
         }

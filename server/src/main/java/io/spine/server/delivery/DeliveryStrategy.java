@@ -86,8 +86,7 @@ public abstract class DeliveryStrategy {
                       "The index of the shard `%s` must be less" +
                               " than the total number of shards `%s`.",
                       indexValue, ofTotal);
-        ShardIndex result = ShardIndex
-                .newBuilder()
+        var result = ShardIndex.newBuilder()
                 .setIndex(indexValue)
                 .setOfTotal(ofTotal)
                 .vBuild();

@@ -35,10 +35,10 @@ import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 
 import java.util.List;
-import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
@@ -65,8 +65,7 @@ public final class Events {
      * @return new UUID-based event ID
      */
     public static EventId generateId() {
-        String value = UUID.randomUUID()
-                           .toString();
+        var value = newUuid();
         return EventId.newBuilder()
                       .setValue(value)
                       .build();
@@ -81,7 +80,7 @@ public final class Events {
         if (eventOrMessage instanceof Event) {
             return ((Event) eventOrMessage).enclosedMessage();
         }
-        Message unpacked = Messages.ensureMessage(eventOrMessage);
+        var unpacked = Messages.ensureMessage(eventOrMessage);
         return (EventMessage) unpacked;
     }
 
@@ -136,7 +135,7 @@ public final class Events {
      * Marks the given event as {@code external}.
      */
     public static Event toExternal(Event event) {
-        Event.Builder externalEvent = event.toBuilder();
+        var externalEvent = event.toBuilder();
         externalEvent.getContextBuilder().setExternal(true);
         return externalEvent.build();
     }
@@ -148,15 +147,15 @@ public final class Events {
 
         @Override
         protected String toString(EventId eventId) {
-            String result = eventId.getValue();
+            var result = eventId.getValue();
             return result;
         }
 
         @Override
         protected EventId fromString(String str) {
-            EventId result = EventId.newBuilder()
-                                    .setValue(str)
-                                    .build();
+            var result = EventId.newBuilder()
+                    .setValue(str)
+                    .build();
             return result;
         }
     }

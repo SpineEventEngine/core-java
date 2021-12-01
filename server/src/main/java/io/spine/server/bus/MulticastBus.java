@@ -65,7 +65,7 @@ public abstract class MulticastBus<M extends Signal<?, ?, ?>,
      */
     protected int callDispatchers(E messageEnvelope) {
         Collection<D> dispatchers = registry().dispatchersOf(messageEnvelope);
-        for (D dispatcher : dispatchers) {
+        for (var dispatcher : dispatchers) {
             dispatcher.dispatch(messageEnvelope);
         }
         return dispatchers.size();

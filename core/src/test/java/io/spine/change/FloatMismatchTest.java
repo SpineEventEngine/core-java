@@ -41,7 +41,7 @@ import static io.spine.change.FloatMismatch.unpackNewValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("FloatMismatch should")
+@DisplayName("`FloatMismatch` should")
 class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
 
     private static final int VERSION = 100;
@@ -55,13 +55,13 @@ class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
     }
 
     @Nested
-    @DisplayName("create ValueMismatch instance")
+    @DisplayName("create `ValueMismatch` instance")
     class Create {
 
         @Test
         @DisplayName("from given float values")
         void withFloats() {
-            ValueMismatch mismatch = FloatMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = FloatMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -73,7 +73,7 @@ class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
         @DisplayName("for expected zero amount")
         void forExpectedZero() {
             double expected = 0.0f;
-            ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(expected, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -82,10 +82,10 @@ class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
         }
 
         @Test
-        @DisplayName("for expected non zero amount")
+        @DisplayName("for expected non-zero amount")
         void forExpectedNonZero() {
-            float actual = 0.0f;
-            ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+            var actual = 0.0f;
+            var mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(actual, unpackActual(mismatch), DELTA);
@@ -96,7 +96,7 @@ class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
         @Test
         @DisplayName("for unexpected float value")
         void forUnexpectedFloat() {
-            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -108,33 +108,33 @@ class FloatMismatchTest extends UtilityClassTest<FloatMismatch> {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        float value = 19.19f;
+        var value = 19.19f;
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("if given non-float ValueMismatch, fail to unpack")
+    @DisplayName("if given non-float `ValueMismatch`, fail to unpack")
     class FailToUnpack {
 
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual float")
         void actualWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }

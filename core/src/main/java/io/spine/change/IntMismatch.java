@@ -90,16 +90,16 @@ public final class IntMismatch {
      * for an integer attribute.
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
-        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                     .setExpected(toAny(expected))
-                                                     .setActual(toAny(actual))
-                                                     .setNewValue(toAny(newValue))
-                                                     .setVersion(version);
+        var builder = ValueMismatch.newBuilder()
+                .setExpected(toAny(expected))
+                .setActual(toAny(actual))
+                .setNewValue(toAny(newValue))
+                .setVersion(version);
         return builder.build();
     }
 
     private static int unpacked(Any any) {
-        Int32Value unpacked = unpack(any, Int32Value.class);
+        var unpacked = unpack(any, Int32Value.class);
         return unpacked.getValue();
     }
 
@@ -110,7 +110,7 @@ public final class IntMismatch {
      */
     public static int unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any expected = mismatch.getExpected();
+        var expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -121,7 +121,7 @@ public final class IntMismatch {
      */
     public static int unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any actual = mismatch.getActual();
+        var actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -132,7 +132,7 @@ public final class IntMismatch {
      */
     public static int unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any newValue = mismatch.getNewValue();
+        var newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

@@ -52,8 +52,8 @@ class AcksTest extends UtilityClassTest<Acks> {
         @Test
         @DisplayName("returning ID value")
         void value() {
-            CommandId commandId = CommandId.generate();
-            Ack ack = newAck(commandId);
+            var commandId = CommandId.generate();
+            var ack = newAck(commandId);
             assertThat(toCommandId(ack))
                     .isEqualTo(commandId);
         }

@@ -62,7 +62,7 @@ public final class Ignored {
     public static DispatchOutcome ignored(ModelClass<?> handler, EventEnvelope event) {
         checkNotNull(handler);
         checkNotNull(event);
-        String reason = format(
+        var reason = format(
                 "`@%s` filters in `%s` rejected event %s[%s]",
                 Where.class.getSimpleName(), handler, event.messageTypeName(), event.id().value()
         );

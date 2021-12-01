@@ -78,11 +78,11 @@ public enum AllowImportAttribute implements Attribute<Boolean> {
      */
     public static AllowImportAttribute of(Method method) {
         checkNotNull(method);
-        Apply annotation = method.getAnnotation(Apply.class);
+        var annotation = method.getAnnotation(Apply.class);
         checkArgument(annotation != null,
                       "The method `%s` is not annotated with `@Apply`.",
                       method);
-        AllowImportAttribute result = annotation.allowImport() ? ALLOW : DO_NOT_ALLOW;
+        var result = annotation.allowImport() ? ALLOW : DO_NOT_ALLOW;
         return result;
     }
 }

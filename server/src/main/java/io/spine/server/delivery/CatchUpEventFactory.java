@@ -26,13 +26,12 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Any;
 import io.spine.base.EventMessage;
 import io.spine.client.ActorRequestFactory;
-import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
+import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventFactory;
 import io.spine.server.tenant.TenantFunction;
@@ -59,29 +58,30 @@ final class CatchUpEventFactory {
      * one of the options on how to do that.
      */
     Event createEvent(EventMessage message) {
-        return factory.createEvent(message, null);
+        return factory.createEvent(message, Versions.zero());
     }
 
     private static EventFactory newEventFactory(TypeUrl stateType, boolean multitenant) {
-        String userIdValue = format("`CatchUpEventFactory` for `%s`", stateType.value());
-        UserId onBehalfOf = UserId.newBuilder()
-                                  .setValue(userIdValue)
-                                  .build();
-        ActorRequestFactory requestFactory = requestFactory(onBehalfOf, multitenant);
-        Any producerId = AnyPacker.pack(onBehalfOf);
-        ActorContext actorContext = requestFactory.newActorContext();
+        var userIdValue = format("`CatchUpEventFactory` for `%s`", stateType.value());
+        var onBehalfOf = UserId.newBuilder()
+                .setValue(userIdValue)
+                .build();
+        var requestFactory = requestFactory(onBehalfOf, multitenant);
+        var producerId = AnyPacker.pack(onBehalfOf);
+        var actorContext = requestFactory.newActorContext();
         return EventFactory.forImport(actorContext, producerId);
     }
 
+    @SuppressWarnings("ConstantConditions") /* The method never returns `null`. */
     private static ActorRequestFactory requestFactory(UserId actor, boolean multitenant) {
-        TenantFunction<ActorRequestFactory> function =
+        var function =
                 new TenantFunction<ActorRequestFactory>(multitenant) {
                     @Override
                     public ActorRequestFactory apply(TenantId id) {
                         return ActorRequestFactory.newBuilder()
-                                                  .setActor(actor)
-                                                  .setTenantId(id)
-                                                  .build();
+                                .setActor(actor)
+                                .setTenantId(id)
+                                .build();
                     }
                 };
         return function.execute();

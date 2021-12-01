@@ -41,7 +41,7 @@ import static io.spine.change.DoubleMismatch.unpackNewValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("DoubleMismatch should")
+@DisplayName("`DoubleMismatch` should")
 class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
 
     private static final int VERSION = 100;
@@ -55,13 +55,13 @@ class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
     }
 
     @Nested
-    @DisplayName("create ValueMismatch instance")
+    @DisplayName("create `ValueMismatch` instance")
     class Create {
 
         @Test
         @DisplayName("from given double values")
         void withDoubles() {
-            ValueMismatch mismatch = DoubleMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = DoubleMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -72,8 +72,8 @@ class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
         @Test
         @DisplayName("for expected zero amount")
         void forExpectedZero() {
-            double expected = 0.0;
-            ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+            var expected = 0.0;
+            var mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(expected, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -82,10 +82,10 @@ class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
         }
 
         @Test
-        @DisplayName("for expected non zero amount")
+        @DisplayName("for expected non-zero amount")
         void forExpectedNonZero() {
-            double actual = 0.0;
-            ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+            var actual = 0.0;
+            var mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(actual, unpackActual(mismatch), DELTA);
@@ -97,7 +97,7 @@ class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
         @Test
         @DisplayName("for unexpected double value")
         void forUnexpectedDouble() {
-            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -109,7 +109,7 @@ class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        double value = 19.19;
+        var value = 19.19;
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
@@ -121,21 +121,21 @@ class DoubleMismatchTest extends UtilityClassTest<DoubleMismatch> {
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual double")
         void actualWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }

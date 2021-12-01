@@ -50,8 +50,8 @@ final class CompositeFn<M extends Message, C extends EnrichableMessageContext>
     CompositeFn(Iterable<EnrichmentFn<M, C, ? extends Message>> functions) {
         super();
         checkNotNull(functions);
-        ImmutableSet<EnrichmentFn<M, C, ?>> fns = ImmutableSet.copyOf(functions);
-        int size = fns.size();
+        var fns = ImmutableSet.copyOf(functions);
+        var size = fns.size();
         checkArgument(
                 size >= 2,
                 "Composite enrichment function must have at least two items. Passed: %s.",
@@ -62,8 +62,8 @@ final class CompositeFn<M extends Message, C extends EnrichableMessageContext>
 
     @Override
     protected void applyAndPut(Container.Builder container, M m, C c) {
-        for (EnrichmentFn<M, C, ?> function : functions) {
-            Message enrichment = function.apply(m, c);
+        for (var function : functions) {
+            var enrichment = function.apply(m, c);
             checkResult(enrichment, m, c, function);
             put(container, enrichment);
         }

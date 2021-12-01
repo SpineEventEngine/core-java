@@ -54,7 +54,7 @@ final class DispatchingId {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        DispatchingId id = (DispatchingId) o;
+        var id = (DispatchingId) o;
         return Objects.equals(signal, id.signal) &&
                 Objects.equals(inbox, id.inbox);
     }

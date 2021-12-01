@@ -98,7 +98,7 @@ public interface Signal<I extends SignalId,
      */
     default Class<? extends M> type() {
         @SuppressWarnings("unchecked") // Safe as we obtain it from an instance of <M>.
-        Class<? extends M> type = (Class<? extends M>) enclosedMessage().getClass();
+        var type = (Class<? extends M>) enclosedMessage().getClass();
         return type;
     }
 
@@ -109,7 +109,7 @@ public interface Signal<I extends SignalId,
      */
     @SuppressWarnings("unchecked") // protected by generic params of extending interfaces
     default M enclosedMessage() {
-        Message enclosed = AnyPacker.unpack(getMessage());
+        var enclosed = AnyPacker.unpack(getMessage());
         return (M) enclosed;
     }
 
@@ -134,7 +134,7 @@ public interface Signal<I extends SignalId,
     default boolean is(Class<? extends Message> enclosedMessageClass) {
         checkNotNull(enclosedMessageClass);
         Message enclosed = enclosedMessage();
-        boolean result = enclosedMessageClass.isAssignableFrom(enclosed.getClass());
+        var result = enclosedMessageClass.isAssignableFrom(enclosed.getClass());
         return result;
     }
 
@@ -163,7 +163,7 @@ public interface Signal<I extends SignalId,
      * <p>This origin is assigned to any signal message produced as a reaction to this one.
      */
     default Origin asMessageOrigin() {
-        Origin.Builder originBuilder = Origin
+        var originBuilder = Origin
                 .newBuilder()
                 .setActorContext(actorContext())
                 .setMessage(messageId());

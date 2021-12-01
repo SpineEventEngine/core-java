@@ -28,7 +28,6 @@ package io.spine.server.commandbus;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
-import io.spine.core.Status;
 import io.spine.server.event.EventBus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,7 +55,7 @@ final class AckRejectionPublisher implements StreamObserver<Ack> {
     @Override
     public void onNext(Ack value) {
         checkNotNull(value);
-        Status status = value.getStatus();
+        var status = value.getStatus();
         if (status.getStatusCase() == REJECTION) {
             eventBus.post(status.getRejection());
         }

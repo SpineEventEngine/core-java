@@ -41,7 +41,7 @@ import static io.spine.change.StringMismatch.unpackNewValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("StringMismatch should")
+@DisplayName("`StringMismatch` should")
 class StringMismatchTest extends UtilityClassTest<StringMismatch> {
 
     private static final String EXPECTED = "expected string";
@@ -54,13 +54,13 @@ class StringMismatchTest extends UtilityClassTest<StringMismatch> {
     }
 
     @Nested
-    @DisplayName("create ValueMismatch instance")
+    @DisplayName("create `ValueMismatch` instance")
     class Create {
 
         @Test
         @DisplayName("for expected empty string")
         void forExpectedEmptyString() {
-            ValueMismatch mismatch = expectedEmpty(ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = expectedEmpty(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals("", unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -71,7 +71,7 @@ class StringMismatchTest extends UtilityClassTest<StringMismatch> {
         @Test
         @DisplayName("for unexpected empty string")
         void forUnexpectedEmptyString() {
-            ValueMismatch mismatch = expectedNotEmpty(EXPECTED, VERSION);
+            var mismatch = expectedNotEmpty(EXPECTED, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
 
@@ -88,7 +88,7 @@ class StringMismatchTest extends UtilityClassTest<StringMismatch> {
         @Test
         @DisplayName("for unexpected value")
         void forUnexpectedValue() {
-            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -100,33 +100,33 @@ class StringMismatchTest extends UtilityClassTest<StringMismatch> {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        String value = "same-same";
+        var value = "same-same";
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
 
     @Nested
-    @DisplayName("if given non-string ValueMismatch, fail to unpack")
+    @DisplayName("if given non-string `ValueMismatch`, fail to unpack")
     class FailToUnpack {
 
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual String")
         void actualWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            ValueMismatch mismatch = expectedTrue(VERSION);
+            var mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }

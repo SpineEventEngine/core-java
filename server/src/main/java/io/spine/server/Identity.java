@@ -55,7 +55,7 @@ public final class Identity {
      */
     public static MessageId byString(String value) {
         checkNotEmptyOrBlank(value);
-        Any producer = Identifier.pack(value);
+        var producer = Identifier.pack(value);
         return ofProducer(producer);
     }
 

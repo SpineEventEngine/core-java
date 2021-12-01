@@ -29,11 +29,9 @@ package io.spine.server.delivery;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import io.spine.core.SignalId;
-import io.spine.core.TenantId;
 import io.spine.server.bus.MulticastDispatchListener;
 import io.spine.server.tenant.TenantAwareRunner;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -68,10 +66,10 @@ final class DeliveryDispatchListener implements MulticastDispatchListener {
 
     @Override
     public void onCompleted(SignalId signal) {
-        boolean removed = currentlyDispatching.remove(signal);
+        var removed = currentlyDispatching.remove(signal);
         if (removed) {
-            Collection<InboxMessage> messages = pending.removeAll(signal);
-            for (InboxMessage message : messages) {
+            var messages = pending.removeAll(signal);
+            for (var message : messages) {
                 propagateMessage(message);
             }
         }
@@ -97,11 +95,9 @@ final class DeliveryDispatchListener implements MulticastDispatchListener {
     }
 
     private void propagateMessage(InboxMessage message) {
-        TenantId tenant =
-                message.hasEvent() ? message.getEvent()
-                                            .tenant()
-                                   : message.getCommand()
-                                            .tenant();
+        var tenant = message.hasEvent()
+                     ? message.getEvent().tenant()
+                     : message.getCommand().tenant();
         TenantAwareRunner
                 .with(tenant)
                 .run(() -> onNewMessage.accept(message));

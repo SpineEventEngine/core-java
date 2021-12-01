@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.IdInTenant;
@@ -69,7 +68,7 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
     public void deliver(List<InboxMessage> incoming) {
 
         if (batchListener == null) {
-            for (InboxMessage incomingMessage : incoming) {
+            for (var incomingMessage : incoming) {
                 doDeliver(inboxOfCmds, inboxOfEvents, incomingMessage);
             }
         } else {
@@ -100,8 +99,8 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
                                 BatchDeliveryListener<I> batchDispatcher) {
         List<Batch<I>> batches = Batch.byInboxId(incoming, this::asEnvelope);
 
-        for (Batch<I> batch : batches) {
-            TenantId tenant = batch.inboxId.tenant();
+        for (var batch : batches) {
+            var tenant = batch.inboxId.tenant();
             TenantAwareRunner.with(tenant).run(
                     () -> batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents)
             );
@@ -140,11 +139,11 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         byInboxId(List<InboxMessage> messages, Function<InboxMessage, SignalEnvelope<?, ?, ?>> fn) {
             List<Batch<I>> batches = new ArrayList<>();
             Batch<I> currentBatch = null;
-            for (InboxMessage message : messages) {
+            for (var message : messages) {
 
-                InboxId msgInboxId = message.getInboxId();
-                SignalEnvelope<?, ?, ?> envelope = fn.apply(message);
-                TenantId tenantId = envelope.tenantId();
+                var msgInboxId = message.getInboxId();
+                var envelope = fn.apply(message);
+                var tenantId = envelope.tenantId();
                 if (currentBatch == null) {
                     currentBatch = new Batch<>(msgInboxId, tenantId);
                 } else {
@@ -178,14 +177,14 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
                                 InboxOfCommands<I> cmdDispatcher,
                                 InboxOfEvents<I> eventDispatcher) {
             if (messages.size() > 1) {
-                Any packedId = inboxId.value()
+                var packedId = inboxId.value()
                                       .getEntityId()
                                       .getId();
                 @SuppressWarnings("unchecked")      // Only IDs of type `I` are stored.
-                        I id = (I) Identifier.unpack(packedId);
+                var id = (I) Identifier.unpack(packedId);
                 dispatcher.onStart(id);
                 try {
-                    for (InboxMessage message : messages) {
+                    for (var message : messages) {
                         doDeliver(cmdDispatcher, eventDispatcher, message);
                     }
                 } finally {

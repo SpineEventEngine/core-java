@@ -53,7 +53,7 @@ public final class CommandHandlerClass<C extends AbstractCommandHandler>
     CommandHandlerClass<C> asCommandHandlerClass(Class<C> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        CommandHandlerClass<C> result = (CommandHandlerClass<C>)
+        var result = (CommandHandlerClass<C>)
                 get(cls, CommandHandlerClass.class, () -> new CommandHandlerClass<>(cls));
         return result;
     }

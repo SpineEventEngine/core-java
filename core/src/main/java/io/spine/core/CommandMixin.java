@@ -28,7 +28,6 @@ package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
@@ -76,8 +75,7 @@ interface CommandMixin
 
     @Override
     default MessageId rootMessage() {
-        MessageId rootId = context().getOrigin()
-                                    .root();
+        var rootId = context().getOrigin().root();
         return isNotDefault(rootId)
                ? rootId
                : messageId();
@@ -85,7 +83,7 @@ interface CommandMixin
 
     @Override
     default Optional<Origin> origin() {
-        Origin parent = context().getOrigin();
+        var parent = context().getOrigin();
         return Optional.of(parent)
                        .filter(Messages::isNotDefault);
     }
@@ -97,8 +95,8 @@ interface CommandMixin
      *         {@code false} otherwise
      */
     default boolean isScheduled() {
-        CommandContext.Schedule schedule = context().getSchedule();
-        Duration delay = schedule.getDelay();
+        var schedule = context().getSchedule();
+        var delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkState(delay.getSeconds() > 0,
                        "Command delay seconds must be a positive value.");

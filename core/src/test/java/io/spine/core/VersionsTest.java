@@ -63,7 +63,7 @@ class VersionsTest extends UtilityClassTest<Versions> {
     @Test
     @DisplayName("increment `Version`")
     void incr() {
-        Version v1 = GivenVersion.withNumber(1);
+        var v1 = GivenVersion.withNumber(1);
         assertThat(increment(v1).getNumber())
                 .isEqualTo(v1.getNumber() + 1);
     }

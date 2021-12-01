@@ -60,7 +60,7 @@ final class DeliveredMessages {
      * Records the delivery of the message.
      */
     void recordDelivered(InboxMessage message) {
-        DispatchingId id = new DispatchingId(message);
+        var id = new DispatchingId(message);
         cache.put(id, Time.currentTime());
     }
 }

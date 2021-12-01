@@ -64,7 +64,7 @@ public final class Commands {
         if (commandOrMessage instanceof Command) {
             return ((Command) commandOrMessage).enclosedMessage();
         }
-        CommandMessage unpacked = (CommandMessage) Messages.ensureMessage(commandOrMessage);
+        var unpacked = (CommandMessage) Messages.ensureMessage(commandOrMessage);
         return unpacked;
     }
 
@@ -91,13 +91,13 @@ public final class Commands {
     static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
         protected String toString(CommandId commandId) {
-            String result = commandId.getUuid();
+            var result = commandId.getUuid();
             return result;
         }
 
         @Override
         protected CommandId fromString(String str) {
-            CommandId result = CommandId.of(str);
+            var result = CommandId.of(str);
             return result;
         }
     }

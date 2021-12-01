@@ -66,7 +66,7 @@ public abstract class UnicastBus<T extends Signal<?, ?, ?>,
     }
 
     private static IllegalStateException noDispatcherFound(MessageEnvelope<?, ?, ?> envelope) {
-        String id = Identifier.toString(envelope.id());
+        var id = Identifier.toString(envelope.id());
         throw newIllegalStateException(
                 "No dispatcher found for the command (class: `%s` id: `%s`).",
                 envelope.messageClass(), id

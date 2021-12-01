@@ -83,7 +83,7 @@ public final class UniformAcrossAllShards extends DeliveryStrategy implements Se
      * @return a uniform distribution strategy instance for a given shard number
      */
     public static DeliveryStrategy forNumber(int totalShards) {
-        UniformAcrossAllShards result = new UniformAcrossAllShards(totalShards);
+        var result = new UniformAcrossAllShards(totalShards);
         return result;
     }
 
@@ -92,10 +92,10 @@ public final class UniformAcrossAllShards extends DeliveryStrategy implements Se
         if (1 == numberOfShards) {
             return newIndex(0);
         }
-        int hashValue = hash(entityId);
-        int totalShards = shardCount();
-        int indexValue = abs(hashValue % totalShards);
-        ShardIndex result = newIndex(indexValue);
+        var hashValue = hash(entityId);
+        var totalShards = shardCount();
+        var indexValue = abs(hashValue % totalShards);
+        var result = newIndex(indexValue);
         return result;
     }
 
@@ -107,7 +107,7 @@ public final class UniformAcrossAllShards extends DeliveryStrategy implements Se
             bytes = entityId.toString()
                             .getBytes(Charset.defaultCharset());
         }
-        int value = HASHER.hashBytes(bytes)
+        var value = HASHER.hashBytes(bytes)
                           .asInt();
         return value;
     }

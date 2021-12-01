@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.core.Event;
 import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.event.EventComparator;
 import io.spine.type.TypeUrl;
@@ -48,15 +47,13 @@ final class CatchUpMessageComparator
     @Override
     public int compare(InboxMessage m1, InboxMessage m2) {
         if (m1.hasEvent() && m2.hasEvent()) {
-            Event e1 = m1.getEvent();
-            String typeOfFirst = e1.getMessage()
-                                   .getTypeUrl();
+            var e1 = m1.getEvent();
+            var typeOfFirst = e1.getMessage().getTypeUrl();
             if (typeOfFirst.equals(CATCH_UP_STARTED.toString())) {
                 return -1;
             }
-            Event e2 = m2.getEvent();
-            String typeOfSecond = e2.getMessage()
-                                    .getTypeUrl();
+            var e2 = m2.getEvent();
+            var typeOfSecond = e2.getMessage().getTypeUrl();
             if (typeOfSecond.equals(CATCH_UP_STARTED.toString())) {
                 return 1;
             }

@@ -66,6 +66,7 @@ public class AggregateTransaction<I,
      * @return the new transaction instance
      */
     static <I> AggregateTransaction<I, ?, ?> start(Aggregate<I, ?, ?> aggregate) {
+        @SuppressWarnings("RedundantExplicitVariableType")  /* To enable wildcard instantiation. */
         AggregateTransaction<I, ?, ?> tx = new AggregateTransaction<>(aggregate);
         return tx;
     }
@@ -82,7 +83,7 @@ public class AggregateTransaction<I,
      */
     @Override
     public DispatchOutcome play(EventEnvelope event) {
-        DispatchOutcome outcome = super.play(event);
+        var outcome = super.play(event);
         entity().onAfterEventPlayed(event);
         return outcome;
     }

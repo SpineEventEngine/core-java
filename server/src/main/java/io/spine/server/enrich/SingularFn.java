@@ -57,7 +57,7 @@ final class SingularFn<M extends Message, C extends EnrichableMessageContext>
 
     @Override
     void applyAndPut(Container.Builder container, M m, C c) {
-        Message output = function.apply(m, c);
+        var output = function.apply(m, c);
         checkResult(output, m, c, function);
         put(container, output);
     }

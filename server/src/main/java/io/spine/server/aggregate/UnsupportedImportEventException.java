@@ -29,9 +29,7 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.server.bus.MessageUnhandled;
-import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
-import io.spine.type.TypeName;
 
 import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
 import static io.spine.server.event.EventException.eventTypeAttribute;
@@ -54,9 +52,9 @@ public final class UnsupportedImportEventException
     }
 
     private static String messageFormat(EventEnvelope event) {
-        EventClass eventClass = event.messageClass();
-        TypeName typeName = eventClass.typeName();
-        String result = format(
+        var eventClass = event.messageClass();
+        var typeName = eventClass.typeName();
+        var result = format(
             "None of the aggregates declare importing appliers for " +
                     "the event of the class: `%s` (proto type: `%s`).",
             eventClass, typeName
@@ -75,8 +73,7 @@ public final class UnsupportedImportEventException
     }
 
     private static Error unsupportedImportEvent(Message eventMessage, String errorMessage) {
-        Error result = Error
-                .newBuilder()
+        var result = Error.newBuilder()
                 .setType(UnsupportedImportEventException.class.getName())
                 .setCode(UNSUPPORTED_EVENT_VALUE)
                 .setMessage(errorMessage)

@@ -44,8 +44,10 @@ import static io.spine.util.Preconditions2.checkPositive;
 /**
  * Method object for reading {@link AggregateHistory}s.
  *
- * @param <I> the type of aggregate IDs
- * @param <S> the type of aggregate state
+ * @param <I>
+ *         the type of aggregate IDs
+ * @param <S>
+ *         the type of aggregate state
  */
 final class ReadOperation<I, S extends EntityState<I>> {
 
@@ -92,16 +94,16 @@ final class ReadOperation<I, S extends EntityState<I>> {
      *         or {@code Optional.empty()} if this {@code Aggregate} has no history
      */
     Optional<AggregateHistory> perform() {
-        Iterator<AggregateEventRecord> historyBackward = storage.historyBackward(id, batchSize);
+        var historyBackward = storage.historyBackward(id, batchSize);
         if (!historyBackward.hasNext()) {
             return Optional.empty();
         }
 
-        boolean historyBottomReached = false;
+        var historyBottomReached = false;
         while(snapshot == null && !historyBottomReached) {
-            Optional<Version> lastVersion = process(historyBackward);
+            var lastVersion = process(historyBackward);
             if(snapshot == null) {
-                if(!lastVersion.isPresent()) {
+                if(lastVersion.isEmpty()) {
                     historyBottomReached = true;
                 } else {
                     historyBackward = storage.historyBackward(id, batchSize, lastVersion.get());
@@ -109,7 +111,7 @@ final class ReadOperation<I, S extends EntityState<I>> {
             }
         }
 
-        AggregateHistory result = buildRecord();
+        var result = buildRecord();
         return Optional.of(result);
     }
 
@@ -123,7 +125,7 @@ final class ReadOperation<I, S extends EntityState<I>> {
     private Optional<Version> process(Iterator<AggregateEventRecord> historyBackward) {
         Version lastHandledVersion = null;
         while(historyBackward.hasNext() && snapshot == null) {
-            AggregateEventRecord record = historyBackward.next();
+            var record = historyBackward.next();
             lastHandledVersion = handleRecord(record);
         }
         return Optional.ofNullable(lastHandledVersion);
@@ -147,13 +149,13 @@ final class ReadOperation<I, S extends EntityState<I>> {
 
     @SuppressWarnings("ResultOfMethodCallIgnored") // calling builder
     private AggregateHistory buildRecord() {
-        AggregateHistory.Builder builder = AggregateHistory.newBuilder();
+        var builder = AggregateHistory.newBuilder();
         if (snapshot != null) {
             builder.setSnapshot(snapshot);
         }
         builder.addAllEvent(history);
 
-        AggregateHistory result = builder.build();
+        var result = builder.build();
         checkRecord(result);
         return result;
     }
@@ -171,9 +173,8 @@ final class ReadOperation<I, S extends EntityState<I>> {
      * @throws IllegalStateException if the {@link AggregateHistory} is not valid
      */
     private static void checkRecord(AggregateHistory record) throws IllegalStateException {
-        boolean snapshotIsNotSet = !record.hasSnapshot();
-        boolean noEvents = record.getEventList()
-                                 .isEmpty();
+        var snapshotIsNotSet = !record.hasSnapshot();
+        var noEvents = record.getEventList().isEmpty();
         if (noEvents && snapshotIsNotSet) {
             throw new IllegalStateException("AggregateStateRecord instance should have either "
                                                     + "snapshot or non-empty event list.");

@@ -49,9 +49,9 @@ final class CleanupStation extends Station {
      */
     @Override
     public final Result process(Conveyor conveyor) {
-        for (InboxMessage message : conveyor) {
+        for (var message : conveyor) {
             if (message.getStatus() == InboxMessageStatus.DELIVERED) {
-                Timestamp keepUntil = message.getKeepUntil();
+                var keepUntil = message.getKeepUntil();
                 if (keepUntil.equals(Timestamp.getDefaultInstance()) || isInPast(keepUntil)) {
                     conveyor.remove(message);
                 }

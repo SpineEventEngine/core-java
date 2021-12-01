@@ -49,7 +49,7 @@ interface OriginMixin extends OriginOrBuilder, FieldAwareMessage {
      * <p>The root message has no further origin, as it is produced by an actor.
      */
     default MessageId root() {
-        OriginMixin root = this;
+        var root = this;
         while (isNotDefault(root.getGrandOrigin())) {
             root = root.getGrandOrigin();
         }

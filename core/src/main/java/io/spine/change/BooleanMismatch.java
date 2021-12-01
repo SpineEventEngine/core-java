@@ -75,16 +75,16 @@ public final class BooleanMismatch {
                                     boolean actual,
                                     boolean newValue,
                                     int version) {
-        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                     .setExpected(toAny(expected))
-                                                     .setActual(toAny(actual))
-                                                     .setNewValue(toAny(newValue))
-                                                     .setVersion(version);
+        var builder = ValueMismatch.newBuilder()
+                .setExpected(toAny(expected))
+                .setActual(toAny(actual))
+                .setNewValue(toAny(newValue))
+                .setVersion(version);
         return builder.build();
     }
 
     private static boolean unpacked(Any any) {
-        BoolValue unpacked = unpack(any, BoolValue.class);
+        var unpacked = unpack(any, BoolValue.class);
         return unpacked.getValue();
     }
 
@@ -95,7 +95,7 @@ public final class BooleanMismatch {
      */
     public static boolean unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any expected = mismatch.getExpected();
+        var expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -106,7 +106,7 @@ public final class BooleanMismatch {
      */
     public static boolean unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any actual = mismatch.getActual();
+        var actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -117,7 +117,7 @@ public final class BooleanMismatch {
      */
     public static boolean unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any newValue = mismatch.getNewValue();
+        var newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

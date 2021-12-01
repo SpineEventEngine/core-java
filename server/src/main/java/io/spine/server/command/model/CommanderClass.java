@@ -27,7 +27,6 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets.SetView;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
@@ -39,7 +38,6 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
@@ -66,7 +64,7 @@ public final class CommanderClass<C extends Commander>
 
     public static <C extends Commander> CommanderClass<C> delegateFor(Class<C> cls) {
         checkNotNull(cls);
-        CommanderClass<C> result = new CommanderClass<>(cls);
+        var result = new CommanderClass<>(cls);
         return result;
     }
 
@@ -74,7 +72,7 @@ public final class CommanderClass<C extends Commander>
     CommanderClass<C> asCommanderClass(Class<C> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        CommanderClass<C> result = (CommanderClass<C>)
+        var result = (CommanderClass<C>)
                 get(cls, CommanderClass.class, () -> new CommanderClass<>(cls));
         return result;
     }
@@ -118,7 +116,7 @@ public final class CommanderClass<C extends Commander>
 
     @Override
     public ImmutableSet<CommandClass> outgoingCommands() {
-        SetView<CommandClass> result = union(commandOutput(), delegate.producedTypes());
+        var result = union(commandOutput(), delegate.producedTypes());
         return result.immutableCopy();
     }
 
@@ -134,11 +132,10 @@ public final class CommanderClass<C extends Commander>
      *         in case external command substitution methods are found within the class
      */
     private void validateExternalMethods() {
-        Set<CommandSubstituteMethod> methods = commands()
-                         .stream()
-                         .flatMap(type -> handlersForType(type).stream())
-                         .filter(HandlerMethod::isExternal)
-                         .collect(toSet());
+        var methods = commands().stream()
+                .flatMap(type -> handlersForType(type).stream())
+                .filter(HandlerMethod::isExternal)
+                .collect(toSet());
         if (!methods.isEmpty()) {
             throw new ExternalCommandReceiverMethodError(this, methods);
         }

@@ -53,9 +53,8 @@ interface BoundedContextNameMixin extends BoundedContextNameOrBuilder {
      */
     @Internal
     default BoundedContextName toSystem() {
-        String value = value() + "_System";
-        BoundedContextName result = BoundedContextName
-                .newBuilder()
+        var value = value() + "_System";
+        var result = BoundedContextName.newBuilder()
                 .setValue(value)
                 .build();
         return result;

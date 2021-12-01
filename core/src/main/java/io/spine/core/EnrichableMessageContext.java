@@ -48,8 +48,8 @@ public interface EnrichableMessageContext extends MessageContext {
     Enrichment getEnrichment();
 
     default <E extends Message> Optional<E> find(Class<E> cls) {
-        Optional<Container> container = containerIn(this);
-        Optional<E> result = container.flatMap(c -> Enrichments.find(cls, c));
+        var container = containerIn(this);
+        var result = container.flatMap(c -> Enrichments.find(cls, c));
         return result;
     }
 
@@ -59,8 +59,8 @@ public interface EnrichableMessageContext extends MessageContext {
      * @throws IllegalStateException if the enrichment is not found
      */
     default <E extends Message> E get(Class<E> cls) {
-        Container container = containerIn(this).orElse(Container.getDefaultInstance());
-        E result = Enrichments.get(cls, container);
+        var container = containerIn(this).orElse(Container.getDefaultInstance());
+        var result = Enrichments.get(cls, container);
         return result;
     }
 }

@@ -33,7 +33,6 @@ import io.spine.base.EntityState;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
@@ -52,7 +51,7 @@ public final class InMemoryRootDirectory implements AggregateRootDirectory {
     public void register(AggregatePartRepository<?, ?, ?, ?> repository) {
         checkNotNull(repository);
 
-        Class<? extends AggregateRoot<?>> rootClass = repository.aggregatePartClass().rootClass();
+        var rootClass = repository.aggregatePartClass().rootClass();
         repositories.put(rootClass, repository);
     }
 
@@ -60,13 +59,12 @@ public final class InMemoryRootDirectory implements AggregateRootDirectory {
     public Optional<? extends AggregatePartRepository<?, ?, ?, ?>>
     findPart(Class<? extends AggregateRoot<?>> rootClass,
              Class<? extends EntityState<?>> partStateClass) {
-        Set<AggregatePartRepository<?, ?, ?, ?>> parts = repositories.get(rootClass);
+        var parts = repositories.get(rootClass);
         if (parts.isEmpty()) {
             return Optional.empty();
         } else {
-            TypeUrl targetType = TypeUrl.of(partStateClass);
-            Optional<AggregatePartRepository<?, ?, ?, ?>> repository = parts
-                    .stream()
+            var targetType = TypeUrl.of(partStateClass);
+            var repository = parts.stream()
                     .filter(repo -> repo.entityStateType().equals(targetType))
                     .findAny();
             return repository;

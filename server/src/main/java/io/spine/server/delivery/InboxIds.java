@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.string.Stringifiers;
@@ -59,12 +58,10 @@ final class InboxIds {
         checkNotNull(id);
         checkNotNull(entityType);
 
-        EntityId entityId = EntityId
-                .newBuilder()
+        var entityId = EntityId.newBuilder()
                 .setId(pack(id))
                 .vBuild();
-        InboxId inboxId = InboxId
-                .newBuilder()
+        var inboxId = InboxId.newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(entityType.value())
                 .vBuild();
@@ -80,9 +77,8 @@ final class InboxIds {
      */
     static Object unwrap(InboxId inboxId) {
         checkNotNull(inboxId);
-        Any idValue = inboxId.getEntityId()
-                             .getId();
-        Object unpackedId = Identifier.unpack(idValue);
+        var idValue = inboxId.getEntityId().getId();
+        var unpackedId = Identifier.unpack(idValue);
         return unpackedId;
     }
 
@@ -99,10 +95,10 @@ final class InboxIds {
         checkNotNull(targetId);
         checkNotNull(uuid);
 
-        String rawValue = uuid + '@' + Stringifiers.toString(targetId);
-        InboxSignalId result = InboxSignalId.newBuilder()
-                                            .setValue(rawValue)
-                                            .build();
+        var rawValue = uuid + '@' + Stringifiers.toString(targetId);
+        var result = InboxSignalId.newBuilder()
+                .setValue(rawValue)
+                .build();
         return result;
     }
 }

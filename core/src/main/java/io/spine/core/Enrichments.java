@@ -26,7 +26,6 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Enrichment.Container;
 import io.spine.core.Enrichment.ModeCase;
@@ -55,7 +54,7 @@ final class Enrichments {
      * <p>Otherwise, empty {@code Optional} is returned.
      */
     static Optional<Container> containerIn(EnrichableMessageContext context) {
-        Enrichment enrichment = context.getEnrichment();
+        var enrichment = context.getEnrichment();
         if (enrichment.getModeCase() == ModeCase.CONTAINER) {
             return Optional.of(enrichment.getContainer());
         }
@@ -67,8 +66,8 @@ final class Enrichments {
      */
     static <E extends Message>
     Optional<E> find(Class<E> enrichmentClass, Container container) {
-        TypeName typeName = TypeName.of(enrichmentClass);
-        Optional<E> result = findType(typeName, enrichmentClass, container);
+        var typeName = TypeName.of(enrichmentClass);
+        var result = findType(typeName, enrichmentClass, container);
         return result;
     }
 
@@ -78,8 +77,8 @@ final class Enrichments {
      * @throws IllegalStateException if there is no enrichment of this class in the passed container
      */
     static <E extends Message> E get(Class<E> enrichmentClass, Container container) {
-        TypeName typeName = TypeName.of(enrichmentClass);
-        E result = findType(typeName, enrichmentClass, container)
+        var typeName = TypeName.of(enrichmentClass);
+        var result = findType(typeName, enrichmentClass, container)
                 .orElseThrow(() -> newIllegalStateException(
                         "Unable to get enrichment of the type `%s` from the container `%s`.",
                         typeName, container));
@@ -88,10 +87,10 @@ final class Enrichments {
 
     private static <E extends Message> Optional<E>
     findType(TypeName typeName, Class<E> enrichmentClass, Container container) {
-        Any any = container.getItemsMap()
+        var any = container.getItemsMap()
                            .get(typeName.value());
-        Optional<E> result = Optional.ofNullable(any)
-                                     .map(packed -> unpack(packed, enrichmentClass));
+        var result = Optional.ofNullable(any)
+                             .map(packed -> unpack(packed, enrichmentClass));
         return result;
     }
 
@@ -100,17 +99,16 @@ final class Enrichments {
      */
     @SuppressWarnings("deprecation") // Uses the deprecated field to be sure to clean up old data.
     static Event clear(Event event) {
-        EventContext context = event.getContext();
-        EventContext.OriginCase originCase = context.getOriginCase();
-        EventContext.Builder resultContext = context.toBuilder()
-                                                    .clearEnrichment();
+        var context = event.getContext();
+        var originCase = context.getOriginCase();
+        var resultContext = context.toBuilder().clearEnrichment();
         if (originCase == EventContext.OriginCase.EVENT_CONTEXT) {
             resultContext.setEventContext(context.getEventContext()
-                                                 .toBuilder()
-                                                 .clearEnrichment()
-                                                 .build());
+                                                  .toBuilder()
+                                                  .clearEnrichment()
+                                                  .build());
         }
-        Event result = event.toBuilder()
+        var result = event.toBuilder()
                             .setContext(resultContext.build())
                             .build();
         return result;
@@ -123,18 +121,18 @@ final class Enrichments {
             "deprecation" /* Uses the deprecated field to be sure to clean up old data. */,
             "ConstantConditions" /* Checked logically. */})
     static Event clearAll(Event event) {
-        EventContext.Builder eventContext = event.getContext()
-                                                 .toBuilder()
-                                                 .clearEnrichment();
-        Deque<EventContext.Builder> contexts = eventContextHierarchy(eventContext);
+        var eventContext = event.getContext()
+                .toBuilder()
+                .clearEnrichment();
+        var contexts = eventContextHierarchy(eventContext);
 
-        EventContext.Builder context = contexts.pollLast();
-        EventContext.Builder next = contexts.pollLast();
+        var context = contexts.pollLast();
+        var next = contexts.pollLast();
         while (next != null) {
             context = next.setEventContext(context);
             next = contexts.pollLast();
         }
-        Event result = event.toBuilder()
+        var result = event.toBuilder()
                             .setContext(context.build())
                             .build();
         return result;
@@ -150,14 +148,14 @@ final class Enrichments {
     private static Deque<EventContext.Builder>
     eventContextHierarchy(EventContext.Builder eventContext) {
 
-        EventContext.Builder child = eventContext;
-        EventContext.OriginCase originCase = child.getOriginCase();
+        var child = eventContext;
+        var originCase = child.getOriginCase();
         Deque<EventContext.Builder> contexts = newArrayDeque();
         contexts.add(child);
         while (originCase == EventContext.OriginCase.EVENT_CONTEXT) {
-            EventContext.Builder origin = child.getEventContext()
-                                               .toBuilder()
-                                               .clearEnrichment();
+            var origin = child.getEventContext()
+                    .toBuilder()
+                    .clearEnrichment();
             contexts.add(origin);
             child = origin;
             originCase = child.getOriginCase();

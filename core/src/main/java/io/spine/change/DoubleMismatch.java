@@ -90,16 +90,16 @@ public final class DoubleMismatch {
      * for a double attribute.
      */
     public static ValueMismatch of(double expected, double actual, double newValue, int version) {
-        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                     .setExpected(toAny(expected))
-                                                     .setActual(toAny(actual))
-                                                     .setNewValue(toAny(newValue))
-                                                     .setVersion(version);
+        var builder = ValueMismatch.newBuilder()
+                .setExpected(toAny(expected))
+                .setActual(toAny(actual))
+                .setNewValue(toAny(newValue))
+                .setVersion(version);
         return builder.build();
     }
 
     private static double unpacked(Any any) {
-        DoubleValue unpacked = unpack(any, DoubleValue.class);
+        var unpacked = unpack(any, DoubleValue.class);
         return unpacked.getValue();
     }
 
@@ -110,7 +110,7 @@ public final class DoubleMismatch {
      */
     public static double unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any expected = mismatch.getExpected();
+        var expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -121,7 +121,7 @@ public final class DoubleMismatch {
      */
     public static double unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any actual = mismatch.getActual();
+        var actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -132,7 +132,7 @@ public final class DoubleMismatch {
      */
     public static double unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        Any newValue = mismatch.getNewValue();
+        var newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

@@ -35,8 +35,6 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.logging.Logging;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.model.CommandReactionMethod;
-import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
@@ -48,7 +46,6 @@ import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -82,7 +79,7 @@ public abstract class AbstractCommander
 
     @Override
     public void dispatch(CommandEnvelope command) {
-        CommandSubstituteMethod method = thisClass.handlerOf(command);
+        var method = thisClass.handlerOf(command);
         DispatchOutcomeHandler
                 .from(method.invoke(this, command))
                 .onCommands(this::postCommands)
@@ -107,7 +104,7 @@ public abstract class AbstractCommander
 
     @Override
     public void dispatchEvent(EventEnvelope event) {
-        Optional<CommandReactionMethod> method = thisClass.commanderOn(event);
+        var method = thisClass.commanderOn(event);
         if (method.isPresent()) {
             DispatchOutcomeHandler
                     .from(method.get().invoke(this, event))
@@ -144,7 +141,7 @@ public abstract class AbstractCommander
     }
 
     private void postRejection(Event rejectionEvent) {
-        ImmutableList<Event> events = ImmutableList.of(rejectionEvent);
+        var events = ImmutableList.of(rejectionEvent);
         postEvents(events);
     }
 }

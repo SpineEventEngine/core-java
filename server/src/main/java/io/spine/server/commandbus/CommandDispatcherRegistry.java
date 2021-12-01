@@ -32,7 +32,6 @@ import io.spine.server.type.CommandEnvelope;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -95,9 +94,8 @@ class CommandDispatcherRegistry
         Set<CommandClass> commandClasses = dispatcher.messageClasses();
         Map<CommandClass, CommandDispatcher> alreadyRegistered = new HashMap<>();
         // Gather command classes from this dispatcher that are registered.
-        for (CommandClass commandClass : commandClasses) {
-            Optional<? extends CommandDispatcher> registeredDispatcher =
-                    getDispatcherForType(commandClass);
+        for (var commandClass : commandClasses) {
+            var registeredDispatcher  = getDispatcherForType(commandClass);
             registeredDispatcher.ifPresent(d -> alreadyRegistered.put(commandClass, d));
         }
 

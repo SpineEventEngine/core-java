@@ -47,14 +47,12 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.UnicastBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -164,9 +162,8 @@ public final class CommandBus
     @OverridingMethodsMustInvokeSuper
     protected Iterable<BusFilter<CommandEnvelope>>
     setupFilters(Iterable<BusFilter<CommandEnvelope>> filters) {
-        Iterable<BusFilter<CommandEnvelope>> fromSuper = super.setupFilters(filters);
-        return ImmutableList
-                .<BusFilter<CommandEnvelope>>builder()
+        var fromSuper = super.setupFilters(filters);
+        return ImmutableList.<BusFilter<CommandEnvelope>>builder()
                 .add(new CommandReceivedTap(this::systemFor))
                 .addAll(fromSuper)
                 .add(scheduler)
@@ -188,8 +185,8 @@ public final class CommandBus
     @Override
     protected StreamObserver<Ack> prepareObserver(Iterable<Command> commands,
                                                   StreamObserver<Ack> source) {
-        StreamObserver<Ack> wrappedSource = super.prepareObserver(commands, source);
-        TenantId tenant = tenantOf(commands);
+        var wrappedSource = super.prepareObserver(commands, source);
+        var tenant = tenantOf(commands);
         StreamObserver<Ack> commandAckMonitor = CommandAckMonitor
                 .newBuilder()
                 .setTenantId(tenant)
@@ -205,7 +202,7 @@ public final class CommandBus
     }
 
     private static TenantId tenantOf(Iterable<Command> commands) {
-        Iterator<Command> iterator = commands.iterator();
+        var iterator = commands.iterator();
         return iterator.hasNext()
                ? iterator.next().tenant()
                : TenantId.getDefaultInstance();
@@ -213,13 +210,13 @@ public final class CommandBus
 
     final SystemWriteSide systemFor(TenantId tenantId) {
         checkNotNull(tenantId);
-        SystemWriteSide result = delegatingTo(systemWriteSide).get(tenantId);
+        var result = delegatingTo(systemWriteSide).get(tenantId);
         return result;
     }
 
     @Override
     protected void dispatch(CommandEnvelope command) {
-        CommandDispatcher dispatcher = dispatcherOf(command);
+        var dispatcher = dispatcherOf(command);
         watcher.onDispatchCommand(command);
         dispatcher.dispatch(command);
     }
@@ -253,13 +250,13 @@ public final class CommandBus
      * Passes a previously scheduled command to the corresponding dispatcher.
      */
     void postPreviouslyScheduled(Command command) {
-        CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        var commandEnvelope = CommandEnvelope.of(command);
         dispatch(commandEnvelope);
     }
 
     @Override
     protected void store(Iterable<Command> commands) {
-        TenantId tenantId = tenantOf(commands);
+        var tenantId = tenantOf(commands);
         tenantConsumer.accept(tenantId);
     }
 
@@ -334,7 +331,7 @@ public final class CommandBus
                     ServerEnvironment.instance()
                                      .newCommandScheduler();
             @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
-            SystemWriteSide writeSide = system().get();
+            var writeSide = system().get();
 
             if (watcher == null) {
                 watcher = new FlightRecorder(
@@ -343,10 +340,10 @@ public final class CommandBus
             }
             commandScheduler.setWatcher(watcher);
 
-            TenantIndex tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
+            var tenantIndex = tenantIndex().orElseThrow(tenantIndexNotSet());
             tenantConsumer = tenantIndex::keep;
 
-            CommandBus commandBus = createCommandBus();
+            var commandBus = createCommandBus();
 
             commandScheduler.setCommandBus(commandBus);
 
@@ -362,7 +359,7 @@ public final class CommandBus
         @CheckReturnValue
         @SuppressWarnings("CheckReturnValue")
         private CommandBus createCommandBus() {
-            CommandBus commandBus = new CommandBus(this);
+            var commandBus = new CommandBus(this);
             return commandBus;
         }
     }

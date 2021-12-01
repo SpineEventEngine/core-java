@@ -28,9 +28,7 @@ package io.spine.server.commandbus;
 
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.TenantId;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
 import io.spine.system.server.event.CommandReceived;
 
@@ -57,16 +55,15 @@ final class CommandReceivedTap implements CommandFilter {
 
     @Override
     public Optional<Ack> filter(CommandEnvelope envelope) {
-        CommandReceived systemEvent = systemEvent(envelope.command());
-        TenantId tenantId = envelope.tenantId();
-        SystemWriteSide writeSide = writeSideFunction.get(tenantId);
+        var systemEvent = systemEvent(envelope.command());
+        var tenantId = envelope.tenantId();
+        var writeSide = writeSideFunction.get(tenantId);
         writeSide.postEvent(systemEvent, envelope.asMessageOrigin());
         return letPass();
     }
 
     private static CommandReceived systemEvent(Command domainCommand) {
-        CommandReceived result = CommandReceived
-                .newBuilder()
+        var result = CommandReceived.newBuilder()
                 .setId(domainCommand.getId())
                 .setPayload(domainCommand)
                 .build();

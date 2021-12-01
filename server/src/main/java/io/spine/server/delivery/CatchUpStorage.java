@@ -29,7 +29,6 @@ package io.spine.server.delivery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
-import io.spine.query.RecordQuery;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.StorageFactory;
@@ -65,11 +64,10 @@ public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
      *         the type of the projection state to use for filtering
      */
     public Iterator<CatchUp> readByType(TypeUrl projectionType) {
-        RecordQuery<CatchUpId, CatchUp> query =
-                queryBuilder().where(projection_type)
-                              .is(projectionType.value())
-                              .build();
-        Iterator<CatchUp> result = readAll(query);
+        var query = queryBuilder()
+                .where(projection_type).is(projectionType.value())
+                .build();
+        var result = readAll(query);
         return result;
     }
 
@@ -98,8 +96,8 @@ public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
      */
     @VisibleForTesting
     void clear() {
-        Iterator<CatchUpId> iterator = index();
-        ImmutableList<CatchUpId> allIds = ImmutableList.copyOf(iterator);
+        var iterator = index();
+        var allIds = ImmutableList.copyOf(iterator);
         deleteAll(allIds);
     }
 }

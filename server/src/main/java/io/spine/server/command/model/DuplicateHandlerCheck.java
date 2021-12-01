@@ -27,7 +27,6 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.Aggregate;
@@ -58,6 +57,7 @@ public final class DuplicateHandlerCheck implements Logging {
             "unchecked", // The cast is preserved by correct key-value pairs.
             "CheckReturnValue" /* Returned values for asXxxClass() are ignored because we use
                                   these methods only for verification of the classes. */
+            , "rawtypes" /* For code brevity. */
     })
     private final ImmutableMap<Class<?>, Appender> appenders =
             ImmutableMap.<Class<?>, Appender>builder()
@@ -88,7 +88,7 @@ public final class DuplicateHandlerCheck implements Logging {
     public void check(Iterable<Class<?>> classes) {
         _debug().log("Dropping models...");
         Model.dropAllModels();
-        for (Class<?> cls : classes) {
+        for (var cls : classes) {
             add(cls);
         }
     }
@@ -101,10 +101,10 @@ public final class DuplicateHandlerCheck implements Logging {
      * known to the Model.
      */
     public void add(Class<?> cls) {
-        FluentLogger.Api debug = _debug();
-        for (Class<?> keyClass : appenders.keySet()) {
+        var debug = _debug();
+        for (var keyClass : appenders.keySet()) {
             if (keyClass.isAssignableFrom(cls)) {
-                Appender appender = appenders.get(keyClass);
+                var appender = appenders.get(keyClass);
                 appender.apply(cls);
                 debug.log("`%s` has been added to the Model.", cls);
                 return;

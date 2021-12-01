@@ -166,7 +166,7 @@ public final class GrpcContainer {
      * @see GrpcContainer#shutdown()
      */
     public boolean isShutdown() {
-        boolean isShutdown = grpcServer == null;
+        var isShutdown = grpcServer == null;
         return isShutdown;
     }
 
@@ -218,13 +218,13 @@ public final class GrpcContainer {
      * @return {@code true}, if the given gRPC service for deployment and {@code false} otherwise
      */
     public boolean isScheduledForDeployment(BindableService service) {
-        String nameOfInterest = service.bindService()
-                                       .getServiceDescriptor()
-                                       .getName();
-        boolean serviceIsPresent = false;
-        for (ServerServiceDefinition serverServiceDefinition : services) {
-            String scheduledServiceName = serverServiceDefinition.getServiceDescriptor()
-                                                                 .getName();
+        var nameOfInterest = service.bindService()
+                                    .getServiceDescriptor()
+                                    .getName();
+        var serviceIsPresent = false;
+        for (var serverServiceDefinition : services) {
+            var scheduledServiceName = serverServiceDefinition.getServiceDescriptor()
+                                                              .getName();
             serviceIsPresent = serviceIsPresent || scheduledServiceName.equals(nameOfInterest);
         }
         return serviceIsPresent;
@@ -244,9 +244,9 @@ public final class GrpcContainer {
      *         {@code false} otherwise
      */
     public boolean isLive(BindableService service) {
-        boolean inShutdownState = isShutdown();
-        boolean scheduledForDeployment = isScheduledForDeployment(service);
-        boolean result = !inShutdownState && scheduledForDeployment;
+        var inShutdownState = isShutdown();
+        var scheduledForDeployment = isScheduledForDeployment(service);
+        var result = !inShutdownState && scheduledForDeployment;
         return result;
     }
 
@@ -273,8 +273,8 @@ public final class GrpcContainer {
         if (injectedServer != null) {
             return injectedServer;
         }
-        ServerBuilder<?> builder = createServerBuilder(executor);
-        for (ServerServiceDefinition service : services) {
+        var builder = createServerBuilder(executor);
+        for (var service : services) {
             builder.addService(service);
         }
         return builder.build();
@@ -290,17 +290,16 @@ public final class GrpcContainer {
      *         executor to configure for the created builder
      */
     private ServerBuilder<?> createServerBuilder(@Nullable Executor executor) {
-        boolean serverNameGiven = serverName != null;
+        var serverNameGiven = serverName != null;
         @Nullable Integer port = serverNameGiven ? null : requireNonNull(this.port);
-        ServerBuilder<?> result =
-                serverNameGiven
-                ? inProcessBuilder(serverName, executor)
-                : builderAtPort(requireNonNull(port), executor);
+        var result = serverNameGiven
+                     ? inProcessBuilder(serverName, executor)
+                     : builderAtPort(requireNonNull(port), executor);
         return result;
     }
 
     private static ServerBuilder<?> inProcessBuilder(String name, @Nullable Executor executor) {
-        InProcessServerBuilder builder = InProcessServerBuilder.forName(name);
+        var builder = InProcessServerBuilder.forName(name);
         builder = executor == null
                   ? builder.directExecutor()
                   : builder.executor(executor);
@@ -308,7 +307,7 @@ public final class GrpcContainer {
     }
 
     private static ServerBuilder<?> builderAtPort(Integer port, @Nullable Executor executor) {
-        ServerBuilder<?> builder = ServerBuilder.forPort(port);
+        var builder = ServerBuilder.forPort(port);
         builder = executor == null
                   ? builder
                   : builder.executor(executor);
@@ -363,7 +362,7 @@ public final class GrpcContainer {
 
         @FormatMethod
         private void println(@FormatString String msgFormat, Object... arg) {
-            String msg = format(msgFormat, arg);
+            var msg = format(msgFormat, arg);
             System.err.println(msg);
         }
     }

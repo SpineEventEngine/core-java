@@ -26,7 +26,6 @@
 
 package io.spine.core;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import io.spine.annotation.GeneratedMixin;
@@ -59,7 +58,7 @@ interface MessageIdMixin extends MessageIdOrBuilder, FieldAwareMessage {
      * Checks if the associated message is an event.
      */
     default boolean isEvent() {
-        Any id = getId();
+        var id = getId();
         return EVENT_ID_TYPE_URL.equals(id.getTypeUrl());
     }
 
@@ -77,7 +76,7 @@ interface MessageIdMixin extends MessageIdOrBuilder, FieldAwareMessage {
      * Checks if the associated message is a command.
      */
     default boolean isCommand() {
-        Any id = getId();
+        var id = getId();
         return COMMAND_ID_TYPE_URL.equals(id.getTypeUrl());
     }
 

@@ -62,8 +62,8 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
     public Optional<Ack> filter(E envelope) {
         checkNotNull(envelope);
         checkOpen();
-        for (BusFilter<E> filter : chain) {
-            Optional<Ack> output = filter.filter(envelope);
+        for (var filter : chain) {
+            var output = filter.filter(envelope);
             if (output.isPresent()) {
                 return output;
             }
@@ -107,10 +107,10 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>> implements BusFilter
 
     @Override
     public String toString() {
-        String filters = chain.stream()
-                              .map(BusFilter::getClass)
-                              .map(Class::getSimpleName)
-                              .collect(joining(", "));
+        var filters = chain.stream()
+                .map(BusFilter::getClass)
+                .map(Class::getSimpleName)
+                .collect(joining(", "));
         return format("%s[%s]", FilterChain.class.getName(), filters);
     }
 }

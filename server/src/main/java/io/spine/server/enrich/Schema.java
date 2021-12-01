@@ -55,8 +55,8 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
 
     static <M extends Message, C extends EnrichableMessageContext>
     Schema<M, C> newInstance(EnricherBuilder<? extends M, C, ?> eBuilder) {
-        Factory<M, C> factory = new Factory<>(eBuilder);
-        Schema<M, C> result = factory.create();
+        var factory = new Factory<M, C>(eBuilder);
+        var result = factory.create();
         return result;
     }
 
@@ -71,7 +71,7 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
     }
 
     @Nullable SchemaFn<? extends M, C> enrichmentOf(Class<? extends M> cls) {
-        SchemaFn<? extends M, C> fn = map.get(cls);
+        var fn = map.get(cls);
         return fn;
     }
 
@@ -111,8 +111,8 @@ final class Schema<M extends Message, C extends EnrichableMessageContext> implem
         }
 
         private Schema<M, C> create() {
-            for (Class<? extends M> sourceType : sourceTypes) {
-                SchemaFn<? extends M, C> fn = createFn(sourceType);
+            for (var sourceType : sourceTypes) {
+                var fn = createFn(sourceType);
                 schemaMap.put(sourceType, fn);
             }
 

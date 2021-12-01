@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Time;
 import io.spine.server.delivery.event.ShardProcessed;
@@ -71,9 +70,8 @@ final class ShardMaintenanceProcess extends AbstractEventReactor {
     @SuppressWarnings("unused")     // see the Javadoc.
     @React
     ShardProcessed on(ShardProcessingRequested event) {
-        Timestamp now = Time.currentTime();
-        ShardProcessed processed = ShardProcessed
-                .newBuilder()
+        var now = Time.currentTime();
+        var processed = ShardProcessed.newBuilder()
                 .setIndex(event.getIndex())
                 .setProcess(event.getProcess())
                 .setRunInfo(event.getRunInfo())
@@ -83,7 +81,7 @@ final class ShardMaintenanceProcess extends AbstractEventReactor {
 
     @Override
     public void dispatch(EventEnvelope event) {
-        ShardEvent message = (ShardEvent) event.message();
+        var message = (ShardEvent) event.message();
         inbox.send(event)
              .toReactor(message.getIndex());
     }

@@ -77,8 +77,8 @@ public abstract class AggregatePartRepository<I,
 
     @Override
     public A create(I id) {
-        AggregateRoot<I> root = createAggregateRoot(id);
-        A result = createAggregatePart(root);
+        var root = createAggregateRoot(id);
+        var result = createAggregatePart(root);
         return result;
     }
 
@@ -93,7 +93,7 @@ public abstract class AggregatePartRepository<I,
     }
 
     private AggregateRoot<I> createAggregateRoot(I id) {
-        AggregateRoot<I> result = aggregatePartClass().createRoot(context(), id);
+        var result = aggregatePartClass().createRoot(context(), id);
         return result;
     }
 

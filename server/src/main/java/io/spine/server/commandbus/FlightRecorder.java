@@ -27,9 +27,7 @@
 package io.spine.server.commandbus;
 
 import io.spine.base.EventMessage;
-import io.spine.core.CommandContext;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.system.server.SystemWriteSide;
 import io.spine.system.server.WriteSideFunction;
 import io.spine.system.server.event.CommandDispatched;
 import io.spine.system.server.event.CommandScheduled;
@@ -55,8 +53,7 @@ final class FlightRecorder implements CommandFlowWatcher {
      */
     @Override
     public void onDispatchCommand(CommandEnvelope command) {
-        CommandDispatched systemEvent = CommandDispatched
-                .newBuilder()
+        var systemEvent = CommandDispatched.newBuilder()
                 .setId(command.id())
                 .build();
         postSystemEvent(systemEvent, command);
@@ -69,10 +66,9 @@ final class FlightRecorder implements CommandFlowWatcher {
      */
     @Override
     public void onScheduled(CommandEnvelope command) {
-        CommandContext context = command.context();
-        CommandContext.Schedule schedule = context.getSchedule();
-        CommandScheduled systemEvent = CommandScheduled
-                .newBuilder()
+        var context = command.context();
+        var schedule = context.getSchedule();
+        var systemEvent = CommandScheduled.newBuilder()
                 .setId(command.id())
                 .setSchedule(schedule)
                 .build();
@@ -80,7 +76,7 @@ final class FlightRecorder implements CommandFlowWatcher {
     }
 
     private void postSystemEvent(EventMessage systemEvent, CommandEnvelope cmd) {
-        SystemWriteSide writeSide = function.get(cmd.tenantId());
+        var writeSide = function.get(cmd.tenantId());
         writeSide.postEvent(systemEvent, cmd.asMessageOrigin());
     }
 }

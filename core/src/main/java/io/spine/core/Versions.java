@@ -69,7 +69,7 @@ public final class Versions {
      */
     public static Version increment(Version version) {
         checkNotNull(version);
-        Version result = create(version.getNumber() + 1, currentTime());
+        var result = create(version.getNumber() + 1, currentTime());
         return result;
     }
 
@@ -85,7 +85,7 @@ public final class Versions {
         checkNotNull(currentVersion);
         checkNotNull(newVersion);
         if (!newVersion.isIncrement(currentVersion)) {
-            String errMsg = format(
+            var errMsg = format(
                     "New version number (%d) cannot be less or equal to the current (%d).",
                     newVersion.getNumber(), currentVersion.getNumber());
             throw new IllegalArgumentException(errMsg);

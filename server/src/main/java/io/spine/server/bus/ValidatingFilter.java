@@ -27,9 +27,7 @@
 package io.spine.server.bus;
 
 import com.google.protobuf.Message;
-import io.spine.base.Error;
 import io.spine.core.Ack;
-import io.spine.server.MessageInvalid;
 import io.spine.server.type.MessageEnvelope;
 
 import java.util.Optional;
@@ -58,10 +56,9 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
     @Override
     public Optional<Ack> filter(E envelope) {
         checkNotNull(envelope);
-        Optional<MessageInvalid> violation = validator.validate(envelope);
+        var violation = validator.validate(envelope);
         if (violation.isPresent()) {
-            Error error = violation.get()
-                                   .asError();
+            var error = violation.get().asError();
             return reject(envelope, error);
         } else {
             return letPass();

@@ -80,8 +80,7 @@ final class UncommittedEvents {
      * @return new {@code UncommittedEvents} instance
      */
     UncommittedEvents append(Iterable<Event> newEvents) {
-        ImmutableList<Event> newList = ImmutableList
-                .<Event>builder()
+        var newList = ImmutableList.<Event>builder()
                 .addAll(events)
                 .addAll(newEvents)
                 .build();

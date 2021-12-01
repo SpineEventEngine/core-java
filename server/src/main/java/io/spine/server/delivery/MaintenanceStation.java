@@ -28,8 +28,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 
-import java.util.List;
-
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
@@ -73,11 +71,10 @@ final class MaintenanceStation extends Station {
     }
 
     private static ImmutableList<CatchUp> findFinalizingCatchUps(DeliveryRunInfo runInfo) {
-        List<CatchUp> jobs = runInfo.getCatchUpJobList();
-        ImmutableList<CatchUp> finalizingJobs =
-                jobs.stream()
-                    .filter((job) -> job.getStatus() == CatchUpStatus.FINALIZING)
-                    .collect(toImmutableList());
+        var jobs = runInfo.getCatchUpJobList();
+        var finalizingJobs = jobs.stream()
+                .filter((job) -> job.getStatus() == CatchUpStatus.FINALIZING)
+                .collect(toImmutableList());
         return finalizingJobs;
     }
 }

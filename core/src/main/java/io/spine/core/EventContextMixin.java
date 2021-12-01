@@ -73,7 +73,7 @@ interface EventContextMixin extends EventContextOrBuilder,
     })
     default ActorContext actorContext() {
         ActorContext actorContext = null;
-        EventContext ctx = (EventContext) this;
+        var ctx = (EventContext) this;
 
         while (actorContext == null) {
             switch (ctx.getOriginCase()) {
@@ -116,7 +116,7 @@ interface EventContextMixin extends EventContextOrBuilder,
      */
     @SuppressWarnings("deprecation") // For backward compatibility.
     default Optional<MessageId> rootMessage() {
-        EventContext.OriginCase origin = getOriginCase();
+        var origin = getOriginCase();
         switch (origin) {
             case PAST_MESSAGE:
                 return Optional.of(getPastMessage().root());
@@ -128,8 +128,7 @@ interface EventContextMixin extends EventContextOrBuilder,
             default:
                 if (hasRootCommandId()) {
                     @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence.
-                    MessageId id = MessageId
-                            .newBuilder()
+                    var id = MessageId.newBuilder()
                             .setId(Identifier.pack(getRootCommandId()))
                             .setTypeUrl("Unknown")
                             .vBuild();
@@ -146,7 +145,7 @@ interface EventContextMixin extends EventContextOrBuilder,
      */
     default Object producer() {
         @SuppressWarnings("ClassReferencesSubclass")  // which is the only impl.
-        EventContext thisContext = (EventContext) this;
+        var thisContext = (EventContext) this;
         return Identifier.unpack(thisContext.getProducerId());
     }
 

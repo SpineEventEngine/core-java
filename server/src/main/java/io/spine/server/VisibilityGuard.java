@@ -32,7 +32,6 @@ import io.spine.base.EntityState;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.entity.EntityVisibility;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeName;
 
 import java.util.HashMap;
@@ -70,14 +69,14 @@ final class VisibilityGuard {
      */
     void register(Repository<?, ?> repository) {
         checkNotNull(repository);
-        EntityClass<?> entityClass = repository.entityModelClass();
-        Class<? extends EntityState<?>> stateClass = entityClass.stateClass();
+        var entityClass = repository.entityModelClass();
+        var stateClass = entityClass.stateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 
     private void checkNotAlreadyRegistered(Class<? extends EntityState<?>> stateClass) {
-        RepositoryAccess alreadyRegistered = repositories.get(stateClass);
+        var alreadyRegistered = repositories.get(stateClass);
         if (alreadyRegistered != null) {
             throw newIllegalStateException(
                     "A repository for the state class %s already registered: `%s`.",
@@ -92,7 +91,7 @@ final class VisibilityGuard {
      */
     boolean hasRepository(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
-        boolean result = repositories.containsKey(stateClass);
+        var result = repositories.containsKey(stateClass);
         return result;
     }
 
@@ -111,12 +110,12 @@ final class VisibilityGuard {
      */
     Optional<Repository<?, ?>> repositoryFor(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
-        RepositoryAccess repositoryAccess = findOrThrow(stateClass);
+        var repositoryAccess = findOrThrow(stateClass);
         return repositoryAccess.get();
     }
 
     private RepositoryAccess findOrThrow(Class<? extends EntityState<?>> stateClass) {
-        RepositoryAccess repository = repositories.get(stateClass);
+        var repository = repositories.get(stateClass);
         if (repository == null) {
             throw newIllegalStateException(
                     "A repository for the state class `%s` is not registered.",
@@ -133,7 +132,7 @@ final class VisibilityGuard {
      *         if there is not repository entities of which have the passed state
      */
     Repository<?, ?> get(Class<? extends EntityState<?>> stateClass) {
-        RepositoryAccess access = findOrThrow(stateClass);
+        var access = findOrThrow(stateClass);
         return access.repository;
     }
 
@@ -191,7 +190,7 @@ final class VisibilityGuard {
 
         private RepositoryAccess(Repository<?, ?> repository) {
             this.repository = repository;
-            EntityClass<?> entityClass = repository.entityModelClass();
+            var entityClass = repository.entityModelClass();
             this.visibility = entityClass.visibility();
         }
 

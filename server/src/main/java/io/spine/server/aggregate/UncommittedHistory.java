@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -125,19 +125,19 @@ final class UncommittedHistory {
         if (!enabled) {
             return;
         }
-        checkNotNull(snapshotTrigger,
-                     "The snapshot trigger must be set" +
-                             " to track the events applied to an `Aggregate`.");
+        requireNonNull(snapshotTrigger,
+                       "The snapshot trigger must be set" +
+                               " to track the events applied to an `Aggregate`.");
 
-        Event event = envelope.outerObject();
+        var event = envelope.outerObject();
         if (event.isRejection()) {
             return;
         }
         currentSegment.add(event);
-        int eventsInSegment = currentSegment.size();
+        var eventsInSegment = currentSegment.size();
         if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
-            Snapshot snapshot = makeSnapshot.get();
-            AggregateHistory completedSegment = historyFrom(currentSegment, snapshot);
+            var snapshot = makeSnapshot.get();
+            var completedSegment = historyFrom(currentSegment, snapshot);
             historySegments.add(completedSegment);
             currentSegment.clear();
             eventCountAfterLastSnapshot = 0;
@@ -154,7 +154,7 @@ final class UncommittedHistory {
         ImmutableList.Builder<AggregateHistory> builder = ImmutableList.builder();
         builder.addAll(historySegments);
         if (currentSegment.size() > 0) {
-            AggregateHistory lastSegment = historyFrom(currentSegment);
+            var lastSegment = historyFrom(currentSegment);
             builder.add(lastSegment);
         }
         return builder.build();
@@ -164,7 +164,7 @@ final class UncommittedHistory {
      * Returns all tracked uncommitted events.
      */
     UncommittedEvents events() {
-        List<Event> events = get().stream()
+        var events = get().stream()
                                   .flatMap(segment -> segment.getEventList()
                                                              .stream())
                                   .collect(toList());

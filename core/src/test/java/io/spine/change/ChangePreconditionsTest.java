@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.change.ChangePreconditions.checkNewValueNotEmpty;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("ChangePreconditions utility should")
+@DisplayName("`ChangePreconditions` utility should")
 class ChangePreconditionsTest extends UtilityClassTest<ChangePreconditions> {
 
     ChangePreconditionsTest() {
@@ -42,16 +42,16 @@ class ChangePreconditionsTest extends UtilityClassTest<ChangePreconditions> {
     }
 
     @Test
-    @DisplayName("not accept empty ByteString value")
+    @DisplayName("not accept empty `ByteString` value")
     void failOnEmptyByteString() {
-        ByteString str = ByteString.EMPTY;
+        var str = ByteString.EMPTY;
         assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 
     @Test
     @DisplayName("not accept empty String value")
     void failOnEmptyString() {
-        String str = "";
+        var str = "";
         assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 }
