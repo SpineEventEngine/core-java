@@ -238,13 +238,13 @@ final class Conveyor implements Iterable<InboxMessage> {
      * Writes all the pending changes to the passed {@code InboxStorage}.
      */
     void flushTo(InboxStorage storage) {
-        var dirtyMessages = messages.values()
+        var toWrite = messages.values()
                 .stream()
-                .filter(message -> this.dirtyMessages.contains(message.getId()))
+                .filter(message -> dirtyMessages.contains(message.getId()))
                 .collect(toList());
-        storage.writeBatch(dirtyMessages);
+        storage.writeBatch(toWrite);
         storage.removeBatch(removals);
-        dirtyMessages.clear();
+        toWrite.clear();
         removals.clear();
         duplicates.clear();
     }
