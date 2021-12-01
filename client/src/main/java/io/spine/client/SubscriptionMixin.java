@@ -69,7 +69,7 @@ public interface SubscriptionMixin extends SubscriptionOrBuilder {
     default String toShortString() {
         var id = getId().getValue();
         var type = getTopic().getTarget().getType();
-        var result = format("(ID: %s, target: %s)", id, type);
+        var result = format("(ID: `%s`, target: `%s`)", id, type);
         return result;
     }
 }

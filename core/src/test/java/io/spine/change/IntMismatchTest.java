@@ -95,8 +95,7 @@ class IntMismatchTest extends UtilityClassTest<IntMismatch> {
         @Test
         @DisplayName("for unexpected int value")
         void forUnexpectedInt() {
-            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE,
-                                           VERSION);
+            var mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));

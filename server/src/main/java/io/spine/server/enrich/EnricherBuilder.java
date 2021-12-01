@@ -204,8 +204,10 @@ public abstract class EnricherBuilder<M extends Message,
                 return false;
             }
             final var other = (Key) obj;
-            return Objects.equals(this.sourceClass, other.sourceClass)
-                    && Objects.equals(this.enrichmentClass, other.enrichmentClass);
+            return Objects.equals(this.sourceClass.getName(),
+                                  other.sourceClass.getName())
+                    && Objects.equals(this.enrichmentClass.getName(),
+                                      other.enrichmentClass.getName());
         }
     }
 }
