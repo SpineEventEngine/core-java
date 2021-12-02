@@ -45,7 +45,7 @@ import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
 
-public class IdempotencyGuardTestEnv {
+public final class IdempotencyGuardTestEnv {
 
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(IdempotencyGuardTestEnv.class);
@@ -59,39 +59,39 @@ public class IdempotencyGuardTestEnv {
 
     public static TenantId newTenantId() {
         return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
+                .setValue(newUuid())
+                .build();
     }
 
     private static AggTaskId newTaskId() {
         return AggTaskId.newBuilder()
-                        .setId(Identifier.newUuid())
-                        .build();
+                .setId(Identifier.newUuid())
+                .build();
     }
 
     public static AggCreateProject createProject(ProjectId projectId) {
         return AggCreateProject.newBuilder()
-                               .setProjectId(projectId)
-                               .build();
+                .setProjectId(projectId)
+                .build();
     }
 
     public static AggStartProject startProject(ProjectId projectId) {
         return AggStartProject.newBuilder()
-                              .setProjectId(projectId)
-                              .build();
+                .setProjectId(projectId)
+                .build();
     }
 
     public static AggTaskStarted taskStarted(ProjectId projectId) {
         return AggTaskStarted.newBuilder()
-                             .setTaskId(newTaskId())
-                             .setProjectId(projectId)
-                             .build();
+                .setTaskId(newTaskId())
+                .setProjectId(projectId)
+                .build();
     }
 
     public static AggProjectPaused projectPaused(ProjectId projectId) {
         return AggProjectPaused.newBuilder()
-                               .setProjectId(projectId)
-                               .build();
+                .setProjectId(projectId)
+                .build();
     }
 
     public static Command command(CommandMessage commandMessage) {
