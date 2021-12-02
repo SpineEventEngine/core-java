@@ -30,7 +30,9 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.SubProjectList;
 
-public class RejectingRepository
+/**
+ * The repository of {@link RejectingAggregate}.
+ */
+public final class RejectingRepository
         extends AggregateRepository<ProjectId, RejectingAggregate, SubProjectList> {
-
 }
