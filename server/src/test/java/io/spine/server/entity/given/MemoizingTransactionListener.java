@@ -34,7 +34,6 @@ import io.spine.server.entity.EntityRecordChange;
 import io.spine.server.entity.Phase;
 import io.spine.server.entity.TransactionListener;
 import io.spine.validate.NonValidated;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -49,79 +48,45 @@ import static com.google.common.collect.Lists.newLinkedList;
  */
 public final class MemoizingTransactionListener<I> implements TransactionListener<I> {
 
-    private final List<Phase<I>> phasesOnBefore = newLinkedList();
     private final List<Phase<I>> phasesOnAfter = newLinkedList();
 
-    private final List<@Nullable EntityRecord> recordsBeforeCommit = newLinkedList();
-    private final List<@Nullable EntityRecordChange> recordsAfterCommit = newLinkedList();
-
     private Error lastError;
-    private EntityRecord lastErroredRecord;
-
-    private Event lastRejection;
-    private EntityRecord lastRejectedRecord;
-
-    @Override
-    public void onBeforePhase(Phase<I> phase) {
-        phasesOnBefore.add(phase);
-    }
 
     @Override
     public void onAfterPhase(Phase<I> phase) {
         phasesOnAfter.add(phase);
     }
 
-    @Override
-    public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
-        recordsBeforeCommit.add(entityRecord);
+    public ImmutableList<Phase<I>> phasesOnAfter() {
+        return ImmutableList.copyOf(phasesOnAfter);
     }
 
     @Override
     public void onTransactionFailed(Error cause, @NonValidated EntityRecord entityRecord) {
         lastError = cause;
-        lastErroredRecord = entityRecord;
-    }
-
-    @Override
-    public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
-        lastRejection = cause;
-        lastRejectedRecord = entityRecord;
-    }
-
-    @Override
-    public void onAfterCommit(EntityRecordChange change) {
-        recordsAfterCommit.add(change);
-    }
-
-    public ImmutableList<Phase<I>> phasesOnBefore() {
-        return ImmutableList.copyOf(phasesOnBefore);
-    }
-
-    public ImmutableList<Phase<I>> phasesOnAfter() {
-        return ImmutableList.copyOf(phasesOnAfter);
-    }
-
-    public ImmutableList<EntityRecord> recordsBeforeCommit() {
-        return ImmutableList.copyOf(recordsBeforeCommit);
-    }
-
-    public ImmutableList<EntityRecordChange> recordsAfterCommit() {
-        return ImmutableList.copyOf(recordsAfterCommit);
     }
 
     public Error lastError() {
         return lastError;
     }
 
-    public EntityRecord lastErroredRecord() {
-        return lastErroredRecord;
+    @Override
+    public void onBeforePhase(Phase<I> phase) {
+        // Do nothing.
     }
 
-    public Event getLastRejection() {
-        return lastRejection;
+    @Override
+    public void onBeforeCommit(@NonValidated EntityRecord entityRecord) {
+        // Do nothing.
     }
 
-    public EntityRecord getLastRejectedRecord() {
-        return lastRejectedRecord;
+    @Override
+    public void onTransactionFailed(Event cause, @NonValidated EntityRecord entityRecord) {
+        // Do nothing.
+    }
+
+    @Override
+    public void onAfterCommit(EntityRecordChange change) {
+        // Do nothing.
     }
 }
