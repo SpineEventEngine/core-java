@@ -57,8 +57,4 @@ public final class BbCommandDispatcher extends AbstractCommandDispatcher {
     public void dispatch(CommandEnvelope envelope) {
         commandsReceived++;
     }
-
-    public int commandsDispatched() {
-        return commandsReceived;
-    }
 }
