@@ -30,7 +30,8 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 
-public class ProjectEntity extends TransactionalEntity<ProjectId, Project, Project.Builder> {
+public final class ProjectEntity extends TransactionalEntity<ProjectId, Project, Project.Builder> {
+
     private ProjectEntity(ProjectId id) {
         super(id);
     }
