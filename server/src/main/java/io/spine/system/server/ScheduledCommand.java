@@ -55,15 +55,13 @@ final class ScheduledCommand
     }
 
     private static Command withSchedule(Command source, CommandContext.Schedule schedule) {
-        var updatedContext =
-                source.context()
-                      .toBuilder()
-                      .setSchedule(schedule)
-                      .build();
-        var updatedCommand =
-                source.toBuilder()
-                      .setContext(updatedContext)
-                      .build();
+        var updatedContext = source.context()
+                .toBuilder()
+                .setSchedule(schedule)
+                .build();
+        var updatedCommand = source.toBuilder()
+                .setContext(updatedContext)
+                .build();
         return updatedCommand;
     }
 
