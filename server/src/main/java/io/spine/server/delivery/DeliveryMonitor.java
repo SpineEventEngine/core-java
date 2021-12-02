@@ -84,11 +84,19 @@ public class DeliveryMonitor {
      * @param stats
      *         the statistics of the performed delivery
      */
-    @SuppressWarnings("unused")  // This SPI method is designed for descendants.
+    @SuppressWarnings("unused")  /* This SPI method is designed for descendants. */
     public void onDeliveryCompleted(DeliveryStats stats) {
         // do nothing.
     }
 
+    /**
+     * Called after the delivery processed has picked up the shard with the specified index
+     * and before any of the messages to deliver were read from the storage.
+     *
+     * @param index
+     *         the index of the shard, the delivery from which has been started
+     */
+    @SuppressWarnings({"unused", "WeakerAccess"}) /* This SPI method is designed for descendants. */
     public void onDeliveryStarted(ShardIndex index) {
         // do nothing.
     }
