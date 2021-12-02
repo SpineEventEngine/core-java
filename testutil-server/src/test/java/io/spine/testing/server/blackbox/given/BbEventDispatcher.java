@@ -30,18 +30,10 @@ import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.testing.server.blackbox.event.BbEventDispatcherRegistered;
 
-/** Receives one type of events and keeps track of how many events it has received. */
 public final class BbEventDispatcher extends AbstractEventSubscriber {
-
-    private int eventsReceived = 0;
 
     @Subscribe
     void to(BbEventDispatcherRegistered dispatcherRegistered) {
-        eventsReceived++;
-    }
-
-    /** Obtains an amount of events dispatched by this dispatcher. */
-    public int eventsReceived() {
-        return eventsReceived;
+        // Do nothing.
     }
 }
