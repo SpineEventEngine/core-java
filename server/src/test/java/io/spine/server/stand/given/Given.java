@@ -44,7 +44,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -68,16 +67,9 @@ public class Given {
         private @Nullable Iterator<EntityRecord> records;
 
         private static final EventRoute<ProjectId, PrjProjectCreated> EVENT_TARGETS_FN =
-                new EventRoute<ProjectId, PrjProjectCreated>() {
-                    private static final long serialVersionUID = 0L;
-
-                    @Override
-                    public Set<ProjectId> apply(PrjProjectCreated message, EventContext context) {
-                        return ImmutableSet.of(ProjectId.newBuilder()
-                                                        .setId(PROJECT_UUID)
-                                                        .build());
-                    }
-                };
+                (msg, ctx) -> ImmutableSet.of(ProjectId.newBuilder()
+                                                      .setId(PROJECT_UUID)
+                                                      .build());
 
         public void setRecords(Iterator<EntityRecord> records) {
             this.records = records;
