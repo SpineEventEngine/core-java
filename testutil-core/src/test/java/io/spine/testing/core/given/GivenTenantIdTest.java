@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("GivenTenantId should")
+@DisplayName("`GivenTenantId` should")
 class GivenTenantIdTest extends UtilityClassTest<GivenTenantId> {
 
     GivenTenantIdTest() {
@@ -41,7 +41,7 @@ class GivenTenantIdTest extends UtilityClassTest<GivenTenantId> {
     }
 
     @Test
-    @DisplayName("create TenantId by string value")
+    @DisplayName("create `TenantId` by string value")
     void createByStringValue() {
         var expected = Identifier.newUuid();
 
@@ -50,7 +50,7 @@ class GivenTenantIdTest extends UtilityClassTest<GivenTenantId> {
     }
 
     @Test
-    @DisplayName("create TenantId by test class name")
+    @DisplayName("create `TenantId` by test class name")
     void createByTestClassName() {
         assertEquals(getClass().getSimpleName(), GivenTenantId.nameOf(getClass())
                                                               .getValue());

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.TestValues.random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("GivenVersion should")
+@DisplayName("`GivenVersion` should")
 class GivenVersionTest extends UtilityClassTest<GivenVersion> {
 
     GivenVersionTest() {

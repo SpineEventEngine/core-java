@@ -90,7 +90,7 @@ class BoundedContextBuilderTest {
         }
 
         @Test
-        @DisplayName("AggregateRootDirectory if it was set")
+        @DisplayName("`AggregateRootDirectory` if it was set")
         void aggregateRootDirectory() {
             AggregateRootDirectory directory = new InMemoryRootDirectory();
             builder.setAggregateRootDirectory(() -> directory);

@@ -94,7 +94,7 @@ class IdempotencyGuardTest {
         }
 
         @Test
-        @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
+        @DisplayName("throw `DuplicateCommandException` if command was handled since last snapshot")
         void throwExceptionForDuplicateCommand() {
             var createCommand = command(createProject(projectId));
 
@@ -173,7 +173,7 @@ class IdempotencyGuardTest {
         }
 
         @Test
-        @DisplayName("throw DuplicateEventException when event was handled since last snapshot")
+        @DisplayName("throw `DuplicateEventException` if event was handled since last snapshot")
         void throwExceptionForDuplicateCommand() {
             var event = event(taskStarted(projectId));
             post(event);

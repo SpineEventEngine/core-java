@@ -71,7 +71,7 @@ class CommandBusBuilderTest
     }
 
     @Test
-    @DisplayName("create new CommandBus instance")
+    @DisplayName("create new `CommandBus` instance")
     void createNewInstance() {
         var commandBus = CommandBus.newBuilder()
                 .injectTenantIndex(tenantIndex)
@@ -81,14 +81,14 @@ class CommandBusBuilderTest
     }
 
     @Test
-    @DisplayName("not accept null CommandStore")
+    @DisplayName("not accept `null` `CommandStore`")
     void notAcceptNullCommandStore() {
         assertThrows(NullPointerException.class,
                      () -> builder().injectTenantIndex(nullRef()));
     }
 
     @Test
-    @DisplayName("not allow to omit setting CommandStore")
+    @DisplayName("not allow to omit setting `CommandStore`")
     void neverOmitCommandStore() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
@@ -97,7 +97,7 @@ class CommandBusBuilderTest
     }
 
     @Test
-    @DisplayName("not allow to omit setting SystemWriteSide")
+    @DisplayName("not allow to omit setting `SystemWriteSide`")
     void neverOmitSystem() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
@@ -110,7 +110,7 @@ class CommandBusBuilderTest
     class AllowToSpecify {
 
         @Test
-        @DisplayName("if CommandBus is multitenant")
+        @DisplayName("if `CommandBus` is multitenant")
         void ifIsMultitenant() {
             assertTrue(builder().setMultitenant(true)
                                 .build()

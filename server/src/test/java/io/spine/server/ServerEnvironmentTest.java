@@ -102,7 +102,7 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("obtain AppEngine environment GAE cloud infrastructure server environment")
+        @DisplayName("obtain App Engine environment GAE cloud infrastructure server environment")
         void receivesCloudEnvironment() {
             assertEquals(APPENGINE_CLOUD, serverEnvironment.deploymentType());
         }
@@ -125,7 +125,7 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("obtain AppEngine environment GAE local dev server environment")
+        @DisplayName("obtain App Engine environment GAE local dev server environment")
         void receivesEmulatorEnvironment() {
             assertEquals(APPENGINE_EMULATOR, serverEnvironment.deploymentType());
         }
@@ -140,7 +140,7 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("receive STANDALONE deployment type")
+        @DisplayName("receive `STANDALONE` deployment type")
         void receivesStandalone() {
             assertEquals(STANDALONE, serverEnvironment.deploymentType());
         }

@@ -91,7 +91,7 @@ class RepositoryTest {
     }
 
     @Test
-    @DisplayName("not allow getting BoundedContext before registration")
+    @DisplayName("not allow getting `BoundedContext` before registration")
     void notGetBcIfUnregistered() {
         assertThrows(IllegalStateException.class, () -> new TestRepo().context());
     }

@@ -99,7 +99,7 @@ class EventReactorMethodTest {
     }
 
     @Nested
-    @DisplayName("support Message return type")
+    @DisplayName("support `Message` return type")
     class MessageReturn {
 
         @Test

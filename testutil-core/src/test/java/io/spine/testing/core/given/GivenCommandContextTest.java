@@ -43,7 +43,7 @@ import static io.spine.validate.Validate.checkValid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@DisplayName("GivenCommandContext should")
+@DisplayName("`GivenCommandContext` should")
 class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
 
     GivenCommandContextTest() {
@@ -58,7 +58,7 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     }
 
     @Test
-    @DisplayName("create CommandContext with random actor")
+    @DisplayName("create `CommandContext` with random actor")
     void createWithRandomActor() {
         var first = GivenCommandContext.withRandomActor();
         var second = GivenCommandContext.withRandomActor();
@@ -72,7 +72,7 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     }
 
     @Test
-    @DisplayName("create CommandContext with actor and time")
+    @DisplayName("create `CommandContext` with actor and time")
     void createWithActorAndTime() {
         var actorId = newUuid();
         var when = add(currentTime(), minutes(100));
@@ -87,7 +87,7 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
     }
 
     @Test
-    @DisplayName("create CommandContext with scheduled delay")
+    @DisplayName("create `CommandContext` with scheduled delay")
     void createWithScheduledDelay() {
         var delay = hours(42);
         var expectedSchedule = Schedule.newBuilder()

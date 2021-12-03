@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@DisplayName("DelegatingEventDispatcher should")
+@DisplayName("`DelegatingEventDispatcher` should")
 class DelegatingEventDispatcherTest {
 
     @Test

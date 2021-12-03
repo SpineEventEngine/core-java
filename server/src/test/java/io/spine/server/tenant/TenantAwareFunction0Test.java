@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("TenantAwareFunction0 should")
+@DisplayName("`TenantAwareFunction0` should")
 class TenantAwareFunction0Test {
 
     @Test

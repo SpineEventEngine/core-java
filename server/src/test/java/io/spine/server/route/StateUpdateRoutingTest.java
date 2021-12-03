@@ -44,7 +44,7 @@ class StateUpdateRoutingTest {
     private static final EventContext emptyContext = EventContext.getDefaultInstance();
 
     @Test
-    @DisplayName("not accept nulls")
+    @DisplayName("not accept `null`s")
     void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(EventContext.class, emptyContext)

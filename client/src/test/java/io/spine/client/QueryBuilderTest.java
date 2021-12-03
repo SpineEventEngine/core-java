@@ -105,7 +105,7 @@ class QueryBuilderTest {
         }
 
         @Test
-        @DisplayName("throw IAE if negative limit int value is provided")
+        @DisplayName("throw `IAE` if negative limit int value is provided")
         void notAcceptNegativeIntLimit() {
             assertThrows(IllegalArgumentException.class,
                          () -> factory.select(TEST_ENTITY_TYPE)
@@ -113,7 +113,7 @@ class QueryBuilderTest {
         }
 
         @Test
-        @DisplayName("throw IAE if limit int value is 0")
+        @DisplayName("throw `IAE` if limit int value is 0")
         void notAcceptZeroIntLimit() {
             assertThrows(IllegalArgumentException.class,
                          () -> factory.select(TEST_ENTITY_TYPE)
@@ -121,7 +121,7 @@ class QueryBuilderTest {
         }
 
         @Test
-        @DisplayName("throw IAE if order direction is not ASCENDING or DESCENDING")
+        @DisplayName("throw `IAE` if order direction is not ASCENDING or DESCENDING")
         void notAcceptInvalidDirection() {
             var select = factory.select(TEST_ENTITY_TYPE)
                                 .orderBy(FIRST_FIELD, ASCENDING)
@@ -200,7 +200,7 @@ class QueryBuilderTest {
         }
 
         @Test
-        @DisplayName("by id")
+        @DisplayName("by ID")
         void byId() {
             var id1 = 314;
             var id2 = 271;

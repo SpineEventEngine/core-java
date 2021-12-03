@@ -114,7 +114,7 @@ abstract class EmittedMessageSubjectTest<S extends EmittedMessageSubject<S, W, M
     }
 
     @Test
-    @DisplayName("check the message count when obtaining a ProtoSubject")
+    @DisplayName("check the message count when obtaining a `ProtoSubject`")
     void failOnIndexOutOfBounds() {
         var messageCount = 5;
         var messages = messages(messageCount);

@@ -85,7 +85,7 @@ class CommandRequestTest extends AbstractClientTest {
     }
 
     @Nested
-    @DisplayName("Allow posting without subscriptions")
+    @DisplayName("allow posting without subscriptions")
     class NoSubscriptions {
 
         @Test
@@ -106,7 +106,7 @@ class CommandRequestTest extends AbstractClientTest {
     }
 
     @Nested
-    @DisplayName("Deliver")
+    @DisplayName("deliver")
     class OfDelivery {
 
         @Test
@@ -147,7 +147,7 @@ class CommandRequestTest extends AbstractClientTest {
     }
 
     @Test
-    @DisplayName("Suggest `postAndForget()` call if no subscriptions were made")
+    @DisplayName("suggest `postAndForget()` call if no subscriptions were made")
     void noSubscriptions() {
         assertThrows(
                 IllegalStateException.class,
@@ -156,7 +156,7 @@ class CommandRequestTest extends AbstractClientTest {
     }
 
     @Nested
-    @DisplayName("Support custom error handler for")
+    @DisplayName("support custom error handler for")
     class OfErrorHandler {
 
         @Nested

@@ -35,7 +35,7 @@ import static io.spine.server.command.given.CommandHandlingEntityTestEnv.msg;
 import static io.spine.server.command.given.CommandHandlingEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("CommandHandlingEntity should")
+@DisplayName("`CommandHandlingEntity` should")
 class CommandHandlingEntityTest {
 
     /** The object we test. */

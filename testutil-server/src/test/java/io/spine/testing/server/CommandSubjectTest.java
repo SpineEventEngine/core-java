@@ -39,7 +39,7 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.CommandSubject.commands;
 
-@DisplayName("CommandSubject should")
+@DisplayName("`CommandSubject` should")
 class CommandSubjectTest
         extends EmittedMessageSubjectTest<CommandSubject, Command, CommandMessage> {
 

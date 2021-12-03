@@ -31,7 +31,7 @@ import io.spine.testing.SingletonTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("EmptyClass should")
+@DisplayName("`EmptyClass` should")
 class EmptyClassTest extends SingletonTest<EmptyClass> {
 
     EmptyClassTest() {

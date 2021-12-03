@@ -737,9 +737,9 @@ public class AggregateTest {
         }
     }
 
-    @MuteLogging
     @Test
-    @DisplayName("throw DuplicateCommandException for a duplicated command")
+    @DisplayName("throw `DuplicateCommandException` for a duplicated command")
+    @MuteLogging
     void acknowledgeExceptionForDuplicateCommand() {
         var monitor = new DiagnosticMonitor();
         context.internalAccess()
@@ -758,7 +758,7 @@ public class AggregateTest {
     }
 
     @Test
-    @DisplayName("run Idempotency guard when dispatching commands")
+    @DisplayName("run `IdempotencyGuard` when dispatching commands")
     void checkCommandsUponHistory() {
         var monitor = new DiagnosticMonitor();
         context.internalAccess()

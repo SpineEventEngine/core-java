@@ -34,6 +34,7 @@ import io.spine.test.queries.TaskId;
 import io.spine.testing.UtilityClassTest;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.client.Targets.acceptingOnly;
@@ -51,83 +52,88 @@ class TargetsTest extends UtilityClassTest<Targets> {
         super(Targets.class);
     }
 
-    @Test
-    @DisplayName("compose Target for all of type")
-    void composeForAllOfType() {
-        var target = allOf(TestEntity.class);
+    @Nested
+    @DisplayName("compose `Target`")
+    class Compose {
 
-        assertUrl(target);
+        @Test
+        @DisplayName("for all of type")
+        void allOfType() {
+            var target = allOf(TestEntity.class);
+
+            assertUrl(target);
+        }
+
+        private void assertUrl(Target target) {
+            assertEquals(TypeUrl.of(TestEntity.class), parse(target.getType()));
+        }
+
+        @Test
+        @DisplayName("with `Message` IDs")
+        void withMessageIds() {
+            var taskId = newTaskId();
+            var target = someOf(TestEntity.class, ImmutableSet.of(taskId));
+
+            assertUrl(target);
+
+            var expected = acceptingOnly(taskId);
+            assertEquals(expected, target.getFilters());
+        }
+
+        @Test
+        @DisplayName("with `String` IDs")
+        void withStringIds() {
+            var firstId = "a";
+            var secondId = "b";
+            var thirdId = "c";
+
+            var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
+
+            assertUrl(target);
+
+            var expected = acceptingOnly(StringValue.of(firstId),
+                                         StringValue.of(secondId),
+                                         StringValue.of(thirdId));
+            assertEquals(expected, target.getFilters());
+        }
+
+        @Test
+        @DisplayName("with `Integer` IDs")
+        void withIntIds() {
+            var firstId = 1;
+            var secondId = 2;
+            var thirdId = 3;
+
+            var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
+
+            assertUrl(target);
+
+            var expected = acceptingOnly(Int32Value.of(firstId),
+                                         Int32Value.of(secondId),
+                                         Int32Value.of(thirdId));
+            assertEquals(expected, target.getFilters());
+        }
+
+        @Test
+        @DisplayName("with `Long` IDs")
+        void withLongIds() {
+            var firstId = 1L;
+            var secondId = 2L;
+            var thirdId = 3L;
+
+            var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
+
+            assertUrl(target);
+
+            var expected = acceptingOnly(Int64Value.of(firstId),
+                                         Int64Value.of(secondId),
+                                         Int64Value.of(thirdId));
+            assertEquals(expected, target.getFilters());
+        }
     }
 
-    private static void assertUrl(Target target) {
-        assertEquals(TypeUrl.of(TestEntity.class), parse(target.getType()));
-    }
-
     @Test
-    @DisplayName("compose Target with Message IDs")
-    void composeWithMessageIds() {
-        var taskId = newTaskId();
-        var target = someOf(TestEntity.class, ImmutableSet.of(taskId));
-
-        assertUrl(target);
-
-        var expected = acceptingOnly(taskId);
-        assertEquals(expected, target.getFilters());
-    }
-
-    @Test
-    @DisplayName("compose Target with String IDs")
-    void composeWithStringIds() {
-        var firstId = "a";
-        var secondId = "b";
-        var thirdId = "c";
-
-        var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
-
-        assertUrl(target);
-
-        var expected = acceptingOnly(StringValue.of(firstId),
-                                     StringValue.of(secondId),
-                                     StringValue.of(thirdId));
-        assertEquals(expected, target.getFilters());
-    }
-
-    @Test
-    @DisplayName("compose Target with Integer IDs")
-    void composeWithIntIds() {
-        var firstId = 1;
-        var secondId = 2;
-        var thirdId = 3;
-
-        var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
-
-        assertUrl(target);
-
-        var expected = acceptingOnly(Int32Value.of(firstId),
-                                     Int32Value.of(secondId),
-                                     Int32Value.of(thirdId));
-        assertEquals(expected, target.getFilters());
-    }
-
-    @Test
-    @DisplayName("compose Target with Long IDs")
-    void composeWithLongIds() {
-        var firstId = 1L;
-        var secondId = 2L;
-        var thirdId = 3L;
-
-        var target = someOf(TestEntity.class, ImmutableSet.of(firstId, secondId, thirdId));
-
-        assertUrl(target);
-
-        var expected = acceptingOnly(Int64Value.of(firstId),
-                                     Int64Value.of(secondId),
-                                     Int64Value.of(thirdId));
-        assertEquals(expected, target.getFilters());
-    }
-
-    @Test
-    @DisplayName("throw IAE for unsupported IDs")
+    @DisplayName("throw `IAE` for unsupported IDs")
     void throwIaeForUnsupportedIds() {
         assertThrows(IllegalArgumentException.class,
                      () -> someOf(TaskId.class, ImmutableSet.of(new Object())));

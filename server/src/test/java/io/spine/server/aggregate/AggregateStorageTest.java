@@ -186,7 +186,7 @@ public class AggregateStorageTest
         }
 
         @Test
-        @DisplayName("absent AggregateStateRecord on reading record")
+        @DisplayName("empty `AggregateHistory` on reading record")
         void absentRecord() {
             var record = storage.read(id);
 
@@ -466,7 +466,7 @@ public class AggregateStorageTest
     class NotStoreEnrichment {
 
         @Test
-        @DisplayName("for EventContext")
+        @DisplayName("for `EventContext`")
         void forEventContext() {
             var context = ActorContext.newBuilder().buildPartial();
             var messageId = MessageId.newBuilder()
@@ -498,7 +498,7 @@ public class AggregateStorageTest
 
         @SuppressWarnings("deprecation") // For backward compatibility.
         @Test
-        @DisplayName("for origin of EventContext type")
+        @DisplayName("for origin of `EventContext` type")
         void forEventContextOrigin() {
             var origin = EventContext.newBuilder()
                     .setEnrichment(withOneAttribute())

@@ -40,7 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("DefaultEntityFactory should")
+@DisplayName("`DefaultEntityFactory` should")
 class DefaultEntityFactoryTest {
 
     private EntityFactory<TestEntity1> entityFactory1;
