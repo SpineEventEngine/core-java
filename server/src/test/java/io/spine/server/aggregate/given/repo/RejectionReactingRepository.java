@@ -27,15 +27,11 @@
 package io.spine.server.aggregate.given.repo;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.ParentState;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
-
-import java.util.Set;
 
 public final class RejectionReactingRepository
         extends AggregateRepository<ProjectId, RejectionReactingAggregate, ParentState> {
@@ -43,19 +39,7 @@ public final class RejectionReactingRepository
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {
         super.setupEventRouting(routing);
-        routing.route(AggCannotStartArchivedProject.class, routeRejection());
-    }
-
-    private static EventRoute<ProjectId, AggCannotStartArchivedProject> routeRejection() {
-        return new EventRoute<ProjectId, AggCannotStartArchivedProject>() {
-            private static final long serialVersionUID = 0L;
-
-            @Override
-            public Set<ProjectId> apply(
-                    AggCannotStartArchivedProject message,
-                    EventContext context) {
-                return ImmutableSet.copyOf(message.getChildProjectIdList());
-            }
-        };
+        routing.route(AggCannotStartArchivedProject.class,
+                      (msg, ctx) -> ImmutableSet.copyOf(msg.getChildProjectIdList()));
     }
 }
