@@ -27,6 +27,7 @@
 package io.spine.server.event;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.enrich.given.EitProjectRepository;
 import io.spine.server.enrich.given.EitTaskRepository;
 import io.spine.server.enrich.given.EitUserRepository;
@@ -51,7 +52,7 @@ public class EventEnricherIntegrationTest {
         var tasks = new EitTaskRepository();
         var users = new EitUserRepository();
         var enricher = createEnricher(users, projects, tasks);
-        var contextBuilder = BoundedContext.multitenant(assumingTestsValue())
+        var contextBuilder = BoundedContextBuilder.assumingTests(true)
                 .enrichEventsUsing(enricher)
                 .add(projects)
                 .add(tasks)
