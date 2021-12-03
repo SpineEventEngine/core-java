@@ -26,9 +26,7 @@
 
 package io.spine.server.route.given.switchman;
 
-import io.spine.core.CommandContext;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.route.CommandRoute;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.given.switchman.command.SetSwitch;
 import io.spine.server.route.given.switchman.rejection.SwitchmanUnavailable;
@@ -43,23 +41,24 @@ public final class SwitchmanBureau extends AggregateRepository<String, Switchman
     public static final String MISSING_SWITCHMAN_NAME = "Petrovich";
 
     @Override
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     protected void setupCommandRouting(CommandRouting<String> routing) {
         super.setupCommandRouting(routing);
-        routing.route(SetSwitch.class, new CommandRoute<>() {
-            private static final long serialVersionUID = 0L;
+        routing.route(SetSwitch.class, (cmd, ctx) -> routeToSwitchman(cmd));
+    }
 
-            @Override
-            public String apply(SetSwitch cmd, CommandContext context) {
-                var switchmanName = cmd.getSwitchmanName();
-                if (switchmanName.equals(MISSING_SWITCHMAN_NAME)) {
-                    throw new RuntimeException(
-                            SwitchmanUnavailable.newBuilder()
-                                    .setSwitchmanName(switchmanName)
-                                    .build());
-                }
-                return switchmanName;
-            }
-        });
+    /**
+     * Returns the route to a switchman, checking whether he is available.
+     *
+     * <p>In case the switchman isn't available, throws a {@code RuntimeException}.
+     */
+    private static String routeToSwitchman(SetSwitch cmd) {
+        var switchmanName = cmd.getSwitchmanName();
+        if (switchmanName.equals(MISSING_SWITCHMAN_NAME)) {
+            throw new RuntimeException(
+                    SwitchmanUnavailable.newBuilder()
+                            .setSwitchmanName(switchmanName)
+                            .build());
+        }
+        return switchmanName;
     }
 }
