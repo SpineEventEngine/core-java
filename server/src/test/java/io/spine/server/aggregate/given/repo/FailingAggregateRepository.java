@@ -30,17 +30,13 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.CommandContext;
-import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.RejectNegativeInt;
-
-import java.util.Set;
 
 /**
  * The repository of {@link io.spine.server.aggregate.given.repo.FailingAggregate}s.
@@ -68,27 +64,22 @@ public final class FailingAggregateRepository
                 });
     }
 
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override
     protected void setupEventRouting(EventRouting<Long> routing) {
         super.setupEventRouting(routing);
-        routing.replaceDefault(
-                new EventRoute<>() {
-                    private static final long serialVersionUID = 0L;
+        routing.replaceDefault((message, context) -> newDefaultRouteFor(message));
+    }
 
-                    /**
-                     * Returns several entity identifiers to check error isolation.
-                     *
-                     * @see io.spine.server.aggregate.given.repo.FailingAggregate#on(io.spine.test.aggregate.number.FloatEncountered)
-                     */
-                    @Override
-                    public Set<Long> apply(EventMessage message, EventContext context) {
-                        if (message instanceof FloatEncountered) {
-                            var absValue = FailingAggregate.toId((FloatEncountered) message);
-                            return ImmutableSet.of(absValue, absValue + 100, absValue + 200);
-                        }
-                        return ImmutableSet.of(1L, 2L);
-                    }
-                });
+    /**
+     * Returns several entity identifiers to check error isolation.
+     *
+     * @see io.spine.server.aggregate.given.repo.FailingAggregate#on(io.spine.test.aggregate.number.FloatEncountered)
+     */
+    private static ImmutableSet<Long> newDefaultRouteFor(EventMessage message) {
+        if (message instanceof FloatEncountered) {
+            var absValue = FailingAggregate.toId((FloatEncountered) message);
+            return ImmutableSet.of(absValue, absValue + 100, absValue + 200);
+        }
+        return ImmutableSet.of(1L, 2L);
     }
 }
