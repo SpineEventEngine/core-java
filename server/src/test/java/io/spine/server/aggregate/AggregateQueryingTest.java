@@ -117,12 +117,11 @@ class AggregateQueryingTest {
             var records = repository.findRecords(query.filters(),
                                                  query.responseFormat());
             var asList = ImmutableList.copyOf(records);
-            List<? extends EntityState<?>> result =
-                    asList.stream()
-                          .map(EntityRecord::getState)
-                          .map(unpackFunc())
-                          .map((s) -> (EntityState<?>) s)
-                          .collect(toList());
+            var result = asList.stream()
+                    .map(EntityRecord::getState)
+                    .map(unpackFunc())
+                    .map((s) -> (EntityState<?>) s)
+                    .collect(toList());
             return result;
         }
     }
@@ -353,18 +352,18 @@ class AggregateQueryingTest {
 
         private MRPhoto onePhoto() {
             var target = givenPhotos.stream()
-                                        .findFirst()
-                                        .orElseGet(() -> fail("No test data."));
+                    .findFirst()
+                    .orElseGet(() -> fail("No test data."));
             return target;
         }
 
         private MRPhoto anotherPhoto() {
             var target = givenPhotos.stream()
-                                        .skip(1)
-                                        .findFirst()
-                                        .orElseGet(() -> fail(
-                                                "Too few test data items: " + givenPhotos.size())
-                                        );
+                    .skip(1)
+                    .findFirst()
+                    .orElseGet(() -> fail(
+                            "Too few test data items: " + givenPhotos.size())
+                    );
             return target;
         }
 
