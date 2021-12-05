@@ -38,11 +38,11 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
 
 /**
- * The aggregate with the state of {@linkplain io.spine.test.aggregate.event.AggProjectCreated creation event}
- * wrapped into {@code Any}. The event keeps the list of child project IDs, which we use
- * in rejecting subsequent commands.
+ * The aggregate with the state of {@linkplain io.spine.test.aggregate.event.AggProjectCreated
+ * creation event} wrapped into {@code Any}. The event keeps the list of child project IDs,
+ * which we use in rejecting subsequent commands.
  */
-class RejectingAggregate
+final class RejectingAggregate
         extends Aggregate<ProjectId, SubProjectList, SubProjectList.Builder> {
 
     private RejectingAggregate(ProjectId id) {
@@ -52,9 +52,9 @@ class RejectingAggregate
     @Assign
     AggProjectCreated on(AggCreateProjectWithChildren cmd) {
         return AggProjectCreated.newBuilder()
-                                .setProjectId(cmd.getProjectId())
-                                .addAllChildProjectId(cmd.getChildProjectIdList())
-                                .build();
+                .setProjectId(cmd.getProjectId())
+                .addAllChildProjectId(cmd.getChildProjectIdList())
+                .build();
     }
 
     @Apply

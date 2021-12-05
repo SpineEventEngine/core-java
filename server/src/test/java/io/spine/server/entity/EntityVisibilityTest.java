@@ -74,7 +74,7 @@ class EntityVisibilityTest {
     }
 
     @Test
-    @DisplayName("report `NONE` level for `Process Manager`s by default")
+    @DisplayName("report `NONE` level for `ProcessManager`s by default")
     void pmDefaults() {
         var actual = assertVisibility(UserSignIn.class, NONE);
         assertFalse(actual.isNotNone());

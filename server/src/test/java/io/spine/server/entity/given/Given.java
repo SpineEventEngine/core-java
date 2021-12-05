@@ -28,10 +28,7 @@ package io.spine.server.entity.given;
 
 import io.spine.base.EntityState;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregatePart;
-import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.given.dispatch.AggregateBuilder;
-import io.spine.server.aggregate.given.dispatch.AggregatePartBuilder;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.given.dispatch.ProcessManagerBuilder;
 import io.spine.server.projection.Projection;
@@ -57,20 +54,6 @@ public class Given {
         checkNotNull(aggregateClass);
         var result = new AggregateBuilder<A, I, S>();
         result.setResultClass(aggregateClass);
-        return result;
-    }
-
-    /**
-     * Creates a builder for an {@code AggregatePart}.
-     */
-    public static <A extends AggregatePart<I, S, ?, R>,
-                   I,
-                   S extends EntityState<I>,
-                   R extends AggregateRoot<I>>
-    AggregatePartBuilder<A, I, S, R> aggregatePartOfClass(Class<A> partClass) {
-        checkNotNull(partClass);
-        var result = new AggregatePartBuilder<A, I, S, R>();
-        result.setResultClass(partClass);
         return result;
     }
 

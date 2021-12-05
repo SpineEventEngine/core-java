@@ -59,7 +59,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
 /**
  * An aggregate class with handlers and appliers.
  */
-@SuppressWarnings("PublicField") /* For inspection in tests. */
+@SuppressWarnings({"PublicField", "WeakerAccess"}) /* For inspection in tests. */
 public class TestAggregate
         extends Aggregate<ProjectId, AggProject, AggProject.Builder> {
 

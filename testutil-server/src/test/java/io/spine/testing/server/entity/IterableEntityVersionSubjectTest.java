@@ -101,11 +101,11 @@ class IterableEntityVersionSubjectTest
     }
 
     @Nested
-    @DisplayName("if actual is null")
+    @DisplayName("if actual is `null`")
     class IfNull {
 
         @Test
-        @DisplayName("not allow to containsAllNewerThan(...)")
+        @DisplayName("not allow to `containsAllNewerThan(...)`")
         void containsAllNewerThan() {
             var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
@@ -115,7 +115,7 @@ class IterableEntityVersionSubjectTest
         }
 
         @Test
-        @DisplayName("not allow to containsAllNewerOrEqualTo(...)")
+        @DisplayName("not allow to `containsAllNewerOrEqualTo(...)`")
         void containsAllNewerOrEqualTo() {
             var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
@@ -125,7 +125,7 @@ class IterableEntityVersionSubjectTest
         }
 
         @Test
-        @DisplayName("not allow to containsAllOlderThan(...)")
+        @DisplayName("not allow to `containsAllOlderThan(...)`")
         void containsAllOlderThan() {
             var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
@@ -135,7 +135,7 @@ class IterableEntityVersionSubjectTest
         }
 
         @Test
-        @DisplayName("not allow to containsAllOlderOrEqualTo(...)")
+        @DisplayName("not allow to `containsAllOlderOrEqualTo(...)`")
         void containsAllOlderOrEqualTo() {
             var error = expectFailure(
                     whenTesting -> whenTesting.that(null)
@@ -145,7 +145,7 @@ class IterableEntityVersionSubjectTest
         }
 
         @Test
-        @DisplayName("not allow to containsSingleEntityVersionThat()")
+        @DisplayName("not allow to `containsSingleEntityVersionThat()`")
         void containsSingleEntityVersionThat() {
             var error = expectFailure(
                     whenTesting -> whenTesting.that(null)

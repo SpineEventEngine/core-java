@@ -116,17 +116,17 @@ class CommandFactoryTest {
     }
 
     @Nested
-    @DisplayName("throw ValidationException when creating command")
+    @DisplayName("throw `ValidationException` when creating command")
     class NotAccept {
 
         @Test
-        @DisplayName("from invalid Message")
+        @DisplayName("from invalid `Message`")
         void invalidMessage() {
             assertThrows(ValidationException.class, () -> factory.create(INVALID_COMMAND));
         }
 
         @Test
-        @DisplayName("from invalid Message with version")
+        @DisplayName("from invalid `Message` with version")
         void invalidMessageWithVersion() {
             assertThrows(ValidationException.class, () -> factory.create(INVALID_COMMAND, 42));
         }

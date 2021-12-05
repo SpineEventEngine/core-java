@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.TestValues.nullRef;
 
-@DisplayName("EntitySubject should")
+@DisplayName("`EntitySubject` should")
 class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
 
     @Override

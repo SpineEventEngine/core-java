@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class QueryFactoryTestEnv {
+public final class QueryFactoryTestEnv {
 
     // See {@code client_requests.proto} for declaration.
     public static final Class<TestEntity> TEST_ENTITY_TYPE = TestEntity.class;
@@ -55,12 +55,6 @@ public class QueryFactoryTestEnv {
 
     /** Prevents instantiation of this test environment class. */
     private QueryFactoryTestEnv() {
-    }
-
-    public static TestEntityId entityId(int idValue) {
-        return TestEntityId.newBuilder()
-                           .setValue(idValue)
-                           .build();
     }
 
     public static Set<TestEntityId> threeIds() {

@@ -27,13 +27,7 @@
 package io.spine.server.aggregate.given.query;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.base.EventMessage;
-import io.spine.core.Event;
-import io.spine.core.EventId;
-import io.spine.core.MessageId;
-import io.spine.core.Versions;
 import io.spine.net.Url;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.aggregate.Aggregate;
@@ -52,18 +46,15 @@ import io.spine.test.aggregate.query.event.MRPhotoArchived;
 import io.spine.test.aggregate.query.event.MRPhotoDeleted;
 import io.spine.test.aggregate.query.event.MRPhotoUploaded;
 import io.spine.test.aggregate.query.event.MRSoundUploaded;
-import io.spine.testing.server.TestEventFactory;
 
 import java.util.Collection;
 
 import static io.spine.test.aggregate.query.MRPhotoType.CROP_FRAME;
 import static io.spine.test.aggregate.query.MRPhotoType.FULL_FRAME;
 import static io.spine.test.aggregate.query.MRPhotoType.THUMBNAIL;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 
 public final class AggregateQueryingTestEnv {
 
-    public static final TestEventFactory events = newInstance(AggregateQueryingTestEnv.class);
     private static final MRPhoto spineLogo = newPhoto(THUMBNAIL,
                                                       "spine.io/logo",
                                                       "Spine Logo",
@@ -123,22 +114,6 @@ public final class AggregateQueryingTestEnv {
                 .setHeight(height)
                 .vBuild();
         return photo;
-    }
-
-    public static MessageId cause() {
-        var causeOfChange = EventId.newBuilder()
-                .setValue("For tests")
-                .build();
-        var messageId = MessageId.newBuilder()
-                .setId(AnyPacker.pack(causeOfChange))
-                .setVersion(Versions.zero())
-                .setTypeUrl("example.org/test.Type")
-                .vBuild();
-        return messageId;
-    }
-
-    public static Event event(EventMessage eventMessage) {
-        return events.createEvent(eventMessage);
     }
 
     // This suppression makes sense only to Error Prone.

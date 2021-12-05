@@ -309,13 +309,6 @@ public abstract class ProjectionRepository<I,
     }
 
     /**
-     * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
-     */
-    protected final Stand stand() {
-        return context().stand();
-    }
-
-    /**
      * {@inheritDoc}
      *
      * <p>Overrides the parent method to expose it to this package.

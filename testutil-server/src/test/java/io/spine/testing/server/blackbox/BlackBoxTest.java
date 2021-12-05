@@ -443,7 +443,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
     }
 
     @Test
-    @DisplayName("throw Illegal State Exception on Bounded Context close error")
+    @DisplayName("throw `IllegalStateException` on Bounded Context close error")
     void throwIllegalStateExceptionOnClose() {
         var throwingRepo = new RepositoryThrowingExceptionOnClose() {
             @Override
@@ -460,7 +460,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
     }
 
     @Nested
-    @DisplayName("create an instance by BoundedContextBuilder")
+    @DisplayName("create an instance by `BoundedContextBuilder`")
     class CreateByBuilder {
 
         private final ImmutableList<Repository<?, ?>> repositories = ImmutableList.of(

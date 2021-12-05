@@ -154,61 +154,61 @@ class LoggingEntityTest extends LoggingTest {
         }
 
         @Test
-        @DisplayName("_severe")
+        @DisplayName("`_severe`")
         void severe() {
             testLevel(Logging::_severe, SEVERE);
         }
 
         @Test
-        @DisplayName("_warn")
+        @DisplayName("`_warn`")
         void warn() {
             testLevel(Logging::_warn, WARNING);
         }
 
         @Test
-        @DisplayName("_info")
+        @DisplayName("`_info`")
         void info() {
             testLevel(Logging::_info, INFO);
         }
 
         @Test
-        @DisplayName("_config")
+        @DisplayName("`_config`")
         void config() {
             testLevel(Logging::_config, CONFIG);
         }
 
         @Test
-        @DisplayName("_fine")
+        @DisplayName("`_fine`")
         void fine() {
             testLevel(Logging::_fine, FINE);
         }
 
         @Test
-        @DisplayName("_finer")
+        @DisplayName("`_finer`")
         void finer() {
             testLevel(Logging::_finer, FINER);
         }
 
         @Test
-        @DisplayName("_finest")
+        @DisplayName("`_finest`")
         void finest() {
             testLevel(Logging::_finest, FINEST);
         }
 
         @Test
-        @DisplayName("_error")
+        @DisplayName("`_error`")
         void error() {
             testLevel(Logging::_error, Logging.errorLevel());
         }
 
         @Test
-        @DisplayName("_debug")
+        @DisplayName("`_debug`")
         void debug() {
             testLevel(Logging::_debug, Logging.debugLevel());
         }
 
         @Test
-        @DisplayName("_trace")
+        @DisplayName("`_trace`")
         void trace() {
             testLevel(Logging::_trace, FINEST);
         }

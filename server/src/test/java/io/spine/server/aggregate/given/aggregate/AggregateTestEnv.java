@@ -46,7 +46,7 @@ import io.spine.testing.server.TestEventFactory;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.core.given.GivenVersion.withNumber;
 
-public class AggregateTestEnv {
+public final class AggregateTestEnv {
 
     /** Prevent instantiation of this test environment. */
     private AggregateTestEnv() {
@@ -55,44 +55,44 @@ public class AggregateTestEnv {
 
     private static AggTaskId newTaskId() {
         return AggTaskId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+                .setId(newUuid())
+                .build();
     }
 
     public static TenantId newTenantId() {
         return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
+                .setValue(newUuid())
+                .build();
     }
 
     public static AggCreateTask createTask() {
         return AggCreateTask.newBuilder()
-                            .setTaskId(newTaskId())
-                            .build();
+                .setTaskId(newTaskId())
+                .build();
     }
 
     public static AggAssignTask assignTask() {
         return AggAssignTask.newBuilder()
-                            .setTaskId(newTaskId())
-                            .setAssignee(GivenUserId.generated())
-                            .build();
+                .setTaskId(newTaskId())
+                .setAssignee(GivenUserId.generated())
+                .build();
     }
 
     public static AggReassignTask reassignTask() {
         return AggReassignTask.newBuilder()
-                              .setTaskId(newTaskId())
-                              .setAssignee(GivenUserId.generated())
-                              .build();
+                .setTaskId(newTaskId())
+                .setAssignee(GivenUserId.generated())
+                .build();
     }
 
     public static Command command(CommandMessage commandMessage, TenantId tenantId) {
         return requestFactory(tenantId).command()
-                                       .create(commandMessage);
+                .create(commandMessage);
     }
 
     public static Command command(CommandMessage commandMessage) {
         return requestFactory().command()
-                               .create(commandMessage);
+                .create(commandMessage);
     }
 
     public static CommandEnvelope env(CommandMessage commandMessage) {

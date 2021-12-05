@@ -40,7 +40,7 @@ import static io.spine.testing.server.query.GivenResponseStatus.rejection;
 import static io.spine.testing.server.query.ResponseStatusSubject.assertResponseStatus;
 import static io.spine.testing.server.query.ResponseStatusSubject.responseStatus;
 
-@DisplayName("ResponseStatusSubject should")
+@DisplayName("`ResponseStatusSubject` should")
 class ResponseStatusSubjectTest extends SubjectTest<ResponseStatusSubject, Status> {
 
     @Test

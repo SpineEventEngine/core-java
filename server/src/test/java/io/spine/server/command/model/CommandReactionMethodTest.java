@@ -84,7 +84,7 @@ class CommandReactionMethodTest {
     }
 
     @Nested
-    @DisplayName("support Message return type")
+    @DisplayName("support `Message` return type")
     class MessageReturn {
 
         private EventReceiver target;

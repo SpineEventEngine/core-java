@@ -77,7 +77,7 @@ class CommandAckMonitorTest {
     }
 
     @Test
-    @DisplayName("not accept null arguments in Builder")
+    @DisplayName("not accept null arguments in `Builder`")
     void rejectNulls() {
         new NullPointerTester()
                 .testInstanceMethods(CommandAckMonitor.newBuilder(), PACKAGE);
@@ -96,7 +96,7 @@ class CommandAckMonitorTest {
         }
 
         @Test
-        @DisplayName("delegate StreamObserver")
+        @DisplayName("delegate `StreamObserver`")
         void delegate() {
             builder.setTenantId(TenantId.getDefaultInstance())
                    .setSystemWriteSide(NoOpSystemWriteSide.INSTANCE);

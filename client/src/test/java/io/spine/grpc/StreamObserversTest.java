@@ -143,11 +143,11 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
     }
 
     @Nested
-    @DisplayName("return Error extracted")
+    @DisplayName("return `Error` extracted")
     class ExtractError {
 
         @Test
-        @DisplayName("from StatusRuntimeException metadata")
+        @DisplayName("from `StatusRuntimeException` metadata")
         void fromStatusRuntimeException() {
             var expectedError = Error.getDefaultInstance();
             var metadata = MetadataConverter.toMetadata(expectedError);
@@ -159,7 +159,7 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
         }
 
         @Test
-        @DisplayName("from StatusException metadata")
+        @DisplayName("from `StatusException` metadata")
         void fromStatusException() {
             var expectedError = Error.getDefaultInstance();
             var metadata = MetadataConverter.toMetadata(expectedError);
@@ -172,11 +172,11 @@ class StreamObserversTest extends UtilityClassTest<StreamObservers> {
     }
 
     @Nested
-    @DisplayName("return absent on Error extraction")
+    @DisplayName("return absent on `Error` extraction")
     class ExtractAbsent {
 
         @Test
-        @DisplayName("from Throwable which is not status exception")
+        @DisplayName("from `Throwable` which is not status exception")
         void fromGenericThrowable() {
             var msg = "Neither a StatusException nor a StatusRuntimeException.";
             var exception = new Exception(msg);

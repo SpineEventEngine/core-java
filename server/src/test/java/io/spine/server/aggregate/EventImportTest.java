@@ -173,7 +173,7 @@ class EventImportTest {
                 .build();
 
         @Test
-        @DisplayName("Producer ID by default")
+        @DisplayName("producer ID by default")
         void routeById() {
             createRepository(false);
 

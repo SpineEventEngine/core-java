@@ -41,7 +41,7 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 
-public class AggregateRootTestEnv {
+public final class AggregateRootTestEnv {
 
     private AggregateRootTestEnv() {
     }

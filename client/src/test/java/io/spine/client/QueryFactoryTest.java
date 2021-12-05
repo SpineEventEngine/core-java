@@ -154,7 +154,7 @@ class QueryFactoryTest {
     }
 
     @Nested
-    @DisplayName("be consistent with QueryBuilder when creating query")
+    @DisplayName("be consistent with `QueryBuilder` when creating query")
     class CreateQuery {
 
         @Test

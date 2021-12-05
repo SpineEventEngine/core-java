@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("Subscriptions utility should")
+@DisplayName("`Subscriptions` utility should")
 class SubscriptionsTest {
 
     @Test

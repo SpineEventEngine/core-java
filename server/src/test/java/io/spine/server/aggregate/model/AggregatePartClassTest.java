@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("AggregatePartClass should")
+@DisplayName("`AggregatePartClass` should")
 class AggregatePartClassTest {
 
     private final AggregatePartClass<AnAggregatePart> partClass =

@@ -27,15 +27,11 @@
 package io.spine.server.aggregate.given.repo;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventContext;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.test.aggregate.ParentState;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.event.AggProjectArchived;
-
-import java.util.Set;
 
 /**
  * The repository of {@link io.spine.server.aggregate.given.repo.ReactingAggregate}.
@@ -43,19 +39,10 @@ import java.util.Set;
 public class ReactingRepository
         extends AggregateRepository<ProjectId, ReactingAggregate, ParentState> {
 
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {
         super.setupEventRouting(routing);
         routing.route(AggProjectArchived.class,
-                      new EventRoute<ProjectId, AggProjectArchived>() {
-                          private static final long serialVersionUID = 0L;
-
-                          @Override
-                          public Set<ProjectId> apply(AggProjectArchived message,
-                                                      EventContext context) {
-                              return ImmutableSet.copyOf(message.getChildProjectIdList());
-                          }
-                      });
+                      (msg, ctx) -> ImmutableSet.copyOf(msg.getChildProjectIdList()));
     }
 }

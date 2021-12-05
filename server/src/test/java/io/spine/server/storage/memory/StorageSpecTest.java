@@ -42,7 +42,7 @@ import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("StorageSpec should")
+@DisplayName("`StorageSpec` should")
 class StorageSpecTest {
 
     @Test

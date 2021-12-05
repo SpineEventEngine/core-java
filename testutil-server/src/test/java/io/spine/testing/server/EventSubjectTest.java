@@ -37,7 +37,7 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.server.EventSubject.events;
 
-@DisplayName("EventSubject should")
+@DisplayName("`EventSubject` should")
 class EventSubjectTest extends EmittedMessageSubjectTest<EventSubject, Event, EventMessage> {
 
     private static final TestEventFactory events =

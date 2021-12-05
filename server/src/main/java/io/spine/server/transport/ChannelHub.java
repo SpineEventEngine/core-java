@@ -54,20 +54,11 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
         this.transportFactory = transportFactory;
     }
 
+    /**
+     * Returns the identifiers of the channels for this hub.
+     */
     public Set<ChannelId> ids() {
         return unmodifiableSet(channels.keySet());
-    }
-
-    /**
-     * Checks if this channel hub contains a channel with a given ID.
-     *
-     * @param id
-     *         the ID of the channel
-     * @return {@code true} if such a channel is established in this hub, {@code false} otherwise
-     * @see #get(ChannelId)
-     */
-    public boolean hasChannel(ChannelId id) {
-        return channels.containsKey(id);
     }
 
     /**

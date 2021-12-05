@@ -182,7 +182,7 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
      * overriding them in descendants.
      */
     @Test
-    @DisplayName("return non-null `index()`")
+    @DisplayName("return non-`null` `index()`")
     protected void nonNullIndex() {
         var index = storage.index();
         assertNotNull(index);
@@ -247,20 +247,20 @@ public abstract class AbstractStorageTest<I, M extends Message, S extends Abstra
     class ThrowNpeIf {
 
         @Test
-        @DisplayName("reading by null ID")
+        @DisplayName("reading by `null` ID")
         void readByNullId() {
             assertThrows(NullPointerException.class, () -> storage.read(nullRef()));
         }
 
         @Test
-        @DisplayName("writing by null ID")
+        @DisplayName("writing by `null` ID")
         void writeByNullId() {
             assertThrows(NullPointerException.class,
                          () -> storage.write(nullRef(), newStorageRecord(newId())));
         }
 
         @Test
-        @DisplayName("writing null record")
+        @DisplayName("writing `null` record")
         void writeNullRecord() {
             assertThrows(NullPointerException.class, () -> storage.write(newId(), nullRef()));
         }

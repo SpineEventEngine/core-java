@@ -67,11 +67,4 @@ final class StateColumns<S extends EntityState<?>> implements Iterable<EntityCol
     public Iterator<EntityColumn<S, ?>> iterator() {
         return columns.iterator();
     }
-
-    /**
-     * Returns the number of columns.
-     */
-    int size() {
-        return columns.size();
-    }
 }

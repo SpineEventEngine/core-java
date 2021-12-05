@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@DisplayName("GivenUserId should")
+@DisplayName("`GivenUserId` should")
 class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
 
     GivenUserIdTest() {
@@ -42,7 +42,7 @@ class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
     }
 
     @Test
-    @DisplayName("create UserId by string")
+    @DisplayName("create `UserId` by string")
     void createByString() {
         var testIdString = "12345";
         var userId = GivenUserId.of(testIdString);
@@ -55,7 +55,7 @@ class GivenUserIdTest extends UtilityClassTest<GivenUserId> {
     }
 
     @Test
-    @DisplayName("create new UUID based UserId")
+    @DisplayName("create new UUID-based `UserId`")
     void createNewUuidBased() {
         assertFalse(GivenUserId.newUuid()
                                .getValue()

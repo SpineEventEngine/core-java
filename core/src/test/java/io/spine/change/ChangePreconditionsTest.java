@@ -49,7 +49,7 @@ class ChangePreconditionsTest extends UtilityClassTest<ChangePreconditions> {
     }
 
     @Test
-    @DisplayName("not accept empty String value")
+    @DisplayName("not accept empty `String` value")
     void failOnEmptyString() {
         var str = "";
         assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));

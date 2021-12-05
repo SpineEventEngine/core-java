@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventApplierMethod should")
+@DisplayName("`EventApplierMethod` should")
 class ApplierTest {
 
     private final EventApplierSignature signature = new EventApplierSignature();
@@ -113,7 +113,7 @@ class ApplierTest {
     }
 
     @Test
-    @DisplayName("convert `null` result to Success")
+    @DisplayName("convert `null` result to `Success`")
     void convertToSuccess() {
         var applierObject = new ValidApplier();
         var method = signature.classify(applierObject.getMethod());

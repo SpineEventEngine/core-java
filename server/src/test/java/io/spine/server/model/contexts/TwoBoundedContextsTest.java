@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@DisplayName("Two BoundedContexts")
+@DisplayName("Two `BoundedContext`s")
 class TwoBoundedContextsTest {
 
     private BoundedContext tasksContext;

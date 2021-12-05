@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * {@link SubjectTest} due to the non-standard
  * {@linkplain QueryResultSubject#assertQueryResult(QueryResponse) way} of subject creation.
  */
-@DisplayName("QueryResultSubject should")
+@DisplayName("`QueryResultSubject` should")
 class QueryResultSubjectTest extends SubjectTest<QueryResultSubject, Iterable<EntityState<?>>> {
 
     private static final String EXPECTED_ASSERTION_ERROR_TO_BE_THROWN =

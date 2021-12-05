@@ -36,7 +36,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.TestValues.randomString;
 
-@DisplayName("SingleTenantIndex should")
+@DisplayName("`SingleTenantIndex` should")
 class SingleTenantIndexTest {
 
     private final TenantIndex index = TenantIndex.singleTenant();

@@ -257,7 +257,7 @@ class AggregateRepositoryTest {
     }
 
     @Nested
-    @DisplayName("pass snapshot trigger + 1 to AggregateReadRequest")
+    @DisplayName("pass (snapshot trigger + 1) to `AggregateReadRequest`")
     class PassSnapshotTrigger {
 
         @Test
@@ -369,7 +369,7 @@ class AggregateRepositoryTest {
 
     @SuppressWarnings("CheckReturnValue")
     @Test
-    @DisplayName("throw an ISE when history is corrupted")
+    @DisplayName("throw an `ISE` when history is corrupted")
     void throwWhenCorrupted() {
         var aggregate = givenStoredAggregate();
         var history = aggregate.recentHistory();
