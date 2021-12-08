@@ -112,8 +112,8 @@ class ModelVerifierPluginTest {
         var filesWithBuild = new ArrayList<>(Arrays.asList(fileNames));
         filesWithBuild.add("build.gradle.kts");
         var javaFiles = filesWithBuild.stream()
-                          .map(Paths::get)
-                          .collect(toImmutableList());
+                .map(Paths::get)
+                .collect(toImmutableList());
         Function1<Path, Boolean> matching = path -> {
             var isWantedJavaFile = javaFiles.stream().anyMatch(path::endsWith);
             return isWantedJavaFile || path.toString().endsWith(".proto");
