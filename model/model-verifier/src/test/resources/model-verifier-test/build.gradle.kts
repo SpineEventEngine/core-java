@@ -48,6 +48,7 @@ buildscript {
 
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
+    val toolBaseVersion: String by extra
     val mcJavaVersion: String by extra
     val versionToPublish: String by extra
 
@@ -62,7 +63,8 @@ buildscript {
         resolutionStrategy {
             force(
                 "io.spine:spine-base:$spineBaseVersion",
-                "io.spine:spine-time:$spineTimeVersion"
+                "io.spine:spine-time:$spineTimeVersion",
+                "io.spine.tools:spine-plugin-base:$toolBaseVersion"
             )
         }
     }
