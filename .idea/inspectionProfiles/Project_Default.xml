@@ -768,6 +768,7 @@
         <option name="useParameterizedTypeForCollectionMethods" value="true" />
         <option name="doNotWeakenToJavaLangObject" value="true" />
         <option name="onlyWeakentoInterface" value="true" />
+        <option name="doNotWeakenInferredVariableType" value="true" />
       </scope>
       <scope name="Tests" level="INFO" enabled="true">
         <option name="useRighthandTypeAsWeakestTypeInAssignments" value="true" />
