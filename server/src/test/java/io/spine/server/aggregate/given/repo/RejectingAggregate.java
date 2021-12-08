@@ -26,6 +26,7 @@
 
 package io.spine.server.aggregate.given.repo;
 
+import com.google.errorprone.annotations.DoNotCall;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -63,6 +64,7 @@ final class RejectingAggregate
     }
 
     @Assign
+    @SuppressWarnings("DoNotCallSuggester") // OK to always throw in this test env. method.
     AggProjectStarted on(AggStartProjectWithChildren cmd) throws AggCannotStartArchivedProject {
         throw AggCannotStartArchivedProject.newBuilder()
                 .setProjectId(id())
