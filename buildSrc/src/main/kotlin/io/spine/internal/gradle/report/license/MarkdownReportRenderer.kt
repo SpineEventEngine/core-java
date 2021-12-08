@@ -50,7 +50,7 @@ internal class MarkdownReportRenderer(
         ProjectDependencies.of(data).printTo(document)
         template.writeFooter()
 
-        document.appendToFile(outputFile)
+        document.writeToFile(outputFile)
     }
 
     private fun outputFile(project: Project): File {

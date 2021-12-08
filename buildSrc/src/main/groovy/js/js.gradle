@@ -39,6 +39,8 @@
  * <p>The script is based on other scripts from `config` submodule.
  */
 
+println("`js.gradle` script is deprecated. Please use `javascript` extension instead.")
+
 ext {
     srcDir = "$projectDir/main"
     testSrcDir = "$projectDir/test"

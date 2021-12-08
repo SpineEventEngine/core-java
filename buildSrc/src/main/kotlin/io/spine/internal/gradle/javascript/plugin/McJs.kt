@@ -24,39 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.AutoService
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Kotlin
+package io.spine.internal.gradle.javascript.plugin
 
-val spineBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.withGroovyBuilder
 
-dependencies {
-    api(Kotlin.reflect)
-    api(Grpc.protobuf)
-    api(Grpc.core)
-    api(Grpc.stub)
-    api(project(":client"))
+/**
+ * Applies `mc-js` plugin and specifies directories for generated code.
+ *
+ * @see JsPlugins
+ */
+fun JsPlugins.mcJs() {
 
-    AutoService.apply {
-        testAnnotationProcessor(processor)
-        testCompileOnly(annotations)
+    plugins {
+        apply("io.spine.mc-js")
     }
-    testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine:spine-base-types:$spineBaseTypesVersion")
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
-    testImplementation(project(":testutil-server"))
-}
 
-// Copies the documentation files to the Javadoc output folder.
-// Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
-tasks.javadoc {
-    doLast {
-        copy {
-            from("src/main/docs")
-            into("$buildDir/docs/javadoc")
+    // Temporarily use GroovyInterop.
+    // Currently, it is not possible to obtain `McJsPlugin` on the classpath of `buildSrc`.
+    // See issue: https://github.com/SpineEventEngine/config/issues/298
+
+    project.withGroovyBuilder {
+        "protoJs" {
+            setProperty("generatedMainDir", genProtoMain)
+            setProperty("generatedTestDir", genProtoTest)
         }
     }
 }
+
+/**
+ * Locates `generateJsonParsers` in this [TaskContainer].
+ *
+ * The task generates JSON-parsing code for JavaScript messages compiled from Protobuf.
+ */
+val TaskContainer.generateJsonParsers: TaskProvider<Task>
+    get() = named("generateJsonParsers")

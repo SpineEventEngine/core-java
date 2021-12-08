@@ -32,12 +32,11 @@ import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.server.command.model.DuplicateHandlerCheck;
 import io.spine.server.model.Model;
-import io.spine.tools.gradle.ProjectHierarchy;
+import io.spine.tools.gradle.project.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;

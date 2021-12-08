@@ -43,6 +43,8 @@ import io.spine.internal.gradle.Scripts
  * the NPM packages should be published.
  */
 
+println("`configure-proto.gradle` script is deprecated. Please use `javascript` extension instead.")
+
 ext {
     genProtoBaseDir = "$projectDir/generated"
     genProtoMain = "$genProtoBaseDir/main/js"

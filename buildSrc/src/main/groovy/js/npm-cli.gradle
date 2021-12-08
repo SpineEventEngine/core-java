@@ -30,6 +30,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
  * The script allowing to run NPM commands from Gradle.
  */
 
+println("`npm-cli.gradle` script is deprecated. Please use `javascript` extension instead.")
 
 /**
  * The name of an environmental variable which contains the NPM auth token.

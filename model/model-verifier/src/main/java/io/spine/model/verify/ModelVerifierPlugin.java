@@ -31,10 +31,12 @@ import io.spine.annotation.Experimental;
 import io.spine.logging.Logging;
 import io.spine.model.CommandHandlers;
 import io.spine.model.assemble.AssignLookup;
-import io.spine.tools.gradle.SpinePlugin;
+import io.spine.tools.gradle.SourceSetName;
+import io.spine.tools.gradle.task.GradleTask;
 import io.spine.tools.mc.java.gradle.McJavaOptions;
 import io.spine.tools.type.MoreKnownTypes;
 import org.gradle.api.Action;
+import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
@@ -43,8 +45,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import static io.spine.tools.gradle.JavaTaskName.classes;
-import static io.spine.tools.gradle.JavaTaskName.compileJava;
+import static io.spine.tools.gradle.project.Projects.descriptorSetFile;
+import static io.spine.tools.gradle.task.JavaTaskName.classes;
+import static io.spine.tools.gradle.task.JavaTaskName.compileJava;
 import static io.spine.tools.mc.java.gradle.plugins.ModelVerifierTaskName.verifyModel;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
@@ -53,7 +56,7 @@ import static java.nio.file.Files.newInputStream;
  * The plugin performing the Spine type model verification.
  */
 @Experimental
-public final class ModelVerifierPlugin extends SpinePlugin {
+public final class ModelVerifierPlugin implements Plugin<Project>, Logging {
 
     private static final String RELATIVE_RAW_MODEL_PATH = AssignLookup.DESTINATION_PATH;
 
@@ -70,7 +73,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
 
     private void createTask(Path rawModelStorage, Project project) {
         _debug().log("Adding task `%s`.", verifyModel);
-        newTask(verifyModel, action(rawModelStorage))
+        GradleTask.newBuilder(verifyModel, action(rawModelStorage))
                 .insertBeforeTask(classes)
                 .insertAfterTask(compileJava)
                 .applyNowTo(project);
@@ -118,7 +121,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         private void extendKnownTypes(Project project) {
             var pluginExtensionName = McJavaOptions.name();
             if (project.getExtensions().findByName(pluginExtensionName) != null) {
-                var descriptorFile = McJavaOptions.descriptorSetFileOf(project, true);
+                var descriptorFile = descriptorSetFile(project, SourceSetName.main);
                 tryExtend(descriptorFile);
             } else {
                 _warn().log(
