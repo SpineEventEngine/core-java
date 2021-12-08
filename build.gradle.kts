@@ -37,6 +37,8 @@ import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.javac.configureErrorProne
 import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.javadoc.JavadocConfig
+import io.spine.internal.gradle.kotlin.applyJvmToolchain
+import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
 import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
@@ -83,14 +85,10 @@ apply(from = "$rootDir/version.gradle.kts")
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
-    kotlin("jvm") version io.spine.internal.dependency.Kotlin.version
+    kotlin("jvm")
     idea
-    io.spine.internal.dependency.Protobuf.GradlePlugin.apply {
-        id(id) version version
-    }
-    io.spine.internal.dependency.ErrorProne.GradlePlugin.apply {
-        id(id)
-    }
+    id(io.spine.internal.dependency.Protobuf.GradlePlugin.id)
+    id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
 }
 
 /** The name of the GitHub repository to which this project belongs. */
@@ -98,6 +96,7 @@ val repositoryName: String = "core-java"
 
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
+val toolBaseVersion: String by extra
 
 spinePublishing {
     with(PublishingRepos) {
@@ -157,27 +156,21 @@ subprojects {
         plugin("pmd-settings")
     }
 
-    val javaVersion = JavaVersion.VERSION_11
-
-    java {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-    }
-
     tasks.withType<JavaCompile> {
         configureJavac()
         configureErrorProne()
     }
 
+    @Suppress("MagicNumber")
+    val javaVersion = 11
     kotlin {
+        applyJvmToolchain(javaVersion)
         explicitApi()
     }
 
     tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = javaVersion.toString()
-            freeCompilerArgs = listOf("-Xskip-prerelease-check")
-        }
+        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+        setFreeCompilerArgs()
     }
 
     dependencies {
@@ -199,7 +192,8 @@ subprojects {
                 force(
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
-                    "io.spine.tools:spine-testlib:$spineBaseVersion"
+                    "io.spine.tools:spine-testlib:$spineBaseVersion",
+                    "io.spine.tools:spine-plugin-base:$toolBaseVersion"
                 )
             }
         }
