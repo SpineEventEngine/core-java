@@ -32,13 +32,11 @@ val spineBaseVersion: String by extra
 val spineBaseTypesVersion: String by extra
 
 dependencies {
+    api(Kotlin.reflect)
+    api(Grpc.protobuf)
+    api(Grpc.core)
+    api(Grpc.stub)
     api(project(":client"))
-    implementation(Kotlin.reflect)
-
-    Grpc.apply {
-        implementation(protobuf)
-        implementation(core)
-    }
 
     AutoService.apply {
         testAnnotationProcessor(processor)
