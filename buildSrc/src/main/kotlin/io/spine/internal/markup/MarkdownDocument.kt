@@ -115,7 +115,7 @@ class MarkdownDocument {
     /**
      * Writes the content of this document to the passed file.
      *
-     * If the file exists, it becomes overwritten.
+     * If the file exists, it is overwritten.
      */
     fun writeToFile(file: File) {
         file.writeText(builder.toString())
