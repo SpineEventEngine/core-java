@@ -26,20 +26,23 @@
 
 package io.spine.model.verify;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import io.spine.testing.SlowTest;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.tools.gradle.TaskName;
 import io.spine.tools.gradle.testing.GradleProject;
+import kotlin.jvm.functions.Function1;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.tools.mc.java.gradle.plugins.ModelVerifierTaskName.verifyModel;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,11 +55,6 @@ class ModelVerifierPluginTest {
     private static final String PROJECT_NAME = "model-verifier-test";
     private static final String VALID_AGGREGATE_JAVA =
             "io/spine/model/verify/ValidAggregate.java";
-    private static final ImmutableCollection<String> PROTO_FILES = ImmutableList.of(
-            "spine/model/verify/call_entity.proto",
-            "spine/model/verify/commands.proto",
-            "spine/model/verify/events.proto"
-    );
 
     @TempDir
     @SuppressWarnings("PackageVisibleField") // must be non-private for JUnit's annotation to work.
@@ -85,7 +83,7 @@ class ModelVerifierPluginTest {
                 "io/spine/model/verify/DuplicateCommandHandler.java"
         );
         var result = project.executeAndFail(verifyModel);
-        var task = result.task(toPath(verifyModel));
+        var task = result.task(verifyModel.path());
         assertNotNull(task, result.getOutput());
         var generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult, result.getOutput());
@@ -104,22 +102,25 @@ class ModelVerifierPluginTest {
     void rejectMalformedHandlingMethods() {
         var result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
                 .executeAndFail(verifyModel);
-        var task = result.task(toPath(verifyModel));
+        var task = result.task(verifyModel.path());
         assertNotNull(task, result.getOutput());
         var generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult, result.getOutput());
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
-        return GradleProject.newBuilder()
-                .setProjectName(PROJECT_NAME)
-                .setProjectFolder(tempDir)
-                .addJavaFiles(fileNames)
-                .addProtoFiles(PROTO_FILES)
-                .build();
-    }
-
-    private static String toPath(TaskName name) {
-        return ":" + name;
+        var filesWithBuild = new ArrayList<>(Arrays.asList(fileNames));
+        filesWithBuild.add("build.gradle.kts");
+        var javaFiles = filesWithBuild.stream()
+                          .map(Paths::get)
+                          .collect(toImmutableList());
+        Function1<Path, Boolean> matching = path -> {
+            var isWantedJavaFile = javaFiles.stream().anyMatch(path::endsWith);
+            return isWantedJavaFile || path.toString().endsWith(".proto");
+        };
+        return GradleProject.setupAt(tempDir)
+                .fromResources(PROJECT_NAME, matching)
+                .copyBuildSrc()
+                .create();
     }
 }
