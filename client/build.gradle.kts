@@ -25,20 +25,15 @@
  */
 
 import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
 import io.spine.internal.gradle.testing.exposeTestArtifacts
 
 val spineBaseVersion: String by extra
 
 dependencies {
     api(project(":core"))
-
-    val deps = this
-    with(Grpc) {
-        deps.api(stub)
-        implementation(protobuf)
-        implementation(core)
-    }
+    api(Grpc.stub)
+    api(Grpc.protobuf)
+    api(Grpc.core)
 
     testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     testImplementation(project(":testutil-client"))
