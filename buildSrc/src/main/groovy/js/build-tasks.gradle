@@ -33,6 +33,8 @@
  * <p>This script doesn't configure Protobuf plugin and Spine's Protobuf JS plugin.
  */
 
+println("`build-tasks.gradle` script is deprecated. Please use `javascript` extension instead.")
+
 ext {
     JAVA_SCRIPT_TASK_GROUP = 'JavaScript'
 
