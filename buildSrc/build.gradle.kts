@@ -61,6 +61,14 @@ val licenseReportVersion = "2.0"
 val grGitVersion = "3.1.1"
 
 /**
+ * The version of the Kotlin Gradle plugin.
+ *
+ * Please check that this value matches one defined in
+ *  `io.spine.internal.dependency.Kotlin.version`.
+ */
+val kotlinVersion = "1.6.0"
+
+/**
  * The version of Guava used in `buildSrc`.
  *
  * Always use the same version as the one specified in `io.spine.internal.dependency.Guava`.
@@ -78,7 +86,18 @@ val guavaVersion = "30.1.1-jre"
  */
 val errorProneVersion = "2.0.2"
 
+/**
+ * The version of Protobuf Gradle Plugin.
+ *
+ * Please keep in sync. with `io.spine.internal.dependency.Protobuf.GradlePlugin.version`.
+ *
+ * @see <a href="https://github.com/google/protobuf-gradle-plugin/releases">
+ *     Protobuf Gradle Plugins Releases</a>
+ */
+val protobufPluginVersion = "0.8.17"
+
 dependencies {
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
     implementation("com.google.cloud.artifactregistry:artifactregistry-auth-common:$googleAuthToolVersion") {
         exclude(group = "com.google.guava")
@@ -87,4 +106,6 @@ dependencies {
     api("com.github.jk1:gradle-license-report:$licenseReportVersion")
     implementation("org.ajoberstar.grgit:grgit-core:${grGitVersion}")
     implementation("net.ltgt.gradle:gradle-errorprone-plugin:${errorProneVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+    implementation("gradle.plugin.com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion")
 }
