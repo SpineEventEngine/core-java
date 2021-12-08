@@ -26,37 +26,15 @@
 
 package io.spine.internal.gradle.report.license
 
-import com.github.jk1.license.LicenseReportExtension
-import com.github.jk1.license.ProjectData
-import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.markup.MarkdownDocument
-import java.io.File
-import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 
 /**
- * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ * Locates `generateLicenseReport` in this [TaskContainer].
+ *
+ * The task generates a license report for a specific Gradle project. License report includes
+ * information of all dependencies and their licenses.
  */
-internal class MarkdownReportRenderer(
-    private val filename: String
-) : ReportRenderer {
-
-    override fun render(data: ProjectData) {
-        val project = data.project
-        val outputFile = outputFile(project)
-        val document = MarkdownDocument()
-        val template = Template(project, document)
-
-        template.writeHeader()
-        ProjectDependencies.of(data).printTo(document)
-        template.writeFooter()
-
-        document.writeToFile(outputFile)
-    }
-
-    private fun outputFile(project: Project): File {
-        val config =
-            project.extensions.findByName("licenseReport") as LicenseReportExtension
-        return File(config.outputDir).resolve(filename)
-    }
-}
-
+val TaskContainer.generateLicenseReport: TaskProvider<Task>
+    get() = named("generateLicenseReport")

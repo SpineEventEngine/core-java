@@ -24,39 +24,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.report.license
+package io.spine.internal.gradle.javascript.plugin
 
-import com.github.jk1.license.LicenseReportExtension
-import com.github.jk1.license.ProjectData
-import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.markup.MarkdownDocument
-import java.io.File
-import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
+import org.gradle.plugins.ide.idea.model.IdeaModel
 
 /**
- * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ * Applies and configures `idea` plugin to work with a JavaScript module.
+ *
+ * In particular, this method:
+ *
+ *  1. Specifies directories for production and test sources.
+ *  2. Excludes directories with generated code and build artifacts.
+ *
+ * @see JsPlugins
  */
-internal class MarkdownReportRenderer(
-    private val filename: String
-) : ReportRenderer {
+fun JsPlugins.idea() {
 
-    override fun render(data: ProjectData) {
-        val project = data.project
-        val outputFile = outputFile(project)
-        val document = MarkdownDocument()
-        val template = Template(project, document)
-
-        template.writeHeader()
-        ProjectDependencies.of(data).printTo(document)
-        template.writeFooter()
-
-        document.writeToFile(outputFile)
+    plugins {
+        apply("org.gradle.idea")
     }
 
-    private fun outputFile(project: Project): File {
-        val config =
-            project.extensions.findByName("licenseReport") as LicenseReportExtension
-        return File(config.outputDir).resolve(filename)
+    extensions.configure<IdeaModel> {
+
+        module {
+            sourceDirs.add(srcDir)
+            testSourceDirs.add(testSrcDir)
+
+            excludeDirs.addAll(
+                listOf(
+                    nodeModules,
+                    nycOutput,
+                    genProtoMain,
+                    genProtoTest
+                )
+            )
+        }
     }
 }
-

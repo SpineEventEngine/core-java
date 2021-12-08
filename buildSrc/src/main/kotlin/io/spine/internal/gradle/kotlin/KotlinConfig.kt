@@ -24,39 +24,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.report.license
+package io.spine.internal.gradle.kotlin
 
-import com.github.jk1.license.LicenseReportExtension
-import com.github.jk1.license.ProjectData
-import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.markup.MarkdownDocument
-import java.io.File
-import org.gradle.api.Project
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainSpec
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
- * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ * Sets [Java toolchain](https://kotlinlang.org/docs/gradle.html#gradle-java-toolchains-support)
+ * to the specified version (e.g. "11" or "8").
  */
-internal class MarkdownReportRenderer(
-    private val filename: String
-) : ReportRenderer {
-
-    override fun render(data: ProjectData) {
-        val project = data.project
-        val outputFile = outputFile(project)
-        val document = MarkdownDocument()
-        val template = Template(project, document)
-
-        template.writeHeader()
-        ProjectDependencies.of(data).printTo(document)
-        template.writeFooter()
-
-        document.writeToFile(outputFile)
-    }
-
-    private fun outputFile(project: Project): File {
-        val config =
-            project.extensions.findByName("licenseReport") as LicenseReportExtension
-        return File(config.outputDir).resolve(filename)
+fun KotlinJvmProjectExtension.applyJvmToolchain(version: Int) {
+    jvmToolchain {
+        (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(version))
     }
 }
 
+/**
+ * Opts-in to experimental features that we use in our codebase.
+ */
+fun KotlinCompile.setFreeCompilerArgs() {
+    kotlinOptions {
+        freeCompilerArgs = listOf(
+            "-Xskip-prerelease-check",
+            "-Xjvm-default=all",
+            "-Xopt-in=kotlin.contracts.ExperimentalContracts",
+            "-Xopt-in=kotlin.ExperimentalStdlibApi"
+        )
+    }
+}

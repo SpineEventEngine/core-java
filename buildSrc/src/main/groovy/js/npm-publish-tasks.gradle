@@ -32,6 +32,9 @@
  * the NPM execution process, which is sufficient for the local development.
  */
 
+println("`npm-publish-tasks.gradle` script is deprecated. " +
+        "Please use `javascript` extension instead.")
+
 apply from: "$rootDir" + io.spine.internal.gradle.Scripts.commonPath + "js/build-tasks.gradle"
 
 ext {

@@ -31,6 +31,9 @@ import groovy.json.JsonSlurper
  * This script declares a task to update the version in in a package.json file.
  */
 
+println("`update-package-version.gradle` script is deprecated. " +
+        "Please use `javascript` extension instead.")
+
 /**
  * Updates the package.json version to the specified one.
  * 

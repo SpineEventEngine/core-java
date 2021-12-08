@@ -24,39 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.report.license
+package io.spine.internal.gradle.java.publish
 
-import com.github.jk1.license.LicenseReportExtension
-import com.github.jk1.license.ProjectData
-import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.markup.MarkdownDocument
-import java.io.File
-import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 
 /**
- * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ * Locates `publish` task in this [TaskContainer].
+ *
+ * This task publishes all defined publications to all defined repositories. To achieve that,
+ * the task depends on all `publish`*PubName*`PublicationTo`*RepoName*`Repository` tasks.
+ *
+ * Please note, task execution would not copy publications to the local Maven cache.
+ *
+ * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks">
+ *     Tasks | Maven Publish Plugin</a>
  */
-internal class MarkdownReportRenderer(
-    private val filename: String
-) : ReportRenderer {
-
-    override fun render(data: ProjectData) {
-        val project = data.project
-        val outputFile = outputFile(project)
-        val document = MarkdownDocument()
-        val template = Template(project, document)
-
-        template.writeHeader()
-        ProjectDependencies.of(data).printTo(document)
-        template.writeFooter()
-
-        document.writeToFile(outputFile)
-    }
-
-    private fun outputFile(project: Project): File {
-        val config =
-            project.extensions.findByName("licenseReport") as LicenseReportExtension
-        return File(config.outputDir).resolve(filename)
-    }
-}
-
+internal val TaskContainer.publish: TaskProvider<Task>
+    get() = named("publish")

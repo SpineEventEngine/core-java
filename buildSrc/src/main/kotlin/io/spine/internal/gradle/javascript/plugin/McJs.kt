@@ -24,39 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.report.license
+package io.spine.internal.gradle.javascript.plugin
 
-import com.github.jk1.license.LicenseReportExtension
-import com.github.jk1.license.ProjectData
-import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.markup.MarkdownDocument
-import java.io.File
-import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.kotlin.dsl.withGroovyBuilder
 
 /**
- * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ * Applies `mc-js` plugin and specifies directories for generated code.
+ *
+ * @see JsPlugins
  */
-internal class MarkdownReportRenderer(
-    private val filename: String
-) : ReportRenderer {
+fun JsPlugins.mcJs() {
 
-    override fun render(data: ProjectData) {
-        val project = data.project
-        val outputFile = outputFile(project)
-        val document = MarkdownDocument()
-        val template = Template(project, document)
-
-        template.writeHeader()
-        ProjectDependencies.of(data).printTo(document)
-        template.writeFooter()
-
-        document.writeToFile(outputFile)
+    plugins {
+        apply("io.spine.mc-js")
     }
 
-    private fun outputFile(project: Project): File {
-        val config =
-            project.extensions.findByName("licenseReport") as LicenseReportExtension
-        return File(config.outputDir).resolve(filename)
+    // Temporarily use GroovyInterop.
+    // Currently, it is not possible to obtain `McJsPlugin` on the classpath of `buildSrc`.
+    // See issue: https://github.com/SpineEventEngine/config/issues/298
+
+    project.withGroovyBuilder {
+        "protoJs" {
+            setProperty("generatedMainDir", genProtoMain)
+            setProperty("generatedTestDir", genProtoTest)
+        }
     }
 }
 
+/**
+ * Locates `generateJsonParsers` in this [TaskContainer].
+ *
+ * The task generates JSON-parsing code for JavaScript messages compiled from Protobuf.
+ */
+val TaskContainer.generateJsonParsers: TaskProvider<Task>
+    get() = named("generateJsonParsers")

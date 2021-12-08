@@ -24,39 +24,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.report.license
+package io.spine.internal.gradle
 
-import com.github.jk1.license.LicenseReportExtension
-import com.github.jk1.license.ProjectData
-import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.markup.MarkdownDocument
-import java.io.File
-import org.gradle.api.Project
+import kotlin.reflect.KClass
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.register
 
 /**
- * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ * A name and a type of a Gradle task.
  */
-internal class MarkdownReportRenderer(
-    private val filename: String
-) : ReportRenderer {
+internal class TaskName<T : Task>(
+    val value: String,
+    val clazz: KClass<T>,
+) {
+    companion object {
 
-    override fun render(data: ProjectData) {
-        val project = data.project
-        val outputFile = outputFile(project)
-        val document = MarkdownDocument()
-        val template = Template(project, document)
+        fun of(name: String) = TaskName(name, Task::class)
 
-        template.writeHeader()
-        ProjectDependencies.of(data).printTo(document)
-        template.writeFooter()
-
-        document.writeToFile(outputFile)
-    }
-
-    private fun outputFile(project: Project): File {
-        val config =
-            project.extensions.findByName("licenseReport") as LicenseReportExtension
-        return File(config.outputDir).resolve(filename)
+        fun <T : Task> of(name: String, clazz: KClass<T>) = TaskName(name, clazz)
     }
 }
 
+/**
+ * Locates [the task][TaskName] in this [TaskContainer].
+ */
+internal fun <T : Task> TaskContainer.named(name: TaskName<T>) = named(name.value, name.clazz)
+
+/**
+ * Registers [the task][TaskName] in this [TaskContainer].
+ */
+internal fun <T : Task> TaskContainer.register(name: TaskName<T>, init: T.() -> Unit) =
+    register(name.value, name.clazz, init)

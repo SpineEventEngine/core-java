@@ -24,39 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.report.license
+package io.spine.internal.gradle.javascript
 
-import com.github.jk1.license.LicenseReportExtension
-import com.github.jk1.license.ProjectData
-import com.github.jk1.license.render.ReportRenderer
-import io.spine.internal.markup.MarkdownDocument
 import java.io.File
 import org.gradle.api.Project
 
 /**
- * Renders the dependency report for a single [project][ProjectData] in Markdown.
+ * Provides access to the current [JsEnvironment] and shortcuts for running `npm` tool.
  */
-internal class MarkdownReportRenderer(
-    private val filename: String
-) : ReportRenderer {
+open class JsContext(jsEnv: JsEnvironment, internal val project: Project)
+    : JsEnvironment by jsEnv
+{
+    /**
+     * Executes `npm` command in a separate process.
+     *
+     * [JsEnvironment.projectDir] is used as a working directory.
+     */
+    fun npm(vararg args: String) = projectDir.npm(*args)
 
-    override fun render(data: ProjectData) {
-        val project = data.project
-        val outputFile = outputFile(project)
-        val document = MarkdownDocument()
-        val template = Template(project, document)
+    /**
+     * Executes `npm` command in a separate process.
+     *
+     * This [File] is used as a working directory.
+     */
+    fun File.npm(vararg args: String) = project.exec {
 
-        template.writeHeader()
-        ProjectDependencies.of(data).printTo(document)
-        template.writeFooter()
+        workingDir(this@npm)
+        commandLine(npmExecutable)
+        args(*args)
 
-        document.writeToFile(outputFile)
-    }
+        // Using private packages in a CI/CD workflow | npm Docs
+        // https://docs.npmjs.com/using-private-packages-in-a-ci-cd-workflow
 
-    private fun outputFile(project: Project): File {
-        val config =
-            project.extensions.findByName("licenseReport") as LicenseReportExtension
-        return File(config.outputDir).resolve(filename)
+        environment["NPM_TOKEN"] = npmAuthToken
     }
 }
-

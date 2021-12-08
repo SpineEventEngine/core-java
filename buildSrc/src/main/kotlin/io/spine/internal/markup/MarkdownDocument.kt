@@ -35,7 +35,7 @@ import java.io.File
 /**
  * A virtual document written in Markdown.
  *
- * After it's finished, end-users would typically write it to a [real file][appendToFile].
+ * After it's finished, end-users would typically write it to a [real file][writeToFile].
  */
 @SuppressWarnings("detekt.complexity.TooManyFunctions")     /* By design. */
 class MarkdownDocument {
@@ -113,11 +113,11 @@ class MarkdownDocument {
     fun ol(): MarkdownDocument = nl().text("1. ")
 
     /**
-     * Appends the passed [file] with the contents of this document.
+     * Writes the content of this document to the passed file.
      *
-     * The previous contents of the file are NOT overwritten.
+     * If the file exists, it becomes overwritten.
      */
-    fun appendToFile(file: File) {
-        file.appendText(builder.toString())
+    fun writeToFile(file: File) {
+        file.writeText(builder.toString())
     }
 }
