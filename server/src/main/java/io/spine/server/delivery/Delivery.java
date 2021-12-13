@@ -411,6 +411,13 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
+
+        // ThreadId currentThread = ThreadId.from(Thread.currentThread().getId());
+        // WorkerId currentWorker = WorkerId
+        //      .builder()
+        //      .setNodeId(currentNode)
+        //      .setThreadId(currentNode);
+
         Optional<ShardProcessingSession> picked = workRegistry.pickUp(index, currentNode);
         if (!picked.isPresent()) {
             return Optional.empty();

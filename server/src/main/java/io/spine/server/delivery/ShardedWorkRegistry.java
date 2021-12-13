@@ -37,7 +37,7 @@ import java.util.Optional;
  * process the messages corresponding to each index.
  */
 @SPI
-public interface ShardedWorkRegistry {
+public abstract class ShardedWorkRegistry {
 
     /**
      * Picks up the shard at a given index to process.
@@ -59,7 +59,13 @@ public interface ShardedWorkRegistry {
      * @return the session of shard processing,
      *         or {@code Optional.empty()} if the shard is not available
      */
-    Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId);
+    public final Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+        WorkerId worker = currentWorkerAt(nodeId);
+        Optional<ShardProcessingSession> result = doPickUp(index, worker);
+        return result;
+    }
+
+    protected abstract Optional<ShardProcessingSession> doPickUp(ShardIndex index, WorkerId worker);
 
     /**
      * Clears up the recorded {@code NodeId}s from the session records if there was no activity
@@ -72,5 +78,7 @@ public interface ShardedWorkRegistry {
      *         the duration of the period after which the session is considered expired
      * @return the indexes of shards which sessions have been released
      */
-    Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod);
+    abstract Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod);
+
+    abstract WorkerId currentWorkerAt(NodeId node);
 }
