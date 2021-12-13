@@ -29,6 +29,7 @@ package io.spine.server.delivery;
 import com.google.protobuf.Duration;
 import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
+import io.spine.server.WorkerId;
 
 import java.util.Optional;
 
@@ -37,7 +38,9 @@ import java.util.Optional;
  * process the messages corresponding to each index.
  */
 @SPI
-public abstract class ShardedWorkRegistry {
+public interface ShardedWorkRegistry {
+
+    Optional<ShardProcessingSession> pickUp(ShardIndex index, WorkerId worker);
 
     /**
      * Picks up the shard at a given index to process.
@@ -54,18 +57,25 @@ public abstract class ShardedWorkRegistry {
      *
      * @param index
      *         the index of the shard to pick up for processing
-     * @param nodeId
+     * @param node
      *         the identifier of the node for which to pick the shard
      * @return the session of shard processing,
      *         or {@code Optional.empty()} if the shard is not available
      */
-    public final Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
-        WorkerId worker = currentWorkerAt(nodeId);
-        Optional<ShardProcessingSession> result = doPickUp(index, worker);
+    default Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node) {
+        WorkerId worker = availableWorkerAt(node);
+        Optional<ShardProcessingSession> result = pickUp(index, worker);
         return result;
     }
 
-    protected abstract Optional<ShardProcessingSession> doPickUp(ShardIndex index, WorkerId worker);
+    default WorkerId availableWorkerAt(NodeId nodeId) {
+        WorkerId worker = WorkerId
+                .newBuilder()
+                .setNodeId(nodeId)
+                .setValue(String.valueOf(Thread.currentThread().getId()))
+                .vBuild();
+        return worker;
+    }
 
     /**
      * Clears up the recorded {@code NodeId}s from the session records if there was no activity
@@ -78,7 +88,5 @@ public abstract class ShardedWorkRegistry {
      *         the duration of the period after which the session is considered expired
      * @return the indexes of shards which sessions have been released
      */
-    abstract Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod);
-
-    abstract WorkerId currentWorkerAt(NodeId node);
+    Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod);
 }
