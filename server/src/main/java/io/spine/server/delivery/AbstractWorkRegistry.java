@@ -31,6 +31,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.SPI;
+import io.spine.server.NodeId;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -50,10 +51,16 @@ import static io.spine.base.Time.currentTime;
 public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
     @Override
-    public Optional<ShardProcessingSession> pickUp(ShardIndex index, WorkerId worker) {
+    public Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node) {
         checkNotNull(index);
-        checkNotNull(worker);
+        checkNotNull(node);
 
+        WorkerId worker = currentWorkerFor(node);
+        Optional<ShardProcessingSession> result = pickUp(index, worker);
+        return result;
+    }
+
+    private Optional<ShardProcessingSession> pickUp(ShardIndex index, WorkerId worker) {
         Optional<ShardSessionRecord> optionalRecord = find(index);
         if (!optionalRecord.isPresent()) {
             ShardSessionRecord newRecord = createRecord(index, worker);
@@ -68,6 +75,16 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
         ShardSessionRecord updatedRecord = updateNode(record, worker);
         return Optional.of(asSession(updatedRecord));
     }
+
+    /**
+     * Returns an identifier of a worker that is now going to process the shard.
+     *
+     * Typically, it would a thread ID.
+     *
+     * @param node
+     *         the node to which the resulted worker belongs
+     */
+    protected abstract WorkerId currentWorkerFor(NodeId node);
 
     private static boolean hasWorker(ShardSessionRecord record) {
         return !WorkerId.getDefaultInstance().equals(record.getWorker());
