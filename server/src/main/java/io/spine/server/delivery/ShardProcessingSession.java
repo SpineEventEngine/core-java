@@ -32,7 +32,7 @@ import io.spine.server.NodeId;
 /**
  * The session of processing the messages, which reside in a shard.
  *
- * <p>Starts by {@linkplain ShardedWorkRegistry#pickUp(ShardIndex, NodeId)} picking up}
+ * <p>Starts by {@linkplain ShardedWorkRegistry#pickUp(ShardIndex, NodeId) picking up}
  * the shard to process.
  */
 @SPI

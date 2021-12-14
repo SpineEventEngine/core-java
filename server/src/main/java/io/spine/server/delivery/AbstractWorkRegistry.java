@@ -31,7 +31,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.annotation.SPI;
-import io.spine.server.NodeId;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -45,50 +44,56 @@ import static io.spine.base.Time.currentTime;
  * persistence mechanism.
  *
  * @implNote This class is NOT thread safe. Synchronize the atomic persistence operations
- *         as well as the methods implemented in this class make an implementation thread safe.
+ *         as well as the methods implemented in this class to make an implementation thread safe.
  */
 @SPI
 public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
     @Override
-    public Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+    public Optional<ShardProcessingSession> pickUp(ShardIndex index, WorkerId worker) {
         checkNotNull(index);
-        checkNotNull(nodeId);
+        checkNotNull(worker);
 
-        Optional<ShardSessionRecord> record = find(index);
-        if (record.isPresent()) {
-            ShardSessionRecord existingRecord = record.get();
-            if (hasPickedBy(existingRecord)) {
+        Optional<ShardSessionRecord> optionalRecord = find(index);
+
+        if (optionalRecord.isPresent()) {
+
+            ShardSessionRecord record = optionalRecord.get();
+
+            if (hasWorker(record)) {
+
                 return Optional.empty();
             } else {
-                ShardSessionRecord updatedRecord = updateNode(existingRecord, nodeId);
+
+                ShardSessionRecord updatedRecord = updateNode(record, worker);
                 return Optional.of(asSession(updatedRecord));
             }
         } else {
-            ShardSessionRecord newRecord = createRecord(index, nodeId);
+
+            ShardSessionRecord newRecord = createRecord(index, worker);
             return Optional.of(asSession(newRecord));
         }
     }
 
-    private static boolean hasPickedBy(ShardSessionRecord record) {
-        return !NodeId.getDefaultInstance().equals(record.getPickedBy());
+    private static boolean hasWorker(ShardSessionRecord record) {
+        return !WorkerId.getDefaultInstance().equals(record.getWorker());
     }
 
-    private ShardSessionRecord createRecord(ShardIndex index, NodeId nodeId) {
+    private ShardSessionRecord createRecord(ShardIndex index, WorkerId worker) {
         ShardSessionRecord newRecord = ShardSessionRecord
                 .newBuilder()
                 .setIndex(index)
-                .setPickedBy(nodeId)
+                .setWorker(worker)
                 .setWhenLastPicked(currentTime())
                 .vBuild();
         write(newRecord);
         return newRecord;
     }
 
-    private ShardSessionRecord updateNode(ShardSessionRecord record, NodeId nodeId) {
+    private ShardSessionRecord updateNode(ShardSessionRecord record, WorkerId worker) {
         ShardSessionRecord updatedRecord = record
                 .toBuilder()
-                .setPickedBy(nodeId)
+                .setWorker(worker)
                 .setWhenLastPicked(currentTime())
                 .build();
         write(updatedRecord);
@@ -100,7 +105,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
         checkNotNull(inactivityPeriod);
         ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
         allRecords().forEachRemaining(record -> {
-            if (record.hasPickedBy()) {
+            if (record.hasWorker()) {
                 Timestamp whenPicked = record.getWhenLastPicked();
                 Duration elapsed = between(whenPicked, currentTime());
 
@@ -115,11 +120,11 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
     }
 
     /**
-     * Clears the value of {@code ShardSessionRecord.when_last_picked} and stores the session.
+     * Clears the value of {@code ShardSessionRecord.worker} and stores the session.
      */
     protected void clearNode(ShardSessionRecord session) {
         ShardSessionRecord record = session.toBuilder()
-                                           .clearPickedBy()
+                                           .clearWorker()
                                            .build();
         write(record);
     }

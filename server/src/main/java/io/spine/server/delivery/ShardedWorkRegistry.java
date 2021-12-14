@@ -29,7 +29,6 @@ package io.spine.server.delivery;
 import com.google.protobuf.Duration;
 import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
-import io.spine.server.WorkerId;
 
 import java.util.Optional;
 
