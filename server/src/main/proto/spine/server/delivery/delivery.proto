@@ -66,7 +66,7 @@ message ShardSessionRecord {
 
     // An identifier of an application worker, which picked up the shard and processes it.
     //
-    // Unset until a worker picks the session.
+    // Unset until a worker picks the shard.
     WorkerId worker = 4;
 
     reserved 2;
