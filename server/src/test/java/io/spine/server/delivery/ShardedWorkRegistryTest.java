@@ -79,32 +79,6 @@ public abstract class ShardedWorkRegistryTest {
     }
 
     @Test
-    @DisplayName("should not pick up the same shard from different threads of the same node")
-    void testPickUpFromDifferentThreads() throws InterruptedException {
-        ShardedWorkRegistry registry = registry();
-
-        ShardIndex index = newIndex(1, 42);
-        NodeId node = generateNodeId();
-
-        Runnable firstPickUp = () -> {
-            Optional<ShardProcessingSession> session = registry.pickUp(index, node);
-            ShardProcessingSession actualSession = assertSession(session, index);
-            actualSession.complete();
-        };
-
-        Thread t1 = new Thread(firstPickUp);
-        t1.start();
-        t1.join();
-
-        Runnable secondPickUp = () -> assertThat(registry.pickUp(index, node))
-                .isEmpty();
-
-        Thread t2 = new Thread(secondPickUp);
-        t2.start();
-        t2.join();
-    }
-
-    @Test
     @DisplayName("release the shards which sessions expired")
     void testReleaseExpired() {
         ShardedWorkRegistry registry = registry();
