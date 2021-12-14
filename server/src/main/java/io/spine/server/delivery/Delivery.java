@@ -128,10 +128,11 @@ import static java.util.Collections.synchronizedList;
  *
  * <h2>Work registry</h2>
  *
- * <p>Once an application node picks the shard to deliver the messages from it, it registers itself
- * in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard that only allows
- * to pick a shard to a single node at a time. The framework users may configure the implementation
- * of the registry by calling {@link DeliveryBuilder#setWorkRegistry(ShardedWorkRegistry)}.
+ * <p>Once an application worker picks the shard to deliver the messages from it,
+ * it registers itself in a {@link ShardedWorkRegistry}. It serves as a list of locks-per-shard that
+ * only allows to pick a shard to a single worker at a time. The framework users may
+ * configure the implementation of the registry by calling
+ * {@link DeliveryBuilder#setWorkRegistry(ShardedWorkRegistry)}.
  *
  * <h2>Dispatching messages</h2>
  *
@@ -212,7 +213,7 @@ import static java.util.Collections.synchronizedList;
  * BoundedContext}s to register themselves in it. Upon this registration, a special
  * {@link ShardMaintenanceProcess} is registered as an event dispatcher in a passed
  * {@code BoundedContext}. Such a registration is performed automatically when the context is
- * {@linkplain  io.spine.server.BoundedContextBuilder#build() built}.
+ * {@linkplain io.spine.server.BoundedContextBuilder#build() built}.
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // It's fine for a centerpiece.
 public final class Delivery implements Logging {

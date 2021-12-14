@@ -64,7 +64,7 @@ message ShardSessionRecord {
     // This field is unset if no nodes ever picked the session.
     google.protobuf.Timestamp when_last_picked = 3;
 
-    // An identifier of an application worker, which picked up the index and processes it.
+    // An identifier of an application worker, which picked up the shard and processes it.
     //
     // Unset until a worker picks the session.
     WorkerId worker = 4;
@@ -95,13 +95,13 @@ message ShardMaintenance {
 // An identifier of a worker which processes a shard.
 //
 // This value is unique across the application. It is used to indicate who is currently processing
-// which shard. A node can contain several workers (typically represented by threads) processing
-// different shards.
+// which shard. A single node can contain several workers (typically represented by threads)
+// processing different shards.
 message WorkerId {
 
     // A node to which this worker belongs.
     NodeId nodeId = 1 [(required) = true];
 
-    // A node's worker identifier, typically it would a Thread ID.
+    // Worker's identifier, typically it would a Thread ID.
     string value = 2 [(required) = true];
 }

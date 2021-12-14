@@ -33,25 +33,46 @@ import io.spine.server.NodeId;
 import java.util.Optional;
 
 /**
- * The registry of the shard indexes along with the identifiers of the nodes, which
+ * The registry of the shard indexes along with the identifiers of the application workers, which
  * process the messages corresponding to each index.
  */
 @SPI
 public interface ShardedWorkRegistry {
 
+    /**
+     * Picks up the shard at a given index to process by the specified worker.
+     *
+     * <p>This action is intended to be exclusive, i.e. a single shard may be served
+     * by a single application worker at a given moment of time.
+     *
+     * <p>In case of a successful operation, an instance of {@link ShardProcessingSession}
+     * is returned. The worker obtained the session should perform the desired actions with
+     * the sharded messages and then {@link ShardProcessingSession#complete() complete} the session.
+     *
+     * <p>In case the shard at a given index is already picked up by some worker,
+     * an {@link Optional#empty() Optional.empty()} is returned.
+     *
+     * @param index
+     *         the index of the shard to pick up for processing
+     * @param worker
+     *         the identifier of the application worker for which to pick the shard
+     * @return the session of shard processing,
+     *         or {@code Optional.empty()} if the shard is not available
+     */
     Optional<ShardProcessingSession> pickUp(ShardIndex index, WorkerId worker);
 
     /**
-     * Picks up the shard at a given index to process.
+     * Picks up the shard at a given index to process by the
+     * {@link ShardedWorkRegistry#availableWorkerAt(NodeId) node's available worker}.
      *
      * <p>This action is intended to be exclusive, i.e. a single shard may be served
-     * by a single application node at a given moment of time.
+     * by a single application worker at a given moment of time.
      *
      * <p>In case of a successful operation, an instance of {@link ShardProcessingSession}
-     * is returned. The node obtained the session should perform the desired actions with the
+     * is returned. The worker obtained the session should perform the desired actions with the
      * sharded messages and then {@link ShardProcessingSession#complete() complete} the session.
      *
-     * <p>In case the shard at a given index is already picked up by some node,
+     * <p>In case the shard at a given index is already picked up by some worker,
      * an {@link Optional#empty() Optional.empty()} is returned.
      *
      * @param index
@@ -67,10 +88,21 @@ public interface ShardedWorkRegistry {
         return result;
     }
 
-    default WorkerId availableWorkerAt(NodeId nodeId) {
+    /**
+     * Finds an available worker to process a shard withing the specified node.
+     *
+     * <p>Typically, it would be a thread.
+     *
+     * <p>Default implementation uses the current thread as a worker.
+     *
+     * @param node
+     *         the node which should provide a worker
+     * @return ready-to-use worker for a shard processing
+     */
+    default WorkerId availableWorkerAt(NodeId node) {
         WorkerId worker = WorkerId
                 .newBuilder()
-                .setNodeId(nodeId)
+                .setNodeId(node)
                 .setValue(String.valueOf(Thread.currentThread().getId()))
                 .vBuild();
         return worker;

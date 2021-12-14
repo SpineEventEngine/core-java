@@ -55,14 +55,12 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
         checkNotNull(worker);
 
         Optional<ShardSessionRecord> optionalRecord = find(index);
-
         if (!optionalRecord.isPresent()) {
             ShardSessionRecord newRecord = createRecord(index, worker);
             return Optional.of(asSession(newRecord));
         }
 
         ShardSessionRecord record = optionalRecord.get();
-
         if (hasWorker(record)) {
             return Optional.empty();
         }
