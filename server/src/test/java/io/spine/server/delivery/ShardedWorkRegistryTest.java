@@ -32,6 +32,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
 import io.spine.server.NodeId;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -42,6 +43,7 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static io.spine.server.delivery.given.DeliveryTestEnv.generateNodeId;
+import static io.spine.server.delivery.given.DeliveryTestEnv.generateWorkerId;
 import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
 import static java.util.stream.IntStream.range;
@@ -57,25 +59,49 @@ public abstract class ShardedWorkRegistryTest {
      */
     protected abstract ShardedWorkRegistry registry();
 
-    @Test
-    @DisplayName("pick up the shard if it is not picked up previously and allow to complete it")
-    void testPickUp() {
-        ShardedWorkRegistry registry = registry();
+    @Nested
+    @DisplayName("pick up the shard if it is not picked up previously and complete it")
+    class PickUp {
 
-        ShardIndex index = newIndex(1, 42);
-        NodeId node = generateNodeId();
+        @Test
+        @DisplayName("by node")
+        void byNode() {
+            ShardedWorkRegistry registry = registry();
+            ShardIndex index = newIndex(1, 42);
+            NodeId node = generateNodeId();
 
-        Optional<ShardProcessingSession> session = registry.pickUp(index, node);
-        ShardProcessingSession actualSession = assertSession(session, index);
+            Optional<ShardProcessingSession> session = registry.pickUp(index, node);
+            ShardProcessingSession actualSession = assertSession(session, index);
 
-        assertThat(registry.pickUp(index, node))
-                .isEmpty();
-        assertThat(registry.pickUp(index, generateNodeId()))
-                .isEmpty();
+            assertThat(registry.pickUp(index, node))
+                    .isEmpty();
+            assertThat(registry.pickUp(index, generateNodeId()))
+                    .isEmpty();
 
-        actualSession.complete();
-        Optional<ShardProcessingSession> newSession = registry.pickUp(index, generateNodeId());
-        assertSession(newSession, index);
+            actualSession.complete();
+            Optional<ShardProcessingSession> newSession = registry.pickUp(index, generateNodeId());
+            assertSession(newSession, index);
+        }
+
+        @Test
+        @DisplayName("by worker")
+        void byWorker() {
+            ShardedWorkRegistry registry = registry();
+            ShardIndex index = newIndex(1, 42);
+            WorkerId worker = generateWorkerId();
+
+            Optional<ShardProcessingSession> session = registry.pickUp(index, worker);
+            ShardProcessingSession actualSession = assertSession(session, index);
+
+            assertThat(registry.pickUp(index, worker))
+                    .isEmpty();
+            assertThat(registry.pickUp(index, generateWorkerId()))
+                    .isEmpty();
+
+            actualSession.complete();
+            Optional<ShardProcessingSession> newSession = registry.pickUp(index, generateWorkerId());
+            assertSession(newSession, index);
+        }
     }
 
     @Test
