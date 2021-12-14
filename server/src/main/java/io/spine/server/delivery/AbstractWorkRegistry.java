@@ -77,7 +77,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
     }
 
     /**
-     * Returns an identifier of a worker that is now going to process the shard.
+     * Returns an identifier of the current worker that is now going to process the shard.
      *
      * Typically, it would a thread ID.
      *
