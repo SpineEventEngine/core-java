@@ -102,6 +102,8 @@ message WorkerId {
     // A node to which this worker belongs.
     NodeId nodeId = 1 [(required) = true];
 
-    // Worker's identifier, typically it would a Thread ID.
+    // Worker's identifier.
+    //
+    // An example of such an identifier could be ID of the thread which processes a shard.
     string value = 2 [(required) = true];
 }
