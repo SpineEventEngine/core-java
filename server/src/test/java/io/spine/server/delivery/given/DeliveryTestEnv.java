@@ -38,7 +38,6 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.delivery.InboxMessage;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardObserver;
-import io.spine.server.delivery.WorkerId;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
