@@ -18,7 +18,7 @@ This repository contains the code of:
 The project is under active ongoing development. 
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.6.0][latest-release].  
+The latest stable version is [1.8.0][latest-release].  
 
 ## Quick start and examples
 
