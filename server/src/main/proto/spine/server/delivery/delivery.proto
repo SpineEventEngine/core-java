@@ -44,7 +44,6 @@ import "spine/server/server_environment.proto";
 //
 // A value type used across the application. To be potentially used in JavaScript, Go, C++ and
 // other client and server environments, that are split into shards.
-//
 message ShardIndex {
 
     // The zero-based index of the shard.
@@ -60,17 +59,18 @@ message ShardSessionRecord {
     // The index of a shard processed in this session.
     ShardIndex index = 1 [(required) = true];
 
-    // The identifier of an application node, which picked up the index and processes it.
-    //
-    // Unset until a node picks the session.
-    //
-    NodeId picked_by = 2;
-
     // When the shard processed within the session was last picked by the node.
     //
     // This field is unset if no nodes ever picked the session.
-    //
     google.protobuf.Timestamp when_last_picked = 3;
+
+    // An identifier of an application worker, which picked up the shard and processes it.
+    //
+    // Unset until a worker picks the shard.
+    WorkerId worker = 4;
+
+    reserved 2;
+    reserved "picked_by";
 }
 
 //A stage of the `Delivery` process running for some particular `ShardIndex`.
@@ -87,8 +87,23 @@ message DeliveryStage {
 //
 // Represented in each of the bounded contexts as an event reactor,
 // as it's impossible to have several process managers of the same state across bounded contexts.
-//
 message ShardMaintenance {
 
     ShardIndex id = 1;
+}
+
+// An identifier of a worker which processes a shard.
+//
+// This value is unique across the application. It is used to indicate who is currently processing
+// which shard. A single node can contain several workers (typically represented by threads)
+// processing different shards.
+message WorkerId {
+
+    // A node to which this worker belongs.
+    NodeId nodeId = 1 [(required) = true];
+
+    // Worker's identifier.
+    //
+    // An example of such an identifier could be ID of the thread which processes a shard.
+    string value = 2 [(required) = true];
 }
