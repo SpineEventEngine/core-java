@@ -79,14 +79,6 @@ public class DeliveryTestEnv {
                 .vBuild();
     }
 
-    public static WorkerId generateWorkerId() {
-        return WorkerId
-                .newBuilder()
-                .setNodeId(generateNodeId())
-                .setValue(String.valueOf(Thread.currentThread().getId()))
-                .vBuild();
-    }
-
     public static class CalculatorRepository extends AggregateRepository<String, CalcAggregate> {
 
         /** How many calls there were to {@link #doStore(CalcAggregate)} method, grouped by ID. */
