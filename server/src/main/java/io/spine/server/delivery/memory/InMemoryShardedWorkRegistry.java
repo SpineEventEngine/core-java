@@ -59,7 +59,7 @@ public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
 
     @Override
     protected WorkerId currentWorkerFor(NodeId node) {
-        WorkerId worker = WorkerId
+        var worker = WorkerId
                 .newBuilder()
                 .setNodeId(node)
                 .setValue(String.valueOf(Thread.currentThread().getId()))
