@@ -57,6 +57,14 @@ public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
         return super.pickUp(index, node);
     }
 
+    /**
+     * Returns an identifier of the current worker that is now going to process the shard.
+     *
+     * <p>This implementation uses an identifier of the current thread as a {@code WorkerId}.
+     *
+     * @param node
+     *         the node to which the resulted worker belongs
+     */
     @Override
     protected WorkerId currentWorkerFor(NodeId node) {
         var currentThread = String.valueOf(Thread.currentThread().getId());
