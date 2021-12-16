@@ -33,6 +33,7 @@ import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
 import io.spine.server.delivery.ShardedWorkRegistry;
+import io.spine.server.delivery.WorkerId;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -52,8 +53,27 @@ public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
     private final Map<ShardIndex, ShardSessionRecord> workByNode = newConcurrentMap();
 
     @Override
-    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
-        return super.pickUp(index, nodeId);
+    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node) {
+        return super.pickUp(index, node);
+    }
+
+    /**
+     * Returns an identifier of the current worker that is now going to process the shard.
+     *
+     * <p>This implementation uses an identifier of the current thread as a {@code WorkerId}.
+     *
+     * @param node
+     *         the node to which the resulted worker belongs
+     */
+    @Override
+    protected WorkerId currentWorkerFor(NodeId node) {
+        var currentThread = Thread.currentThread().getId();
+        var worker = WorkerId
+                .newBuilder()
+                .setNodeId(node)
+                .setValue(String.valueOf(currentThread))
+                .vBuild();
+        return worker;
     }
 
     @Override

@@ -54,12 +54,12 @@ public interface ShardedWorkRegistry {
      *
      * @param index
      *         the index of the shard to pick up for processing
-     * @param nodeId
+     * @param node
      *         the identifier of the node for which to pick the shard
      * @return the session of shard processing,
      *         or {@code Optional.empty()} if the shard is not available
      */
-    Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId);
+    Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node);
 
     /**
      * Clears up the recorded {@code NodeId}s from the session records if there was no activity
