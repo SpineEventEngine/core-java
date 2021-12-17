@@ -31,7 +31,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
+import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyAssignee;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +64,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @BeforeEach
     public void setUp() {
         super.setUp();
-        commandBus.register(createProjectHandler);
+        commandBus.register(createProjectAssignee);
     }
 
     @Test
@@ -112,8 +112,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
-        var faultyHandler = FaultyHandler.initializedHandler();
-        commandBus.register(faultyHandler);
+        var faultyAssignee = FaultyAssignee.initializedAssignee();
+        commandBus.register(faultyAssignee);
 
         var remoteTaskCommand = clearTenantId(removeTask());
         MemoizingObserver<Ack> observer = memoizingObserver();

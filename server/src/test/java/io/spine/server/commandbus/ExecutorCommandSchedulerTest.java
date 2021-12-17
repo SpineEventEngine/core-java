@@ -34,7 +34,7 @@ import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
-import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandHandler;
+import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandAssignee;
 import io.spine.server.commandbus.given.DirectScheduledExecutor;
 import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
 import io.spine.server.commandbus.given.ThrowingScheduledExecutor;
@@ -85,7 +85,7 @@ class ExecutorCommandSchedulerTest {
         commandContext = GivenCommandContext.withScheduledDelayOf(DELAY);
 
         context = assumingTests()
-                .addCommandDispatcher(new TestCommandHandler())
+                .addCommandDispatcher(new TestCommandAssignee())
                 .build();
         commandBus = context.commandBus();
 

@@ -38,7 +38,7 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.given.DirectScheduledExecutor;
 import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
@@ -83,7 +83,7 @@ abstract class AbstractCommandBusTestSuite {
 
     protected CommandBus commandBus;
     protected EventBus eventBus;
-    protected CreateProjectHandler createProjectHandler;
+    protected CreateProjectAssignee createProjectAssignee;
     protected MemoizingObserver<Ack> observer;
     protected MemoizingCommandFlowWatcher watcher;
     protected TenantIndex tenantIndex;
@@ -185,8 +185,8 @@ abstract class AbstractCommandBusTestSuite {
                 multitenant
                 ? new TestActorRequestFactory(getClass(), generate())
                 : new TestActorRequestFactory(getClass());
-        createProjectHandler = new CreateProjectHandler();
-        contextAccess.registerCommandDispatcher(createProjectHandler);
+        createProjectAssignee = new CreateProjectAssignee();
+        contextAccess.registerCommandDispatcher(createProjectAssignee);
         observer = memoizingObserver();
     }
 
@@ -213,14 +213,14 @@ abstract class AbstractCommandBusTestSuite {
 
         // Some derived test suite classes may register the handler in setUp().
         // This prevents the repeating registration (which is an illegal operation).
-        commandBus.unregister(createProjectHandler);
-        commandBus.register(createProjectHandler);
+        commandBus.unregister(createProjectAssignee);
+        commandBus.register(createProjectAssignee);
 
         commandBus.post(commands, memoizingObserver());
 
-        assertTrue(createProjectHandler.received(first.enclosedMessage()));
-        assertTrue(createProjectHandler.received(second.enclosedMessage()));
-        commandBus.unregister(createProjectHandler);
+        assertTrue(createProjectAssignee.received(first.enclosedMessage()));
+        assertTrue(createProjectAssignee.received(second.enclosedMessage()));
+        commandBus.unregister(createProjectAssignee);
     }
 
     protected Command newCommand() {
@@ -236,15 +236,15 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     /**
-     * A sample command handler that tells whether a handler was invoked.
+     * A sample command assignee that tells whether a handler was invoked.
      */
-    final class CreateProjectHandler extends AbstractCommandHandler {
+    final class CreateProjectAssignee extends AbstractCommandAssignee {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();
 
         @Override
-        public final void registerWith(BoundedContext context) {
+        public void registerWith(BoundedContext context) {
             super.registerWith(context);
         }
 

@@ -33,7 +33,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.given.CommandHandlerTestEnv.EventCatcher;
-import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandHandler;
+import io.spine.server.commandbus.given.CommandHandlerTestEnv.TestCommandAssignee;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -47,15 +47,15 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("`CommandHandler` should")
-class CommandHandlerTest {
+@DisplayName("`CommandAssignee` should")
+class CommandAssigneeTest {
 
     private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(CommandHandlerTest.class);
+            new TestActorRequestFactory(CommandAssigneeTest.class);
 
     private CommandBus commandBus;
     private EventBus eventBus;
-    private TestCommandHandler handler;
+    private TestCommandAssignee assignee;
 
     @BeforeEach
     void setUp() {
@@ -65,9 +65,9 @@ class CommandHandlerTest {
                 .build();
         commandBus = context.commandBus();
         eventBus = context.eventBus();
-        handler = new TestCommandHandler();
+        assignee = new TestCommandAssignee();
         context.internalAccess()
-               .registerCommandDispatcher(handler);
+               .registerCommandDispatcher(assignee);
     }
 
     @AfterEach
@@ -81,7 +81,7 @@ class CommandHandlerTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(CommandEnvelope.class, generate())
-                .testAllPublicInstanceMethods(handler);
+                .testAllPublicInstanceMethods(assignee);
     }
 
     @Nested
@@ -103,8 +103,8 @@ class CommandHandlerTest {
         }
 
         private void assertHandles(Command cmd) {
-            handler.handle(cmd);
-            handler.assertHandled(cmd);
+            assignee.handle(cmd);
+            assignee.assertHandled(cmd);
         }
     }
 
@@ -116,9 +116,9 @@ class CommandHandlerTest {
         var eventCatcher = new EventCatcher();
         eventBus.register(eventCatcher);
 
-        handler.handle(cmd);
+        assignee.handle(cmd);
 
-        ImmutableList<? extends Message> expectedMessages = handler.getEventsOnStartProjectCmd();
+        ImmutableList<? extends Message> expectedMessages = assignee.getEventsOnStartProjectCmd();
         var actualEvents = eventCatcher.dispatched();
         for (var i = 0; i < expectedMessages.size(); i++) {
             var expected = expectedMessages.get(i);
@@ -142,7 +142,7 @@ class CommandHandlerTest {
             var eventCatcher = new EventCatcher();
             eventBus.register(eventCatcher);
 
-            handler.handle(cmd);
+            assignee.handle(cmd);
 
             var dispatchedEvents = eventCatcher.dispatched();
             assertThat(dispatchedEvents)
@@ -157,7 +157,7 @@ class CommandHandlerTest {
             var eventCatcher = new EventCatcher();
             eventBus.register(eventCatcher);
 
-            handler.handle(cmd);
+            assignee.handle(cmd);
 
             var dispatchedEvents = eventCatcher.dispatched();
             assertThat(dispatchedEvents)
@@ -168,7 +168,7 @@ class CommandHandlerTest {
     @Test
     @DisplayName("handle equality")
     void equality() {
-        new EqualsTester().addEqualityGroup(handler, new TestCommandHandler())
+        new EqualsTester().addEqualityGroup(assignee, new TestCommandAssignee())
                           .testEquals();
     }
 

@@ -57,7 +57,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("return `OK`")
     void storeScheduledCommand() {
-        commandBus.register(createProjectHandler);
+        commandBus.register(createProjectAssignee);
         var cmd = createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, observer);
@@ -68,7 +68,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("schedule command if delay is set")
     void scheduleIfDelayIsSet() {
-        commandBus.register(createProjectHandler);
+        commandBus.register(createProjectAssignee);
         var cmd = createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, observer);
@@ -77,9 +77,9 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("not schedule command if no scheduling options are set")
     void notScheduleWithoutOptions() {
-        var handler = new CreateProjectHandler();
-        handler.registerWith(BoundedContextBuilder.assumingTests().build());
-        commandBus.register(handler);
+        var assignee = new CreateProjectAssignee();
+        assignee.registerWith(BoundedContextBuilder.assumingTests().build());
+        commandBus.register(assignee);
 
         var command = createProject();
         commandBus.post(command, observer);
@@ -90,7 +90,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("post previously scheduled command")
     void postPreviouslyScheduled() {
-        commandBus.register(createProjectHandler);
+        commandBus.register(createProjectAssignee);
         var command = createScheduledCommand();
 
         commandBus.postPreviouslyScheduled(command);
