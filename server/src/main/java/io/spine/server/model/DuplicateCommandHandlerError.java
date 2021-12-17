@@ -26,7 +26,7 @@
 
 package io.spine.server.model;
 
-import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.command.model.CommandAssigneeMethod;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.type.CommandClass;
 
@@ -42,7 +42,7 @@ import static java.lang.String.format;
 
 /**
  * An error thrown on attempt to add a class which declares a
- * {@linkplain CommandHandlerMethod method} that handles a command which is
+ * {@linkplain CommandAssigneeMethod method} that handles a command which is
  * already handled by a class already added to the {@link Model}.
  */
 public final class DuplicateCommandHandlerError extends ModelError {
