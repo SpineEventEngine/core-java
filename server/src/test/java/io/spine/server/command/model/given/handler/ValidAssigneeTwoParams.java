@@ -27,26 +27,21 @@
 package io.spine.server.command.model.given.handler;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.EventMessage;
+import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.event.RefProjectCreated;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
- * Provides a method which accepts one parameter and returns a list of messages.
+ * Provides a method with two params which returns an event message.
  */
-public final class ValidHandlerOneParamReturnsList extends TestCommandHandler {
-
+public class ValidAssigneeTwoParams extends TestCommandAssignee {
     @Assign
     @VisibleForTesting
-    public List<EventMessage> handleTest(RefCreateProject cmd) {
+    public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
         addHandledCommand(cmd);
-        List<EventMessage> result = newLinkedList();
-        result.add(projectCreated(cmd.getProjectId()));
-        return result;
+        return projectCreated(cmd.getProjectId());
     }
 }

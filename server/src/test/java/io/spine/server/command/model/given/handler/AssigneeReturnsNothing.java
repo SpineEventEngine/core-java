@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
  */
-public class HandlerReturnsNothing extends TestCommandHandler {
+public class AssigneeReturnsNothing extends TestCommandAssignee {
 
     @Assign
     List<EventMessage> handleTest(RefCreateProject cmd) {

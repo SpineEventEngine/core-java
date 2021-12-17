@@ -26,7 +26,7 @@
 
 package io.spine.server.command;
 
-import io.spine.server.command.given.CommandHandlingEntityTestEnv.HandlingEntity;
+import io.spine.server.command.given.CommandHandlingEntityTestEnv.AssigneeEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,15 +35,15 @@ import static io.spine.server.command.given.CommandHandlingEntityTestEnv.msg;
 import static io.spine.server.command.given.CommandHandlingEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("`CommandHandlingEntity` should")
-class CommandHandlingEntityTest {
+@DisplayName("`CommandAssigneeEntity` should")
+class CommandAssigneeEntityTest {
 
     /** The object we test. */
-    private HandlingEntity entity;
+    private AssigneeEntity entity;
 
     @BeforeEach
     void setUp() {
-        entity = new HandlingEntity(getClass().getName());
+        entity = new AssigneeEntity(getClass().getName());
     }
 
     @Test

@@ -38,7 +38,7 @@ import io.spine.model.contexts.projects.event.SigProjectStarted;
 import io.spine.model.contexts.projects.event.SigTaskPaused;
 import io.spine.model.contexts.projects.event.SigTaskStopped;
 import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.model.given.SignatureTestEvent;
@@ -55,7 +55,7 @@ import java.util.Optional;
  * registered in any Bounded Context. This is done for simplicity of enumerating all possible
  * combinations of parameters.
  */
-public final class ValidHandler extends AbstractCommandHandler {
+public final class ValidAssignee extends AbstractCommandAssignee {
 
     @Assign
     SigProjectCreated singleMsgSingleResult(SigCreateProject command) {

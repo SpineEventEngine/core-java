@@ -26,30 +26,30 @@
 
 package io.spine.server.command;
 
-import io.spine.server.command.model.CommandHandlerSignature;
-import io.spine.server.command.model.given.handler.InvalidHandler;
-import io.spine.server.command.model.given.handler.ValidHandler;
+import io.spine.server.command.model.CommandAssigneeSignature;
+import io.spine.server.command.model.given.handler.InvalidAssignee;
+import io.spine.server.command.model.given.handler.ValidAssignee;
 import io.spine.server.model.MethodSignatureTest;
 import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-@DisplayName("`CommandHandlerSignature` should")
-class CommandHandlerSignatureTest extends MethodSignatureTest<CommandHandlerSignature> {
+@DisplayName("`CommandAssigneeSignature` should")
+class CommandAssigneeSignatureTest extends MethodSignatureTest<CommandAssigneeSignature> {
 
     @Override
     protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(Assign.class, ValidHandler.class).stream();
+        return methodsAnnotatedWith(Assign.class, ValidAssignee.class).stream();
     }
 
     @Override
     protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(Assign.class, InvalidHandler.class).stream();
+        return methodsAnnotatedWith(Assign.class, InvalidAssignee.class).stream();
     }
 
     @Override
-    protected CommandHandlerSignature signature() {
-        return new CommandHandlerSignature();
+    protected CommandAssigneeSignature signature() {
+        return new CommandAssigneeSignature();
     }
 }

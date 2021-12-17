@@ -33,9 +33,9 @@ import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
- * A command handler which always rejects the passed command.
+ * A command assignee which always rejects the passed command.
  */
-public class RejectingHandler extends TestCommandHandler {
+public class RejectingAssignee extends TestCommandAssignee {
     @Assign
     RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
         throw EntityAlreadyArchived
