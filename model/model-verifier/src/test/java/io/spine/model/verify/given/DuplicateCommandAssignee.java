@@ -26,12 +26,12 @@
 
 package io.spine.model.verify.given;
 
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
 import io.spine.test.model.verify.command.UploadPhoto;
 import io.spine.test.model.verify.event.PhotoUploaded;
 
-public class UploadCommandHandler extends AbstractCommandHandler {
+public class DuplicateCommandAssignee extends AbstractCommandAssignee {
 
     @Assign
     PhotoUploaded handle(UploadPhoto command) {

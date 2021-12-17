@@ -28,15 +28,15 @@ package io.spine.model.verify;
 
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
-import io.spine.model.verify.given.DuplicateCommandHandler;
+import io.spine.model.verify.given.DuplicateCommandAssignee;
 import io.spine.model.verify.given.EditAggregate;
 import io.spine.model.verify.given.InvalidCommander;
 import io.spine.model.verify.given.InvalidDeleteAggregate;
 import io.spine.model.verify.given.InvalidEnhanceAggregate;
 import io.spine.model.verify.given.InvalidRestoreAggregate;
 import io.spine.model.verify.given.RenameProcMan;
-import io.spine.model.verify.given.UploadCommandHandler;
-import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.model.verify.given.UploadCommandAssignee;
+import io.spine.server.command.model.CommandAssigneeSignature;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.SignatureMismatchException;
@@ -87,8 +87,7 @@ class ModelVerifierTest {
     @DisplayName("verify model from classpath")
     void verifyModel() {
         var verifier = new ModelVerifier(project);
-
-        var commandHandlerTypeName = UploadCommandHandler.class.getName();
+        var commandHandlerTypeName = UploadCommandAssignee.class.getName();
         var aggregateTypeName = EditAggregate.class.getName();
         var procManTypeName = RenameProcMan.class.getName();
         var spineModel = CommandHandlers.newBuilder()
@@ -120,8 +119,8 @@ class ModelVerifierTest {
     @DisplayName("fail on duplicate command handlers")
     void failOnDuplicateHandlers() {
         var verifier = new ModelVerifier(project);
-        var firstType = UploadCommandHandler.class.getName();
-        var secondType = DuplicateCommandHandler.class.getName();
+        var firstType = UploadCommandAssignee.class.getName();
+        var secondType = DuplicateCommandAssignee.class.getName();
 
         var spineModel = CommandHandlers.newBuilder()
                 .addCommandHandlingType(firstType)
@@ -148,7 +147,7 @@ class ModelVerifierTest {
         private final Class<?> aggregateClass = InvalidRestoreAggregate.class;
 
         WarnLogging() {
-            super(CommandHandlerSignature.class, Level.WARNING);
+            super(CommandAssigneeSignature.class, Level.WARNING);
         }
 
         @BeforeEach
@@ -203,9 +202,10 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve compilation destination directory from task")
     void getCompilationDestDir() throws MalformedURLException {
-        var compileTask = actualProject().getTasks()
-                                         .withType(JavaCompile.class)
-                                         .getByName(compileJava.name());
+        var compileTask = actualProject()
+                .getTasks()
+                .withType(JavaCompile.class)
+                .getByName(compileJava.name());
         var dest = TempDir.forClass(getClass());
         compileTask.getDestinationDirectory().set(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
@@ -216,9 +216,10 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve `null` if destination directory is null")
     void getNullDestDir() {
-        var compileTask = actualProject().getTasks()
-                                         .withType(JavaCompile.class)
-                                         .getByName(compileJava.name());
+        var compileTask = actualProject()
+                .getTasks()
+                .withType(JavaCompile.class)
+                .getByName(compileJava.name());
         compileTask.getDestinationDirectory().set((File) null);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));

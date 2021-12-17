@@ -27,7 +27,7 @@
 package io.spine.model.verify;
 
 import io.spine.base.EventMessage;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
 
 import java.util.List;
@@ -35,9 +35,9 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 /**
- * A CommandHandler with a valid command handler method.
+ * A command assignee with a valid command handling method.
  */
-public class ValidCommandHandler extends AbstractCommandHandler {
+public class ValidCommandAssignee extends AbstractCommandAssignee {
 
     @Assign
     List<? extends EventMessage> handle(SendLink command) {
