@@ -26,29 +26,17 @@
 
 package io.spine.server.commandbus.given;
 
-import com.google.protobuf.Message;
-import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.test.commandbus.command.CmdBusAddTask;
 import io.spine.test.commandbus.command.CmdBusRemoveTask;
-import io.spine.test.commandbus.command.FirstCmdBusCreateProject;
-import io.spine.test.commandbus.command.SecondCmdBusStartProject;
-import io.spine.test.commandbus.event.CmdBusProjectCreated;
-import io.spine.test.commandbus.event.CmdBusProjectStarted;
 import io.spine.test.commandbus.event.CmdBusTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.Collections.unmodifiableList;
 
 public class SingleTenantCommandBusTestEnv {
 
@@ -91,45 +79,6 @@ public class SingleTenantCommandBusTestEnv {
 
         public InvalidProjectName getThrowable() {
             return rejection;
-        }
-    }
-
-    /**
-     * A {@code CommandAssignee} that posts a nested command.
-     */
-    public static class CommandPostingAssignee extends AbstractCommandAssignee {
-
-        private final CommandBus commandBus;
-        private final List<Message> handledCommands = new ArrayList<>();
-        private final Command commandToPost;
-
-        public CommandPostingAssignee(CommandBus commandBus, Command commandToPost) {
-            super();
-            this.commandBus = commandBus;
-            this.commandToPost = commandToPost;
-        }
-
-        @Assign
-        CmdBusProjectCreated handle(FirstCmdBusCreateProject command) {
-            commandBus.post(commandToPost, noOpObserver());
-            handledCommands.add(command);
-            return CmdBusProjectCreated
-                    .newBuilder()
-                    .setProjectId(command.getId())
-                    .build();
-        }
-
-        @Assign
-        CmdBusProjectStarted handle(SecondCmdBusStartProject command) {
-            handledCommands.add(command);
-            return CmdBusProjectStarted
-                    .newBuilder()
-                    .setProjectId(command.getId())
-                    .build();
-        }
-
-        public List<Message> handledCommands() {
-            return unmodifiableList(handledCommands);
         }
     }
 }
