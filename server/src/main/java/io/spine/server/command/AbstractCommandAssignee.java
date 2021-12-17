@@ -46,7 +46,7 @@ import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssign
  * <p>A command assignee is responsible for:
  * <ol>
  *     <li>Changing the state of the business model in response to a command.
- *     This is done by one of the assigned methods to which the handler dispatches the command.
+ *         This is done by one of the assigned methods to which the handler dispatches the command.
  *     <li>Producing corresponding events.
  *     <li>Posting events to {@code EventBus}.
  * </ol>

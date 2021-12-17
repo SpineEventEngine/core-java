@@ -41,7 +41,7 @@ import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 /**
- * An entity that handles {@linkplain Assign assigned} commands.
+ * An entity that has one or methods {@link Assign assigned} to handle commands.
  *
  * @param <I>
  *         the type of the entity identifiers

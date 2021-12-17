@@ -34,9 +34,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method as command handler.
+ * Marks a method as a command assignee.
  *
- * <p>A command handler method <em>must</em>:
+ * <p>A command assignee method <em>must</em>:
  * <ul>
  *     <li>be annotated with {@link Assign @Assign};
  *     <li>return an event message derived from {@link io.spine.base.EventMessage EventMessage}
@@ -47,21 +47,21 @@ import java.lang.annotation.Target;
  *         as the first parameter.
  * </ul>
  *
- * <p>Like other message-handling methods, command handlers are designed to be called by
+ * <p>Like other message-handling methods, command assignees are designed to be called by
  * the framework only. Therefore, it is recommended to declare them package-private
  * (or {@code internal} in Kotlin). It discourages developers from calling these methods directly
  * from anywhere. It is also acceptable to use {@code protected} if the declaring class inherits
  * the method from a superclass.
  *
- * <p>This level of access declares that a command handler method is a part
+ * <p>This level of access declares that a command assignee method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
  * BoundedContext} description on how the packages and Bounded Contexts relate.
  *
  * <h1>Accepted Parameters</h1>
  *
- * <p>The first parameter of the command handler always declares a type of the handled command.
+ * <p>The first parameter of the command assignee always declares a type of the handled command.
  *
- * <p>A command handler method <strong>may</strong> accept a {@link io.spine.core.CommandContext
+ * <p>A command assignee method <strong>may</strong> accept a {@link io.spine.core.CommandContext
  * CommandContext} as the second parameter, if handling of the command requires its context.
  *
  * <pre>
@@ -131,9 +131,9 @@ import java.lang.annotation.Target;
  *  </pre>
  * </ul>
  *
- * <h1>One Handler per Command</h1>
+ * <h1>One Assignee per Command</h1>
  *
- * <p>An application must have one and only one handler per command message class.
+ * <p>An application must have one and only one assignee per command message class.
  * This includes {@linkplain io.spine.server.command.Command the case} of transforming an incoming
  * command into one or more commands that will to be handled instead of the received one.
  *
