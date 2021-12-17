@@ -26,7 +26,7 @@
 
 package io.spine.server.command.model;
 
-import io.spine.server.command.CommandHandler;
+import io.spine.server.command.CommandAssignee;
 import io.spine.server.dispatch.Success;
 import io.spine.server.model.EventProducingMethod;
 import io.spine.server.model.IllegalOutcomeException;
@@ -41,31 +41,31 @@ import java.lang.reflect.Method;
 import static java.lang.String.format;
 
 /**
- * The wrapper for a command handler method.
+ * The wrapper for a method assigned to handle commands.
  */
-public final class CommandHandlerMethod
-        extends CommandAcceptingMethod<CommandHandler, EventClass>
-        implements EventProducingMethod<CommandHandler, CommandClass, CommandEnvelope> {
+public final class CommandAssigneeMethod
+        extends CommandAcceptingMethod<CommandAssignee, EventClass>
+        implements EventProducingMethod<CommandAssignee, CommandClass, CommandEnvelope> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method
-     *         command handler method
+     *         method assigned to handle commands
      */
-    CommandHandlerMethod(Method method, ParameterSpec<CommandEnvelope> params) {
+    CommandAssigneeMethod(Method method, ParameterSpec<CommandEnvelope> params) {
         super(method, params);
     }
 
     @Override
     public Success toSuccessfulOutcome(@Nullable Object rawResult,
-                                       CommandHandler target,
+                                       CommandAssignee target,
                                        CommandEnvelope handledSignal) {
         Success outcome =
                 EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
         if (outcome.getProducedEvents().getEventCount() == 0) {
             var errorMessage = format(
-                    "Command handler %s did not produce any events when processing command %s",
+                    "Assigned command handler %s did not produce any events when processing command %s",
                     this,
                     handledSignal.id()
             );

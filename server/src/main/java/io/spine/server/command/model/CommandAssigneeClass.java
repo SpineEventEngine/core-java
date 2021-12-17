@@ -26,35 +26,35 @@
 
 package io.spine.server.command.model;
 
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.type.EventClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides message handling information on a command handler class.
+ * Provides message handling information on a command assignee class.
  *
  * @param <C>
- *         the type of command handlers
+ *         the type of command assignees
  */
-public final class CommandHandlerClass<C extends AbstractCommandHandler>
-        extends AbstractCommandHandlingClass<C, EventClass, CommandHandlerMethod> {
+public final class CommandAssigneeClass<C extends AbstractCommandAssignee>
+        extends AbstractCommandHandlingClass<C, EventClass, CommandAssigneeMethod> {
 
     private static final long serialVersionUID = 0L;
 
-    private CommandHandlerClass(Class<C> cls) {
-        super(cls, new CommandHandlerSignature());
+    private CommandAssigneeClass(Class<C> cls) {
+        super(cls, new CommandAssigneeSignature());
     }
 
     /**
-     * Obtains command handler class for the passed raw class.
+     * Obtains command assignee class for the passed raw class.
      */
-    public static <C extends AbstractCommandHandler>
-    CommandHandlerClass<C> asCommandHandlerClass(Class<C> cls) {
+    public static <C extends AbstractCommandAssignee>
+    CommandAssigneeClass<C> asCommandAssigneeClass(Class<C> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        var result = (CommandHandlerClass<C>)
-                get(cls, CommandHandlerClass.class, () -> new CommandHandlerClass<>(cls));
+        var result = (CommandAssigneeClass<C>)
+                get(cls, CommandAssigneeClass.class, () -> new CommandAssigneeClass<>(cls));
         return result;
     }
 }

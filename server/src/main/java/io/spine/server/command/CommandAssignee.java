@@ -24,39 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
-
-import com.google.common.reflect.TypeToken;
-import io.spine.base.EventMessage;
-import io.spine.server.command.Assign;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.model.ReturnTypes;
-import io.spine.server.type.CommandEnvelope;
-
-import java.lang.reflect.Method;
+package io.spine.server.command;
 
 /**
- * The signature of {@code Command} handler method.
+ * A command assignee declares one or more methods {@linkplain Assign assigned} to handle commands.
+ *
+ * <p>An assigned method may reject a received command or produce events in response.
+ *
+ * @see Assign @Assign
  */
-public final class CommandHandlerSignature
-        extends CommandAcceptingSignature<CommandHandlerMethod> {
-
-    private static final ReturnTypes TYPES = new ReturnTypes(
-            TypeToken.of(EventMessage.class),
-            new TypeToken<Iterable<EventMessage>>() {}
-    );
-
-    public CommandHandlerSignature() {
-        super(Assign.class);
-    }
-
-    @Override
-    protected ReturnTypes returnTypes() {
-        return TYPES;
-    }
-
-    @Override
-    public CommandHandlerMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
-        return new CommandHandlerMethod(method, params);
-    }
+public interface CommandAssignee extends CommandReceiver {
 }
