@@ -28,7 +28,7 @@ package io.spine.testing.server.model.given;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
 import io.spine.testing.server.given.entity.command.TuRemoveProject;
 
@@ -36,12 +36,14 @@ import java.util.List;
 
 public class ModelTestsTestEnv {
 
-    /** Prevents instantiation of this utility class. */
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private ModelTestsTestEnv() {
     }
 
-    public static class TestCommandHandler extends AbstractCommandHandler {
-        private TestCommandHandler() {
+    public static class TestCommandAssignee extends AbstractCommandAssignee {
+        private TestCommandAssignee() {
             super();
         }
 
@@ -51,13 +53,13 @@ public class ModelTestsTestEnv {
         }
     }
 
-    public static class DuplicatedCommandHandler extends AbstractCommandHandler {
-        private DuplicatedCommandHandler() {
+    public static class DuplicatedCommandAssignee extends AbstractCommandAssignee {
+        private DuplicatedCommandAssignee() {
             super();
         }
 
         /**
-         * Handles the same command as {@link TestCommandHandler#handle(TuRemoveProject)}.
+         * Handles the same command as {@link TestCommandAssignee#handle(TuRemoveProject)}.
          */
         @Assign
         List<EventMessage> handle(TuRemoveProject cmd) {

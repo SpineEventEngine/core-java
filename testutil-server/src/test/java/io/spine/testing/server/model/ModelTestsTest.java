@@ -28,13 +28,13 @@ package io.spine.testing.server.model;
 
 import io.spine.server.model.Model;
 import io.spine.testing.UtilityClassTest;
-import io.spine.testing.server.model.given.ModelTestsTestEnv.DuplicatedCommandHandler;
-import io.spine.testing.server.model.given.ModelTestsTestEnv.TestCommandHandler;
+import io.spine.testing.server.model.given.ModelTestsTestEnv.DuplicatedCommandAssignee;
+import io.spine.testing.server.model.given.ModelTestsTestEnv.TestCommandAssignee;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,15 +55,15 @@ class ModelTestsTest extends UtilityClassTest<ModelTests> {
     @Test
     @DisplayName("clear all models")
     void clearModel() {
-        // This adds a command handler for `com.google.protobuf.Timestamp`.
-        var cls1 = asCommandHandlerClass(TestCommandHandler.class);
+        // This adds a command assignee for `com.google.protobuf.Timestamp`.
+        var cls1 = asCommandAssigneeClass(TestCommandAssignee.class);
         assertNotNull(cls1);
 
         ModelTests.dropAllModels();
 
         // This should pass as we cleared the model,
-        // i.e. there is no registered command handler for `com.google.protobuf.Timestamp`.
-        var cls2 = asCommandHandlerClass(DuplicatedCommandHandler.class);
+        // i.e. there is no registered command assignee for `com.google.protobuf.Timestamp`.
+        var cls2 = asCommandAssigneeClass(DuplicatedCommandAssignee.class);
         assertNotNull(cls2);
         assertNotEquals(cls1, cls2);
     }
