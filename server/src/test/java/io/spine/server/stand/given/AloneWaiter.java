@@ -26,15 +26,15 @@
 
 package io.spine.server.stand.given;
 
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
 import io.spine.test.integration.command.PlaceOrder;
 import io.spine.test.integration.event.OrderPlaced;
 
 /**
- * A standalone command handler to use in {@link io.spine.server.stand.StandTest StandTest}s.
+ * A standalone command assignee to use in {@link io.spine.server.stand.StandTest StandTest}s.
  */
-public final class AloneWaiter extends AbstractCommandHandler {
+public final class AloneWaiter extends AbstractCommandAssignee {
 
     private int ordersPlaced = 0;
 
