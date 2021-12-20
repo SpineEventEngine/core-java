@@ -26,7 +26,7 @@
 
 package io.spine.model.verify;
 
-import io.spine.model.CommandHandlers;
+import io.spine.model.CommandAssignees;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
 import io.spine.model.verify.given.DuplicateCommandAssignee;
 import io.spine.model.verify.given.EditAggregate;
@@ -87,44 +87,44 @@ class ModelVerifierTest {
     @DisplayName("verify model from classpath")
     void verifyModel() {
         var verifier = new ModelVerifier(project);
-        var commandHandlerTypeName = UploadCommandAssignee.class.getName();
+        var commandAssigneeTypeName = UploadCommandAssignee.class.getName();
         var aggregateTypeName = EditAggregate.class.getName();
         var procManTypeName = RenameProcMan.class.getName();
-        var spineModel = CommandHandlers.newBuilder()
-                .addCommandHandlingType(commandHandlerTypeName)
-                .addCommandHandlingType(aggregateTypeName)
-                .addCommandHandlingType(procManTypeName)
+        var spineModel = CommandAssignees.newBuilder()
+                .addCommandAssigneeType(commandAssigneeTypeName)
+                .addCommandAssigneeType(aggregateTypeName)
+                .addCommandAssigneeType(procManTypeName)
                 .build();
         verifier.verify(spineModel);
     }
 
     @ParameterizedTest
-    @DisplayName("throw when attempting to verify a model that declares an invalid command handler")
-    @MethodSource("getBadHandlers")
+    @DisplayName("fail on an invalid command assignee method")
+    @MethodSource("getBadAssignees")
     void throwOnSignatureMismatch(String badHandlerName) {
         var verifier = new ModelVerifier(project);
-        var model = CommandHandlers.newBuilder()
-                .addCommandHandlingType(badHandlerName)
+        var model = CommandAssignees.newBuilder()
+                .addCommandAssigneeType(badHandlerName)
                 .build();
         assertThrows(SignatureMismatchException.class, () -> verifier.verify(model));
     }
 
-    private static Stream<Arguments> getBadHandlers() {
+    private static Stream<Arguments> getBadAssignees() {
         return Stream.of(
                 Arguments.of(InvalidDeleteAggregate.class.getName()),
                 Arguments.of(InvalidEnhanceAggregate.class.getName()));
     }
 
     @Test
-    @DisplayName("fail on duplicate command handlers")
-    void failOnDuplicateHandlers() {
+    @DisplayName("fail on duplicate command assignee")
+    void failOnDuplicateAssignees() {
         var verifier = new ModelVerifier(project);
         var firstType = UploadCommandAssignee.class.getName();
         var secondType = DuplicateCommandAssignee.class.getName();
 
-        var spineModel = CommandHandlers.newBuilder()
-                .addCommandHandlingType(firstType)
-                .addCommandHandlingType(secondType)
+        var spineModel = CommandAssignees.newBuilder()
+                .addCommandAssigneeType(firstType)
+                .addCommandAssigneeType(secondType)
                 .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
@@ -134,8 +134,8 @@ class ModelVerifierTest {
     void failOnExternalCommandReceivers() {
         var verifier = new ModelVerifier(project);
         var invalidProcman = InvalidCommander.class.getName();
-        var spineModel = CommandHandlers.newBuilder()
-                .addCommandHandlingType(invalidProcman)
+        var spineModel = CommandAssignees.newBuilder()
+                .addCommandAssigneeType(invalidProcman)
                 .build();
         assertThrows(ExternalCommandReceiverMethodError.class, () -> verifier.verify(spineModel));
     }
@@ -153,10 +153,10 @@ class ModelVerifierTest {
         @BeforeEach
         void verifyModel() {
             var verifier = new ModelVerifier(project);
-            // Add handler here to avoid unnecessary logging.
+            // Add an assignee here to avoid unnecessary logging.
             interceptLogging();
-            var model = CommandHandlers.newBuilder()
-                    .addCommandHandlingType(aggregateClass.getName())
+            var model = CommandAssignees.newBuilder()
+                    .addCommandAssigneeType(aggregateClass.getName())
                     .build();
             verifier.verify(model);
         }
@@ -167,7 +167,7 @@ class ModelVerifierTest {
         }
 
         @Test
-        @DisplayName("on `private` command handling methods")
+        @DisplayName("on `private` command assignee methods")
         void onPrivateMethod() {
             var assertRecord = assertLog().record();
             assertRecord.hasLevelThat()
@@ -182,18 +182,18 @@ class ModelVerifierTest {
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
         var invalidClassname = "non.existing.class.Name";
-        var spineModel = CommandHandlers.newBuilder()
-                .addCommandHandlingType(invalidClassname)
+        var spineModel = CommandAssignees.newBuilder()
+                .addCommandAssigneeType(invalidClassname)
                 .build();
         new ModelVerifier(project).verify(spineModel);
     }
 
     @Test
-    @DisplayName("not accept non-CommandHandler types")
-    void rejectNonHandlerTypes() {
+    @DisplayName("not accept non-CommandAssignee types")
+    void rejectNonAssigneeTypes() {
         var invalidClassname = ModelVerifierTest.class.getName();
-        var spineModel = CommandHandlers.newBuilder()
-                .addCommandHandlingType(invalidClassname)
+        var spineModel = CommandAssignees.newBuilder()
+                .addCommandAssigneeType(invalidClassname)
                 .build();
         assertThrows(IllegalArgumentException.class,
                      () -> new ModelVerifier(project).verify(spineModel));

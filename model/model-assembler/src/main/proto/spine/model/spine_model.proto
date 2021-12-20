@@ -32,18 +32,19 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
-option java_outer_classname = "CommandHandlersProto";
+option java_outer_classname = "CommandAssigneesProto";
 option java_package = "io.spine.model";
 
 option (internal_all) = true;
 
-// The command handling types of a project.
-message CommandHandlers {
+// The command assignee types of a project.
+message CommandAssignees {
 
-    // All the command handling types of a Spine project.
+    // All the command assignee types of a Spine-based project.
     //
-    // Each type is represented with its Java fully-qualified class name.
-    // These types include `Aggregate`s, `ProcessManager`s, and `CommandHandler`s.
+    // Each type is represented by its Java fully-qualified class name.
+    // These types include entities such as `Aggregate`s and `ProcessManager`s as well
+    // as standalone `CommandAssignee`s.
     //
-    repeated string command_handling_type = 1;
+    repeated string command_assignee_type = 1;
 }

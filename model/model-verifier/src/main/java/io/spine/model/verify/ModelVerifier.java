@@ -29,7 +29,7 @@ package io.spine.model.verify;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import io.spine.logging.Logging;
-import io.spine.model.CommandHandlers;
+import io.spine.model.CommandAssignees;
 import io.spine.server.command.model.DuplicateHandlerCheck;
 import io.spine.server.model.Model;
 import io.spine.tools.gradle.project.ProjectHierarchy;
@@ -74,11 +74,11 @@ final class ModelVerifier implements Logging {
     /**
      * Verifies Spine model upon the given Gradle project.
      *
-     * @param handlers the listing of the Spine model classes
+     * @param assignees the listing of the Spine model classes
      */
-    void verify(CommandHandlers handlers) {
+    void verify(CommandAssignees assignees) {
         var classSet = new ClassSet(projectClassLoader,
-                                    handlers.getCommandHandlingTypeList());
+                                    assignees.getCommandAssigneeTypeList());
         reportNotFoundIfAny(classSet);
         DuplicateHandlerCheck.newInstance()
                              .check(classSet.elements());

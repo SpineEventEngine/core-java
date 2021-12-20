@@ -28,7 +28,7 @@ package io.spine.model.assemble;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.model.CommandHandlers;
+import io.spine.model.CommandAssignees;
 import io.spine.server.command.Assign;
 
 import javax.lang.model.element.Element;
@@ -50,7 +50,7 @@ import static io.spine.protobuf.Messages.isDefault;
 /**
  * An annotation processor for the {@link Assign @Assign} annotation.
  *
- * <p>Collects the types which contain command handler methods (marked with {@code @Assign}
+ * <p>Collects the types which contain command assignee methods (marked with {@code @Assign}
  * annotation) and writes them into the {@code ${spineDirRoot}/.spine/spine_model.ser} file, where
  * "{@code spineDirRoot}" is the value of the <b>spineDirRoot</b> annotator option.
  *
@@ -66,7 +66,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
     static final String OUTPUT_OPTION_NAME = "spineDirRoot";
     private static final String DEFAULT_OUTPUT_OPTION = ".";
 
-    private final CommandHandlers.Builder commandHandlers = CommandHandlers.newBuilder();
+    private final CommandAssignees.Builder commandAssignees = CommandAssignees.newBuilder();
 
     @Override
     protected Class<? extends Annotation> getAnnotationType() {
@@ -86,7 +86,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
         var enclosingTypeElement = (TypeElement) element.getEnclosingElement();
         var typeName = enclosingTypeElement.getQualifiedName()
                                            .toString();
-        commandHandlers.addCommandHandlingType(typeName);
+        commandAssignees.addCommandAssigneeType(typeName);
     }
 
     @Override
@@ -94,45 +94,45 @@ public class AssignLookup extends SpineAnnotationProcessor {
         var spineOutput = getOption(OUTPUT_OPTION_NAME).orElse(DEFAULT_OUTPUT_OPTION);
         var fileName = spineOutput + '/' + DESTINATION_PATH;
         var serializedModelStorage = new File(fileName);
-        mergeOldHandlersFrom(serializedModelStorage);
-        writeHandlersTo(serializedModelStorage);
+        mergeOldAssigneesFrom(serializedModelStorage);
+        writeAssigneesTo(serializedModelStorage);
     }
 
     /**
-     * Merges the currently built {@linkplain CommandHandlers commandHandlers}
+     * Merges the currently built {@linkplain CommandAssignees commandAssignees}
      * with the pre-built one.
      *
-     * <p>If the file exists and is not empty, the message of type {@link CommandHandlers} is
-     * read from it and merged with the current commandHandlers by the rules of
+     * <p>If the file exists and is not empty, the message of type {@link CommandAssignees} is
+     * read from it and merged with the current commandAssignees by the rules of
      * {@link com.google.protobuf.Message.Builder#mergeFrom(com.google.protobuf.Message)
      * Message.Builder.mergeFrom()}.
      *
-     * @param file the file which may or may not contain the pre-assembled commandHandlers
+     * @param file the file which may or may not contain the pre-assembled commandAssignees
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private void mergeOldHandlersFrom(File file) {
+    private void mergeOldAssigneesFrom(File file) {
         var fileWithData = existsNonEmpty(file);
         if (fileWithData) {
             var preexistingModel = readExisting(file);
-            commandHandlers.mergeFrom(preexistingModel);
+            commandAssignees.mergeFrom(preexistingModel);
         }
     }
 
     /**
-     * Writes the {@link CommandHandlers} to the given file.
+     * Writes the {@link CommandAssignees} to the given file.
      *
      * <p>If the given file does not exist, this method creates it.
      *
-     * <p>The written commandHandlers will be cleaned from duplications in the repeated fields.
+     * <p>The written commandAssignees will be cleaned from duplications in the repeated fields.
      *
      * <p>The I/O errors are handled by rethrowing them as {@link IllegalStateException}.
      *
-     * @param file an existing file to write the commandHandlers into
+     * @param file an existing file to write the commandAssignees into
      */
-    private void writeHandlersTo(File file) {
+    private void writeAssigneesTo(File file) {
         ensureFile(file);
         removeDuplicates();
-        var serializedModel = commandHandlers.vBuild();
+        var serializedModel = commandAssignees.vBuild();
         if (!isDefault(serializedModel)) {
             try (var out = new FileOutputStream(file)) {
                 serializedModel.writeTo(out);
@@ -143,37 +143,37 @@ public class AssignLookup extends SpineAnnotationProcessor {
     }
 
     /**
-     * Cleans the currently built commandHandlers from the duplicates.
+     * Cleans the currently built commandAssignees from the duplicates.
      *
-     * <p>Calling this method will cause the {@linkplain #commandHandlers current commandHandlers}
+     * <p>Calling this method will cause the {@linkplain #commandAssignees current commandAssignees}
      * not to contain duplicate entries in any {@code repeated} field.
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void removeDuplicates() {
-        var list = commandHandlers.getCommandHandlingTypeList();
+        var list = commandAssignees.getCommandAssigneeTypeList();
         Set<String> types = newTreeSet(list);
-        commandHandlers.clearCommandHandlingType()
-                       .addAllCommandHandlingType(types);
+        commandAssignees.clearCommandAssigneeType()
+                        .addAllCommandAssigneeType(types);
     }
 
     /**
-     * Reads the existing {@link CommandHandlers} from the given file.
+     * Reads the existing {@link CommandAssignees} from the given file.
      *
      * <p>The given file should exist.
      *
      * <p>If the given file is empty,
-     * the {@link CommandHandlers#getDefaultInstance() CommandHandlers.getDefaultInstance()} is
+     * the {@link CommandAssignees#getDefaultInstance() CommandAssignees.getDefaultInstance()} is
      * returned.
      *
-     * @param file an existing file with a {@link CommandHandlers} message
-     * @return the read commandHandlers
+     * @param file an existing file with a {@link CommandAssignees} message
+     * @return the read commandAssignees
      */
-    private static CommandHandlers readExisting(File file) {
+    private static CommandAssignees readExisting(File file) {
         if (file.length() == 0) {
-            return CommandHandlers.getDefaultInstance();
+            return CommandAssignees.getDefaultInstance();
         } else {
             try (InputStream in = new FileInputStream(file)) {
-                var preexistingModel = CommandHandlers.parseFrom(in);
+                var preexistingModel = CommandAssignees.parseFrom(in);
                 return preexistingModel;
             } catch (IOException e) {
                 throw new IllegalStateException(e);
