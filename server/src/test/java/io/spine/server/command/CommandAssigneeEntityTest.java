@@ -38,7 +38,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("`CommandAssigneeEntity` should")
 class CommandAssigneeEntityTest {
 
-    /** The object we test. */
+    /**
+     * The object we test.
+     */
     private AssigneeEntity entity;
 
     @BeforeEach

@@ -39,7 +39,7 @@ import io.spine.server.type.EventClass;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
- * Abstract base for entity classes that handle commands.
+ * Abstract base for entity classes that has methods assigned to handle commands.
  *
  * @param <E>
  *         the type of entity

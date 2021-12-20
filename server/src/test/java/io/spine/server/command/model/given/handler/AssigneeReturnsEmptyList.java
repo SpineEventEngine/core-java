@@ -35,7 +35,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 
 /**
- * Provides a handler method that returns an empty list.
+ * Provides a handling method that returns an empty list.
  */
 public class AssigneeReturnsEmptyList extends TestCommandAssignee {
     @Assign

@@ -34,7 +34,7 @@ import io.spine.test.reflect.command.RefCreateProject;
 import java.util.List;
 
 /**
- * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
+ * Provides a handling method that returns {@link io.spine.server.model.Nothing}.
  */
 public class AssigneeReturnsNothing extends TestCommandAssignee {
 

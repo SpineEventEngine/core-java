@@ -56,7 +56,7 @@ import static io.spine.protobuf.Messages.isDefault;
  *
  * <p><b>spineDirRoot</b> is the only supported option of the processor.
  * Use {@code javac -AspineDirRoot=/path/to/project/root [...]} to set the value of the option.
- * If none is set, the option will use current directory (denoted with "{@code ./}") by default.
+ * If none is set, the option will default to current directory (denoted with "{@code ./}").
  */
 public class AssignLookup extends SpineAnnotationProcessor {
 
@@ -70,8 +70,8 @@ public class AssignLookup extends SpineAnnotationProcessor {
      * List of {@link io.spine.server.command.CommandAssignee command assignee}s.
      *
      * @implNote The {@linkplain CommandReceivers type} of this filed implies that it can store
-     * {@code CommandReceiver}s, which could be either {@code CommandAssignee} or {@code Commander}.
-     * But we are going to store there only assignees.
+     *           {@code CommandReceiver}s, which could be either {@code CommandAssignee}
+     *           or {@code Commander}. But we are going to store only assignees there.
      */
     private final CommandReceivers.Builder commandAssignees = CommandReceivers.newBuilder();
 

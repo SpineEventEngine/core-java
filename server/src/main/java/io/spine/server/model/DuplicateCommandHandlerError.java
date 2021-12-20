@@ -40,7 +40,7 @@ import static io.spine.string.Diags.toEnumerationBackticked;
 import static java.lang.String.format;
 
 /**
- * An error thrown on attempt to add a class which declares a
+ * An error is thrown on attempt to add a class which declares a
  * {@linkplain io.spine.server.command.model.CommandAcceptingMethod method} that handles a command
  * which is already handled by a class already added to the {@link Model}.
  */

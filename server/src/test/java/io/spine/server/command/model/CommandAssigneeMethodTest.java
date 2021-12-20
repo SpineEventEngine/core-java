@@ -105,7 +105,7 @@ class CommandAssigneeMethodTest {
 
     @Nested
     @MuteLogging /* Signature mismatch warnings are expected. */
-    @DisplayName("invoke handler method which returns")
+    @DisplayName("invoke handling method which returns")
     class InvokeAssigneeMethod {
 
         @Test

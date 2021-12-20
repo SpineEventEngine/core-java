@@ -36,7 +36,7 @@ import static io.spine.server.model.given.Given.EventMessage.projectCreated;
  * Provides a method which is not annotated.
  *
  * @implNote The "unused" warning is suppressed because the following. There are no calls to this
- * method since all assignee methods are called indirectly. Regular assignee methods have
+ * method since all handling methods are called indirectly. Regular handling methods have
  * annotations and IDEA is configured to ignore unused methods with those annotations.
  * Since the method does not have the annotation (which is the purpose of this test dummy class),
  * it is deemed unused. We suppress the annotation to avoid accidental removal of the method.

@@ -85,12 +85,10 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  * <h2>Adding command assignee methods</h2>
  *
  * <p>A command assignee method is a method that is responsible
- * for handling commands of the specified type.
+ * for handling commands of the specified type. This method is annotated
+ * with {@link io.spine.server.command.Assign @Assign} annotation.
  *
- * <p>Command assignee methods of an {@code Aggregate} are defined
- * in the way as it described in {@link io.spine.server.command.Assign Assign}.
- *
- * <p>Event(s) returned by command assignees are posted to
+ * <p>Event(s) returned by command assignee methods are posted to
  * the {@link io.spine.server.event.EventBus EventBus} automatically
  * by {@link AggregateRepository}.
  *

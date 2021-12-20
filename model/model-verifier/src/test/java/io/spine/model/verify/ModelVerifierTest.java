@@ -121,7 +121,6 @@ class ModelVerifierTest {
         var verifier = new ModelVerifier(project);
         var firstType = UploadCommandAssignee.class.getName();
         var secondType = DuplicateCommandAssignee.class.getName();
-
         var spineModel = CommandReceivers.newBuilder()
                 .addCommandReceiverType(firstType)
                 .addCommandReceiverType(secondType)

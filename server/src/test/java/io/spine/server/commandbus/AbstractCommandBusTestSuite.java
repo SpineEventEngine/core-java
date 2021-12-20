@@ -236,7 +236,7 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     /**
-     * A sample command assignee that tells whether a handler was invoked.
+     * A sample command assignee that tells whether a handling method was invoked.
      */
     final class CreateProjectAssignee extends AbstractCommandAssignee {
 

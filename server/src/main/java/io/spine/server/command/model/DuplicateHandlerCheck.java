@@ -119,7 +119,7 @@ public final class DuplicateHandlerCheck implements Logging {
     }
 
     /**
-     * Creates a model class from a raw class, and adds it to the Model.
+     * Creates a model class by a raw class, and adds it to the Model.
      */
     @FunctionalInterface
     private interface Appender extends Function<Class<?>, ModelClass<?>> {

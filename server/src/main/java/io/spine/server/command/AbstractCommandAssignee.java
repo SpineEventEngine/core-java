@@ -45,13 +45,13 @@ import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssign
  *
  * <p>A command assignee is responsible for:
  * <ol>
- *     <li>Changing the state of the business model in response to a command.
- *         This is done by one of the assigned methods to which the handler dispatches the command.
+ *     <li>Changing the state of the business model in response to a command. This is done
+ *         by one of the command handling methods to which the assignee dispatches the command.
  *     <li>Producing corresponding events.
  *     <li>Posting events to {@code EventBus}.
  * </ol>
  *
- * <p>Event messages are returned as values of command assigned methods.
+ * <p>Event messages are returned as values from command handling methods.
  *
  * <p>A command assignee does not have its own state. So the state of the business
  * model it changes is external to it. Even though such behaviour may be needed in
@@ -71,7 +71,7 @@ public abstract class AbstractCommandAssignee
     private final CommandAssigneeClass<?> thisClass = asCommandAssigneeClass(getClass());
 
     /**
-     * Dispatches the command to the assigned method and posts resulting events
+     * Dispatches the command to an appropriate command handling method and posts resulting events
      * to the {@link EventBus}.
      *
      * @param envelope

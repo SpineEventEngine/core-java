@@ -51,7 +51,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * A standalone commander which declares invalid {@link Assign command handlers}.
  *
- * <p>Being similar to {@link ValidAssignee}, this class also declares duplicate handlers
+ * <p>Being similar to {@link ValidAssignee}, this class also declares duplicate handling methods
  * for the same commands. This is the way to avoid myriads of small classes which enumerate
  * all possible combinations or params.
  */
@@ -135,7 +135,7 @@ public final class InvalidAssignee extends AbstractCommandAssignee {
 
     @Command
     SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
-        throw newIllegalStateException("Command handler method " +
+        throw newIllegalStateException("Command handling method " +
                                                "has declared an illegal exception.");
     }
 }

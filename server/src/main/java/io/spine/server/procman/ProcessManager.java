@@ -153,7 +153,7 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Dispatches the command to the assigned handling method.
+     * Dispatches the command to the handling method.
      *
      * @param command
      *         the envelope with the command to dispatch
