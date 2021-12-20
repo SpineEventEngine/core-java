@@ -32,19 +32,20 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
-option java_outer_classname = "CommandAssigneesProto";
+option java_outer_classname = "CommandReceiversProto";
 option java_package = "io.spine.model";
 
 option (internal_all) = true;
 
-// The command assignee types of a project.
-message CommandAssignees {
+// The command receiving types of a project.
+message CommandReceivers {
 
-    // All the command assignee types of a Spine-based project.
+    // All the command receiving types of a Spine-based project.
     //
     // Each type is represented by its Java fully-qualified class name.
-    // These types include entities such as `Aggregate`s and `ProcessManager`s as well
-    // as standalone `CommandAssignee`s.
     //
-    repeated string command_assignee_type = 1;
+    // These types include `CommandAssignee`s and `Commander`s. Typically, it would be `Aggregate`s,
+    // `ProcessManager`s and standalone components implementing `AbstractCommandAssignee`
+    // or `AbstractCommander` directly.
+    repeated string command_receiver_type = 1;
 }

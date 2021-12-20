@@ -28,7 +28,7 @@ package io.spine.model.assemble;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
-import io.spine.model.CommandAssignees;
+import io.spine.model.CommandReceivers;
 import io.spine.server.command.Assign;
 
 import javax.lang.model.element.Element;
@@ -48,7 +48,7 @@ import static io.spine.io.Files2.existsNonEmpty;
 import static io.spine.protobuf.Messages.isDefault;
 
 /**
- * An annotation processor for the {@link Assign @Assign} annotation.
+ * An annotation processor for {@link Assign @Assign} annotation.
  *
  * <p>Collects the types which contain command assignee methods (marked with {@code @Assign}
  * annotation) and writes them into the {@code ${spineDirRoot}/.spine/spine_model.ser} file, where
@@ -56,7 +56,7 @@ import static io.spine.protobuf.Messages.isDefault;
  *
  * <p><b>spineDirRoot</b> is the only supported option of the processor.
  * Use {@code javac -AspineDirRoot=/path/to/project/root [...]} to set the value of the option.
- * If none is set, the option will default to current directory (denoted with "{@code ./}").
+ * If none is set, the option will use current directory (denoted with "{@code ./}") by default.
  */
 public class AssignLookup extends SpineAnnotationProcessor {
 
@@ -66,7 +66,14 @@ public class AssignLookup extends SpineAnnotationProcessor {
     static final String OUTPUT_OPTION_NAME = "spineDirRoot";
     private static final String DEFAULT_OUTPUT_OPTION = ".";
 
-    private final CommandAssignees.Builder commandAssignees = CommandAssignees.newBuilder();
+    /**
+     * List of {@link io.spine.server.command.CommandAssignee command assignee}s.
+     *
+     * @implNote The {@linkplain CommandReceivers type} of this filed implies that it can store
+     * {@code CommandReceiver}s, which could be either {@code CommandAssignee} or {@code Commander}.
+     * But we are going to store there only assignees.
+     */
+    private final CommandReceivers.Builder commandAssignees = CommandReceivers.newBuilder();
 
     @Override
     protected Class<? extends Annotation> getAnnotationType() {
@@ -86,7 +93,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
         var enclosingTypeElement = (TypeElement) element.getEnclosingElement();
         var typeName = enclosingTypeElement.getQualifiedName()
                                            .toString();
-        commandAssignees.addCommandAssigneeType(typeName);
+        commandAssignees.addCommandReceiverType(typeName);
     }
 
     @Override
@@ -99,10 +106,9 @@ public class AssignLookup extends SpineAnnotationProcessor {
     }
 
     /**
-     * Merges the currently built {@linkplain CommandAssignees commandAssignees}
-     * with the pre-built one.
+     * Merges the currently built {@link AssignLookup#commandAssignees} with the pre-built one.
      *
-     * <p>If the file exists and is not empty, the message of type {@link CommandAssignees} is
+     * <p>If the file exists and is not empty, the message of type {@link CommandReceivers} is
      * read from it and merged with the current commandAssignees by the rules of
      * {@link com.google.protobuf.Message.Builder#mergeFrom(com.google.protobuf.Message)
      * Message.Builder.mergeFrom()}.
@@ -119,7 +125,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
     }
 
     /**
-     * Writes the {@link CommandAssignees} to the given file.
+     * Writes the {@link AssignLookup#commandAssignees} to the given file.
      *
      * <p>If the given file does not exist, this method creates it.
      *
@@ -143,37 +149,37 @@ public class AssignLookup extends SpineAnnotationProcessor {
     }
 
     /**
-     * Cleans the currently built commandAssignees from the duplicates.
+     * Cleans the currently built {@link #commandAssignees} from the duplicates.
      *
-     * <p>Calling this method will cause the {@linkplain #commandAssignees current commandAssignees}
-     * not to contain duplicate entries in any {@code repeated} field.
+     * <p>Calling this method will cause the current list of assignees not to contain
+     * duplicate entries in any {@code repeated} field.
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void removeDuplicates() {
-        var list = commandAssignees.getCommandAssigneeTypeList();
+        var list = commandAssignees.getCommandReceiverTypeList();
         Set<String> types = newTreeSet(list);
-        commandAssignees.clearCommandAssigneeType()
-                        .addAllCommandAssigneeType(types);
+        commandAssignees.clearCommandReceiverType()
+                        .addAllCommandReceiverType(types);
     }
 
     /**
-     * Reads the existing {@link CommandAssignees} from the given file.
+     * Reads the existing {@link #commandAssignees} from the given file.
      *
      * <p>The given file should exist.
      *
      * <p>If the given file is empty,
-     * the {@link CommandAssignees#getDefaultInstance() CommandAssignees.getDefaultInstance()} is
+     * the {@link CommandReceivers#getDefaultInstance() CommandAssignees.getDefaultInstance()} is
      * returned.
      *
-     * @param file an existing file with a {@link CommandAssignees} message
+     * @param file an existing file with a {@link CommandReceivers} message
      * @return the read commandAssignees
      */
-    private static CommandAssignees readExisting(File file) {
+    private static CommandReceivers readExisting(File file) {
         if (file.length() == 0) {
-            return CommandAssignees.getDefaultInstance();
+            return CommandReceivers.getDefaultInstance();
         } else {
             try (InputStream in = new FileInputStream(file)) {
-                var preexistingModel = CommandAssignees.parseFrom(in);
+                var preexistingModel = CommandReceivers.parseFrom(in);
                 return preexistingModel;
             } catch (IOException e) {
                 throw new IllegalStateException(e);

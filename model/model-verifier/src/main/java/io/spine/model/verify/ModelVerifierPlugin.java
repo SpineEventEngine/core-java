@@ -29,7 +29,7 @@ package io.spine.model.verify;
 import com.google.common.flogger.FluentLogger;
 import io.spine.annotation.Experimental;
 import io.spine.logging.Logging;
-import io.spine.model.CommandAssignees;
+import io.spine.model.CommandReceivers;
 import io.spine.model.assemble.AssignLookup;
 import io.spine.tools.gradle.SourceSetName;
 import io.spine.tools.gradle.task.GradleTask;
@@ -94,7 +94,7 @@ public final class ModelVerifierPlugin implements Plugin<Project>, Logging {
      *
      * <p>The action is executed only if the passed {@code rawModelPath} is present.
      *
-     * <p>Reads the {@link CommandAssignees} from the given file and
+     * <p>Reads the {@link CommandReceivers} from the given file and
      * {@linkplain #verifyModel processes} the model.
      */
     private static class VerifierAction implements Action<Task>, Logging {
@@ -142,19 +142,19 @@ public final class ModelVerifierPlugin implements Plugin<Project>, Logging {
         }
 
         /**
-         * Verifies the {@link CommandAssignees} upon the {@linkplain Project Gradle project}.
+         * Verifies the {@link CommandReceivers} upon the {@linkplain Project Gradle project}.
          *
          * @param project the Gradle project to process the model upon
          */
         private void verifyModel(Project project) {
             var verifier = new ModelVerifier(project);
-            var commandAssignees = readCommandAssignees();
-            verifier.verify(commandAssignees);
+            var commandReceivers = readCommandReceivers();
+            verifier.verify(commandReceivers);
         }
 
-        private CommandAssignees readCommandAssignees() {
+        private CommandReceivers readCommandReceivers() {
             try (var in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
-                return CommandAssignees.parseFrom(in);
+                return CommandReceivers.parseFrom(in);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
