@@ -152,7 +152,7 @@ class ModelVerifierTest {
         @BeforeEach
         void verifyModel() {
             var verifier = new ModelVerifier(project);
-            // Add an assignee here to avoid unnecessary logging.
+            // Add a command assignee here to avoid unnecessary logging.
             interceptLogging();
             var model = CommandReceivers.newBuilder()
                     .addCommandReceiverType(aggregateClass.getName())

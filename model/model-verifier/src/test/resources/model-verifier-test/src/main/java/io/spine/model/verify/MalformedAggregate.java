@@ -34,10 +34,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * An Aggregate with invalid command handler method.
+ * An aggregate with an invalid command-handling method.
  *
- * <p>{@link #handle()} method has no arguments and is marked with {@link Assign}, which makes it
- * an invalid command handler method.
+ * <p>{@link #handle()} has no arguments but is marked with {@link Assign @Assign} annotation,
+ * that makes the aggrerate an invalid command assignee.
  */
 public class MalformedAggregate extends Aggregate<String, VoidState, VoidState.Builder> {
 

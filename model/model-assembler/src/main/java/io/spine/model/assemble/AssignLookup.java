@@ -50,9 +50,9 @@ import static io.spine.protobuf.Messages.isDefault;
 /**
  * An annotation processor for {@link Assign @Assign} annotation.
  *
- * <p>Collects the types which contain command assignee methods (marked with {@code @Assign}
- * annotation) and writes them into the {@code ${spineDirRoot}/.spine/spine_model.ser} file, where
- * "{@code spineDirRoot}" is the value of the <b>spineDirRoot</b> annotator option.
+ * <p>Collects the types which contain methods {@linkplain Assign assigned} to handle commands
+ * and writes them into the {@code ${spineDirRoot}/.spine/spine_model.ser} file,
+ * where "{@code spineDirRoot}" is the value of the <b>spineDirRoot</b> annotator option.
  *
  * <p><b>spineDirRoot</b> is the only supported option of the processor.
  * Use {@code javac -AspineDirRoot=/path/to/project/root [...]} to set the value of the option.

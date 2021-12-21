@@ -82,11 +82,11 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  *         state types as generic parameters.
  * </ol>
  *
- * <h2>Adding command assignee methods</h2>
+ * <h2>Adding methods assigned to handle commands</h2>
  *
- * <p>A command assignee method is a method that is responsible
- * for handling commands of the specified type. This method is annotated
- * with {@link io.spine.server.command.Assign @Assign} annotation.
+ * <p>A method assigned to handle commands is annotated with {@code @Assign} annotation
+ * and accepting a {@code CommandMessage} as a first argument. The detailed description
+ * on how to define such methods is described in {@link io.spine.server.command.Assign}.
  *
  * <p>Event(s) returned by command assignee methods are posted to
  * the {@link io.spine.server.event.EventBus EventBus} automatically
