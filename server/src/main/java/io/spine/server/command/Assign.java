@@ -82,7 +82,7 @@ import java.lang.annotation.Target;
  * </pre>
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
- * this method is not considered a command handler and is <strong>not</strong> registered for
+ * this method is not considered a command-handling and is <strong>not</strong> registered for
  * command dispatching.
  *
  * <h1>Returning Values</h1>

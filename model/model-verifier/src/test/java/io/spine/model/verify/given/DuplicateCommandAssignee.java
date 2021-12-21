@@ -34,7 +34,7 @@ import io.spine.test.model.verify.event.PhotoUploaded;
 public class DuplicateCommandAssignee extends AbstractCommandAssignee {
 
     @Assign
-    PhotoUploaded handle(UploadPhoto command) {
+    PhotoUploaded handler(UploadPhoto command) {
         return PhotoUploaded
                 .newBuilder()
                 .setPhoto(command.getPhoto())

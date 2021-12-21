@@ -37,7 +37,7 @@ import java.util.List;
  * An aggregate with an invalid command-handling method.
  *
  * <p>{@link #handle()} has no arguments but is marked with {@link Assign @Assign} annotation,
- * that makes the aggrerate an invalid command assignee.
+ * that makes the aggrerate an invalid.
  */
 public class MalformedAggregate extends Aggregate<String, VoidState, VoidState.Builder> {
 
@@ -46,7 +46,7 @@ public class MalformedAggregate extends Aggregate<String, VoidState, VoidState.B
     }
 
     @Assign
-    List<UInt64Value> handle() {
+    List<UInt64Value> handler() {
         return Collections.emptyList();
     }
 }

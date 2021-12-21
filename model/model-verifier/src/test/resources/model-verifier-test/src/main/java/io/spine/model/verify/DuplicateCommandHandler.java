@@ -31,11 +31,10 @@ import io.spine.server.command.Assign;
 
 import static java.util.Collections.singletonList;
 
-public class DuplicateCommandHandler
-        extends Aggregate<String, ChatState, ChatState.Builder> {
+public class DuplicateCommandAssignee extends Aggregate<String, ChatState, ChatState.Builder> {
 
     @Assign
-    Iterable<LinkSent> handle(SendLink command) {
+    Iterable<LinkSent> handler(SendLink command) {
         return singletonList(LinkSent.newBuilder()
                                      .setLink(command.getLink())
                                      .build());

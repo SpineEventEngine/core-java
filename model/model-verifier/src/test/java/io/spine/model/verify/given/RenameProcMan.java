@@ -41,7 +41,7 @@ public class RenameProcMan extends ProcessManager<String, RenameState, RenameSta
     }
 
     @Assign
-    TitleChanged handle(ChangeTitle command) {
+    TitleChanged handler(ChangeTitle command) {
         return TitleChanged
                 .newBuilder()
                 .setNewTitle(command.getNewTitle())

@@ -44,7 +44,7 @@ public class InvalidCommander extends ProcessManager<String, EditState, EditStat
     }
 
     @Command
-    UploadPhoto handle(@External RestorePhoto command) {
+    UploadPhoto handler(@External RestorePhoto command) {
         return UploadPhoto.getDefaultInstance();
     }
 }

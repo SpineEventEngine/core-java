@@ -35,12 +35,12 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 /**
- * A command assignee with a valid command-handling method.
+ * A {@code CommandAssignee} with a valid command-handling method.
  */
 public class ValidCommandAssignee extends AbstractCommandAssignee {
 
     @Assign
-    List<? extends EventMessage> handle(SendLink command) {
+    List<? extends EventMessage> handler(SendLink command) {
         return singletonList(LinkSent.newBuilder()
                                      .setLink(command.getLink())
                                      .build());

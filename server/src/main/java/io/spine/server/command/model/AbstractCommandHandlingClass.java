@@ -84,21 +84,23 @@ public abstract class AbstractCommandHandlingClass<C,
         return result;
     }
 
-    /** Obtains the handler method for the passed command. */
+    /**
+     * Obtains the handling method for the passed command.
+     */
     @Override
     public H handlerOf(CommandEnvelope command) {
         return commands.getHandlerFor(command);
     }
 
     /**
-     * Obtains handler methods for the given class of commands.
+     * Obtains handling methods for the given class of commands.
      */
     ImmutableSet<H> handlersForType(CommandClass cls) {
         return commands.handlersOf(cls);
     }
 
     /**
-     * Checks if this command handler has a handler method for the given class of commands.
+     * Checks if this command handler has a handling method for the given class of commands.
      */
     boolean hasHandler(CommandClass commandClass) {
         return commands.containsClass(commandClass);

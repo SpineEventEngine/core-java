@@ -42,7 +42,7 @@ public class InvalidRestoreAggregate extends Aggregate<String, EditState, EditSt
 
     @SuppressWarnings("MethodMayBeStatic")
     @Assign
-    private PhotoRestored handle(RestorePhoto restore){
+    private PhotoRestored handler(RestorePhoto restore){
         return PhotoRestored.newBuilder()
                 .setTitle(restore.getTitle())
                 .build();

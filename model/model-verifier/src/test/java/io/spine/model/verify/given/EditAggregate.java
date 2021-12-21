@@ -37,7 +37,7 @@ import io.spine.test.model.verify.given.EditState;
 public class EditAggregate extends Aggregate<String, EditState, EditState.Builder> {
 
     @Assign
-    PhotoEdited handle(EditPhoto command, CommandContext ctx) {
+    PhotoEdited handler(EditPhoto command, CommandContext ctx) {
         return PhotoEdited
                 .newBuilder()
                 .setNewPhoto(command.getNewPhoto())

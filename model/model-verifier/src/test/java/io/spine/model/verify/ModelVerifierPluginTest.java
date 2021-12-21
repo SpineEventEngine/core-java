@@ -80,7 +80,7 @@ class ModelVerifierPluginTest {
     void rejectDuplicateHandlingMethods() {
         var project = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
-                "io/spine/model/verify/DuplicateCommandHandler.java"
+                "io/spine/model/verify/DuplicateCommandAssignee.java"
         );
         var result = project.executeAndFail(verifyModel);
         var task = result.task(verifyModel.path());

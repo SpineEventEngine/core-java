@@ -51,7 +51,7 @@ import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssign
  *     <li>Posting events to {@code EventBus}.
  * </ol>
  *
- * <p>Event messages are returned as values from command handling methods.
+ * <p>Event messages are returned as values from command-handling methods.
  *
  * <p>A command assignee does not have its own state. So the state of the business
  * model it changes is external to it. Even though such behaviour may be needed in
