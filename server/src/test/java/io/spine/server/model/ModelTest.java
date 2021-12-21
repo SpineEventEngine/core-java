@@ -58,7 +58,7 @@ class ModelTest {
     }
 
     @Test
-    @DisplayName("check for duplicated command handling methods in command assignee class")
+    @DisplayName("check for duplicated command-handling methods in command assignee class")
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     void checkDuplicateCmdHandler() {
         try {
@@ -73,7 +73,7 @@ class ModelTest {
     }
 
     @Test
-    @DisplayName("check for duplicated command handling methods in process manager class")
+    @DisplayName("check for duplicated command-handling methods in process manager class")
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     void checkDuplicateInProcman() {
         try {

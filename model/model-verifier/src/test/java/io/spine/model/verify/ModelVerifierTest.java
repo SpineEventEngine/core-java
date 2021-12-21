@@ -91,9 +91,9 @@ class ModelVerifierTest {
         var aggregateTypeName = EditAggregate.class.getName();
         var procManTypeName = RenameProcMan.class.getName();
         var spineModel = CommandReceivers.newBuilder()
-                .addCommandReceiverType(commandAssigneeTypeName)
-                .addCommandReceiverType(aggregateTypeName)
-                .addCommandReceiverType(procManTypeName)
+                .addCommandReceivingType(commandAssigneeTypeName)
+                .addCommandReceivingType(aggregateTypeName)
+                .addCommandReceivingType(procManTypeName)
                 .build();
         verifier.verify(spineModel);
     }
@@ -104,7 +104,7 @@ class ModelVerifierTest {
     void throwOnSignatureMismatch(String badReceiver) {
         var verifier = new ModelVerifier(project);
         var model = CommandReceivers.newBuilder()
-                .addCommandReceiverType(badReceiver)
+                .addCommandReceivingType(badReceiver)
                 .build();
         assertThrows(SignatureMismatchException.class, () -> verifier.verify(model));
     }
@@ -122,8 +122,8 @@ class ModelVerifierTest {
         var firstType = UploadCommandAssignee.class.getName();
         var secondType = DuplicateCommandAssignee.class.getName();
         var spineModel = CommandReceivers.newBuilder()
-                .addCommandReceiverType(firstType)
-                .addCommandReceiverType(secondType)
+                .addCommandReceivingType(firstType)
+                .addCommandReceivingType(secondType)
                 .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
@@ -134,7 +134,7 @@ class ModelVerifierTest {
         var verifier = new ModelVerifier(project);
         var invalidProcman = InvalidCommander.class.getName();
         var spineModel = CommandReceivers.newBuilder()
-                .addCommandReceiverType(invalidProcman)
+                .addCommandReceivingType(invalidProcman)
                 .build();
         assertThrows(ExternalCommandReceiverMethodError.class, () -> verifier.verify(spineModel));
     }
@@ -155,7 +155,7 @@ class ModelVerifierTest {
             // Add a command assignee here to avoid unnecessary logging.
             interceptLogging();
             var model = CommandReceivers.newBuilder()
-                    .addCommandReceiverType(aggregateClass.getName())
+                    .addCommandReceivingType(aggregateClass.getName())
                     .build();
             verifier.verify(model);
         }
@@ -182,7 +182,7 @@ class ModelVerifierTest {
     void ignoreInvalidClassNames() {
         var invalidClassname = "non.existing.class.Name";
         var spineModel = CommandReceivers.newBuilder()
-                .addCommandReceiverType(invalidClassname)
+                .addCommandReceivingType(invalidClassname)
                 .build();
         new ModelVerifier(project).verify(spineModel);
     }
@@ -192,7 +192,7 @@ class ModelVerifierTest {
     void rejectNonAssigneeTypes() {
         var invalidClassname = ModelVerifierTest.class.getName();
         var spineModel = CommandReceivers.newBuilder()
-                .addCommandReceiverType(invalidClassname)
+                .addCommandReceivingType(invalidClassname)
                 .build();
         assertThrows(IllegalArgumentException.class,
                      () -> new ModelVerifier(project).verify(spineModel));
@@ -201,10 +201,9 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve compilation destination directory from task")
     void getCompilationDestDir() throws MalformedURLException {
-        var compileTask = actualProject()
-                .getTasks()
-                .withType(JavaCompile.class)
-                .getByName(compileJava.name());
+        var compileTask = actualProject().getTasks()
+                                         .withType(JavaCompile.class)
+                                         .getByName(compileJava.name());
         var dest = TempDir.forClass(getClass());
         compileTask.getDestinationDirectory().set(dest);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
@@ -215,10 +214,9 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve `null` if destination directory is null")
     void getNullDestDir() {
-        var compileTask = actualProject()
-                .getTasks()
-                .withType(JavaCompile.class)
-                .getByName(compileJava.name());
+        var compileTask = actualProject().getTasks()
+                                         .withType(JavaCompile.class)
+                                         .getByName(compileJava.name());
         compileTask.getDestinationDirectory().set((File) null);
         Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));

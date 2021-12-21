@@ -55,14 +55,14 @@ class ModelTestsTest extends UtilityClassTest<ModelTests> {
     @Test
     @DisplayName("clear all models")
     void clearModel() {
-        // This adds a command handling method for `TuRemoveProject`.
+        // This registers a command-handling method for `TuRemoveProject`.
         var cls1 = asCommandAssigneeClass(TestCommandAssignee.class);
         assertNotNull(cls1);
 
         ModelTests.dropAllModels();
 
         // This should pass as we cleared the model,
-        // i.e. there is no registered command handling method for `TuRemoveProject`.
+        // i.e. there is no registered command-handling method for `TuRemoveProject`.
         var cls2 = asCommandAssigneeClass(DuplicatedCommandAssignee.class);
         assertNotNull(cls2);
         assertNotEquals(cls1, cls2);

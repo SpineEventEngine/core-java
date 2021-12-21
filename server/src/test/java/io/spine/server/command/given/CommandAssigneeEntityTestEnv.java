@@ -36,10 +36,12 @@ import io.spine.server.type.EventClass;
 
 import static io.spine.testing.TestValues.newUuidValue;
 
-public class CommandHandlingEntityTestEnv {
+public class CommandAssigneeEntityTestEnv {
 
-    /** Prevents instantiation of this utility class. */
-    private CommandHandlingEntityTestEnv() {
+    /**
+     * Prevents instantiation of this utility class.
+     */
+    private CommandAssigneeEntityTestEnv() {
     }
 
     /**

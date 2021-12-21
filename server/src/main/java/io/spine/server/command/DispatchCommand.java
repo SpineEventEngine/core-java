@@ -80,7 +80,7 @@ public final class DispatchCommand<I> {
      * {@link EntityLifecycle#onCommandRejected EntityLifecycle.onCommandRejected(...)} callback
      * is triggered.
      *
-     * @return the produced events including the rejections thrown by the command handler method
+     * @return the produced events including the rejections thrown by the command assignee method
      */
     public DispatchOutcome perform() {
         return DispatchOutcomeHandler

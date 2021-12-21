@@ -56,7 +56,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * from anywhere. It is also acceptable to use {@code protected} if the declaring class inherits
  * the method from a superclass.
  *
- * <p>This level of access declares that a command-handling method is a part
+ * <p>This level of access declares that a command handler method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
  * BoundedContext} description on how the packages and Bounded Contexts relate.
  *

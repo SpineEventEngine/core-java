@@ -32,7 +32,7 @@ import io.spine.server.type.EventClass;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides message handling information on a command assignee class.
+ * Provides message-handling information on a {@code CommandAssignee} class.
  *
  * @param <C>
  *         the type of command assignees

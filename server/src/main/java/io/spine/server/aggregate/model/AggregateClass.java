@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
 
 /**
- * Provides message handling information on an aggregate class.
+ * Provides message-handling information on an {@code Aggregate} class.
  *
  * @param <A> the type of aggregates
  */

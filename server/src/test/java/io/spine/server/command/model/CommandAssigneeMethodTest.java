@@ -105,7 +105,7 @@ class CommandAssigneeMethodTest {
 
     @Nested
     @MuteLogging /* Signature mismatch warnings are expected. */
-    @DisplayName("invoke handling method which returns")
+    @DisplayName("invoke assignee method which returns")
     class InvokeAssigneeMethod {
 
         @Test
@@ -207,7 +207,7 @@ class CommandAssigneeMethodTest {
     }
 
     @Nested
-    @DisplayName("consider assignee invalid with")
+    @DisplayName("consider assignee method invalid with")
     class ConsiderAssigneeInvalidWith {
 
         @Test
@@ -224,7 +224,7 @@ class CommandAssigneeMethodTest {
 
         @SuppressWarnings("CheckReturnValue") // no need as the call to dispatch() throws
         @Test
-        @DisplayName("command assignee")
+        @DisplayName("command assignee method")
         void onDispatchToAssignee() {
             var assignee = new RejectingAssignee();
             var envelope = newCommand(createProject());
@@ -263,7 +263,7 @@ class CommandAssigneeMethodTest {
     }
 
     @Test
-    @DisplayName("throw `ModelError` when dispatching command of non-handled type")
+    @DisplayName("throw `ModelError` when dispatching command of non-assigned type")
     void notDispatchNonHandledCmd() {
         var assignee = new ValidAssigneeOneParam();
         var cmd = newCommand(startProject());

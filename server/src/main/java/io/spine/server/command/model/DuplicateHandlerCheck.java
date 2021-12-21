@@ -45,7 +45,7 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Ensures that there are no duplicating command handling methods among the passed classes.
+ * Ensures that there are no duplicating command-handling methods among the passed classes.
  */
 public final class DuplicateHandlerCheck implements Logging {
 

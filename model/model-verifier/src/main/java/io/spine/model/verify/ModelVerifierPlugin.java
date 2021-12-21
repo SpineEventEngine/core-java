@@ -144,7 +144,8 @@ public final class ModelVerifierPlugin implements Plugin<Project>, Logging {
         /**
          * Verifies the {@link CommandReceivers} upon the {@linkplain Project Gradle project}.
          *
-         * @param project the Gradle project to process the model upon
+         * @param project
+         *         the Gradle project to process the model upon
          */
         private void verifyModel(Project project) {
             var verifier = new ModelVerifier(project);

@@ -49,7 +49,7 @@ import java.util.Optional;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A standalone commander which declares an invalid {@link Assign command-handling method}.
+ * A standalone commander which declares invalid {@link Assign command-handling methods}.
  *
  * <p>Being similar to {@link ValidAssignee}, this class also declares duplicate handling methods
  * for the same commands. This is the way to avoid myriads of small classes which enumerate
@@ -135,7 +135,7 @@ public final class InvalidAssignee extends AbstractCommandAssignee {
 
     @Command
     SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
-        throw newIllegalStateException("Command handling method " +
+        throw newIllegalStateException("Command handler method " +
                                                "has declared an illegal exception.");
     }
 }

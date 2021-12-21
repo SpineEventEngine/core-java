@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
 
 /**
- * Provides message handling information on a process manager class.
+ * Provides message-handling information on a {@code ProcessManager} class.
  *
  * @param <P>
  *         the type of process managers

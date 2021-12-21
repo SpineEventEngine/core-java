@@ -36,7 +36,7 @@ import io.spine.test.model.filter.ModProject;
 
 /**
  * This aggregate declares a command-handling method that breaks the contract imposed by
- * {@link Assign} by using {@link Where} filters.
+ * {@link Assign}, by using {@link Where} filters.
  */
 public final class ModSplitCommandAggregate extends Aggregate<String, ModProject, ModProject.Builder> {
 

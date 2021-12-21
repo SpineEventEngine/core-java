@@ -48,7 +48,7 @@ import static io.spine.io.Files2.existsNonEmpty;
 import static io.spine.protobuf.Messages.isDefault;
 
 /**
- * An annotation processor for {@link Assign @Assign} annotation.
+ * An annotation processor for the {@link Assign @Assign} annotation.
  *
  * <p>Collects the types which contain methods {@linkplain Assign assigned} to handle commands
  * and writes them into the {@code ${spineDirRoot}/.spine/spine_model.ser} file,
@@ -93,7 +93,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
         var enclosingTypeElement = (TypeElement) element.getEnclosingElement();
         var typeName = enclosingTypeElement.getQualifiedName()
                                            .toString();
-        commandAssignees.addCommandReceiverType(typeName);
+        commandAssignees.addCommandReceivingType(typeName);
     }
 
     @Override
@@ -113,7 +113,8 @@ public class AssignLookup extends SpineAnnotationProcessor {
      * {@link com.google.protobuf.Message.Builder#mergeFrom(com.google.protobuf.Message)
      * Message.Builder.mergeFrom()}.
      *
-     * @param file the file which may or may not contain the pre-assembled commandAssignees
+     * @param file
+     *         the file which may or may not contain the pre-assembled commandAssignees
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void mergeOldAssigneesFrom(File file) {
@@ -133,7 +134,8 @@ public class AssignLookup extends SpineAnnotationProcessor {
      *
      * <p>The I/O errors are handled by rethrowing them as {@link IllegalStateException}.
      *
-     * @param file an existing file to write the commandAssignees into
+     * @param file
+     *         an existing file to write the commandAssignees into
      */
     private void writeAssigneesTo(File file) {
         ensureFile(file);
@@ -171,7 +173,8 @@ public class AssignLookup extends SpineAnnotationProcessor {
      * the {@link CommandReceivers#getDefaultInstance() CommandAssignees.getDefaultInstance()} is
      * returned.
      *
-     * @param file an existing file with a {@link CommandReceivers} message
+     * @param file
+     *         an existing file with a {@link CommandReceivers} message
      * @return the read commandAssignees
      */
     private static CommandReceivers readExisting(File file) {

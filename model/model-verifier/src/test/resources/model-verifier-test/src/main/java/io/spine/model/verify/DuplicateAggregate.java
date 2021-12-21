@@ -33,9 +33,6 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 
-/**
- * An invalid aggregate which has two command-handling methods for the same type of command.
- */
 public class DuplicateAggregate extends Aggregate<String, CallState, CallState.Builder> {
 
     @Assign

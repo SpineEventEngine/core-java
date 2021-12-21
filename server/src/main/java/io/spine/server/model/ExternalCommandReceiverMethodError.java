@@ -55,8 +55,7 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
     private static final long serialVersionUID = 0L;
 
     /**
-     * Creates a new exception for the command handler method
-     * that violates the {@code @Command} semantic.
+     * Creates a new exception for the command handler that violates the {@code @Command} semantic.
      */
     @Internal
     public ExternalCommandReceiverMethodError(

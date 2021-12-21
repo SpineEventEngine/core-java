@@ -26,13 +26,13 @@
 
 package io.spine.server.command;
 
-import io.spine.server.command.given.CommandHandlingEntityTestEnv.AssigneeEntity;
+import io.spine.server.command.given.CommandAssigneeEntityTestEnv.AssigneeEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.command.given.CommandHandlingEntityTestEnv.msg;
-import static io.spine.server.command.given.CommandHandlingEntityTestEnv.str;
+import static io.spine.server.command.given.CommandAssigneeEntityTestEnv.msg;
+import static io.spine.server.command.given.CommandAssigneeEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`CommandAssigneeEntity` should")
@@ -49,7 +49,7 @@ class CommandAssigneeEntityTest {
     }
 
     @Test
-    @DisplayName("assign own version to created mismatches")
+    @DisplayName("set own version to created mismatches")
     void assignVersionToMismatches() {
         var version = entity.version().getNumber();
 
