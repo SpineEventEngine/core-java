@@ -78,7 +78,7 @@ final class ModelVerifier implements Logging {
      */
     void verify(CommandReceivers receivers) {
         var classSet = new ClassSet(projectClassLoader,
-                                    receivers.getCommandReceiverTypeList());
+                                    receivers.getCommandReceivingTypeList());
         reportNotFoundIfAny(classSet);
         DuplicateHandlerCheck.newInstance()
                              .check(classSet.elements());

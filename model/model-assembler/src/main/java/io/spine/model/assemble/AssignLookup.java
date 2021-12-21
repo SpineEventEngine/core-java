@@ -158,10 +158,10 @@ public class AssignLookup extends SpineAnnotationProcessor {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void removeDuplicates() {
-        var list = commandAssignees.getCommandReceiverTypeList();
+        var list = commandAssignees.getCommandReceivingTypeList();
         Set<String> types = newTreeSet(list);
-        commandAssignees.clearCommandReceiverType()
-                        .addAllCommandReceiverType(types);
+        commandAssignees.clearCommandReceivingType()
+                        .addAllCommandReceivingType(types);
     }
 
     /**
