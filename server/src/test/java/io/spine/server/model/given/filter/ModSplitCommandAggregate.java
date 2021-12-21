@@ -35,9 +35,8 @@ import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.filter.ModProject;
 
 /**
- * An invalid aggregate declaration.
- *
- * <p>Methods {@linkplain Assign assigned} to handle commands cannot have {@link Where} filters.
+ * This aggregate declares a command-handling method that breaks the contract imposed by
+ * {@link Assign} by using {@link Where} filters.
  */
 public final class ModSplitCommandAggregate extends Aggregate<String, ModProject, ModProject.Builder> {
 

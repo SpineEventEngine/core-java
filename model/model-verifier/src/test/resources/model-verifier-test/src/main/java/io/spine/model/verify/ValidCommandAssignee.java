@@ -35,7 +35,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 /**
- * A command assignee with a valid command handling method.
+ * A command assignee with a valid command-handling method.
  */
 public class ValidCommandAssignee extends AbstractCommandAssignee {
 

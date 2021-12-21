@@ -76,7 +76,7 @@ class ModelVerifierPluginTest {
 
     @Test
     @MuteLogging
-    @DisplayName("halt build on duplicate command handling methods")
+    @DisplayName("halt build on duplicate command-handling methods")
     void rejectDuplicateHandlingMethods() {
         var project = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
@@ -98,7 +98,7 @@ class ModelVerifierPluginTest {
     }
 
     @Test
-    @DisplayName("halt build on malformed command handling methods")
+    @DisplayName("halt build on malformed command-handling methods")
     void rejectMalformedHandlingMethods() {
         var result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
                 .executeAndFail(verifyModel);
