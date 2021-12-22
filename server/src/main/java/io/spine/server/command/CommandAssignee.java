@@ -27,11 +27,10 @@
 package io.spine.server.command;
 
 /**
- * A command assignee declares one or more methods {@linkplain Assign assigned} to handle commands.
+ * A command assignee declares one or more methods each of which is {@link Assign assigned}
+ * to handle commands of a specific type.
  *
- * <p>An assigned method may reject the received command or produce events in response.
- *
- * @see Assign @Assign
+ * <p>A handling method may reject the received command or produce events in response.
  */
 public interface CommandAssignee extends CommandReceiver {
 }

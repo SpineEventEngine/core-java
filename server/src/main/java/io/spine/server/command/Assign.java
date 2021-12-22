@@ -59,9 +59,9 @@ import java.lang.annotation.Target;
  *
  * <h1>Accepted Parameters</h1>
  *
- * <p>The first parameter of the command assignee always declares a type of the handled command.
+ * <p>The first parameter of the method always declares a type of the handled command.
  *
- * <p>A command assignee method <strong>may</strong> accept a {@link io.spine.core.CommandContext
+ * <p>The method <strong>may</strong> accept a {@link io.spine.core.CommandContext
  * CommandContext} as the second parameter, if handling of the command requires its context.
  *
  * <pre>
@@ -82,7 +82,7 @@ import java.lang.annotation.Target;
  * </pre>
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
- * this method is not considered a command-handling and is <strong>not</strong> registered for
+ * this method is not considered a command assignee and is <strong>not</strong> registered for
  * command dispatching.
  *
  * <h1>Returning Values</h1>
@@ -91,7 +91,7 @@ import java.lang.annotation.Target;
  * in an emission of one or more events. Each of them must derive
  * from {@link io.spine.base.EventMessage EventMessage} in order to make the code less error-prone.
  *
- * <p>A command handler method must return either
+ * <p>A command assignee method must return either
  * <ul>
  *
  *  <li>an event message:
@@ -116,7 +116,7 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- * {@literal Pair<ProjectCreated, ProjectAssigned>} handlerCreateProject event) { ... }
+ * {@literal Pair<ProjectCreated, ProjectAssigned>} handler(CreateProject event) { ... }
  *
  * {@literal @}Assign
  * {@literal Pair<TaskCreated, Optional<TaskAssigned>>} handler(CreateTask event) { ... }
@@ -131,9 +131,9 @@ import java.lang.annotation.Target;
  *  </pre>
  * </ul>
  *
- * <h1>One Assignee per Command</h1>
+ * <h1>One Handler per Command</h1>
  *
- * <p>An application must have one and only one assignee per command message class.
+ * <p>An application must have one and only one handler per command message class.
  * This includes {@linkplain io.spine.server.command.Command the case} of transforming an incoming
  * command into one or more commands that will to be handled instead of the received one.
  *

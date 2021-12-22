@@ -135,7 +135,7 @@ public final class InvalidAssignee extends AbstractCommandAssignee {
 
     @Command
     SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
-        throw newIllegalStateException("Command handler method " +
+        throw newIllegalStateException("Command assignee handler " +
                                                "has declared an illegal exception.");
     }
 }
