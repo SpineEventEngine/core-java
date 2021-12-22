@@ -52,7 +52,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  * @see io.spine.server.command.Assign @Assign
  */
 public abstract
-class CommandAssigneeEntity<I,
+class CommandAssigningEntity<I,
                             S extends EntityState<I>,
                             B extends ValidatingBuilder<S>>
         extends TransactionalEntity<I, S, B>
@@ -64,14 +64,14 @@ class CommandAssigneeEntity<I,
     @LazyInit
     private @MonotonicNonNull Any idAsAny;
 
-    protected CommandAssigneeEntity() {
+    protected CommandAssigningEntity() {
         super();
     }
 
     /**
      * Creates a new entity with the passed ID.
      */
-    protected CommandAssigneeEntity(I id) {
+    protected CommandAssigningEntity(I id) {
         super(id);
         this.idAsAny = Identifier.pack(id);
     }
