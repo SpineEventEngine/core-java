@@ -37,7 +37,6 @@ import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
-import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.model.given.handler.AssigneeReturnsEmptyList;
 import io.spine.server.command.model.given.handler.AssigneeReturnsNothing;
 import io.spine.server.command.model.given.handler.InvalidAssigneeNoAnnotation;
@@ -62,15 +61,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`CommandAssigneeMethod` should")
 class CommandAssigneeMethodTest {
@@ -113,19 +110,18 @@ class CommandAssigneeMethodTest {
         void returningMessage() {
             var assignee = new ValidAssigneeTwoParams();
             var method = new CommandAssigneeSignature().classify(assignee.method());
-            assertTrue(method.isPresent());
+            assertThat(method).isPresent();
+
             var handler = method.get();
             var cmd = createProject();
             var envelope = envelope(cmd);
-
             var outcome = handler.invoke(assignee, envelope);
             var events = outcome.getSuccess().getProducedEvents().getEventList();
+            assertThat(assignee.handledCommands()).containsExactly(cmd);
+            assertThat(events.size()).isEqualTo(1);
 
-            assertThat(assignee.handledCommands())
-                    .containsExactly(cmd);
-            assertEquals(1, events.size());
             var event = (RefProjectCreated) events.get(0).enclosedMessage();
-            assertEquals(cmd.getProjectId(), event.getProjectId());
+            assertThat(event.getProjectId()).isEqualTo(cmd.getProjectId());
         }
 
         @Test
@@ -133,24 +129,23 @@ class CommandAssigneeMethodTest {
         void returningMessageList() {
             var assignee = new ValidAssigneeOneParamReturnsList();
             var method = new CommandAssigneeSignature().classify(assignee.method());
-            assertTrue(method.isPresent());
+            assertThat(method).isPresent();
+
             var handler = method.get();
             var cmd = createProject();
             var envelope = envelope(cmd);
-
             var outcome = handler.invoke(assignee, envelope);
             var events = outcome.getSuccess().getProducedEvents().getEventList();
+            assertThat(assignee.handledCommands()).containsExactly(cmd);
+            assertThat(events.size()).isEqualTo(1);
 
-            assertThat(assignee.handledCommands())
-                    .containsExactly(cmd);
-            assertEquals(1, events.size());
             var event = (RefProjectCreated) events.get(0).enclosedMessage();
-            assertEquals(cmd.getProjectId(), event.getProjectId());
+            assertThat(event.getProjectId()).isEqualTo(cmd.getProjectId());
         }
     }
 
     @Nested
-    @DisplayName("throw `ISE` when invoked method produces")
+    @DisplayName("throw `IllegalOutcomeException` when invoked method produces")
     class ThrowWhenProduces {
 
         @Test
@@ -158,13 +153,13 @@ class CommandAssigneeMethodTest {
         void noEvents() {
             var assignee = new AssigneeReturnsEmptyList();
             var method = new CommandAssigneeSignature().classify(assignee.method());
-            assertTrue(method.isPresent());
+            assertThat(method).isPresent();
+
             var handler = method.get();
             var cmd = createProject();
             var envelope = envelope(cmd);
-
             var outcome = handler.invoke(assignee, envelope);
-            assertTrue(outcome.hasError());
+            assertThat(outcome.hasError()).isTrue();
             assertThat(outcome.getError().getType())
                     .isEqualTo(IllegalOutcomeException.class.getCanonicalName());
         }
@@ -174,11 +169,11 @@ class CommandAssigneeMethodTest {
         void nothingEvent() {
             var handlerObject = new AssigneeReturnsNothing();
             var method = new CommandAssigneeSignature().classify(handlerObject.method());
-            assertTrue(method.isPresent());
+            assertThat(method).isPresent();
+
             var handler = method.get();
             var cmd = createProject();
             var envelope = envelope(cmd);
-
             var outcome = handler.invoke(handlerObject, envelope);
             checkIllegalOutcome(outcome, envelope.command());
         }
@@ -214,7 +209,7 @@ class CommandAssigneeMethodTest {
         @DisplayName("no annotation")
         void noAnnotation() {
             var handler = new InvalidAssigneeNoAnnotation().method();
-            assertFalse(new CommandAssigneeSignature().matches(handler));
+            assertThat(new CommandAssigneeSignature().matches(handler)).isTrue();
         }
     }
 
@@ -251,14 +246,14 @@ class CommandAssigneeMethodTest {
 
         private void assertCauseAndId(Throwable e, Object handlerId) {
             var cause = getRootCause(e);
+            assertThat(cause instanceof RejectionThrowable).isTrue();
 
-            assertTrue(cause instanceof RejectionThrowable);
             var thrown = (RejectionThrowable) cause;
+            var optionalProducerId = thrown.producerId();
+            assertThat(optionalProducerId).isPresent();
 
-            assertTrue(thrown.producerId()
-                             .isPresent());
-            assertEquals(handlerId, Identifier.unpack(thrown.producerId()
-                                                            .get()));
+            var producerId = Identifier.unpack(optionalProducerId.get());
+            assertThat(producerId).isEqualTo(handlerId);
         }
     }
 
@@ -267,7 +262,6 @@ class CommandAssigneeMethodTest {
     void notDispatchNonHandledCmd() {
         var assignee = new ValidAssigneeOneParam();
         var cmd = newCommand(startProject());
-
         assertThrows(ModelError.class, () -> assignee.dispatch(cmd));
     }
 
