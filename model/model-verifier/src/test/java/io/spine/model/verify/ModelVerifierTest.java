@@ -87,11 +87,11 @@ class ModelVerifierTest {
     @DisplayName("verify model from classpath")
     void verifyModel() {
         var verifier = new ModelVerifier(project);
-        var commandAssigneeTypeName = UploadCommandAssignee.class.getName();
+        var assigneeTypeName = UploadCommandAssignee.class.getName();
         var aggregateTypeName = EditAggregate.class.getName();
         var procManTypeName = RenameProcMan.class.getName();
         var spineModel = CommandReceivers.newBuilder()
-                .addCommandReceivingType(commandAssigneeTypeName)
+                .addCommandReceivingType(assigneeTypeName)
                 .addCommandReceivingType(aggregateTypeName)
                 .addCommandReceivingType(procManTypeName)
                 .build();
