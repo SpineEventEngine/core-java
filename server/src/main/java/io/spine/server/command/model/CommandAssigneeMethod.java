@@ -65,7 +65,7 @@ public final class CommandAssigneeMethod
                 EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
         if (outcome.getProducedEvents().getEventCount() == 0) {
             var errorMessage = format(
-                    "Command-handling methods %s did not produce any events when processing command %s",
+                    "Command-handling method %s did not produce any events when processing command %s",
                     this,
                     handledSignal.id()
             );
