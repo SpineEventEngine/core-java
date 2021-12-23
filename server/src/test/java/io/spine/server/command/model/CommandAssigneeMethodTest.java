@@ -209,7 +209,7 @@ class CommandAssigneeMethodTest {
         @DisplayName("no annotation")
         void noAnnotation() {
             var handler = new InvalidAssigneeNoAnnotation().method();
-            assertThat(new CommandAssigneeSignature().matches(handler)).isTrue();
+            assertThat(new CommandAssigneeSignature().matches(handler)).isFalse();
         }
     }
 
