@@ -42,7 +42,7 @@ import io.spine.server.event.AbstractEventSubscriber;
  * registered in any Bounded Context. This is done for simplicity of enumerating all possible
  * combinations of parameters.
  *
- * @see io.spine.server.event.model.ReactorSignatureTest
+ * @see io.spine.server.event.model.EventSubscriberSignatureTest
  */
 public final class ValidSubscriber extends AbstractEventSubscriber {
 

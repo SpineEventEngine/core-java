@@ -29,7 +29,7 @@ package io.spine.server.event;
 import io.spine.server.EventProducer;
 
 /**
- * An event reactor declares methods that receive events and {@linkplain React may generate}
+ * Declares methods that receive events, {@linkplain React possibly generating}
  * other events in response.
  *
  * <p>This means that a reactor does <em>not</em> have to <em>always</em> generate an event.

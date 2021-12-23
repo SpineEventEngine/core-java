@@ -258,7 +258,7 @@ class CommandAssigneeMethodTest {
     }
 
     @Test
-    @DisplayName("throw `ModelError` when dispatching command of non-assigned type")
+    @DisplayName("throw `ModelError` when dispatching command without an assignee")
     void notDispatchNonHandledCmd() {
         var assignee = new ValidAssigneeOneParam();
         var cmd = newCommand(startProject());

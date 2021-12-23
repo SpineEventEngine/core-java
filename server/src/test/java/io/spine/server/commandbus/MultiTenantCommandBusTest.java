@@ -89,8 +89,8 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("state command not supported when there is neither assignee nor dispatcher for it")
-    void requireAssigneeOrDispatcher() {
+    @DisplayName("state command not supported when there is neither assignee nor commander for it")
+    void requireAssigneeOrCommander() {
         var command = addTask();
         commandBus.post(command, observer);
 

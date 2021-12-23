@@ -45,7 +45,7 @@ message CommandReceivers {
     // Each type is represented by its Java fully-qualified class name.
     //
     // These types include `CommandAssignee`s and `Commander`s. Typically, it would be `Aggregate`s,
-    // `ProcessManager`s and standalone components implementing `AbstractCommandAssignee`
+    // `ProcessManager`s, and standalone components implementing `AbstractCommandAssignee`
     // or `AbstractCommander` directly.
     repeated string command_receiving_type = 1;
 }

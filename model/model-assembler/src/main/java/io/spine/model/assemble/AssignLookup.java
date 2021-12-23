@@ -67,11 +67,11 @@ public class AssignLookup extends SpineAnnotationProcessor {
     private static final String DEFAULT_OUTPUT_OPTION = ".";
 
     /**
-     * List of {@link io.spine.server.command.CommandAssignee command assignee}s.
+     * List of {@linkplain io.spine.server.command.CommandAssignee command assignee}s.
      *
-     * @implNote The {@linkplain CommandReceivers type} of this filed implies that it can store
-     *           {@code CommandReceiver}s, which could be either {@code CommandAssignee}
-     *           or {@code Commander}. But we are going to store only assignees there.
+     * @implNote The type of this filed implies that it can store {@code CommandReceiver}s,
+     *           which could be either {@code CommandAssignee} or {@code Commander}. But we are
+     *           going to store only assignees there.
      */
     private final CommandReceivers.Builder commandAssignees = CommandReceivers.newBuilder();
 

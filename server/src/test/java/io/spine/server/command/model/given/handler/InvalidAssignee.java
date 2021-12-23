@@ -49,9 +49,9 @@ import java.util.Optional;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A standalone commander which declares invalid {@link Assign command-handling methods}.
+ * A standalone assignee which declares invalid {@link Assign command-handling methods}.
  *
- * <p>Being similar to {@link ValidAssignee}, this class also declares duplicate handling methods
+ * <p>Being similar to {@link ValidAssignee}, this class also declares duplicate handlers
  * for the same commands. This is the way to avoid myriads of small classes which enumerate
  * all possible combinations or params.
  */

@@ -55,7 +55,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>A process manager reacts to domain events in a cross-aggregate, eventually consistent manner.
  *
- * <p>Event and command-handling methods are invoked by the {@link ProcessManagerRepository}
+ * <p>Event- and command-handling methods are invoked by the {@link ProcessManagerRepository}
  * that manages instances of a process manager class.
  *
  * <p>For more information on Process Managers, please see:

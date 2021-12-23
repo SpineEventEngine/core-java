@@ -44,13 +44,14 @@ import io.spine.server.model.given.SignatureTestEvent;
 import java.io.IOException;
 
 /**
- * A standalone commander which declares invalid {@link React event-reacting handlers}.
+ * A standalone event subscriber which declares invalid {@link Subscribe event-subscribing
+ * handlers}.
  *
  * <p>Being similar to {@link ValidSubscriber}, this class also declares duplicate handlers
  * for the same events. This is the way to avoid lots of small classes enumerating
  * all possible combinations or params.
  *
- * @see io.spine.server.event.model.ReactorSignatureTest
+ * @see io.spine.server.event.model.EventSubscriberSignatureTest
  */
 public final class InvalidSubscriber extends AbstractEventSubscriber {
 

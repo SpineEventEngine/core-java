@@ -27,8 +27,8 @@
 package io.spine.server.command;
 
 /**
- * A command assignee declares one or more methods each of which is {@linkplain Assign assigned}
- * to handle commands of a specific type.
+ * Declares one or more methods, each {@linkplain Assign assigned} to handle commands
+ * of a specific type.
  *
  * <p>A handling method may reject the received command or produce events in response.
  *

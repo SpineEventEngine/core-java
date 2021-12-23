@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A command dispatch operation.
  *
  * <p>Dispatches the given {@linkplain CommandEnvelope command} to the given
-w * {@linkplain CommandAssigneeEntity entity} and triggers the {@link EntityLifecycle}.
+ * {@linkplain CommandAssigneeEntity entity} and triggers the {@link EntityLifecycle}.
  *
  * @param <I>
  *         the type of entity ID

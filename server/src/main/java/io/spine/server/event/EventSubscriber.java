@@ -27,8 +27,7 @@
 package io.spine.server.event;
 
 /**
- * An event subscriber declares one or more methods {@linkplain io.spine.core.Subscribe subscribed}
- * to events.
+ * Declares one or more methods, {@linkplain io.spine.core.Subscribe subscribed} to events.
  *
  * @see io.spine.core.Subscribe @Subscribe
  */
