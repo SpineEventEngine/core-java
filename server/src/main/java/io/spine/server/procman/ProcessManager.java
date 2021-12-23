@@ -30,7 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.server.command.CommandAssigningEntity;
+import io.spine.server.command.CommandAssigneeEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.HasLifecycleColumns;
@@ -81,7 +81,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class ProcessManager<I,
                                      S extends EntityState<I>,
                                      B extends ValidatingBuilder<S>>
-        extends CommandAssigningEntity<I, S, B>
+        extends CommandAssigneeEntity<I, S, B>
         implements EventReactor,
                    Commander,
                    HasVersionColumn<I, S>,

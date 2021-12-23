@@ -28,7 +28,7 @@ package io.spine.server.command.given;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.StringValue;
-import io.spine.server.command.CommandAssigningEntity;
+import io.spine.server.command.CommandAssigneeEntity;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.test.shared.EmptyEntity;
 import io.spine.server.type.CommandEnvelope;
@@ -36,12 +36,12 @@ import io.spine.server.type.EventClass;
 
 import static io.spine.testing.TestValues.newUuidValue;
 
-public class CommandAssigningEntityTestEnv {
+public class CommandAssigneeEntityTestEnv {
 
     /**
      * Prevents instantiation of this utility class.
      */
-    private CommandAssigningEntityTestEnv() {
+    private CommandAssigneeEntityTestEnv() {
     }
 
     /**
@@ -58,10 +58,10 @@ public class CommandAssigningEntityTestEnv {
         return msg().getValue();
     }
 
-    public static class AssigningEntity
-            extends CommandAssigningEntity<String, EmptyEntity, EmptyEntity.Builder> {
+    public static class AssigneeEntity
+            extends CommandAssigneeEntity<String, EmptyEntity, EmptyEntity.Builder> {
 
-        public AssigningEntity(String id) {
+        public AssigneeEntity(String id) {
             super(id);
         }
 

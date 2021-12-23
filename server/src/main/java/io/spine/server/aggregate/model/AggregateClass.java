@@ -28,7 +28,7 @@ package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.entity.model.CommandAssigningEntityClass;
+import io.spine.server.entity.model.CommandAssigneeEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
@@ -49,7 +49,7 @@ import static com.google.common.collect.Sets.union;
  * @param <A> the type of aggregates
  */
 public class AggregateClass<A extends Aggregate<?, ?, ?>>
-        extends CommandAssigningEntityClass<A>
+        extends CommandAssigneeEntityClass<A>
         implements ReactingClass {
 
     private static final long serialVersionUID = 0L;

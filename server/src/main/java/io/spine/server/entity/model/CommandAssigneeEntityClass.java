@@ -45,14 +45,14 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  * @param <E>
  *         the type of entity
  */
-public abstract class CommandAssigningEntityClass<E extends Entity<?, ?>>
+public abstract class CommandAssigneeEntityClass<E extends Entity<?, ?>>
         extends EntityClass<E>
         implements CommandHandlingClass<EventClass, CommandAssigneeMethod> {
 
     private static final long serialVersionUID = 0L;
     private final HandlerMap<CommandClass, EventClass, CommandAssigneeMethod> commands;
 
-    protected CommandAssigningEntityClass(Class<E> cls) {
+    protected CommandAssigneeEntityClass(Class<E> cls) {
         super(cls);
         this.commands = HandlerMap.create(cls, new CommandAssigneeSignature());
     }

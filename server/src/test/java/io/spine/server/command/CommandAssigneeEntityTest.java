@@ -26,26 +26,26 @@
 
 package io.spine.server.command;
 
-import io.spine.server.command.given.CommandAssigningEntityTestEnv.AssigningEntity;
+import io.spine.server.command.given.CommandAssigneeEntityTestEnv.AssigneeEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.command.given.CommandAssigningEntityTestEnv.msg;
-import static io.spine.server.command.given.CommandAssigningEntityTestEnv.str;
+import static io.spine.server.command.given.CommandAssigneeEntityTestEnv.msg;
+import static io.spine.server.command.given.CommandAssigneeEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`CommandAssigneeEntity` should")
-class CommandAssigningEntityTest {
+class CommandAssigneeEntityTest {
 
     /**
      * The object we test.
      */
-    private AssigningEntity entity;
+    private AssigneeEntity entity;
 
     @BeforeEach
     void setUp() {
-        entity = new AssigningEntity(getClass().getName());
+        entity = new AssigneeEntity(getClass().getName());
     }
 
     @Test

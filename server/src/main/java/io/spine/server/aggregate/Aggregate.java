@@ -34,7 +34,7 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.command.CommandAssigningEntity;
+import io.spine.server.command.CommandAssigneeEntity;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
@@ -84,10 +84,10 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  *
  * <h2>Adding command assignee methods</h2>
  *
- * <p>Command assignee methods of an {@code Aggregate} are defined in
- * the same way as described in {@link CommandAssigningEntity}.
+ * <p>Command-handling methods of an {@code Aggregate} are defined in
+ * the same way as described in {@link CommandAssigneeEntity}.
  *
- * <p>Event(s) returned by command assignee methods are posted to
+ * <p>Event(s) returned by command-handling methods are posted to
  * the {@link io.spine.server.event.EventBus EventBus} automatically
  * by {@link AggregateRepository}.
  *
@@ -124,7 +124,7 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 public abstract class Aggregate<I,
                                 S extends EntityState<I>,
                                 B extends ValidatingBuilder<S>>
-        extends CommandAssigningEntity<I, S, B>
+        extends CommandAssigneeEntity<I, S, B>
         implements EventPlayer, EventReactor, HasLifecycleColumns<I, S> {
 
     private final UncommittedHistory uncommittedHistory = new UncommittedHistory(this::toSnapshot);
