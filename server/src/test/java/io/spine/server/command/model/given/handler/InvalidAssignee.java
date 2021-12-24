@@ -36,9 +36,8 @@ import io.spine.model.contexts.projects.command.SigSetProjectOwner;
 import io.spine.model.contexts.projects.event.SigProjectStarted;
 import io.spine.model.contexts.projects.event.SigTaskAssigned;
 import io.spine.model.contexts.projects.event.SigTaskStarted;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
-import io.spine.server.command.Command;
 import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
 import io.spine.server.model.given.SignatureTestCommand;
@@ -49,13 +48,13 @@ import java.util.Optional;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A standalone commander which declares invalid {@link Assign command handlers}.
+ * A standalone assignee which declares invalid {@link Assign command-handling methods}.
  *
- * <p>Being similar to {@link ValidHandler}, this class also declares duplicate handlers
+ * <p>Being similar to {@link ValidAssignee}, this class also declares duplicate handlers
  * for the same commands. This is the way to avoid myriads of small classes which enumerate
  * all possible combinations or params.
  */
-public final class InvalidHandler extends AbstractCommandHandler {
+public final class InvalidAssignee extends AbstractCommandAssignee {
 
     @Assign
     SigTaskStarted noParams() {
@@ -133,9 +132,9 @@ public final class InvalidHandler extends AbstractCommandHandler {
         return ImmutableList.of();
     }
 
-    @Command
+    @Assign
     SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
-        throw newIllegalStateException("Command handler method " +
+        throw newIllegalStateException("Command assignee " +
                                                "has declared an illegal exception.");
     }
 }

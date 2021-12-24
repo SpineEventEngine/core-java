@@ -32,7 +32,7 @@ import io.spine.test.model.verify.command.EnhancePhoto;
 import io.spine.test.model.verify.given.EditState;
 
 /**
- * This aggregate declares a command handling method that breaks the contract imposed by
+ * This aggregate declares a command-handling method that breaks the contract imposed by
  * {@link Assign}, by having a return value that cannot be derived from
  * {@link io.spine.base.EventMessage}.
  */

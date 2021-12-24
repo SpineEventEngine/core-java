@@ -62,13 +62,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <h1>Command Transformation</h1>
  *
- * <p>Commanding methods may be used to transform an incoming command with one or more commands.
+ * <p>Commanding methods may be used to transform an incoming command into one or more commands.
  * In this case the first method parameter must extend {@linkplain io.spine.base.CommandMessage}.
  * The returning values must derive from the {@linkplain io.spine.base.CommandMessage} as well.
  *
- * <p>If a commanding method accepts a command type which is also handled by the application
- * by another method, a run-time error will occur. This also means that an application cannot have
- * two command-handling methods that accept the same command type.
+ * <p>If a commanding method accepts a command type which is also handled by another method
+ * of the same application, a run-time error will occur. This also means that an application
+ * cannot have two command-handling methods that accept the same command type.
  *
  * <h2>Accepted Parameters</h2>
  *
@@ -95,7 +95,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <h2>Returning Values</h2>
  *
  * <p>A command-transforming method always returns an outcome. Depending on the design intention,
- * a type of an outcome may vary.
+ * a type of outcome may vary.
  *
  * <p>The command-transforming method must return either
  *
@@ -204,7 +204,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <h2>Returning Values</h2>
  *
- * <p>A command-reacting method may emit one more more messages deriving from
+ * <p>A command-reacting method may emit one or more messages derived from
  * {@link io.spine.base.CommandMessage CommandMessage}. The possibilities for the return values
  * are flexible. They serve to describe the returning values as sharp as possible and thus
  * reduce the probability of a human mistake.

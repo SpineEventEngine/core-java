@@ -28,7 +28,7 @@ package io.spine.server.model;
 
 import io.spine.server.model.given.ModelTestEnv.FaultyCommander;
 import io.spine.server.model.given.ModelTestEnv.MAggregate;
-import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
+import io.spine.server.model.given.ModelTestEnv.MCommandAssignee;
 import io.spine.server.model.given.ModelTestEnv.MProcessManager;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
@@ -39,7 +39,7 @@ import tres.quattro.Counter;
 import uno.dos.Encounter;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,22 +58,22 @@ class ModelTest {
     }
 
     @Test
-    @DisplayName("check for duplicated command handlers in command handler class")
+    @DisplayName("check for duplicated command-handling methods in command assignee class")
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     void checkDuplicateCmdHandler() {
         try {
             asAggregateClass(MAggregate.class);
-            asCommandHandlerClass(MCommandHandler.class);
+            asCommandAssigneeClass(MCommandAssignee.class);
             failErrorNotThrown();
         } catch (DuplicateCommandHandlerError error) {
             assertContainsClassName(error, RefCreateProject.class);
             assertContainsClassName(error, MAggregate.class);
-            assertContainsClassName(error, MCommandHandler.class);
+            assertContainsClassName(error, MCommandAssignee.class);
         }
     }
 
     @Test
-    @DisplayName("check for duplicated command handlers in process manager class")
+    @DisplayName("check for duplicated command-handling methods in process manager class")
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     void checkDuplicateInProcman() {
         try {

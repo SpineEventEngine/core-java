@@ -24,22 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
-
-import com.google.common.collect.ImmutableList;
-import io.spine.base.EventMessage;
-import io.spine.server.command.Assign;
-import io.spine.test.reflect.command.RefCreateProject;
-
-import java.util.List;
+package io.spine.server.command;
 
 /**
- * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
+ * Declares one or more methods, each {@linkplain Assign assigned} to handle commands
+ * of a specific type.
+ *
+ * <p>A handling method may reject the received command or produce events in response.
+ *
+ * @see Assign @Assign
  */
-public class HandlerReturnsNothing extends TestCommandHandler {
-
-    @Assign
-    List<EventMessage> handleTest(RefCreateProject cmd) {
-        return ImmutableList.of(nothing());
-    }
+public interface CommandAssignee extends CommandReceiver {
 }

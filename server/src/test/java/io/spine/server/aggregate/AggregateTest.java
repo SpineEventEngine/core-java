@@ -307,7 +307,7 @@ public class AggregateTest {
     void writeVersionIntoEventContext() {
         dispatchCommand(aggregate, command(createProject));
 
-        // Get the first event since the command handler produces only one event message.
+        // Get the first event since the command assignee produces only one event message.
         Aggregate<?, ?, ?> agg = aggregate;
         List<Event> uncommittedEvents = agg.getUncommittedEvents()
                                            .list();
@@ -333,7 +333,7 @@ public class AggregateTest {
     }
 
     @Test
-    @DisplayName("invoke event applier after command handler")
+    @DisplayName("invoke event applier after command assignee")
     void invokeApplierAfterCommandHandler() {
         dispatchCommand(aggregate, command(createProject));
         assertTrue(aggregate.createProjectCommandHandled);
@@ -353,7 +353,7 @@ public class AggregateTest {
     class ThrowOnMissing {
 
         @Test
-        @DisplayName("command handler")
+        @DisplayName("command assignee")
         void commandHandler() {
             ModelTests.dropAllModels();
             var aggregate = new AggregateWithMissingApplier(ID);
@@ -820,9 +820,9 @@ public class AggregateTest {
 
         /**
          * Ensures that a {@linkplain io.spine.server.tuple.Pair pair} with an empty second
-         * optional value returned from a command handler stores a single event.
+         * optional value returned from a command assignee stores a single event.
          *
-         * <p>The command handler that should return a pair is
+         * <p>The command assignee that should return a pair is
          * {@link TaskAggregate#handle(AggAssignTask)
          * TaskAggregate#handle(AggAssignTask)}.
          */

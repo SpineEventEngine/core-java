@@ -27,8 +27,8 @@
 package io.spine.server.entity.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.command.model.CommandHandlerMethod;
-import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.command.model.CommandAssigneeMethod;
+import io.spine.server.command.model.CommandAssigneeSignature;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.HandlerMap;
@@ -39,21 +39,22 @@ import io.spine.server.type.EventClass;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
- * Abstract base for entity classes that handle commands.
+ * Abstract base for entity classes that have methods
+ * {@link io.spine.server.command.Assign assigned} to handle commands.
  *
  * @param <E>
  *         the type of entity
  */
-public abstract class CommandHandlingEntityClass<E extends Entity<?, ?>>
+public abstract class CommandAssigneeEntityClass<E extends Entity<?, ?>>
         extends EntityClass<E>
-        implements CommandHandlingClass<EventClass, CommandHandlerMethod> {
+        implements CommandHandlingClass<EventClass, CommandAssigneeMethod> {
 
     private static final long serialVersionUID = 0L;
-    private final HandlerMap<CommandClass, EventClass, CommandHandlerMethod> commands;
+    private final HandlerMap<CommandClass, EventClass, CommandAssigneeMethod> commands;
 
-    protected CommandHandlingEntityClass(Class<E> cls) {
+    protected CommandAssigneeEntityClass(Class<E> cls) {
         super(cls);
-        this.commands = HandlerMap.create(cls, new CommandHandlerSignature());
+        this.commands = HandlerMap.create(cls, new CommandAssigneeSignature());
     }
 
     @Override
@@ -80,7 +81,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity<?, ?>>
     }
 
     @Override
-    public CommandHandlerMethod handlerOf(CommandEnvelope cmd) {
+    public CommandAssigneeMethod handlerOf(CommandEnvelope cmd) {
         return commands.getHandlerFor(cmd);
     }
 }

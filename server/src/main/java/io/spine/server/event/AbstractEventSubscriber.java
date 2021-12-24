@@ -80,7 +80,6 @@ public abstract class AbstractEventSubscriber
         contextName = context.name();
         system = context.systemClient()
                         .writeSide();
-
     }
 
     @Override

@@ -31,8 +31,7 @@ import io.spine.server.command.Assign;
 
 import static java.util.Collections.singletonList;
 
-public class DuplicateCommandHandler
-        extends Aggregate<String, ChatState, ChatState.Builder> {
+public class DuplicateCommandAssignee extends Aggregate<String, ChatState, ChatState.Builder> {
 
     @Assign
     Iterable<LinkSent> handle(SendLink command) {

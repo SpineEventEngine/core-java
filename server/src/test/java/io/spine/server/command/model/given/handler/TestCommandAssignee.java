@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
@@ -39,18 +39,18 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
- * Abstract base for test environment command handlers.
+ * Abstract base for test environment command assignees.
  *
- * <p>Derived classes must declare a method named {@linkplain #HANDLER_METHOD_NAME handleTest}
+ * <p>Derived classes must declare a method named {@linkplain #ASSIGNEE_METHOD_NAME handleTest}
  * so that the method can be {@linkplain #method() obtained} by the code of tests.
  */
-public abstract class TestCommandHandler extends AbstractCommandHandler {
+public abstract class TestCommandAssignee extends AbstractCommandAssignee {
 
-    private static final String HANDLER_METHOD_NAME = "handleTest";
+    private static final String ASSIGNEE_METHOD_NAME = "handleTest";
 
     private final List<CommandMessage> handledCommands = newLinkedList();
 
-    protected TestCommandHandler() {
+    protected TestCommandAssignee() {
         super();
         var context = BoundedContextBuilder.assumingTests(true).build();
         registerWith(context);
@@ -62,7 +62,7 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
     }
 
     public final Method method() {
-        return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);
+        return ModelTests.getMethod(getClass(), ASSIGNEE_METHOD_NAME);
     }
 
     protected final void addHandledCommand(CommandMessage cmd) {

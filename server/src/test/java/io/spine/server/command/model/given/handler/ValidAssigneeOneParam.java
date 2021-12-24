@@ -26,25 +26,19 @@
 
 package io.spine.server.command.model.given.handler;
 
-import io.spine.core.CommandContext;
+import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
- * Provides a method which is not annotated.
- *
- * @implNote The "unused" warning is suppressed because the following. There are no calls to this
- * method since all handler methods are called indirectly. Regular handler methods have annotations
- * and IDEA is configured to ignore unused methods with those annotations.
- * Since the method does not have the annotation (which is the purpose of this test dummy class),
- * it is deemed unused. We suppress the annotation to avoid accidental removal of the method.
+ * Provides a method which accepts one parameter.
  */
-@SuppressWarnings("unused") // See Javadoc
-public class InvalidHandlerNoAnnotation extends TestCommandHandler {
-
-    public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
+public class ValidAssigneeOneParam extends TestCommandAssignee {
+    @Assign
+    RefProjectCreated handleTest(RefCreateProject cmd) {
+        addHandledCommand(cmd);
         return projectCreated(cmd.getProjectId());
     }
 }

@@ -34,9 +34,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method as command handler.
+ * Marks a method as a command assignee.
  *
- * <p>A command handler method <em>must</em>:
+ * <p>A command assignee method <em>must</em>:
  * <ul>
  *     <li>be annotated with {@link Assign @Assign};
  *     <li>return an event message derived from {@link io.spine.base.EventMessage EventMessage}
@@ -47,30 +47,30 @@ import java.lang.annotation.Target;
  *         as the first parameter.
  * </ul>
  *
- * <p>Like other message-handling methods, command handlers are designed to be called by
+ * <p>Like other message-handling methods, command assignees are designed to be called by
  * the framework only. Therefore, it is recommended to declare them package-private
  * (or {@code internal} in Kotlin). It discourages developers from calling these methods directly
  * from anywhere. It is also acceptable to use {@code protected} if the declaring class inherits
  * the method from a superclass.
  *
- * <p>This level of access declares that a command handler method is a part
+ * <p>This level of access declares that a command assignee method is a part
  * of the Bounded Context-level API. See the {@link io.spine.core.BoundedContext
  * BoundedContext} description on how the packages and Bounded Contexts relate.
  *
  * <h1>Accepted Parameters</h1>
  *
- * <p>The first parameter of the command handler always declares a type of the handled command.
+ * <p>The first parameter of the method always declares a type of the handled command.
  *
- * <p>A command handler method <strong>may</strong> accept a {@link io.spine.core.CommandContext
+ * <p>The method <strong>may</strong> accept a {@link io.spine.core.CommandContext
  * CommandContext} as the second parameter, if handling of the command requires its context.
  *
  * <pre>
  *
  * {@literal @}Assign
- *  TaskCreated handler(CreateTask command) { ... }
+ *  TaskCreated handle(CreateTask command) { ... }
  *
  * {@literal @}Assign
- *  TaskCompleted handler(CompleteTask command, CommandContext context) { ... }
+ *  TaskCompleted handle(CompleteTask command, CommandContext context) { ... }
  * </pre>
  *
  * <p>In case a command may be rejected, a corresponding {@code Throwable} should be declared:
@@ -78,11 +78,11 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Assign
- *  TaskStarted handler(StartTask command) throws TaskAlreadyInProgress { ... }
+ *  TaskStarted handle(StartTask command) throws TaskAlreadyInProgress { ... }
  * </pre>
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
- * this method is not considered a command handler and is <strong>not</strong> registered for
+ * this method is not considered a command assignee and is <strong>not</strong> registered for
  * command dispatching.
  *
  * <h1>Returning Values</h1>
@@ -91,14 +91,14 @@ import java.lang.annotation.Target;
  * in an emission of one or more events. Each of them must derive
  * from {@link io.spine.base.EventMessage EventMessage} in order to make the code less error-prone.
  *
- * <p>A command handler method must return either
+ * <p>A command assignee method must return either
  * <ul>
  *
  *  <li>an event message:
  *  <pre>
  *
  * {@literal @}Assign
- *  TaskReassigned on(ReassignTask command) { ... }
+ *  TaskReassigned handle(ReassignTask command) { ... }
  *  </pre>
  *
  *
@@ -106,7 +106,7 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- * {@literal Iterable<TaskCompleted>} handler(CompleteProject event) { ... }
+ * {@literal Iterable<TaskCompleted>} handle(CompleteProject event) { ... }
  *  </pre>
  *
  *
@@ -116,10 +116,10 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- * {@literal Pair<ProjectCreated, ProjectAssigned>} handlerCreateProject event) { ... }
+ * {@literal Pair<ProjectCreated, ProjectAssigned>} handle(CreateProject event) { ... }
  *
  * {@literal @}Assign
- * {@literal Pair<TaskCreated, Optional<TaskAssigned>>} handler(CreateTask event) { ... }
+ * {@literal Pair<TaskCreated, Optional<TaskAssigned>>} handle(CreateTask event) { ... }
  *  </pre>
  *
  *
@@ -127,7 +127,7 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- * {@literal EitherOf2<TaskRemovedFromProject, TaskDeleted>} handler(RemoveTask command) { ... }
+ * {@literal EitherOf2<TaskRemovedFromProject, TaskDeleted>} handle(RemoveTask command) { ... }
  *  </pre>
  * </ul>
  *

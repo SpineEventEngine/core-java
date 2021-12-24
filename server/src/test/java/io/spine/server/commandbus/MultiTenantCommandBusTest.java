@@ -31,7 +31,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.commandbus.given.MultitenantCommandBusTestEnv.AddTaskDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.test.commandbus.command.CmdBusAddTask;
@@ -77,7 +77,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("verify tenant ID attribute if is multitenant")
     void requireTenantId() {
-        commandBus.register(createProjectHandler);
+        commandBus.register(createProjectAssignee);
         var cmd = newCommandWithoutTenantId();
 
         commandBus.post(cmd, observer);
@@ -89,8 +89,8 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("state command not supported when there is neither handler nor dispatcher for it")
-    void requireHandlerOrDispatcher() {
+    @DisplayName("state command not supported when there is neither assignee nor commander for it")
+    void requireAssigneeOrCommander() {
         var command = addTask();
         commandBus.post(command, observer);
 
@@ -116,11 +116,11 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("command handler")
-        void commandHandler() {
-            var handler = new CreateProjectHandler();
-            commandBus.register(handler);
-            handler.registerWith(context);
+        @DisplayName("command assignee")
+        void commandAssignee() {
+            var assignee = new CreateProjectAssignee();
+            commandBus.register(assignee);
+            assignee.registerWith(context);
 
             commandBus.post(createProject(), observer);
 
@@ -147,12 +147,12 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         }
 
         @Test
-        @DisplayName("command handler")
-        void commandHandler() {
-            AbstractCommandHandler handler = newCommandHandler();
+        @DisplayName("command assignee")
+        void commandAssignee() {
+            AbstractCommandAssignee assignee = newCommandAssignee();
 
-            commandBus.register(handler);
-            commandBus.unregister(handler);
+            commandBus.register(assignee);
+            commandBus.unregister(assignee);
 
             commandBus.post(createProject(), observer);
 
@@ -161,17 +161,17 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
                                         .getStatusCase());
         }
 
-        CreateProjectHandler newCommandHandler() {
-            var handler = new CreateProjectHandler();
-            handler.registerWith(context);
-            return handler;
+        CreateProjectAssignee newCommandAssignee() {
+            var assignee = new CreateProjectAssignee();
+            assignee.registerWith(context);
+            return assignee;
         }
     }
 
     @Test
     @DisplayName("post command and return `OK` response")
     void postCommand() {
-        commandBus.register(createProjectHandler);
+        commandBus.register(createProjectAssignee);
 
         var command = createProject();
         commandBus.post(command, observer);
@@ -184,13 +184,13 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     class Invoke {
 
         @Test
-        @DisplayName("command handler")
-        void commandHandler() {
-            commandBus.register(createProjectHandler);
+        @DisplayName("command assignee")
+        void commandAssignee() {
+            commandBus.register(createProjectAssignee);
 
             commandBus.post(createProject(), observer);
 
-            assertTrue(createProjectHandler.wasHandlerInvoked());
+            assertTrue(createProjectAssignee.wasHandlerInvoked());
         }
 
         @Test
@@ -208,7 +208,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("expose supported classes")
     void exposeSupportedClasses() {
-        commandBus.register(createProjectHandler);
+        commandBus.register(createProjectAssignee);
         commandBus.register(new AddTaskDispatcher());
 
         var cmdClasses = commandBus.registeredCommandClasses();

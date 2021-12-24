@@ -84,7 +84,9 @@ public abstract class AbstractCommandHandlingClass<C,
         return result;
     }
 
-    /** Obtains the handler method for the passed command. */
+    /**
+     * Obtains the handler method for the passed command.
+     */
     @Override
     public H handlerOf(CommandEnvelope command) {
         return commands.getHandlerFor(command);

@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelClass;
@@ -39,19 +39,19 @@ import io.spine.server.procman.ProcessManager;
 import java.util.function.Function;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Ensures that there are no duplicating command handling methods among passed classes.
+ * Ensures that there are no duplicating command-handling methods among the passed classes.
  */
 public final class DuplicateHandlerCheck implements Logging {
 
     /**
-     * Maps a raw class to a function that creates appropriate model class, which in turn
-     * appends itself to corresponding model.
+     * Maps a raw class to a function that creates an appropriate model class, which in turn
+     * appends itself to the corresponding model.
      */
     @SuppressWarnings({
             "unchecked", // The cast is preserved by correct key-value pairs.
@@ -65,13 +65,15 @@ public final class DuplicateHandlerCheck implements Logging {
                          (c) -> asAggregateClass((Class<? extends Aggregate>) c))
                     .put(ProcessManager.class,
                          (c) -> asProcessManagerClass((Class<? extends ProcessManager>) c))
-                    .put(AbstractCommandHandler.class,
-                         (c) -> asCommandHandlerClass((Class<? extends AbstractCommandHandler>) c))
+                    .put(AbstractCommandAssignee.class,
+                         (c) -> asCommandAssigneeClass((Class<? extends AbstractCommandAssignee>) c))
                     .put(AbstractCommander.class,
                          (c) -> asCommanderClass((Class<? extends AbstractCommander>) c))
                     .build();
 
-    /** Prevents instantiation from outside. */
+    /**
+     * Prevents instantiation from outside.
+     */
     private DuplicateHandlerCheck() {
     }
 

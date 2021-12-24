@@ -83,7 +83,7 @@ class FilterTest {
         }
 
         @Test
-        @DisplayName("event accepting `@Command`-er")
+        @DisplayName("event-accepting `@Command`-er")
         void eventCommand() {
             assertValid(CreateProjectEventCommander.class);
         }
@@ -94,13 +94,13 @@ class FilterTest {
     class Rejected {
 
         @Test
-        @DisplayName("`@Assign`-ed command handler")
+        @DisplayName("`@Assign`-ed command-handling method")
         void assign() {
             assertInvalid(ModSplitCommandAggregate.class);
         }
 
         @Test
-        @DisplayName("command accepting `@Command`-er")
+        @DisplayName("command-accepting `@Command`-er")
         void commandCommand() {
             assertInvalid(CreateProjectCommander.class);
         }

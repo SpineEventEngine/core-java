@@ -26,21 +26,20 @@
 
 package io.spine.server.command.model.given.handler;
 
-import io.spine.base.Identifier;
+import com.google.common.collect.ImmutableList;
+import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.test.reflect.command.RefCreateProject;
-import io.spine.test.reflect.event.RefProjectCreated;
+
+import java.util.List;
 
 /**
- * A command handler which always rejects the passed command.
+ * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
  */
-public class RejectingHandler extends TestCommandHandler {
+public class AssigneeReturnsNothing extends TestCommandAssignee {
+
     @Assign
-    RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
-        throw EntityAlreadyArchived
-                .newBuilder()
-                .setEntityId(Identifier.pack(cmd.getProjectId()))
-                .build();
+    List<EventMessage> handleTest(RefCreateProject cmd) {
+        return ImmutableList.of(nothing());
     }
 }

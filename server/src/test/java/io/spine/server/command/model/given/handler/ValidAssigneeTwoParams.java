@@ -24,20 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.verify.given;
+package io.spine.server.command.model.given.handler;
 
-import io.spine.server.command.AbstractCommandHandler;
+import com.google.common.annotations.VisibleForTesting;
+import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
-import io.spine.test.model.verify.command.UploadPhoto;
-import io.spine.test.model.verify.event.PhotoUploaded;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.event.RefProjectCreated;
 
-public class DuplicateCommandHandler extends AbstractCommandHandler {
+import static io.spine.server.model.given.Given.EventMessage.projectCreated;
+
+/**
+ * Provides a method with two params which returns an event message.
+ */
+public class ValidAssigneeTwoParams extends TestCommandAssignee {
 
     @Assign
-    PhotoUploaded handle(UploadPhoto command) {
-        return PhotoUploaded
-                .newBuilder()
-                .setPhoto(command.getPhoto())
-                .build();
+    @VisibleForTesting
+    public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
+        addHandledCommand(cmd);
+        return projectCreated(cmd.getProjectId());
     }
 }

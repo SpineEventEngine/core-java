@@ -24,37 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.model.verify;
 
-import io.spine.server.command.AbstractCommandHandler;
-import io.spine.server.type.EventClass;
+import io.spine.base.EventMessage;
+import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.Assign;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
 
 /**
- * Provides message handling information on a command handler class.
- *
- * @param <C>
- *         the type of command handlers
+ * A {@code CommandAssignee} with a valid command-handling method.
  */
-public final class CommandHandlerClass<C extends AbstractCommandHandler>
-        extends AbstractCommandHandlingClass<C, EventClass, CommandHandlerMethod> {
+public class ValidCommandAssignee extends AbstractCommandAssignee {
 
-    private static final long serialVersionUID = 0L;
-
-    private CommandHandlerClass(Class<C> cls) {
-        super(cls, new CommandHandlerSignature());
-    }
-
-    /**
-     * Obtains command handler class for the passed raw class.
-     */
-    public static <C extends AbstractCommandHandler>
-    CommandHandlerClass<C> asCommandHandlerClass(Class<C> cls) {
-        checkNotNull(cls);
-        @SuppressWarnings("unchecked")
-        var result = (CommandHandlerClass<C>)
-                get(cls, CommandHandlerClass.class, () -> new CommandHandlerClass<>(cls));
-        return result;
+    @Assign
+    List<? extends EventMessage> handle(SendLink command) {
+        return singletonList(LinkSent.newBuilder()
+                                     .setLink(command.getLink())
+                                     .build());
     }
 }

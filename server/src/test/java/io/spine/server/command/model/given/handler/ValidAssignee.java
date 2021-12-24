@@ -38,9 +38,8 @@ import io.spine.model.contexts.projects.event.SigProjectStarted;
 import io.spine.model.contexts.projects.event.SigTaskPaused;
 import io.spine.model.contexts.projects.event.SigTaskStopped;
 import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
-import io.spine.server.command.Command;
 import io.spine.server.model.given.SignatureTestEvent;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.Pair;
@@ -49,20 +48,20 @@ import io.spine.test.reflect.command.RefCreateProject;
 import java.util.Optional;
 
 /**
- * A standalone commander which declares valid {@link Assign command handlers}.
+ * A standalone assignee which declares valid {@link Assign command-handling methods}.
  *
  * <p>This class declares the duplicate handlers for some commands, hence it cannot be
  * registered in any Bounded Context. This is done for simplicity of enumerating all possible
  * combinations of parameters.
  */
-public final class ValidHandler extends AbstractCommandHandler {
+public final class ValidAssignee extends AbstractCommandAssignee {
 
     @Assign
     SigProjectCreated singleMsgSingleResult(SigCreateProject command) {
         return EventMessages.projectCreated();
     }
 
-    @Command
+    @Assign
     @SuppressWarnings("DoNotCallSuggester") // Not relevant in this case of to test data.
     SigProjectCreated declaredRejection(SigCreateProject cmd) throws SigCannotCreateProject {
         throw SigCannotCreateProject

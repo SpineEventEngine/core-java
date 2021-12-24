@@ -26,22 +26,21 @@
 
 package io.spine.server.command.model.given.handler;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.CommandContext;
+import io.spine.base.Identifier;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
-import static io.spine.server.model.given.Given.EventMessage.projectCreated;
-
 /**
- * Provides a method with two params which returns an event message.
+ * A command assignee which always rejects the passed command.
  */
-public class ValidHandlerTwoParams extends TestCommandHandler {
+public class RejectingAssignee extends TestCommandAssignee {
     @Assign
-    @VisibleForTesting
-    public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
-        addHandledCommand(cmd);
-        return projectCreated(cmd.getProjectId());
+    RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
+        throw EntityAlreadyArchived
+                .newBuilder()
+                .setEntityId(Identifier.pack(cmd.getProjectId()))
+                .build();
     }
 }

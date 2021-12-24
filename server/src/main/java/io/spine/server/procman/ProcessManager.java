@@ -30,7 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
-import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.command.CommandAssigneeEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.HasLifecycleColumns;
@@ -55,7 +55,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>A process manager reacts to domain events in a cross-aggregate, eventually consistent manner.
  *
- * <p>Event and command handlers are invoked by the {@link ProcessManagerRepository}
+ * <p>Event- and command-handling methods are invoked by the {@link ProcessManagerRepository}
  * that manages instances of a process manager class.
  *
  * <p>For more information on Process Managers, please see:
@@ -81,7 +81,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class ProcessManager<I,
                                      S extends EntityState<I>,
                                      B extends ValidatingBuilder<S>>
-        extends CommandHandlingEntity<I, S, B>
+        extends CommandAssigneeEntity<I, S, B>
         implements EventReactor,
                    Commander,
                    HasVersionColumn<I, S>,
@@ -125,10 +125,10 @@ public abstract class ProcessManager<I,
      * {@inheritDoc}
      *
      * <p>In {@code ProcessManager}, this method must be called from an event reactor, a rejection
-     * reactor, or a command handler.
+     * reactor, or a command assignee.
      *
      * @throws IllegalStateException
-     *         if the method is called from outside an event/rejection reactor or a command handler
+     *         if the method is called from outside an event/rejection reactor or a command assignee
      * @apiNote Marked {@link VisibleForTesting} to allow package-local use of this method in tests.
      *         It does not affect the visibility for inheritors which stays {@code protected}
      *         {@linkplain io.spine.server.entity.TransactionalEntity#builder() as originally

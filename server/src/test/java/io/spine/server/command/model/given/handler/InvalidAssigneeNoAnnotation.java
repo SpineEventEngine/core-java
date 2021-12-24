@@ -24,25 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.verify;
+package io.spine.server.command.model.given.handler;
 
-import io.spine.base.EventMessage;
-import io.spine.server.command.AbstractCommandHandler;
-import io.spine.server.command.Assign;
+import io.spine.core.CommandContext;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.event.RefProjectCreated;
 
-import java.util.List;
-
-import static java.util.Collections.singletonList;
+import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
- * A CommandHandler with a valid command handler method.
+ * Provides a method which is not annotated.
+ *
+ * @implNote The "unused" warning is suppressed because the following. There are no calls to this
+ * method since all handler methods are called indirectly. Regular handler methods have annotations
+ * and IDEA is configured to ignore unused methods with those annotations.
+ * Since the method does not have the annotation (which is the purpose of this test dummy class),
+ * it is deemed unused. We suppress the annotation to avoid accidental removal of the method.
  */
-public class ValidCommandHandler extends AbstractCommandHandler {
+@SuppressWarnings("unused") // See Javadoc
+public class InvalidAssigneeNoAnnotation extends TestCommandAssignee {
 
-    @Assign
-    List<? extends EventMessage> handle(SendLink command) {
-        return singletonList(LinkSent.newBuilder()
-                                     .setLink(command.getLink())
-                                     .build());
+    public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
+        return projectCreated(cmd.getProjectId());
     }
 }

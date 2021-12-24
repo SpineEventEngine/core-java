@@ -34,7 +34,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 
 /**
- * A ProcessManager with a valid command handler method.
+ * A {@code ProcessManager} with a valid command-handling method.
  */
 public class ValidProcMan extends ProcessManager<String, ValidProcess, ValidProcess.Builder> {
 

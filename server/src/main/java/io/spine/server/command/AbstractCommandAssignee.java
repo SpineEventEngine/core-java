@@ -29,7 +29,7 @@ package io.spine.server.command;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.Version;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.model.CommandHandlerClass;
+import io.spine.server.command.model.CommandAssigneeClass;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventBus;
@@ -37,24 +37,23 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 
-import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
 
 /**
- * The abstract base for non-aggregate classes that expose command handling methods
+ * The abstract base for non-aggregate classes that expose methods assigned to handle commands
  * and post their results to {@link EventBus}.
  *
- * <p>A command handler is responsible for:
+ * <p>A command assignee is responsible for:
  * <ol>
- *     <li>Changing the state of the business model in response to a command.
- *     This is done by one of the command handling methods to which the handler dispatches
- *     the command.
+ *     <li>Changing the state of the business model in response to a command. This is done
+ *         by one of the command-handling methods to which the assignee dispatches the command.
  *     <li>Producing corresponding events.
  *     <li>Posting events to {@code EventBus}.
  * </ol>
  *
- * <p>Event messages are returned as values of command handling methods.
+ * <p>Event messages are returned as values from command-handling methods.
  *
- * <p>A command handler does not have its own state. So the state of the business
+ * <p>A command assignee does not have its own state. So the state of the business
  * model it changes is external to it. Even though such behaviour may be needed in
  * some rare cases, using {@linkplain io.spine.server.aggregate.Aggregate aggregates}
  * is a preferred way of handling commands.
@@ -65,11 +64,11 @@ import static io.spine.server.command.model.CommandHandlerClass.asCommandHandler
  * @see io.spine.server.aggregate.Aggregate Aggregate
  * @see CommandDispatcher
  */
-public abstract class AbstractCommandHandler
+public abstract class AbstractCommandAssignee
         extends AbstractCommandDispatcher
-        implements CommandHandler {
+        implements CommandAssignee {
 
-    private final CommandHandlerClass<?> thisClass = asCommandHandlerClass(getClass());
+    private final CommandAssigneeClass<?> thisClass = asCommandAssigneeClass(getClass());
 
     /**
      * Dispatches the command to the handler method and

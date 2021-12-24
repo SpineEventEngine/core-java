@@ -24,39 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command;
 
-import com.google.common.reflect.TypeToken;
-import io.spine.base.EventMessage;
-import io.spine.server.command.Assign;
-import io.spine.server.model.ParameterSpec;
-import io.spine.server.model.ReturnTypes;
-import io.spine.server.type.CommandEnvelope;
+import io.spine.server.command.model.CommandAssigneeSignature;
+import io.spine.server.command.model.given.handler.InvalidAssignee;
+import io.spine.server.command.model.given.handler.ValidAssignee;
+import io.spine.server.model.MethodSignatureTest;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
-/**
- * The signature of {@code Command} handler method.
- */
-public final class CommandHandlerSignature
-        extends CommandAcceptingSignature<CommandHandlerMethod> {
+@DisplayName("`CommandAssigneeSignature` should")
+class CommandAssigneeSignatureTest extends MethodSignatureTest<CommandAssigneeSignature> {
 
-    private static final ReturnTypes TYPES = new ReturnTypes(
-            TypeToken.of(EventMessage.class),
-            new TypeToken<Iterable<EventMessage>>() {}
-    );
-
-    public CommandHandlerSignature() {
-        super(Assign.class);
+    @Override
+    protected Stream<Method> validMethods() {
+        return methodsAnnotatedWith(Assign.class, ValidAssignee.class).stream();
     }
 
     @Override
-    protected ReturnTypes returnTypes() {
-        return TYPES;
+    protected Stream<Method> invalidMethods() {
+        return methodsAnnotatedWith(Assign.class, InvalidAssignee.class).stream();
     }
 
     @Override
-    public CommandHandlerMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
-        return new CommandHandlerMethod(method, params);
+    protected CommandAssigneeSignature signature() {
+        return new CommandAssigneeSignature();
     }
 }

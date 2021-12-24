@@ -26,19 +26,20 @@
 
 package io.spine.server.command.model.given.handler;
 
+import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
-import io.spine.test.reflect.event.RefProjectCreated;
 
-import static io.spine.server.model.given.Given.EventMessage.projectCreated;
+import java.util.List;
+
+import static java.util.Collections.emptyList;
 
 /**
- * Provides a method which accepts one parameter.
+ * Provides a handler method that returns an empty list.
  */
-public class ValidHandlerOneParam extends TestCommandHandler {
+public class AssigneeReturnsEmptyList extends TestCommandAssignee {
     @Assign
-    RefProjectCreated handleTest(RefCreateProject cmd) {
-        addHandledCommand(cmd);
-        return projectCreated(cmd.getProjectId());
+    List<EventMessage> handleTest(RefCreateProject cmd) {
+        return emptyList();
     }
 }

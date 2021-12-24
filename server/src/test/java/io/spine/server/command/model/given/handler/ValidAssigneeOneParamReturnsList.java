@@ -26,20 +26,27 @@
 
 package io.spine.server.command.model.given.handler;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
 
 import java.util.List;
 
-import static java.util.Collections.emptyList;
+import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
 /**
- * Provides a handler method that returns an empty list.
+ * Provides a method which accepts one parameter and returns a list of messages.
  */
-public class HandlerReturnsEmptyList extends TestCommandHandler {
+public final class ValidAssigneeOneParamReturnsList extends TestCommandAssignee {
+
     @Assign
-    List<EventMessage> handleTest(RefCreateProject cmd) {
-        return emptyList();
+    @VisibleForTesting
+    public List<EventMessage> handleTest(RefCreateProject cmd) {
+        addHandledCommand(cmd);
+        List<EventMessage> result = newLinkedList();
+        result.add(projectCreated(cmd.getProjectId()));
+        return result;
     }
 }

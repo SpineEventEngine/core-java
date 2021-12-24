@@ -30,7 +30,7 @@ import io.spine.base.Identifier;
 import io.spine.model.contexts.projects.ProjectId;
 import io.spine.model.contexts.projects.command.SigCreateProject;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.command.model.CommandHandlerSignature;
+import io.spine.server.command.model.CommandAssigneeSignature;
 import io.spine.server.model.given.map.CompletionWatch;
 import io.spine.server.model.given.map.DupEventFilterValue;
 import io.spine.server.model.given.map.DuplicateCommandHandlers;
@@ -75,7 +75,7 @@ class HandlerMapTest {
         @DisplayName("duplicate message classes in handlers")
         void rejectDuplicateHandlers() {
             assertDuplicate(() -> HandlerMap.create(
-                    DuplicateCommandHandlers.class, new CommandHandlerSignature()
+                    DuplicateCommandHandlers.class, new CommandAssigneeSignature()
             ));
         }
 

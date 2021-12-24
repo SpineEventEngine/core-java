@@ -29,10 +29,10 @@ package io.spine.server.commandbus;
 import io.spine.base.CommandMessage;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandDispatcher;
-import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandHandler;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandAssignee;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.CreateProjectDispatcher;
-import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.CreateProjectHandler;
-import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyCommandHandler;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.CreateProjectAssignee;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyCommandAssignee;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoCommandsDispatcherRepo;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -100,9 +100,9 @@ class CommandDispatcherRegistryTest {
         }
 
         @Test
-        @DisplayName("command handler")
-        void commandHandler() {
-            registry.register(new AllCommandHandler());
+        @DisplayName("command assignee")
+        void commandAssignee() {
+            registry.register(new AllCommandAssignee());
 
             assertSupported(CmdBusCreateProject.class,
                             CmdBusAddTask.class,
@@ -128,12 +128,12 @@ class CommandDispatcherRegistryTest {
         }
 
         @Test
-        @DisplayName("command handler")
-        void commandHandler() {
-            var handler = new AllCommandHandler();
+        @DisplayName("command assignee")
+        void commandAssignee() {
+            var assignee = new AllCommandAssignee();
 
-            registry.register(handler);
-            registry.unregister(handler);
+            registry.register(assignee);
+            registry.unregister(assignee);
 
             assertNotSupported(CmdBusCreateProject.class,
                                CmdBusAddTask.class,
@@ -141,9 +141,9 @@ class CommandDispatcherRegistryTest {
         }
 
         @Test
-        @DisplayName("all command dispatchers and handlers")
+        @DisplayName("all command dispatchers and assignees")
         void everything() {
-            registry.register(new CreateProjectHandler());
+            registry.register(new CreateProjectAssignee());
             registry.register(new AddTaskDispatcher());
 
             registry.unregisterAll();
@@ -165,10 +165,10 @@ class CommandDispatcherRegistryTest {
         }
 
         @Test
-        @DisplayName("command handler")
-        void commandHandler() {
+        @DisplayName("command assignee")
+        void commandAssignee() {
             assertThrows(IllegalArgumentException.class,
-                         () -> registry.register(new EmptyCommandHandler()));
+                         () -> registry.register(new EmptyCommandAssignee()));
         }
 
     }
@@ -187,7 +187,7 @@ class CommandDispatcherRegistryTest {
     @Test
     @DisplayName("state both dispatched and handled commands as supported")
     void supportDispatchedAndHandled() {
-        registry.register(new CreateProjectHandler());
+        registry.register(new CreateProjectAssignee());
         registry.register(new AddTaskDispatcher());
 
         assertSupported(CmdBusCreateProject.class, CmdBusAddTask.class);
@@ -214,25 +214,25 @@ class CommandDispatcherRegistryTest {
         }
 
         @Test
-        @DisplayName("registered handler by another handler")
-        void handlerByHandler() {
-            registry.register(new CreateProjectHandler());
+        @DisplayName("registered assignee by another assignee")
+        void assigneeByAssignee() {
+            registry.register(new CreateProjectAssignee());
             assertThrows(IllegalArgumentException.class,
-                         () -> registry.register(new CreateProjectHandler()));
+                         () -> registry.register(new CreateProjectAssignee()));
         }
 
         @Test
-        @DisplayName("registered dispatcher by handler")
-        void dispatcherByHandler() {
+        @DisplayName("registered dispatcher by assignee")
+        void dispatcherByAssignee() {
             registry.register(new CreateProjectDispatcher());
             assertThrows(IllegalArgumentException.class,
-                         () -> registry.register(new CreateProjectHandler()));
+                         () -> registry.register(new CreateProjectAssignee()));
         }
 
         @Test
-        @DisplayName("registered handler by dispatcher")
-        void handlerByDispatcher() {
-            registry.register(new CreateProjectHandler());
+        @DisplayName("registered assignee by dispatcher")
+        void assigneeByDispatcher() {
+            registry.register(new CreateProjectAssignee());
             assertThrows(IllegalArgumentException.class,
                          () -> registry.register(new CreateProjectDispatcher()));
         }

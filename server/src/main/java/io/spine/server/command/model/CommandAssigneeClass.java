@@ -24,32 +24,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.command.model;
 
-import io.spine.server.command.model.CommandHandlerSignature;
-import io.spine.server.command.model.given.handler.InvalidHandler;
-import io.spine.server.command.model.given.handler.ValidHandler;
-import io.spine.server.model.MethodSignatureTest;
-import org.junit.jupiter.api.DisplayName;
+import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.type.EventClass;
 
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-@DisplayName("`CommandHandlerSignature` should")
-class CommandHandlerSignatureTest extends MethodSignatureTest<CommandHandlerSignature> {
+/**
+ * Provides message-handling information on a {@code CommandAssignee} class.
+ *
+ * @param <C>
+ *         the type of command assignees
+ */
+public final class CommandAssigneeClass<C extends AbstractCommandAssignee>
+        extends AbstractCommandHandlingClass<C, EventClass, CommandAssigneeMethod> {
 
-    @Override
-    protected Stream<Method> validMethods() {
-        return methodsAnnotatedWith(Assign.class, ValidHandler.class).stream();
+    private static final long serialVersionUID = 0L;
+
+    private CommandAssigneeClass(Class<C> cls) {
+        super(cls, new CommandAssigneeSignature());
     }
 
-    @Override
-    protected Stream<Method> invalidMethods() {
-        return methodsAnnotatedWith(Assign.class, InvalidHandler.class).stream();
-    }
-
-    @Override
-    protected CommandHandlerSignature signature() {
-        return new CommandHandlerSignature();
+    /**
+     * Obtains command assignee class for the passed raw class.
+     */
+    public static <C extends AbstractCommandAssignee>
+    CommandAssigneeClass<C> asCommandAssigneeClass(Class<C> cls) {
+        checkNotNull(cls);
+        @SuppressWarnings("unchecked")
+        var result = (CommandAssigneeClass<C>)
+                get(cls, CommandAssigneeClass.class, () -> new CommandAssigneeClass<>(cls));
+        return result;
     }
 }

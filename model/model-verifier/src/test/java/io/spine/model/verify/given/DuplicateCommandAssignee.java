@@ -24,29 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
+package io.spine.model.verify.given;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.base.EventMessage;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
-import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.model.verify.command.UploadPhoto;
+import io.spine.test.model.verify.event.PhotoUploaded;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.server.model.given.Given.EventMessage.projectCreated;
-
-/**
- * Provides a method which accepts one parameter and returns a list of messages.
- */
-public final class ValidHandlerOneParamReturnsList extends TestCommandHandler {
+public class DuplicateCommandAssignee extends AbstractCommandAssignee {
 
     @Assign
-    @VisibleForTesting
-    public List<EventMessage> handleTest(RefCreateProject cmd) {
-        addHandledCommand(cmd);
-        List<EventMessage> result = newLinkedList();
-        result.add(projectCreated(cmd.getProjectId()));
-        return result;
+    PhotoUploaded handle(UploadPhoto command) {
+        return PhotoUploaded
+                .newBuilder()
+                .setPhoto(command.getPhoto())
+                .build();
     }
 }

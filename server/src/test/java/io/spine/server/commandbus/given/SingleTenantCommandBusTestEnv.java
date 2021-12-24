@@ -30,7 +30,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.test.commandbus.command.CmdBusAddTask;
@@ -57,18 +57,18 @@ public class SingleTenantCommandBusTestEnv {
     }
 
     /**
-     * A {@code CommandHandler}, which throws a rejection upon a command.
+     * A {@code CommandAssignee}, which throws a rejection upon a command.
      */
-    public static class FaultyHandler extends AbstractCommandHandler {
+    public static class FaultyAssignee extends AbstractCommandAssignee {
 
-        private FaultyHandler() {
+        private FaultyAssignee() {
             super();
         }
 
-        public static FaultyHandler initializedHandler() {
-            var handler = new FaultyHandler();
-            handler.registerWith(BoundedContextBuilder.assumingTests().build());
-            return handler;
+        public static FaultyAssignee initializedAssignee() {
+            var assignee = new FaultyAssignee();
+            assignee.registerWith(BoundedContextBuilder.assumingTests().build());
+            return assignee;
         }
 
         private final InvalidProjectName rejection = InvalidProjectName
@@ -95,15 +95,15 @@ public class SingleTenantCommandBusTestEnv {
     }
 
     /**
-     * A command handler that posts a nested command.
+     * A {@code CommandAssignee} that posts a nested command.
      */
-    public static class CommandPostingHandler extends AbstractCommandHandler {
+    public static class CommandPostingAssignee extends AbstractCommandAssignee {
 
         private final CommandBus commandBus;
         private final List<Message> handledCommands = new ArrayList<>();
         private final Command commandToPost;
 
-        public CommandPostingHandler(CommandBus commandBus, Command commandToPost) {
+        public CommandPostingAssignee(CommandBus commandBus, Command commandToPost) {
             super();
             this.commandBus = commandBus;
             this.commandToPost = commandToPost;

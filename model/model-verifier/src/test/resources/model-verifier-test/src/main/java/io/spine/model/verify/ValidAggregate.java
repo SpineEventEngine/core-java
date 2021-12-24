@@ -34,9 +34,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * An Aggregate with a valid command handler method.
- *
- * <p>The command handler method handles command of type {@code SendMessage}.
+ * An {@code Aggregate} with a valid command-handling method.
  */
 class ValidAggregate extends Aggregate<String, ValidState, ValidState.Builder> {
 

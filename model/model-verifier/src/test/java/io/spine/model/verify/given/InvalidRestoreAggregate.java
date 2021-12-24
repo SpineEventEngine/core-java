@@ -33,7 +33,7 @@ import io.spine.test.model.verify.event.PhotoRestored;
 import io.spine.test.model.verify.given.EditState;
 
 /**
- * This aggregate declares a command handling method that breaks the contract imposed by
+ * This aggregate declares a command-handling method that breaks the contract imposed by
  * {@link Assign}, by having a {@code private} access modifier.
  *
  * <p>This should result in a warning.
