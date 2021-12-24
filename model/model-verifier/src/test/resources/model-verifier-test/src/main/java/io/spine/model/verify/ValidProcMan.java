@@ -43,7 +43,7 @@ public class ValidProcMan extends ProcessManager<String, ValidProcess, ValidProc
     }
 
     @Assign
-    List<VideoCallStarted> handler(StartVideoCall command) {
+    List<VideoCallStarted> handle(StartVideoCall command) {
         return singletonList(VideoCallStarted.newBuilder()
                                              .setIp(command.getIp())
                                              .build());

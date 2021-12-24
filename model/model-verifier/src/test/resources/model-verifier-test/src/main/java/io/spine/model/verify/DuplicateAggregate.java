@@ -36,7 +36,7 @@ import static java.util.Collections.singletonList;
 public class DuplicateAggregate extends Aggregate<String, CallState, CallState.Builder> {
 
     @Assign
-    MessageSent handler(SendMessage command) {
+    MessageSent handle(SendMessage command) {
         return MessageSent.newBuilder()
                           .setMessage(command.getMessage())
                           .build();

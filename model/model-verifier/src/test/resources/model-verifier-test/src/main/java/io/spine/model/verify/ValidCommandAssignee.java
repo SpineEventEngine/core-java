@@ -40,7 +40,7 @@ import static java.util.Collections.singletonList;
 public class ValidCommandAssignee extends AbstractCommandAssignee {
 
     @Assign
-    List<? extends EventMessage> handler(SendLink command) {
+    List<? extends EventMessage> handle(SendLink command) {
         return singletonList(LinkSent.newBuilder()
                                      .setLink(command.getLink())
                                      .build());

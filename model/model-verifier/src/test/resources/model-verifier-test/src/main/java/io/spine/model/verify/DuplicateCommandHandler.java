@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
 public class DuplicateCommandAssignee extends Aggregate<String, ChatState, ChatState.Builder> {
 
     @Assign
-    Iterable<LinkSent> handler(SendLink command) {
+    Iterable<LinkSent> handle(SendLink command) {
         return singletonList(LinkSent.newBuilder()
                                      .setLink(command.getLink())
                                      .build());

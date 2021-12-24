@@ -39,7 +39,7 @@ import io.spine.test.model.verify.given.EditState;
 public class InvalidDeleteAggregate extends Aggregate<String, EditState, EditState.Builder> {
 
     @Assign
-    PhotoDeleted handler(String unnecessaryString, DeletePhoto delete) {
+    PhotoDeleted handle(String unnecessaryString, DeletePhoto delete) {
         return PhotoDeleted
                 .newBuilder()
                 .setTitle(delete.getTitle())

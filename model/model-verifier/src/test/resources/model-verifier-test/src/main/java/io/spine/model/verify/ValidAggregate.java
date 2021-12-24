@@ -43,7 +43,7 @@ class ValidAggregate extends Aggregate<String, ValidState, ValidState.Builder> {
     }
 
     @Assign
-    List<? extends EventMessage> handler(SendMessage command) {
+    List<? extends EventMessage> handle(SendMessage command) {
         return Collections.emptyList();
     }
 }

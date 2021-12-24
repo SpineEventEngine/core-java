@@ -39,7 +39,7 @@ import io.spine.test.model.verify.given.EditState;
 public class InvalidEnhanceAggregate extends Aggregate<String, EditState, EditState.Builder> {
 
     @Assign
-    String handler(EnhancePhoto delete) {
+    String handle(EnhancePhoto delete) {
         return delete.getTitle();
     }
 }
