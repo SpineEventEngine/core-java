@@ -40,7 +40,6 @@ import io.spine.model.contexts.projects.event.SigTaskStopped;
 import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
-import io.spine.server.command.Command;
 import io.spine.server.model.given.SignatureTestEvent;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.Pair;
@@ -62,7 +61,7 @@ public final class ValidAssignee extends AbstractCommandAssignee {
         return EventMessages.projectCreated();
     }
 
-    @Command
+    @Assign
     @SuppressWarnings("DoNotCallSuggester") // Not relevant in this case of to test data.
     SigProjectCreated declaredRejection(SigCreateProject cmd) throws SigCannotCreateProject {
         throw SigCannotCreateProject

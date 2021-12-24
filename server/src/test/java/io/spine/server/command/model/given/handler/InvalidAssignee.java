@@ -38,7 +38,6 @@ import io.spine.model.contexts.projects.event.SigTaskAssigned;
 import io.spine.model.contexts.projects.event.SigTaskStarted;
 import io.spine.server.command.AbstractCommandAssignee;
 import io.spine.server.command.Assign;
-import io.spine.server.command.Command;
 import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
 import io.spine.server.model.given.SignatureTestCommand;
@@ -133,9 +132,9 @@ public final class InvalidAssignee extends AbstractCommandAssignee {
         return ImmutableList.of();
     }
 
-    @Command
+    @Assign
     SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
-        throw newIllegalStateException("Command assignee handler " +
+        throw newIllegalStateException("Command assignee " +
                                                "has declared an illegal exception.");
     }
 }
