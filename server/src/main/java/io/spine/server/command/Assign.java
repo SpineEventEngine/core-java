@@ -67,10 +67,10 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Assign
- *  TaskCreated handler(CreateTask command) { ... }
+ *  TaskCreated handle(CreateTask command) { ... }
  *
  * {@literal @}Assign
- *  TaskCompleted handler(CompleteTask command, CommandContext context) { ... }
+ *  TaskCompleted handle(CompleteTask command, CommandContext context) { ... }
  * </pre>
  *
  * <p>In case a command may be rejected, a corresponding {@code Throwable} should be declared:
@@ -78,7 +78,7 @@ import java.lang.annotation.Target;
  * <pre>
  *
  * {@literal @}Assign
- *  TaskStarted handler(StartTask command) throws TaskAlreadyInProgress { ... }
+ *  TaskStarted handle(StartTask command) throws TaskAlreadyInProgress { ... }
  * </pre>
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
@@ -98,7 +98,7 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- *  TaskReassigned on(ReassignTask command) { ... }
+ *  TaskReassigned handle(ReassignTask command) { ... }
  *  </pre>
  *
  *
@@ -106,7 +106,7 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- * {@literal Iterable<TaskCompleted>} handler(CompleteProject event) { ... }
+ * {@literal Iterable<TaskCompleted>} handle(CompleteProject event) { ... }
  *  </pre>
  *
  *
@@ -116,10 +116,10 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- * {@literal Pair<ProjectCreated, ProjectAssigned>} handler(CreateProject event) { ... }
+ * {@literal Pair<ProjectCreated, ProjectAssigned>} handle(CreateProject event) { ... }
  *
  * {@literal @}Assign
- * {@literal Pair<TaskCreated, Optional<TaskAssigned>>} handler(CreateTask event) { ... }
+ * {@literal Pair<TaskCreated, Optional<TaskAssigned>>} handle(CreateTask event) { ... }
  *  </pre>
  *
  *
@@ -127,7 +127,7 @@ import java.lang.annotation.Target;
  *  <pre>
  *
  * {@literal @}Assign
- * {@literal EitherOf2<TaskRemovedFromProject, TaskDeleted>} handler(RemoveTask command) { ... }
+ * {@literal EitherOf2<TaskRemovedFromProject, TaskDeleted>} handle(RemoveTask command) { ... }
  *  </pre>
  * </ul>
  *
