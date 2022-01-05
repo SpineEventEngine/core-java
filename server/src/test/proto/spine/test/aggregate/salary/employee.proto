@@ -43,6 +43,8 @@ message Employee {
 
   EmployeeId id = 1 [(required) = true];
 
+  // Employee's remuneration for their work.
+  //
   // Let's take 200$ as the lowest remuneration
   // which employers can legally pay their employees.
   double salary = 2 [(min).value = "200"];

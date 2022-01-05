@@ -48,6 +48,7 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregate;
 import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
+import io.spine.server.aggregate.given.salary.EmployeeAgg;
 import io.spine.server.aggregate.given.thermometer.SafeThermometer;
 import io.spine.server.aggregate.given.thermometer.SafeThermometerRepo;
 import io.spine.server.aggregate.given.thermometer.Thermometer;
@@ -79,6 +80,7 @@ import io.spine.test.aggregate.event.AggTaskCreated;
 import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.logging.mute.MuteLogging;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.testing.server.blackbox.ContextAwareTest;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.BackToTheFuture;
@@ -111,6 +113,9 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.given.salary.Employees.employ;
+import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
+import static io.spine.server.aggregate.given.salary.Employees.shakeUpSalary;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
@@ -444,13 +449,54 @@ public class AggregateTest {
         assertEquals(aggregate, anotherAggregate);
     }
 
+    @Test
+    @DisplayName("add events to `UncommittedHistory` only if they were successfully applied")
+    void addEventsToUncommittedOnlyIfApplied() {
+        var jack = newEmployee();
+        var employeeAgg = new EmployeeAgg(jack);
+
+        employeeAgg.dispatchCommands(
+                employ(jack, 215),
+                shakeUpSalary(jack)
+        );
+
+        Aggregate<?, ?, ?> aggregate = employeeAgg;
+        var uncommitted = aggregate.getUncommittedEvents().list();
+        assertThat(uncommitted.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("add events to `UncommittedHistory` only if they were successfully applied")
+    void addEventsToUncommittedOnlyIfApplied2() {
+        var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
+        var context = BlackBox.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(repository)
+        );
+        repository.aggregateStorage().enableStateQuerying();
+
+        var jack = newEmployee();
+        context.tolerateFailures()
+               .receivesCommands(
+                       employ(jack, 2150),
+                       shakeUpSalary(jack)
+               );
+
+        var storedEvents = repository.aggregateStorage()
+                                     .read(jack)
+                                     .orElseThrow()
+                                     .getEventList();
+
+        assertThat(storedEvents.size()).isEqualTo(1);
+    }
+
     @Nested
     @DisplayName("after dispatch, return event records")
     class ReturnEventRecords {
 
         @Test
         @DisplayName("which are uncommitted")
-        void uncommitedAfterDispatch() {
+        void uncommittedAfterDispatch() {
             aggregate.dispatchCommands(command(createProject),
                                        command(addTask),
                                        command(startProject));
@@ -493,7 +539,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are uncommitted")
-        void uncommitedByDefault() {
+        void uncommittedByDefault() {
             var events = aggregate().getUncommittedEvents();
 
             assertFalse(events.nonEmpty());

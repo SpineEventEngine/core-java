@@ -35,6 +35,11 @@ option java_multiple_files = true;
 
 import "spine/test/aggregate/salary/employee.proto";
 
+message NewEmployed {
+    EmployeeId employee = 1 [(required) = true];
+    int32 salary = 2 [(required) = true];
+}
+
 message SalaryIncreased {
     EmployeeId employee = 1 [(required) = true];
     int32 amount = 2 [(required) = true];

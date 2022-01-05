@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +23,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.aggregate;
+package io.spine.server.aggregate.given.salary;
 
-import "spine/options.proto";
+import io.spine.server.aggregate.given.command.Employ;
+import io.spine.server.aggregate.given.command.ShakeUpSalary;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.aggregate.given.command";
-option java_multiple_files = true;
+public class Employees {
 
-import "spine/test/aggregate/salary/employee.proto";
+    private Employees() {
+    }
 
-message Employ {
-    EmployeeId employee = 1 [(required) = true];
-    int32 salary = 2 [(required) = true];
-}
+    public static EmployeeId newEmployee() {
+        return EmployeeId.generate();
+    }
 
-// Triggers multiple modifications (increases\decreases) of an employee's salary.
-//
-// Used to reach an invalid state of the aggregate in tests.
-message ShakeUpSalary {
-    EmployeeId employee = 1 [(required) = true];
+    public static Employ employ(EmployeeId employee, int salary) {
+        return Employ.newBuilder()
+                .setEmployee(employee)
+                .setSalary(salary)
+                .vBuild();
+    }
+
+    public static ShakeUpSalary shakeUpSalary(EmployeeId employee) {
+        return ShakeUpSalary.newBuilder()
+                .setEmployee(employee)
+                .vBuild();
+    }
 }
