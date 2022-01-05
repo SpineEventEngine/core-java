@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@
  */
 
 import org.apache.tools.ant.taskdefs.condition.Os
+
+println("`pub-publish-tasks.gradle` script is deprecated. " +
+        "Please use `DartTasks.publish()` extension instead.")
 
 final def publicationDir = "$buildDir/pub/publication/$project.name"
 final def extension = Os.isFamily(Os.FAMILY_WINDOWS) ? '.bat' : ''

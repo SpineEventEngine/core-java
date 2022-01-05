@@ -51,7 +51,9 @@ jobs:
         run: cat ./gradle-plugin-portal.secret.properties >> ./gradle.properties
 
       - name: Publish artifacts to Maven
-        run: ./gradlew build publish --stacktrace
+        # Since we're in the `master` branch already, this means that tests of a PR passed.
+        # So, no need to run the tests again when publishing.
+        run: ./gradlew publish -x test --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,21 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
  * Sets [Java toolchain](https://kotlinlang.org/docs/gradle.html#gradle-java-toolchains-support)
- * to the specified version (e.g. "11" or "8").
+ * to the specified version (e.g. 11 or 8).
  */
 fun KotlinJvmProjectExtension.applyJvmToolchain(version: Int) {
     jvmToolchain {
         (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(version))
     }
 }
+
+/**
+ * Sets [Java toolchain](https://kotlinlang.org/docs/gradle.html#gradle-java-toolchains-support)
+ * to the specified version (e.g. "11" or "8").
+ */
+@Suppress("unused")
+fun KotlinJvmProjectExtension.applyJvmToolchain(version: String) =
+    applyJvmToolchain(version.toInt())
 
 /**
  * Opts-in to experimental features that we use in our codebase.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,6 @@ package io.spine.internal.dependency
  * [Gson](https://github.com/google/gson)
  */
 object Gson {
-    private const val version = "2.8.6"
+    private const val version = "2.8.9"
     const val lib = "com.google.code.gson:gson:${version}"
 }

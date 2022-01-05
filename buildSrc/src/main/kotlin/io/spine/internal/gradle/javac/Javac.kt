@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.gradle.process.CommandLineArgumentProvider
 /**
  * Configures the `javac` tool through this `JavaCompile` task.
  *
- * There are several steps performed:
+ * The following steps are performed:
  *
  *  1. Passes a couple of arguments to the compiler. See [JavacConfig] for more details;
  *  2. Sets the UTF-8 encoding to be used when reading Java source files.

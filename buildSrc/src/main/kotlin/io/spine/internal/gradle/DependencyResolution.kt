@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
     force(
         AutoValue.annotations,
         Gson.lib,
-        J2ObjC.lib,
+        J2ObjC.annotations,
         Plexus.utils,
         Okio.lib,
         CommonsCli.lib,

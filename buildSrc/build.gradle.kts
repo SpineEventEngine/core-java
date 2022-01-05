@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,22 +64,22 @@ val grGitVersion = "3.1.1"
  * The version of the Kotlin Gradle plugin.
  *
  * Please check that this value matches one defined in
- *  `io.spine.internal.dependency.Kotlin.version`.
+ *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.6.0"
+val kotlinVersion = "1.6.10"
 
 /**
  * The version of Guava used in `buildSrc`.
  *
- * Always use the same version as the one specified in `io.spine.internal.dependency.Guava`.
+ * Always use the same version as the one specified in [io.spine.internal.dependency.Guava].
  * Otherwise, when testing Gradle plugins, clashes may occur.
  */
-val guavaVersion = "30.1.1-jre"
+val guavaVersion = "31.0.1-jre"
 
 /**
  * The version of ErrorProne Gradle plugin.
  *
- * Please keep in sync. with `io.spine.internal.dependency.ErrorProne.GradlePlugin.version`.
+ * Please keep in sync. with [io.spine.internal.dependency.ErrorProne.GradlePlugin.version].
  *
  * @see <a href="https://github.com/tbroyer/gradle-errorprone-plugin/releases">
  *     Error Prone Gradle Plugin Releases</a>
@@ -89,12 +89,12 @@ val errorProneVersion = "2.0.2"
 /**
  * The version of Protobuf Gradle Plugin.
  *
- * Please keep in sync. with `io.spine.internal.dependency.Protobuf.GradlePlugin.version`.
+ * Please keep in sync. with [io.spine.internal.dependency.Protobuf.GradlePlugin.version].
  *
  * @see <a href="https://github.com/google/protobuf-gradle-plugin/releases">
  *     Protobuf Gradle Plugins Releases</a>
  */
-val protobufPluginVersion = "0.8.17"
+val protobufPluginVersion = "0.8.18"
 
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
