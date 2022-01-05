@@ -346,9 +346,12 @@ public abstract class Aggregate<I,
     final BatchDispatchOutcome apply(List<Event> events, int snapshotTrigger) {
         var versionSequence = new VersionSequence(version());
         var versionedEvents = versionSequence.update(events);
+        System.out.println("Batch size: " + events.size());
         uncommittedHistory.startTracking(snapshotTrigger);
         var result = play(versionedEvents);
+        System.out.println("Batch successful ? " + result.getSuccessful());
         uncommittedHistory.stopTracking();
+        System.out.println("Uncommitted size: " + uncommittedHistory.events().list().size());
         return result;
     }
 
@@ -412,8 +415,7 @@ public abstract class Aggregate<I,
      * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
      */
     final void commitEvents() {
-        List<Event> recentEvents = uncommittedHistory.events()
-                                                     .list();
+        List<Event> recentEvents = uncommittedHistory.events().list();
         appendToRecentHistory(recentEvents);
         uncommittedHistory.commit();
     }
