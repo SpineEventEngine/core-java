@@ -457,42 +457,6 @@ public class AggregateTest {
         assertEquals(aggregate, anotherAggregate);
     }
 
-    @Test
-    @DisplayName("store events only if they were successfully applied")
-    void storeEventsOnlyIfApplied() {
-        var jack = newEmployee();
-        var shardIndex = DeliveryStrategy.newIndex(0, 1);
-        var inboxStorage = PreparedInboxStorage.withCommands(
-                shardIndex,
-                TypeUrl.of(Employee.class),
-                command(employ(jack, 250)),
-                command(decreaseSalary(jack, 15)),
-                command(decreaseSalary(jack, 500)),
-                command(increaseSalary(jack, 500))
-        );
-
-        var serverEnv = ServerEnvironment.instance();
-        serverEnv.reset();
-        ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
-
-        var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
-        BoundedContextBuilder.assumingTests()
-                             .add(repository)
-                             .build();
-
-        serverEnv.delivery().deliverMessagesFrom(shardIndex);
-        serverEnv.reset();
-
-        var storedEvents = repository.aggregateStorage()
-                                     .read(jack)
-                                     .orElseThrow()
-                                     .getEventList();
-        var singleEvent = storedEvents.get(0).enclosedMessage();
-
-        assertThat(storedEvents.size()).isEqualTo(1);
-        assertThat(singleEvent.getClass()).isEqualTo(NewEmployed.class);
-    }
-
     @Nested
     @DisplayName("after dispatch, return event records")
     class ReturnEventRecords {

@@ -349,7 +349,7 @@ public abstract class Aggregate<I,
         System.out.println("Batch size: " + events.size());
         uncommittedHistory.startTracking(snapshotTrigger);
         System.out.println("Uncommitted size before: " + uncommittedHistory.events().list().size());
-        var result = play(versionedEvents);
+        var result = play((List<Event>)versionedEvents);
         System.out.println("Batch successful ? " + result.getSuccessful());
         uncommittedHistory.stopTracking();
         System.out.println("Uncommitted size after: " + uncommittedHistory.events().list().size());
