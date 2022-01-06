@@ -46,3 +46,13 @@ message Employ {
 message ShakeUpSalary {
     EmployeeId employee = 1 [(required) = true];
 }
+
+message IncreaseSalary {
+    EmployeeId employee = 1 [(required) = true];
+    int32 amount = 2 [(required) = true];
+}
+
+message DecreaseSalary {
+    EmployeeId employee = 1 [(required) = true];
+    int32 amount = 2 [(required) = true];
+}

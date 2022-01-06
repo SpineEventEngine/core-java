@@ -318,7 +318,11 @@ public final class DeliveryBuilder {
 
     private static StorageFactory storageFactory() {
         var serverEnvironment = ServerEnvironment.instance();
+        System.out.println("Getting storage factory for Delivery ...");
+        System.out.println(serverEnvironment.type());
         var currentStorageFactory = serverEnvironment.optionalStorageFactory();
+        System.out.println(currentStorageFactory.get().createInboxStorage(false));
+        System.out.println("--------------------");
         return currentStorageFactory.orElseGet(InMemoryStorageFactory::newInstance);
     }
 }

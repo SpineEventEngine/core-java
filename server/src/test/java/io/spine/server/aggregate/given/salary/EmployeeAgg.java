@@ -27,28 +27,23 @@ package io.spine.server.aggregate.given.salary;
 
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.aggregate.DefaultAggregateRepository;
+import io.spine.server.aggregate.given.command.DecreaseSalary;
 import io.spine.server.aggregate.given.command.Employ;
+import io.spine.server.aggregate.given.command.IncreaseSalary;
 import io.spine.server.aggregate.given.command.ShakeUpSalary;
 import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
 import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.command.Assign;
-import io.spine.testing.server.blackbox.BlackBox;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
-import static io.spine.server.aggregate.given.salary.Employees.employ;
-import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
-import static io.spine.server.aggregate.given.salary.Employees.shakeUpSalary;
+import static io.spine.server.aggregate.given.salary.Employees.salaryDecreased;
+import static io.spine.server.aggregate.given.salary.Employees.salaryIncreased;
 
 public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builder> {
 
@@ -71,6 +66,29 @@ public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builde
                 .setSalary(event.getSalary());
     }
 
+    @Assign
+    Iterable<EventMessage> handle(ShakeUpSalary cmd) {
+        var employee = cmd.getEmployee();
+        return List.of(
+                salaryDecreased(employee, 15),
+                salaryIncreased(employee, 50),
+                salaryIncreased(employee, 75),
+
+                // this one would make the aggregate's state invalid.
+                // employee can not be paid less than 200.
+                salaryDecreased(employee, 1000),
+
+                salaryIncreased(employee, 100),
+                salaryIncreased(employee, 75),
+                salaryIncreased(employee, 50)
+        );
+    }
+
+    @Assign
+    SalaryIncreased handle(IncreaseSalary cmd) {
+        return salaryIncreased(cmd.getEmployee(), cmd.getAmount());
+    }
+
     @Apply
     private void on(SalaryIncreased event) {
         builder()
@@ -78,42 +96,16 @@ public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builde
                 .setSalary(state().getSalary() + event.getAmount());
     }
 
+    @Assign
+    SalaryDecreased handle(DecreaseSalary cmd) {
+        return salaryDecreased(cmd.getEmployee(), cmd.getAmount());
+    }
+
     @Apply
     private void on(SalaryDecreased event) {
         builder()
                 .setId(event.getEmployee())
                 .setSalary(state().getSalary() - event.getAmount());
-    }
-
-    @Assign
-    Iterable<EventMessage> handle(ShakeUpSalary cmd) {
-        var employee = cmd.getEmployee();
-        return List.of(
-
-                // we need several events to make them processed as a batch.
-                salaryDecreased(employee, 15),
-                salaryIncreased(employee, 50),
-                salaryIncreased(employee, 75),
-                salaryIncreased(employee, 100),
-
-                // this one would make the aggregate's state invalid.
-                // employee's can not be paid less than 200.
-                salaryDecreased(employee, 1000)
-        );
-    }
-
-    private static SalaryIncreased salaryIncreased(EmployeeId employee, int amount) {
-        return SalaryIncreased.newBuilder()
-                .setEmployee(employee)
-                .setAmount(amount)
-                .vBuild();
-    }
-
-    private static SalaryDecreased salaryDecreased(EmployeeId employee, int amount) {
-        return SalaryDecreased.newBuilder()
-                .setEmployee(employee)
-                .setAmount(amount)
-                .vBuild();
     }
 
     public void dispatchCommands(CommandMessage... commands) {

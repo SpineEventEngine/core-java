@@ -54,7 +54,7 @@ public interface InboxMessageMixin extends ShardedRecord, InboxMessageOrBuilder 
     }
 
     /**
-     * Generates a new {@code InboxMessageId} with a auto-generated UUID and the given shard
+     * Generates a new {@code InboxMessageId} with an auto-generated UUID and the given shard
      * index as parts.
      */
     static InboxMessageId generateIdWith(ShardIndex index) {
