@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,6 @@ package io.spine.internal.dependency
  * [Plexus Utils](https://codehaus-plexus.github.io/plexus-utils/)
  */
 object Plexus {
-    private const val version = "3.3.0"
+    private const val version = "3.4.0"
     const val utils = "org.codehaus.plexus:plexus-utils:${version}"
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,9 @@ package io.spine.internal.dependency
 @Suppress("unused")
 object Grpc {
     @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.38.0"
+    const val version        = "1.43.1"
     const val api            = "io.grpc:grpc-api:${version}"
+    const val auth           = "io.grpc:grpc-auth:${version}"
     const val core           = "io.grpc:grpc-core:${version}"
     const val context        = "io.grpc:grpc-context:${version}"
     const val stub           = "io.grpc:grpc-stub:${version}"

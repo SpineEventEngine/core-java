@@ -1,11 +1,1 @@
-# This file configures Sonatype Lift.
-#
-#   Homepage: https://lift.sonatype.com/
-#   Configuration doc: https://help.sonatype.com/lift/configuration-reference
-
-ignoreFiles = """
-**/build/**
-**/generated/**
-
-**/test/**
-"""
+ignoreRules=["SpreadOperator"]

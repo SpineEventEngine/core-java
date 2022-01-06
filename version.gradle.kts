@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,4 +32,4 @@ val toolBaseVersion: String by extra("2.0.0-SNAPSHOT.84")
 val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.83")
 
 /** The version of this library. */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.90")
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.91")
