@@ -40,7 +40,6 @@ import io.spine.core.TenantId;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.aggregate.given.aggregate.AggregateWithMissingApplier;
@@ -54,6 +53,7 @@ import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.aggregate.given.salary.Employee;
 import io.spine.server.aggregate.given.salary.EmployeeAgg;
 import io.spine.server.aggregate.given.salary.PreparedInboxStorage;
+import io.spine.server.aggregate.given.salary.PreparedStorageFactory;
 import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.thermometer.SafeThermometer;
 import io.spine.server.aggregate.given.thermometer.SafeThermometerRepo;
@@ -61,13 +61,8 @@ import io.spine.server.aggregate.given.thermometer.Thermometer;
 import io.spine.server.aggregate.given.thermometer.ThermometerId;
 import io.spine.server.aggregate.given.thermometer.event.TemperatureChanged;
 import io.spine.server.delivery.DeliveryStrategy;
-import io.spine.server.delivery.InboxStorage;
 import io.spine.server.delivery.MessageEndpoint;
 import io.spine.server.model.ModelError;
-import io.spine.server.storage.RecordSpec;
-import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -112,7 +107,6 @@ import java.util.function.Supplier;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
@@ -464,8 +458,8 @@ public class AggregateTest {
     }
 
     @Test
-    @DisplayName("add events to `UncommittedHistory` only if they were successfully applied")
-    void addEventsToUncommittedOnlyIfApplied3() {
+    @DisplayName("store events only if they were successfully applied")
+    void storeEventsOnlyIfApplied() {
         var jack = newEmployee();
         var shardIndex = DeliveryStrategy.newIndex(0, 1);
         var inboxStorage = PreparedInboxStorage.withCommands(
@@ -477,50 +471,26 @@ public class AggregateTest {
                 command(increaseSalary(jack, 500))
         );
 
-        System.out.println("Setting storage factory ...");
-        ServerEnvironment.instance().reset();
-        ServerEnvironment.when(Tests.class)
-                         .use(new StorageFactory() {
-                             @Override
-                             public <I, R extends Message> RecordStorage<I, R> createRecordStorage(
-                                     ContextSpec context, RecordSpec<I, R, ?> spec) {
-                                 return InMemoryStorageFactory.newInstance().createRecordStorage(context, spec);
-                             }
-
-                             @Override
-                             public InboxStorage createInboxStorage(boolean multitenant) {
-                                 return inboxStorage;
-                             }
-
-                             @Override
-                             public void close() {
-                                 // NO OP
-                             }
-                         });
+        var serverEnv = ServerEnvironment.instance();
+        serverEnv.reset();
+        ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
 
         var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
         BoundedContextBuilder.assumingTests()
                              .add(repository)
                              .build();
 
-        System.out.println(ServerEnvironment.instance().type());
-        System.out.println(ServerEnvironment.instance().storageFactory().createInboxStorage(false));
-
-        var stats = ServerEnvironment
-                .instance()
-                .delivery()
-                .deliverMessagesFrom(shardIndex)
-                .orElseThrow();
-        System.out.println(stats.deliveredCount());
-        ServerEnvironment.instance().reset();
+        serverEnv.delivery().deliverMessagesFrom(shardIndex);
+        serverEnv.reset();
 
         var storedEvents = repository.aggregateStorage()
                                      .read(jack)
                                      .orElseThrow()
                                      .getEventList();
+        var singleEvent = storedEvents.get(0).enclosedMessage();
 
         assertThat(storedEvents.size()).isEqualTo(1);
-        assertThat(storedEvents.get(0).enclosedMessage().getClass()).isEqualTo(NewEmployed.class);
+        assertThat(singleEvent.getClass()).isEqualTo(NewEmployed.class);
     }
 
     @Nested

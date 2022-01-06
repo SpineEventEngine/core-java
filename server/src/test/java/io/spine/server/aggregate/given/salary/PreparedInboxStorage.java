@@ -49,11 +49,8 @@ public class PreparedInboxStorage extends InboxStorage {
         super(InMemoryStorageFactory.newInstance(), false);
     }
 
-    public static PreparedInboxStorage withCommands(
-            ShardIndex shardIndex,
-            TypeUrl target,
-            Command... commands
-    ) {
+    public static InboxStorage
+    withCommands(ShardIndex shardIndex, TypeUrl target, Command... commands) {
 
         var routing = CommandRouting.newInstance(EmployeeId.class);
         var storage = new PreparedInboxStorage();
