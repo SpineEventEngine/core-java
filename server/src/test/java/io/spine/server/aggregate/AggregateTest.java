@@ -130,7 +130,6 @@ import static io.spine.server.aggregate.given.salary.Employees.decreaseSalary;
 import static io.spine.server.aggregate.given.salary.Employees.employ;
 import static io.spine.server.aggregate.given.salary.Employees.increaseSalary;
 import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
-import static io.spine.server.aggregate.given.salary.Employees.shakeUpSalary;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
@@ -466,80 +465,6 @@ public class AggregateTest {
 
     @Test
     @DisplayName("add events to `UncommittedHistory` only if they were successfully applied")
-    void addEventsToUncommittedOnlyIfApplied() {
-        var jack = newEmployee();
-        var employeeAgg = new EmployeeAgg(jack);
-
-        employeeAgg.dispatchCommands(
-                employ(jack, 215),
-                shakeUpSalary(jack)
-        );
-
-        Aggregate<?, ?, ?> aggregate = employeeAgg;
-        var uncommitted = aggregate.getUncommittedEvents().list();
-        assertThat(uncommitted.size()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("add events to `UncommittedHistory` only if they were successfully applied")
-    void addEventsToUncommittedOnlyIfApplied2() {
-        var jack = newEmployee();
-        var shardIndex = DeliveryStrategy.newIndex(0, 1);
-        var inboxStorage = PreparedInboxStorage.withCommands(
-                shardIndex,
-                TypeUrl.of(Employee.class),
-                command(employ(jack, 250)),
-                command(shakeUpSalary(jack))
-        );
-
-        System.out.println("Setting storage factory ...");
-        ServerEnvironment.instance().reset();
-        ServerEnvironment.when(Tests.class)
-                .use(new StorageFactory() {
-                    @Override
-                    public <I, R extends Message> RecordStorage<I, R> createRecordStorage(
-                            ContextSpec context, RecordSpec<I, R, ?> spec) {
-                        return InMemoryStorageFactory.newInstance().createRecordStorage(context, spec);
-                    }
-
-                    @Override
-                    public InboxStorage createInboxStorage(boolean multitenant) {
-                        return inboxStorage;
-                    }
-
-                    @Override
-                    public void close() {
-                        // NO OP
-                    }
-                });
-
-        var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
-        BoundedContextBuilder.assumingTests()
-                             .add(repository)
-                             .build();
-
-        System.out.println(ServerEnvironment.instance().type());
-        System.out.println(ServerEnvironment.instance().storageFactory().createInboxStorage(false));
-
-        var stats = ServerEnvironment
-                .instance()
-                .delivery()
-                .deliverMessagesFrom(shardIndex)
-                .orElseThrow();
-        System.out.println(stats.deliveredCount());
-//        ServerEnvironment.instance().reset();
-
-        var storedEvents = repository.aggregateStorage()
-                                     .read(jack)
-                                     .orElseThrow()
-                                     .getEventList();
-
-        assertThat(storedEvents.size()).isEqualTo(1);
-        assertThat(storedEvents.get(0).enclosedMessage().getClass()).isEqualTo(NewEmployed.class);
-    }
-
-    @Test
-    @DisplayName("add events to `UncommittedHistory` only if they were successfully applied")
     void addEventsToUncommittedOnlyIfApplied3() {
         var jack = newEmployee();
         var shardIndex = DeliveryStrategy.newIndex(0, 1);
@@ -587,7 +512,7 @@ public class AggregateTest {
                 .deliverMessagesFrom(shardIndex)
                 .orElseThrow();
         System.out.println(stats.deliveredCount());
-//        ServerEnvironment.instance().reset();
+        ServerEnvironment.instance().reset();
 
         var storedEvents = repository.aggregateStorage()
                                      .read(jack)

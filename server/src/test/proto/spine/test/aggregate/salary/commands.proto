@@ -40,13 +40,6 @@ message Employ {
     int32 salary = 2 [(required) = true];
 }
 
-// Triggers multiple modifications (increases\decreases) of an employee's salary.
-//
-// Used to reach an invalid state of the aggregate in tests.
-message ShakeUpSalary {
-    EmployeeId employee = 1 [(required) = true];
-}
-
 message IncreaseSalary {
     EmployeeId employee = 1 [(required) = true];
     int32 amount = 2 [(required) = true];

@@ -26,24 +26,18 @@
 package io.spine.server.aggregate.given.salary;
 
 import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.command.DecreaseSalary;
 import io.spine.server.aggregate.given.command.Employ;
 import io.spine.server.aggregate.given.command.IncreaseSalary;
-import io.spine.server.aggregate.given.command.ShakeUpSalary;
 import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
 import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.command.Assign;
 
-import java.util.List;
-
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
-import static io.spine.server.aggregate.given.salary.Employees.salaryDecreased;
-import static io.spine.server.aggregate.given.salary.Employees.salaryIncreased;
 
 public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builder> {
 
@@ -67,26 +61,11 @@ public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builde
     }
 
     @Assign
-    Iterable<EventMessage> handle(ShakeUpSalary cmd) {
-        var employee = cmd.getEmployee();
-        return List.of(
-                salaryDecreased(employee, 15),
-                salaryIncreased(employee, 50),
-                salaryIncreased(employee, 75),
-
-                // this one would make the aggregate's state invalid.
-                // employee can not be paid less than 200.
-                salaryDecreased(employee, 1000),
-
-                salaryIncreased(employee, 100),
-                salaryIncreased(employee, 75),
-                salaryIncreased(employee, 50)
-        );
-    }
-
-    @Assign
     SalaryIncreased handle(IncreaseSalary cmd) {
-        return salaryIncreased(cmd.getEmployee(), cmd.getAmount());
+        return SalaryIncreased.newBuilder()
+                .setEmployee(cmd.getEmployee())
+                .setAmount(cmd.getAmount())
+                .vBuild();
     }
 
     @Apply
@@ -98,7 +77,10 @@ public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builde
 
     @Assign
     SalaryDecreased handle(DecreaseSalary cmd) {
-        return salaryDecreased(cmd.getEmployee(), cmd.getAmount());
+        return SalaryDecreased.newBuilder()
+                .setEmployee(cmd.getEmployee())
+                .setAmount(cmd.getAmount())
+                .vBuild();
     }
 
     @Apply
@@ -106,11 +88,5 @@ public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builde
         builder()
                 .setId(event.getEmployee())
                 .setSalary(state().getSalary() - event.getAmount());
-    }
-
-    public void dispatchCommands(CommandMessage... commands) {
-        for (var cmd : commands) {
-            AggregateMessageDispatcher.dispatchCommand(this, env(cmd));
-        }
     }
 }

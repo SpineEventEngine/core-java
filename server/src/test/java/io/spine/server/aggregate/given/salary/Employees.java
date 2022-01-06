@@ -29,9 +29,6 @@ package io.spine.server.aggregate.given.salary;
 import io.spine.server.aggregate.given.command.DecreaseSalary;
 import io.spine.server.aggregate.given.command.Employ;
 import io.spine.server.aggregate.given.command.IncreaseSalary;
-import io.spine.server.aggregate.given.command.ShakeUpSalary;
-import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
-import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 
 public class Employees {
 
@@ -49,12 +46,6 @@ public class Employees {
                 .vBuild();
     }
 
-    public static ShakeUpSalary shakeUpSalary(EmployeeId employee) {
-        return ShakeUpSalary.newBuilder()
-                .setEmployee(employee)
-                .vBuild();
-    }
-
     public static IncreaseSalary increaseSalary(EmployeeId employee, int amount) {
         return IncreaseSalary.newBuilder()
                 .setEmployee(employee)
@@ -64,20 +55,6 @@ public class Employees {
 
     public static DecreaseSalary decreaseSalary(EmployeeId employee, int amount) {
         return DecreaseSalary.newBuilder()
-                .setEmployee(employee)
-                .setAmount(amount)
-                .vBuild();
-    }
-
-    public static SalaryIncreased salaryIncreased(EmployeeId employee, int amount) {
-        return SalaryIncreased.newBuilder()
-                .setEmployee(employee)
-                .setAmount(amount)
-                .vBuild();
-    }
-
-    public static SalaryDecreased salaryDecreased(EmployeeId employee, int amount) {
-        return SalaryDecreased.newBuilder()
                 .setEmployee(employee)
                 .setAmount(amount)
                 .vBuild();

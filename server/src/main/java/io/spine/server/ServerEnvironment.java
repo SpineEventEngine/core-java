@@ -55,7 +55,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 /**
  * The server conditions and configuration under which the application operates.
  *
- * <h3>Configuration</h3>
+ * ё<h3>Configuration</h3>
  *
  * <p>Some parts of the {@code ServerEnvironment} can be customized based on the {@code
  * EnvironmentType}. To do so, one of the overloads of the {@code use} method can be called.
