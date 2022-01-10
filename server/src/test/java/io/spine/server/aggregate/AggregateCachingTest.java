@@ -26,6 +26,8 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.base.EventMessage;
+import io.spine.core.Event;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -37,14 +39,17 @@ import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.delivery.DeliveryStrategy;
+import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.aggregate.given.salary.Employees.decreaseSalary;
+import static io.spine.server.aggregate.given.salary.Employees.decreaseSalaryThreeTimes;
 import static io.spine.server.aggregate.given.salary.Employees.employ;
 import static io.spine.server.aggregate.given.salary.Employees.increaseSalary;
 import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
@@ -68,49 +73,123 @@ class AggregateCachingTest {
         ServerEnvironment.instance().reset();
     }
 
-    /**
-     * Tests the case when a command from a batch emits one or more events that corrupt the
-     * entity's state.
-     */
-    @Test
-    @DisplayName("store only successfully applied events")
-    void storeEventsOnlyIfApplied() {
-        var jack = newEmployee();
-        var shardIndex = DeliveryStrategy.newIndex(0, 1);
-        var inboxStorage = PreparedInboxStorage.withCommands(
-                shardIndex,
-                TypeUrl.of(Employee.class),
+    @Nested
+    @DisplayName("store only successfully applied events when a command assignee emitted")
+    class StoreSuccessfulEvents {
 
-                employ(jack, 250),
-                decreaseSalary(jack, 15),
+        @Test
+        @DisplayName("a single event")
+        void singleEvent() {
+            var jack = newEmployee();
+            var shardIndex = DeliveryStrategy.newIndex(0, 1);
+            var inboxStorage = PreparedInboxStorage.withCommands(
+                    shardIndex,
+                    TypeUrl.of(Employee.class),
 
-                // this one will fail the aggregate's state
-                // as no employee can be paid less than 200.
-                decreaseSalary(jack, 500),
+                    employ(jack, 250),
+                    decreaseSalary(jack, 15),
 
-                increaseSalary(jack, 500)
-        );
+                    // This command will emit the event that will corrupt the aggregate's state
+                    // as no employee can be paid less than 200.
+                    decreaseSalary(jack, 500),
 
-        var serverEnv = ServerEnvironment.instance();
-        ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
+                    increaseSalary(jack, 500)
+            );
 
-        var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
-        BoundedContextBuilder.assumingTests()
-                             .add(repository)
-                             .build();
+            var serverEnv = ServerEnvironment.instance();
+            ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
 
-        serverEnv.delivery().deliverMessagesFrom(shardIndex);
-        var storedEvents = repository.aggregateStorage()
-                                     .read(jack)
-                                     .orElseThrow()
-                                     .getEventList();
+            var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
+            BoundedContextBuilder.assumingTests()
+                                 .add(repository)
+                                 .build();
 
-        assertThat(storedEvents.size()).isEqualTo(3);
-        assertThat(storedEvents.get(0).enclosedMessage().getClass())
-                .isEqualTo(NewEmployed.class);
-        assertThat(storedEvents.get(1).enclosedMessage().getClass())
-                .isEqualTo(SalaryDecreased.class);
-        assertThat(storedEvents.get(2).enclosedMessage().getClass())
-                .isEqualTo(SalaryIncreased.class);
+            serverEnv.delivery().deliverMessagesFrom(shardIndex);
+            var storedEvents = repository.aggregateStorage()
+                                         .read(jack)
+                                         .orElseThrow()
+                                         .getEventList();
+
+            assertThat(storedEvents.size()).isEqualTo(3);
+            assertEvent(storedEvents.get(0), NewEmployed.class);
+            assertEvent(storedEvents.get(1), SalaryDecreased.class);
+            assertEvent(storedEvents.get(2), SalaryIncreased.class);
+        }
+
+        @Test
+        @DisplayName("multiple events")
+        void multipleEvents() {
+            var jack = newEmployee();
+            var shardIndex = DeliveryStrategy.newIndex(0, 1);
+            var inboxStorage = PreparedInboxStorage.withCommands(
+                    shardIndex,
+                    TypeUrl.of(Employee.class),
+
+                    employ(jack, 250),
+                    increaseSalary(jack, 200),
+
+                    // This command will emit three events. One of them will corrupt
+                    // the aggregate's state as no employee can be paid less than 200.
+                    decreaseSalaryThreeTimes(jack, 200),
+
+                    increaseSalary(jack, 100)
+            );
+
+            var serverEnv = ServerEnvironment.instance();
+            ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
+
+            var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
+            BoundedContextBuilder.assumingTests()
+                                 .add(repository)
+                                 .build();
+
+            serverEnv.delivery().deliverMessagesFrom(shardIndex);
+            var storedEvents = repository.aggregateStorage()
+                                         .read(jack)
+                                         .orElseThrow()
+                                         .getEventList();
+
+            assertThat(storedEvents.size()).isEqualTo(3);
+            assertEvent(storedEvents.get(0), NewEmployed.class);
+            assertEvent(storedEvents.get(1), SalaryIncreased.class);
+            assertEvent(storedEvents.get(2), SalaryIncreased.class);
+        }
+
+        @Test
+        @DisplayName("multiple events not cached")
+        void multipleEventsNotCached() {
+            var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
+            var context = BlackBox.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(repository)
+            ).tolerateFailures();
+
+            var jack = newEmployee();
+            context.receivesCommands(
+                    employ(jack, 250),
+                    increaseSalary(jack, 200),
+
+                    // This command will emit three events. One of them will corrupt
+                    // the aggregate's state as no employee can be paid less than 200.
+                    decreaseSalaryThreeTimes(jack, 200),
+
+                    increaseSalary(jack, 100)
+            );
+
+            var storedEvents = repository.aggregateStorage()
+                                         .read(jack)
+                                         .orElseThrow()
+                                         .getEventList();
+
+            assertThat(storedEvents.size()).isEqualTo(3);
+            assertEvent(storedEvents.get(0), NewEmployed.class);
+            assertEvent(storedEvents.get(1), SalaryIncreased.class);
+            assertEvent(storedEvents.get(2), SalaryIncreased.class);
+        }
+
+        private void assertEvent(Event event, Class<? extends EventMessage> type) {
+            assertThat(event.enclosedMessage().getClass())
+                    .isEqualTo(type);
+        }
     }
 }

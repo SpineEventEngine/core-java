@@ -27,8 +27,10 @@
 package io.spine.server.aggregate.given.salary;
 
 import io.spine.server.aggregate.given.command.DecreaseSalary;
+import io.spine.server.aggregate.given.command.DecreaseSalaryThreeTimes;
 import io.spine.server.aggregate.given.command.Employ;
 import io.spine.server.aggregate.given.command.IncreaseSalary;
+import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 
 public class Employees {
 
@@ -55,6 +57,21 @@ public class Employees {
 
     public static DecreaseSalary decreaseSalary(EmployeeId employee, int amount) {
         return DecreaseSalary.newBuilder()
+                .setEmployee(employee)
+                .setAmount(amount)
+                .vBuild();
+    }
+
+    public static DecreaseSalaryThreeTimes
+    decreaseSalaryThreeTimes(EmployeeId employee, int amount) {
+        return DecreaseSalaryThreeTimes.newBuilder()
+                .setEmployee(employee)
+                .setAmount(amount)
+                .vBuild();
+    }
+
+    static SalaryDecreased salaryDecreased(EmployeeId employee, int amount) {
+        return SalaryDecreased.newBuilder()
                 .setEmployee(employee)
                 .setAmount(amount)
                 .vBuild();

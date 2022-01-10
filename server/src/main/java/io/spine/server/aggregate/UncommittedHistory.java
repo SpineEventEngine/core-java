@@ -52,9 +52,9 @@ import static java.util.stream.Collectors.toList;
  * the snapshot trigger, a snapshot is created and remembered as a part of uncommitted history.
  *
  * <p>In order to ignore the events fed to the aggregate when it's being loaded from the storage,
- * the {@code UncommittedHistory}'s tracking is only {@linkplain #startTracking(int) activated}
+ * the {@code UncommittedHistory}'s tracking is only {@linkplain #startTrackSession(int) activated}
  * when the new and truly un-yet-committed events are dispatched to the applier methods.
- * The tracking {@linkplain #stopTracking() stops} after all the new events have been played
+ * The tracking {@linkplain #stopTrackSession() stops} after all the new events have been played
  * on the aggregate instance.
  *
  * @see Aggregate#apply(List, int) on activation and deactivation of event tracking
@@ -90,7 +90,7 @@ final class UncommittedHistory {
      * @param snapshotTrigger
      *         the snapshot trigger to consider each time a new event is tracked
      */
-    void startTracking(int snapshotTrigger) {
+    void startTrackSession(int snapshotTrigger) {
         enabled = true;
         this.snapshotTrigger = snapshotTrigger;
     }
@@ -101,7 +101,7 @@ final class UncommittedHistory {
      * <p>All the events {@linkplain #track(EventEnvelope) sent to the tracking} will be counted
      * as the events already present in the aggregate storage.
      */
-    void stopTracking() {
+    void stopTrackSession() {
         enabled = false;
         snapshotTrigger = null;
     }
@@ -109,7 +109,7 @@ final class UncommittedHistory {
     /**
      * Tracks the event dispatched to the Aggregate's applier.
      *
-     * <p>If the tracking is not {@linkplain #startTracking(int) started}, the event is considered
+     * <p>If the tracking is not {@linkplain #startTrackSession(int) started}, the event is considered
      * an old one and such as not requiring storage and tracking. In this case, this method
      * does nothing.
      *
@@ -117,7 +117,7 @@ final class UncommittedHistory {
      *
      * <p>If the number of events since the last snapshot equals or exceeds the snapshot trigger,
      * a new snapshot is made and saved to the uncommitted history.
-     *
+     e
      * @param envelope
      *         an event to track
      */
@@ -143,14 +143,6 @@ final class UncommittedHistory {
             eventCountAfterLastSnapshot = 0;
         }
     }
-
-//    void track(Iterable<Event> events, int snapshotTrigger) {
-//        enabled = true;
-//        this.snapshotTrigger = snapshotTrigger;
-//        events.forEach(this::track);
-//        enabled = false;
-//        this.snapshotTrigger = null;
-//    }
 
     /**
      * Composes and obtains the collected uncommitted history.

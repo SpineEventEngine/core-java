@@ -330,7 +330,7 @@ public abstract class Aggregate<I,
      * {@code 44}, and {@code 45}.
      *
      * <p>All the events applied to the aggregate instance are
-     * {@linkplain UncommittedHistory#startTracking(int) tracked} as a part of the aggregate's
+     * {@linkplain UncommittedHistory#startTrackSession(int) tracked} as a part of the aggregate's
      * {@link UncommittedHistory} and later are stored.
      *
      * <p>If during the application of the events, the number of the events since the last snapshot
@@ -346,13 +346,10 @@ public abstract class Aggregate<I,
     final BatchDispatchOutcome apply(List<Event> events, int snapshotTrigger) {
         var versionSequence = new VersionSequence(version());
         var versionedEvents = versionSequence.update(events);
-        uncommittedHistory.startTracking(snapshotTrigger);
-        var result = play(versionedEvents);
-        uncommittedHistory.stopTracking();
 
-//        if (result.getSuccessful()) {
-//            uncommittedHistory.track(events, snapshotTrigger);
-//        }
+        uncommittedHistory.startTrackSession(snapshotTrigger);
+        var result = play(versionedEvents);
+        uncommittedHistory.stopTrackSession();
 
         return result;
     }
@@ -364,8 +361,10 @@ public abstract class Aggregate<I,
      * <p>If this event is new in the aggregate history (e.g. it's not already stored), it is
      * recorded as a part of the aggregate's {@link UncommittedHistory}.
      */
-    final void onAfterEventPlayed(EventEnvelope event) {
-        uncommittedHistory.track(event);
+    final void onAfterEventPlayed(EventEnvelope event, DispatchOutcome outcome) {
+        if (outcome.hasSuccess()) {
+            uncommittedHistory.track(event);
+        }
     }
 
     /**

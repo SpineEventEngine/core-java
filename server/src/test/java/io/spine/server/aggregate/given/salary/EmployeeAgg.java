@@ -28,12 +28,16 @@ package io.spine.server.aggregate.given.salary;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.command.DecreaseSalary;
+import io.spine.server.aggregate.given.command.DecreaseSalaryThreeTimes;
 import io.spine.server.aggregate.given.command.Employ;
 import io.spine.server.aggregate.given.command.IncreaseSalary;
 import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.command.Assign;
+import io.spine.server.tuple.Triplet;
+
+import static io.spine.server.aggregate.given.salary.Employees.salaryDecreased;
 
 public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builder> {
 
@@ -77,6 +81,18 @@ public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builde
                 .setEmployee(cmd.getEmployee())
                 .setAmount(cmd.getAmount())
                 .vBuild();
+    }
+
+    @Assign
+    Triplet<SalaryDecreased, SalaryDecreased, SalaryDecreased>
+    handle(DecreaseSalaryThreeTimes cmd) {
+        var employee = cmd.getEmployee();
+        var amount = cmd.getAmount();
+        return Triplet.of(
+                salaryDecreased(employee, amount),
+                salaryDecreased(employee, amount),
+                salaryDecreased(employee, amount)
+        );
     }
 
     @Apply
