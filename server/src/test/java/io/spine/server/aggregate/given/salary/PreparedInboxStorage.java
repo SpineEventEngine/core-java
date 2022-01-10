@@ -26,9 +26,10 @@
 
 package io.spine.server.aggregate.given.salary;
 
+import io.spine.base.CommandMessage;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
-import io.spine.core.Command;
+import io.spine.server.aggregate.given.aggregate.AggregateTestEnv;
 import io.spine.server.delivery.InboxId;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.InboxMessage;
@@ -41,6 +42,8 @@ import io.spine.server.route.CommandRouting;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;
 
+import java.util.Arrays;
+
 import static io.spine.base.Identifier.pack;
 
 public class PreparedInboxStorage extends InboxStorage {
@@ -50,26 +53,28 @@ public class PreparedInboxStorage extends InboxStorage {
     }
 
     public static InboxStorage
-    withCommands(ShardIndex shardIndex, TypeUrl target, Command... commands) {
+    withCommands(ShardIndex shardIndex, TypeUrl target, CommandMessage... messages) {
 
         var routing = CommandRouting.newInstance(EmployeeId.class);
         var storage = new PreparedInboxStorage();
 
-        for (var cmd : commands) {
-            var inboxSignalId = InboxSignalId.newBuilder()
-                    .setValue(cmd.messageId().getId().getValue().toString())
-                    .vBuild();
-            var inboxMessage = InboxMessage.newBuilder()
-                    .setId(InboxMessageMixin.generateIdWith(shardIndex))
-                    .setSignalId(inboxSignalId)
-                    .setInboxId(wrap(routing.apply(cmd.enclosedMessage(), cmd.getContext()), target))
-                    .setCommand(cmd)
-                    .setLabel(InboxLabel.HANDLE_COMMAND)
-                    .setWhenReceived(Time.currentTime())
-                    .setStatus(InboxMessageStatus.TO_DELIVER)
-                    .vBuild();
-            storage.write(inboxMessage);
-        }
+        Arrays.stream(messages)
+                .map(AggregateTestEnv::command)
+                .forEach(cmd -> {
+                    var inboxSignalId = InboxSignalId.newBuilder()
+                            .setValue(cmd.messageId().getId().getValue().toString())
+                            .vBuild();
+                    var inboxMessage = InboxMessage.newBuilder()
+                            .setId(InboxMessageMixin.generateIdWith(shardIndex))
+                            .setSignalId(inboxSignalId)
+                            .setInboxId(wrap(routing.apply(cmd.enclosedMessage(), cmd.getContext()), target))
+                            .setCommand(cmd)
+                            .setLabel(InboxLabel.HANDLE_COMMAND)
+                            .setWhenReceived(Time.currentTime())
+                            .setStatus(InboxMessageStatus.TO_DELIVER)
+                            .vBuild();
+                    storage.write(inboxMessage);
+                });
 
         return storage;
     }

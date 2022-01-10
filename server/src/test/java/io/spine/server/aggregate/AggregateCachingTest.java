@@ -33,23 +33,45 @@ import io.spine.server.aggregate.given.salary.Employee;
 import io.spine.server.aggregate.given.salary.EmployeeAgg;
 import io.spine.server.aggregate.given.salary.PreparedInboxStorage;
 import io.spine.server.aggregate.given.salary.PreparedStorageFactory;
+import io.spine.server.aggregate.given.salary.event.NewEmployed;
+import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
+import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.delivery.DeliveryStrategy;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.command;
 import static io.spine.server.aggregate.given.salary.Employees.decreaseSalary;
 import static io.spine.server.aggregate.given.salary.Employees.employ;
 import static io.spine.server.aggregate.given.salary.Employees.increaseSalary;
 import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
 
-@Disabled
+/**
+ * Tests a cached `Aggregate`.
+ *
+ * <p>The `Aggregated` is cached when multiple messages are dispatched from `Inbox`. Under the hood,
+ * they are processed as a "batch", that triggers the aggregate to be cached for their processing.
+ */
 @DisplayName("Cached `Aggregate` should")
 class AggregateCachingTest {
 
+    @BeforeEach
+    void setUp() {
+        ServerEnvironment.instance().reset();
+    }
+
+    @AfterEach
+    void tearDown() {
+        ServerEnvironment.instance().reset();
+    }
+
+    /**
+     * Tests the case when a command from a batch emits one or more events that corrupt the
+     * entity's state.
+     */
     @Test
     @DisplayName("store only successfully applied events")
     void storeEventsOnlyIfApplied() {
@@ -58,18 +80,18 @@ class AggregateCachingTest {
         var inboxStorage = PreparedInboxStorage.withCommands(
                 shardIndex,
                 TypeUrl.of(Employee.class),
-                command(employ(jack, 250)),
-                command(decreaseSalary(jack, 15)),
+
+                employ(jack, 250),
+                decreaseSalary(jack, 15),
 
                 // this one will fail the aggregate's state
                 // as no employee can be paid less than 200.
-                command(decreaseSalary(jack, 500)),
+                decreaseSalary(jack, 500),
 
-                command(increaseSalary(jack, 500))
+                increaseSalary(jack, 500)
         );
 
         var serverEnv = ServerEnvironment.instance();
-        serverEnv.reset();
         ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
 
         var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
@@ -78,12 +100,17 @@ class AggregateCachingTest {
                              .build();
 
         serverEnv.delivery().deliverMessagesFrom(shardIndex);
-        serverEnv.reset();
-
         var storedEvents = repository.aggregateStorage()
                                      .read(jack)
                                      .orElseThrow()
                                      .getEventList();
+
         assertThat(storedEvents.size()).isEqualTo(3);
+        assertThat(storedEvents.get(0).enclosedMessage().getClass())
+                .isEqualTo(NewEmployed.class);
+        assertThat(storedEvents.get(1).enclosedMessage().getClass())
+                .isEqualTo(SalaryDecreased.class);
+        assertThat(storedEvents.get(2).enclosedMessage().getClass())
+                .isEqualTo(SalaryIncreased.class);
     }
 }

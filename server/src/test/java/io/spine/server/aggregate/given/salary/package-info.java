@@ -25,7 +25,7 @@
  */
 
 /**
- * Test environment classes for the {@code Aggregate} tests.
+ * Test environment classes for the {@link io.spine.server.aggregate.AggregateCachingTest}.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
