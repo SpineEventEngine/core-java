@@ -47,7 +47,6 @@ final class InboxDeliveries {
      */
     ShardedMessageDelivery<InboxMessage> get(String typeUrl) {
         var result = contents.get(typeUrl);
-//        contents.forEach((str, smth) -> System.out.println(str));
         checkState(result != null,
                    "Cannot find the registered Inbox for the type URL `%s`.", typeUrl);
         return result;

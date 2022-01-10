@@ -176,7 +176,6 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         private void deliverVia(BatchDeliveryListener<I> dispatcher,
                                 InboxOfCommands<I> cmdDispatcher,
                                 InboxOfEvents<I> eventDispatcher) {
-//            System.out.println("deliverVia: " + messages.size());
             if (messages.size() > 1) {
                 var packedId = inboxId.value()
                                       .getEntityId()

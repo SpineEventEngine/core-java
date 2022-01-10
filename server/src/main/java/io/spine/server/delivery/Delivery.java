@@ -466,9 +466,6 @@ public final class Delivery implements Logging {
     private RunResult runDelivery(ShardProcessingSession session) {
         var index = session.shardIndex();
 
-//        System.out.println("runDelivery");
-//        System.out.println(inboxStorage);
-
         var startingPage = inboxStorage.readAll(index, pageSize);
         var maybePage = Optional.of(startingPage);
 

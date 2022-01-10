@@ -319,8 +319,6 @@ public final class ServerEnvironment implements AutoCloseable {
         tracerFactory.reset();
         storageFactory.reset();
         delivery.reset();
-//        var currentEnv = environment().type();
-//        delivery.use(Delivery.local(), currentEnv);
         resetDeploymentType();
     }
 
