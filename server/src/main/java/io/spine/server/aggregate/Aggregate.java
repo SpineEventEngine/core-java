@@ -346,20 +346,20 @@ public abstract class Aggregate<I,
     final BatchDispatchOutcome apply(List<Event> events, int snapshotTrigger) {
         var versionSequence = new VersionSequence(version());
         var versionedEvents = versionSequence.update(events);
-        System.out.println("Batch size: " + events.size());
-//        uncommittedHistory.startTracking(snapshotTrigger);
-        System.out.println("Uncommitted size before: " + uncommittedHistory.events().list().size());
+//        System.out.println("Batch size: " + events.size());
+        uncommittedHistory.startTracking(snapshotTrigger);
+//        System.out.println("Uncommitted size before: " + uncommittedHistory.events().list().size());
         var result = play(versionedEvents);
-        System.out.println("Batch successful ? " + result.getSuccessful());
-//        uncommittedHistory.stopTracking();
-        System.out.println("Uncommitted size after: " + uncommittedHistory.events().list().size());
-        System.out.println();
-        System.out.println();
-        System.out.println();
+//        System.out.println("Batch successful ? " + result.getSuccessful());
+        uncommittedHistory.stopTracking();
+//        System.out.println("Uncommitted size after: " + uncommittedHistory.events().list().size());
+//        System.out.println();
+//        System.out.println();
+//        System.out.println();
 
-        if (result.getSuccessful()) {
-            uncommittedHistory.track(events, snapshotTrigger);
-        }
+//        if (result.getSuccessful()) {
+//            uncommittedHistory.track(events, snapshotTrigger);
+//        }
 
         return result;
     }
@@ -372,7 +372,7 @@ public abstract class Aggregate<I,
      * recorded as a part of the aggregate's {@link UncommittedHistory}.
      */
     final void onAfterEventPlayed(EventEnvelope event) {
-//        uncommittedHistory.track(event);
+        uncommittedHistory.track(event);
     }
 
     /**
