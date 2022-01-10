@@ -55,7 +55,7 @@ public class PreparedInboxStorage extends InboxStorage {
         var routing = CommandRouting.newInstance(EmployeeId.class);
         var storage = new PreparedInboxStorage();
 
-        for (Command cmd : commands) {
+        for (var cmd : commands) {
             var inboxSignalId = InboxSignalId.newBuilder()
                     .setValue(cmd.messageId().getId().getValue().toString())
                     .vBuild();

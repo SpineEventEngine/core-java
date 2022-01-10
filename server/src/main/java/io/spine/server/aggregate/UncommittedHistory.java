@@ -121,7 +121,7 @@ final class UncommittedHistory {
      * @param envelope
      *         an event to track
      */
-    void track(EventEnvelope envelope) {
+    void track(Event event) {
         if (!enabled) {
             return;
         }
@@ -129,7 +129,6 @@ final class UncommittedHistory {
                        "The snapshot trigger must be set" +
                                " to track the events applied to an `Aggregate`.");
 
-        var event = envelope.outerObject();
         if (event.isRejection()) {
             return;
         }
@@ -142,6 +141,14 @@ final class UncommittedHistory {
             currentSegment.clear();
             eventCountAfterLastSnapshot = 0;
         }
+    }
+
+    void track(Iterable<Event> events, int snapshotTrigger) {
+        enabled = true;
+        this.snapshotTrigger = snapshotTrigger;
+        events.forEach(this::track);
+        enabled = false;
+        this.snapshotTrigger = null;
     }
 
     /**
