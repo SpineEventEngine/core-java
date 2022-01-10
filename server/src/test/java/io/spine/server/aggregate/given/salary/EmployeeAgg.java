@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,19 +25,15 @@
  */
 package io.spine.server.aggregate.given.salary;
 
-import io.spine.base.CommandMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.command.DecreaseSalary;
 import io.spine.server.aggregate.given.command.Employ;
 import io.spine.server.aggregate.given.command.IncreaseSalary;
-import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
 import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.command.Assign;
-
-import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
 
 public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builder> {
 

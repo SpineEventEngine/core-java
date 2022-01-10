@@ -35,6 +35,7 @@ import io.spine.server.aggregate.given.salary.PreparedInboxStorage;
 import io.spine.server.aggregate.given.salary.PreparedStorageFactory;
 import io.spine.server.delivery.DeliveryStrategy;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -45,6 +46,7 @@ import static io.spine.server.aggregate.given.salary.Employees.employ;
 import static io.spine.server.aggregate.given.salary.Employees.increaseSalary;
 import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
 
+@Disabled
 @DisplayName("Cached `Aggregate` should")
 class AggregateCachingTest {
 

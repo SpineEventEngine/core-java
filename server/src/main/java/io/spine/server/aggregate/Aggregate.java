@@ -424,7 +424,8 @@ public abstract class Aggregate<I,
      * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
      */
     final void commitEvents() {
-        List<Event> recentEvents = uncommittedHistory.events().list();
+        List<Event> recentEvents = uncommittedHistory.events()
+                                                     .list();
         appendToRecentHistory(recentEvents);
         uncommittedHistory.commit();
     }

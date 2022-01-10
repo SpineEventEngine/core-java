@@ -185,13 +185,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
                 .withBatchListener(new BatchDeliveryListener<I>() {
                     @Override
                     public void onStart(I id) {
-                        System.out.println("BatchDeliveryListener started");
+//                        System.out.println("BatchDeliveryListener started");
                         cache.startCaching(id);
                     }
 
                     @Override
                     public void onEnd(I id) {
-                        System.out.println("BatchDeliveryListener ended");
+//                        System.out.println("BatchDeliveryListener ended");
                         cache.stopCaching(id);
                     }
                 })
