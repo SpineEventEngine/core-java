@@ -29,14 +29,11 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
 import io.spine.server.type.EventEnvelope;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -67,11 +64,7 @@ final class UncommittedHistory {
     private final Supplier<Snapshot> makeSnapshot;
     private final List<AggregateHistory> historySegments = new ArrayList<>();
     private final List<Event> currentSegment = new ArrayList<>();
-    private final List<Event> currentSession = new ArrayList<>();
-
-    private @Nullable Integer snapshotTrigger = null;
     private int eventCountAfterLastSnapshot;
-    private boolean enabled = false;
 
     /**
      * Creates an instance of the uncommitted history.
@@ -81,37 +74,6 @@ final class UncommittedHistory {
      */
     UncommittedHistory(Supplier<Snapshot> makeSnapshot) {
         this.makeSnapshot = makeSnapshot;
-    }
-
-    /**
-     * Enables the tracking of events.
-     *
-     * <p>All events {@linkplain #track(EventEnvelope) sent} to this instance will now be counted
-     * as new and uncommitted events in the aggregate's history.
-     *
-     * @param snapshotTrigger
-     *         the snapshot trigger to consider each time a new event is tracked
-     */
-    void startTrackingSession(int snapshotTrigger) {
-        enabled = true;
-        this.snapshotTrigger = snapshotTrigger;
-    }
-
-    /**
-     * Stops the tracking of the events.
-     *
-     * <p>All the events {@linkplain #track(EventEnvelope) sent to the tracking} will be counted
-     * as the events already present in the aggregate storage.
-     */
-    void startTracking() {
-//        commitSession();
-//        enabled = false;
-//        snapshotTrigger = null;
-    }
-
-    void stopTracking() {
-//        checkState(enabled, "No tracking session is active!");
-//        currentSession.clear();
     }
 
     /**
@@ -129,23 +91,6 @@ final class UncommittedHistory {
      * @param event
      *         an event to track
      */
-    void track(Event event) {
-//        var event = envelope.outerObject();
-//        if (event.isRejection()) {
-//            return;
-//        }
-//
-//        currentSegment.add(event);
-//        var eventsInSegment = currentSegment.size();
-//        if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
-//            var snapshot = makeSnapshot.get();
-//            var completedSegment = historyFrom(currentSegment, snapshot);
-//            historySegments.add(completedSegment);
-//            currentSegment.clear();
-//            eventCountAfterLastSnapshot = 0;
-//        }
-    }
-
     void track(List<Event> events, int snapshotTrigger) {
         for(var event : events) {
             if (event.isRejection()) {
@@ -176,10 +121,6 @@ final class UncommittedHistory {
             var lastSegment = historyFrom(currentSegment);
             builder.add(lastSegment);
         }
-        if (currentSession.size() > 0) {
-            var lastSession = historyFrom(currentSession);
-            builder.add(lastSession);
-        }
         return builder.build();
     }
 
@@ -199,7 +140,7 @@ final class UncommittedHistory {
      * Tells if this history contains any uncommitted events.
      */
     boolean hasEvents() {
-        return currentSession.isEmpty() || !currentSegment.isEmpty() || !historySegments.isEmpty();
+        return !currentSegment.isEmpty() || !historySegments.isEmpty();
     }
 
     /**
@@ -208,7 +149,6 @@ final class UncommittedHistory {
     void commit() {
         historySegments.clear();
         currentSegment.clear();
-        currentSession.clear();
     }
 
     /**
