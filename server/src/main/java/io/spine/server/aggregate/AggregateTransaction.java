@@ -84,7 +84,7 @@ public class AggregateTransaction<I,
     @Override
     public DispatchOutcome play(EventEnvelope event) {
         var outcome = super.play(event);
-        entity().onAfterEventPlayed(event, outcome);
+        entity().onAfterEventPlayed(event);
         return outcome;
     }
 

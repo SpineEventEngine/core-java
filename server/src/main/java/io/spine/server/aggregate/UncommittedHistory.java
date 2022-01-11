@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -52,9 +53,9 @@ import static java.util.stream.Collectors.toList;
  * the snapshot trigger, a snapshot is created and remembered as a part of uncommitted history.
  *
  * <p>In order to ignore the events fed to the aggregate when it's being loaded from the storage,
- * the {@code UncommittedHistory}'s tracking is only {@linkplain #startTrackSession(int) activated}
+ * the {@code UncommittedHistory}'s tracking is only {@linkplain #startTrackingSession(int) activated}
  * when the new and truly un-yet-committed events are dispatched to the applier methods.
- * The tracking {@linkplain #stopTrackSession() stops} after all the new events have been played
+ * The tracking {@linkplain #stopTrackingSession() stops} after all the new events have been played
  * on the aggregate instance.
  *
  * @see Aggregate#apply(List, int) on activation and deactivation of event tracking
@@ -66,9 +67,10 @@ final class UncommittedHistory {
     private final Supplier<Snapshot> makeSnapshot;
     private final List<AggregateHistory> historySegments = new ArrayList<>();
     private final List<Event> currentSegment = new ArrayList<>();
+    private final List<Event> currentSession = new ArrayList<>();
 
-    private int eventCountAfterLastSnapshot;
     private @Nullable Integer snapshotTrigger = null;
+    private int eventCountAfterLastSnapshot;
     private boolean enabled = false;
 
     /**
@@ -90,7 +92,7 @@ final class UncommittedHistory {
      * @param snapshotTrigger
      *         the snapshot trigger to consider each time a new event is tracked
      */
-    void startTrackSession(int snapshotTrigger) {
+    void startTrackingSession(int snapshotTrigger) {
         enabled = true;
         this.snapshotTrigger = snapshotTrigger;
     }
@@ -101,15 +103,21 @@ final class UncommittedHistory {
      * <p>All the events {@linkplain #track(EventEnvelope) sent to the tracking} will be counted
      * as the events already present in the aggregate storage.
      */
-    void stopTrackSession() {
+    void stopTrackingSession() {
+        commitSession();
         enabled = false;
         snapshotTrigger = null;
+    }
+
+    void resetCurrentSession() {
+        checkState(enabled, "No tracking session is active!");
+        currentSession.clear();
     }
 
     /**
      * Tracks the event dispatched to the Aggregate's applier.
      *
-     * <p>If the tracking is not {@linkplain #startTrackSession(int) started}, the event is considered
+     * <p>If the tracking is not {@linkplain #startTrackingSession(int) started}, the event is considered
      * an old one and such as not requiring storage and tracking. In this case, this method
      * does nothing.
      *
@@ -125,22 +133,30 @@ final class UncommittedHistory {
         if (!enabled) {
             return;
         }
-        requireNonNull(snapshotTrigger,
-                       "The snapshot trigger must be set" +
-                               " to track the events applied to an `Aggregate`.");
 
         var event = envelope.outerObject();
         if (event.isRejection()) {
             return;
         }
-        currentSegment.add(event);
-        var eventsInSegment = currentSegment.size();
-        if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
-            var snapshot = makeSnapshot.get();
-            var completedSegment = historyFrom(currentSegment, snapshot);
-            historySegments.add(completedSegment);
-            currentSegment.clear();
-            eventCountAfterLastSnapshot = 0;
+
+        currentSession.add(event);
+    }
+
+    private void commitSession() {
+        requireNonNull(snapshotTrigger,
+                       "The snapshot trigger must be set" +
+                               " to track the events applied to an `Aggregate`.");
+
+        for (var event : currentSession) {
+            currentSegment.add(event);
+            var eventsInSegment = currentSegment.size();
+            if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
+                var snapshot = makeSnapshot.get();
+                var completedSegment = historyFrom(currentSegment, snapshot);
+                historySegments.add(completedSegment);
+                currentSegment.clear();
+                eventCountAfterLastSnapshot = 0;
+            }
         }
     }
 
@@ -156,6 +172,10 @@ final class UncommittedHistory {
         if (currentSegment.size() > 0) {
             var lastSegment = historyFrom(currentSegment);
             builder.add(lastSegment);
+        }
+        if (currentSession.size() > 0) {
+            var lastSession = historyFrom(currentSession);
+            builder.add(lastSession);
         }
         return builder.build();
     }
@@ -176,7 +196,7 @@ final class UncommittedHistory {
      * Tells if this history contains any uncommitted events.
      */
     boolean hasEvents() {
-        return !currentSegment.isEmpty() || !historySegments.isEmpty();
+        return currentSession.isEmpty() || !currentSegment.isEmpty() || !historySegments.isEmpty();
     }
 
     /**
@@ -185,6 +205,7 @@ final class UncommittedHistory {
     void commit() {
         historySegments.clear();
         currentSegment.clear();
+        currentSession.clear();
     }
 
     /**

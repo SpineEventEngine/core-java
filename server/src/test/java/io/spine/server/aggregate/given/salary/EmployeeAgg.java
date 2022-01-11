@@ -27,10 +27,10 @@ package io.spine.server.aggregate.given.salary;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.aggregate.given.command.DecreaseSalary;
-import io.spine.server.aggregate.given.command.DecreaseSalaryThreeTimes;
-import io.spine.server.aggregate.given.command.Employ;
-import io.spine.server.aggregate.given.command.IncreaseSalary;
+import io.spine.server.aggregate.given.salary.command.DecreaseSalary;
+import io.spine.server.aggregate.given.salary.command.DecreaseSalaryThreeTimes;
+import io.spine.server.aggregate.given.salary.command.Employ;
+import io.spine.server.aggregate.given.salary.command.IncreaseSalary;
 import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;

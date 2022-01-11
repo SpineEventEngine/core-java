@@ -30,7 +30,7 @@ package spine.test.aggregate;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.aggregate.given.command";
+option java_package = "io.spine.server.aggregate.given.salary.command";
 option java_multiple_files = true;
 
 import "spine/test/aggregate/salary/employee.proto";

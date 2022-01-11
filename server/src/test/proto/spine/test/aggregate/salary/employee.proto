@@ -37,7 +37,6 @@ message EmployeeId {
   string uuid = 1 [(required) = true];
 }
 
-// A company's employee and his\her\its salary.
 message Employee {
   option (entity).kind = AGGREGATE;
 
