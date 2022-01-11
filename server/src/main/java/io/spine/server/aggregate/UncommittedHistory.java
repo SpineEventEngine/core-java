@@ -71,7 +71,7 @@ final class UncommittedHistory {
      *         the events to track
      * @param snapshotTrigger
      *          if the number of events since the last snapshot equals or exceeds
-     *          the snapshot trigger, a new snapshot is made and saved to the uncommitted history.
+     *          the snapshot trigger, a new snapshot is made and saved to the uncommitted history
      */
     void track(List<Event> events, int snapshotTrigger) {
         for(var event : events) {

@@ -26,26 +26,31 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
 import io.spine.environment.Tests;
+import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.salary.Employee;
 import io.spine.server.aggregate.given.salary.EmployeeAgg;
+import io.spine.server.aggregate.given.salary.EmployeeId;
 import io.spine.server.aggregate.given.salary.PreparedInboxStorage;
 import io.spine.server.aggregate.given.salary.PreparedStorageFactory;
 import io.spine.server.aggregate.given.salary.event.NewEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.delivery.DeliveryStrategy;
-import io.spine.testing.server.blackbox.BlackBox;
+import io.spine.server.entity.Repository;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.aggregate.given.salary.Employees.decreaseSalary;
@@ -57,58 +62,41 @@ import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
 /**
  * Tests a cached `Aggregate`.
  *
- * <p>The `Aggregated` is cached when multiple messages are dispatched from `Inbox`. Under the hood,
- * they are processed as a "batch", that triggers the aggregate to be cached for their processing.
+ * <p>An `Aggregate` is cached when multiple messages are dispatched from `Inbox`. Under the hood,
+ * they are processed as a "batch", which triggers the aggregate to be cached for their processing.
  */
 @DisplayName("Cached `Aggregate` should")
 class AggregateCachingTest {
-
-    @BeforeEach
-    void setUp() {
-        ServerEnvironment.instance().reset();
-    }
-
-    @AfterEach
-    void tearDown() {
-        ServerEnvironment.instance().reset();
-    }
 
     @Nested
     @DisplayName("store only successfully applied events when a command assignee emitted")
     class StoreSuccessfulEvents {
 
+        @BeforeEach
+        void setUp() {
+            ServerEnvironment.instance().reset();
+        }
+
+        @AfterEach
+        void tearDown() {
+            ServerEnvironment.instance().reset();
+        }
+
         @Test
         @DisplayName("a single event")
-        void singleEvent() {
+        void singleEvent() throws Exception {
             var jack = newEmployee();
-            var shardIndex = DeliveryStrategy.newIndex(0, 1);
-            var inboxStorage = PreparedInboxStorage.withCommands(
-                    shardIndex,
-                    TypeUrl.of(Employee.class),
-
+            var storedEvents = dispatchInBatch(
+                    jack,
                     employ(jack, 250),
                     decreaseSalary(jack, 15),
 
-                    // This command will emit the event that will corrupt the aggregate's state
+                    // This command emits the event that will corrupt the aggregate's state
                     // as no employee can be paid less than 200.
                     decreaseSalary(jack, 500),
 
                     increaseSalary(jack, 500)
             );
-
-            var serverEnv = ServerEnvironment.instance();
-            ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
-
-            var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
-            BoundedContextBuilder.assumingTests()
-                                 .add(repository)
-                                 .build();
-
-            serverEnv.delivery().deliverMessagesFrom(shardIndex);
-            var storedEvents = repository.aggregateStorage()
-                                         .read(jack)
-                                         .orElseThrow()
-                                         .getEventList();
 
             assertThat(storedEvents.size()).isEqualTo(3);
             assertEvent(storedEvents.get(0), NewEmployed.class);
@@ -118,36 +106,19 @@ class AggregateCachingTest {
 
         @Test
         @DisplayName("multiple events")
-        void multipleEvents() {
+        void multipleEvents() throws Exception {
             var jack = newEmployee();
-            var shardIndex = DeliveryStrategy.newIndex(0, 1);
-            var inboxStorage = PreparedInboxStorage.withCommands(
-                    shardIndex,
-                    TypeUrl.of(Employee.class),
-
+            var storedEvents = dispatchInBatch(
+                    jack,
                     employ(jack, 250),
                     increaseSalary(jack, 200),
 
-                    // This command will emit three events. One of them will corrupt
+                    // This command emits three events. Second one will corrupt
                     // the aggregate's state as no employee can be paid less than 200.
                     decreaseSalaryThreeTimes(jack, 200),
 
                     increaseSalary(jack, 100)
             );
-
-            var serverEnv = ServerEnvironment.instance();
-            ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
-
-            var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
-            BoundedContextBuilder.assumingTests()
-                                 .add(repository)
-                                 .build();
-
-            serverEnv.delivery().deliverMessagesFrom(shardIndex);
-            var storedEvents = repository.aggregateStorage()
-                                         .read(jack)
-                                         .orElseThrow()
-                                         .getEventList();
 
             assertThat(storedEvents.size()).isEqualTo(3);
             assertEvent(storedEvents.get(0), NewEmployed.class);
@@ -155,36 +126,36 @@ class AggregateCachingTest {
             assertEvent(storedEvents.get(2), SalaryIncreased.class);
         }
 
-        @Test
-        @DisplayName("multiple events not cached")
-        void multipleEventsNotCached() {
-            var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
-            var context = BlackBox.from(
-                    BoundedContextBuilder.assumingTests()
-                                         .add(repository)
-            ).tolerateFailures();
-
-            var jack = newEmployee();
-            context.receivesCommands(
-                    employ(jack, 250),
-                    increaseSalary(jack, 200),
-
-                    // This command will emit three events. One of them will corrupt
-                    // the aggregate's state as no employee can be paid less than 200.
-                    decreaseSalaryThreeTimes(jack, 200),
-
-                    increaseSalary(jack, 100)
+        /**
+         * Returns a list of events which were actually put into a storage
+         * as a result of commands dispatching.
+         */
+        private List<Event> dispatchInBatch(EmployeeId entityId, CommandMessage... commands) throws Exception {
+            var shardIndex = DeliveryStrategy.newIndex(0, 1);
+            var inboxStorage = PreparedInboxStorage.withCommands(
+                    shardIndex,
+                    TypeUrl.of(Employee.class),
+                    commands
             );
 
-            var storedEvents = repository.aggregateStorage()
-                                         .read(jack)
-                                         .orElseThrow()
-                                         .getEventList();
+            var serverEnv = ServerEnvironment.instance();
+            ServerEnvironment.when(Tests.class).use(PreparedStorageFactory.with(inboxStorage));
 
-            assertThat(storedEvents.size()).isEqualTo(3);
-            assertEvent(storedEvents.get(0), NewEmployed.class);
-            assertEvent(storedEvents.get(1), SalaryIncreased.class);
-            assertEvent(storedEvents.get(2), SalaryIncreased.class);
+            var repository = new DefaultAggregateRepository<>(EmployeeAgg.class);
+            try(var ignored = createBcWith(repository)) {
+                serverEnv.delivery().deliverMessagesFrom(shardIndex);
+                var storedEvents = repository.aggregateStorage()
+                                             .read(entityId)
+                                             .orElseThrow()
+                                             .getEventList();
+                return storedEvents;
+            }
+        }
+
+        private BoundedContext createBcWith(Repository<?, ?> repository) {
+            return BoundedContextBuilder.assumingTests()
+                                        .add(repository)
+                                        .build();
         }
 
         private void assertEvent(Event event, Class<? extends EventMessage> type) {
