@@ -52,6 +52,9 @@ public class PreparedInboxStorage extends InboxStorage {
         super(InMemoryStorageFactory.newInstance(), false);
     }
 
+    /**
+     * Returns in-memory {@code InboxStorage} which is pre-filled with the passed messages.
+     */
     public static InboxStorage
     withCommands(ShardIndex shardIndex, TypeUrl target, CommandMessage... messages) {
 

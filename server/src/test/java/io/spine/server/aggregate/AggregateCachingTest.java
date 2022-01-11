@@ -68,19 +68,19 @@ import static io.spine.server.aggregate.given.salary.Employees.newEmployee;
 @DisplayName("Cached `Aggregate` should")
 class AggregateCachingTest {
 
+    @BeforeEach
+    void setUp() {
+        ServerEnvironment.instance().reset();
+    }
+
+    @AfterEach
+    void tearDown() {
+        ServerEnvironment.instance().reset();
+    }
+
     @Nested
     @DisplayName("store only successfully applied events when a command assignee emitted")
     class StoreSuccessfulEvents {
-
-        @BeforeEach
-        void setUp() {
-            ServerEnvironment.instance().reset();
-        }
-
-        @AfterEach
-        void tearDown() {
-            ServerEnvironment.instance().reset();
-        }
 
         @Test
         @DisplayName("a single event")

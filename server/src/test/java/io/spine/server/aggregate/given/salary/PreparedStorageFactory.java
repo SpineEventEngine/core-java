@@ -36,6 +36,9 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 
 public class PreparedStorageFactory implements StorageFactory {
 
+    /**
+     * Returns in-memory {@code StorageFactory} with the custom {@code InboxStorage}.
+     */
     public static StorageFactory with(InboxStorage inboxStorage) {
         return new PreparedStorageFactory() {
             @Override
