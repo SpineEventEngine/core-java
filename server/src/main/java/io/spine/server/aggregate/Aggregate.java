@@ -329,8 +329,8 @@ public abstract class Aggregate<I,
      * the {@code events} list is of size 3, the applied events will have versions {@code 43},
      * {@code 44}, and {@code 45}.
      *
-     * <p>All the events applied to the aggregate instance are
-     * {@linkplain UncommittedHistory#startTrackingSession(int) tracked} as a part of the aggregate's
+     * <p>All the events which were successfully applied to the aggregate instance are
+     * {@linkplain UncommittedHistory#track(List, int) tracked} as a part of the aggregate's
      * {@link UncommittedHistory} and later are stored.
      *
      * <p>If during the application of the events, the number of the events since the last snapshot
