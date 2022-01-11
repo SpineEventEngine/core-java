@@ -49,11 +49,4 @@ interface BatchDispatchOutcomeMixin extends BatchDispatchOutcomeOrBuilder, Field
                 return getField(field);
         }
     }
-
-    /**
-     * The propagation is erroneous if any of the `outcome`s is erroneous.
-     */
-    default boolean erroneous() {
-        return !getSuccessful();
-    }
 }

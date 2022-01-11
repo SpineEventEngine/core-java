@@ -55,7 +55,7 @@ import static java.util.stream.Collectors.toList;
  * <p>In order to ignore the events fed to the aggregate when it's being loaded from the storage,
  * the {@code UncommittedHistory}'s tracking is only {@linkplain #startTrackingSession(int) activated}
  * when the new and truly un-yet-committed events are dispatched to the applier methods.
- * The tracking {@linkplain #stopTrackingSession() stops} after all the new events have been played
+ * The tracking {@linkplain #startTracking() stops} after all the new events have been played
  * on the aggregate instance.
  *
  * @see Aggregate#apply(List, int) on activation and deactivation of event tracking
@@ -103,15 +103,15 @@ final class UncommittedHistory {
      * <p>All the events {@linkplain #track(EventEnvelope) sent to the tracking} will be counted
      * as the events already present in the aggregate storage.
      */
-    void stopTrackingSession() {
-        commitSession();
-        enabled = false;
-        snapshotTrigger = null;
+    void startTracking() {
+//        commitSession();
+//        enabled = false;
+//        snapshotTrigger = null;
     }
 
-    void resetCurrentSession() {
-        checkState(enabled, "No tracking session is active!");
-        currentSession.clear();
+    void stopTracking() {
+//        checkState(enabled, "No tracking session is active!");
+//        currentSession.clear();
     }
 
     /**
@@ -126,28 +126,31 @@ final class UncommittedHistory {
      * <p>If the number of events since the last snapshot equals or exceeds the snapshot trigger,
      * a new snapshot is made and saved to the uncommitted history.
      e
-     * @param envelope
+     * @param event
      *         an event to track
      */
-    void track(EventEnvelope envelope) {
-        if (!enabled) {
-            return;
-        }
-
-        var event = envelope.outerObject();
-        if (event.isRejection()) {
-            return;
-        }
-
-        currentSession.add(event);
+    void track(Event event) {
+//        var event = envelope.outerObject();
+//        if (event.isRejection()) {
+//            return;
+//        }
+//
+//        currentSegment.add(event);
+//        var eventsInSegment = currentSegment.size();
+//        if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
+//            var snapshot = makeSnapshot.get();
+//            var completedSegment = historyFrom(currentSegment, snapshot);
+//            historySegments.add(completedSegment);
+//            currentSegment.clear();
+//            eventCountAfterLastSnapshot = 0;
+//        }
     }
 
-    private void commitSession() {
-        requireNonNull(snapshotTrigger,
-                       "The snapshot trigger must be set" +
-                               " to track the events applied to an `Aggregate`.");
-
-        for (var event : currentSession) {
+    void track(List<Event> events, int snapshotTrigger) {
+        for(var event : events) {
+            if (event.isRejection()) {
+                return;
+            }
             currentSegment.add(event);
             var eventsInSegment = currentSegment.size();
             if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {

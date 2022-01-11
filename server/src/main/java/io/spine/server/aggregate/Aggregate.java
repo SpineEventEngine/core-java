@@ -347,25 +347,12 @@ public abstract class Aggregate<I,
         var versionSequence = new VersionSequence(version());
         var versionedEvents = versionSequence.update(events);
 
-        uncommittedHistory.startTrackingSession(snapshotTrigger);
         var result = play(versionedEvents);
-        if (result.erroneous()) {
-            uncommittedHistory.resetCurrentSession();
+        if (result.getSuccessful()) {
+            uncommittedHistory.track(versionedEvents, snapshotTrigger);
         }
-        uncommittedHistory.stopTrackingSession();
 
         return result;
-    }
-
-    /**
-     * A callback telling that the event has been played on this aggregate in scope
-     * of a transaction.
-     *
-     * <p>If this event is new in the aggregate history (e.g. it's not already stored), it is
-     * recorded as a part of the aggregate's {@link UncommittedHistory}.
-     */
-    final void onAfterEventPlayed(EventEnvelope event) {
-        uncommittedHistory.track(event);
     }
 
     /**
