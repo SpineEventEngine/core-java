@@ -37,10 +37,6 @@ public class Employees {
     private Employees() {
     }
 
-    public static EmployeeId newEmployee() {
-        return EmployeeId.generate();
-    }
-
     public static Employ employ(EmployeeId employee, int salary) {
         return Employ.newBuilder()
                 .setEmployee(employee)
