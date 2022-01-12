@@ -28,22 +28,44 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.type.EventEnvelope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
  * Uncommitted events and snapshots created for this aggregate during the dispatching.
  *
+ * <p>Watches how the events {@linkplain Aggregate#invokeApplier(EventEnvelope) are sent}
+ * to the {@link Aggregate} applier methods. Remembers all successfully applied events
+ * as uncommitted.
+ *
  * <p>Once an aggregate is loaded from the storage, the {@code UncommittedHistory}
  * {@linkplain #onAggregateRestored(AggregateHistory) remembers} the event count
  * after the last snapshot.
  *
- * <p>The history is meant to contain only successfully applied events.
+ * <p>If during the tracking the number of events since the last snapshot exceeds
+ * the snapshot trigger, a snapshot is created and remembered as a part of uncommitted history.
  *
+ * <p>In order to ignore the events fed to the aggregate when it's being loaded from the storage,
+ * the {@code UncommittedHistory}'s tracking is only {@linkplain #startTracking(int) activated}
+ * when the new and truly un-yet-committed events are dispatched to the applier methods.
+ *
+ * <p>The tracking stops in two cases:
+ * <ul>
+ *     <li>all new events have been played on the aggregate instance
+ *     and the tracking {@linkplain #stopTracking() explicitly deactivated};</li>
+ *     <li>the history {@linkplain #track(Event, DispatchOutcome) received} an event
+ *     which has non-successful outcome.</li>
+ * </ul>
+ *
+ * @see Aggregate#apply(List, int) on activation and deactivation of event tracking
  * @see Aggregate#replay(AggregateHistory) on supplying the history stats when loading aggregate
  *         instances from the storage
  */
@@ -52,7 +74,10 @@ final class UncommittedHistory {
     private final Supplier<Snapshot> makeSnapshot;
     private final List<AggregateHistory> historySegments = new ArrayList<>();
     private final List<Event> currentSegment = new ArrayList<>();
+
     private int eventCountAfterLastSnapshot;
+    private @Nullable Integer snapshotTrigger = null;
+    private boolean enabled = false;
 
     /**
      * Creates an instance of the uncommitted history.
@@ -65,30 +90,74 @@ final class UncommittedHistory {
     }
 
     /**
-     * Tracks the events successfully dispatched to the Aggregate's applier.
+     * Enables the tracking of events.
      *
-     * @param events
-     *         the events to track
+     * <p>All events {@linkplain #track(Event, DispatchOutcome) sent} to this instance
+     * will now be counted as new and uncommitted events in the aggregate's history.
+     *
      * @param snapshotTrigger
-     *          if the number of events since the last snapshot equals or exceeds
-     *          the snapshot trigger, a new snapshot is made and saved to the uncommitted history
+     *         the snapshot trigger to consider each time a new event is tracked
      */
-    void track(List<Event> events, int snapshotTrigger) {
-        for(var event : events) {
-            if (event.isRejection()) {
-                return;
-            }
+    void startTracking(int snapshotTrigger) {
+        enabled = true;
+        this.snapshotTrigger = snapshotTrigger;
+    }
 
-            currentSegment.add(event);
+    /**
+     * Stops the tracking of the events.
+     *
+     * <p>All the events {@linkplain #track(Event, DispatchOutcome) sent to the tracking}
+     * will be counted as the events already present in the aggregate storage.
+     */
+    void stopTracking() {
+        enabled = false;
+        snapshotTrigger = null;
+    }
 
-            var eventsInSegment = currentSegment.size();
-            if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
-                var snapshot = makeSnapshot.get();
-                var completedSegment = historyFrom(currentSegment, snapshot);
-                historySegments.add(completedSegment);
-                currentSegment.clear();
-                eventCountAfterLastSnapshot = 0;
-            }
+    /**
+     * Tracks the event dispatched to the Aggregate's applier.
+     *
+     * <p>If the tracking is not {@linkplain #startTracking(int) started}, the event is considered
+     * old and such as not requiring storage and tracking. In this case, this method
+     * does nothing.
+     *
+     * <p>If the number of events since the last snapshot equals or exceeds the snapshot trigger,
+     * a new snapshot is made and saved to the uncommitted history.
+     *
+     * <p>If the event has non-successful outcome, the history will
+     * {@linkplain #stopTracking() stop tracking}, the erroneous event will not be remembered.
+     *
+     * @param event
+     *         an event to track
+     * @param outcome
+     *         an outcome of dispatching
+     */
+    void track(Event event, DispatchOutcome outcome) {
+        if (!outcome.hasSuccess()) {
+            stopTracking();
+        }
+        if (!enabled || event.isRejection()) {
+            return;
+        }
+
+        requireNonNull(snapshotTrigger,
+                       "The snapshot trigger must be set" +
+                               " to track the events applied to an `Aggregate`.");
+
+        doTrack(event);
+    }
+
+    @SuppressWarnings("ConstantConditions" /* Preconditions are checked right before the call. */)
+    private void doTrack(Event event) {
+        currentSegment.add(event);
+
+        var eventsInSegment = currentSegment.size();
+        if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
+            var snapshot = makeSnapshot.get();
+            var completedSegment = historyFrom(currentSegment, snapshot);
+            historySegments.add(completedSegment);
+            currentSegment.clear();
+            eventCountAfterLastSnapshot = 0;
         }
     }
 

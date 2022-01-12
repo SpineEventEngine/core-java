@@ -241,7 +241,7 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>Reacting on a event may result in emitting event messages.
+     * <p>Reacting on an event may result in emitting event messages.
      * All the {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param event
@@ -329,8 +329,8 @@ public abstract class Aggregate<I,
      * the {@code events} list is of size 3, the applied events will have versions {@code 43},
      * {@code 44}, and {@code 45}.
      *
-     * <p>All the events which were successfully applied to the aggregate instance are
-     * {@linkplain UncommittedHistory#track(List, int) tracked} as a part of the aggregate's
+     * <p>All the events successfully applied to the aggregate instance are
+     * {@linkplain UncommittedHistory#startTracking(int) tracked} as a part of the aggregate's
      * {@link UncommittedHistory} and later are stored.
      *
      * <p>If during the application of the events, the number of the events since the last snapshot
@@ -346,13 +346,21 @@ public abstract class Aggregate<I,
     final BatchDispatchOutcome apply(List<Event> events, int snapshotTrigger) {
         var versionSequence = new VersionSequence(version());
         var versionedEvents = versionSequence.update(events);
-
+        uncommittedHistory.startTracking(snapshotTrigger);
         var result = play(versionedEvents);
-        if (result.getSuccessful()) {
-            uncommittedHistory.track(versionedEvents, snapshotTrigger);
-        }
-
+        uncommittedHistory.stopTracking();
         return result;
+    }
+
+    /**
+     * A callback telling that the event has been played on this aggregate in scope
+     * of a transaction.
+     *
+     * <p>If this event is new in the aggregate history (e.g. it's not already stored), it is
+     * recorded as a part of the aggregate's {@link UncommittedHistory}.
+     */
+    final void onAfterEventPlayed(Event event, DispatchOutcome outcome) {
+        uncommittedHistory.track(event, outcome);
     }
 
     /**
@@ -386,7 +394,7 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Tells if there any uncommitted events.
+     * Tells if there are any uncommitted events.
      */
     boolean hasUncommittedEvents() {
         return uncommittedHistory.hasEvents();
@@ -475,7 +483,7 @@ public abstract class Aggregate<I,
     /**
      * Creates an iterator of the aggregate event history with reverse traversal.
      *
-     * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
+     * <p>The records are returned sorted by timestamp in descending order (from newer to older).
      *
      * <p>The iterator is empty if there's no history for the aggregate.
      *
