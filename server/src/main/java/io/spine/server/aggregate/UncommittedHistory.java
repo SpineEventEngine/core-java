@@ -62,7 +62,7 @@ import static java.util.stream.Collectors.toList;
  *     <li>all new events have been played on the aggregate instance
  *     and the tracking {@linkplain #stopTracking() explicitly deactivated};</li>
  *     <li>the history {@linkplain #track(EventEnvelope, DispatchOutcome) received} an event
- *     which has non-successful outcome.</li>
+ *     with non-successful outcome.</li>
  * </ul>
  *
  * @see Aggregate#apply(List, int) on activation and deactivation of event tracking

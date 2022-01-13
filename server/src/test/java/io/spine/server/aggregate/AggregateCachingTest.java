@@ -85,17 +85,18 @@ class AggregateCachingTest {
         void singleEvent() throws Exception {
             var storedEvents = dispatchInBatch(
                     employ(jack, 250),
-                    decreaseSalary(jack, 15),
+                    increaseSalary(jack, 15),
 
                     // This command emits the event that will corrupt the aggregate's state
                     // as no employee can be paid less than 200.
+                    // This event should NOT be stored.
                     decreaseSalary(jack, 500),
 
                     increaseSalary(jack, 500)
             );
             assertEvents(storedEvents,
                          NewEmployed.class,
-                         SalaryDecreased.class,
+                         SalaryIncreased.class,
                          SalaryIncreased.class
             );
         }
@@ -109,6 +110,7 @@ class AggregateCachingTest {
 
                     // This command emits three events. Second one will corrupt
                     // the aggregate's state as no employee can be paid less than 200.
+                    // Only first of them should be stored.
                     decreaseSalaryThreeTimes(jack, 200),
 
                     increaseSalary(jack, 100)
