@@ -42,7 +42,7 @@ message Employee {
 
   EmployeeId id = 1 [(required) = true];
 
-  // Employee's remuneration for their work.
+  // Employee's compensation for their work.
   //
   // Let's take 200$ as the lowest compensation
   // which employers can legally pay their employees.
