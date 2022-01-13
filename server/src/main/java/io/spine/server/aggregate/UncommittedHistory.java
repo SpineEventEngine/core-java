@@ -61,7 +61,7 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *     <li>all new events have been played on the aggregate instance
  *     and the tracking {@linkplain #stopTracking() explicitly deactivated};</li>
- *     <li>the history {@linkplain #track(Event, DispatchOutcome) received} an event
+ *     <li>the history {@linkplain #track(EventEnvelope, DispatchOutcome) received} an event
  *     which has non-successful outcome.</li>
  * </ul>
  *
@@ -92,7 +92,7 @@ final class UncommittedHistory {
     /**
      * Enables the tracking of events.
      *
-     * <p>All events {@linkplain #track(Event, DispatchOutcome) sent} to this instance
+     * <p>All events {@linkplain #track(EventEnvelope, DispatchOutcome) sent} to this instance
      * will now be counted as new and uncommitted events in the aggregate's history.
      *
      * @param snapshotTrigger
@@ -106,7 +106,7 @@ final class UncommittedHistory {
     /**
      * Stops the tracking of the events.
      *
-     * <p>All the events {@linkplain #track(Event, DispatchOutcome) sent to the tracking}
+     * <p>All the events {@linkplain #track(EventEnvelope, DispatchOutcome) sent to the tracking}
      * will be counted as the events already present in the aggregate storage.
      */
     void stopTracking() {
@@ -127,16 +127,16 @@ final class UncommittedHistory {
      * <p>If the event has non-successful outcome, the history will
      * {@linkplain #stopTracking() stop tracking}, the erroneous event will not be remembered.
      *
-     * @param event
+     * @param envelope
      *         an event to track
      * @param outcome
      *         an outcome of dispatching
      */
-    void track(Event event, DispatchOutcome outcome) {
+    void track(EventEnvelope envelope, DispatchOutcome outcome) {
         if (!outcome.hasSuccess()) {
             stopTracking();
         }
-        if (!enabled || event.isRejection()) {
+        if (!enabled || envelope.isRejection()) {
             return;
         }
 
@@ -144,7 +144,7 @@ final class UncommittedHistory {
                        "The snapshot trigger must be set" +
                                " to track the events applied to an `Aggregate`.");
 
-        doTrack(event);
+        doTrack(envelope.outerObject());
     }
 
     @SuppressWarnings("ConstantConditions" /* Preconditions are checked right before the call. */)

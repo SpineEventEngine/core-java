@@ -359,7 +359,7 @@ public abstract class Aggregate<I,
      * <p>If this event is new in the aggregate history (e.g. it's not already stored), it is
      * recorded as a part of the aggregate's {@link UncommittedHistory}.
      */
-    final void onAfterEventPlayed(Event event, DispatchOutcome outcome) {
+    final void onAfterEventPlayed(EventEnvelope event, DispatchOutcome outcome) {
         uncommittedHistory.track(event, outcome);
     }
 
