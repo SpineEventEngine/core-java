@@ -127,10 +127,11 @@ final class UncommittedHistory {
      * <p>If the event has non-successful outcome, the history will
      * {@linkplain #stopTracking() stop tracking}, the erroneous event will not be remembered.
      *
-     * <p>If the event was not dispatched successfully, the history {@linkplain #stopTracking() stops}
-     * the event tracking. The erroneous event itself is also not tracked. The reason for this
-     * is that the state of the corresponding aggregate most likely became broken after dispatching
-     * this event. And therefore it is no longer available for further interaction.
+     * <p>If the event was not dispatched successfully, the history
+     * {@linkplain #stopTracking() stops} the event tracking. The erroneous event itself
+     * is also not tracked. The reason for this is that the state of the corresponding aggregate
+     * most likely became broken after dispatching this event. And therefore it is no longer
+     * available for further interaction.
      *
      * @param envelope
      *         an event to track
@@ -152,7 +153,7 @@ final class UncommittedHistory {
         doTrack(envelope.outerObject());
     }
 
-    @SuppressWarnings("ConstantConditions" /* `snapshotTrigger` is nullable, but it is checked in `track()` */)
+    @SuppressWarnings("ConstantConditions" /* `snapshotTrigger` is checked in `track()` */)
     private void doTrack(Event event) {
         currentSegment.add(event);
 
