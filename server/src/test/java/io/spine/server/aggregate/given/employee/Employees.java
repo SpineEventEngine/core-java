@@ -24,8 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.salary;
+package io.spine.server.aggregate.given.employee;
 
+import io.spine.server.aggregate.given.salary.EmployeeId;
 import io.spine.server.aggregate.given.salary.command.DecreaseSalary;
 import io.spine.server.aggregate.given.salary.command.DecreaseSalaryThreeTimes;
 import io.spine.server.aggregate.given.salary.command.Employ;

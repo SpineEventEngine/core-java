@@ -24,38 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.salary;
+/**
+ * Test environment classes for the {@link io.spine.server.aggregate.AggregateCachingTest}.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.aggregate.given.employee;
 
-import com.google.protobuf.Message;
-import io.spine.server.ContextSpec;
-import io.spine.server.delivery.InboxStorage;
-import io.spine.server.storage.RecordSpec;
-import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
+import com.google.errorprone.annotations.CheckReturnValue;
 
-public class PreparedStorageFactory implements StorageFactory {
-
-    /**
-     * Returns in-memory {@code StorageFactory} with the custom {@code InboxStorage}.
-     */
-    public static StorageFactory with(InboxStorage inboxStorage) {
-        return new PreparedStorageFactory() {
-            @Override
-            public InboxStorage createInboxStorage(boolean multitenant) {
-                return inboxStorage;
-            }
-        };
-    }
-
-    @Override
-    public <I, R extends Message> RecordStorage<I, R>
-    createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> spec) {
-        return InMemoryStorageFactory.newInstance().createRecordStorage(context, spec);
-    }
-
-    @Override
-    public void close() throws Exception {
-        // NO OP
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

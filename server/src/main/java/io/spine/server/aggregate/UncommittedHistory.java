@@ -118,7 +118,7 @@ final class UncommittedHistory {
      * Tracks the event dispatched to the Aggregate's applier.
      *
      * <p>If the tracking is not {@linkplain #startTracking(int) started}, the event is considered
-     * old and such as not requiring storage and tracking. In this case, this method
+     * an old one and such as not requiring storage and tracking. In this case, this method
      * does nothing.
      *
      * <p>If the number of events since the last snapshot equals or exceeds the snapshot trigger,
@@ -126,6 +126,11 @@ final class UncommittedHistory {
      *
      * <p>If the event has non-successful outcome, the history will
      * {@linkplain #stopTracking() stop tracking}, the erroneous event will not be remembered.
+     *
+     * <p>If the event was not dispatched successfully, the history {@linkplain #stopTracking() stops}
+     * the event tracking. The erroneous event itself is also not tracked. The reason for this
+     * is that the state of the corresponding aggregate most likely became broken after dispatching
+     * this event. And therefore it is no longer available for further interaction.
      *
      * @param envelope
      *         an event to track

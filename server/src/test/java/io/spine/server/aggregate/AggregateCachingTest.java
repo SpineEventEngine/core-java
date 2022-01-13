@@ -30,16 +30,14 @@ import io.spine.base.CommandMessage;
 import io.spine.core.Event;
 import io.spine.environment.Tests;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.aggregate.given.salary.Employee;
-import io.spine.server.aggregate.given.salary.EmployeeAgg;
+import io.spine.server.aggregate.given.employee.EmployeeAgg;
 import io.spine.server.aggregate.given.salary.EmployeeId;
-import io.spine.server.aggregate.given.salary.PreparedInboxStorage;
-import io.spine.server.aggregate.given.salary.PreparedStorageFactory;
-import io.spine.server.aggregate.given.salary.event.NewEmployed;
+import io.spine.server.aggregate.given.employee.PreparedInboxStorage;
+import io.spine.server.aggregate.given.employee.PreparedStorageFactory;
+import io.spine.server.aggregate.given.salary.event.PersonEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.delivery.DeliveryStrategy;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,10 +48,10 @@ import java.util.List;
 
 import static io.spine.server.aggregate.given.AggregateCachingTestEnv.*;
 import static io.spine.server.aggregate.given.salary.EmployeeId.*;
-import static io.spine.server.aggregate.given.salary.Employees.decreaseSalary;
-import static io.spine.server.aggregate.given.salary.Employees.decreaseSalaryThreeTimes;
-import static io.spine.server.aggregate.given.salary.Employees.employ;
-import static io.spine.server.aggregate.given.salary.Employees.increaseSalary;
+import static io.spine.server.aggregate.given.employee.Employees.decreaseSalary;
+import static io.spine.server.aggregate.given.employee.Employees.decreaseSalaryThreeTimes;
+import static io.spine.server.aggregate.given.employee.Employees.employ;
+import static io.spine.server.aggregate.given.employee.Employees.increaseSalary;
 
 /**
  * Tests interaction of `Aggregate` with `UncommittedHistory`.
@@ -95,7 +93,7 @@ class AggregateCachingTest {
                     increaseSalary(jack, 500)
             );
             assertEvents(storedEvents,
-                         NewEmployed.class,
+                         PersonEmployed.class,
                          SalaryIncreased.class,
                          SalaryIncreased.class
             );
@@ -116,7 +114,7 @@ class AggregateCachingTest {
                     increaseSalary(jack, 100)
             );
             assertEvents(storedEvents,
-                         NewEmployed.class,
+                         PersonEmployed.class,
                          SalaryIncreased.class,
                          SalaryDecreased.class,
                          SalaryIncreased.class
@@ -127,7 +125,6 @@ class AggregateCachingTest {
             var shardIndex = DeliveryStrategy.newIndex(0, 1);
             var inboxStorage = PreparedInboxStorage.withCommands(
                     shardIndex,
-                    TypeUrl.of(Employee.class),
                     commands
             );
 

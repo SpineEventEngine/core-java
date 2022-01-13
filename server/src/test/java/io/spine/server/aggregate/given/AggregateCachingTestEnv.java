@@ -36,7 +36,7 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class AggregateCachingTestEnv {
+public final class AggregateCachingTestEnv {
 
     private AggregateCachingTestEnv() {
     }

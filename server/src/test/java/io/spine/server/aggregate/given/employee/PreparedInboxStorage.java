@@ -24,12 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.salary;
+package io.spine.server.aggregate.given.employee;
 
 import io.spine.base.CommandMessage;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
+import io.spine.core.Command;
 import io.spine.server.aggregate.given.aggregate.AggregateTestEnv;
+import io.spine.server.aggregate.given.salary.Employee;
+import io.spine.server.aggregate.given.salary.EmployeeId;
 import io.spine.server.delivery.InboxId;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.InboxMessage;
@@ -46,40 +49,45 @@ import java.util.Arrays;
 
 import static io.spine.base.Identifier.pack;
 
-public class PreparedInboxStorage extends InboxStorage {
+/**
+ * In-memory {@code InboxStorage} which has messages inside right after being initialized.
+ */
+public final class PreparedInboxStorage extends InboxStorage {
 
     private PreparedInboxStorage() {
         super(InMemoryStorageFactory.newInstance(), false);
     }
 
     /**
-     * Returns in-memory {@code InboxStorage} which is pre-filled with the passed messages.
+     * Returns in-memory {@code InboxStorage} which is pre-filled with the passed commands.
      */
     public static InboxStorage
-    withCommands(ShardIndex shardIndex, TypeUrl target, CommandMessage... messages) {
-
-        var routing = CommandRouting.newInstance(EmployeeId.class);
+    withCommands(ShardIndex shardIndex, CommandMessage... messages) {
         var storage = new PreparedInboxStorage();
-
         Arrays.stream(messages)
                 .map(AggregateTestEnv::command)
-                .forEach(cmd -> {
-                    var inboxSignalId = InboxSignalId.newBuilder()
-                            .setValue(cmd.messageId().getId().getValue().toString())
-                            .vBuild();
-                    var inboxMessage = InboxMessage.newBuilder()
-                            .setId(InboxMessageMixin.generateIdWith(shardIndex))
-                            .setSignalId(inboxSignalId)
-                            .setInboxId(wrap(routing.apply(cmd.enclosedMessage(), cmd.getContext()), target))
-                            .setCommand(cmd)
-                            .setLabel(InboxLabel.HANDLE_COMMAND)
-                            .setWhenReceived(Time.currentTime())
-                            .setStatus(InboxMessageStatus.TO_DELIVER)
-                            .vBuild();
-                    storage.write(inboxMessage);
-                });
-
+                .forEach(cmd -> writeToStorage(shardIndex, storage, cmd));
         return storage;
+    }
+
+    private static void writeToStorage(ShardIndex shardIndex, PreparedInboxStorage storage, Command cmd) {
+        var routing = CommandRouting.newInstance(EmployeeId.class);
+        var target = TypeUrl.of(Employee.class);
+
+        var inboxSignalId = InboxSignalId.newBuilder()
+                .setValue(cmd.messageId().getId().getValue().toString())
+                .vBuild();
+        var inboxMessage = InboxMessage.newBuilder()
+                .setId(InboxMessageMixin.generateIdWith(shardIndex))
+                .setSignalId(inboxSignalId)
+                .setInboxId(wrap(routing.apply(cmd.enclosedMessage(), cmd.getContext()), target))
+                .setCommand(cmd)
+                .setLabel(InboxLabel.HANDLE_COMMAND)
+                .setWhenReceived(Time.currentTime())
+                .setStatus(InboxMessageStatus.TO_DELIVER)
+                .vBuild();
+
+        storage.write(inboxMessage);
     }
 
     private static <T> InboxId wrap(T id, TypeUrl target) {

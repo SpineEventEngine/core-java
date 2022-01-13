@@ -23,21 +23,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.aggregate.given.salary;
+package io.spine.server.aggregate.given.employee;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.aggregate.given.salary.Employee;
+import io.spine.server.aggregate.given.salary.EmployeeId;
 import io.spine.server.aggregate.given.salary.command.DecreaseSalary;
 import io.spine.server.aggregate.given.salary.command.DecreaseSalaryThreeTimes;
 import io.spine.server.aggregate.given.salary.command.Employ;
 import io.spine.server.aggregate.given.salary.command.IncreaseSalary;
-import io.spine.server.aggregate.given.salary.event.NewEmployed;
+import io.spine.server.aggregate.given.salary.event.PersonEmployed;
 import io.spine.server.aggregate.given.salary.event.SalaryDecreased;
 import io.spine.server.aggregate.given.salary.event.SalaryIncreased;
 import io.spine.server.command.Assign;
 import io.spine.server.tuple.Triplet;
 
-import static io.spine.server.aggregate.given.salary.Employees.salaryDecreased;
+import static io.spine.server.aggregate.given.employee.Employees.salaryDecreased;
 
 public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builder> {
 
@@ -46,15 +48,15 @@ public class EmployeeAgg extends Aggregate<EmployeeId, Employee, Employee.Builde
     }
 
     @Assign
-    NewEmployed handle(Employ cmd) {
-        return NewEmployed.newBuilder()
+    PersonEmployed handle(Employ cmd) {
+        return PersonEmployed.newBuilder()
                 .setEmployee(cmd.getEmployee())
                 .setSalary(cmd.getSalary())
                 .vBuild();
     }
 
     @Apply
-    private void on(NewEmployed event) {
+    private void on(PersonEmployed event) {
         builder()
                 .setId(event.getEmployee())
                 .setSalary(event.getSalary());

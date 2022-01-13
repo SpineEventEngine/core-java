@@ -25,32 +25,27 @@
  */
 syntax = "proto3";
 
-package spine.test.aggregate;
+package spine.test.aggregate.employee;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.aggregate.given.salary.command";
+option java_package = "io.spine.server.aggregate.given.employee";
 option java_multiple_files = true;
 
-import "spine/test/aggregate/salary/employee.proto";
+import "spine/test/aggregate/employee/employee.proto";
 
-message Employ {
+message PersonEmployed {
     EmployeeId employee = 1 [(required) = true];
     int32 salary = 2 [(required) = true];
 }
 
-message IncreaseSalary {
+message SalaryIncreased {
     EmployeeId employee = 1 [(required) = true];
     int32 amount = 2 [(required) = true];
 }
 
-message DecreaseSalary {
-    EmployeeId employee = 1 [(required) = true];
-    int32 amount = 2 [(required) = true];
-}
-
-message DecreaseSalaryThreeTimes {
+message SalaryDecreased {
     EmployeeId employee = 1 [(required) = true];
     int32 amount = 2 [(required) = true];
 }
