@@ -152,7 +152,7 @@ final class UncommittedHistory {
         doTrack(envelope.outerObject());
     }
 
-    @SuppressWarnings("ConstantConditions" /* Preconditions are checked right before the call. */)
+    @SuppressWarnings("ConstantConditions" /* `snapshotTrigger` is nullable, but it is checked in `track()` */)
     private void doTrack(Event event) {
         currentSegment.add(event);
 
