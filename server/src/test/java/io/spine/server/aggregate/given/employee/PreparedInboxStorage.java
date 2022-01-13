@@ -31,8 +31,6 @@ import io.spine.base.Time;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
 import io.spine.server.aggregate.given.aggregate.AggregateTestEnv;
-import io.spine.server.aggregate.given.salary.Employee;
-import io.spine.server.aggregate.given.salary.EmployeeId;
 import io.spine.server.delivery.InboxId;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.InboxMessage;
