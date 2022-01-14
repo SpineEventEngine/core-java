@@ -24,37 +24,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given;
+package io.spine.server.aggregate;
 
-import io.spine.base.EventMessage;
-import io.spine.core.Event;
+import io.spine.core.Command;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
-import io.spine.server.entity.Repository;
 
 import java.util.List;
 
-import static com.google.common.truth.Truth.assertThat;
+/**
+ * Tests how {@code Aggregate} handles the case when one of events, emitted by a command,
+ * corrupts the {@code Aggregate}'s state.
+ *
+ * @see AbstractAggregateResilienceTest
+ * @see CachedAggregateResilienceTest
+ */
+final class AggregateResilienceTest extends AbstractAggregateResilienceTest {
 
-public final class AggregateCachingTestEnv {
-
-    private AggregateCachingTestEnv() {
-    }
-
-    public static BoundedContext createBcWith(Repository<?, ?> repository) {
-        return BoundedContextBuilder.assumingTests()
-                                    .add(repository)
-                                    .build();
-    }
-
-    @SafeVarargs
-    public static void assertEvents(List<Event> events, Class<? extends EventMessage>... types) {
-        assertThat(events.size()).isEqualTo(types.length);
-        for (var i = 0; i < types.length; i++) {
-            assertThat(events.get(i)
-                             .enclosedMessage()
-                             .getClass())
-                    .isEqualTo(types[i]);
+    /**
+     * @inheritDoc
+     *
+     * This method dispatches the passed commands directly to the context's
+     * {@code CommandBus} <i>one by one</i>.
+     */
+    @Override
+    void dispatch(List<Command> commands, BoundedContext context) {
+        var commandBus = context.commandBus();
+        for (var cmd : commands) {
+            commandBus.post(cmd, StreamObservers.noOpObserver());
         }
     }
 }

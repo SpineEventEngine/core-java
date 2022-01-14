@@ -26,11 +26,9 @@
 
 package io.spine.server.aggregate.given.employee;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.Time;
 import io.spine.client.EntityId;
 import io.spine.core.Command;
-import io.spine.server.aggregate.given.aggregate.AggregateTestEnv;
 import io.spine.server.delivery.InboxId;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.InboxMessage;
@@ -43,32 +41,25 @@ import io.spine.server.route.CommandRouting;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.type.TypeUrl;
 
-import java.util.Arrays;
-
 import static io.spine.base.Identifier.pack;
 
 /**
- * In-memory {@code InboxStorage} which has messages inside right after being initialized.
+ * In-memory {@code InboxStorage} which allows putting commands there directly.
  */
 public final class PreparedInboxStorage extends InboxStorage {
 
-    private PreparedInboxStorage() {
+    public PreparedInboxStorage() {
         super(InMemoryStorageFactory.newInstance(), false);
     }
 
     /**
-     * Returns in-memory {@code InboxStorage} which is pre-filled with the passed commands.
+     * Puts the passed commands into the storage.
      */
-    public static InboxStorage
-    withCommands(ShardIndex shardIndex, CommandMessage... messages) {
-        var storage = new PreparedInboxStorage();
-        Arrays.stream(messages)
-                .map(AggregateTestEnv::command)
-                .forEach(cmd -> writeToStorage(shardIndex, storage, cmd));
-        return storage;
+    public void write(ShardIndex shardIndex, Iterable<Command> commands) {
+        commands.forEach(cmd -> write(shardIndex, cmd));
     }
 
-    private static void writeToStorage(ShardIndex shardIndex, PreparedInboxStorage storage, Command cmd) {
+    private void write(ShardIndex shardIndex, Command cmd) {
         var routing = CommandRouting.newInstance(EmployeeId.class);
         var target = TypeUrl.of(Employee.class);
 
@@ -85,7 +76,7 @@ public final class PreparedInboxStorage extends InboxStorage {
                 .setStatus(InboxMessageStatus.TO_DELIVER)
                 .vBuild();
 
-        storage.write(inboxMessage);
+        write(inboxMessage);
     }
 
     private static <T> InboxId wrap(T id, TypeUrl target) {
