@@ -49,7 +49,6 @@ import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.trace.TracerFactory;
 import io.spine.system.server.SystemClient;
@@ -400,7 +399,6 @@ public abstract class BoundedContext implements Closeable, Logging {
      *
      * <p>This method performs the following:
      * <ol>
-     *     <li>Closes associated {@link StorageFactory}.
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
      *     <li>Closes {@link IntegrationBroker}.
