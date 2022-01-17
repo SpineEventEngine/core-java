@@ -26,7 +26,9 @@
 
 package io.spine.server.aggregate;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.spine.base.CommandMessage;
+import io.spine.client.ResponseFormat;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.grpc.MemoizingObserver;
@@ -36,13 +38,14 @@ import io.spine.server.aggregate.given.aggregate.AggregateTestEnv;
 import io.spine.server.aggregate.given.employee.Employee;
 import io.spine.server.aggregate.given.employee.EmployeeAgg;
 import io.spine.server.aggregate.given.employee.EmployeeId;
-import io.spine.server.aggregate.given.employee.ResultedEvents;
+import io.spine.server.aggregate.given.employee.CommandExhaust;
 import io.spine.server.aggregate.given.employee.PersonEmployed;
 import io.spine.server.aggregate.given.employee.SalaryDecreased;
 import io.spine.server.aggregate.given.employee.SalaryIncreased;
 import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.aggregate.given.AbstractAggregateResilienceTestEnv.assertEvents;
 import static io.spine.server.aggregate.given.AbstractAggregateResilienceTestEnv.eventTypes;
 import static io.spine.server.aggregate.given.employee.EmployeeId.generate;
@@ -79,6 +83,7 @@ abstract class AbstractAggregateResilienceTest {
         context = BoundedContextBuilder.assumingTests()
                                        .add(repository)
                                        .build();
+        repository.aggregateStorage().enableStateQuerying();
     }
 
     @AfterEach
@@ -93,7 +98,7 @@ abstract class AbstractAggregateResilienceTest {
         @Test
         @DisplayName("a single event")
         void singleEvent() {
-            var resultedEvents = dispatch(
+            dispatch(
                     employ(jack, 250),
                     increaseSalary(jack, 15),
 
@@ -104,19 +109,24 @@ abstract class AbstractAggregateResilienceTest {
 
                     increaseSalary(jack, 500)
             );
-            var expected = eventTypes(
+
+            var exhaust = collectExhaust();
+            var expectedEvents = eventTypes(
                     PersonEmployed.class,
                     SalaryIncreased.class,
                     SalaryIncreased.class
             );
-            assertEvents(resultedEvents.stored(), expected);
-            assertEvents(resultedEvents.posted(), expected);
+
+            assertEvents(exhaust.storedEvents(), expectedEvents);
+            assertEvents(exhaust.postedEvents(), expectedEvents);
+            assertThat(exhaust.state().getSalary())
+                 .isEqualTo(250 + 15 + 500);
         }
 
         @Test
         @DisplayName("multiple events")
         void multipleEvents() {
-            var resultedEvents = dispatch(
+            dispatch(
                     employ(jack, 250),
                     increaseSalary(jack, 200),
 
@@ -127,35 +137,52 @@ abstract class AbstractAggregateResilienceTest {
 
                     increaseSalary(jack, 100)
             );
-            var expected = eventTypes(
+
+            var exhaust = collectExhaust();
+            var expectedEvents = eventTypes(
                     PersonEmployed.class,
                     SalaryIncreased.class,
                     SalaryDecreased.class,
                     SalaryIncreased.class
             );
-            assertEvents(resultedEvents.stored(), expected);
-            assertEvents(resultedEvents.posted(), expected);
+
+            assertEvents(exhaust.storedEvents(), expectedEvents);
+            assertEvents(exhaust.postedEvents(), expectedEvents);
+            assertThat(exhaust.state().getSalary())
+                    .isEqualTo(250 + 200 - 200 + 100);
         }
 
-        private ResultedEvents dispatch(CommandMessage... messages) {
+        private void dispatch(CommandMessage... messages) {
             var commands = Arrays.stream(messages)
                     .map(AggregateTestEnv::command)
                     .collect(Collectors.toList());
-
             AbstractAggregateResilienceTest.this.dispatch(commands, context);
+        }
 
+        private CommandExhaust collectExhaust() {
             var observer = new MemoizingObserver<Event>();
             context.eventBus()
                    .eventStore()
                    .read(EventStreamQuery.getDefaultInstance(), observer);
+            var postedEvents = observer.responses();
 
-            var posted = observer.responses();
-            var stored = repository.aggregateStorage()
-                                         .read(jack)
-                                         .orElseThrow()
-                                         .getEventList();
+            var storedEvents = repository.aggregateStorage()
+                                   .read(jack)
+                                   .orElseThrow()
+                                   .getEventList();
 
-            return new ResultedEvents(stored, posted);
+            var rawState = repository.aggregateStorage()
+                                         .readStates(ResponseFormat.getDefaultInstance())
+                                         .next()
+                                         .getState();
+
+            try {
+                var state = rawState.unpack(Employee.class);
+                return new CommandExhaust(storedEvents, postedEvents, state);
+
+            } catch (InvalidProtocolBufferException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 

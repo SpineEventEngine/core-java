@@ -32,33 +32,43 @@ import io.spine.core.Event;
 import java.util.List;
 
 /**
- * Resulted events of a {@code Command} dispatching.
+ * Result of a {@code Command} dispatching.
  *
- * <p>Consists of events that were:
- *
+ * <p>Consists of:
  * <ul>
- *     <li>stored to {@code AggregateStorage};</li>
- *     <li>posted to {@code EventBus}.</li>
+ *     <li>events stored to {@code AggregateStorage};</li>
+ *     <li>events posted to {@code EventBus};</li>
+ *     <li>updated {@code Aggregate}'s state.</li>
  * </ul>
  *
- * A healthy {@code Aggregate} usually stores and posts the same set of events.
- * Thus, both lists should be equal.
+ * <p>A healthy {@code Aggregate} usually stores and posts the same set of events withing a command
+ * dispatching. That leads to updating of its state.
  */
-public final class ResultedEvents {
+public final class CommandExhaust {
 
     private final ImmutableList<Event> stored;
     private final ImmutableList<Event> posted;
+    private final Employee state;
 
-    public ResultedEvents(List<Event> stored, List<Event> posted) {
-        this.stored = ImmutableList.copyOf(stored);
-        this.posted = ImmutableList.copyOf(posted);
+    public CommandExhaust(
+            List<Event> storedEvents,
+            List<Event> postedEvents,
+            Employee state
+    ) {
+        this.stored = ImmutableList.copyOf(storedEvents);
+        this.posted = ImmutableList.copyOf(postedEvents);
+        this.state = state;
     }
 
-    public List<Event> stored() {
+    public List<Event> storedEvents() {
         return stored;
     }
 
-    public List<Event> posted() {
+    public List<Event> postedEvents() {
         return posted;
+    }
+
+    public Employee state() {
+        return state;
     }
 }
