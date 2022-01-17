@@ -69,10 +69,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *     its further querying.
  * </ol>
  *
- * <h3>Storing Aggregate events</h3>
+ * <h1>Storing Aggregate events</h1>
  *
  * <p>Each Aggregate is an event-sourced Entity. To load an Aggregate instance, one plays all
- * of the events emitted by it, eventually obtaining the last known state. While the Event Store
+ * the events emitted by it, eventually obtaining the last known state. While the Event Store
  * of a Bounded Context, to which some Aggregate belongs, stores all domain events, using it
  * for the sake of loading an Aggregate is inefficient in most cases. An overwhelming number of
  * the domain events emitted in a Bounded Context and the restrictions applied by an underlying
@@ -91,7 +91,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * created. It persists data as Protobuf message records in its pre-configured
  * {@link io.spine.server.storage.RecordStorage RecordStorage}.
  *
- * <h3>Storing and querying the latest Aggregate states</h3>
+ * <h1>Storing and querying the latest Aggregate states</h1>
  *
  * <p>End-users of the framework are able to set the visibility level for each Aggregate state
  * by using an {@linkplain io.spine.server.entity.EntityVisibility (entity).visibility} option
@@ -108,7 +108,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>However, even if the Aggregate visibility is set to
  * {@link io.spine.option.EntityOption.Visibility#NONE NONE}, the storage still persists
  * the essential bits of Aggregate as-an-Entity. Namely, its identifier, its lifecycle flags
- * and version. Such a behavior allows to speed up the execution of calls such
+ * and version. Such a behavior allows speeding up the execution of calls such
  * as {@linkplain #index() obtaining an index} of Aggregate identifiers, which otherwise would
  * involve major scans of event storage, with {@code DISTINCT} group operation applied.
  *
@@ -208,7 +208,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
 
     /**
      * Forms and returns an {@link AggregateHistory} based on the
-     * {@linkplain #historyBackward(Object, int)}  aggregate history}.
+     * {@linkplain #historyBackward(Object, int) aggregate history}.
      *
      * @param id
      *         the identifier of the aggregate for which to return the history
