@@ -34,19 +34,25 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 
 /**
- * Environment for {@link io.spine.server.aggregate.AggregateResilienceTest AggregateResilienceTest}.
+ * Environment for {@link io.spine.server.aggregate.AbstractAggregateResilienceTest}.
  */
 public final class AbstractAggregateResilienceTestEnv {
 
     private AbstractAggregateResilienceTestEnv() {
     }
 
+    /**
+     * Wraps the "varargs-passed" event messages into a {@code List}.
+     */
     @SafeVarargs
     public static List<Class<? extends EventMessage>>
     eventTypes(Class<? extends EventMessage>... types) {
         return List.of(types);
     }
 
+    /**
+     * Assert that the passed events correspond to the passed types.
+     */
     public static void assertEvents(List<Event> events, List<Class<? extends EventMessage>> types) {
         assertThat(events.size()).isEqualTo(types.size());
         for (var i = 0; i < types.size(); i++) {

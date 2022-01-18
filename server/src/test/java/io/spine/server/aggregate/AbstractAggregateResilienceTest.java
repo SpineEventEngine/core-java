@@ -68,6 +68,7 @@ import static io.spine.server.aggregate.given.employee.Employees.increaseSalary;
  * @see AggregateResilienceTest
  * @see CachedAggregateResilienceTest
  */
+@DisplayName("Abstract resilient `Aggregate` should")
 abstract class AbstractAggregateResilienceTest {
 
     private final EmployeeId jack = generate();
@@ -93,7 +94,7 @@ abstract class AbstractAggregateResilienceTest {
     class NotStoreAndPostEventsBundle {
 
         @Nested
-        @DisplayName("when a faulty command produced")
+        @DisplayName("when a faulty command emitted")
         class WhenCommandEmitted {
 
             @Test

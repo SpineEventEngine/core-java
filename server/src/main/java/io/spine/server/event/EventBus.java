@@ -195,7 +195,7 @@ public final class EventBus
      * Posts the event for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Signal, StreamObserver)} parent method},
+     * {@linkplain io.spine.server.bus.Bus#post(Signal, StreamObserver) parent method},
      * but does not require any response observer.
      *
      * @param event the event to be handled
@@ -209,10 +209,10 @@ public final class EventBus
      * Posts the events for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method}
+     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver) parent method}
      * but does not require any response observer.
      *
-     * <p>This method should be used if the callee does not care about the events acknowledgement.
+     * <p>This method should be used if the callee does not care about the events' acknowledgement.
      *
      * @param events the events to be handled
      * @see io.spine.server.bus.Bus#post(Signal, StreamObserver)

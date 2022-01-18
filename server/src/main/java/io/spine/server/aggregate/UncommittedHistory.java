@@ -44,7 +44,7 @@ import static java.util.stream.Collectors.toList;
  * {@linkplain #onAggregateRestored(AggregateHistory) remembers} the event count
  * after the last snapshot.
  *
- * <p>If during the tracking the number of events since the last snapshot exceeds
+ * <p>If during the dispatching of events the number of events since the last snapshot exceeds
  * the snapshot trigger, a snapshot is created and remembered as a part of uncommitted history.
  *
  * @see Aggregate#apply(List, int) remembering successfully applied events
@@ -66,15 +66,6 @@ final class UncommittedHistory {
      */
     UncommittedHistory(Supplier<Snapshot> makeSnapshot) {
         this.makeSnapshot = makeSnapshot;
-    }
-
-    /**
-     * Records the history loaded from the aggregate storage.
-     *
-     * <p>This is only required in order to know the number of events since the last snapshot.
-     */
-    void onAggregateRestored(AggregateHistory history) {
-        this.eventCountAfterLastSnapshot = history.getEventCount();
     }
 
     /**
@@ -102,13 +93,6 @@ final class UncommittedHistory {
         }
     }
 
-    private static AggregateHistory historyFrom(List<Event> events, Snapshot snapshot) {
-        return AggregateHistory.newBuilder()
-                .addAllEvent(events)
-                .setSnapshot(snapshot)
-                .vBuild();
-    }
-
     /**
      * Composes and obtains the collected uncommitted history.
      *
@@ -123,12 +107,6 @@ final class UncommittedHistory {
             builder.add(lastSegment);
         }
         return builder.build();
-    }
-
-    private static AggregateHistory historyFrom(List<Event> events) {
-        return AggregateHistory.newBuilder()
-                .addAllEvent(events)
-                .vBuild();
     }
 
     /**
@@ -155,5 +133,27 @@ final class UncommittedHistory {
     void commit() {
         historySegments.clear();
         currentSegment.clear();
+    }
+
+    /**
+     * Records the history loaded from the aggregate storage.
+     *
+     * <p>This is only required in order to know the number of events since the last snapshot.
+     */
+    void onAggregateRestored(AggregateHistory history) {
+        this.eventCountAfterLastSnapshot = history.getEventCount();
+    }
+
+    private static AggregateHistory historyFrom(List<Event> events, Snapshot snapshot) {
+        return AggregateHistory.newBuilder()
+                .addAllEvent(events)
+                .setSnapshot(snapshot)
+                .vBuild();
+    }
+
+    private static AggregateHistory historyFrom(List<Event> events) {
+        return AggregateHistory.newBuilder()
+                .addAllEvent(events)
+                .vBuild();
     }
 }

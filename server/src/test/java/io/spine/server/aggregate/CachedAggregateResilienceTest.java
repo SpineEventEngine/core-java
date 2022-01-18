@@ -44,11 +44,11 @@ import java.util.List;
  * Tests how <i>cached</i> {@code Aggregate} handles the case when one of events,
  * emitted by a command, corrupts the {@code Aggregate}'s state.
  *
- * An {@code Aggregate} is cached when multiple messages are dispatched from `Inbox` at once.
+ * <p>An {@code Aggregate} is cached when multiple messages are dispatched from `Inbox` at once.
  * Under the hood, they are processed as a "batch", which triggers the aggregate
  * to be cached for their processing.
  *
- * This class uses the custom {@linkplain PreparedInboxStorage InboxStorage} which allow
+ * <p>This class uses the custom {@linkplain PreparedInboxStorage InboxStorage} which allow
  * writing messages there directly. This storage is "fed" to the delivery which then is triggered
  * to perform dispatching.
  *
@@ -82,7 +82,7 @@ final class CachedAggregateResilienceTest extends AbstractAggregateResilienceTes
     /**
      * @inheritDoc
      *
-     * This method fills the custom {@linkplain PreparedInboxStorage InboxStorage} with the passed
+     * <p>This method fills the custom {@linkplain PreparedInboxStorage InboxStorage} with the passed
      * commands and then runs delivery. The commands, dispatched this way, will be processed
      * withing a single "batch" which would cause an {@code Aggregate} to be cached.
      */

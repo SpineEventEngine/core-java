@@ -41,7 +41,7 @@ import java.util.List;
  *     <li>updated {@code Aggregate}'s state.</li>
  * </ul>
  *
- * <p>A healthy {@code Aggregate} usually stores and posts the same set of events withing a command
+ * <p>A healthy {@code Aggregate} usually stores and posts the same set of events within
  * dispatching. That consequently causes its state to be updated.
  */
 public final class DispatchExhaust {

@@ -255,7 +255,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * <p>The default routing uses {@linkplain io.spine.core.EventContext#getProducerId()
      * producer ID} of the event as the ID of the target aggregate.
      *
-     * <p>This default routing requires that {@link Event Event} instances
+     * <p>This default routing requires that {@link Event} instances
      * {@linkplain ImportBus#post(io.spine.core.Signal, io.grpc.stub.StreamObserver) posted}
      * for import must {@link io.spine.core.EventContext#getProducerId() contain} the ID of the
      * target aggregate. Not providing a valid aggregate ID would result in
