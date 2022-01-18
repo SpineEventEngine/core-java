@@ -32,7 +32,7 @@ import io.spine.core.Event;
 import java.util.List;
 
 /**
- * Result of a {@code Command} dispatching.
+ * Result of {@code Message}s dispatching.
  *
  * <p>Consists of:
  * <ul>
@@ -42,15 +42,15 @@ import java.util.List;
  * </ul>
  *
  * <p>A healthy {@code Aggregate} usually stores and posts the same set of events withing a command
- * dispatching. That leads to updating of its state.
+ * dispatching. That consequently causes its state to be updated.
  */
-public final class CommandExhaust {
+public final class DispatchExhaust {
 
     private final ImmutableList<Event> stored;
     private final ImmutableList<Event> posted;
     private final Employee state;
 
-    public CommandExhaust(
+    public DispatchExhaust(
             List<Event> storedEvents,
             List<Event> postedEvents,
             Employee state

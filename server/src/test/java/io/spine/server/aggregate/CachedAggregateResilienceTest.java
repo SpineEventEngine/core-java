@@ -55,7 +55,7 @@ import java.util.List;
  * @see AbstractAggregateResilienceTest
  * @see AggregateResilienceTest
  */
-@DisplayName("Cached `Aggregate` should")
+@DisplayName("Cached resilient `Aggregate` should")
 final class CachedAggregateResilienceTest extends AbstractAggregateResilienceTest {
 
     private final ShardIndex shardIndex = DeliveryStrategy.newIndex(0, 1);

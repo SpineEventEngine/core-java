@@ -38,14 +38,12 @@ import io.spine.server.aggregate.given.aggregate.AggregateTestEnv;
 import io.spine.server.aggregate.given.employee.Employee;
 import io.spine.server.aggregate.given.employee.EmployeeAgg;
 import io.spine.server.aggregate.given.employee.EmployeeId;
-import io.spine.server.aggregate.given.employee.CommandExhaust;
+import io.spine.server.aggregate.given.employee.DispatchExhaust;
 import io.spine.server.aggregate.given.employee.PersonEmployed;
-import io.spine.server.aggregate.given.employee.SalaryDecreased;
 import io.spine.server.aggregate.given.employee.SalaryIncreased;
 import io.spine.server.event.EventStreamQuery;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -70,7 +68,6 @@ import static io.spine.server.aggregate.given.employee.Employees.increaseSalary;
  * @see AggregateResilienceTest
  * @see CachedAggregateResilienceTest
  */
-@DisplayName("`Aggregate` should")
 abstract class AbstractAggregateResilienceTest {
 
     private final EmployeeId jack = generate();
@@ -92,96 +89,102 @@ abstract class AbstractAggregateResilienceTest {
     }
 
     @Nested
-    @DisplayName("store and post only successfully applied events when a faulty command emits")
-    class StoreAndPostOnlySuccessfulEvents {
+    @DisplayName("not store and post events emitted by a command if one of them was not applied successfully")
+    class NotStoreAndPostEventsBundle {
 
-        @Test
-        @DisplayName("a single event")
-        void singleEvent() {
-            dispatch(
-                    employ(jack, 250),
-                    increaseSalary(jack, 15),
+        @Nested
+        @DisplayName("when a faulty command produced")
+        class WhenCommandEmitted {
 
-                    // This command emits the event that will corrupt the aggregate's state
-                    // as no employee can be paid less than 200.
-                    // This event should neither be stored nor posted.
-                    decreaseSalary(jack, 500),
+            @Test
+            @DisplayName("a single event")
+            void singleEvent() {
+                dispatch(
+                        employ(jack, 250),
+                        increaseSalary(jack, 15),
 
-                    increaseSalary(jack, 500)
-            );
+                        // This command emits the event that will corrupt the aggregate's state
+                        // as no employee can be paid less than 200.
+                        //
+                        // This event should neither be stored nor posted.
+                        decreaseSalary(jack, 500),
 
-            var exhaust = collectExhaust();
-            var expectedEvents = eventTypes(
-                    PersonEmployed.class,
-                    SalaryIncreased.class,
-                    SalaryIncreased.class
-            );
+                        increaseSalary(jack, 500)
+                );
 
-            assertEvents(exhaust.storedEvents(), expectedEvents);
-            assertEvents(exhaust.postedEvents(), expectedEvents);
-            assertThat(exhaust.state().getSalary())
-                 .isEqualTo(250 + 15 + 500);
-        }
+                var exhaust = collectExhaust();
+                var expectedEvents = eventTypes(
+                        PersonEmployed.class,
+                        SalaryIncreased.class,
+                        SalaryIncreased.class
+                );
 
-        @Test
-        @DisplayName("multiple events")
-        void multipleEvents() {
-            dispatch(
-                    employ(jack, 250),
-                    increaseSalary(jack, 200),
+                assertEvents(exhaust.storedEvents(), expectedEvents);
+                assertEvents(exhaust.postedEvents(), expectedEvents);
+                assertThat(exhaust.state().getSalary())
+                        .isEqualTo(250 + 15 + 500);
+            }
 
-                    // This command emits three events. Second one will corrupt
-                    // the aggregate's state as no employee can be paid less than 200.
-                    // Only first of them should be stored and posted.
-                    decreaseSalaryThreeTimes(jack, 200),
+            @Test
+            @DisplayName("multiple events")
+            void multipleEvents() {
+                dispatch(
+                        employ(jack, 250),
+                        increaseSalary(jack, 200),
 
-                    increaseSalary(jack, 100)
-            );
+                        // This command emits three events. Second one will corrupt
+                        // the aggregate's state as no employee can be paid less than 200.
+                        //
+                        // These events should neither be stored nor posted.
+                        decreaseSalaryThreeTimes(jack, 200),
 
-            var exhaust = collectExhaust();
-            var expectedEvents = eventTypes(
-                    PersonEmployed.class,
-                    SalaryIncreased.class,
-                    SalaryDecreased.class,
-                    SalaryIncreased.class
-            );
+                        increaseSalary(jack, 100)
+                );
 
-            assertEvents(exhaust.storedEvents(), expectedEvents);
-            assertEvents(exhaust.postedEvents(), expectedEvents);
-            assertThat(exhaust.state().getSalary())
-                    .isEqualTo(250 + 200 - 200 + 100);
-        }
+                var exhaust = collectExhaust();
+                var expectedEvents = eventTypes(
+                        PersonEmployed.class,
+                        SalaryIncreased.class,
+                        SalaryIncreased.class
+                );
 
-        private void dispatch(CommandMessage... messages) {
-            var commands = Arrays.stream(messages)
-                    .map(AggregateTestEnv::command)
-                    .collect(Collectors.toList());
-            AbstractAggregateResilienceTest.this.dispatch(commands, context);
-        }
+                assertEvents(exhaust.storedEvents(), expectedEvents);
+                assertEvents(exhaust.postedEvents(), expectedEvents);
+                assertThat(exhaust.state().getSalary())
+                        .isEqualTo(250 + 200 + 100);
+            }
 
-        private CommandExhaust collectExhaust() {
-            var observer = new MemoizingObserver<Event>();
-            context.eventBus()
-                   .eventStore()
-                   .read(EventStreamQuery.getDefaultInstance(), observer);
-            var postedEvents = observer.responses();
+            private void dispatch(CommandMessage... messages) {
+                var commands = Arrays.stream(messages)
+                        .map(AggregateTestEnv::command)
+                        .collect(Collectors.toList());
+                AbstractAggregateResilienceTest.this.dispatch(commands, context);
+            }
 
-            var storedEvents = repository.aggregateStorage()
-                                   .read(jack)
-                                   .orElseThrow()
-                                   .getEventList();
+            private DispatchExhaust collectExhaust() {
+                var observer = new MemoizingObserver<Event>();
+                context.eventBus()
+                       .eventStore()
+                       .read(EventStreamQuery.getDefaultInstance(), observer);
+                var postedEvents = observer.responses();
 
-            var rawState = repository.aggregateStorage()
+                var storedEvents = repository.aggregateStorage()
+                                             .read(jack)
+                                             .orElseThrow()
+                                             .getEventList();
+
+                var rawState = repository.aggregateStorage()
                                          .readStates(ResponseFormat.getDefaultInstance())
                                          .next()
                                          .getState();
 
-            try {
-                var state = rawState.unpack(Employee.class);
-                return new CommandExhaust(storedEvents, postedEvents, state);
+                try {
+                    var state = rawState.unpack(Employee.class);
+                    return new DispatchExhaust(storedEvents, postedEvents, state);
 
-            } catch (InvalidProtocolBufferException e) {
-                throw new IllegalStateException(e);
+                } catch (InvalidProtocolBufferException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
     }

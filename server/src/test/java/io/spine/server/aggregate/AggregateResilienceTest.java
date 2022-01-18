@@ -29,6 +29,7 @@ package io.spine.server.aggregate;
 import io.spine.core.Command;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
@@ -39,6 +40,7 @@ import java.util.List;
  * @see AbstractAggregateResilienceTest
  * @see CachedAggregateResilienceTest
  */
+@DisplayName("Resilient `Aggregate` should")
 final class AggregateResilienceTest extends AbstractAggregateResilienceTest {
 
     /**
