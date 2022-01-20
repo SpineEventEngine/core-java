@@ -59,12 +59,12 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  *         (i.e. {@link EntityRecordColumn#archived EntityRecordColumn.archived}.
  */
 @RecordColumns(ofType = EntityRecord.class)
-final class EntityRecordColumn {
+public final class EntityRecordColumn {
 
     /**
      * An {@link ArchivedColumn} which uses {@link EntityRecord} as a source for its values.
      */
-    static final RecordColumn<EntityRecord, Boolean> archived =
+    public static final RecordColumn<EntityRecord, Boolean> archived =
             AsEntityRecordColumn.apply(ArchivedColumn.instance(),
                                        Boolean.class,
                                        EntityRecord::isArchived);
@@ -72,7 +72,7 @@ final class EntityRecordColumn {
     /**
      * A {@link DeletedColumn} which uses {@link EntityRecord} as a source for its values.
      */
-    static final RecordColumn<EntityRecord, Boolean> deleted =
+    public static final RecordColumn<EntityRecord, Boolean> deleted =
             AsEntityRecordColumn.apply(DeletedColumn.instance(),
                                        Boolean.class,
                                        EntityRecord::isDeleted);
@@ -80,7 +80,7 @@ final class EntityRecordColumn {
     /**
      * A {@link VersionColumn} which uses {@link EntityRecord} as a source for its values.
      */
-    static final RecordColumn<EntityRecord, Version> version =
+    public static final RecordColumn<EntityRecord, Version> version =
             AsEntityRecordColumn.apply(VersionColumn.instance(),
                                        Version.class,
                                        EntityRecord::getVersion);
