@@ -37,10 +37,11 @@ import static io.spine.query.RecordColumn.create;
  * The columns stored for {@link CatchUp} states.
  */
 @RecordColumns(ofType = CatchUp.class)
-@SuppressWarnings(
-        {"DuplicateStringLiteralInspection",  // Column names may repeat across records.
-                "BadImport"})                 // `create` looks fine in this context.
-public class CatchUpColumn {
+@SuppressWarnings({
+        "DuplicateStringLiteralInspection"  /* Column names may repeat. */,
+        "BadImport" /* `create` looks fine in this context. */,
+        "WeakerAccess" /* Exposed for Spine libraries providing storage impls. */})
+public final class CatchUpColumn {
 
     /**
      * Stores the status of the catch-up process.
