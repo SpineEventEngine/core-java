@@ -23,13 +23,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/** Versions of the Spine libraries that `core-java` depends on. */
-val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.77")
-val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.75")
-val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.76")
-val toolBaseVersion: String by extra("2.0.0-SNAPSHOT.84")
-val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.83")
+package spine.test.migration;
 
-/** The version of this library. */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.92")
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.migration.given";
+option java_multiple_files = true;
+
+import "spine/test/migration/identifiers.proto";
+
+message Courier {
+    option (entity).kind = AGGREGATE;
+    option (entity).visibility = QUERY;
+
+    CourierId id = 1 [(required) = true];
+    ParcelId parcel = 2;
+}
+
+message Parcel {
+    option (entity).kind = AGGREGATE;
+    option (entity).visibility = QUERY;
+
+    ParcelId id = 1 [(required) = true];
+    RecipientId recipient = 2 [(required) = true, (column) = true];
+    SenderId sender = 3;
+    bool delivered = 4 [(required) = true, (column) = true];
+}
+
+message Vehicle {
+    option (entity).kind = AGGREGATE;
+    option (entity).visibility = QUERY;
+
+    VehicleId id = 1 [(required) = true];
+    CourierId courier = 2;
+}

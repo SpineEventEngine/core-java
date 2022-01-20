@@ -54,7 +54,6 @@ import io.spine.server.event.EventStore;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
-import io.spine.server.stand.Stand;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.time.TimestampTemporal;
