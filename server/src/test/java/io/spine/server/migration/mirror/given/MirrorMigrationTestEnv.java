@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.migration.given;
+package io.spine.server.migration.mirror.given;
 
 import com.google.protobuf.Any;
 import io.spine.base.EntityState;

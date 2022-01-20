@@ -24,8 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.migration;
+/**
+ * The package provides a migration assistant for legacy data that used deprecated
+ * {@link io.spine.system.server.Mirror Mirror} projection.
+ */
 
-public class MigrationObserver {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.migration.mirror;
 
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

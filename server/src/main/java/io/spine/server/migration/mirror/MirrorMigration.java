@@ -24,14 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Contains ....
- */
+package io.spine.server.migration.mirror;
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.migration.given;
+import io.spine.base.EntityState;
+import io.spine.server.entity.storage.EntityRecordStorage;
+import io.spine.server.storage.Storage;
+import io.spine.system.server.Mirror;
+import io.spine.system.server.MirrorId;
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+public class MirrorMigration {
+    public <I, S extends EntityState<I>> void run(Storage<MirrorId, Mirror> mirrors,
+                                                  EntityRecordStorage<I, S> entityRecords) {
+        // To implement.
+    }
+}

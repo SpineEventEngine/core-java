@@ -24,33 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.migration;
+package io.spine.server.migration.mirror;
 
+import io.spine.query.ColumnName;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.migration.mirror.given.ParcelId;
+import io.spine.server.migration.mirror.given.ParcelAgg;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.system.server.Mirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.migration.given.DeliveryService.generateCourier;
-import static io.spine.server.migration.given.MirrorMigrationTestEnv.lifecycle;
-import static io.spine.server.migration.given.MirrorMigrationTestEnv.mirror;
-import static io.spine.server.migration.given.MirrorMigrationTestEnv.version;
+import static io.spine.server.migration.mirror.given.DeliveryService.generateCourier;
+import static io.spine.server.migration.mirror.given.DeliveryService.generateParcel;
+import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.lifecycle;
+import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.mirror;
+import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.version;
 
 @DisplayName("MirrorMigration should")
 class MirrorMigrationTest {
 
     @Test
-    @DisplayName("convert a `Mirror` to an `EntityRecord`")
-    void migrateSingleRecord() {
+    @DisplayName("transform a `Mirror` to an `EntityRecordWithColumns`")
+    void migrateSingleMirror() {
         var courier = generateCourier();
         var lifecycle = lifecycle(true, false);
         var version = version(12);
         var mirror = mirror(courier, lifecycle, version);
 
-        var migration = new MirrorMigration();
-        var entityRecord = migration.convert(mirror);
-        assertEqual(entityRecord, mirror);
+        var migration = new MirrorTransformation();
+        var record = migration.transform(mirror);
+        assertEqual(record, mirror);
     }
 
     private static void assertEqual(EntityRecord record, Mirror mirror) {
@@ -58,5 +63,26 @@ class MirrorMigrationTest {
         assertThat(record.getState()).isEqualTo(mirror.getState());
         assertThat(record.getVersion()).isEqualTo(mirror.getVersion());
         assertThat(record.lifecycleFlags()).isEqualTo(mirror.getLifecycle());
+    }
+
+    @Test
+    void testColumns() {
+        var parcel = generateParcel();
+        var lifecycle = lifecycle(true, false);
+        var version = version(12);
+        var mirror = mirror(parcel, lifecycle, version);
+
+        var transformation = new MirrorTransformation();
+        var recordWithColumns = transformation.transform(ParcelAgg.class, mirror);
+
+        assertMatch(recordWithColumns);
+    }
+
+    private static void assertMatch(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns) {
+        assertThat(recordWithColumns.columnNames())
+                .containsExactly(
+                        ColumnName.of("recipient"),
+                        ColumnName.of("delivered")
+                );
     }
 }

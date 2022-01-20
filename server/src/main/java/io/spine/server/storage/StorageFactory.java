@@ -70,7 +70,7 @@ import io.spine.server.event.store.DefaultEventStore;
  * the database. Only two of the storage types do not follow this concept: {@link InboxStorage}
  * and {@link CatchUpStorage}. The reason for that is that they are a part of
  * a {@link io.spine.server.delivery.Delivery} which is shared across all domain Bounded Contexts.
- * One more storage which stands apart of this idea is
+ * One more storage which stands apart from this idea is
  * a {@link io.spine.server.tenant.TenantStorage}. While it uses a {@code StorageFactory}
  * for an initialization, it is a part of a special {@code Tenants} context, which is also shared
  * between domain Bounded Contexts of an application.
@@ -93,7 +93,7 @@ public interface StorageFactory extends AutoCloseable {
      *         the type of the stored records
      * @apiNote All other storage types delegate all their operations to
      *         a {@code RecordStorage} and therefore use this method during their initialization
-     *         to create an private instance of a record storage.
+     *         to create a private instance of a record storage.
      */
     <I, R extends Message> RecordStorage<I, R>
     createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec);
@@ -158,7 +158,7 @@ public interface StorageFactory extends AutoCloseable {
      * Creates a new {@link InboxStorage}.
      *
      * <p>The instance of {@code InboxStorage} is used in the {@link
-     * io.spine.server.delivery.Delivery Delivery} operations. Therefore there is typically just
+     * io.spine.server.delivery.Delivery Delivery} operations. Therefore, there is typically just
      * a single instance of {@code InboxStorage} per {@link io.spine.server.ServerEnvironment
      * ServerEnvironment} instance, unlike other {@code Storage} types which instances are created
      * per-{@link io.spine.server.BoundedContext BoundedContext}.

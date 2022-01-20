@@ -24,30 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.migration.given;
+package io.spine.server.migration.mirror.given;
 
-public class DeliveryService {
+import io.spine.server.aggregate.Aggregate;
 
-    private DeliveryService() {
-    }
+public class ParcelAgg extends Aggregate<ParcelId, Parcel, Parcel.Builder> {
 
-    public static Courier generateCourier() {
-        return Courier.newBuilder()
-                .setId(CourierId.generate())
-                .vBuild();
-    }
-
-    public static Parcel parcel() {
-        return Parcel.newBuilder()
-                .setId(ParcelId.generate())
-                .setRecipient(RecipientId.generate())
-                .setDelivered(false)
-                .vBuild();
-    }
-
-    public static Vehicle vehicle() {
-        return Vehicle.newBuilder()
-                .setId(VehicleId.generate())
-                .vBuild();
-    }
 }

@@ -23,40 +23,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.migration;
+package io.spine.server.migration.mirror.given;
 
-import "spine/options.proto";
+import io.spine.server.aggregate.Aggregate;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.migration.given";
-option java_multiple_files = true;
+public class CourierAgg extends Aggregate<CourierId, Courier, Courier.Builder> {
 
-import "spine/test/migration/identifiers.proto";
-
-message Courier {
-    option (entity).kind = AGGREGATE;
-    option (entity).visibility = QUERY;
-
-    CourierId id = 1 [(required) = true];
-    ParcelId parcel = 2;
-}
-
-message Parcel {
-    option (entity).kind = AGGREGATE;
-    option (entity).visibility = QUERY;
-
-    ParcelId id = 1 [(required) = true];
-    RecipientId recipient = 2 [(required) = true, (column) = true];
-    SenderId sender = 3;
-    bool delivered = 4 [(required) = true, (column) = true];
-}
-
-message Vehicle {
-    option (entity).kind = AGGREGATE;
-    option (entity).visibility = QUERY;
-
-    VehicleId id = 1 [(required) = true];
-    CourierId courier = 2;
 }
