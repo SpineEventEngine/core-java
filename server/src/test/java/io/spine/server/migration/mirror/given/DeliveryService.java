@@ -26,14 +26,6 @@
 
 package io.spine.server.migration.mirror.given;
 
-import io.spine.server.migration.mirror.given.Courier;
-import io.spine.server.migration.mirror.given.CourierId;
-import io.spine.server.migration.mirror.given.Parcel;
-import io.spine.server.migration.mirror.given.ParcelId;
-import io.spine.server.migration.mirror.given.RecipientId;
-import io.spine.server.migration.mirror.given.Vehicle;
-import io.spine.server.migration.mirror.given.VehicleId;
-
 public class DeliveryService {
 
     private DeliveryService() {

@@ -30,8 +30,10 @@ import io.spine.server.migration.mirror.given.ParcelAgg;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.assertMatch;
+import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.assertLifecycleColumns;
+import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.assertEntityColumns;
 import static io.spine.server.migration.mirror.given.DeliveryService.generateParcel;
+import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.assertRecord;
 import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.mirror;
 
 /**
@@ -43,14 +45,17 @@ import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.mirror
 class MirrorMappingTest {
 
     @Test
-    @DisplayName("transform a `Mirror` into a `RecordWithColumns`")
+    @DisplayName("transform a `Mirror` into an `EntityRecordWithColumns`")
     void mapMirrorToRecordWithColumns() {
         var parcel = generateParcel();
         var mirror = mirror(parcel);
 
         MirrorMapping mapping = new MirrorMapping.Default();
         var recordWithColumns = mapping.toRecordWithColumns(ParcelAgg.class, mirror);
+        var record = recordWithColumns.record();
 
-        assertMatch(recordWithColumns, mirror);
+        assertRecord(record, mirror);
+        assertLifecycleColumns(recordWithColumns, mirror);
+        assertEntityColumns(recordWithColumns, mirror);
     }
 }

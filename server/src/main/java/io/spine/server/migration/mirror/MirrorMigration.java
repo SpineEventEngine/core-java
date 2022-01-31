@@ -26,34 +26,37 @@
 
 package io.spine.server.migration.mirror;
 
+import com.google.common.collect.Lists;
 import io.spine.base.EntityState;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.entity.storage.EntityRecordStorage;
+import io.spine.server.storage.RecordStorage;
 import io.spine.system.server.Mirror;
+import io.spine.system.server.MirrorId;
 
 public final class MirrorMigration {
 
-    private final MirrorStorage mirrors;
+    private final RecordStorage<MirrorId, Mirror> mirrors;
     private final MirrorMapping mapping;
 
-    public MirrorMigration(MirrorStorage mirrors) {
+    public MirrorMigration(RecordStorage<MirrorId, Mirror> mirrors) {
         this(mirrors, new MirrorMapping.Default());
     }
 
-    public MirrorMigration(MirrorStorage mirrors, MirrorMapping mapping) {
+    public MirrorMigration(RecordStorage<MirrorId, Mirror> mirrors, MirrorMapping mapping) {
         this.mirrors = mirrors;
         this.mapping = mapping;
     }
 
     /**
-     * Migrates {@linkplain Mirror} projections of the specified aggregate
+     * Migrates {@linkplain Mirror} projections which belong to the specified aggregate
      * to the {@linkplain EntityRecordStorage} of that aggregate.
      *
      * @param aggregateClass
-     *         the type of aggregate, mirrors of which are to be migrated
+     *         the type of aggregate, mirror projections of which are to be migrated
      * @param entityRecords
-     *         the storage with entity records of the aggregate
+     *         the entity records storage of the aggregate
      * @param <I>
      *         the aggregate's identifier
      * @param <S>
@@ -64,16 +67,18 @@ public final class MirrorMigration {
     public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
     run(Class<A> aggregateClass, EntityRecordStorage<I, S> entityRecords) {
         var aggregateType = AggregateClass.asAggregateClass(aggregateClass)
-                .stateTypeUrl()
-                .value();
-        var query = mirrors.queryBuilder()
-                           .where(Mirror.Column.aggregateType())
-                           .is(aggregateType)
-                           .build();
+                                          .stateTypeUrl()
+                                          .value();
+        var query = mirrors.queryBuilder().build();
         mirrors.readAll(query)
-                .forEachRemaining(mirror -> {
-                    var recordWithColumns = mapping.toRecordWithColumns(aggregateClass, mirror);
-                    entityRecords.write(recordWithColumns);
-                });
+               .forEachRemaining(mirror -> {
+
+                   if (!mirror.getAggregateType().equals(aggregateType)) {
+                       return;
+                   }
+
+                   var recordWithColumns = mapping.toRecordWithColumns(aggregateClass, mirror);
+                   entityRecords.write(recordWithColumns);
+               });
     }
 }

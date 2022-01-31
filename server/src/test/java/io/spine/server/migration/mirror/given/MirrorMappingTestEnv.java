@@ -33,16 +33,9 @@ import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.query.ColumnName;
-import io.spine.server.ContextSpec;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordWithColumns;
-import io.spine.server.storage.Storage;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorId;
 
@@ -50,27 +43,17 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class MirrorMappingTestEnv {
 
-    private static final StorageFactory factory = InMemoryStorageFactory.newInstance();
-    private static final String tenantId = MirrorMappingTestEnv.class.getSimpleName();
-    private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
-
     private MirrorMappingTestEnv() {
     }
 
-    public static void assertMatch(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns,
-                                   Mirror mirror) {
-
-        assertRecord(recordWithColumns.record(), mirror);
-        assertLifecycleColumns(recordWithColumns, mirror);
-
-        var parcel = AnyPacker.unpack(mirror.getState(), Parcel.class);
-        assertThat(recordWithColumns.columnValue(ColumnName.of("recipient")))
-                .isEqualTo(parcel.getRecipient());
-        assertThat(recordWithColumns.columnValue(ColumnName.of("delivered")))
-                .isEqualTo(parcel.getDelivered());
+    public static void assertRecord(EntityRecord record, Mirror mirror) {
+        assertThat(record.getEntityId()).isEqualTo(mirror.getId().getValue());
+        assertThat(record.getState()).isEqualTo(mirror.getState());
+        assertThat(record.getVersion()).isEqualTo(mirror.getVersion());
+        assertThat(record.lifecycleFlags()).isEqualTo(mirror.getLifecycle());
     }
 
-    private static void assertLifecycleColumns(RecordWithColumns<?, EntityRecord> recordWithColumns,
+    public static void assertLifecycleColumns(RecordWithColumns<?, EntityRecord> recordWithColumns,
                                                Mirror mirror) {
 
         // total columns = (1x version) + (2x lifecycle columns) + (2x entity's columns)
@@ -88,48 +71,18 @@ public class MirrorMappingTestEnv {
                 .isEqualTo(version);
     }
 
-    private static void assertRecord(EntityRecord record, Mirror mirror) {
-        assertThat(record.getEntityId()).isEqualTo(mirror.getId().getValue());
-        assertThat(record.getState()).isEqualTo(mirror.getState());
-        assertThat(record.getVersion()).isEqualTo(mirror.getVersion());
-        assertThat(record.lifecycleFlags()).isEqualTo(mirror.getLifecycle());
-    }
+    public static void assertEntityColumns(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns,
+                                           Mirror mirror) {
 
-    public static <I> EntityRecord
-    entityRecord(EntityState<I> state, Version version, LifecycleFlags flags) {
-        return EntityRecord.newBuilder()
-                .setEntityId(id(state))
-                .setState(Any.pack(state))
-                .setVersion(version)
-                .setLifecycleFlags(flags)
-                .vBuild();
-    }
-
-    public static <I, S extends EntityState<I>> EntityRecordStorage<I, S>
-    createEntityRecordStorage(Class<? extends Entity<I, S>> entityClass) {
-        var storage = factory
-                .createEntityRecordStorage(contextSpec, entityClass);
-        return storage;
-    }
-
-    @SuppressWarnings("ConstantConditions") // `Mirror.getId()` would not return `null`.
-    public static Storage<MirrorId, Mirror> createMirrorStorage() {
-        var recordSpec = new MessageRecordSpec<>(
-                MirrorId.class,
-                Mirror.class,
-                Mirror::getId
-        );
-        var storage = factory.createRecordStorage(contextSpec, recordSpec);
-        return storage;
-    }
-
-    public static <I> void write(EntityState<I> state, Storage<MirrorId, Mirror> storage) {
-//        var mirror = mirror(state);
-//        storage.write(mirror.getId(), mirror);
+        var parcel = AnyPacker.unpack(mirror.getState(), Parcel.class);
+        assertThat(recordWithColumns.columnValue(ColumnName.of("recipient")))
+                .isEqualTo(parcel.getRecipient());
+        assertThat(recordWithColumns.columnValue(ColumnName.of("delivered")))
+                .isEqualTo(parcel.getDelivered());
     }
 
     public static Mirror mirror(EntityState<?> state) {
-        var lifecycle = lifecycle(true, false);
+        var lifecycle = lifecycle(false, false);
         var version = version(12);
         var mirrorId = mirrorId(state);
         return Mirror.newBuilder()
@@ -154,14 +107,14 @@ public class MirrorMappingTestEnv {
         return TypeConverter.toAny(stateId);
     }
 
-    public static LifecycleFlags lifecycle(boolean archived, boolean deleted) {
+    private static LifecycleFlags lifecycle(boolean archived, boolean deleted) {
         return LifecycleFlags.newBuilder()
                 .setArchived(archived)
                 .setDeleted(deleted)
                 .vBuild();
     }
 
-    public static Version version(int number) {
+    private static Version version(int number) {
         return Version.newBuilder()
                 .setNumber(number)
                 .setTimestamp(Time.currentTime())

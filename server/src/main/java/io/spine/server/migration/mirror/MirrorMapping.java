@@ -44,15 +44,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * A transformation from a {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
+ * A transformation of a {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
  */
 public interface MirrorMapping {
 
     /**
-     * Transforms the passed {@code Mirror} into a {@code EntityRecordWithColumns}.
+     * Transforms the passed {@code Mirror} into an {@code EntityRecordWithColumns}.
      *
      * @param aggregateClass
-     *         contains information about which columns to fetch along the record itself
+     *         destination entity type
      * @param mirror
      *         the mirror to be transformed into a record
      * @param <I>
