@@ -25,7 +25,7 @@
  */
 syntax = "proto3";
 
-package spine.test.migration;
+package spine.test.migration.mirror;
 
 import "spine/options.proto";
 
