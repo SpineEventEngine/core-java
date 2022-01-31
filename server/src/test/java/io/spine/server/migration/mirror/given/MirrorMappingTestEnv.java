@@ -30,26 +30,69 @@ import com.google.protobuf.Any;
 import io.spine.base.EntityState;
 import io.spine.base.Time;
 import io.spine.core.Version;
+import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
+import io.spine.query.ColumnName;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorId;
 
-public class MirrorMigrationTestEnv {
+import static com.google.common.truth.Truth.assertThat;
+
+public class MirrorMappingTestEnv {
 
     private static final StorageFactory factory = InMemoryStorageFactory.newInstance();
-    private static final String tenantId = MirrorMigrationTestEnv.class.getSimpleName();
+    private static final String tenantId = MirrorMappingTestEnv.class.getSimpleName();
     private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
 
-    private MirrorMigrationTestEnv() {
+    private MirrorMappingTestEnv() {
+    }
+
+    public static void assertMatch(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns,
+                                   Mirror mirror) {
+
+        assertRecord(recordWithColumns.record(), mirror);
+        assertLifecycleColumns(recordWithColumns, mirror);
+
+        var parcel = AnyPacker.unpack(mirror.getState(), Parcel.class);
+        assertThat(recordWithColumns.columnValue(ColumnName.of("recipient")))
+                .isEqualTo(parcel.getRecipient());
+        assertThat(recordWithColumns.columnValue(ColumnName.of("delivered")))
+                .isEqualTo(parcel.getDelivered());
+    }
+
+    private static void assertLifecycleColumns(RecordWithColumns<?, EntityRecord> recordWithColumns,
+                                               Mirror mirror) {
+
+        // total columns = (1x version) + (2x lifecycle columns) + (2x entity's columns)
+        var columns = recordWithColumns.columnNames();
+        assertThat(columns.size()).isEqualTo(1 + 2 + 2);
+
+        var lifecycleFlags = mirror.getLifecycle();
+        assertThat(recordWithColumns.columnValue(ColumnName.of("archived")))
+                .isEqualTo(lifecycleFlags.getArchived());
+        assertThat(recordWithColumns.columnValue(ColumnName.of("deleted")))
+                .isEqualTo(lifecycleFlags.getDeleted());
+
+        var version = mirror.getVersion();
+        assertThat(recordWithColumns.columnValue(ColumnName.of("version")))
+                .isEqualTo(version);
+    }
+
+    private static void assertRecord(EntityRecord record, Mirror mirror) {
+        assertThat(record.getEntityId()).isEqualTo(mirror.getId().getValue());
+        assertThat(record.getState()).isEqualTo(mirror.getState());
+        assertThat(record.getVersion()).isEqualTo(mirror.getVersion());
+        assertThat(record.lifecycleFlags()).isEqualTo(mirror.getLifecycle());
     }
 
     public static <I> EntityRecord
@@ -85,7 +128,9 @@ public class MirrorMigrationTestEnv {
 //        storage.write(mirror.getId(), mirror);
     }
 
-    public static Mirror mirror(EntityState<?> state, LifecycleFlags lifecycle, Version version) {
+    public static Mirror mirror(EntityState<?> state) {
+        var lifecycle = lifecycle(true, false);
+        var version = version(12);
         var mirrorId = mirrorId(state);
         return Mirror.newBuilder()
                 .setId(mirrorId)
