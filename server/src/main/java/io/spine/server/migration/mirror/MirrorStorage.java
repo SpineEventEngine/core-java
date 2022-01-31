@@ -26,36 +26,16 @@
 
 package io.spine.server.migration.mirror;
 
-import com.google.protobuf.Message;
 import io.spine.query.RecordQuery;
-import io.spine.server.ContextSpec;
-import io.spine.server.storage.RecordSpec;
-import io.spine.server.storage.RecordStorage;
+import io.spine.query.RecordQueryBuilder;
+import io.spine.system.server.Mirror;
+import io.spine.system.server.MirrorId;
 
 import java.util.Iterator;
 
-/**
- * Exposes {@linkplain QueryableRecordStorage#readAll()} method.
- *
- * @param <I>
- *         the type of the record identifiers
- * @param <R>
- *         the type of the stored message records
- */
-public abstract class QueryableRecordStorage<I, R extends Message> extends RecordStorage<I, R> {
+public interface MirrorStorage {
 
-    /**
-     * Creates the new storage instance.
-     *
-     * @param context
-     *         specification of the Bounded Context in scope of which the storage will be used
-     */
-    protected QueryableRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
-        super(context, recordSpec);
-    }
+    RecordQueryBuilder<MirrorId, Mirror> queryBuilder();
 
-    @Override
-    public Iterator<R> readAll(RecordQuery<I, R> query) {
-        return super.readAll(query);
-    }
+    Iterator<Mirror> readAll(RecordQuery<MirrorId, Mirror> query);
 }

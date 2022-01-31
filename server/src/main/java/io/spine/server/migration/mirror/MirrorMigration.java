@@ -31,18 +31,17 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.system.server.Mirror;
-import io.spine.system.server.MirrorId;
 
 public final class MirrorMigration {
 
-    private final QueryableRecordStorage<MirrorId, Mirror> mirrors;
+    private final MirrorStorage mirrors;
     private final MirrorMapping mapping;
 
-    public MirrorMigration(QueryableRecordStorage<MirrorId, Mirror> mirrors) {
+    public MirrorMigration(MirrorStorage mirrors) {
         this(mirrors, new MirrorMapping.Default());
     }
 
-    public MirrorMigration(QueryableRecordStorage<MirrorId, Mirror> mirrors, MirrorMapping mapping) {
+    public MirrorMigration(MirrorStorage mirrors, MirrorMapping mapping) {
         this.mirrors = mirrors;
         this.mapping = mapping;
     }
