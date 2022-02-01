@@ -46,6 +46,9 @@ public class MirrorMappingTestEnv {
     private MirrorMappingTestEnv() {
     }
 
+    /**
+     * Asserts that common fields in {@linkplain EntityRecord} and {@linkplain Mirror} match.
+     */
     public static void assertRecord(EntityRecord record, Mirror mirror) {
         assertThat(record.getEntityId()).isEqualTo(mirror.getId().getValue());
         assertThat(record.getState()).isEqualTo(mirror.getState());
@@ -53,6 +56,11 @@ public class MirrorMappingTestEnv {
         assertThat(record.lifecycleFlags()).isEqualTo(mirror.getLifecycle());
     }
 
+    /**
+     * Asserts that version and lifecycle columns match to the ones in mirror.
+     *
+     * <p>Those columns are defined for all entity records.
+     */
     public static void assertLifecycleColumns(RecordWithColumns<?, EntityRecord> recordWithColumns,
                                                Mirror mirror) {
 
@@ -71,8 +79,17 @@ public class MirrorMappingTestEnv {
                 .isEqualTo(version);
     }
 
+    /**
+     * Asserts that aggregate's columns defined for {@linkplain Parcel} aggregate are present
+     * in the record.
+     *
+     * <p>Those columns are specific to a concrete aggregate.
+     */
     public static void assertEntityColumns(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns,
                                            Mirror mirror) {
+
+        // This method is hardcoded for `Parcel` aggregate.
+        // Try to generify by accepting the aggregate's class.
 
         var parcel = AnyPacker.unpack(mirror.getState(), Parcel.class);
         assertThat(recordWithColumns.columnValue(ColumnName.of("recipient")))
@@ -81,6 +98,9 @@ public class MirrorMappingTestEnv {
                 .isEqualTo(parcel.getDelivered());
     }
 
+    /**
+     * Creates {@linkplain Mirror} projection from the passed state.
+     */
     public static Mirror mirror(EntityState<?> state) {
         var lifecycle = lifecycle(false, false);
         var version = version(12);

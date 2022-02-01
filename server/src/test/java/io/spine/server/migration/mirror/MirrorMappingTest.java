@@ -51,7 +51,7 @@ class MirrorMappingTest {
         var mirror = mirror(parcel);
 
         MirrorMapping mapping = new MirrorMapping.Default();
-        var recordWithColumns = mapping.toRecordWithColumns(ParcelAgg.class, mirror);
+        var recordWithColumns = mapping.toRecordWithColumns(mirror, ParcelAgg.class);
         var record = recordWithColumns.record();
 
         assertRecord(record, mirror);

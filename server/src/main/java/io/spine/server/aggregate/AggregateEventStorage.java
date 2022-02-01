@@ -75,7 +75,7 @@ public class AggregateEventStorage
      * <p>Overrides to expose this method as a part of storage's package-level API.
      */
     @Override
-    public Iterator<AggregateEventRecord>
+    protected Iterator<AggregateEventRecord>
     readAll(RecordQuery<AggregateEventRecordId, AggregateEventRecord> query) {
         return super.readAll(query);
     }

@@ -40,12 +40,19 @@ import io.spine.system.server.MirrorId;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 
+/**
+ * A message storage for {@linkplain Mirror} projections, which exposes
+ * {@linkplain MirrorStorage#readAll(RecordQuery)} method.
+ */
 public interface MirrorStorage extends Storage<MirrorId, Mirror> {
 
     RecordQueryBuilder<MirrorId, Mirror> queryBuilder();
 
     Iterator<Mirror> readAll(RecordQuery<MirrorId, Mirror> query);
 
+    /**
+     * In-memory implementation of {@linkplain MirrorStorage} used for tests.
+     */
     class InMemory extends InMemoryRecordStorage<MirrorId, Mirror> implements MirrorStorage {
 
         public InMemory(ContextSpec context, RecordSpec<MirrorId, Mirror, ?> recordSpec) {

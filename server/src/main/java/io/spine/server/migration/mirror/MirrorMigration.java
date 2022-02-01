@@ -32,6 +32,13 @@ import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.system.server.Mirror;
 
+/**
+ * Migrates {@linkplain Mirror} projections into
+ * {@linkplain io.spine.server.entity.storage.EntityRecordWithColumns EntityRecordWithColumns}.
+ *
+ * <p>{@code Mirror} was deprecated in Spine 2.x. Now, {@code EntityRecordWithColumns} is used
+ * to store the aggregate's state for further querying.
+ */
 public final class MirrorMigration {
 
     private final MirrorStorage mirrors;
@@ -53,7 +60,7 @@ public final class MirrorMigration {
      * @param aggregateClass
      *         the type of aggregate, mirror projections of which are to be migrated
      * @param entityRecords
-     *         the entity records storage of the aggregate
+     *         the destination storage of entity records for the aggregate
      * @param <I>
      *         the aggregate's identifier
      * @param <S>
@@ -63,17 +70,24 @@ public final class MirrorMigration {
      */
     public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
     run(Class<A> aggregateClass, EntityRecordStorage<I, S> entityRecords) {
+
         var aggregateType = AggregateClass.asAggregateClass(aggregateClass)
                                           .stateTypeUrl()
                                           .value();
-        var query = mirrors.queryBuilder()
+        var aggregateMirrors = mirrors.queryBuilder()
                            .where(Mirror.Column.aggregateType())
                            .is(aggregateType)
                            .build();
-        mirrors.readAll(query)
+        mirrors.readAll(aggregateMirrors)
                .forEachRemaining(mirror -> {
-                   var recordWithColumns = mapping.toRecordWithColumns(aggregateClass, mirror);
+                   var recordWithColumns = mapping.toRecordWithColumns(mirror, aggregateClass);
                    entityRecords.write(recordWithColumns);
                });
+    }
+
+    public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
+    run(Class<A> aggregateClass, EntityRecordStorage<I, S> entityRecords, int batchSizes) {
+
+        // Implement migration step-by-step, with step size specified.
     }
 }

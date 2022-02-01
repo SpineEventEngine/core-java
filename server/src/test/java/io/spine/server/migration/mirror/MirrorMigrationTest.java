@@ -27,8 +27,11 @@
 package io.spine.server.migration.mirror;
 
 import com.google.common.collect.Lists;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.migration.mirror.given.Courier;
 import io.spine.server.migration.mirror.given.CourierAgg;
 import io.spine.server.migration.mirror.given.DeliveryService;
+import io.spine.server.migration.mirror.given.Parcel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.createEntityRecordStorage;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.createMirrorStorage;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @DisplayName("`MirrorMigration` should")
 class MirrorMigrationTest {
@@ -54,12 +58,16 @@ class MirrorMigrationTest {
             );
 
             var migration = new MirrorMigration(mirrors);
-            var entityClass = CourierAgg.class;
-            var entityRecords = createEntityRecordStorage(entityClass);
+            var entityToMigrate = CourierAgg.class;
+            var entityRecords = createEntityRecordStorage(entityToMigrate);
 
-            migration.run(entityClass, entityRecords);
+            migration.run(entityToMigrate, entityRecords);
+
             var migratedRecords = Lists.newArrayList(entityRecords.readAll());
-            assertThat(migratedRecords.size()).isEqualTo(4_000);
+            assertThat(migratedRecords).hasSize(4_000);
+            assertDoesNotThrow(() -> migratedRecords.forEach(
+                    record -> AnyPacker.unpack(record.getState(), Courier.class)
+            ));
         }
 
         @Nested

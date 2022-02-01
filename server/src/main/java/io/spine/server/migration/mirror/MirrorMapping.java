@@ -45,34 +45,44 @@ import java.util.stream.Collectors;
 
 /**
  * A transformation of a {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
+ *
+ * <p>{@code Mirror} was deprecated in Spine 2.x. Now, {@code EntityRecordWithColumns} is used
+ * to store the aggregate's state for further querying.
  */
 public interface MirrorMapping {
 
     /**
-     * Transforms the passed {@code Mirror} into an {@code EntityRecordWithColumns}.
+     * Transforms the passed {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
      *
-     * @param aggregateClass
-     *         destination entity type
      * @param mirror
-     *         the mirror to be transformed into a record
+     *         the source mirror to be transformed into an entity record
+     * @param aggregateClass
+     *         the destination entity type
      * @param <I>
      *         the type of aggregate's identifiers
      * @param <S>
      *         the type of aggregate's state
      * @param <A>
      *         the type of aggregate
+     *
+     * @implNote {@code Mirror} itself can be directly transformed into
+     *         an {@linkplain EntityRecord}. In order to get {@code EntityRecordWithColumns},
+     *         we need to know which columns should be fetched from the entity's state.
+     *         For this reason, aggregate class is passed along the mirror itself. It contains
+     *         information about which columns are defined to be stored along the aggregate's state.
      */
     <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> EntityRecordWithColumns<I>
-    toRecordWithColumns(Class<A> aggregateClass, Mirror mirror);
+    toRecordWithColumns(Mirror mirror, Class<A> aggregateClass);
 
     /**
-     * A default transformation of a {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
+     * The default transformation of a {@linkplain Mirror} into
+     * an {@linkplain EntityRecordWithColumns}.
      */
     class Default implements MirrorMapping {
 
         @Override
         public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>>
-        EntityRecordWithColumns<I> toRecordWithColumns(Class<A> aggregateClass, Mirror mirror) {
+        EntityRecordWithColumns<I> toRecordWithColumns(Mirror mirror, Class<A> aggregateClass) {
             var record = toRecord(mirror);
             var recordSpec = EntityRecordSpec.of(aggregateClass);
             var columns = fetchColumns(recordSpec, record);
@@ -82,7 +92,8 @@ public interface MirrorMapping {
 
         private static EntityRecord toRecord(Mirror mirror) {
             var record = EntityRecord.newBuilder()
-                    .setEntityId(mirror.getId().getValue())
+                    .setEntityId(mirror.getId()
+                                       .getValue())
                     .setState(mirror.getState())
                     .setVersion(mirror.getVersion())
                     .setLifecycleFlags(mirror.getLifecycle())
@@ -96,7 +107,7 @@ public interface MirrorMapping {
             // fetching of lifecycle columns
             var lifecycleColumns = EntityRecordColumn.valuesIn(record);
 
-            // fetching of entity's columns
+            // fetching of state's columns
             var state = AnyPacker.unpack(record.getState());
             var stateDescriptor = state.getDescriptorForType();
             var allColumns = recordSpec.columns()
@@ -107,6 +118,7 @@ public interface MirrorMapping {
                             column -> extractColumnValue(column.name(), state, stateDescriptor)
                     ));
 
+            // returning of `lifecycle + state` columns
             allColumns.putAll(lifecycleColumns);
             return allColumns;
         }

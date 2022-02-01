@@ -25,7 +25,7 @@
  */
 
 /**
- * Contains ....
+ * Contains a small domain and environment classes for testing the mirror migration assistant.
  */
 
 @CheckReturnValue

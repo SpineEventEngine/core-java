@@ -33,7 +33,6 @@ import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.migration.mirror.MirrorStorage;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.Storage;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorId;
@@ -46,15 +45,28 @@ import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.mirror
 
 public class MirrorMigrationTestEnv {
 
-    private static final StorageFactory factory = InMemoryStorageFactory.newInstance();
     private static final String tenantId = MirrorMappingTestEnv.class.getSimpleName();
     private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
 
     private MirrorMigrationTestEnv() {
     }
 
+    public static <I, S extends EntityState<I>> EntityRecordStorage<I, S>
+    createEntityRecordStorage(Class<? extends Entity<I, S>> entityClass) {
+        var storage = InMemoryStorageFactory.newInstance()
+                .createEntityRecordStorage(contextSpec, entityClass);
+        return storage;
+
+    }
+
+    /**
+     * Creates a storage for {@linkplain Mirror} projections.
+     *
+     * <p>The returned storage is pre-filled with three types of entities'. For each type, number
+     * of records to generate is specified.
+     */
     @SuppressWarnings({
-            "ConstantConditions", /* `Mirror::getId` will not return `NULL`. */
+            "ConstantConditions", /* `Mirror::getId` is a required field, will not return `NULL`. */
             "MethodWithTooManyParameters" /* Convenient for tests. */
     })
     public static MirrorStorage createMirrorStorage(
@@ -85,16 +97,8 @@ public class MirrorMigrationTestEnv {
         return storage;
     }
 
-    public static <I> void write(EntityState<I> state, Storage<MirrorId, Mirror> storage) {
+    private static <I> void write(EntityState<I> state, Storage<MirrorId, Mirror> storage) {
         var mirror = mirror(state);
         storage.write(mirror.getId(), mirror);
-    }
-
-    public static <I, S extends EntityState<I>> EntityRecordStorage<I, S>
-    createEntityRecordStorage(Class<? extends Entity<I, S>> entityClass) {
-        var storage = factory
-                .createEntityRecordStorage(contextSpec, entityClass);
-        return storage;
-
     }
 }
