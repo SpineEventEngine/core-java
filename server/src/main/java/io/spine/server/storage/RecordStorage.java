@@ -194,7 +194,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @throws IllegalStateException
      *         if the storage was closed before
      */
-    public Iterator<R> readAll(RecordQuery<I, R> query) {
+    protected Iterator<R> readAll(RecordQuery<I, R> query) {
         checkNotClosed();
         return readAllRecords(query);
     }

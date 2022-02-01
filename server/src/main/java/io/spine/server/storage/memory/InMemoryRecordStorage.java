@@ -47,7 +47,7 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
 
     private final MultitenantStorage<TenantRecords<I, R>> multitenantStorage;
 
-    InMemoryRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
+    public InMemoryRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
         super(context, recordSpec);
         this.multitenantStorage =
                 new MultitenantStorage<>(context.isMultitenant()) {

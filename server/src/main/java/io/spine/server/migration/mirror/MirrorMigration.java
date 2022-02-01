@@ -26,25 +26,22 @@
 
 package io.spine.server.migration.mirror;
 
-import com.google.common.collect.Lists;
 import io.spine.base.EntityState;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.storage.RecordStorage;
 import io.spine.system.server.Mirror;
-import io.spine.system.server.MirrorId;
 
 public final class MirrorMigration {
 
-    private final RecordStorage<MirrorId, Mirror> mirrors;
+    private final MirrorStorage mirrors;
     private final MirrorMapping mapping;
 
-    public MirrorMigration(RecordStorage<MirrorId, Mirror> mirrors) {
+    public MirrorMigration(MirrorStorage mirrors) {
         this(mirrors, new MirrorMapping.Default());
     }
 
-    public MirrorMigration(RecordStorage<MirrorId, Mirror> mirrors, MirrorMapping mapping) {
+    public MirrorMigration(MirrorStorage mirrors, MirrorMapping mapping) {
         this.mirrors = mirrors;
         this.mapping = mapping;
     }
@@ -69,14 +66,12 @@ public final class MirrorMigration {
         var aggregateType = AggregateClass.asAggregateClass(aggregateClass)
                                           .stateTypeUrl()
                                           .value();
-        var query = mirrors.queryBuilder().build();
+        var query = mirrors.queryBuilder()
+                           .where(Mirror.Column.aggregateType())
+                           .is(aggregateType)
+                           .build();
         mirrors.readAll(query)
                .forEachRemaining(mirror -> {
-
-                   if (!mirror.getAggregateType().equals(aggregateType)) {
-                       return;
-                   }
-
                    var recordWithColumns = mapping.toRecordWithColumns(aggregateClass, mirror);
                    entityRecords.write(recordWithColumns);
                });

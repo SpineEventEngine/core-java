@@ -30,13 +30,15 @@ import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityRecordStorage;
+import io.spine.server.migration.mirror.MirrorStorage;
 import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorId;
 
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -51,8 +53,11 @@ public class MirrorMigrationTestEnv {
     private MirrorMigrationTestEnv() {
     }
 
-    @SuppressWarnings("ConstantConditions") // `Mirror.getId()` would not return `null`.
-    public static RecordStorage<MirrorId, Mirror> createMirrorStorage(
+    @SuppressWarnings({
+            "ConstantConditions", /* `Mirror::getId` will not return `NULL`. */
+            "MethodWithTooManyParameters" /* Convenient for tests. */
+    })
+    public static MirrorStorage createMirrorStorage(
             Supplier<EntityState<?>> entity1,
             int numberOfEntity1,
             Supplier<EntityState<?>> entity2,
@@ -61,13 +66,15 @@ public class MirrorMigrationTestEnv {
             int numberOfEntity3
     ) {
 
+        var recordColumn = Mirror.Column.aggregateType();
         var recordSpec = new MessageRecordSpec<>(
                 MirrorId.class,
                 Mirror.class,
-                Mirror::getId
+                Mirror::getId,
+                List.of(recordColumn)
         );
 
-        var storage = factory.createRecordStorage(contextSpec, recordSpec);
+        MirrorStorage storage = new MirrorStorage.InMemory(contextSpec, recordSpec);
         IntStream.rangeClosed(1, numberOfEntity1)
                 .forEach(i -> write(entity1.get(), storage));
         IntStream.rangeClosed(1, numberOfEntity2)
@@ -78,7 +85,7 @@ public class MirrorMigrationTestEnv {
         return storage;
     }
 
-    public static <I> void write(EntityState<I> state, RecordStorage<MirrorId, Mirror> storage) {
+    public static <I> void write(EntityState<I> state, Storage<MirrorId, Mirror> storage) {
         var mirror = mirror(state);
         storage.write(mirror.getId(), mirror);
     }
