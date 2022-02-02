@@ -26,7 +26,6 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.base.EntityState;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
@@ -52,7 +51,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * storing lifecycle and version attributes of an {@code Entity}.
  *
  * @param <E>
- *         the type of an {@code Entity} to scan
+ *         the type of {@code Entity} to scan
  * @param <S>
  *         the type of the state for the scanned {@code Entity}
  * @implNote Client-side API includes generic definitions of lifecycle and version columns
@@ -124,7 +123,6 @@ final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
     /**
      * Obtains the {@linkplain EntityColumn entity-state-based} columns of the class.
      */
-    @VisibleForTesting
     @SuppressWarnings("OverlyBroadCatchBlock")   /* Treating all exceptions equally. */
     StateColumns<S> stateColumns() {
         var stateClass = entityClass.stateClass();

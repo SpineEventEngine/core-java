@@ -59,7 +59,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  *         (i.e. {@link EntityRecordColumn#archived EntityRecordColumn.archived}).
  */
 @RecordColumns(ofType = EntityRecord.class)
-public final class EntityRecordColumn {
+final class EntityRecordColumn {
 
     /**
      * An {@link ArchivedColumn} which uses {@link EntityRecord} as a source for its values.
@@ -113,7 +113,7 @@ public final class EntityRecordColumn {
      * Evaluates the columns against the passed record and returns the value of each column
      * along the with its name.
      */
-    public static ImmutableMap<ColumnName, Object> valuesIn(EntityRecord record) {
+    static ImmutableMap<ColumnName, Object> valuesIn(EntityRecord record) {
         checkNotNull(record);
         ImmutableMap<ColumnName, Object> values =
                 all.stream()

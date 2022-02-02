@@ -26,22 +26,11 @@
 
 package io.spine.server.migration.mirror;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
 import io.spine.base.EntityState;
-import io.spine.protobuf.AnyPacker;
-import io.spine.query.Column;
-import io.spine.query.ColumnName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityRecordColumn;
-import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.system.server.Mirror;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A transformation of a {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
@@ -69,7 +58,7 @@ public interface MirrorMapping {
      *         an {@linkplain EntityRecord}. In order to get {@code EntityRecordWithColumns},
      *         we need to know which columns should be fetched from the entity's state.
      *         For this reason, aggregate class is passed along the mirror itself. It contains
-     *         information about which columns are defined to be stored along the aggregate's state.
+     *         information about which columns are declared to be stored along the aggregate's state.
      */
     <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> EntityRecordWithColumns<I>
     toRecordWithColumns(Mirror mirror, Class<A> aggregateClass);
@@ -83,52 +72,14 @@ public interface MirrorMapping {
         @Override
         public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>>
         EntityRecordWithColumns<I> toRecordWithColumns(Mirror mirror, Class<A> aggregateClass) {
-            var record = toRecord(mirror);
-            var recordSpec = EntityRecordSpec.of(aggregateClass);
-            var columns = fetchColumns(recordSpec, record);
-            var result = EntityRecordWithColumns.<I>of(record, columns);
-            return result;
-        }
-
-        private static EntityRecord toRecord(Mirror mirror) {
             var record = EntityRecord.newBuilder()
-                    .setEntityId(mirror.getId()
-                                       .getValue())
+                    .setEntityId(mirror.getId().getValue())
                     .setState(mirror.getState())
                     .setVersion(mirror.getVersion())
                     .setLifecycleFlags(mirror.getLifecycle())
                     .vBuild();
-            return record;
-        }
-
-        private static Map<ColumnName, @Nullable Object>
-        fetchColumns(EntityRecordSpec<?, ?, ?> recordSpec, EntityRecord record) {
-
-            // fetching of lifecycle columns
-            var lifecycleColumns = EntityRecordColumn.valuesIn(record);
-
-            // fetching of state's columns
-            var state = AnyPacker.unpack(record.getState());
-            var stateDescriptor = state.getDescriptorForType();
-            var allColumns = recordSpec.columns()
-                    .stream()
-                    .filter(column -> !lifecycleColumns.containsKey(column.name()))
-                    .collect(Collectors.toMap(
-                            Column::name,
-                            column -> extractColumnValue(column.name(), state, stateDescriptor)
-                    ));
-
-            // returning of `lifecycle + state` columns
-            allColumns.putAll(lifecycleColumns);
-            return allColumns;
-        }
-
-        private static Object extractColumnValue(ColumnName column,
-                                                 Message state,
-                                                 Descriptors.Descriptor descriptor) {
-            var fieldDescriptor = descriptor.findFieldByName(column.value());
-            var result = state.getField(fieldDescriptor);
-            return result;
+            var recordWithColumns = EntityRecordWithColumns.create(record, aggregateClass);
+            return recordWithColumns;
         }
     }
 }

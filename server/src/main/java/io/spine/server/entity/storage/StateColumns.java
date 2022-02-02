@@ -29,13 +29,18 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EntityState;
+import io.spine.query.ColumnName;
 import io.spine.query.EntityColumn;
+import io.spine.query.RecordColumn;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Descries the columns of a particular entity defined in its Protobuf {@code Message}
+ * Describes the columns of a particular entity defined in its Protobuf {@code Message}
  * via {@code (column)} annotation.
  *
  * @param <S>
@@ -61,6 +66,13 @@ final class StateColumns<S extends EntityState<?>> implements Iterable<EntityCol
      */
     static <S extends EntityState<?>> StateColumns<S> none() {
         return new StateColumns<>(ImmutableSet.of());
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    Map<ColumnName, @Nullable Object> valuesIn(S entityState) {
+        var values = columns.stream()
+                .collect(Collectors.toMap(RecordColumn::name, column -> (Object) column.valueIn(entityState)));
+        return values;
     }
 
     @Override

@@ -53,6 +53,12 @@ public final class MirrorMigration {
         this.mapping = mapping;
     }
 
+    public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
+    run(Class<A> aggregateClass, EntityRecordStorage<I, S> entityRecords, int batchSizes) {
+
+        // ...
+    }
+
     /**
      * Migrates {@linkplain Mirror} projections which belong to the specified aggregate
      * to the {@linkplain EntityRecordStorage} of that aggregate.
@@ -83,11 +89,5 @@ public final class MirrorMigration {
                    var recordWithColumns = mapping.toRecordWithColumns(mirror, aggregateClass);
                    entityRecords.write(recordWithColumns);
                });
-    }
-
-    public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
-    run(Class<A> aggregateClass, EntityRecordStorage<I, S> entityRecords, int batchSizes) {
-
-        // Implement migration step-by-step, with step size specified.
     }
 }

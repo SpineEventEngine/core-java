@@ -30,14 +30,17 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.protobuf.AnyPacker;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -102,6 +105,25 @@ public final class EntityRecordWithColumns<I>
         checkNotNull(record);
         var lifecycleValues = EntityRecordColumn.valuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
+    create(EntityRecord record, Class<E> entityClass) {
+
+        var entityClazz = EntityClass.asParameterizedEntityClass(entityClass);
+        var columnsScanner = new Scanner<>(entityClazz);
+        var entityState = (S) AnyPacker.unpack(record.getState());
+
+        var stateValues = columnsScanner.stateColumns().valuesIn(entityState);
+        var lifecycleValues = EntityRecordColumn.valuesIn(record);
+
+        Map<ColumnName, Object> allValues = new HashMap<>();
+        allValues.putAll(stateValues);
+        allValues.putAll(lifecycleValues);
+
+        var result = (EntityRecordWithColumns<I>) of(record, allValues);
+        return result;
     }
 
     /**

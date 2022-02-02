@@ -31,7 +31,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.migration.mirror.given.Courier;
 import io.spine.server.migration.mirror.given.CourierAgg;
 import io.spine.server.migration.mirror.given.DeliveryService;
-import io.spine.server.migration.mirror.given.Parcel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -77,7 +76,8 @@ class MirrorMigrationTest {
             @Test
             @DisplayName("one hundred")
             void oneHundred() {
-
+                // assert result
+                // assert communicates with batches of 100
             }
 
             @Test

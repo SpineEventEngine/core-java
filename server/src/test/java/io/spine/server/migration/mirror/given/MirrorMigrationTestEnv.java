@@ -56,7 +56,6 @@ public class MirrorMigrationTestEnv {
         var storage = InMemoryStorageFactory.newInstance()
                 .createEntityRecordStorage(contextSpec, entityClass);
         return storage;
-
     }
 
     /**
