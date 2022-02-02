@@ -26,51 +26,48 @@
 
 package io.spine.server.migration.mirror;
 
-import io.spine.query.RecordColumn;
 import io.spine.query.RecordQuery;
-import io.spine.query.RecordQueryBuilder;
 import io.spine.server.ContextSpec;
-import io.spine.server.storage.RecordSpec;
-import io.spine.server.storage.RecordWithColumns;
-import io.spine.server.storage.Storage;
-import io.spine.server.storage.memory.InMemoryRecordStorage;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorId;
 
 import java.util.Iterator;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
- * A message storage for {@linkplain Mirror} projections, which exposes
+ * A contract for storages of ...
+ *
+ * <p>A message storage for {@linkplain Mirror} projections, which exposes
  * {@linkplain MirrorStorage#readAll(RecordQuery)} method.
  */
-public interface MirrorStorage extends Storage<MirrorId, Mirror> {
-
-    RecordQueryBuilder<MirrorId, Mirror> queryBuilder();
-
-    Iterator<Mirror> readAll(RecordQuery<MirrorId, Mirror> query);
+public class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
 
     /**
-     * In-memory implementation of {@linkplain MirrorStorage} used for tests.
+     * Creates a new instance.
+     *
+     * @param context
+     *         a specification of Bounded Context in which the created storage is used
      */
-    class InMemory extends InMemoryRecordStorage<MirrorId, Mirror> implements MirrorStorage {
+    public MirrorStorage(ContextSpec context, StorageFactory factory) {
+        super(context, factory.createRecordStorage(context, spec()));
+    }
 
-        public InMemory(ContextSpec context, RecordSpec<MirrorId, Mirror, ?> recordSpec) {
-            super(context, recordSpec);
-        }
+    @SuppressWarnings("ConstantConditions")
+    private static MessageRecordSpec<MirrorId, Mirror> spec() {
+        var spec = new MessageRecordSpec<>(
+                MirrorId.class,
+                Mirror.class,
+                Mirror::getId,
+                List.of(Mirror.Column.aggregateType())
+        );
+        return spec;
+    }
 
-        @Override
-        public void write(MirrorId id, Mirror record) {
-            var columns = Mirror.Column.definitions()
-                    .stream()
-                    .collect(Collectors.toMap(RecordColumn::name, column -> (Object) column.valueIn(record)));
-            var recordWithColumns = RecordWithColumns.of(id, record, columns);
-            write(recordWithColumns);
-        }
-
-        @Override
-        public Iterator<Mirror> readAll(RecordQuery<MirrorId, Mirror> query) {
-            return super.readAll(query);
-        }
+    @Override
+    public Iterator<Mirror> readAll(RecordQuery<MirrorId, Mirror> query) {
+        return super.readAll(query);
     }
 }

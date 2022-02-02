@@ -31,13 +31,12 @@ import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.migration.mirror.MirrorStorage;
-import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.Storage;
+import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorId;
 
-import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -45,6 +44,7 @@ import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.mirror
 
 public class MirrorMigrationTestEnv {
 
+    private static final StorageFactory factory = InMemoryStorageFactory.newInstance();
     private static final String tenantId = MirrorMappingTestEnv.class.getSimpleName();
     private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
 
@@ -53,7 +53,7 @@ public class MirrorMigrationTestEnv {
 
     public static <I, S extends EntityState<I>> EntityRecordStorage<I, S>
     createEntityRecordStorage(Class<? extends Entity<I, S>> entityClass) {
-        var storage = InMemoryStorageFactory.newInstance()
+        var storage = factory
                 .createEntityRecordStorage(contextSpec, entityClass);
         return storage;
     }
@@ -64,10 +64,7 @@ public class MirrorMigrationTestEnv {
      * <p>The returned storage is pre-filled with three types of entities'. For each type, number
      * of records to generate is specified.
      */
-    @SuppressWarnings({
-            "ConstantConditions", /* `Mirror::getId` is a required field, will not return `NULL`. */
-            "MethodWithTooManyParameters" /* Convenient for tests. */
-    })
+    @SuppressWarnings("MethodWithTooManyParameters")
     public static MirrorStorage createMirrorStorage(
             Supplier<EntityState<?>> entity1,
             int numberOfEntity1,
@@ -77,15 +74,7 @@ public class MirrorMigrationTestEnv {
             int numberOfEntity3
     ) {
 
-        var recordColumn = Mirror.Column.aggregateType();
-        var recordSpec = new MessageRecordSpec<>(
-                MirrorId.class,
-                Mirror.class,
-                Mirror::getId,
-                List.of(recordColumn)
-        );
-
-        MirrorStorage storage = new MirrorStorage.InMemory(contextSpec, recordSpec);
+        var storage = new MirrorStorage(contextSpec, factory);
         IntStream.rangeClosed(1, numberOfEntity1)
                 .forEach(i -> write(entity1.get(), storage));
         IntStream.rangeClosed(1, numberOfEntity2)
