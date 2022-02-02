@@ -64,6 +64,8 @@ message Mirror {
 
     // The aggregate type URL.
     string aggregate_type = 6 [(column) = true];
+
+    bool wasMigrated = 7 [(column) = true];
 }
 
 // An ID of a mirror projection.

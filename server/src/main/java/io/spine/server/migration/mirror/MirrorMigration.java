@@ -27,9 +27,11 @@
 package io.spine.server.migration.mirror;
 
 import io.spine.base.EntityState;
+import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.entity.storage.EntityRecordStorage;
+import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.Mirror;
 
 /**
@@ -43,20 +45,22 @@ public final class MirrorMigration {
 
     private final MirrorStorage mirrors;
     private final MirrorMapping mapping;
+    private final StorageFactory storageFactory;
+    private final ContextSpec contextSpec;
 
-    public MirrorMigration(MirrorStorage mirrors) {
-        this(mirrors, new MirrorMapping.Default());
+    public MirrorMigration(ContextSpec contextSpec, StorageFactory storageFactory) {
+        this(new MirrorMapping.Default(), contextSpec, storageFactory);
     }
 
-    public MirrorMigration(MirrorStorage mirrors, MirrorMapping mapping) {
-        this.mirrors = mirrors;
+    public MirrorMigration(
+            MirrorMapping mapping,
+            ContextSpec contextSpec,
+            StorageFactory storageFactory
+    ) {
+        this.mirrors = new MirrorStorage(contextSpec, storageFactory);
         this.mapping = mapping;
-    }
-
-    public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
-    run(Class<A> aggregateClass, EntityRecordStorage<I, S> entityRecords, int batchSizes) {
-
-        // ...
+        this.storageFactory = storageFactory;
+        this.contextSpec = contextSpec;
     }
 
     /**
@@ -65,8 +69,6 @@ public final class MirrorMigration {
      *
      * @param aggregateClass
      *         the type of aggregate, mirror projections of which are to be migrated
-     * @param entityRecords
-     *         the destination storage of entity records for the aggregate
      * @param <I>
      *         the aggregate's identifier
      * @param <S>
@@ -75,19 +77,44 @@ public final class MirrorMigration {
      *         the aggregate's class
      */
     public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
-    run(Class<A> aggregateClass, EntityRecordStorage<I, S> entityRecords) {
+    run(Class<A> aggregateClass, MigrationSupervisor supervisor) {
 
+        supervisor.onMigrationStarted();
+
+        var completedStep = proceed(supervisor);
+        while (completedStep.getMigrated() == supervisor.stepSize()) {
+            completedStep = proceed(supervisor);
+        }
+
+        supervisor.onMigrationCompleted();
+    }
+
+    private MigrationStep proceed(MigrationSupervisor supervisor) {
+
+        supervisor.onStepStarted();
+
+        var entityRecords = storageFactory
+                .createEntityRecordStorage(contextSpec, aggregateClass);
         var aggregateType = AggregateClass.asAggregateClass(aggregateClass)
                                           .stateTypeUrl()
                                           .value();
         var aggregateMirrors = mirrors.queryBuilder()
-                           .where(Mirror.Column.aggregateType())
-                           .is(aggregateType)
-                           .build();
+                                      .where(Mirror.Column.aggregateType())
+                                      .is(aggregateType)
+                                      .limit(supervisor.stepSize())
+                                      .build();
         mirrors.readAll(aggregateMirrors)
                .forEachRemaining(mirror -> {
                    var recordWithColumns = mapping.toRecordWithColumns(mirror, aggregateClass);
                    entityRecords.write(recordWithColumns);
                });
+
+        var completedStep = MigrationStep.newBuilder()
+                .setMigrated(123)
+                .build();
+
+        supervisor.onStepCompleted(completedStep);
+
+        return completedStep;
     }
 }

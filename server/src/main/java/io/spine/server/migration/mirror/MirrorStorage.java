@@ -61,7 +61,10 @@ public class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
                 MirrorId.class,
                 Mirror.class,
                 Mirror::getId,
-                List.of(Mirror.Column.aggregateType())
+                List.of(
+                        Mirror.Column.aggregateType(),
+                        Mirror.Column.wasMigrated()
+                )
         );
         return spec;
     }

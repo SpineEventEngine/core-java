@@ -30,7 +30,7 @@ import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
 
 /**
- * A controlling monitor of a {@link Delivery Inbox Delivery} process.
+ * A controlling monitor of an {@link Delivery Inbox Delivery} process.
  *
  * <p>In some cases when a funnel-like {@code Entity} (e.g. some projection of a business report
  * subscribed to half of the domain events) has a lot of messages in its {@code Inbox},
@@ -102,7 +102,7 @@ public class DeliveryMonitor {
     }
 
     /**
-     * Returns an instance of {@code DeliveryMonitor} which always tells to continue.
+     * Returns an instance of {@code DeliveryMonitor} which always says to continue.
      */
     static DeliveryMonitor alwaysContinue() {
         return ALWAYS_CONTINUE;
