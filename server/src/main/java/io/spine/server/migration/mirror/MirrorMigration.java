@@ -26,13 +26,18 @@
 
 package io.spine.server.migration.mirror;
 
+import com.google.common.collect.Lists;
 import io.spine.base.EntityState;
+import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.Mirror;
+import io.spine.system.server.MirrorId;
+
+import java.util.stream.Collectors;
 
 /**
  * Migrates {@linkplain Mirror} projections into
@@ -40,81 +45,104 @@ import io.spine.system.server.Mirror;
  *
  * <p>{@code Mirror} was deprecated in Spine 2.x. Now, {@code EntityRecordWithColumns} is used
  * to store the aggregate's state for further querying.
+ *
+ * @param <I>
+ *         the aggregate's identifier
+ * @param <S>
+ *         the aggregate's state
+ * @param <A>
+ *         the aggregate's class
  */
-public final class MirrorMigration {
+public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> {
 
-    private final MirrorStorage mirrors;
-    private final MirrorMapping mapping;
-    private final StorageFactory storageFactory;
-    private final ContextSpec contextSpec;
+    private final EntityRecordStorage<I, S> entityRecordStorage;
+    private final MirrorStorage mirrorStorage;
+    private final MirrorMapping<I> mapping;
+    private final RecordQuery<MirrorId, Mirror> nextBatch;
+    private final MigrationSupervisor supervisor;
 
-    public MirrorMigration(ContextSpec contextSpec, StorageFactory storageFactory) {
-        this(new MirrorMapping.Default(), contextSpec, storageFactory);
+    public MirrorMigration(ContextSpec contextSpec,
+                           StorageFactory storageFactory,
+                           Class<A> aggregateClass,
+                           MigrationSupervisor supervisor) {
+
+        this.entityRecordStorage = storageFactory
+                .createEntityRecordStorage(contextSpec, aggregateClass);
+        this.mirrorStorage = new MirrorStorage(contextSpec, storageFactory);
+        this.mapping = new MirrorMapping.Default<>(aggregateClass);
+        this.nextBatch = composeQuery(mirrorStorage, aggregateClass, supervisor.stepSize());
+        this.supervisor = supervisor;
+
     }
 
-    public MirrorMigration(
-            MirrorMapping mapping,
-            ContextSpec contextSpec,
-            StorageFactory storageFactory
-    ) {
-        this.mirrors = new MirrorStorage(contextSpec, storageFactory);
-        this.mapping = mapping;
-        this.storageFactory = storageFactory;
-        this.contextSpec = contextSpec;
+    private static <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>>
+    RecordQuery<MirrorId, Mirror> composeQuery(MirrorStorage mirrorStorage,
+                                               Class<A> aggregateClass,
+                                               int batchSize) {
+
+        var aggregateType = AggregateClass.asAggregateClass(aggregateClass)
+                                          .stateTypeUrl()
+                                          .value();
+        var nextBatch = mirrorStorage.queryBuilder()
+                                      .where(Mirror.Column.aggregateType())
+                                      .is(aggregateType)
+                                      .where(Mirror.Column.wasMigrated())
+                                      .is(false)
+                                      .limit(batchSize)
+                                      .build();
+        return nextBatch;
     }
 
     /**
      * Migrates {@linkplain Mirror} projections which belong to the specified aggregate
      * to the {@linkplain EntityRecordStorage} of that aggregate.
-     *
-     * @param aggregateClass
-     *         the type of aggregate, mirror projections of which are to be migrated
-     * @param <I>
-     *         the aggregate's identifier
-     * @param <S>
-     *         the aggregate's state
-     * @param <A>
-     *         the aggregate's class
      */
-    public <I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> void
-    run(Class<A> aggregateClass, MigrationSupervisor supervisor) {
+    public void run() {
 
         supervisor.onMigrationStarted();
 
-        var completedStep = proceed(supervisor);
-        while (completedStep.getMigrated() == supervisor.stepSize()) {
-            completedStep = proceed(supervisor);
+        ensureWasMigratedColumn(); // ??
+
+        var completedStep = proceed();
+        while (completedStep.getMigrated() == supervisor.stepSize()
+                        && supervisor.shouldContinueAfter(completedStep)) {
+            completedStep = proceed();
         }
 
         supervisor.onMigrationCompleted();
     }
 
-    private MigrationStep proceed(MigrationSupervisor supervisor) {
+    private void ensureWasMigratedColumn() {
+
+        // Goes through all the messages, sets `wasMigrated=false` if the column is not set.
+
+        // Could it be a responsibility of `MirrorStorage` to ensure the column is present, and the
+        // default value = `false`?
+
+        // For table-based - as simple as a single query.
+        // For record-based - batch updated is required, which is sort of impossible.
+    }
+
+    private MigrationStep proceed() {
 
         supervisor.onStepStarted();
 
-        var entityRecords = storageFactory
-                .createEntityRecordStorage(contextSpec, aggregateClass);
-        var aggregateType = AggregateClass.asAggregateClass(aggregateClass)
-                                          .stateTypeUrl()
-                                          .value();
-        var aggregateMirrors = mirrors.queryBuilder()
-                                      .where(Mirror.Column.aggregateType())
-                                      .is(aggregateType)
-                                      .limit(supervisor.stepSize())
-                                      .build();
-        mirrors.readAll(aggregateMirrors)
-               .forEachRemaining(mirror -> {
-                   var recordWithColumns = mapping.toRecordWithColumns(mirror, aggregateClass);
-                   entityRecords.write(recordWithColumns);
-               });
+        var mirrorRecords = Lists.newArrayList(mirrorStorage.readAll(nextBatch));
+        var entityRecords = mirrorRecords.stream()
+                .map(mapping::toEntityRecord)
+                .collect(Collectors.toList());
+        var migratedMirrorRecords = mirrorRecords.stream()
+                .map(mirror -> mirror.toBuilder().setWasMigrated(true).build())
+                .collect(Collectors.toList());
+
+        entityRecordStorage.writeAll(entityRecords);
+        mirrorStorage.writeBatch(migratedMirrorRecords);
 
         var completedStep = MigrationStep.newBuilder()
-                .setMigrated(123)
+                .setMigrated(migratedMirrorRecords.size())
                 .build();
 
         supervisor.onStepCompleted(completedStep);
-
         return completedStep;
     }
 }

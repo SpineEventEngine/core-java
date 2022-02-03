@@ -26,6 +26,7 @@
 
 package io.spine.server.migration.mirror;
 
+import io.spine.annotation.SPI;
 import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageRecordSpec;
@@ -43,6 +44,7 @@ import java.util.List;
  * <p>A message storage for {@linkplain Mirror} projections, which exposes
  * {@linkplain MirrorStorage#readAll(RecordQuery)} method.
  */
+@SPI
 public class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
 
     /**
@@ -72,5 +74,10 @@ public class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
     @Override
     public Iterator<Mirror> readAll(RecordQuery<MirrorId, Mirror> query) {
         return super.readAll(query);
+    }
+
+    @Override
+    public void writeBatch(Iterable<Mirror> messages) {
+        super.writeBatch(messages);
     }
 }
