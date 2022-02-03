@@ -88,9 +88,6 @@ public class MirrorMappingTestEnv {
     public static void assertEntityColumns(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns,
                                            Mirror mirror) {
 
-        // This method is hardcoded for `Parcel` aggregate.
-        // Try to generify by accepting the aggregate's class.
-
         var parcel = AnyPacker.unpack(mirror.getState(), Parcel.class);
         assertThat(recordWithColumns.columnValue(ColumnName.of("recipient")))
                 .isEqualTo(parcel.getRecipient());

@@ -37,6 +37,10 @@ public class MemoizingSupervisor extends MigrationSupervisor {
 
     private final List<MigrationStep> completedSteps = new ArrayList<>();
 
+    private int startedTimes = 0;
+    private int completedTimes = 0;
+    private int stepStartedTimes = 0;
+
     public MemoizingSupervisor(int batchSize) {
         super(batchSize);
     }
@@ -48,5 +52,32 @@ public class MemoizingSupervisor extends MigrationSupervisor {
 
     public List<MigrationStep> completedSteps() {
         return Collections.unmodifiableList(completedSteps);
+    }
+
+    @Override
+    public void onMigrationStarted() {
+        startedTimes++;
+    }
+
+    public int startedTimes() {
+        return startedTimes;
+    }
+
+    @Override
+    public void onMigrationCompleted() {
+        completedTimes++;
+    }
+
+    public int completedTimes() {
+        return completedTimes;
+    }
+
+    @Override
+    public void onStepStarted() {
+        stepStartedTimes++;
+    }
+
+    public int stepStartedTimes() {
+        return stepStartedTimes;
     }
 }

@@ -35,12 +35,16 @@ import io.spine.server.migration.mirror.given.CourierAgg;
 import io.spine.server.migration.mirror.given.DeliveryService;
 import io.spine.server.migration.mirror.given.MemoizingSupervisor;
 import io.spine.server.migration.mirror.given.MirrorMappingTestEnv;
+import io.spine.server.migration.mirror.given.ParcelAgg;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.Mirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.fill;
@@ -117,33 +121,65 @@ class MirrorMigrationTest {
     class NotifySupervisor {
 
         @Test
-        @DisplayName("on a migration staring")
-        void onMigrationStarting() {
+        @DisplayName("on a migration start and completion")
+        void onMigrationRunning() {
+            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+            var mirrorStorage = migration.mirrorStorage();
+            fill(mirrorStorage, DeliveryService::generateParcel, 3_000);
 
+            var supervisor = new MemoizingSupervisor(1_000);
+            migration.run(supervisor);
+
+            assertThat(supervisor.startedTimes()).isEqualTo(1);
+            assertThat(supervisor.completedTimes()).isEqualTo(1);
         }
 
         @Test
-        @DisplayName("on a migration completion")
-        void onMigrationCompletion() {
+        @DisplayName("on a migration's step start and completion")
+        void onStepRunning() {
+            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+            var mirrorStorage = migration.mirrorStorage();
+            fill(mirrorStorage, DeliveryService::generateParcel, 3_050);
 
-        }
+            var supervisor = new MemoizingSupervisor(1_000);
+            migration.run(supervisor);
 
-        @Test
-        @DisplayName("on a migration step staring")
-        void onMigrationStepStarting() {
-
-        }
-
-        @Test
-        @DisplayName("on a migration step completion")
-        void onMigrationStepCompletion() {
-
+            assertThat(supervisor.stepStartedTimes()).isEqualTo(4);
+            assertThat(supervisor.completedSteps()).hasSize(4);
         }
     }
 
     @Test
     @DisplayName("terminate on a supervisor's refusal")
     void terminateMigration() {
+        var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+        var mirrorStorage = migration.mirrorStorage();
+        var expectedNumber = 5_000;
+        fill(mirrorStorage, DeliveryService::generateParcel, expectedNumber);
 
+        // Too small batch size would slow down the migration.
+        // We are going to terminate the migration when it takes more than 5 seconds.
+        var supervisor = new MigrationSupervisor(10) {
+
+            private LocalDateTime whenStarted;
+
+            @Override
+            public void onMigrationStarted() {
+                whenStarted = LocalDateTime.now();
+            }
+
+            @Override
+            public boolean shouldContinueAfter(MigrationStep step) {
+                var secondsSinceStart = ChronoUnit.SECONDS
+                        .between(whenStarted, LocalDateTime.now());
+                return secondsSinceStart <= 5;
+            }
+        };
+
+        migration.run(supervisor);
+
+        var entityRecordStorage = migration.entityRecordStorage();
+        var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
+        assertThat(entityRecords.size()).isNotEqualTo(expectedNumber);
     }
 }
