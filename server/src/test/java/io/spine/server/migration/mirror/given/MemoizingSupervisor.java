@@ -24,43 +24,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.migration.mirror;
+package io.spine.server.migration.mirror.given;
 
-import io.spine.annotation.SPI;
+import io.spine.server.migration.mirror.MigrationStep;
+import io.spine.server.migration.mirror.MigrationSupervisor;
 
-import javax.annotation.concurrent.Immutable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-@SPI
-@Immutable
-public class MigrationSupervisor {
+public class MemoizingSupervisor extends MigrationSupervisor {
 
-    private final int batchSize;
+    private final List<MigrationStep> completedSteps = new ArrayList<>();
 
-    public MigrationSupervisor(int batchSize) {
-        this.batchSize = batchSize;
+    public MemoizingSupervisor(int batchSize) {
+        super(batchSize);
     }
 
-    public int batchSize() {
-        return batchSize;
-    }
-
-    public boolean shouldContinueAfter(MigrationStep step) {
-        return true;
-    }
-
-    public void onStepStarted() {
-        // do nothing.
-    }
-
+    @Override
     public void onStepCompleted(MigrationStep step) {
-        // do nothing.
+        completedSteps.add(step);
     }
 
-    public void onMigrationStarted() {
-        // do nothing.
-    }
-
-    public void onMigrationCompleted() {
-        // do nothing.
+    public List<MigrationStep> completedSteps() {
+        return Collections.unmodifiableList(completedSteps);
     }
 }
