@@ -37,53 +37,37 @@ import io.spine.system.server.Mirror;
  *
  * <p>{@code Mirror} was deprecated in Spine 2.x. Now, {@code EntityRecordWithColumns} is used
  * to store the aggregate's state for further querying.
+ *
+ * @param <I>
+ *         the type of aggregate's identifiers
+ * @param <S>
+ *         the type of aggregate's state
+ * @param <A>
+ *         the type of aggregate
+ *
+ * @implNote {@code Mirror} itself can be directly transformed into
+ *         an {@linkplain EntityRecord}. In order to get {@code EntityRecordWithColumns},
+ *         we need to know which columns should be fetched from the entity's state.
+ *         For this reason, aggregate class is passed along the mirror itself. It contains
+ *         information about which columns are declared to be stored along the aggregate's state.
  */
-public interface MirrorMapping<I> {
+class MirrorMapping<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> {
 
-    /**
-     * Transforms the passed {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
-     *
-     * @param mirror
-     *         the source mirror to be transformed into an entity record
-     *
-     * @implNote {@code Mirror} itself can be directly transformed into
-     *         an {@linkplain EntityRecord}. In order to get {@code EntityRecordWithColumns},
-     *         we need to know which columns should be fetched from the entity's state.
-     *         For this reason, aggregate class is passed along the mirror itself. It contains
-     *         information about which columns are declared to be stored along the aggregate's state.
-     */
-    EntityRecordWithColumns<I> toEntityRecord(Mirror mirror);
+    private final Class<A> aggregateClass;
 
-    /**
-     * The default transformation of a {@linkplain Mirror} into
-     * an {@linkplain EntityRecordWithColumns}.
-     *
-     * @param <I>
-     *         the type of aggregate's identifiers
-     * @param <S>
-     *         the type of aggregate's state
-     * @param <A>
-     *         the type of aggregate
-     */
-    class Default<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>>
-            implements MirrorMapping<I> {
+    public MirrorMapping(Class<A> aggregateClass) {
+        this.aggregateClass = aggregateClass;
+    }
 
-        private final Class<A> aggregateClass;
-
-        public Default(Class<A> aggregateClass) {
-            this.aggregateClass = aggregateClass;
-        }
-
-        @Override
-        public EntityRecordWithColumns<I> toEntityRecord(Mirror mirror) {
-            var record = EntityRecord.newBuilder()
-                    .setEntityId(mirror.getId().getValue())
-                    .setState(mirror.getState())
-                    .setVersion(mirror.getVersion())
-                    .setLifecycleFlags(mirror.getLifecycle())
-                    .vBuild();
-            var recordWithColumns = EntityRecordWithColumns.create(record, aggregateClass);
-            return recordWithColumns;
-        }
+    public EntityRecordWithColumns<I> toEntityRecord(Mirror mirror) {
+        var record = EntityRecord.newBuilder()
+                .setEntityId(mirror.getId()
+                                   .getValue())
+                .setState(mirror.getState())
+                .setVersion(mirror.getVersion())
+                .setLifecycleFlags(mirror.getLifecycle())
+                .vBuild();
+        var recordWithColumns = EntityRecordWithColumns.create(record, aggregateClass);
+        return recordWithColumns;
     }
 }

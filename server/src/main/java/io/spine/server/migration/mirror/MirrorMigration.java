@@ -57,7 +57,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
 
     private final EntityRecordStorage<I, S> entityRecordStorage;
     private final MirrorStorage mirrorStorage;
-    private final MirrorMapping<I> mapping;
+    private final MirrorMapping<I, S, A> mapping;
     private final RecordQuery<MirrorId, Mirror> nextBatch;
     private final MigrationSupervisor supervisor;
 
@@ -69,7 +69,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         this.entityRecordStorage = storageFactory
                 .createEntityRecordStorage(contextSpec, aggregateClass);
         this.mirrorStorage = new MirrorStorage(contextSpec, storageFactory);
-        this.mapping = new MirrorMapping.Default<>(aggregateClass);
+        this.mapping = new MirrorMapping<>(aggregateClass);
         this.nextBatch = composeQuery(mirrorStorage, aggregateClass, supervisor.stepSize());
         this.supervisor = supervisor;
 

@@ -27,7 +27,6 @@
 package io.spine.server.migration.mirror;
 
 import io.spine.server.migration.mirror.given.ParcelAgg;
-import io.spine.server.migration.mirror.given.ParcelId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +50,7 @@ class MirrorMappingTest {
         var parcel = generateParcel();
         var mirror = mirror(parcel);
 
-        MirrorMapping<ParcelId> mapping = new MirrorMapping.Default<>(ParcelAgg.class);
+        var mapping = new MirrorMapping<>(ParcelAgg.class);
         var recordWithColumns = mapping.toEntityRecord(mirror);
         var record = recordWithColumns.record();
 
