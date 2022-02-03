@@ -138,10 +138,8 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
 
     private Iterator<Mirror> fetchNextBatch(int batchSize) {
         var query = mirrorStorage.queryBuilder()
-                                 .where(Mirror.Column.aggregateType())
-                                 .is(aggregateType)
-                                 .where(Mirror.Column.wasMigrated())
-                                 .is(false)
+                                 .where(Mirror.Column.aggregateType()).is(aggregateType)
+                                 .where(Mirror.Column.wasMigrated()).is(false)
                                  .sortAscendingBy(Mirror.Column.wasMigrated())
                                  .limit(batchSize)
                                  .build();

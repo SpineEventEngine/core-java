@@ -23,24 +23,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.migration.mirror.given;
+package spine.test.migration.mirror;
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.event.React;
+import "spine/options.proto";
+import "spine/test/migration/mirror/identifiers.proto";
 
-public class ParcelAgg extends Aggregate<ParcelId, Parcel, Parcel.Builder> {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.migration.mirror.given";
+option java_multiple_files = true;
 
-    @React
-    ParcelDelivered on(DeliveryCanceled event) {
-        return ParcelDelivered.newBuilder()
-                .setId(event.getId())
-                .vBuild();
-    }
+message DeliveryCanceled {
+    ParcelId id = 1 [(required) = true];
+}
 
-    @Apply
-    void on(ParcelDelivered event) {
-        builder().setDelivered(true);
-    }
+message ParcelDelivered {
+    ParcelId id = 1 [(required) = true];
 }

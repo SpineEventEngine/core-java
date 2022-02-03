@@ -28,17 +28,19 @@ package io.spine.server.migration.mirror;
 
 import com.google.common.collect.Lists;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.migration.mirror.given.Courier;
-import io.spine.server.migration.mirror.given.CourierAgg;
 import io.spine.server.migration.mirror.given.DeliveryService;
 import io.spine.server.migration.mirror.given.MemoizingSupervisor;
 import io.spine.server.migration.mirror.given.MirrorMappingTestEnv;
+import io.spine.server.migration.mirror.given.Parcel;
 import io.spine.server.migration.mirror.given.ParcelAgg;
+import io.spine.server.migration.mirror.given.ParcelId;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.system.server.Mirror;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -74,20 +76,25 @@ class MirrorMigrationTest {
         }
 
         private void testInBatchesOf(int batchSize) {
-            var migration = new MirrorMigration<>(contextSpec, storageFactory, CourierAgg.class);
+            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
             var mirrorStorage = migration.mirrorStorage();
-            var numberOfMirrors = 4_000;
+            var deliveredParcels = 2_175;
+            var parcels = 3_780;
+            var totalParcels = deliveredParcels + parcels;
 
-            fill(mirrorStorage, DeliveryService::generateParcel, 3_000);
-            fill(mirrorStorage, DeliveryService::generateCourier, numberOfMirrors);
-            fill(mirrorStorage, DeliveryService::generateVehicle, 5_000);
+            fill(mirrorStorage, DeliveryService::generateCourier, 3_000);
+            fill(mirrorStorage, DeliveryService::generateVehicle, 4_000);
+            fill(mirrorStorage, DeliveryService::generateDeliveredParcel, deliveredParcels);
+            fill(mirrorStorage, DeliveryService::generateParcel, parcels);
 
             var supervisor = new MemoizingSupervisor(batchSize);
             migration.run(supervisor);
 
-            assertEntityRecords(migration.entityRecordStorage(), numberOfMirrors);
+            var entityRecordStorage = migration.entityRecordStorage();
+            assertEntityRecords(entityRecordStorage, totalParcels);
+            assertWithinBc(entityRecordStorage, deliveredParcels, parcels);
+            assertMigratedMirrors(mirrorStorage, totalParcels);
             assertUsedBatchSize(supervisor, batchSize);
-            assertMigratedMirrors(mirrorStorage, numberOfMirrors);
         }
 
         private void assertEntityRecords(EntityRecordStorage<?, ?> entityRecordStorage,
@@ -96,7 +103,7 @@ class MirrorMigrationTest {
             var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
             assertThat(entityRecords).hasSize(expected);
             assertDoesNotThrow(() -> entityRecords.forEach(
-                    entityRecord -> AnyPacker.unpack(entityRecord.getState(), Courier.class))
+                    entityRecord -> AnyPacker.unpack(entityRecord.getState(), Parcel.class))
             );
         }
 
@@ -113,6 +120,33 @@ class MirrorMigrationTest {
                                               .build();
             var migratedMirrors = Lists.newArrayList(mirrorStorage.readAll(migratedNumber));
             assertThat(migratedMirrors).hasSize(expected);
+        }
+
+        private void assertWithinBc(EntityRecordStorage<ParcelId, Parcel> entityRecordStorage,
+                                    int expectedDelivered,
+                                    int expectedParcels) {
+
+            var context = BlackBox.from(
+                    BoundedContextBuilder.assumingTests()
+                                         .add(ParcelAgg.class)
+            );
+            var client = context.clients()
+                                .withMatchingTenant()
+                                .asGuest();
+
+            var delivered = client.run(
+                    Parcel.query()
+                          .delivered().is(true)
+                          .build()
+            );
+            var parcels = client.run(
+                    Parcel.query()
+                          .delivered().is(true)
+                          .build()
+            );
+
+            assertThat(delivered).hasSize(expectedDelivered);
+            assertThat(parcels).hasSize(expectedParcels);
         }
     }
 

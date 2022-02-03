@@ -37,6 +37,14 @@ public class DeliveryService {
                 .vBuild();
     }
 
+    public static Parcel generateDeliveredParcel() {
+        return Parcel.newBuilder()
+                .setId(ParcelId.generate())
+                .setRecipient(RecipientId.generate())
+                .setDelivered(true)
+                .vBuild();
+    }
+
     public static Parcel generateParcel() {
         return Parcel.newBuilder()
                 .setId(ParcelId.generate())
