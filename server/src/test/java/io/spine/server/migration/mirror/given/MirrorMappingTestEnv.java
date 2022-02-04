@@ -41,15 +41,15 @@ import io.spine.system.server.MirrorId;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class MirrorMappingTestEnv {
+public final class MirrorMappingTestEnv {
 
     private MirrorMappingTestEnv() {
     }
 
     /**
-     * Asserts that common fields in {@linkplain EntityRecord} and {@linkplain Mirror} match.
+     * Asserts that the common fields in {@linkplain EntityRecord} and {@linkplain Mirror} match.
      */
-    public static void assertRecord(EntityRecord record, Mirror mirror) {
+    public static void assertEntityRecord(EntityRecord record, Mirror mirror) {
         assertThat(record.getEntityId()).isEqualTo(mirror.getId().getValue());
         assertThat(record.getState()).isEqualTo(mirror.getState());
         assertThat(record.getVersion()).isEqualTo(mirror.getVersion());
@@ -57,16 +57,12 @@ public class MirrorMappingTestEnv {
     }
 
     /**
-     * Asserts that version and lifecycle columns match to the ones in mirror.
+     * Asserts that version and lifecycle column values match to the ones in mirror.
      *
-     * <p>Those columns are defined for all entity records.
+     * <p>Those columns are declared for all entity records.
      */
     public static void assertLifecycleColumns(RecordWithColumns<?, EntityRecord> recordWithColumns,
                                                Mirror mirror) {
-
-        // total columns = (1x version) + (2x lifecycle columns) + (2x entity's columns)
-        var columns = recordWithColumns.columnNames();
-        assertThat(columns.size()).isEqualTo(1 + 2 + 2);
 
         var lifecycleFlags = mirror.getLifecycle();
         assertThat(recordWithColumns.columnValue(ColumnName.of("archived")))
@@ -80,13 +76,13 @@ public class MirrorMappingTestEnv {
     }
 
     /**
-     * Asserts that aggregate's columns defined for {@linkplain Parcel} aggregate are present
+     * Asserts that state-based columns defined for {@linkplain Parcel} aggregate are present
      * in the record.
      *
-     * <p>Those columns are specific to a concrete aggregate.
+     * <p>Those columns are specific to a concrete aggregate's state.
      */
-    public static void assertEntityColumns(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns,
-                                           Mirror mirror) {
+    public static void assertStateColumns(RecordWithColumns<ParcelId, EntityRecord> recordWithColumns,
+                                          Mirror mirror) {
 
         var parcel = AnyPacker.unpack(mirror.getState(), Parcel.class);
         assertThat(recordWithColumns.columnValue(ColumnName.of("recipient")))
@@ -102,13 +98,14 @@ public class MirrorMappingTestEnv {
         var lifecycle = lifecycle(false, false);
         var version = version(12);
         var mirrorId = mirrorId(state);
-        return Mirror.newBuilder()
+        var mirror = Mirror.newBuilder()
                 .setId(mirrorId)
                 .setState(Any.pack(state, state.typeUrl().prefix()))
                 .setLifecycle(lifecycle)
                 .setVersion(version)
                 .setAggregateType(state.typeUrl().value())
                 .vBuild();
+        return mirror;
     }
 
     private static MirrorId mirrorId(EntityState<?> state) {

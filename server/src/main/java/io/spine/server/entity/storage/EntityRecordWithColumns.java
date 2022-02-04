@@ -107,7 +107,27 @@ public final class EntityRecordWithColumns<I>
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Creates a new instance of {@code EntityRecordWithColumns} using the pre-created
+     * entity record and the entity class.
+     *
+     * <p>This method considers both lifecycle and state-based columns.
+     *
+     * <p>It is a responsibility of the caller to provide a record with the matching
+     * identifier and state types.
+     *
+     * @param record
+     *         the record prepared for storage
+     * @param entityClass
+     *         the class of the record's entity
+     * @param <I>
+     *         the type of the entity's identifier
+     * @param <S>
+     *         the type of the entity's state
+     * @param <E>
+     *         the type of the entity
+     */
+    @SuppressWarnings("unchecked") // see the docs.
     public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
     create(EntityRecord record, Class<E> entityClass) {
 
@@ -118,11 +138,11 @@ public final class EntityRecordWithColumns<I>
         var stateValues = columnsScanner.stateColumns().valuesIn(entityState);
         var lifecycleValues = EntityRecordColumn.valuesIn(record);
 
-        Map<ColumnName, Object> allValues = new HashMap<>();
-        allValues.putAll(stateValues);
-        allValues.putAll(lifecycleValues);
+        Map<ColumnName, Object> allColumnValues = new HashMap<>();
+        allColumnValues.putAll(stateValues);
+        allColumnValues.putAll(lifecycleValues);
 
-        var result = (EntityRecordWithColumns<I>) of(record, allValues);
+        var result = (EntityRecordWithColumns<I>) of(record, allColumnValues);
         return result;
     }
 

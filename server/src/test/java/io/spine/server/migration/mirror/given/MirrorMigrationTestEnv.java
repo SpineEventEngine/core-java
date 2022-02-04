@@ -27,7 +27,6 @@
 package io.spine.server.migration.mirror.given;
 
 import com.google.common.collect.Lists;
-import io.spine.base.EntityState;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -36,43 +35,16 @@ import io.spine.server.migration.mirror.MirrorStorage;
 import io.spine.system.server.Mirror;
 import io.spine.testing.server.blackbox.BlackBox;
 
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import static com.google.common.truth.Truth.assertThat;
 
-public class MirrorMigrationTestEnv {
+public final class MirrorMigrationTestEnv {
 
     private MirrorMigrationTestEnv() {
     }
 
-    /**
-     * Fills a storage with {@linkplain Mirror} projections.
-     *
-     * <p>The returned storage is pre-filled with three types of entities'. For each type, number
-     * of records to generate is specified.
-     */
-    public static void fill(MirrorStorage mirrorStorage,
-                            Supplier<EntityState<?>> stateSupplier,
-                            int numberOfStates) {
-
-        var mirrors = IntStream.rangeClosed(1, numberOfStates)
-                               .mapToObj(i -> stateSupplier)
-                               .map(MirrorMigrationTestEnv::mirror)
-                               .collect(Collectors.toList());
-        mirrorStorage.writeBatch(mirrors);
-    }
-
-    private static Mirror mirror(Supplier<EntityState<?>> stateSupplier) {
-        var state = stateSupplier.get();
-        var mirror = MirrorMappingTestEnv.mirror(state);
-        return mirror;
-    }
-
     public static void assertWithinBc(EntityRecordStorage<ParcelId, Parcel> entityRecordStorage,
                                       int expectedDelivered,
-                                      int expectedParcels) {
+                                      int expectedInProgress) {
 
         ServerEnvironment.instance().reset();
         ServerEnvironment.when(Tests.class)
@@ -98,7 +70,7 @@ public class MirrorMigrationTestEnv {
         );
 
         assertThat(delivered).hasSize(expectedDelivered);
-        assertThat(parcels).hasSize(expectedParcels);
+        assertThat(parcels).hasSize(expectedInProgress);
 
         ServerEnvironment.instance().reset();
         context.close();

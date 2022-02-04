@@ -32,6 +32,7 @@ import io.spine.server.migration.mirror.given.DeliveryService;
 import io.spine.server.migration.mirror.given.MemoizingSupervisor;
 import io.spine.server.migration.mirror.given.MirrorMappingTestEnv;
 import io.spine.server.migration.mirror.given.ParcelAgg;
+import io.spine.server.migration.mirror.given.PreparedMirrorStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.jupiter.api.DisplayName;
@@ -45,43 +46,43 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertMigratedMirrors;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertUsedBatchSize;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertWithinBc;
-import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.fill;
 
 @DisplayName("`MirrorMigration` should")
-class MirrorMigrationTest {
+final class MirrorMigrationTest {
 
     private static final StorageFactory storageFactory = InMemoryStorageFactory.newInstance();
     private static final String tenantId = MirrorMappingTestEnv.class.getSimpleName();
     private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
 
     @Nested
-    @DisplayName("migrate mirror records step by step with a batches of")
+    @DisplayName("migrate mirror records step-by-step with a step size of")
     class MigrateMirrorsInBatchesOf {
 
         @Test
-        @DisplayName("one hundred")
-        void oneHundred() {
+        @DisplayName("one hundred records")
+        void oneHundredRecords() {
             testInBatchesOf(100);
         }
 
         @Test
-        @DisplayName("one thousand")
-        void fiveThousands() {
+        @DisplayName("one thousand records")
+        void fiveThousandsRecords() {
             testInBatchesOf(1_000);
         }
 
         private void testInBatchesOf(int batchSize) {
-            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
-            var mirrorStorage = migration.mirrorStorage();
             var delivered = 2_175;
             var inProgress = 3_780;
 
-            fill(mirrorStorage, DeliveryService::generateCourier, 3_000);
-            fill(mirrorStorage, DeliveryService::generateVehicle, 4_000);
-            fill(mirrorStorage, DeliveryService::generateDeliveredParcel, delivered);
-            fill(mirrorStorage, DeliveryService::generateParcel, inProgress);
-
+            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+            var mirrorStorage = new PreparedMirrorStorage(migration.mirrorStorage())
+                    .put(DeliveryService::generateCourier, 3_000)
+                    .put(DeliveryService::generateVehicle, 4_000)
+                    .put(DeliveryService::generateDeliveredParcel, delivered)
+                    .put(DeliveryService::generateInProgressParcel, inProgress)
+                    .get();
             var supervisor = new MemoizingSupervisor(batchSize);
+
             migration.run(supervisor);
 
             assertWithinBc(migration.entityRecordStorage(), delivered, inProgress);
@@ -116,9 +117,8 @@ class MirrorMigrationTest {
 
         private void runMigration(MemoizingSupervisor supervisor) {
             var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
-            var mirrorStorage = migration.mirrorStorage();
-
-            fill(mirrorStorage, DeliveryService::generateParcel, 3_050);
+            new PreparedMirrorStorage(migration.mirrorStorage())
+                    .put(DeliveryService::generateInProgressParcel, 3_050);
             migration.run(supervisor);
         }
     }
@@ -126,11 +126,10 @@ class MirrorMigrationTest {
     @Test
     @DisplayName("terminate on a supervisor's refusal")
     void terminateMigration() {
-        var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
-        var mirrorStorage = migration.mirrorStorage();
-
         var expectedNumber = 5_000;
-        fill(mirrorStorage, DeliveryService::generateParcel, expectedNumber);
+        var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+        new PreparedMirrorStorage(migration.mirrorStorage())
+                .put(DeliveryService::generateInProgressParcel, expectedNumber);
 
         // Too small batch size would slow down the migration.
         // We are going to terminate the migration when it takes more than three seconds.

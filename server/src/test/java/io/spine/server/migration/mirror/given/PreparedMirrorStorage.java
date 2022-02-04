@@ -26,36 +26,40 @@
 
 package io.spine.server.migration.mirror.given;
 
-public class DeliveryService {
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.base.EntityState;
+import io.spine.server.migration.mirror.MirrorStorage;
+import io.spine.system.server.Mirror;
 
-    private DeliveryService() {
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class PreparedMirrorStorage {
+
+    private final MirrorStorage storage;
+
+    public PreparedMirrorStorage(MirrorStorage storage) {
+        this.storage = storage;
     }
 
-    public static Courier generateCourier() {
-        return Courier.newBuilder()
-                .setId(CourierId.generate())
-                .vBuild();
+    @CanIgnoreReturnValue
+    public PreparedMirrorStorage put(Supplier<EntityState<?>> stateSupplier, int numberOfStates) {
+        var mirrors = IntStream.rangeClosed(1, numberOfStates)
+                               .mapToObj(i -> stateSupplier)
+                               .map(PreparedMirrorStorage::mirror)
+                               .collect(Collectors.toList());
+        storage.writeBatch(mirrors);
+        return this;
     }
 
-    public static Parcel generateDeliveredParcel() {
-        return Parcel.newBuilder()
-                .setId(ParcelId.generate())
-                .setRecipient(RecipientId.generate())
-                .setDelivered(true)
-                .vBuild();
+    private static Mirror mirror(Supplier<EntityState<?>> stateSupplier) {
+        var state = stateSupplier.get();
+        var mirror = MirrorMappingTestEnv.mirror(state);
+        return mirror;
     }
 
-    public static Parcel generateInProgressParcel() {
-        return Parcel.newBuilder()
-                .setId(ParcelId.generate())
-                .setRecipient(RecipientId.generate())
-                .setDelivered(false)
-                .vBuild();
-    }
-
-    public static Vehicle generateVehicle() {
-        return Vehicle.newBuilder()
-                .setId(VehicleId.generate())
-                .vBuild();
+    public MirrorStorage get() {
+        return storage;
     }
 }

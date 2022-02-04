@@ -42,11 +42,38 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Migrates {@linkplain Mirror} projections into
- * {@linkplain io.spine.server.entity.storage.EntityRecordWithColumns EntityRecordWithColumns}.
+ * Migrates {@linkplain Mirror} projections into {@linkplain EntityRecordWithColumns}.
  *
- * <p>{@code Mirror} was deprecated in Spine 2.x. Now, {@code EntityRecordWithColumns} is used
- * to store the aggregate's state for further querying.
+ * <p>{@code Mirror} projection was deprecated in Spine 2.x. Previously, it was used to store
+ * aggregates' states to allow their querying. A single projection stored states of <b>all</b>
+ * aggregates in a Bounded Context.
+ *
+ * <p>Now, {@code EntityRecordWithColumns} is used to store the aggregate's states when it is
+ * open for querying. They are stored on a <b>per-aggregate</b> basis. This enables storing of
+ * queryable state-based columns along the state itself. For this reason, the migration
+ * is also done on a per-aggregate basis.
+ *
+ * <p><b>An example usage</b>
+ *
+ * <p>1. Create an instance of `MirrorMigration`:
+ * <pre>
+ * var contextSpec = ContextSpec.singleTenant("...");
+ * var storageFactory = ServerEnvironment.instance().storageFactory();
+ * var migration = new MirrorMigration(contextSpec, storageFactory, ParcelAgg.class);
+ * </pre>
+ *
+ * <p>2. Create `MigrationSupervisor`. Here we are going to use a default implementation,
+ * which always continues the migration. Also, we will work with storages via batches
+ * of 500 records.
+ * <pre>
+ * var stepSize = 500;
+ * var supervisor = new MigrationSupervisor(stepSize);
+ * </pre>
+ *
+ * <p>3. Run the migration.
+ * <pre>
+ * migration.run(supervisor);
+ * </pre>
  *
  * @param <I>
  *         the aggregate's identifier
@@ -64,11 +91,11 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     private final String aggregateType;
 
     public MirrorMigration(ContextSpec contextSpec,
-                           StorageFactory storageFactory,
+                           StorageFactory factory,
                            Class<A> aggClass) {
 
-        this.entityRecordStorage = storageFactory.createEntityRecordStorage(contextSpec, aggClass);
-        this.mirrorStorage = new MirrorStorage(contextSpec, storageFactory);
+        this.mirrorStorage = new MirrorStorage(contextSpec, factory);
+        this.entityRecordStorage = factory.createEntityRecordStorage(contextSpec, aggClass);
         this.mapping = new MirrorMapping<>(aggClass);
         this.aggregateType = AggregateClass.asAggregateClass(aggClass)
                                           .stateTypeUrl()
@@ -80,36 +107,20 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
      * to the {@linkplain EntityRecordStorage} of that aggregate.
      */
     public void run(MigrationSupervisor supervisor) {
-
         supervisor.onMigrationStarted();
 
-        ensureWasMigratedColumn(); // ??
-
-        var completedStep = proceed(supervisor);
-        while (completedStep.getMigrated() == supervisor.batchSize()
-                        && supervisor.shouldContinueAfter(completedStep)) {
-            completedStep = proceed(supervisor);
+        var step = proceed(supervisor);
+        while (step.getMigrated() != 0 && supervisor.shouldContinueAfter(step)) {
+            step = proceed(supervisor);
         }
 
         supervisor.onMigrationCompleted();
     }
 
-    private void ensureWasMigratedColumn() {
-
-        // Goes through all the messages, sets `wasMigrated=false` if the column is not set.
-
-        // Could it be a responsibility of `MirrorStorage` to ensure the column is present, and the
-        // default value = `false`?
-
-        // For table-based - as simple as a single query.
-        // For record-based - batch updated is required, which is sort of impossible.
-    }
-
     private MigrationStep proceed(MigrationSupervisor supervisor) {
-
         supervisor.onStepStarted();
 
-        var batchSize = supervisor.batchSize();
+        var batchSize = supervisor.stepSize();
         Collection<EntityRecordWithColumns<I>> entityRecords = new ArrayList<>(batchSize);
         Collection<Mirror> migratedMirrors = new ArrayList<>(batchSize);
 

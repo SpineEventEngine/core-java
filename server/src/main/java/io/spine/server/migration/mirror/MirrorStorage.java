@@ -26,7 +26,6 @@
 
 package io.spine.server.migration.mirror;
 
-import io.spine.annotation.SPI;
 import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageRecordSpec;
@@ -44,21 +43,20 @@ import java.util.List;
  * <p>A message storage for {@linkplain Mirror} projections, which exposes
  * {@linkplain MirrorStorage#readAll(RecordQuery)} method.
  */
-@SPI
 public class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
 
     /**
      * Creates a new instance.
      *
-     * @param context
+     * @param contextSpec
      *         a specification of Bounded Context in which the created storage is used
      */
-    public MirrorStorage(ContextSpec context, StorageFactory factory) {
-        super(context, factory.createRecordStorage(context, spec()));
+    public MirrorStorage(ContextSpec contextSpec, StorageFactory factory) {
+        super(contextSpec, factory.createRecordStorage(contextSpec, messageSpec()));
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static MessageRecordSpec<MirrorId, Mirror> spec() {
+    private static MessageRecordSpec<MirrorId, Mirror> messageSpec() {
         var spec = new MessageRecordSpec<>(
                 MirrorId.class,
                 Mirror.class,

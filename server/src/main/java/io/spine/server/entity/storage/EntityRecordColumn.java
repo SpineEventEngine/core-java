@@ -111,7 +111,7 @@ final class EntityRecordColumn {
 
     /**
      * Evaluates the columns against the passed record and returns the value of each column
-     * along the with its name.
+     * along with its name.
      */
     static ImmutableMap<ColumnName, Object> valuesIn(EntityRecord record) {
         checkNotNull(record);
