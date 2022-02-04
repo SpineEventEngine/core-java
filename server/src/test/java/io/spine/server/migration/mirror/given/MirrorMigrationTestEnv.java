@@ -26,13 +26,21 @@
 
 package io.spine.server.migration.mirror.given;
 
+import com.google.common.collect.Lists;
 import io.spine.base.EntityState;
+import io.spine.environment.Tests;
+import io.spine.server.BoundedContextBuilder;
+import io.spine.server.ServerEnvironment;
+import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.migration.mirror.MirrorStorage;
 import io.spine.system.server.Mirror;
+import io.spine.testing.server.blackbox.BlackBox;
 
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.google.common.truth.Truth.assertThat;
 
 public class MirrorMigrationTestEnv {
 
@@ -60,5 +68,53 @@ public class MirrorMigrationTestEnv {
         var state = stateSupplier.get();
         var mirror = MirrorMappingTestEnv.mirror(state);
         return mirror;
+    }
+
+    public static void assertWithinBc(EntityRecordStorage<ParcelId, Parcel> entityRecordStorage,
+                                      int expectedDelivered,
+                                      int expectedParcels) {
+
+        ServerEnvironment.instance().reset();
+        ServerEnvironment.when(Tests.class)
+                         .use(PreparedStorageFactory.with(entityRecordStorage));
+
+        var context = BlackBox.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(ParcelAgg.class)
+        );
+        var client = context.clients()
+                            .withMatchingTenant()
+                            .asGuest();
+
+        var delivered = client.run(
+                Parcel.query()
+                      .delivered().is(true)
+                      .build()
+        );
+        var parcels = client.run(
+                Parcel.query()
+                      .delivered().is(false)
+                      .build()
+        );
+
+        assertThat(delivered).hasSize(expectedDelivered);
+        assertThat(parcels).hasSize(expectedParcels);
+
+        ServerEnvironment.instance().reset();
+        context.close();
+    }
+
+    public static void assertMigratedMirrors(MirrorStorage mirrorStorage, int expected) {
+        var migratedNumber = mirrorStorage.queryBuilder()
+                                          .where(Mirror.Column.wasMigrated()).is(true)
+                                          .build();
+        var iterator = mirrorStorage.readAll(migratedNumber);
+        var migratedMirrors = Lists.newArrayList(iterator);
+        assertThat(migratedMirrors).hasSize(expected);
+    }
+
+    public static void assertUsedBatchSize(MemoizingSupervisor supervisor, int batchSize) {
+        supervisor.completedSteps()
+                  .forEach(step -> assertThat(step.getMigrated()).isAtMost(batchSize));
     }
 }

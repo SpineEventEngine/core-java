@@ -40,7 +40,7 @@ public class ParcelAgg extends Aggregate<ParcelId, Parcel, Parcel.Builder> {
     }
 
     @Apply
-    void on(ParcelDelivered event) {
+    private void on(ParcelDelivered event) {
         builder().setDelivered(true);
     }
 }

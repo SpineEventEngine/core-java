@@ -27,20 +27,13 @@
 package io.spine.server.migration.mirror;
 
 import com.google.common.collect.Lists;
-import io.spine.protobuf.AnyPacker;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
-import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.migration.mirror.given.DeliveryService;
 import io.spine.server.migration.mirror.given.MemoizingSupervisor;
 import io.spine.server.migration.mirror.given.MirrorMappingTestEnv;
-import io.spine.server.migration.mirror.given.Parcel;
 import io.spine.server.migration.mirror.given.ParcelAgg;
-import io.spine.server.migration.mirror.given.ParcelId;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.system.server.Mirror;
-import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,8 +42,10 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertMigratedMirrors;
+import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertUsedBatchSize;
+import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertWithinBc;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.fill;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @DisplayName("`MirrorMigration` should")
 class MirrorMigrationTest {
@@ -78,75 +73,20 @@ class MirrorMigrationTest {
         private void testInBatchesOf(int batchSize) {
             var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
             var mirrorStorage = migration.mirrorStorage();
-            var deliveredParcels = 2_175;
-            var parcels = 3_780;
-            var totalParcels = deliveredParcels + parcels;
+            var delivered = 2_175;
+            var inProgress = 3_780;
 
             fill(mirrorStorage, DeliveryService::generateCourier, 3_000);
             fill(mirrorStorage, DeliveryService::generateVehicle, 4_000);
-            fill(mirrorStorage, DeliveryService::generateDeliveredParcel, deliveredParcels);
-            fill(mirrorStorage, DeliveryService::generateParcel, parcels);
+            fill(mirrorStorage, DeliveryService::generateDeliveredParcel, delivered);
+            fill(mirrorStorage, DeliveryService::generateParcel, inProgress);
 
             var supervisor = new MemoizingSupervisor(batchSize);
             migration.run(supervisor);
 
-            var entityRecordStorage = migration.entityRecordStorage();
-            assertEntityRecords(entityRecordStorage, totalParcels);
-            assertWithinBc(entityRecordStorage, deliveredParcels, parcels);
-            assertMigratedMirrors(mirrorStorage, totalParcels);
+            assertWithinBc(migration.entityRecordStorage(), delivered, inProgress);
+            assertMigratedMirrors(mirrorStorage, delivered + inProgress);
             assertUsedBatchSize(supervisor, batchSize);
-        }
-
-        private void assertEntityRecords(EntityRecordStorage<?, ?> entityRecordStorage,
-                                         int expected) {
-
-            var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
-            assertThat(entityRecords).hasSize(expected);
-            assertDoesNotThrow(() -> entityRecords.forEach(
-                    entityRecord -> AnyPacker.unpack(entityRecord.getState(), Parcel.class))
-            );
-        }
-
-        private void assertUsedBatchSize(MemoizingSupervisor supervisor, int batchSize) {
-            supervisor.completedSteps().forEach(
-                    step -> assertThat(step.getMigrated()).isAtMost(batchSize)
-            );
-        }
-
-        private void assertMigratedMirrors(MirrorStorage mirrorStorage, int expected) {
-            var migratedNumber = mirrorStorage.queryBuilder()
-                                              .where(Mirror.Column.wasMigrated())
-                                              .is(true)
-                                              .build();
-            var migratedMirrors = Lists.newArrayList(mirrorStorage.readAll(migratedNumber));
-            assertThat(migratedMirrors).hasSize(expected);
-        }
-
-        private void assertWithinBc(EntityRecordStorage<ParcelId, Parcel> entityRecordStorage,
-                                    int expectedDelivered,
-                                    int expectedParcels) {
-
-            var context = BlackBox.from(
-                    BoundedContextBuilder.assumingTests()
-                                         .add(ParcelAgg.class)
-            );
-            var client = context.clients()
-                                .withMatchingTenant()
-                                .asGuest();
-
-            var delivered = client.run(
-                    Parcel.query()
-                          .delivered().is(true)
-                          .build()
-            );
-            var parcels = client.run(
-                    Parcel.query()
-                          .delivered().is(true)
-                          .build()
-            );
-
-            assertThat(delivered).hasSize(expectedDelivered);
-            assertThat(parcels).hasSize(expectedParcels);
         }
     }
 
@@ -157,12 +97,8 @@ class MirrorMigrationTest {
         @Test
         @DisplayName("on a migration start and completion")
         void onMigrationRunning() {
-            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
-            var mirrorStorage = migration.mirrorStorage();
-            fill(mirrorStorage, DeliveryService::generateParcel, 3_000);
-
             var supervisor = new MemoizingSupervisor(1_000);
-            migration.run(supervisor);
+            runMigration(supervisor);
 
             assertThat(supervisor.startedTimes()).isEqualTo(1);
             assertThat(supervisor.completedTimes()).isEqualTo(1);
@@ -171,15 +107,19 @@ class MirrorMigrationTest {
         @Test
         @DisplayName("on a migration's step start and completion")
         void onStepRunning() {
-            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
-            var mirrorStorage = migration.mirrorStorage();
-            fill(mirrorStorage, DeliveryService::generateParcel, 3_050);
-
             var supervisor = new MemoizingSupervisor(1_000);
-            migration.run(supervisor);
+            runMigration(supervisor);
 
             assertThat(supervisor.stepStartedTimes()).isEqualTo(4);
             assertThat(supervisor.completedSteps()).hasSize(4);
+        }
+
+        private void runMigration(MemoizingSupervisor supervisor) {
+            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+            var mirrorStorage = migration.mirrorStorage();
+
+            fill(mirrorStorage, DeliveryService::generateParcel, 3_050);
+            migration.run(supervisor);
         }
     }
 
@@ -188,12 +128,14 @@ class MirrorMigrationTest {
     void terminateMigration() {
         var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
         var mirrorStorage = migration.mirrorStorage();
+
         var expectedNumber = 5_000;
         fill(mirrorStorage, DeliveryService::generateParcel, expectedNumber);
 
         // Too small batch size would slow down the migration.
-        // We are going to terminate the migration when it takes more than 5 seconds.
-        var supervisor = new MigrationSupervisor(10) {
+        // We are going to terminate the migration when it takes more than three seconds.
+        var batchSize = 10;
+        var supervisor = new MigrationSupervisor(batchSize) {
 
             private LocalDateTime whenStarted;
 
@@ -206,7 +148,7 @@ class MirrorMigrationTest {
             public boolean shouldContinueAfter(MigrationStep step) {
                 var secondsSinceStart = ChronoUnit.SECONDS
                         .between(whenStarted, LocalDateTime.now());
-                return secondsSinceStart <= 5;
+                return secondsSinceStart <= 3;
             }
         };
 
@@ -214,6 +156,7 @@ class MirrorMigrationTest {
 
         var entityRecordStorage = migration.entityRecordStorage();
         var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
-        assertThat(entityRecords.size()).isNotEqualTo(expectedNumber);
+        assertThat(entityRecords.size()).isLessThan(expectedNumber);
+        assertThat(entityRecords.size()).isAtLeast(batchSize);
     }
 }
