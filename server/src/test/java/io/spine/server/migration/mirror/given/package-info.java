@@ -25,7 +25,8 @@
  */
 
 /**
- * Contains a small domain and environment classes for testing the mirror migration assistant.
+ * Contains a small domain and environment classes for testing
+ * {@linkplain io.spine.server.migration.mirror.MirrorMigration MirrorMigration} assistant.
  */
 
 @CheckReturnValue

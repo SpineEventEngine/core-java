@@ -449,7 +449,7 @@ public abstract class ProjectionRepository<I,
      * routed as per the repository routing schema, and the obtained set of the identifiers
      * is narrowed down to the restricted targets.
      *
-     * <p>Such a setting allows to catch up only the selected targets.
+     * <p>Such a setting allows catching up only the selected targets.
      *
      * <p>This API method also supports sending the special {@link CatchUpSignal}s
      * to the projection. They regulate the lifecycle of the catch-up and are handled by

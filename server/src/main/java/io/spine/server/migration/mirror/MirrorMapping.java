@@ -59,7 +59,8 @@ final class MirrorMapping<I, S extends EntityState<I>, A extends Aggregate<I, S,
     private final Class<A> aggregateClass;
 
     /**
-     * Creates a mapping to transform mirror projections of the specified aggregate class.
+     * Creates a mapping to transform mirror projections
+     * which belong to the specified aggregate class.
      *
      * @param aggregateClass
      *         the class of an aggregate, mirrors of which are to be transformed.

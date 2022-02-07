@@ -57,9 +57,7 @@ public final class MirrorMappingTestEnv {
     }
 
     /**
-     * Asserts that version and lifecycle column values match to the ones in mirror.
-     *
-     * <p>Those columns are declared for all entity records.
+     * Asserts that version and lifecycle column values match to the ones from the mirror.
      */
     public static void assertLifecycleColumns(RecordWithColumns<?, EntityRecord> recordWithColumns,
                                                Mirror mirror) {

@@ -65,6 +65,14 @@ message Mirror {
     // The aggregate type URL.
     string aggregate_type = 6 [(column) = true];
 
+    // A flag which tells whether this message was migrated to an `EntityRecord`.
+    //
+    // `Mirror` was deprecated in Spine 2.x. Now, `EntityRecord`s are used to persist
+    // the aggregate's state
+    //
+    // The presence of this flag pops out of the need to perform a step-by-step migration.
+    //
+    // See `io.spine.server.migration.mirror.MirrorMigration`.
     bool wasMigrated = 7 [(column) = true];
 }
 

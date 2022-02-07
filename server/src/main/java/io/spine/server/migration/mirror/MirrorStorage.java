@@ -38,10 +38,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A contract for storages of ...
+ * A contract for storages of {@code Mirror} projections.
  *
- * <p>A message storage for {@linkplain Mirror} projections, which exposes
- * {@linkplain MirrorStorage#readAll(RecordQuery)} method.
+ * <p>This storage exposes methods for performing read and write operations
+ * in batches.
  */
 public class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
 
@@ -49,7 +49,7 @@ public class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
      * Creates a new instance.
      *
      * @param contextSpec
-     *         a specification of Bounded Context in which the created storage is used
+     *         a specification of a Bounded Context within which the created storage is used
      */
     public MirrorStorage(ContextSpec contextSpec, StorageFactory factory) {
         super(contextSpec, factory.createRecordStorage(contextSpec, messageSpec()));

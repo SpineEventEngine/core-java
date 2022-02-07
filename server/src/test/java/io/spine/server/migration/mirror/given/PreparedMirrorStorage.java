@@ -35,7 +35,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class PreparedMirrorStorage {
+/**
+ * Fills a {@linkplain MirrorStorage} with data.
+ */
+public final class PreparedMirrorStorage {
 
     private final MirrorStorage storage;
 

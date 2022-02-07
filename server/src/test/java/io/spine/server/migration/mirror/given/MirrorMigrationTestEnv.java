@@ -42,6 +42,10 @@ public final class MirrorMigrationTestEnv {
     private MirrorMigrationTestEnv() {
     }
 
+    /**
+     * Asserts that the migrated records have the expected columns, so they are queryable
+     * from a Bounded Context.
+     */
     public static void assertWithinBc(EntityRecordStorage<ParcelId, Parcel> entityRecordStorage,
                                       int expectedDelivered,
                                       int expectedInProgress) {
@@ -76,6 +80,10 @@ public final class MirrorMigrationTestEnv {
         context.close();
     }
 
+    /**
+     * Asserts that the migrated {@code Mirror} projections have received the updated
+     * {@linkplain Mirror#getWasMigrated()} flag.
+     */
     public static void assertMigratedMirrors(MirrorStorage mirrorStorage, int expected) {
         var migratedNumber = mirrorStorage.queryBuilder()
                                           .where(Mirror.Column.wasMigrated()).is(true)
@@ -85,6 +93,9 @@ public final class MirrorMigrationTestEnv {
         assertThat(migratedMirrors).hasSize(expected);
     }
 
+    /**
+     * Asserts that all steps during the migration were of the expected size.
+     */
     public static void assertUsedBatchSize(MemoizingSupervisor supervisor, int batchSize) {
         supervisor.completedSteps()
                   .forEach(step -> assertThat(step.getMigrated()).isAtMost(batchSize));

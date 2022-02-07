@@ -90,6 +90,19 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     private final MirrorMapping<I, S, A> mapping;
     private final String aggregateType;
 
+    /**
+     * Creates a new instance of {@code MirrorMigration}.
+     *
+     * <p>The created instance is able to migrate {@code Mirror} projections of the
+     * given aggregate class.
+     *
+     * @param contextSpec
+     *         the context to which the passed aggregate belongs
+     * @param factory
+     *         the storage provider
+     * @param aggClass
+     *         the class of an aggregate, {@code Mirror} projections of which are to be migrated
+     */
     public MirrorMigration(ContextSpec contextSpec,
                            StorageFactory factory,
                            Class<A> aggClass) {
@@ -103,8 +116,8 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     }
 
     /**
-     * Migrates {@linkplain Mirror} projections which belong to the specified aggregate
-     * to the {@linkplain EntityRecordStorage} of that aggregate.
+     * Migrates {@linkplain Mirror} projections
+     * to the aggregate's {@linkplain EntityRecordStorage}.
      */
     public void run(MigrationSupervisor supervisor) {
         supervisor.onMigrationStarted();
@@ -117,6 +130,9 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         supervisor.onMigrationCompleted();
     }
 
+    /**
+     * Fetches and processes the next batch.
+     */
     private MigrationStep proceed(MigrationSupervisor supervisor) {
         supervisor.onStepStarted();
 

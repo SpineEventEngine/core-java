@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MemoizingSupervisor extends MigrationSupervisor {
+public final class MemoizingSupervisor extends MigrationSupervisor {
 
     private final List<MigrationStep> completedSteps = new ArrayList<>();
 

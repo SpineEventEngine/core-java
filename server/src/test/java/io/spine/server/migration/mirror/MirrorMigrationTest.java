@@ -111,8 +111,8 @@ final class MirrorMigrationTest {
             var supervisor = new MemoizingSupervisor(1_000);
             runMigration(supervisor);
 
-            assertThat(supervisor.stepStartedTimes()).isEqualTo(4);
-            assertThat(supervisor.completedSteps()).hasSize(4);
+            assertThat(supervisor.stepStartedTimes()).isEqualTo(5);
+            assertThat(supervisor.completedSteps()).hasSize(5);
         }
 
         private void runMigration(MemoizingSupervisor supervisor) {

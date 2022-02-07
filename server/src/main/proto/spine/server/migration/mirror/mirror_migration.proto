@@ -34,7 +34,12 @@ option java_package = "io.spine.server.migration.mirror";
 option java_outer_classname = "MirrorMigrationProto";
 option java_multiple_files = true;
 
+// A stage in a process of migration `Mirror` projections into `EntityRecord`s.
+//
+// The migration is done step-by-step. And this message describes those steps.
+//
 message MigrationStep {
 
+    // A number of `Mirror` projections which were migrated during the step.
     int32 migrated = 1 [(required) = true, (min).value = "0"];
 }

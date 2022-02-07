@@ -27,6 +27,8 @@
 /**
  * The package provides a migration assistant for legacy data that used deprecated
  * {@link io.spine.system.server.Mirror Mirror} projection.
+ *
+ * @see  io.spine.server.migration.mirror.MirrorMigration
  */
 
 @CheckReturnValue
