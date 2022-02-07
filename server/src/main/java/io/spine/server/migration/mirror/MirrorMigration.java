@@ -48,9 +48,9 @@ import java.util.Iterator;
  * aggregates' states to allow their querying. A single projection stored states of <b>all</b>
  * aggregates in a Bounded Context.
  *
- * <p>Now, {@code EntityRecordWithColumns} is used to store the aggregate's states when it is
- * open for querying. They are stored on a <b>per-aggregate</b> basis. This enables storing of
- * queryable state-based columns along the state itself. For this reason, the migration
+ * <p>Now, {@linkplain EntityRecordStorage} is used to store the aggregate's states when it is
+ * open for querying. This storage is created on a <b>per-aggregate</b> basis. This enables
+ * storing of queryable state-based columns along the state itself. For this reason, the migration
  * is also done on a per-aggregate basis.
  *
  * <p><b>An example usage</b>
