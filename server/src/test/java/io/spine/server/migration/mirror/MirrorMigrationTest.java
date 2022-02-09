@@ -87,13 +87,13 @@ final class MirrorMigrationTest {
                         .put(DeliveryService::generateDeliveredParcel, delivered)
                         .put(DeliveryService::generateInProgressParcel, inProgress)
                         .get();
-                var supervisor = new MemoizingMonitor(batchSize);
+                var monitor = new MemoizingMonitor(batchSize);
 
-                migration.run(supervisor);
+                migration.run(monitor);
 
                 assertWithinBc(migration.entityRecordStorage(), delivered, inProgress);
                 assertMigratedMirrors(mirrorStorage, delivered + inProgress);
-                assertUsedBatchSize(supervisor, batchSize);
+                assertUsedBatchSize(monitor, batchSize);
             }
         }
 
@@ -123,39 +123,39 @@ final class MirrorMigrationTest {
     }
 
     @Nested
-    @DisplayName("notify a supervisor")
-    class NotifySupervisor {
+    @DisplayName("notify a monitor")
+    class NotifyMonitor {
 
         @Test
         @DisplayName("on a migration start and completion")
         void onMigrationRunning() {
-            var supervisor = new MemoizingMonitor(1_000);
-            runMigration(supervisor);
+            var monitor = new MemoizingMonitor(1_000);
+            runMigration(monitor);
 
-            assertThat(supervisor.startedTimes()).isEqualTo(1);
-            assertThat(supervisor.completedTimes()).isEqualTo(1);
+            assertThat(monitor.startedTimes()).isEqualTo(1);
+            assertThat(monitor.completedTimes()).isEqualTo(1);
         }
 
         @Test
         @DisplayName("on a migration's step start and completion")
         void onStepRunning() {
-            var supervisor = new MemoizingMonitor(1_000);
-            runMigration(supervisor);
+            var monitor = new MemoizingMonitor(1_000);
+            runMigration(monitor);
 
-            assertThat(supervisor.stepStartedTimes()).isEqualTo(4);
-            assertThat(supervisor.completedSteps()).hasSize(4);
+            assertThat(monitor.stepStartedTimes()).isEqualTo(4);
+            assertThat(monitor.completedSteps()).hasSize(4);
         }
 
-        private void runMigration(MemoizingMonitor supervisor) {
+        private void runMigration(MemoizingMonitor monitor) {
             var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
             new PreparedMirrorStorage(migration.mirrorStorage())
                     .put(DeliveryService::generateInProgressParcel, 3_050);
-            migration.run(supervisor);
+            migration.run(monitor);
         }
     }
 
     @Test
-    @DisplayName("terminate on a supervisor's refusal")
+    @DisplayName("terminate on a monitor's refusal")
     void terminateMigration() {
         var expectedNumber = 5_000;
         var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
@@ -165,7 +165,7 @@ final class MirrorMigrationTest {
         // Too small batch size would slow down the migration.
         // We are going to terminate the migration when it takes more than three seconds.
         var batchSize = 10;
-        var supervisor = new MirrorMigrationMonitor(batchSize) {
+        var monitor = new MirrorMigrationMonitor(batchSize) {
 
             private LocalDateTime whenStarted;
 
@@ -182,7 +182,7 @@ final class MirrorMigrationTest {
             }
         };
 
-        migration.run(supervisor);
+        migration.run(monitor);
 
         var entityRecordStorage = migration.entityRecordStorage();
         var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
