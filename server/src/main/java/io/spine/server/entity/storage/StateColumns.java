@@ -72,7 +72,7 @@ final class StateColumns<S extends EntityState<?>> implements Iterable<EntityCol
      * Evaluates the columns against the passed entity's state and returns the value of each column
      * along with its name.
      */
-    @SuppressWarnings("ConstantConditions") // We have a `@Nullable` value mapper for the collector.
+    @SuppressWarnings("ConstantConditions") /* `@Nullable` value mapper for the map's collector. */
     Map<ColumnName, @Nullable Object> valuesIn(S entityState) {
         var values = columns.stream()
                 .collect(Collectors.toMap(

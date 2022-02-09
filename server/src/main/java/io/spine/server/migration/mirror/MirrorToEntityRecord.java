@@ -33,6 +33,7 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.system.server.Mirror;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.function.Function;
 
 /**
  * A transformation of a {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
@@ -54,18 +55,16 @@ import javax.annotation.concurrent.Immutable;
  *         the type of aggregate
  */
 @Immutable
-final class MirrorMapping<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> {
+final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>>
+        implements Function<Mirror, EntityRecordWithColumns<I>> {
 
     private final Class<A> aggregateClass;
 
     /**
-     * Creates a mapping to transform mirror projections
-     * which belong to the specified aggregate class.
-     *
-     * @param aggregateClass
-     *         the class of an aggregate, mirrors of which are to be transformed.
+     * Creates a function that can transform mirror projections
+     * which belong to the given aggregate class.
      */
-    MirrorMapping(Class<A> aggregateClass) {
+    MirrorToEntityRecord(Class<A> aggregateClass) {
         this.aggregateClass = aggregateClass;
     }
 
@@ -73,10 +72,11 @@ final class MirrorMapping<I, S extends EntityState<I>, A extends Aggregate<I, S,
      * Transforms the passed {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
      *
      * <p>The method will throw an exception when the mirror is incompatible
-     * with the {@link #MirrorMapping(Class) used aggregate class}. Meaning, its identifier and\or
-     * state types differ from the ones, declared in the aggregate.
+     * with the {@link #MirrorToEntityRecord(Class) used aggregate class}. Meaning, its identifier
+     * and\or state types differ from the ones, declared in the aggregate.
      */
-    EntityRecordWithColumns<I> toEntityRecord(Mirror mirror) {
+    @Override
+    public EntityRecordWithColumns<I> apply(Mirror mirror) {
         var record = EntityRecord.newBuilder()
                 .setEntityId(mirror.getId().getValue())
                 .setState(mirror.getState())

@@ -73,7 +73,7 @@ message Mirror {
     // The presence of this flag pops out of the need to perform a step-by-step migration.
     //
     // See `io.spine.server.migration.mirror.MirrorMigration`.
-    bool wasMigrated = 7 [(column) = true];
+    bool was_migrated = 7 [(column) = true];
 }
 
 // An ID of a mirror projection.

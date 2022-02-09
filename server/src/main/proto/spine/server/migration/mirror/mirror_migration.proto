@@ -34,12 +34,14 @@ option java_package = "io.spine.server.migration.mirror";
 option java_outer_classname = "MirrorMigrationProto";
 option java_multiple_files = true;
 
-// A stage in a process of migration `Mirror` projections into `EntityRecord`s.
+// Represents a number of `Mirror` projections, which were migrated
+// in a single request during the process of `MirrorMigration`.
 //
-// The migration is done step-by-step. And this message describes those steps.
+// The batch size for the migration is dictated by a `MirrorMigrationMonitor`. Hence, the value
+// of this message is usually equal to the batch size. Only the last request is expected to
+// return less or zero, indicating no records left to migrate.
 //
-message MigrationStep {
+message MirrorsMigrated {
 
-    // A number of `Mirror` projections which were migrated during the step.
-    int32 migrated = 1 [(required) = true, (min).value = "0"];
+    int32 value = 1 [(required) = true, (min).value = "0"];
 }

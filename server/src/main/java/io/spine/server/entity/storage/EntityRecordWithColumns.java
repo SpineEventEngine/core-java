@@ -119,7 +119,7 @@ public final class EntityRecordWithColumns<I>
      * @param record
      *         the record prepared for storage
      * @param entityClass
-     *         the class of the record's entity
+     *         the class of entity which is stored as the given {@code EntityRecord}
      * @param <I>
      *         the type of the entity's identifier
      * @param <S>
@@ -142,7 +142,7 @@ public final class EntityRecordWithColumns<I>
         allColumnValues.putAll(stateValues);
         allColumnValues.putAll(lifecycleValues);
 
-        var result = (EntityRecordWithColumns<I>) of(record, allColumnValues);
+        var result = EntityRecordWithColumns.<I>of(record, allColumnValues);
         return result;
     }
 

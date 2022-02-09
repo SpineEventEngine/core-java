@@ -41,9 +41,9 @@ import io.spine.system.server.MirrorId;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public final class MirrorMappingTestEnv {
+public final class MirrorToEntityRecordTestEnv {
 
-    private MirrorMappingTestEnv() {
+    private MirrorToEntityRecordTestEnv() {
     }
 
     /**

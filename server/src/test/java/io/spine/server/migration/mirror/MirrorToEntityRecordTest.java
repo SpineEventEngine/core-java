@@ -26,30 +26,36 @@
 
 package io.spine.server.migration.mirror;
 
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.migration.mirror.given.ParcelAgg;
+import io.spine.server.migration.mirror.given.ParcelId;
+import io.spine.system.server.Mirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Function;
+
 import static io.spine.server.migration.mirror.given.DeliveryService.generateCourier;
-import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.assertLifecycleColumns;
-import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.assertStateColumns;
+import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertLifecycleColumns;
+import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertStateColumns;
 import static io.spine.server.migration.mirror.given.DeliveryService.generateInProgressParcel;
-import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.assertEntityRecord;
-import static io.spine.server.migration.mirror.given.MirrorMappingTestEnv.mirror;
+import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertEntityRecord;
+import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.mirror;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`MirrorMapping` should")
-final class MirrorMappingTest {
+@DisplayName("`MirrorToEntityRecord` should")
+final class MirrorToEntityRecordTest {
 
     @Test
     @DisplayName("transform a `Mirror` into an `EntityRecord`")
     void mapMirrorToEntityRecord() {
-        var mapping = new MirrorMapping<>(ParcelAgg.class);
+        Function<Mirror, EntityRecordWithColumns<ParcelId>> transformation =
+                new MirrorToEntityRecord<>(ParcelAgg.class);
 
         var parcel = generateInProgressParcel();
         var mirror = mirror(parcel);
 
-        var recordWithColumns = mapping.toEntityRecord(mirror);
+        var recordWithColumns = transformation.apply(mirror);
         var record = recordWithColumns.record();
 
         assertEntityRecord(record, mirror);
@@ -61,14 +67,14 @@ final class MirrorMappingTest {
     @DisplayName("throw an exception when a mirror of an inappropriate entity class is passed")
     @SuppressWarnings("ResultOfMethodCallIgnored" /* the method throws an exception */)
     void throwException() {
-        var mapping = new MirrorMapping<>(ParcelAgg.class);
+        var transformation = new MirrorToEntityRecord<>(ParcelAgg.class);
 
         var courier = generateCourier();
         var mirror = mirror(courier);
 
         assertThrows(
                 Exception.class,
-                () -> mapping.toEntityRecord(mirror)
+                () -> transformation.apply(mirror)
         );
     }
 }
