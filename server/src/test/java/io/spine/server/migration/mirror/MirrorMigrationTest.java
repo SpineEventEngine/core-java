@@ -40,9 +40,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertEntityRecords;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertMigratedMirrors;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertUsedBatchSize;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertWithinBc;
@@ -55,39 +57,68 @@ final class MirrorMigrationTest {
     private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
 
     @Nested
-    @DisplayName("migrate mirror records step-by-step with a step size of")
-    class MigrateMirrorsInBatchesOf {
+    @DisplayName("migrate mirrors")
+    class MigrateMirrors {
 
-        @Test
-        @DisplayName("one hundred records")
-        void oneHundredRecords() {
-            testInBatchesOf(100);
+        @Nested
+        @DisplayName("in batches of")
+        class InBatchesOf {
+
+            @Test
+            @DisplayName("one hundred records")
+            void oneHundredRecords() {
+                testInBatchesOf(100);
+            }
+
+            @Test
+            @DisplayName("one thousand records")
+            void fiveThousandsRecords() {
+                testInBatchesOf(1_000);
+            }
+
+            private void testInBatchesOf(int batchSize) {
+                var delivered = 2_175;
+                var inProgress = 3_780;
+
+                var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+                var mirrorStorage = new PreparedMirrorStorage(migration.mirrorStorage())
+                        .put(DeliveryService::generateCourier, 3_000)
+                        .put(DeliveryService::generateVehicle, 4_000)
+                        .put(DeliveryService::generateDeliveredParcel, delivered)
+                        .put(DeliveryService::generateInProgressParcel, inProgress)
+                        .get();
+                var supervisor = new MemoizingMonitor(batchSize);
+
+                migration.run(supervisor);
+
+                assertWithinBc(migration.entityRecordStorage(), delivered, inProgress);
+                assertMigratedMirrors(mirrorStorage, delivered + inProgress);
+                assertUsedBatchSize(supervisor, batchSize);
+            }
         }
 
         @Test
-        @DisplayName("one thousand records")
-        void fiveThousandsRecords() {
-            testInBatchesOf(1_000);
-        }
-
-        private void testInBatchesOf(int batchSize) {
-            var delivered = 2_175;
-            var inProgress = 3_780;
+        @DisplayName("with deleted or archived flags")
+        void withDeletedOrArchivedFlags() {
+            var active = 2_175;
+            var archived = 2_200;
+            var deleted = 3_350;
 
             var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
             var mirrorStorage = new PreparedMirrorStorage(migration.mirrorStorage())
-                    .put(DeliveryService::generateCourier, 3_000)
-                    .put(DeliveryService::generateVehicle, 4_000)
-                    .put(DeliveryService::generateDeliveredParcel, delivered)
-                    .put(DeliveryService::generateInProgressParcel, inProgress)
+                    .put(DeliveryService::generateDeliveredParcel, active)
+                    .putDeleted(DeliveryService::generateDeliveredParcel, deleted)
+                    .putArchived(DeliveryService::generateDeliveredParcel, archived)
                     .get();
-            var supervisor = new MemoizingMonitor(batchSize);
 
-            migration.run(supervisor);
+            var batchSize = 500;
+            var monitor = new MemoizingMonitor(batchSize);
 
-            assertWithinBc(migration.entityRecordStorage(), delivered, inProgress);
-            assertMigratedMirrors(mirrorStorage, delivered + inProgress);
-            assertUsedBatchSize(supervisor, batchSize);
+            migration.run(monitor);
+
+            assertEntityRecords(migration.entityRecordStorage(), active, archived, deleted);
+            assertMigratedMirrors(mirrorStorage, active + archived + deleted);
+            assertUsedBatchSize(monitor, batchSize);
         }
     }
 
@@ -111,8 +142,8 @@ final class MirrorMigrationTest {
             var supervisor = new MemoizingMonitor(1_000);
             runMigration(supervisor);
 
-            assertThat(supervisor.stepStartedTimes()).isEqualTo(5);
-            assertThat(supervisor.completedSteps()).hasSize(5);
+            assertThat(supervisor.stepStartedTimes()).isEqualTo(4);
+            assertThat(supervisor.completedSteps()).hasSize(4);
         }
 
         private void runMigration(MemoizingMonitor supervisor) {
@@ -140,13 +171,13 @@ final class MirrorMigrationTest {
 
             @Override
             public void onMigrationStarted() {
-                whenStarted = LocalDateTime.now();
+                whenStarted = LocalDateTime.now(ZoneId.systemDefault());
             }
 
             @Override
             public boolean shouldContinueAfter(MirrorsMigrated step) {
                 var secondsSinceStart = ChronoUnit.SECONDS
-                        .between(whenStarted, LocalDateTime.now());
+                        .between(whenStarted, LocalDateTime.now(ZoneId.systemDefault()));
                 return secondsSinceStart <= 3;
             }
         };

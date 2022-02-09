@@ -47,18 +47,39 @@ public final class PreparedMirrorStorage {
     }
 
     @CanIgnoreReturnValue
-    public PreparedMirrorStorage put(Supplier<EntityState<?>> stateSupplier, int numberOfStates) {
+    public PreparedMirrorStorage put(Supplier<EntityState<?>> stateSupplier,
+                                     int numberOfStates) {
+        return put(stateSupplier, numberOfStates, false, false);
+    }
+
+    @CanIgnoreReturnValue
+    public PreparedMirrorStorage putDeleted(Supplier<EntityState<?>> stateSupplier,
+                                            int numberOfStates) {
+        return put(stateSupplier, numberOfStates, false, true);
+    }
+
+    @CanIgnoreReturnValue
+    public PreparedMirrorStorage putArchived(Supplier<EntityState<?>> stateSupplier,
+                                             int numberOfStates) {
+        return put(stateSupplier, numberOfStates, true, false);
+    }
+
+    private PreparedMirrorStorage put(Supplier<EntityState<?>> supplier, int numberOfStates,
+                                      boolean archived, boolean deleted) {
+
         var mirrors = IntStream.rangeClosed(1, numberOfStates)
-                               .mapToObj(i -> stateSupplier)
-                               .map(PreparedMirrorStorage::mirror)
+                               .mapToObj(i -> mirror(supplier, archived, deleted))
                                .collect(Collectors.toList());
         storage.writeBatch(mirrors);
         return this;
     }
 
-    private static Mirror mirror(Supplier<EntityState<?>> stateSupplier) {
+    private static Mirror mirror(Supplier<EntityState<?>> stateSupplier,
+                                 boolean archived, boolean deleted) {
+
         var state = stateSupplier.get();
-        var mirror = MirrorToEntityRecordTestEnv.mirror(state);
+        var lifecycle = MirrorToEntityRecordTestEnv.lifecycle(archived, deleted);
+        var mirror = MirrorToEntityRecordTestEnv.mirror(state, lifecycle);
         return mirror;
     }
 

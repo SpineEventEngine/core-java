@@ -80,6 +80,19 @@ public final class MirrorMigrationTestEnv {
         context.close();
     }
 
+    public static void assertEntityRecords(EntityRecordStorage<ParcelId, Parcel> storage,
+                                           int active, int archived, int deleted) {
+
+        var exposedStorage = new ExposedEntityRecordStorage<>(storage);
+        var activeRecords = exposedStorage.readActive();
+        var archivedRecords = exposedStorage.readArchived();
+        var deletedRecords = exposedStorage.readDeleted();
+
+        assertThat(activeRecords).hasSize(active);
+        assertThat(archivedRecords).hasSize(archived);
+        assertThat(deletedRecords).hasSize(deleted);
+    }
+
     /**
      * Asserts that the migrated {@code Mirror} projections have received the updated
      * {@linkplain Mirror#getWasMigrated()} flag.

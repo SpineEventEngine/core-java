@@ -92,9 +92,8 @@ public final class MirrorToEntityRecordTestEnv {
     /**
      * Creates {@linkplain Mirror} projection from the passed state.
      */
-    public static Mirror mirror(EntityState<?> state) {
-        var lifecycle = lifecycle(false, false);
-        var version = version(12);
+    public static Mirror mirror(EntityState<?> state, LifecycleFlags lifecycle) {
+        var version = version();
         var mirrorId = mirrorId(state);
         var mirror = Mirror.newBuilder()
                 .setId(mirrorId)
@@ -103,6 +102,12 @@ public final class MirrorToEntityRecordTestEnv {
                 .setVersion(version)
                 .setAggregateType(state.typeUrl().value())
                 .vBuild();
+        return mirror;
+    }
+
+    public static Mirror mirror(EntityState<?> state) {
+        var lifecycle = lifecycle(false, false);
+        var mirror = mirror(state, lifecycle);
         return mirror;
     }
 
@@ -119,16 +124,16 @@ public final class MirrorToEntityRecordTestEnv {
         return TypeConverter.toAny(stateId);
     }
 
-    private static LifecycleFlags lifecycle(boolean archived, boolean deleted) {
+    public static LifecycleFlags lifecycle(boolean archived, boolean deleted) {
         return LifecycleFlags.newBuilder()
                 .setArchived(archived)
                 .setDeleted(deleted)
                 .vBuild();
     }
 
-    private static Version version(int number) {
+    private static Version version() {
         return Version.newBuilder()
-                .setNumber(number)
+                .setNumber(12)
                 .setTimestamp(Time.currentTime())
                 .vBuild();
     }
