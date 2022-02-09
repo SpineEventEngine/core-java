@@ -34,49 +34,57 @@ import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
 
-import java.util.Collection;
+import java.util.List;
 
-class ExposedEntityRecordStorage<I, S extends EntityState<I>> {
+/**
+ * Fetches entity records from the {@link EntityRecordStorage}.
+ *
+ * @param <I>
+ *         the type of the identifiers of stored entities
+ * @param <S>
+ *         the type of {@code Entity} state
+ */
+final class FetchEntityRecords<I, S extends EntityState<I>> {
 
-    private final RecordColumn<EntityRecord, Boolean> archived =
-            RecordColumn.create(
+    private final RecordColumn<EntityRecord, Boolean> archived = RecordColumn.create(
                     ArchivedColumn.instance().name().value(),
                     Boolean.class,
                     EntityRecord::isArchived
             );
-    private final RecordColumn<EntityRecord, Boolean> deleted =
-            RecordColumn.create(
+    private final RecordColumn<EntityRecord, Boolean> deleted = RecordColumn.create(
                     DeletedColumn.instance().name().value(),
                     Boolean.class,
                     EntityRecord::isDeleted
             );
     private final EntityRecordStorage<I, S> storage;
 
-    ExposedEntityRecordStorage(EntityRecordStorage<I, S> storage) {
+    FetchEntityRecords(EntityRecordStorage<I, S> storage) {
         this.storage = storage;
     }
 
-    Collection<EntityRecord> readActive() {
+    List<EntityRecord> active() {
         var iterator = storage.readAll();
-        var active = Lists.newArrayList(iterator);
-        return active;
+        var result = Lists.newArrayList(iterator);
+        return result;
     }
 
-    Collection<EntityRecord> readArchived() {
-        var query = storage.queryBuilder()
-                .where(archived).is(true)
-                .build();
-        var iterator = storage.readAll(query);
-        var archived = Lists.newArrayList(iterator);
-        return archived;
+    List<EntityRecord> archived() {
+        var iterator = storage.readAll(
+                storage.queryBuilder()
+                       .where(archived).is(true)
+                       .build()
+        );
+        var result = Lists.newArrayList(iterator);
+        return result;
     }
 
-    Collection<EntityRecord> readDeleted() {
-        var query = storage.queryBuilder()
-                .where(deleted).is(true)
-                .build();
-        var iterator = storage.readAll(query);
-        var archived = Lists.newArrayList(iterator);
-        return archived;
+    List<EntityRecord> deleted() {
+        var iterator = storage.readAll(
+                storage.queryBuilder()
+                       .where(deleted).is(true)
+                       .build()
+        );
+        var result = Lists.newArrayList(iterator);
+        return result;
     }
 }

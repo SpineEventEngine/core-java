@@ -26,7 +26,6 @@
 
 package io.spine.server.migration.mirror.given;
 
-import com.google.common.collect.Lists;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -35,6 +34,7 @@ import io.spine.server.migration.mirror.MirrorStorage;
 import io.spine.system.server.Mirror;
 import io.spine.testing.server.blackbox.BlackBox;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.truth.Truth.assertThat;
 
 public final class MirrorMigrationTestEnv {
@@ -80,13 +80,18 @@ public final class MirrorMigrationTestEnv {
         context.close();
     }
 
+    /**
+     * Asserts that the given storage has the expected number
+     * of active, archived and deleted records.
+     */
     public static void assertEntityRecords(EntityRecordStorage<ParcelId, Parcel> storage,
                                            int active, int archived, int deleted) {
 
-        var exposedStorage = new ExposedEntityRecordStorage<>(storage);
-        var activeRecords = exposedStorage.readActive();
-        var archivedRecords = exposedStorage.readArchived();
-        var deletedRecords = exposedStorage.readDeleted();
+        var records = new FetchEntityRecords<>(storage);
+
+        var activeRecords = records.active();
+        var archivedRecords = records.archived();
+        var deletedRecords = records.deleted();
 
         assertThat(activeRecords).hasSize(active);
         assertThat(archivedRecords).hasSize(archived);
@@ -102,7 +107,7 @@ public final class MirrorMigrationTestEnv {
                                           .where(Mirror.Column.wasMigrated()).is(true)
                                           .build();
         var iterator = mirrorStorage.readAll(migratedNumber);
-        var migratedMirrors = Lists.newArrayList(iterator);
+        var migratedMirrors = newArrayList(iterator);
         assertThat(migratedMirrors).hasSize(expected);
     }
 
