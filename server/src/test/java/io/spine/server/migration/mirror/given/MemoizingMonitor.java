@@ -26,31 +26,31 @@
 
 package io.spine.server.migration.mirror.given;
 
-import io.spine.server.migration.mirror.MigrationStep;
-import io.spine.server.migration.mirror.MigrationSupervisor;
+import io.spine.server.migration.mirror.MirrorsMigrated;
+import io.spine.server.migration.mirror.MirrorMigrationMonitor;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class MemoizingSupervisor extends MigrationSupervisor {
+public final class MemoizingMonitor extends MirrorMigrationMonitor {
 
-    private final List<MigrationStep> completedSteps = new ArrayList<>();
+    private final List<MirrorsMigrated> completedSteps = new ArrayList<>();
 
     private int startedTimes = 0;
     private int completedTimes = 0;
     private int stepStartedTimes = 0;
 
-    public MemoizingSupervisor(int batchSize) {
+    public MemoizingMonitor(int batchSize) {
         super(batchSize);
     }
 
     @Override
-    public void onStepCompleted(MigrationStep step) {
+    public void onBatchCompleted(MirrorsMigrated step) {
         completedSteps.add(step);
     }
 
-    public List<MigrationStep> completedSteps() {
+    public List<MirrorsMigrated> completedSteps() {
         return Collections.unmodifiableList(completedSteps);
     }
 
@@ -73,7 +73,7 @@ public final class MemoizingSupervisor extends MigrationSupervisor {
     }
 
     @Override
-    public void onStepStarted() {
+    public void onBatchStarted() {
         stepStartedTimes++;
     }
 

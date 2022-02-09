@@ -44,7 +44,7 @@ import java.util.Iterator;
 /**
  * Migrates {@linkplain Mirror} projections into {@linkplain EntityRecordWithColumns}.
  *
- * <p>{@code Mirror} projection was deprecated in Spine 2.x. Previously, it was used to store
+ * <p>{@code Mirror} projection was deprecated in Spine 2.0. Previously, it was used to store
  * aggregates' states to allow their querying. A single projection stored states of <b>all</b>
  * aggregates in a Bounded Context.
  *
@@ -128,7 +128,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         supervisor.onMigrationStarted();
 
         var step = proceed(supervisor);
-        while (step.getValue() != 0 && supervisor.shouldContinueAfter(step)) {
+        while (step.getValue() == supervisor.batchSize() && supervisor.shouldContinueAfter(step)) {
             step = proceed(supervisor);
         }
 
@@ -139,7 +139,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
      * Fetches and processes the next batch.
      */
     private MirrorsMigrated proceed(MirrorMigrationMonitor supervisor) {
-        supervisor.onStepStarted();
+        supervisor.onBatchStarted();
 
         var batchSize = supervisor.batchSize();
         Collection<EntityRecordWithColumns<I>> entityRecords = new ArrayList<>(batchSize);
@@ -166,7 +166,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
                 .setValue(migratedMirrors.size())
                 .build();
 
-        supervisor.onStepCompleted(completedStep);
+        supervisor.onBatchCompleted(completedStep);
         return completedStep;
     }
 

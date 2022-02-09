@@ -189,7 +189,7 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Creates a new {@link MirrorStorage}.
      *
-     * <p>Pay attention, {@link io.spine.system.server.Mirror Mirror} was deprecated in Spine 2.x.
+     * <p>Pay attention, {@link io.spine.system.server.Mirror Mirror} was deprecated in Spine 2.0.
      * The presence of this storage in the factory is for those who will
      * {@link io.spine.server.migration.mirror.MirrorMigration migrate mirrors} from Spine 1.x.
      *
