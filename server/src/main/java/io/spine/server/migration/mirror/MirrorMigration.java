@@ -90,9 +90,9 @@ import java.util.Iterator;
 @Immutable
 public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>> {
 
-    private final EntityRecordStorage<I, S> entityRecordStorage;
     private final MirrorStorage mirrorStorage;
-    private final MirrorToEntityRecord<I, S, A> mapping;
+    private final EntityRecordStorage<I, S> entityRecordStorage;
+    private final MirrorToEntityRecord<I, S, A> transformation;
     private final String aggregateType;
 
     /**
@@ -114,7 +114,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
 
         this.mirrorStorage = factory.createMirrorStorage(context);
         this.entityRecordStorage = factory.createEntityRecordStorage(context, aggClass);
-        this.mapping = new MirrorToEntityRecord<>(aggClass);
+        this.transformation = new MirrorToEntityRecord<>(aggClass);
         this.aggregateType = AggregateClass.asAggregateClass(aggClass)
                                           .stateTypeUrl()
                                           .value();
@@ -124,50 +124,39 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
      * Migrates {@linkplain Mirror} projections
      * to the aggregate's {@linkplain EntityRecordStorage}.
      */
-    public void run(MirrorMigrationMonitor supervisor) {
-        supervisor.onMigrationStarted();
+    public void run(MirrorMigrationMonitor monitor) {
+        monitor.onMigrationStarted();
 
-        var step = proceed(supervisor);
-        while (step.getValue() == supervisor.batchSize() && supervisor.shouldContinueAfter(step)) {
-            step = proceed(supervisor);
+        var batchSize = monitor.batchSize();
+        var migrated = proceed(monitor);
+        while (migrated.getValue() == batchSize && monitor.shouldContinueAfter(migrated)) {
+            migrated = proceed(monitor);
         }
 
-        supervisor.onMigrationCompleted();
+        monitor.onMigrationCompleted();
     }
 
     /**
      * Fetches and processes the next batch.
      */
-    private MirrorsMigrated proceed(MirrorMigrationMonitor supervisor) {
-        supervisor.onBatchStarted();
+    private MirrorsMigrated proceed(MirrorMigrationMonitor monitor) {
+        monitor.onBatchStarted();
 
-        var batchSize = supervisor.batchSize();
-        Collection<EntityRecordWithColumns<I>> entityRecords = new ArrayList<>(batchSize);
-        Collection<Mirror> migratedMirrors = new ArrayList<>(batchSize);
+        var batchSize = monitor.batchSize();
+        var batch = new MigrationBatch(batchSize);
 
         fetchNextBatch(batchSize)
-                .forEachRemaining(mirror -> {
+                .forEachRemaining(batch::migrate);
 
-                    // Extract into a nested (or just inner?) type.
+        entityRecordStorage.writeAll(batch.entityRecords());
+        mirrorStorage.writeBatch(batch.migratedMirrors());
 
-                    var entityRecord = mapping.apply(mirror);
-                    var migratedMirror = mirror.toBuilder()
-                            .setWasMigrated(true)
-                            .build();
-
-                    entityRecords.add(entityRecord);
-                    migratedMirrors.add(migratedMirror);
-                });
-
-        entityRecordStorage.writeAll(entityRecords);
-        mirrorStorage.writeBatch(migratedMirrors);
-
-        var completedStep = MirrorsMigrated.newBuilder()
-                .setValue(migratedMirrors.size())
+        var migrated = MirrorsMigrated.newBuilder()
+                .setValue(batch.migratedMirrors().size())
                 .build();
 
-        supervisor.onBatchCompleted(completedStep);
-        return completedStep;
+        monitor.onBatchCompleted(migrated);
+        return migrated;
     }
 
     private Iterator<Mirror> fetchNextBatch(int batchSize) {
@@ -195,5 +184,33 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     @VisibleForTesting
     MirrorStorage mirrorStorage() {
         return mirrorStorage;
+    }
+
+    private class MigrationBatch {
+        private final Collection<EntityRecordWithColumns<I>> entityRecords;
+        private final Collection<Mirror> migratedMirrors;
+
+        private MigrationBatch(int expectedSize) {
+            entityRecords = new ArrayList<>(expectedSize);
+            migratedMirrors = new ArrayList<>(expectedSize);
+        }
+
+        private void migrate(Mirror mirror) {
+            var entityRecord = transformation.apply(mirror);
+            var migratedMirror = mirror.toBuilder()
+                    .setWasMigrated(true)
+                    .build();
+
+            entityRecords.add(entityRecord);
+            migratedMirrors.add(migratedMirror);
+        }
+
+        private Collection<EntityRecordWithColumns<I>> entityRecords() {
+            return entityRecords;
+        }
+
+        private Collection<Mirror> migratedMirrors() {
+            return migratedMirrors;
+        }
     }
 }

@@ -67,10 +67,10 @@ message Mirror {
 
     // A flag which tells whether this message was migrated to an `EntityRecord`.
     //
-    // `Mirror` was deprecated in Spine 2.0. Now, `EntityRecord`s are used to persist
+    // `Mirror` was deprecated in Spine 2.0. Now, `EntityRecord is used to persist
     // the aggregate's state
     //
-    // The presence of this flag pops out of the need to perform a step-by-step migration.
+    // The presence of this flag pops out of the need to perform the migration in batches.
     //
     // See `io.spine.server.migration.mirror.MirrorMigration`.
     bool was_migrated = 7 [(column) = true];
