@@ -29,8 +29,8 @@ package io.spine.server.migration.mirror;
 import com.google.common.collect.Lists;
 import io.spine.server.ContextSpec;
 import io.spine.server.migration.mirror.given.DeliveryService;
-import io.spine.server.migration.mirror.given.MemoizingSupervisor;
-import io.spine.server.migration.mirror.given.MirrorMappingTestEnv;
+import io.spine.server.migration.mirror.given.MemoizingMonitor;
+import io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv;
 import io.spine.server.migration.mirror.given.ParcelAgg;
 import io.spine.server.migration.mirror.given.PreparedMirrorStorage;
 import io.spine.server.storage.StorageFactory;
@@ -51,7 +51,7 @@ import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.asse
 final class MirrorMigrationTest {
 
     private static final StorageFactory storageFactory = InMemoryStorageFactory.newInstance();
-    private static final String tenantId = MirrorMappingTestEnv.class.getSimpleName();
+    private static final String tenantId = MirrorToEntityRecordTestEnv.class.getSimpleName();
     private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
 
     @Nested
@@ -81,7 +81,7 @@ final class MirrorMigrationTest {
                     .put(DeliveryService::generateDeliveredParcel, delivered)
                     .put(DeliveryService::generateInProgressParcel, inProgress)
                     .get();
-            var supervisor = new MemoizingSupervisor(batchSize);
+            var supervisor = new MemoizingMonitor(batchSize);
 
             migration.run(supervisor);
 
@@ -98,7 +98,7 @@ final class MirrorMigrationTest {
         @Test
         @DisplayName("on a migration start and completion")
         void onMigrationRunning() {
-            var supervisor = new MemoizingSupervisor(1_000);
+            var supervisor = new MemoizingMonitor(1_000);
             runMigration(supervisor);
 
             assertThat(supervisor.startedTimes()).isEqualTo(1);
@@ -108,14 +108,14 @@ final class MirrorMigrationTest {
         @Test
         @DisplayName("on a migration's step start and completion")
         void onStepRunning() {
-            var supervisor = new MemoizingSupervisor(1_000);
+            var supervisor = new MemoizingMonitor(1_000);
             runMigration(supervisor);
 
             assertThat(supervisor.stepStartedTimes()).isEqualTo(5);
             assertThat(supervisor.completedSteps()).hasSize(5);
         }
 
-        private void runMigration(MemoizingSupervisor supervisor) {
+        private void runMigration(MemoizingMonitor supervisor) {
             var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
             new PreparedMirrorStorage(migration.mirrorStorage())
                     .put(DeliveryService::generateInProgressParcel, 3_050);
@@ -134,7 +134,7 @@ final class MirrorMigrationTest {
         // Too small batch size would slow down the migration.
         // We are going to terminate the migration when it takes more than three seconds.
         var batchSize = 10;
-        var supervisor = new MigrationSupervisor(batchSize) {
+        var supervisor = new MirrorMigrationMonitor(batchSize) {
 
             private LocalDateTime whenStarted;
 
@@ -144,7 +144,7 @@ final class MirrorMigrationTest {
             }
 
             @Override
-            public boolean shouldContinueAfter(MigrationStep step) {
+            public boolean shouldContinueAfter(MirrorsMigrated step) {
                 var secondsSinceStart = ChronoUnit.SECONDS
                         .between(whenStarted, LocalDateTime.now());
                 return secondsSinceStart <= 3;

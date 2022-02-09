@@ -38,6 +38,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.DefaultEventStore;
+import io.spine.server.migration.mirror.MirrorStorage;
 
 /**
  * A factory for creating storages used by repositories, {@link EventStore EventStore}
@@ -183,5 +184,19 @@ public interface StorageFactory extends AutoCloseable {
      */
     default CatchUpStorage createCatchUpStorage(boolean multitenant) {
         return new CatchUpStorage(this, multitenant);
+    }
+
+    /**
+     * Creates a new {@link MirrorStorage}.
+     *
+     * <p>Pay attention, {@link io.spine.system.server.Mirror Mirror} was deprecated in Spine 2.x.
+     * The presence of this storage in the factory is for those who will
+     * {@link io.spine.server.migration.mirror.MirrorMigration migrate mirrors} from Spine 1.x.
+     *
+     * @param context
+     *         specification of the Bounded Context, in scope of which this storage will be used
+     */
+    default MirrorStorage createMirrorStorage(ContextSpec context) {
+        return new MirrorStorage(context, this);
     }
 }

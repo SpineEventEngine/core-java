@@ -53,26 +53,31 @@ import java.util.Iterator;
  * storing of queryable state-based columns along the state itself. For this reason, the migration
  * is also done on a per-aggregate basis.
  *
+ * <p><b>Migration order</b>
+ *
+ * <p>Sorted by {@code was_migrated}
+ *
  * <p><b>An example usage</b>
  *
- * <p>1. Create an instance of `MirrorMigration`:
  * <pre>
+ * // 1. Create an instance of `MirrorMigration`.
+ *
  * var contextSpec = ContextSpec.singleTenant("...");
  * var storageFactory = ServerEnvironment.instance().storageFactory();
  * var migration = new MirrorMigration(contextSpec, storageFactory, ParcelAgg.class);
- * </pre>
  *
- * <p>2. Create `MigrationSupervisor`. Here we are going to use a default implementation,
- * which always continues the migration. Also, we will work with storages via batches
- * of 500 records.
- * <pre>
- * var stepSize = 500;
- * var supervisor = new MigrationSupervisor(stepSize);
- * </pre>
  *
- * <p>3. Run the migration.
- * <pre>
- * migration.run(supervisor);
+ * // 2. Create `MirrorMigrationMonitor`. Here we are going to use a default implementation,
+ * // which always continues the migration. Also, we will work with storages via batches
+ * // of 500 records.
+ *
+ * var batchSize = 500;
+ * var monitor = new MirrorMigrationMonitor(batchSize);
+ *
+ *
+ * // 3. Run the migration.
+ *
+ * migration.run(monitor);
  * </pre>
  *
  * @param <I>
@@ -87,7 +92,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
 
     private final EntityRecordStorage<I, S> entityRecordStorage;
     private final MirrorStorage mirrorStorage;
-    private final MirrorMapping<I, S, A> mapping;
+    private final MirrorToEntityRecord<I, S, A> mapping;
     private final String aggregateType;
 
     /**
@@ -96,20 +101,20 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
      * <p>The created instance is able to migrate {@code Mirror} projections of the
      * given aggregate class.
      *
-     * @param contextSpec
+     * @param context
      *         the context to which the passed aggregate belongs
      * @param factory
      *         the storage provider
      * @param aggClass
      *         the class of an aggregate, {@code Mirror} projections of which are to be migrated
      */
-    public MirrorMigration(ContextSpec contextSpec,
+    public MirrorMigration(ContextSpec context,
                            StorageFactory factory,
                            Class<A> aggClass) {
 
-        this.mirrorStorage = new MirrorStorage(contextSpec, factory);
-        this.entityRecordStorage = factory.createEntityRecordStorage(contextSpec, aggClass);
-        this.mapping = new MirrorMapping<>(aggClass);
+        this.mirrorStorage = factory.createMirrorStorage(context);
+        this.entityRecordStorage = factory.createEntityRecordStorage(context, aggClass);
+        this.mapping = new MirrorToEntityRecord<>(aggClass);
         this.aggregateType = AggregateClass.asAggregateClass(aggClass)
                                           .stateTypeUrl()
                                           .value();
@@ -119,11 +124,11 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
      * Migrates {@linkplain Mirror} projections
      * to the aggregate's {@linkplain EntityRecordStorage}.
      */
-    public void run(MigrationSupervisor supervisor) {
+    public void run(MirrorMigrationMonitor supervisor) {
         supervisor.onMigrationStarted();
 
         var step = proceed(supervisor);
-        while (step.getMigrated() != 0 && supervisor.shouldContinueAfter(step)) {
+        while (step.getValue() != 0 && supervisor.shouldContinueAfter(step)) {
             step = proceed(supervisor);
         }
 
@@ -133,17 +138,19 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     /**
      * Fetches and processes the next batch.
      */
-    private MigrationStep proceed(MigrationSupervisor supervisor) {
+    private MirrorsMigrated proceed(MirrorMigrationMonitor supervisor) {
         supervisor.onStepStarted();
 
-        var batchSize = supervisor.stepSize();
+        var batchSize = supervisor.batchSize();
         Collection<EntityRecordWithColumns<I>> entityRecords = new ArrayList<>(batchSize);
         Collection<Mirror> migratedMirrors = new ArrayList<>(batchSize);
 
         fetchNextBatch(batchSize)
                 .forEachRemaining(mirror -> {
 
-                    var entityRecord = mapping.toEntityRecord(mirror);
+                    // Extract into a nested (or just inner?) type.
+
+                    var entityRecord = mapping.apply(mirror);
                     var migratedMirror = mirror.toBuilder()
                             .setWasMigrated(true)
                             .build();
@@ -155,8 +162,8 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         entityRecordStorage.writeAll(entityRecords);
         mirrorStorage.writeBatch(migratedMirrors);
 
-        var completedStep = MigrationStep.newBuilder()
-                .setMigrated(migratedMirrors.size())
+        var completedStep = MirrorsMigrated.newBuilder()
+                .setValue(migratedMirrors.size())
                 .build();
 
         supervisor.onStepCompleted(completedStep);
@@ -174,11 +181,17 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         return iterator;
     }
 
+    /**
+     * Some storage.
+     */
     @VisibleForTesting
     EntityRecordStorage<I, S> entityRecordStorage() {
         return entityRecordStorage;
     }
 
+    /**
+     * Some storage.
+     */
     @VisibleForTesting
     MirrorStorage mirrorStorage() {
         return mirrorStorage;

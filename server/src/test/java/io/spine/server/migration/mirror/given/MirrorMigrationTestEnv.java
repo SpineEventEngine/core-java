@@ -96,8 +96,8 @@ public final class MirrorMigrationTestEnv {
     /**
      * Asserts that all steps during the migration were of the expected size.
      */
-    public static void assertUsedBatchSize(MemoizingSupervisor supervisor, int batchSize) {
+    public static void assertUsedBatchSize(MemoizingMonitor supervisor, int batchSize) {
         supervisor.completedSteps()
-                  .forEach(step -> assertThat(step.getMigrated()).isAtMost(batchSize));
+                  .forEach(step -> assertThat(step.getValue()).isAtMost(batchSize));
     }
 }

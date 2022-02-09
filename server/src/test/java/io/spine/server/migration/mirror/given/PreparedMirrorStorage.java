@@ -58,7 +58,7 @@ public final class PreparedMirrorStorage {
 
     private static Mirror mirror(Supplier<EntityState<?>> stateSupplier) {
         var state = stateSupplier.get();
-        var mirror = MirrorMappingTestEnv.mirror(state);
+        var mirror = MirrorToEntityRecordTestEnv.mirror(state);
         return mirror;
     }
 
