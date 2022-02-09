@@ -25,41 +25,26 @@
  */
 syntax = "proto3";
 
-package spine.test.aggregate;
+package spine.test.aggregate.employee;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.aggregate.given.thermometer";
+option java_package = "io.spine.server.aggregate.given.employee";
 option java_multiple_files = true;
 
-
-// The unique factory-provided identifier of a thermometer.
-message ThermometerId {
+message EmployeeId {
   string uuid = 1 [(required) = true];
 }
 
-// A US thermometer for mild-weather regions.
-//
-// This particular thermometer type is created for the mild-weather conditions and is not gonna
-// work in cold parts of the country while not being able to determine the cold temperature
-// under 0 ℉.
-//
-message Thermometer {
+message Employee {
   option (entity).kind = AGGREGATE;
 
-  ThermometerId id = 1 [(required) = true];
+  EmployeeId id = 1 [(required) = true];
 
-  // The temperature in ℉.
-  double fahrenheit = 2 [(min).value = "0.1", (max).value = "120"];
-}
-
-// A change in the temperature.
-message TemperatureChange {
-
-  // The previous temperature in ℉.
-  double previous_value = 1;
-
-  // The previous temperature in ℉.
-  double new_value = 2;
+  // Employee's compensation for their work.
+  //
+  // Let's take 200$ as the lowest compensation
+  // which employers can legally pay their employees.
+  int32 salary = 2 [(min).value = "200"];
 }

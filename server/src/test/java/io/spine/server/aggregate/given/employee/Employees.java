@@ -24,43 +24,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
+package io.spine.server.aggregate.given.employee;
 
-import io.spine.annotation.GeneratedMixin;
-import io.spine.annotation.Internal;
-import io.spine.core.TenantId;
+public class Employees {
 
-import static io.spine.base.Identifier.newUuid;
-
-/**
- * A mixin for {@link InboxMessage}.
- */
-@GeneratedMixin
-@Internal
-public interface InboxMessageMixin extends ShardedRecord, InboxMessageOrBuilder {
-
-    @Override
-    default ShardIndex shardIndex() {
-        return getId().getIndex();
+    private Employees() {
     }
 
-    /**
-     * Returns the {@link TenantId} for the original {@linkplain #getPayloadCase() signal payload}.
-     */
-    default TenantId tenant() {
-        return hasCommand()
-                       ? getCommand().tenant()
-                       : getEvent().tenant();
+    public static Employ employ(EmployeeId employee, int salary) {
+        return Employ.newBuilder()
+                .setEmployee(employee)
+                .setSalary(salary)
+                .vBuild();
     }
 
-    /**
-     * Generates a new {@code InboxMessageId} with an auto-generated UUID and the given shard
-     * index as parts.
-     */
-    static InboxMessageId generateIdWith(ShardIndex index) {
-        return InboxMessageId.newBuilder()
-                             .setUuid(newUuid())
-                             .setIndex(index)
-                             .vBuild();
+    public static IncreaseSalary increaseSalary(EmployeeId employee, int amount) {
+        return IncreaseSalary.newBuilder()
+                .setEmployee(employee)
+                .setAmount(amount)
+                .vBuild();
+    }
+
+    public static DecreaseSalary decreaseSalary(EmployeeId employee, int amount) {
+        return DecreaseSalary.newBuilder()
+                .setEmployee(employee)
+                .setAmount(amount)
+                .vBuild();
+    }
+
+    public static DecreaseSalaryThreeTimes
+    decreaseSalaryThreeTimes(EmployeeId employee, int amount) {
+        return DecreaseSalaryThreeTimes.newBuilder()
+                .setEmployee(employee)
+                .setAmount(amount)
+                .vBuild();
+    }
+
+    static SalaryDecreased salaryDecreased(EmployeeId employee, int amount) {
+        return SalaryDecreased.newBuilder()
+                .setEmployee(employee)
+                .setAmount(amount)
+                .vBuild();
     }
 }

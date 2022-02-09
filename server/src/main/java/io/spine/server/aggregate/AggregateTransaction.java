@@ -41,7 +41,7 @@ import io.spine.validate.ValidatingBuilder;
  *
  * @param <I> the type of aggregate IDs
  * @param <S> the type of aggregate state
- * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
+ * @param <B> the type of {@code ValidatingBuilder} for the aggregate state
  */
 @Internal
 public class AggregateTransaction<I,
@@ -74,18 +74,6 @@ public class AggregateTransaction<I,
     @Override
     protected final DispatchOutcome dispatch(Aggregate<I, S, B> aggregate, EventEnvelope event) {
         return aggregate.invokeApplier(event);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Additionally, notifies the {@code Aggregate} instance that the event has been played.
-     */
-    @Override
-    public DispatchOutcome play(EventEnvelope event) {
-        var outcome = super.play(event);
-        entity().onAfterEventPlayed(event);
-        return outcome;
     }
 
     @Override

@@ -182,7 +182,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
                                         .delivery();
         inbox = delivery
                 .<I>newInbox(entityStateType())
-                .withBatchListener(new BatchDeliveryListener<I>() {
+                .withBatchListener(new BatchDeliveryListener<>() {
                     @Override
                     public void onStart(I id) {
                         cache.startCaching(id);
@@ -255,8 +255,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * <p>The default routing uses {@linkplain io.spine.core.EventContext#getProducerId()
      * producer ID} of the event as the ID of the target aggregate.
      *
-     * <p>This default routing requires that {@link Event Event} instances
-     * {@linkplain ImportBus#post(io.spine.core.Signal, io.grpc.stub.StreamObserver)}  posted}
+     * <p>This default routing requires that {@link Event} instances
+     * {@linkplain ImportBus#post(io.spine.core.Signal, io.grpc.stub.StreamObserver) posted}
      * for import must {@link io.spine.core.EventContext#getProducerId() contain} the ID of the
      * target aggregate. Not providing a valid aggregate ID would result in
      * {@code RuntimeException}.
@@ -494,7 +494,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      *
      * <p><b>NOTE</b>: repository read operations are optimized around the current snapshot
      * trigger. Setting the snapshot trigger to a new value may cause read operations to perform
-     * sub-optimally, until a new snapshot is created. This doesn't apply to newly created
+     * suboptimally, until a new snapshot is created. This doesn't apply to newly created
      * repositories.
      *
      * @param snapshotTrigger
@@ -591,7 +591,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * <p>The method loads only the recent history of the aggregate.
      *
      * <p>The current {@link #snapshotTrigger} is used as a batch size of the read operation,
-     * so the method can perform sub-optimally for some time
+     * so the method can perform suboptimally for some time
      * after the {@link #snapshotTrigger} change.
      *
      * @param id

@@ -23,43 +23,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.aggregate;
+/**
+ * Environment classes for {@link io.spine.server.aggregate.AbstractAggregateResilienceTest}.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.aggregate.given.employee;
 
-import "spine/options.proto";
+import com.google.errorprone.annotations.CheckReturnValue;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.aggregate.given.thermometer";
-option java_multiple_files = true;
-
-
-// The unique factory-provided identifier of a thermometer.
-message ThermometerId {
-  string uuid = 1 [(required) = true];
-}
-
-// A US thermometer for mild-weather regions.
-//
-// This particular thermometer type is created for the mild-weather conditions and is not gonna
-// work in cold parts of the country while not being able to determine the cold temperature
-// under 0 ℉.
-//
-message Thermometer {
-  option (entity).kind = AGGREGATE;
-
-  ThermometerId id = 1 [(required) = true];
-
-  // The temperature in ℉.
-  double fahrenheit = 2 [(min).value = "0.1", (max).value = "120"];
-}
-
-// A change in the temperature.
-message TemperatureChange {
-
-  // The previous temperature in ℉.
-  double previous_value = 1;
-
-  // The previous temperature in ℉.
-  double new_value = 2;
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -24,43 +24,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.delivery;
+package io.spine.server.aggregate.given.employee;
 
-import io.spine.annotation.GeneratedMixin;
-import io.spine.annotation.Internal;
-import io.spine.core.TenantId;
-
-import static io.spine.base.Identifier.newUuid;
+import com.google.protobuf.Message;
+import io.spine.server.ContextSpec;
+import io.spine.server.delivery.InboxStorage;
+import io.spine.server.storage.RecordSpec;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 
 /**
- * A mixin for {@link InboxMessage}.
+ * In-memory {@code StorageFactory} which substitutes individual storages with the custom ones.
  */
-@GeneratedMixin
-@Internal
-public interface InboxMessageMixin extends ShardedRecord, InboxMessageOrBuilder {
+public final class PreparedStorageFactory {
 
-    @Override
-    default ShardIndex shardIndex() {
-        return getId().getIndex();
+    private PreparedStorageFactory() {
     }
 
     /**
-     * Returns the {@link TenantId} for the original {@linkplain #getPayloadCase() signal payload}.
+     * Returns in-memory {@code StorageFactory} with the custom {@code InboxStorage}.
      */
-    default TenantId tenant() {
-        return hasCommand()
-                       ? getCommand().tenant()
-                       : getEvent().tenant();
-    }
+    public static StorageFactory with(InboxStorage inboxStorage) {
+        return new StorageFactory() {
+            @Override
+            public void close() {
+                // NO OP
+            }
 
-    /**
-     * Generates a new {@code InboxMessageId} with an auto-generated UUID and the given shard
-     * index as parts.
-     */
-    static InboxMessageId generateIdWith(ShardIndex index) {
-        return InboxMessageId.newBuilder()
-                             .setUuid(newUuid())
-                             .setIndex(index)
-                             .vBuild();
+            @Override
+            public <I, R extends Message> RecordStorage<I, R> createRecordStorage(
+                    ContextSpec context, RecordSpec<I, R, ?> spec) {
+                return InMemoryStorageFactory.newInstance().createRecordStorage(context, spec);
+            }
+
+            @Override
+            public InboxStorage createInboxStorage(boolean multitenant) {
+                return inboxStorage;
+            }
+        };
     }
 }

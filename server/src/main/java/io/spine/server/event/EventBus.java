@@ -142,12 +142,12 @@ public final class EventBus
     }
 
     @VisibleForTesting
-    final Set<? extends EventDispatcher> dispatchersOf(EventClass eventClass) {
+    Set<? extends EventDispatcher> dispatchersOf(EventClass eventClass) {
         return registry().dispatchersOf(eventClass);
     }
 
     @VisibleForTesting
-    final boolean hasDispatchers(EventClass eventClass) {
+    boolean hasDispatchers(EventClass eventClass) {
         Set<?> dispatchers = dispatchersOf(eventClass);
         return !dispatchers.isEmpty();
     }
@@ -159,7 +159,7 @@ public final class EventBus
      *
      * @return a set of classes of supported events
      */
-    public final Set<EventClass> registeredEventClasses() {
+    public Set<EventClass> registeredEventClasses() {
         return registry().registeredMessageClasses();
     }
 
@@ -195,13 +195,13 @@ public final class EventBus
      * Posts the event for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Signal, StreamObserver)} parent method},
+     * {@linkplain io.spine.server.bus.Bus#post(Signal, StreamObserver) parent method},
      * but does not require any response observer.
      *
      * @param event the event to be handled
      * @see io.spine.server.bus.Bus#post(Signal, StreamObserver)
      */
-    public final void post(Event event) {
+    public void post(Event event) {
         post(event, observer());
     }
 
@@ -209,15 +209,15 @@ public final class EventBus
      * Posts the events for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method}
+     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver) parent method}
      * but does not require any response observer.
      *
-     * <p>This method should be used if the callee does not care about the events acknowledgement.
+     * <p>This method should be used if the callee does not care about the events' acknowledgement.
      *
      * @param events the events to be handled
      * @see io.spine.server.bus.Bus#post(Signal, StreamObserver)
      */
-    public final void post(Iterable<Event> events) {
+    public void post(Iterable<Event> events) {
         post(events, observer());
     }
 
@@ -230,7 +230,7 @@ public final class EventBus
      * Obtains the {@code EventEnricher} used by this Event Bus.
      */
     @VisibleForTesting
-    public final Optional<EventEnricher> enricher() {
+    public Optional<EventEnricher> enricher() {
         return Optional.ofNullable(enricher);
     }
 

@@ -23,43 +23,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.aggregate;
+package io.spine.server.aggregate.given;
 
-import "spine/options.proto";
+import io.spine.base.EventMessage;
+import io.spine.core.Event;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.aggregate.given.thermometer";
-option java_multiple_files = true;
+import java.util.List;
 
+import static com.google.common.truth.Truth.assertThat;
 
-// The unique factory-provided identifier of a thermometer.
-message ThermometerId {
-  string uuid = 1 [(required) = true];
-}
+/**
+ * Environment for {@link io.spine.server.aggregate.AbstractAggregateResilienceTest}.
+ */
+public final class AbstractAggregateResilienceTestEnv {
 
-// A US thermometer for mild-weather regions.
-//
-// This particular thermometer type is created for the mild-weather conditions and is not gonna
-// work in cold parts of the country while not being able to determine the cold temperature
-// under 0 ℉.
-//
-message Thermometer {
-  option (entity).kind = AGGREGATE;
+    private AbstractAggregateResilienceTestEnv() {
+    }
 
-  ThermometerId id = 1 [(required) = true];
+    /**
+     * Wraps the "varargs-passed" event messages into a {@code List}.
+     */
+    @SafeVarargs
+    public static List<Class<? extends EventMessage>>
+    eventTypes(Class<? extends EventMessage>... types) {
+        return List.of(types);
+    }
 
-  // The temperature in ℉.
-  double fahrenheit = 2 [(min).value = "0.1", (max).value = "120"];
-}
-
-// A change in the temperature.
-message TemperatureChange {
-
-  // The previous temperature in ℉.
-  double previous_value = 1;
-
-  // The previous temperature in ℉.
-  double new_value = 2;
+    /**
+     * Assert that the passed events correspond to the passed types.
+     */
+    public static void assertEvents(List<Event> events, List<Class<? extends EventMessage>> types) {
+        assertThat(events.size()).isEqualTo(types.size());
+        for (var i = 0; i < types.size(); i++) {
+            var messageClass = events.get(i)
+                                     .enclosedMessage()
+                                     .getClass();
+            assertThat(messageClass).isEqualTo(types.get(i));
+        }
+    }
 }

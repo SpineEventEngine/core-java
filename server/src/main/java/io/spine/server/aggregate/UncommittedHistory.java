@@ -28,21 +28,17 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
-import io.spine.server.type.EventEnvelope;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
  * Uncommitted events and snapshots created for this aggregate during the dispatching.
  *
- * <p>Watches how the events {@linkplain Aggregate#invokeApplier(EventEnvelope) are sent}
- * to the {@link Aggregate} applier methods. Remembers all such events as uncommitted.
+ * Remembers all successfully applied events as uncommitted.
  *
  * <p>Once an aggregate is loaded from the storage, the {@code UncommittedHistory}
  * {@linkplain #onAggregateRestored(AggregateHistory) remembers} the event count
@@ -51,13 +47,7 @@ import static java.util.stream.Collectors.toList;
  * <p>If during the dispatching of events the number of events since the last snapshot exceeds
  * the snapshot trigger, a snapshot is created and remembered as a part of uncommitted history.
  *
- * <p>In order to ignore the events fed to the aggregate when it's being loaded from the storage,
- * the {@code UncommittedHistory}'s tracking is only {@linkplain #startTracking(int) activated}
- * when the new and truly un-yet-committed events are dispatched to the applier methods.
- * The tracking {@linkplain #stopTracking() stops} after all the new events have been played
- * on the aggregate instance.
- *
- * @see Aggregate#apply(List, int) on activation and deactivation of event tracking
+ * @see Aggregate#apply(List, int) remembering successfully applied events
  * @see Aggregate#replay(AggregateHistory) on supplying the history stats when loading aggregate
  *         instances from the storage
  */
@@ -66,10 +56,7 @@ final class UncommittedHistory {
     private final Supplier<Snapshot> makeSnapshot;
     private final List<AggregateHistory> historySegments = new ArrayList<>();
     private final List<Event> currentSegment = new ArrayList<>();
-
     private int eventCountAfterLastSnapshot;
-    private @Nullable Integer snapshotTrigger = null;
-    private boolean enabled = false;
 
     /**
      * Creates an instance of the uncommitted history.
@@ -82,65 +69,27 @@ final class UncommittedHistory {
     }
 
     /**
-     * Enables the tracking of events.
-     *
-     * <p>All events {@linkplain #track(EventEnvelope) sent} to this instance will now be counted
-     * as new and uncommitted events in the aggregate's history.
-     *
-     * @param snapshotTrigger
-     *         the snapshot trigger to consider each time a new event is tracked
-     */
-    void startTracking(int snapshotTrigger) {
-        enabled = true;
-        this.snapshotTrigger = snapshotTrigger;
-    }
-
-    /**
-     * Stops the tracking of the events.
-     *
-     * <p>All the events {@linkplain #track(EventEnvelope) sent to the tracking} will be counted
-     * as the events already present in the aggregate storage.
-     */
-    void stopTracking() {
-        enabled = false;
-        snapshotTrigger = null;
-    }
-
-    /**
-     * Tracks the event dispatched to the Aggregate's applier.
-     *
-     * <p>If the tracking is not {@linkplain #startTracking(int) started}, the event is considered
-     * an old one and such as not requiring storage and tracking. In this case, this method
-     * does nothing.
-     *
-     * <p>If the event is a new one, it is remembered as a part of the uncommitted history.
+     * Tracks the events, successfully dispatched to the Aggregate's applier.
      *
      * <p>If the number of events since the last snapshot equals or exceeds the snapshot trigger,
      * a new snapshot is made and saved to the uncommitted history.
      *
-     * @param envelope
-     *         an event to track
+     * @param events
+     *         successfully applied events
+     * @param snapshotTrigger
+     *         number of tracked events, exceeding which, triggers a new snapshot creation
      */
-    void track(EventEnvelope envelope) {
-        if (!enabled) {
-            return;
-        }
-        requireNonNull(snapshotTrigger,
-                       "The snapshot trigger must be set" +
-                               " to track the events applied to an `Aggregate`.");
-
-        var event = envelope.outerObject();
-        if (event.isRejection()) {
-            return;
-        }
-        currentSegment.add(event);
-        var eventsInSegment = currentSegment.size();
-        if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
-            var snapshot = makeSnapshot.get();
-            var completedSegment = historyFrom(currentSegment, snapshot);
-            historySegments.add(completedSegment);
-            currentSegment.clear();
-            eventCountAfterLastSnapshot = 0;
+    void track(List<Event> events, int snapshotTrigger) {
+        for (var event : events) {
+            currentSegment.add(event);
+            var eventsInSegment = currentSegment.size();
+            if (eventCountAfterLastSnapshot + eventsInSegment >= snapshotTrigger) {
+                var snapshot = makeSnapshot.get();
+                var completedSegment = historyFrom(currentSegment, snapshot);
+                historySegments.add(completedSegment);
+                currentSegment.clear();
+                eventCountAfterLastSnapshot = 0;
+            }
         }
     }
 
@@ -165,8 +114,7 @@ final class UncommittedHistory {
      */
     UncommittedEvents events() {
         var events = get().stream()
-                                  .flatMap(segment -> segment.getEventList()
-                                                             .stream())
+                                  .flatMap(segment -> segment.getEventList().stream())
                                   .collect(toList());
         return UncommittedEvents.ofNone()
                                 .append(events);

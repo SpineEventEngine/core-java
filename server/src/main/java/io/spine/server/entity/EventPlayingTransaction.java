@@ -45,7 +45,7 @@ import io.spine.validate.ValidatingBuilder;
  * @param <S>
  *         the type of entity state
  * @param <B>
- *         the type of a {@code ValidatingBuilder} for the entity state
+ *         the type of {@code ValidatingBuilder} for the entity state
  */
 @Internal
 public abstract

@@ -23,43 +23,52 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.aggregate;
+package io.spine.server.aggregate.given.employee;
 
-import "spine/options.proto";
+import com.google.common.collect.ImmutableList;
+import io.spine.core.Event;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.aggregate.given.thermometer";
-option java_multiple_files = true;
+import java.util.List;
 
+/**
+ * Result of {@code Message}s dispatching.
+ *
+ * <p>Consists of:
+ * <ul>
+ *     <li>events stored to {@code AggregateStorage};</li>
+ *     <li>events posted to {@code EventBus};</li>
+ *     <li>updated {@code Aggregate}'s state.</li>
+ * </ul>
+ *
+ * <p>A healthy {@code Aggregate} usually stores and posts the same set of events within
+ * dispatching. That consequently causes its state to be updated.
+ */
+public final class DispatchExhaust {
 
-// The unique factory-provided identifier of a thermometer.
-message ThermometerId {
-  string uuid = 1 [(required) = true];
-}
+    private final ImmutableList<Event> stored;
+    private final ImmutableList<Event> posted;
+    private final Employee state;
 
-// A US thermometer for mild-weather regions.
-//
-// This particular thermometer type is created for the mild-weather conditions and is not gonna
-// work in cold parts of the country while not being able to determine the cold temperature
-// under 0 ℉.
-//
-message Thermometer {
-  option (entity).kind = AGGREGATE;
+    public DispatchExhaust(
+            List<Event> storedEvents,
+            List<Event> postedEvents,
+            Employee state
+    ) {
+        this.stored = ImmutableList.copyOf(storedEvents);
+        this.posted = ImmutableList.copyOf(postedEvents);
+        this.state = state;
+    }
 
-  ThermometerId id = 1 [(required) = true];
+    public List<Event> storedEvents() {
+        return stored;
+    }
 
-  // The temperature in ℉.
-  double fahrenheit = 2 [(min).value = "0.1", (max).value = "120"];
-}
+    public List<Event> postedEvents() {
+        return posted;
+    }
 
-// A change in the temperature.
-message TemperatureChange {
-
-  // The previous temperature in ℉.
-  double previous_value = 1;
-
-  // The previous temperature in ℉.
-  double new_value = 2;
+    public Employee state() {
+        return state;
+    }
 }

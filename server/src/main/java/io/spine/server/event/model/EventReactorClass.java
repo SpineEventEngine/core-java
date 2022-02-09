@@ -69,7 +69,7 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
         @SuppressWarnings("unchecked")
         var result = (EventReactorClass<S>)
                 get(cls, EventReactorClass.class, () -> new EventReactorClass<>(cls));
-        return (result);
+        return result;
     }
 
     @Override

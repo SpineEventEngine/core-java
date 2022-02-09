@@ -450,7 +450,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are uncommitted")
-        void uncommitedAfterDispatch() {
+        void uncommittedAfterDispatch() {
             aggregate.dispatchCommands(command(createProject),
                                        command(addTask),
                                        command(startProject));
@@ -493,7 +493,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are uncommitted")
-        void uncommitedByDefault() {
+        void uncommittedByDefault() {
             var events = aggregate().getUncommittedEvents();
 
             assertFalse(events.nonEmpty());
