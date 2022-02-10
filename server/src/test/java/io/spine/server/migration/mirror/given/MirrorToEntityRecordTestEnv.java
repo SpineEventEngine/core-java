@@ -60,7 +60,7 @@ public final class MirrorToEntityRecordTestEnv {
      * Asserts that version and lifecycle column values match to the ones from the mirror.
      */
     public static void assertLifecycleColumns(RecordWithColumns<?, EntityRecord> recordWithColumns,
-                                               Mirror mirror) {
+                                              Mirror mirror) {
 
         var lifecycleFlags = mirror.getLifecycle();
         assertThat(recordWithColumns.columnValue(ColumnName.of("archived")))
