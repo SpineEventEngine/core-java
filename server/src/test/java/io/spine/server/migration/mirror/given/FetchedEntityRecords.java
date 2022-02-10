@@ -58,16 +58,26 @@ final class FetchedEntityRecords<I, S extends EntityState<I>> {
             );
     private final EntityRecordStorage<I, S> storage;
 
+    /**
+     * Creates a new instance of {@code FetchedEntityRecords} using the passed storage
+     * as a source of records.
+     */
     FetchedEntityRecords(EntityRecordStorage<I, S> storage) {
         this.storage = storage;
     }
 
+    /**
+     * Returns entity records, which are neither archived nor deleted.
+     */
     List<EntityRecord> active() {
         var iterator = storage.readAll();
         var result = Lists.newArrayList(iterator);
         return result;
     }
 
+    /**
+     * Return entity records, which are marked as archived.
+     */
     List<EntityRecord> archived() {
         var iterator = storage.readAll(
                 storage.queryBuilder()
@@ -78,6 +88,9 @@ final class FetchedEntityRecords<I, S extends EntityState<I>> {
         return result;
     }
 
+    /**
+     * Return entity records, which are marked as deleted.
+     */
     List<EntityRecord> deleted() {
         var iterator = storage.readAll(
                 storage.queryBuilder()
