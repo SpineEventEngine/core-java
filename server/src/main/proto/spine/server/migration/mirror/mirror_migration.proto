@@ -34,7 +34,7 @@ option java_package = "io.spine.server.migration.mirror";
 option java_outer_classname = "MirrorMigrationProto";
 option java_multiple_files = true;
 
-// Represents a number of `Mirror` projections, which were migrated
+// A number of `Mirror` projections, which were migrated
 // in a single request during the process of `MirrorMigration`.
 //
 // The batch size for the migration is dictated by a `MirrorMigrationMonitor`. Hence, the value
