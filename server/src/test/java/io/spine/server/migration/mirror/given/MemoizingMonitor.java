@@ -33,9 +33,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A {@code MirrorMigrationMonitor} which memorizes all completed batches.
+ *
+ * <p>Also, counts how many times notification callback methods were called.
+ */
 public final class MemoizingMonitor extends MirrorMigrationMonitor {
 
-    private final List<MirrorsMigrated> completedSteps = new ArrayList<>();
+    private final List<MirrorsMigrated> completedBatches = new ArrayList<>();
 
     private int startedTimes = 0;
     private int completedTimes = 0;
@@ -47,11 +52,11 @@ public final class MemoizingMonitor extends MirrorMigrationMonitor {
 
     @Override
     public void onBatchCompleted(MirrorsMigrated step) {
-        completedSteps.add(step);
+        completedBatches.add(step);
     }
 
     public List<MirrorsMigrated> completedSteps() {
-        return Collections.unmodifiableList(completedSteps);
+        return Collections.unmodifiableList(completedBatches);
     }
 
     @Override
