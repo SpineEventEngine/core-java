@@ -44,7 +44,7 @@ import java.util.List;
  * @param <S>
  *         the type of {@code Entity} state
  */
-final class FetchEntityRecords<I, S extends EntityState<I>> {
+final class FetchedEntityRecords<I, S extends EntityState<I>> {
 
     private final RecordColumn<EntityRecord, Boolean> archived = RecordColumn.create(
                     ArchivedColumn.instance().name().value(),
@@ -58,7 +58,7 @@ final class FetchEntityRecords<I, S extends EntityState<I>> {
             );
     private final EntityRecordStorage<I, S> storage;
 
-    FetchEntityRecords(EntityRecordStorage<I, S> storage) {
+    FetchedEntityRecords(EntityRecordStorage<I, S> storage) {
         this.storage = storage;
     }
 

@@ -87,7 +87,7 @@ public final class MirrorMigrationTestEnv {
     public static void assertEntityRecords(EntityRecordStorage<ParcelId, Parcel> storage,
                                            int active, int archived, int deleted) {
 
-        var records = new FetchEntityRecords<>(storage);
+        var records = new FetchedEntityRecords<>(storage);
 
         var activeRecords = records.active();
         var archivedRecords = records.archived();
@@ -99,8 +99,8 @@ public final class MirrorMigrationTestEnv {
     }
 
     /**
-     * Asserts that the migrated {@code Mirror} projections have received the updated
-     * {@linkplain Mirror#getWasMigrated()} flag.
+     * Asserts that the migrated {@code Mirror} projections have received
+     * the updated {@linkplain Mirror#getWasMigrated()} flag.
      */
     public static void assertMigratedMirrors(MirrorStorage mirrorStorage, int expected) {
         var migratedNumber = mirrorStorage.queryBuilder()
@@ -112,7 +112,7 @@ public final class MirrorMigrationTestEnv {
     }
 
     /**
-     * Asserts that all steps during the migration were of the expected size.
+     * Asserts that all batches during the migration were of the expected size.
      */
     public static void assertUsedBatchSize(MemoizingMonitor monitor, int batchSize) {
         monitor.completedSteps()

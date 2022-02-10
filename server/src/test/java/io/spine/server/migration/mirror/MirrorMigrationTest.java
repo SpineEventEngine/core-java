@@ -52,9 +52,9 @@ import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.asse
 @DisplayName("`MirrorMigration` should")
 final class MirrorMigrationTest {
 
-    private static final StorageFactory storageFactory = InMemoryStorageFactory.newInstance();
+    private static final StorageFactory factory = InMemoryStorageFactory.newInstance();
     private static final String tenantId = MirrorToEntityRecordTestEnv.class.getSimpleName();
-    private static final ContextSpec contextSpec = ContextSpec.singleTenant(tenantId);
+    private static final ContextSpec context = ContextSpec.singleTenant(tenantId);
 
     @Nested
     @DisplayName("migrate mirrors")
@@ -72,7 +72,7 @@ final class MirrorMigrationTest {
 
             @Test
             @DisplayName("one thousand records")
-            void fiveThousandsRecords() {
+            void oneThousandRecords() {
                 testInBatchesOf(1_000);
             }
 
@@ -80,7 +80,7 @@ final class MirrorMigrationTest {
                 var delivered = 2_175;
                 var inProgress = 3_780;
 
-                var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+                var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
                 var mirrorStorage = new PreparedMirrorStorage(migration.mirrorStorage())
                         .put(DeliveryService::generateCourier, 3_000)
                         .put(DeliveryService::generateVehicle, 4_000)
@@ -104,7 +104,7 @@ final class MirrorMigrationTest {
             var archived = 2_200;
             var deleted = 3_350;
 
-            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+            var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
             var mirrorStorage = new PreparedMirrorStorage(migration.mirrorStorage())
                     .put(DeliveryService::generateDeliveredParcel, active)
                     .putDeleted(DeliveryService::generateDeliveredParcel, deleted)
@@ -137,7 +137,7 @@ final class MirrorMigrationTest {
         }
 
         @Test
-        @DisplayName("on a migration's step start and completion")
+        @DisplayName("on a migration's batch start and completion")
         void onStepRunning() {
             var monitor = new MemoizingMonitor(1_000);
             runMigration(monitor);
@@ -147,7 +147,7 @@ final class MirrorMigrationTest {
         }
 
         private void runMigration(MemoizingMonitor monitor) {
-            var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+            var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
             new PreparedMirrorStorage(migration.mirrorStorage())
                     .put(DeliveryService::generateInProgressParcel, 3_050);
             migration.run(monitor);
@@ -158,7 +158,7 @@ final class MirrorMigrationTest {
     @DisplayName("terminate on a monitor's refusal")
     void terminateMigration() {
         var expectedNumber = 5_000;
-        var migration = new MirrorMigration<>(contextSpec, storageFactory, ParcelAgg.class);
+        var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
         new PreparedMirrorStorage(migration.mirrorStorage())
                 .put(DeliveryService::generateInProgressParcel, expectedNumber);
 

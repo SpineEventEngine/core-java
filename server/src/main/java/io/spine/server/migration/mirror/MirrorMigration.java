@@ -53,29 +53,33 @@ import java.util.Iterator;
  * storing of queryable state-based columns along the state itself. For this reason, the migration
  * is also done on a per-aggregate basis.
  *
- * <p><b>Migration order</b>
+ * <p><b>Which records from the storage will be migrated?</b>
  *
- * <p>Sorted by {@code was_migrated}
+ * <p>In Spine 2.0 {@link Mirror#getWasMigrated() a new optional field} has been added
+ * to {@code Mirror}. This field tells whether the given mirror record was already migrated.
+ * The migration relies on a value of this field. It migrates only those records for which a value
+ * of this field is not set at all or equals to {@code false}.
+ *
+ * <p>Mirrors, which are marked as archived or deleted – will be migrated as well.
  *
  * <p><b>An example usage</b>
  *
  * <pre>
- * // 1. Create an instance of `MirrorMigration`.
+ * // Create an instance of `MirrorMigration`.
  *
- * var contextSpec = ContextSpec.singleTenant("...");
- * var storageFactory = ServerEnvironment.instance().storageFactory();
- * var migration = new MirrorMigration(contextSpec, storageFactory, ParcelAgg.class);
+ * var context = ContextSpec.singleTenant("...");
+ * var factory = ServerEnvironment.instance().storageFactory();
+ * var aggToMigrate = ParcelAgg.class;
+ * var migration = new MirrorMigration(context, factory, aggToMigrate);
  *
- *
- * // 2. Create `MirrorMigrationMonitor`. Here we are going to use a default implementation,
- * // which always continues the migration. Also, we will work with storages via batches
- * // of 500 records.
+ * // Create a migration monitor. Here we are going to use a default
+ * // implementation, which always continues the migration.
+ * // Wel will work with storages via batches of 500 records.
  *
  * var batchSize = 500;
  * var monitor = new MirrorMigrationMonitor(batchSize);
  *
- *
- * // 3. Run the migration.
+ * // Run the migration.
  *
  * migration.run(monitor);
  * </pre>
@@ -143,10 +147,10 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         monitor.onBatchStarted();
 
         var batchSize = monitor.batchSize();
+        var mirrors = fetchMirrors(batchSize);
         var batch = new MigrationBatch(batchSize);
 
-        fetchNextBatch(batchSize)
-                .forEachRemaining(batch::migrate);
+        batch.transform(mirrors);
 
         entityRecordStorage.writeAll(batch.entityRecords());
         mirrorStorage.writeBatch(batch.migratedMirrors());
@@ -159,7 +163,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         return migrated;
     }
 
-    private Iterator<Mirror> fetchNextBatch(int batchSize) {
+    private Iterator<Mirror> fetchMirrors(int batchSize) {
         var query = mirrorStorage.queryBuilder()
                                  .where(Mirror.Column.aggregateType()).is(aggregateType)
                                  .where(Mirror.Column.wasMigrated()).is(false)
@@ -171,19 +175,21 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     }
 
     /**
-     * Some storage.
-     */
-    @VisibleForTesting
-    EntityRecordStorage<I, S> entityRecordStorage() {
-        return entityRecordStorage;
-    }
-
-    /**
-     * Some storage.
+     * Returns a source {@link MirrorStorage},
+     * from which mirrors are to be read and migrated.
      */
     @VisibleForTesting
     MirrorStorage mirrorStorage() {
         return mirrorStorage;
+    }
+
+    /**
+     * Returns a destination {@link EntityRecordStorage},
+     * to which the transformed mirrors will be written.
+     */
+    @VisibleForTesting
+    EntityRecordStorage<I, S> entityRecordStorage() {
+        return entityRecordStorage;
     }
 
     private class MigrationBatch {
@@ -195,14 +201,20 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
             migratedMirrors = new ArrayList<>(expectedSize);
         }
 
-        private void migrate(Mirror mirror) {
-            var entityRecord = transformation.apply(mirror);
-            var migratedMirror = mirror.toBuilder()
-                    .setWasMigrated(true)
-                    .build();
+        /**
+         * Goes through the passed mirrors,
+         * transforms them into entity records and accumulates the result.
+         */
+        private void transform(Iterator<Mirror> mirrors) {
+            mirrors.forEachRemaining(mirror -> {
+                var entityRecord = transformation.apply(mirror);
+                var migratedMirror = mirror.toBuilder()
+                        .setWasMigrated(true)
+                        .build();
 
-            entityRecords.add(entityRecord);
-            migratedMirrors.add(migratedMirror);
+                entityRecords.add(entityRecord);
+                migratedMirrors.add(migratedMirror);
+            });
         }
 
         private Collection<EntityRecordWithColumns<I>> entityRecords() {
