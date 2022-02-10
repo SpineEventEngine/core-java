@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 final class MirrorToEntityRecordTest {
 
     @Test
-    @DisplayName("transform a `Mirror` into an `EntityRecord`")
+    @DisplayName("transform a `Mirror` into an `EntityRecordWithColumns`")
     void mapMirrorToEntityRecord() {
         Function<Mirror, EntityRecordWithColumns<ParcelId>> transformation =
                 new MirrorToEntityRecord<>(ParcelAgg.class);
@@ -56,11 +56,11 @@ final class MirrorToEntityRecordTest {
         var mirror = mirror(parcel);
 
         var recordWithColumns = transformation.apply(mirror);
-        var record = recordWithColumns.record();
-
-        assertEntityRecord(record, mirror);
         assertLifecycleColumns(recordWithColumns, mirror);
         assertStateColumns(recordWithColumns, mirror);
+
+        var record = recordWithColumns.record();
+        assertEntityRecord(record, mirror);
     }
 
     @Test

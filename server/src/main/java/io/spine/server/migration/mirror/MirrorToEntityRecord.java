@@ -73,7 +73,7 @@ final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregat
      *
      * <p>The method will throw an exception when the mirror is incompatible
      * with the {@link #MirrorToEntityRecord(Class) used aggregate class}. Meaning, its identifier
-     * and\or state types differ from the ones, declared in the aggregate.
+     * and/or state types differ from the ones, declared for the aggregate.
      */
     @Override
     public EntityRecordWithColumns<I> apply(Mirror mirror) {

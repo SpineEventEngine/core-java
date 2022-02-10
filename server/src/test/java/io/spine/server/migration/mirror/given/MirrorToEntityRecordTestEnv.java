@@ -90,7 +90,7 @@ public final class MirrorToEntityRecordTestEnv {
     }
 
     /**
-     * Creates {@linkplain Mirror} projection from the passed state.
+     * Creates {@linkplain Mirror} projection with the passed state and lifecycle.
      */
     public static Mirror mirror(EntityState<?> state, LifecycleFlags lifecycle) {
         var version = version();
@@ -105,6 +105,9 @@ public final class MirrorToEntityRecordTestEnv {
         return mirror;
     }
 
+    /**
+     * Creates {@linkplain Mirror} projection with the passed state.
+     */
     public static Mirror mirror(EntityState<?> state) {
         var lifecycle = lifecycle(false, false);
         var mirror = mirror(state, lifecycle);
