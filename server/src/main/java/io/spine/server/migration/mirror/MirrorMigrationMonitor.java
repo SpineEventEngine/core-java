@@ -35,23 +35,23 @@ import io.spine.system.server.Mirror;
  * <p>There are three responsibility of a monitor:
  *
  * <ol>
- *     <li>Provides a {@link #batchSize() batch size} which is a number of records
+ *     <li>Dictates a {@link #batchSize() batch size} which is a number of records
  *         processed within a single request.</li>
- *     <li>When the current batch was processed, a monitor is
+ *     <li>When the processing of a current batch is completed, a monitor is
  *         {@link #shouldContinueAfter(MirrorsMigrated) asked}
  *         whether to continue or terminate.</li>
  *     <li>Receives notifications about the key stages in the course of the migration.</li>
  * </ol>
  *
- * This class is open for extending. It may come in handy in the next cases:
+ * <p>This class is open for extending. It may come in handy in the next cases:
  *
  * <ol>
- *     <li>Application's environment imposes some restrictions on a session duration. Which means,
- *         the migration can't be completed in a single run. One can
+ *     <li>Application's environment imposes restrictions on a session duration. Which means,
+ *         the migration can't be completed in a single run. For example, one can
  *         {@link #shouldContinueAfter(MirrorsMigrated) terminate} the migration after the desired
  *         time since {@link #onMigrationStarted() start}. And then run it again to continue.</li>
  *     <li>Tracing data about the course of the migration. One can measure speed of the whole
- *         process and for every batch. And be aware about the number
+ *         process or for every batch. And be aware about the number
  *         of already migrated mirrors.</li>
  * </ol>
  */
@@ -115,7 +115,7 @@ public class MirrorMigrationMonitor {
      *
      * <ol>
      *     <li>During the last batch, less than {@link #batchSize batch size} mirrors were migrated.
-     *         It indicates no records left to migrate.</li>
+     *         It indicates that no records left to migrate.</li>
      *     <li>The migration has been {@link #shouldContinueAfter(MirrorsMigrated) terminated}
      *         ahead of time by a monitor.</li>
      * </ol>
@@ -134,7 +134,8 @@ public class MirrorMigrationMonitor {
     /**
      * Called when the current batch is completed.
      *
-     * @param migrated number of mirrors, migrated within the last batch
+     * @param migrated
+     *         number of mirrors, migrated within the last batch
      */
     public void onBatchCompleted(MirrorsMigrated migrated) {
         // do nothing.

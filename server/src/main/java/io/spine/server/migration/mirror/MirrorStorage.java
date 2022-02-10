@@ -47,12 +47,6 @@ import java.util.List;
  */
 public final class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
 
-    /**
-     * Creates a new instance.
-     *
-     * @param contextSpec
-     *         a specification of a Bounded Context within which the created storage is used
-     */
     public MirrorStorage(ContextSpec contextSpec, StorageFactory factory) {
         super(contextSpec, factory.createRecordStorage(contextSpec, messageSpec()));
     }
