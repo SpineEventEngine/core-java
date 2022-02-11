@@ -81,7 +81,7 @@ final class MirrorMigrationTest {
                 var inProgress = 3_780;
 
                 var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
-                var mirrorStorage = new PreparedMirrorStorage(migration.mirrorStorage())
+                var mirrorStorage = new PreparedMirrorStorage(migration.sourceStorage())
                         .put(DeliveryService::generateCourier, 3_000)
                         .put(DeliveryService::generateVehicle, 4_000)
                         .put(DeliveryService::generateDeliveredParcel, delivered)
@@ -91,7 +91,7 @@ final class MirrorMigrationTest {
 
                 migration.run(monitor);
 
-                assertWithinBc(migration.entityRecordStorage(), delivered, inProgress);
+                assertWithinBc(migration.destinationStorage(), delivered, inProgress);
                 assertMigratedMirrors(mirrorStorage, delivered + inProgress);
                 assertUsedBatchSize(monitor, batchSize);
             }
@@ -105,7 +105,7 @@ final class MirrorMigrationTest {
             var deleted = 3_350;
 
             var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
-            var mirrorStorage = new PreparedMirrorStorage(migration.mirrorStorage())
+            var mirrorStorage = new PreparedMirrorStorage(migration.sourceStorage())
                     .put(DeliveryService::generateDeliveredParcel, active)
                     .putDeleted(DeliveryService::generateDeliveredParcel, deleted)
                     .putArchived(DeliveryService::generateDeliveredParcel, archived)
@@ -116,7 +116,7 @@ final class MirrorMigrationTest {
 
             migration.run(monitor);
 
-            assertEntityRecords(migration.entityRecordStorage(), active, archived, deleted);
+            assertEntityRecords(migration.destinationStorage(), active, archived, deleted);
             assertMigratedMirrors(mirrorStorage, active + archived + deleted);
             assertUsedBatchSize(monitor, batchSize);
         }
@@ -148,7 +148,7 @@ final class MirrorMigrationTest {
 
         private void runMigration(MemoizingMonitor monitor) {
             var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
-            new PreparedMirrorStorage(migration.mirrorStorage())
+            new PreparedMirrorStorage(migration.sourceStorage())
                     .put(DeliveryService::generateInProgressParcel, 3_050);
             migration.run(monitor);
         }
@@ -159,7 +159,7 @@ final class MirrorMigrationTest {
     void terminateMigration() {
         var expectedNumber = 5_000;
         var migration = new MirrorMigration<>(context, factory, ParcelAgg.class);
-        new PreparedMirrorStorage(migration.mirrorStorage())
+        new PreparedMirrorStorage(migration.sourceStorage())
                 .put(DeliveryService::generateInProgressParcel, expectedNumber);
 
         // Too small batch size would slow down the migration.
@@ -184,7 +184,7 @@ final class MirrorMigrationTest {
 
         migration.run(monitor);
 
-        var entityRecordStorage = migration.entityRecordStorage();
+        var entityRecordStorage = migration.destinationStorage();
         var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
         assertThat(entityRecords.size()).isLessThan(expectedNumber);
         assertThat(entityRecords.size()).isAtLeast(batchSize);

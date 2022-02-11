@@ -42,18 +42,16 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Migrates {@linkplain Mirror} projections into {@linkplain EntityRecordWithColumns}.
+ * Migrates {@link Mirror} projections into {@link EntityRecordWithColumns}.
  *
  * <p>{@code Mirror} projection was deprecated in Spine 2.0. Previously, it was used to store
  * aggregates' states to allow their querying. A single projection stored states of <b>all</b>
  * aggregates in a Bounded Context.
  *
- * <p>Now, {@linkplain EntityRecordStorage} is used to store the aggregate's states when it is
+ * <p>Now, {@link EntityRecordStorage} is used to store the aggregate's states when it is
  * open for querying. This storage is created on a <b>per-aggregate</b> basis. This enables
  * storing of queryable state-based columns along the state itself. For this reason, the migration
  * is also done on a per-aggregate basis.
- *
- * <p><b>Which records from the storage will be migrated?</b>
  *
  * <p>In Spine 2.0 {@link Mirror#getWasMigrated() a new optional field} has been added
  * to {@code Mirror}. This field tells whether the given mirror record was already migrated.
@@ -72,9 +70,9 @@ import java.util.Iterator;
  * var aggToMigrate = ParcelAgg.class;
  * var migration = new MirrorMigration(context, factory, aggToMigrate);
  *
- * // Create a migration monitor. Here we are going to use a default
- * // implementation, which always continues the migration.
- * // Wel will work with storages via batches of 500 records.
+ * // Create an instance of `MigrationMonitor`. We are going to use
+ * // a default implementation, which always continues the migration.
+ * // We will work with the storages in batches of 500 records.
  *
  * var batchSize = 500;
  * var monitor = new MirrorMigrationMonitor(batchSize);
@@ -125,8 +123,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     }
 
     /**
-     * Migrates {@linkplain Mirror} projections
-     * to the aggregate's {@linkplain EntityRecordStorage}.
+     * Migrates {@link Mirror} projections to the aggregate's {@link EntityRecordStorage}.
      */
     public void run(MirrorMigrationMonitor monitor) {
         monitor.onMigrationStarted();
@@ -175,20 +172,19 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     }
 
     /**
-     * Returns a source {@link MirrorStorage},
-     * from which mirrors are to be read and migrated.
+     * Returns a source {@link MirrorStorage}, from which mirrors are to be read and migrated.
      */
     @VisibleForTesting
-    MirrorStorage mirrorStorage() {
+    MirrorStorage sourceStorage() {
         return mirrorStorage;
     }
 
     /**
-     * Returns a destination {@link EntityRecordStorage},
-     * to which the transformed mirrors will be written.
+     * Returns a destination {@link EntityRecordStorage}, to which the transformed mirrors
+     * will be written.
      */
     @VisibleForTesting
-    EntityRecordStorage<I, S> entityRecordStorage() {
+    EntityRecordStorage<I, S> destinationStorage() {
         return entityRecordStorage;
     }
 
@@ -202,8 +198,8 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         }
 
         /**
-         * Goes through the passed mirrors,
-         * transforms them into entity records and accumulates the result.
+         * Goes through the passed mirrors, transforms them into entity records
+         * and accumulates the result.
          */
         private void transform(Iterator<Mirror> mirrors) {
             mirrors.forEachRemaining(mirror -> {
