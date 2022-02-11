@@ -133,7 +133,7 @@ public final class EntityRecordWithColumns<I>
         checkNotNull(record);
         checkNotNull(entityClass);
 
-        var stateValues = stateValuesFrom(record, entityClass);
+        var stateValues = stateColumnsFrom(record, entityClass);
         var lifecycleValues = EntityRecordColumn.valuesIn(record);
         var allColumnValues = merge(stateValues, lifecycleValues);
 
@@ -143,7 +143,7 @@ public final class EntityRecordWithColumns<I>
 
     @SuppressWarnings("unchecked") /* See the docs for `create(record, entityClass)`. */
     private static <I, S extends EntityState<I>, E extends Entity<I, S>>
-    Map<ColumnName, @Nullable Object> stateValuesFrom(EntityRecord record, Class<E> entityClass) {
+    Map<ColumnName, @Nullable Object> stateColumnsFrom(EntityRecord record, Class<E> entityClass) {
         var entityClazz = EntityClass.asParameterizedEntityClass(entityClass);
         var columnsScanner = new Scanner<>(entityClazz);
         var entityState = (S) AnyPacker.unpack(record.getState());
