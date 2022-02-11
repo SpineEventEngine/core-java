@@ -594,7 +594,7 @@ public abstract class BlackBox implements Logging, Closeable {
     }
 
     /**
-     * Asserts that the is an entity with the passed ID and the passed type of state.
+     * Asserts that there is an entity with the passed ID and the passed type of state.
      *
      * @return assertion that compares only expected fields
      */

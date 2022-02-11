@@ -100,7 +100,7 @@ public final class MirrorMigrationTestEnv {
 
     /**
      * Asserts that the migrated {@code Mirror} projections have received
-     * the updated {@linkplain Mirror#getWasMigrated()} flag.
+     * the updated {@link Mirror#getWasMigrated()} flag.
      */
     public static void assertMigratedMirrors(MirrorStorage mirrorStorage, int expected) {
         var migratedNumber = mirrorStorage.queryBuilder()

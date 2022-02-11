@@ -47,7 +47,7 @@ public final class MirrorToEntityRecordTestEnv {
     }
 
     /**
-     * Asserts that the common fields in {@linkplain EntityRecord} and {@linkplain Mirror} match.
+     * Asserts that the common fields in {@link EntityRecord} and {@link Mirror} match.
      */
     public static void assertEntityRecord(EntityRecord record, Mirror mirror) {
         assertThat(record.getEntityId()).isEqualTo(mirror.getId().getValue());
@@ -74,7 +74,7 @@ public final class MirrorToEntityRecordTestEnv {
     }
 
     /**
-     * Asserts that state-based columns defined for {@linkplain Parcel} aggregate are present
+     * Asserts that state-based columns defined for {@link Parcel} aggregate are present
      * in the record.
      *
      * <p>Those columns are specific to a concrete aggregate's state.
@@ -90,7 +90,7 @@ public final class MirrorToEntityRecordTestEnv {
     }
 
     /**
-     * Creates {@linkplain Mirror} projection with the passed state and lifecycle.
+     * Creates {@link Mirror} projection with the passed state and lifecycle.
      */
     public static Mirror mirror(EntityState<?> state, LifecycleFlags lifecycle) {
         var version = version();
@@ -106,7 +106,7 @@ public final class MirrorToEntityRecordTestEnv {
     }
 
     /**
-     * Creates {@linkplain Mirror} projection with the passed state.
+     * Creates {@link Mirror} projection with the passed state.
      */
     public static Mirror mirror(EntityState<?> state) {
         var lifecycle = lifecycle(false, false);

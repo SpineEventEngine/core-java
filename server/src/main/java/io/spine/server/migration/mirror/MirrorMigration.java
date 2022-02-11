@@ -75,7 +75,7 @@ import java.util.Iterator;
  * var aggToMigrate = ParcelAgg.class;
  * var migration = new MirrorMigration(context, factory, aggToMigrate);
  *
- * // Create an instance of `MigrationMonitor`. We are going to use
+ * // Create an instance of `MirrorMigrationMonitor`. We are going to use
  * // a default implementation, which always continues the migration.
  * // We will work with storage implementations in batches of 500 records.
  *

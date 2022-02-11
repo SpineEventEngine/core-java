@@ -38,10 +38,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A contract for storages of legacy {@link  Mirror} projections.
+ * A contract for storages of legacy {@link Mirror} projections.
  *
- * <p>{@link Mirror} was deprecated in Spine 2.0. The storage is intended to be used
- * only in a scope of the {@link MirrorMigration migration}.
+ * <p>{@code Mirror} was deprecated in Spine 2.0. The storage is intended to be used
+ * only in a scope of the {@linkplain MirrorMigration migration}.
  *
  * <p>It exposes methods for performing read and write operations in batches.
  */

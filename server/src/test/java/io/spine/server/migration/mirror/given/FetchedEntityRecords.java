@@ -37,7 +37,7 @@ import io.spine.server.entity.storage.EntityRecordStorage;
 import java.util.List;
 
 /**
- * Fetches entity records from the {@link EntityRecordStorage}.
+ * Fetches and exposes entity records from the {@link EntityRecordStorage}.
  *
  * @param <I>
  *         the type of the identifiers of stored entities

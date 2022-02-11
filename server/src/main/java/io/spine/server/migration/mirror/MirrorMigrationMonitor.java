@@ -83,8 +83,8 @@ public class MirrorMigrationMonitor {
      *
      * <ol>
      *     <li>In order to <b>continue</b> the interrupted migration, just
-     *         {@link MirrorMigration#run(MirrorMigrationMonitor) run} it again. The migration
-     *         process {@link Mirror#getWasMigrated() marks} already migrated records. Thus,
+     *         {@linkplain MirrorMigration#run(MirrorMigrationMonitor) run} it again. The migration
+     *         process {@linkplain Mirror#getWasMigrated() marks} already migrated records. Thus,
      *         they will not be migrated twice and duplicated.
      *     <li>In order to <b>re-run</b> the migration, values of {@link Mirror#getWasMigrated()}
      *          column should be reset to {@code false} or no value. And this is the responsibility
@@ -114,9 +114,9 @@ public class MirrorMigrationMonitor {
      * <p>This method is called in two cases:
      *
      * <ol>
-     *     <li>During the last batch, less than {@link #batchSize batch size} mirrors were migrated.
-     *         It indicates that no records left to migrate.
-     *     <li>The migration has been {@link #shouldContinueAfter(MirrorsMigrated) terminated}
+     *     <li>During the last batch, less than {@linkplain #batchSize() batch size} mirrors
+     *         were migrated. It indicates that no records left to migrate.
+     *     <li>The migration has been {@linkplain #shouldContinueAfter(MirrorsMigrated) terminated}
      *         ahead of time by a monitor.
      * </ol>
      */

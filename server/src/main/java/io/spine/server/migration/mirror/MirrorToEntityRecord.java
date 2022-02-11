@@ -36,12 +36,12 @@ import javax.annotation.concurrent.Immutable;
 import java.util.function.Function;
 
 /**
- * A transformation of a {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
+ * A transformation of a {@link Mirror} into an {@link EntityRecordWithColumns}.
  *
  * <p>This transformation is applied to the mirror projections
  * in a scope of {@link MirrorMigration}.
  *
- * <p>{@code Mirror} itself can be directly transformed into an {@linkplain EntityRecord}.
+ * <p>{@code Mirror} itself can be directly transformed into an {@link EntityRecord}.
  * In order to get {@code EntityRecordWithColumns}, we need to know which columns should be
  * fetched from the entity's state. For this reason, aggregate class is passed along
  * the mirror itself. It contains information about which columns are declared to be stored
@@ -69,11 +69,11 @@ final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregat
     }
 
     /**
-     * Transforms the passed {@linkplain Mirror} into an {@linkplain EntityRecordWithColumns}.
+     * Transforms the passed {@link Mirror} into an {@link EntityRecordWithColumns}.
      *
      * <p>The method will throw an exception when the mirror is incompatible
-     * with the {@link #MirrorToEntityRecord(Class) used aggregate class}. Meaning, its identifier
-     * and/or state types differ from the ones, declared for the aggregate.
+     * with the {@linkplain #MirrorToEntityRecord(Class) used aggregate class}. Meaning,
+     * its identifier and/or state types differ from the ones, declared for the aggregate.
      */
     @Override
     public EntityRecordWithColumns<I> apply(Mirror mirror) {
