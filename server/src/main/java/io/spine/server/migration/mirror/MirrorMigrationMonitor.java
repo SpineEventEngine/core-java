@@ -36,23 +36,23 @@ import io.spine.system.server.Mirror;
  *
  * <ol>
  *     <li>Dictates a {@link #batchSize() batch size} which is a number of records
- *         processed within a single request.</li>
+ *         processed within a single request.
  *     <li>When the processing of a current batch is completed, a monitor is
  *         {@link #shouldContinueAfter(MirrorsMigrated) asked}
- *         whether to continue or terminate.</li>
- *     <li>Receives notifications about the key stages in the course of the migration.</li>
+ *         whether to continue or terminate.
+ *     <li>Receives notifications about the key stages in the course of the migration.
  * </ol>
  *
  * <p>This class is open for extending. It may come in handy in the next cases:
  *
  * <ol>
- *     <li>Application's environment imposes restrictions on a session duration. Which means,
+ *     <li>Application environment imposes restrictions on a session duration. Which means,
  *         the migration can't be completed in a single run. For example, one can
  *         {@link #shouldContinueAfter(MirrorsMigrated) terminate} the migration after the desired
- *         time since {@link #onMigrationStarted() start}. And then run it again to continue.</li>
+ *         time since {@link #onMigrationStarted() start}. And then run it again to continue.
  *     <li>Tracing data about the course of the migration. One can measure speed of the whole
  *         process or for every batch. And be aware about the number
- *         of already migrated mirrors.</li>
+ *         of already migrated mirrors.
  * </ol>
  */
 @SPI
@@ -85,10 +85,10 @@ public class MirrorMigrationMonitor {
      *     <li>In order to <b>continue</b> the interrupted migration, just
      *         {@link MirrorMigration#run(MirrorMigrationMonitor) run} it again. The migration
      *         process {@link Mirror#getWasMigrated() marks} already migrated records. Thus,
-     *         they will not be migrated twice and duplicated.</li>
+     *         they will not be migrated twice and duplicated.
      *     <li>In order to <b>re-run</b> the migration, values of {@link Mirror#getWasMigrated()}
      *          column should be reset to {@code false} or no value. And this is the responsibility
-     *          of a user.</li>
+     *          of a user.
      * </ol>
      *
      * <p>This method is not called when during the last request zero mirrors were migrated.
@@ -115,9 +115,9 @@ public class MirrorMigrationMonitor {
      *
      * <ol>
      *     <li>During the last batch, less than {@link #batchSize batch size} mirrors were migrated.
-     *         It indicates that no records left to migrate.</li>
+     *         It indicates that no records left to migrate.
      *     <li>The migration has been {@link #shouldContinueAfter(MirrorsMigrated) terminated}
-     *         ahead of time by a monitor.</li>
+     *         ahead of time by a monitor.
      * </ol>
      */
     public void onMigrationCompleted() {

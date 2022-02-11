@@ -467,8 +467,8 @@ public abstract class BlackBox implements Logging, Closeable {
      *
      * <p>This method performs the following:
      * <ol>
-     *     <li>Closes the tested {@link BoundedContext}.</li>
-     *     <li>Closes the associated {@link io.spine.client.Client Client}s.</li>
+     *     <li>Closes the tested {@link BoundedContext}.
+     *     <li>Closes the associated {@link io.spine.client.Client Client}s.
      * </ol>
      *
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
