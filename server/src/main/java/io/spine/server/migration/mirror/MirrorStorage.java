@@ -47,8 +47,19 @@ import java.util.List;
  */
 public final class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
 
-    public MirrorStorage(ContextSpec contextSpec, StorageFactory factory) {
-        super(contextSpec, factory.createRecordStorage(contextSpec, messageSpec()));
+    /**
+     * Creates a new storage.
+     *
+     * <p>Uses the passed factory to create a {@code RecordStorage} delegate, and configures it to
+     * store {@code Mirror} records.
+     *
+     * @param context
+     *         specification of the Bounded Context in scope of which the storage will be used
+     * @param factory
+     *         the storage factory to use when creating a record storage delegate
+     */
+    public MirrorStorage(ContextSpec context, StorageFactory factory) {
+        super(context, factory.createRecordStorage(context, messageSpec()));
     }
 
     @SuppressWarnings("ConstantConditions")
