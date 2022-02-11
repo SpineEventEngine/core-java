@@ -130,20 +130,34 @@ public final class EntityRecordWithColumns<I>
     @SuppressWarnings("unchecked") // see the docs.
     public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
     create(EntityRecord record, Class<E> entityClass) {
+        checkNotNull(record);
+        checkNotNull(entityClass);
 
+        var stateValues = stateValuesFrom(record, entityClass);
+        var lifecycleValues = EntityRecordColumn.valuesIn(record);
+        var allColumnValues = merge(stateValues, lifecycleValues);
+
+        var result = (EntityRecordWithColumns<I>) of(record, allColumnValues);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked") /* See the docs for `create(record, entityClass)`. */
+    private static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    Map<ColumnName, @Nullable Object> stateValuesFrom(EntityRecord record, Class<E> entityClass) {
         var entityClazz = EntityClass.asParameterizedEntityClass(entityClass);
         var columnsScanner = new Scanner<>(entityClazz);
         var entityState = (S) AnyPacker.unpack(record.getState());
 
         var stateValues = columnsScanner.stateColumns().valuesIn(entityState);
-        var lifecycleValues = EntityRecordColumn.valuesIn(record);
+        return stateValues;
+    }
 
+    private static Map<ColumnName, Object> merge(Map<ColumnName, @Nullable Object> stateValues,
+                                                 Map<ColumnName, Object> lifecycleValues) {
         Map<ColumnName, Object> allColumnValues = new HashMap<>();
         allColumnValues.putAll(stateValues);
         allColumnValues.putAll(lifecycleValues);
-
-        var result = EntityRecordWithColumns.<I>of(record, allColumnValues);
-        return result;
+        return allColumnValues;
     }
 
     /**
