@@ -46,12 +46,12 @@ import io.spine.system.server.Mirror;
  * <p>This class is open for extending. It may come in handy in the next cases:
  *
  * <ol>
- *     <li>Application environment imposes restrictions on a session duration. Which means,
+ *     <li>When an application environment imposes restrictions on a session duration. Which means,
  *         the migration can't be completed in a single run. For example, one can
  *         {@link #shouldContinueAfter(MirrorsMigrated) terminate} the migration after the desired
  *         time since {@link #onMigrationStarted() start}. And then run it again to continue.
- *     <li>Tracing data about the course of the migration. One can measure speed of the whole
- *         process or for every batch. And be aware about the number
+ *     <li>When there is a need to collect data about the course of the migration. One can measure
+ *         speed of the whole process or for every batch. And be aware about the number
  *         of already migrated mirrors.
  * </ol>
  */

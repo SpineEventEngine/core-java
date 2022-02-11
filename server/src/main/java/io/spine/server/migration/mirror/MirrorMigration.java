@@ -53,10 +53,15 @@ import java.util.Iterator;
  * storing of queryable state-based columns along the state itself. For this reason, the migration
  * is also done on a per-aggregate basis.
  *
- * <p>In Spine 2.0 {@link Mirror#getWasMigrated() a new optional field} has been added
- * to {@code Mirror}. This field tells whether the given mirror record was already migrated.
- * The migration relies on a value of this field. It migrates only those records for which a value
+ * <p>In Spine 2.0 a new optional field has been added to {@code Mirror}.
+ * {@link Mirror#getWasMigrated()} tells whether the given mirror record was already migrated.
+ * The migration relies on a value of this field. It migrates only those records, for which a value
  * of this field is not set at all or equals to {@code false}.
+ *
+ * <p>There is no particular ordering in which mirrors are fetched. For every batch
+ * just the first {@code x} non-migrated records are queried. But, limiting the resulting dataset
+ * requires at least one sorting directive. For this reason, the query result is additionally sorted
+ * by {@link Mirror#getWasMigrated()}, which in fact makes no effect on the resulting dataset.
  *
  * <p>Mirrors, which are marked as archived or deleted – will be migrated as well.
  *
@@ -72,7 +77,7 @@ import java.util.Iterator;
  *
  * // Create an instance of `MigrationMonitor`. We are going to use
  * // a default implementation, which always continues the migration.
- * // We will work with the storages in batches of 500 records.
+ * // We will work with storage implementations in batches of 500 records.
  *
  * var batchSize = 500;
  * var monitor = new MirrorMigrationMonitor(batchSize);
