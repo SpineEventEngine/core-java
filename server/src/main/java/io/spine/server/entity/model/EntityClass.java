@@ -254,7 +254,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
      * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
      * {@code Message}.
      *
-     * <p>We perform the check to to detect possible programming error
+     * <p>We perform the check to detect possible programming error
      * in declarations of entity and repository classes <em>until</em> we have
      * compile-time model check.
      *

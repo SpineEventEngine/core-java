@@ -56,7 +56,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  *         are not available on the client, the enumeration of columns declared here is,
  *         in some way, a wiring between a generic declaration of the column
  *         (e.g. {@link ArchivedColumn}) and its {@code EntityRecord}-based counterpart
- *         (i.e. {@link EntityRecordColumn#archived EntityRecordColumn.archived}.
+ *         (i.e. {@link EntityRecordColumn#archived EntityRecordColumn.archived}).
  */
 @RecordColumns(ofType = EntityRecord.class)
 final class EntityRecordColumn {
@@ -111,7 +111,7 @@ final class EntityRecordColumn {
 
     /**
      * Evaluates the columns against the passed record and returns the value of each column
-     * along the with its name.
+     * along with its name.
      */
     static ImmutableMap<ColumnName, Object> valuesIn(EntityRecord record) {
         checkNotNull(record);

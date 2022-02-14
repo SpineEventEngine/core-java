@@ -30,14 +30,17 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.protobuf.AnyPacker;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -102,6 +105,58 @@ public final class EntityRecordWithColumns<I>
         checkNotNull(record);
         var lifecycleValues = EntityRecordColumn.valuesIn(record);
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
+    }
+
+    /**
+     * Creates a new instance of {@code EntityRecordWithColumns} using the pre-created
+     * entity record and the entity class.
+     *
+     * <p>This method considers both lifecycle and state-based columns.
+     *
+     * <p>It is a responsibility of the caller to provide a record with the matching
+     * identifier and state types.
+     *
+     * @param record
+     *         the record prepared for storage
+     * @param entityClass
+     *         the class of entity which is stored as the given {@code EntityRecord}
+     * @param <I>
+     *         the type of the entity's identifier
+     * @param <S>
+     *         the type of the entity's state
+     * @param <E>
+     *         the type of the entity
+     */
+    @SuppressWarnings("unchecked") // see the docs.
+    public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
+    create(EntityRecord record, Class<E> entityClass) {
+        checkNotNull(record);
+        checkNotNull(entityClass);
+
+        var stateValues = stateColumnsFrom(record, entityClass);
+        var lifecycleValues = EntityRecordColumn.valuesIn(record);
+        var allColumnValues = merge(stateValues, lifecycleValues);
+        var result = (EntityRecordWithColumns<I>) of(record, allColumnValues);
+        return result;
+    }
+
+    @SuppressWarnings("unchecked") /* See the docs for `create(record, entityClass)`. */
+    private static <I, S extends EntityState<I>, E extends Entity<I, S>>
+    Map<ColumnName, @Nullable Object> stateColumnsFrom(EntityRecord record, Class<E> entityClass) {
+        var entityClazz = EntityClass.asParameterizedEntityClass(entityClass);
+        var columnsScanner = new Scanner<>(entityClazz);
+        var entityState = (S) AnyPacker.unpack(record.getState());
+
+        var stateValues = columnsScanner.stateColumns().valuesIn(entityState);
+        return stateValues;
+    }
+
+    private static Map<ColumnName, Object> merge(Map<ColumnName, @Nullable Object> stateValues,
+                                                 Map<ColumnName, Object> lifecycleValues) {
+        Map<ColumnName, Object> allColumnValues = new HashMap<>();
+        allColumnValues.putAll(stateValues);
+        allColumnValues.putAll(lifecycleValues);
+        return allColumnValues;
     }
 
     /**

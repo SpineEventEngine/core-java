@@ -50,7 +50,7 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
     InMemoryRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
         super(context, recordSpec);
         this.multitenantStorage =
-                new MultitenantStorage<TenantRecords<I, R>>(context.isMultitenant()) {
+                new MultitenantStorage<>(context.isMultitenant()) {
                     @Override
                     TenantRecords<I, R> createSlice() {
                         return new TenantRecords<>();

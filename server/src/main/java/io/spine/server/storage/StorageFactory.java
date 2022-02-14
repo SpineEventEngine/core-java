@@ -38,6 +38,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.DefaultEventStore;
+import io.spine.server.migration.mirror.MirrorStorage;
 
 /**
  * A factory for creating storages used by repositories, {@link EventStore EventStore}
@@ -70,7 +71,7 @@ import io.spine.server.event.store.DefaultEventStore;
  * the database. Only two of the storage types do not follow this concept: {@link InboxStorage}
  * and {@link CatchUpStorage}. The reason for that is that they are a part of
  * a {@link io.spine.server.delivery.Delivery} which is shared across all domain Bounded Contexts.
- * One more storage which stands apart of this idea is
+ * One more storage which stands apart from this idea is
  * a {@link io.spine.server.tenant.TenantStorage}. While it uses a {@code StorageFactory}
  * for an initialization, it is a part of a special {@code Tenants} context, which is also shared
  * between domain Bounded Contexts of an application.
@@ -93,7 +94,7 @@ public interface StorageFactory extends AutoCloseable {
      *         the type of the stored records
      * @apiNote All other storage types delegate all their operations to
      *         a {@code RecordStorage} and therefore use this method during their initialization
-     *         to create an private instance of a record storage.
+     *         to create a private instance of a record storage.
      */
     <I, R extends Message> RecordStorage<I, R>
     createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec);
@@ -158,7 +159,7 @@ public interface StorageFactory extends AutoCloseable {
      * Creates a new {@link InboxStorage}.
      *
      * <p>The instance of {@code InboxStorage} is used in the {@link
-     * io.spine.server.delivery.Delivery Delivery} operations. Therefore there is typically just
+     * io.spine.server.delivery.Delivery Delivery} operations. Therefore, there is typically just
      * a single instance of {@code InboxStorage} per {@link io.spine.server.ServerEnvironment
      * ServerEnvironment} instance, unlike other {@code Storage} types which instances are created
      * per-{@link io.spine.server.BoundedContext BoundedContext}.
@@ -183,5 +184,19 @@ public interface StorageFactory extends AutoCloseable {
      */
     default CatchUpStorage createCatchUpStorage(boolean multitenant) {
         return new CatchUpStorage(this, multitenant);
+    }
+
+    /**
+     * Creates a new {@link MirrorStorage}.
+     *
+     * <p>Pay attention, {@link io.spine.system.server.Mirror Mirror} was deprecated in Spine 2.0.
+     * The presence of this storage in the factory is for those who will
+     * {@linkplain io.spine.server.migration.mirror.MirrorMigration migrate mirrors} from Spine 1.x.
+     *
+     * @param context
+     *         specification of the Bounded Context, in scope of which this storage will be used
+     */
+    default MirrorStorage createMirrorStorage(ContextSpec context) {
+        return new MirrorStorage(context, this);
     }
 }

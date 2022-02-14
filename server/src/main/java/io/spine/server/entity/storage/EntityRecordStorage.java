@@ -279,7 +279,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
             for (QueryPredicate<?> child : children) {
                 var childResult = hasLifecycleColumn(child);
                 if (childResult) {
-                    return childResult;
+                    return true;
                 }
             }
         }

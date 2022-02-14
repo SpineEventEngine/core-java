@@ -467,8 +467,8 @@ public abstract class BlackBox implements Logging, Closeable {
      *
      * <p>This method performs the following:
      * <ol>
-     *     <li>Closes the tested {@link BoundedContext}.</li>
-     *     <li>Closes the associated {@link io.spine.client.Client Client}s.</li>
+     *     <li>Closes the tested {@link BoundedContext}.
+     *     <li>Closes the associated {@link io.spine.client.Client Client}s.
      * </ol>
      *
      * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
@@ -594,7 +594,7 @@ public abstract class BlackBox implements Logging, Closeable {
     }
 
     /**
-     * Asserts that the is an entity with the passed ID and the passed type of state.
+     * Asserts that there is an entity with the passed ID and the passed type of state.
      *
      * @return assertion that compares only expected fields
      */
