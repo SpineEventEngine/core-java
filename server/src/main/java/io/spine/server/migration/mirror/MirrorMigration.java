@@ -77,7 +77,7 @@ import java.util.Iterator;
  *
  * // Create an instance of `MirrorMigrationMonitor`. We are going to use
  * // a default implementation, which always continues the migration.
- * // We will work with storage implementations in batches of 500 records.
+ * // Also, the mirrors will be migrated in batches of 500 records.
  *
  * var batchSize = 500;
  * var monitor = new MirrorMigrationMonitor(batchSize);
