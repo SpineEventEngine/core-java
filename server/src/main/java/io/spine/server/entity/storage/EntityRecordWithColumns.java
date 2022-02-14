@@ -136,7 +136,6 @@ public final class EntityRecordWithColumns<I>
         var stateValues = stateColumnsFrom(record, entityClass);
         var lifecycleValues = EntityRecordColumn.valuesIn(record);
         var allColumnValues = merge(stateValues, lifecycleValues);
-
         var result = (EntityRecordWithColumns<I>) of(record, allColumnValues);
         return result;
     }
