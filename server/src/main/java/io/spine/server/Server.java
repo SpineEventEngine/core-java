@@ -152,14 +152,23 @@ public final class Server implements Logging {
         grpcContainer.shutdownNowAndWait();
     }
 
+    /**
+     * Obtains the {@link QueryService} exposed by this server.
+     */
     public QueryService queryService() {
         return queryService;
     }
 
+    /**
+     * Obtains the {@link SubscriptionService} exposed by this server.
+     */
     public SubscriptionService subscriptionService() {
         return subscriptionService;
     }
 
+    /**
+     * Obtains the {@link CommandService} exposed by this server.
+     */
     public CommandService commandService() {
         return commandService;
     }
@@ -200,6 +209,14 @@ public final class Server implements Logging {
             return this;
         }
 
+        /**
+         * Adds a gRPC service to the built server.
+         *
+         * <p>By default, the {@linkplain CommandService Command}, {@linkplain QueryService Query},
+         * and {@linkplain SubscriptionService Subscription} services are present in the server.
+         * But the users may add any other gRPC services to work alongside the standard ones,
+         * e.g. for monitoring, warmup procedures, etc.
+         */
         @CanIgnoreReturnValue
         public Builder include(BindableService service) {
             checkNotNull(service);
