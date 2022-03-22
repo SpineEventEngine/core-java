@@ -30,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.grpc.BindableService;
 import io.spine.logging.Logging;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -54,6 +55,10 @@ public final class Server implements Logging {
 
     /** The container for Command- and Query- services. */
     private final GrpcContainer grpcContainer;
+
+    private final QueryService queryService;
+    private final SubscriptionService subscriptionService;
+    private final CommandService commandService;
 
     /**
      * Creates a new builder for the server.
@@ -85,6 +90,9 @@ public final class Server implements Logging {
     private Server(Builder builder) {
         this.contexts = builder.contexts();
         this.grpcContainer = builder.createContainer();
+        this.queryService = checkNotNull(builder.queryService);
+        this.subscriptionService = checkNotNull(builder.subscriptionService);
+        this.commandService = checkNotNull(builder.commandService);
     }
 
     /**
@@ -145,6 +153,27 @@ public final class Server implements Logging {
     }
 
     /**
+     * Obtains the {@link QueryService} exposed by this server.
+     */
+    public QueryService queryService() {
+        return queryService;
+    }
+
+    /**
+     * Obtains the {@link SubscriptionService} exposed by this server.
+     */
+    public SubscriptionService subscriptionService() {
+        return subscriptionService;
+    }
+
+    /**
+     * Obtains the {@link CommandService} exposed by this server.
+     */
+    public CommandService commandService() {
+        return commandService;
+    }
+
+    /**
      * Always returns zero.
      *
      * @deprecated please do not use
@@ -159,8 +188,12 @@ public final class Server implements Logging {
      */
     public static final class Builder extends ConnectionBuilder {
 
+        private final Set<BindableService> extraServices = new HashSet<>();
         private final Set<BoundedContextBuilder> contextBuilders = new HashSet<>();
         private @MonotonicNonNull ImmutableSet<BoundedContext> contexts;
+        private @MonotonicNonNull QueryService queryService;
+        private @MonotonicNonNull SubscriptionService subscriptionService;
+        private @MonotonicNonNull CommandService commandService;
 
         private Builder(@Nullable Integer port, @Nullable String serverName) {
             super(port, serverName);
@@ -173,6 +206,21 @@ public final class Server implements Logging {
         public Builder add(BoundedContextBuilder context) {
             checkNotNull(context);
             contextBuilders.add(context);
+            return this;
+        }
+
+        /**
+         * Adds a gRPC service to the built server.
+         *
+         * <p>By default, the {@linkplain CommandService Command}, {@linkplain QueryService Query},
+         * and {@linkplain SubscriptionService Subscription} services are present in the server.
+         * But the users may add any other gRPC services to work alongside the standard ones,
+         * e.g. for monitoring, warmup procedures, etc.
+         */
+        @CanIgnoreReturnValue
+        public Builder include(BindableService service) {
+            checkNotNull(service);
+            extraServices.add(service);
             return this;
         }
 
@@ -217,13 +265,15 @@ public final class Server implements Logging {
                 queryService.add(context);
                 subscriptionService.add(context);
             });
+            this.queryService = queryService.build();
+            this.subscriptionService = subscriptionService.build();
+            this.commandService = commandService.build();
             GrpcContainer.Builder builder = createContainerBuilder();
-            GrpcContainer result = builder
-                    .addService(commandService.build())
-                    .addService(queryService.build())
-                    .addService(subscriptionService.build())
-                    .build();
-            return result;
+            builder.addService(this.commandService)
+                   .addService(this.queryService)
+                   .addService(this.subscriptionService);
+            extraServices.forEach(builder::addService);
+            return builder.build();
         }
 
         private GrpcContainer.Builder createContainerBuilder() {
