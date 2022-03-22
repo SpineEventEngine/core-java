@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.test.client.ClientTestContext.tasks;
 import static io.spine.test.client.ClientTestContext.users;
@@ -67,5 +68,17 @@ class ServerTest {
                 .isNotEqualToDefaultInstance();
         server.shutdown();
         ch.shutdownNow();
+    }
+
+    @Test
+    @DisplayName("provide `CommandService`, `QueryService`, and `SubscriptionService`")
+    void cAndQ() {
+        Server server = Server.atPort(PORT)
+                              .add(users())
+                              .add(tasks())
+                              .build();
+        assertThat(server.subscriptionService()).isNotNull();
+        assertThat(server.queryService()).isNotNull();
+        assertThat(server.commandService()).isNotNull();
     }
 }
