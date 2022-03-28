@@ -138,11 +138,7 @@ allprojects {
 
 subprojects {
 
-    with(repositories) {
-        applyGitHubPackages("base", rootProject)
-        applyGitHubPackages("time", rootProject)
-        applyStandard()
-    }
+    repositories.applyStandard()
 
     apply {
         plugin("java-library")
