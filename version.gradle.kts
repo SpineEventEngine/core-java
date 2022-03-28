@@ -32,4 +32,4 @@ val toolBaseVersion: String by extra("2.0.0-SNAPSHOT.84")
 val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.83")
 
 /** The version of this library. */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.92")
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.93")
