@@ -233,7 +233,6 @@ public final class Server implements Logging {
             var commandService = CommandService.newBuilder();
             var queryService = QueryService.newBuilder();
             var subscriptionService = SubscriptionService.newBuilder();
-
             contexts().forEach(context -> {
                 commandService.add(context);
                 queryService.add(context);
