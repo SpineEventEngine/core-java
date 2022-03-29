@@ -43,7 +43,6 @@ buildscript {
     val enclosingRootDir: String by extra
     apply(from = "${enclosingRootDir}/version.gradle.kts")
 
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "core-java", rootProject)
     io.spine.internal.gradle.doApplyStandard(repositories)
 
     val spineBaseVersion: String by extra
@@ -89,7 +88,6 @@ apply {
     from("$enclosingRootDir/version.gradle.kts")
 }
 
-repositories.applyGitHubPackages("core-java", rootProject)
 repositories.applyStandard()
 
 tasks.compileJava {
