@@ -51,6 +51,7 @@ modelCompiler {
         }
     }
 }
+
 java {
     exposeTestConfiguration()
 }
