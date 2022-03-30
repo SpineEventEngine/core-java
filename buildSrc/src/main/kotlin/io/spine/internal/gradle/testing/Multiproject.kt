@@ -55,10 +55,10 @@ import org.gradle.kotlin.dsl.register
  * }
  * ```
  */
-fun Project.exposeTestArtifacts() {
+fun Project.exposeTestConfiguration() {
 
     val testArtifacts = configurations.create("testArtifacts") {
-        extendsFrom(configurations.getAt("testRuntimeClasspath"))
+        extendsFrom(configurations.getByName("testRuntimeClasspath"))
     }
 
     val sourceSets = extensions.getByType<JavaPluginExtension>().sourceSets
@@ -67,5 +67,7 @@ fun Project.exposeTestArtifacts() {
         from(sourceSets.getAt("test").output)
     }
 
-    artifacts.add(testArtifacts.name, testJar)
+    testArtifacts.outgoing {
+        artifact(testJar)
+    }
 }
