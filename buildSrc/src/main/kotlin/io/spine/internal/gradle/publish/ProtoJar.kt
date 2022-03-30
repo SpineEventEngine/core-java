@@ -24,33 +24,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Pmd
+package io.spine.internal.gradle.publish
 
-plugins {
-    pmd
-}
+/**
+ * A DSL element of [SpinePublishing] extension which allows disabling publishing
+ * of [protoJar] artifact.
+ *
+ * This artifact contains all the `.proto` definitions from `sourceSets.main.proto`. By default,
+ * it is published.
+ *
+ * Take a look on [SpinePublishing.protoJar] for a usage example.
+ *
+ * @see [registerArtifacts]
+ */
+class ProtoJar {
 
-pmd {
-    toolVersion = Pmd.version
-    isConsoleOutput = true
-    incrementalAnalysis.set(true)
+    /**
+     * Set of modules, for which a proto JAR will not be published.
+     */
+    var exclusions: Set<String> = emptySet()
 
-    // The build is going to fail in case of violations.
-    isIgnoreFailures = false
-
-    // Disable the default rule set to use the custom rules (see below).
-    ruleSets = listOf()
-
-    // Load PMD settings.
-    val pmdSettings = file("$rootDir/config/quality/pmd.xml")
-    val textResource: TextResource = resources.text.fromFile(pmdSettings)
-    ruleSetConfig = textResource
-
-    reportsDir = file("build/reports/pmd")
-
-    // Just analyze the main sources; do not analyze tests.
-    val javaExtension: JavaPluginExtension =
-        project.extensions.getByType(JavaPluginExtension::class.java)
-    val mainSourceSet = javaExtension.sourceSets.getByName("main")
-    sourceSets = listOf(mainSourceSet)
+    /**
+     * Disables proto JAR publishing for all published modules.
+     */
+    var disabled = false
 }

@@ -35,7 +35,7 @@ package io.spine.internal.dependency
  */
 // https://github.com/google/guava
 object Guava {
-    private const val version = "31.0.1-jre"
+    private const val version = "31.1-jre"
     const val lib     = "com.google.guava:guava:${version}"
     const val testLib = "com.google.guava:guava-testlib:${version}"
 }
