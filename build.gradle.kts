@@ -26,9 +26,8 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.VersionWriter
-import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
@@ -39,7 +38,6 @@ import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.kotlin.applyJvmToolchain
 import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
-import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.coverage.JacocoConfig
@@ -99,15 +97,7 @@ val spineTimeVersion: String by extra
 val toolBaseVersion: String by extra
 
 spinePublishing {
-    with(PublishingRepos) {
-        targetRepositories.addAll(setOf(
-            cloudRepo,
-            gitHub(repositoryName),
-            cloudArtifactRegistry
-        ))
-    }
-
-    projectsToPublish.addAll(
+    modules = setOf(
         "core",
         "client",
         "server",
@@ -115,8 +105,15 @@ spinePublishing {
         "testutil-client",
         "testutil-server",
         "model-assembler",
-        "model-verifier"
+        "model-verifier",
     )
+    destinations = with(PublishingRepos) {
+        setOf(
+            cloudRepo,
+            gitHub(repositoryName),
+            cloudArtifactRegistry
+        )
+    }
 }
 
 allprojects {
@@ -235,7 +232,6 @@ subprojects {
 
     apply<IncrementGuard>()
     apply<VersionWriter>()
-    publishProtoArtifact(project)
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
