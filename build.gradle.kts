@@ -114,6 +114,9 @@ spinePublishing {
             cloudArtifactRegistry
         )
     }
+    testJar {
+        inclusions = setOf("server")
+    }
 }
 
 allprojects {
