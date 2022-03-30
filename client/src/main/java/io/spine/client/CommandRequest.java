@@ -32,7 +32,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Status;
 import io.spine.logging.Logging;
