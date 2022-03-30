@@ -28,7 +28,7 @@ package io.spine.internal.dependency
 
 @Suppress("unused")
 object Jackson {
-    private const val version = "2.13.2"
+    private const val version = "2.13.1"
     // https://github.com/FasterXML/jackson-core
     const val core = "com.fasterxml.jackson.core:jackson-core:${version}"
     // https://github.com/FasterXML/jackson-databind

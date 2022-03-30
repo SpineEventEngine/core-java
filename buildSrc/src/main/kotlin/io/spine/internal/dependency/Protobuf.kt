@@ -29,14 +29,12 @@ package io.spine.internal.dependency
 // https://github.com/protocolbuffers/protobuf
 @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
 object Protobuf {
-    private const val group = "com.google.protobuf"
-    const val version       = "3.19.4"
+    const val version    = "3.19.1"
     val libs = listOf(
-        "${group}:protobuf-java:${version}",
-        "${group}:protobuf-java-util:${version}",
-        "${group}:protobuf-kotlin:${version}"
+        "com.google.protobuf:protobuf-java:${version}",
+        "com.google.protobuf:protobuf-java-util:${version}"
     )
-    const val compiler = "${group}:protoc:${version}"
+    const val compiler = "com.google.protobuf:protoc:${version}"
 
     // https://github.com/google/protobuf-gradle-plugin/releases
     object GradlePlugin {
@@ -48,6 +46,6 @@ object Protobuf {
          */
         const val version = "0.8.18"
         const val id = "com.google.protobuf"
-        const val lib = "${group}:protobuf-gradle-plugin:${version}"
+        const val lib = "com.google.protobuf:protobuf-gradle-plugin:${version}"
     }
 }

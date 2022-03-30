@@ -32,6 +32,6 @@ package io.spine.internal.dependency
  * [Klaxon](https://github.com/cbeust/klaxon)
  */
 object Klaxon {
-    private const val version = "5.6"
+    private const val version = "5.5"
     const val lib = "com.beust:klaxon:${version}"
 }

@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://github.com/square/javapoet
-@Suppress("unused")
 object JavaPoet {
     private const val version = "1.13.0"
     const val lib = "com.squareup:javapoet:${version}"
