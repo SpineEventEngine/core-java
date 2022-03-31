@@ -30,36 +30,48 @@ import org.gradle.api.Project
 import io.spine.internal.gradle.publish.testJar
 
 /**
- * Exposes the test classes of this project as a new `testArtifacts` configuration.
+ * Exposes the test classes of this project as a new "testArtifacts" configuration.
  *
  * This allows other projects to depend on the test classes from this project within a Gradle
- * multi-module project. It is helpful in case the dependant projects re-use abstract test suites
+ * multi-project build. It is helpful in case the dependant projects re-use abstract test suites
  * of some "parent" project.
  *
  * Please note that this utility requires Gradle `java` plugin to be applied. Hence, it is
- * recommended to call this extension method from `java` scope:
+ * recommended to call this extension method from `java` scope.
+ *
+ * Here's an example of how to expose the test classes of "projectA":
  *
  * ```
  * java {
- *     exposeTestArtifacts()
+ *     exposeTestConfiguration()
  * }
  * ```
  *
- * Here's an example of how to consume the exposed test classes:
+ * Here's an example of how to consume the exposed classes in "projectB":
  *
  * ```
  * dependencies {
- *     testImplementation(project(path = ":projectName", configuration = "testArtifacts"))
+ *     testImplementation(project(path = ":projectA", configuration = "testArtifacts"))
  * }
  * ```
+ *
+ * Don't forget that this exposure mechanism works only for projects that reside within the same
+ * multi-project build. In order to share the test classes with external projects, publish a
+ * dedicated [testJar][io.spine.internal.gradle.publish.SpinePublishing.testJar] artifact.
  */
-fun Project.exposeTestConfiguration() = pluginManager.withPlugin("java") {
+@Suppress("unused")
+fun Project.exposeTestConfiguration() {
 
-    val testArtifacts = configurations.create("testArtifacts") {
-        extendsFrom(configurations.getByName("testRuntimeClasspath"))
+    if (pluginManager.hasPlugin("java").not()) {
+        throw IllegalStateException(
+            "Can't expose the test configuration because `java` plugin has not been applied!"
+        )
     }
 
-    testArtifacts.outgoing {
-        artifact(testJar())
+    configurations.create("testArtifacts") {
+        extendsFrom(configurations.getByName("testRuntimeClasspath"))
+        outgoing {
+            artifact(testJar())
+        }
     }
 }
