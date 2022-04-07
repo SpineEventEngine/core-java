@@ -30,7 +30,7 @@ package io.spine.internal.dependency
 @Suppress("unused")
 object ErrorProne {
     // https://github.com/google/error-prone
-    private const val version = "2.10.0"
+    private const val version = "2.11.0"
     // https://github.com/tbroyer/gradle-errorprone-plugin/blob/v0.8/build.gradle.kts
     private const val javacPluginVersion = "9+181-r4173-1"
 

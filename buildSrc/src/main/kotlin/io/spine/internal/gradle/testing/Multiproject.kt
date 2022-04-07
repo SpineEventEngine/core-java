@@ -64,7 +64,7 @@ fun Project.exposeTestConfiguration() {
 
     if (pluginManager.hasPlugin("java").not()) {
         throw IllegalStateException(
-            "Can't expose the test configuration because `java` plugin has not been applied!"
+            "Can't expose the test configuration because `java` plugin has not been applied."
         )
     }
 

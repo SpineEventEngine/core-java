@@ -30,27 +30,61 @@ import io.spine.internal.gradle.Repository
 import java.util.*
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
+
+private const val PUBLISH = "publish"
+
+/**
+ * Locates `publish` task in this [TaskContainer].
+ *
+ * This task publishes all defined publications to all defined repositories. To achieve that,
+ * the task depends on all `publish`*PubName*`PublicationTo`*RepoName*`Repository` tasks.
+ *
+ * Please note, task execution would not copy publications to the local Maven cache.
+ *
+ * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks">
+ *     Tasks | Maven Publish Plugin</a>
+ */
+internal val TaskContainer.publish: TaskProvider<Task>
+    get() = named(PUBLISH)
 
 /**
  * Sets dependencies for `publish` task in this [Project].
  *
  * This method performs the following:
  *
- *  1. Makes `publish` task in a root project depend on local `publish`.
+ *  1. When this [Project] is not a root, makes `publish` task in a root project
+ *     depend on a local `publish`.
  *  2. Makes local `publish` task verify that credentials are present for each
  *     of destination repositories.
  */
 internal fun Project.configurePublishTask(destinations: Set<Repository>) {
-    val rootPublish = rootProject.tasks.getOrCreatePublishTask()
-    val localPublish = tasks.getOrCreatePublishTask()
+    attachCredentialsVerification(destinations)
+    bindToRootPublish()
+}
+
+private fun Project.attachCredentialsVerification(destinations: Set<Repository>) {
     val checkCredentials = tasks.registerCheckCredentialsTask(destinations)
-    rootPublish.configure { dependsOn(localPublish) }
+    val localPublish = tasks.publish
     localPublish.configure { dependsOn(checkCredentials) }
 }
 
-private const val PUBLISH = "publish"
+private fun Project.bindToRootPublish() {
+    if (project == rootProject) {
+        return
+    }
 
+    val localPublish = tasks.publish
+    val rootPublish = rootProject.tasks.getOrCreatePublishTask()
+    rootPublish.configure { dependsOn(localPublish) }
+}
+
+/**
+ * Use this task accessor when it is not guaranteed that the task is present
+ * in this [TaskContainer].
+ */
 private fun TaskContainer.getOrCreatePublishTask() =
     if (names.contains(PUBLISH)) {
         named(PUBLISH)

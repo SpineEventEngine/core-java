@@ -116,6 +116,9 @@ fun Project.spinePublishing(configuration: SpinePublishing.() -> Unit) {
 /**
  * A Gradle extension for setting up publishing of spine modules using `maven-publish` plugin.
  *
+ * @param project a project in which the extension is opened. By default, this project will be
+ *  published as long as a [set][modules] of modules to publish is not specified explicitly.
+ *
  * @see spinePublishing
  */
 open class SpinePublishing(private val project: Project) {
@@ -253,20 +256,36 @@ open class SpinePublishing(private val project: Project) {
 
         val protoJarExclusions = protoJar.exclusions
         val testJarInclusions = testJar.inclusions
-        val publishedModules = modules.ifEmpty { setOf(project.name) }
+        val publishedProjects = publishedProjects()
 
-        publishedModules.forEach { module ->
-            val includeProtoJar = (protoJarExclusions.contains(module) || protoJar.disabled).not()
-            val includeTestJar = (testJarInclusions.contains(module) || testJar.enabled)
-            setUpPublishing(module, includeProtoJar, includeTestJar)
+        publishedProjects.forEach { project ->
+            val name = project.name
+            val includeProtoJar = (protoJarExclusions.contains(name) || protoJar.disabled).not()
+            val includeTestJar = (testJarInclusions.contains(name) || testJar.enabled)
+            setUpPublishing(project, includeProtoJar, includeTestJar)
         }
     }
 
     /**
-     * Sets up `maven-publish` plugin for the given module.
+     * Maps the names of published modules to [Project] instances.
      *
-     * Firstly, an instance of [PublishingConfig] is assembled for the module. Then, this
-     * config is applied to the module.
+     * The method considers two options:
+     *
+     * 1. The [set][modules] of subprojects to publish is not empty. It means that the extension
+     *   is opened from a root project.
+     * 2. The [set][modules] is empty. Then, the [project] in which the extension is opened
+     *   will be published.
+     *
+     * @see modules
+     */
+    private fun publishedProjects() = modules.map { name -> project.project(name) }
+        .ifEmpty { setOf(project) }
+
+    /**
+     * Sets up `maven-publish` plugin for the given project.
+     *
+     * Firstly, an instance of [PublishingConfig] is assembled for the project. Then, this
+     * config is applied.
      *
      * This method utilizes `project.afterEvaluate` closure. General rule of thumb is to avoid using
      * of this closure, as it configures a project when its configuration is considered completed.
@@ -284,8 +303,7 @@ open class SpinePublishing(private val project: Project) {
      * `project.afterEvaluate` in order to guarantee that a module will be configured by the time
      * we configure publishing for it.
      */
-    private fun setUpPublishing(module: String, includeProtoJar: Boolean, includeTestJar: Boolean) {
-        val project = project.project(module)
+    private fun setUpPublishing(project: Project, includeProtoJar: Boolean, includeTestJar: Boolean) {
         val artifactId = artifactId(project)
         val publishingConfig = PublishingConfig(
             artifactId,

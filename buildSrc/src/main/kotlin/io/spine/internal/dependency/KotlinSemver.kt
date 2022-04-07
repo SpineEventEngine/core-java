@@ -24,22 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.java.publish
+package io.spine.internal.dependency
 
-import org.gradle.api.Task
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.TaskProvider
-
-/**
- * Locates `publish` task in this [TaskContainer].
- *
- * This task publishes all defined publications to all defined repositories. To achieve that,
- * the task depends on all `publish`*PubName*`PublicationTo`*RepoName*`Repository` tasks.
- *
- * Please note, task execution would not copy publications to the local Maven cache.
- *
- * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks">
- *     Tasks | Maven Publish Plugin</a>
- */
-internal val TaskContainer.publish: TaskProvider<Task>
-    get() = named("publish")
+// https://github.com/z4kn4fein/kotlin-semver
+@Suppress("unused")
+object KotlinSemver {
+    private const val version = "1.2.1"
+    const val lib     = "io.github.z4kn4fein:semver:$version"
+}

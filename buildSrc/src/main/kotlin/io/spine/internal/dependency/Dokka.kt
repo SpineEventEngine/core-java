@@ -29,6 +29,6 @@ package io.spine.internal.dependency
 // https://github.com/Kotlin/dokka
 @Suppress("unused")
 object Dokka {
-    const val version = "1.5.0"
+    const val version = "1.6.10"
     const val pluginId = "org.jetbrains.dokka"
 }

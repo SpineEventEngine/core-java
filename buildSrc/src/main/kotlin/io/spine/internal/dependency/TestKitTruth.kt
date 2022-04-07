@@ -26,8 +26,17 @@
 
 package io.spine.internal.dependency
 
-// https://www.mojohaus.org/animal-sniffer/animal-sniffer-maven-plugin/
-object AnimalSniffer {
-    private const val version = "1.21"
-    const val lib = "org.codehaus.mojo:animal-sniffer-annotations:${version}"
+/**
+ * Gradle TestKit extension for Google Truth.
+ *
+ * Source code:
+ * https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/tree/main/testkit-truth
+ *
+ * Usage description:
+ * https://dev.to/autonomousapps/gradle-all-the-way-down-testing-your-gradle-plugin-with-gradle-testkit-2hmc
+ */
+@Suppress("unused")
+object TestKitTruth {
+    private const val version = "1.1"
+    const val lib = "com.autonomousapps:testkit-truth:$version"
 }
