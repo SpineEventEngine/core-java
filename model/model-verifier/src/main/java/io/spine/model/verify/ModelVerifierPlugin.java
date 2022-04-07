@@ -31,7 +31,7 @@ import io.spine.annotation.Experimental;
 import io.spine.logging.Logging;
 import io.spine.model.CommandReceivers;
 import io.spine.model.assemble.AssignLookup;
-import io.spine.tools.code.SourceSetName;
+import io.spine.tools.gradle.SourceSetName;
 import io.spine.tools.gradle.task.GradleTask;
 import io.spine.tools.mc.java.gradle.McJavaOptions;
 import io.spine.tools.type.MoreKnownTypes;
