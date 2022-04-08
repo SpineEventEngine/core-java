@@ -24,8 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@file:Suppress("RemoveRedundantQualifierName")
-
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.gradle.publish.IncrementGuard
@@ -77,6 +75,7 @@ buildscript {
     }
 }
 
+@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm")
