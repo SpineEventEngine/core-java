@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 pluginManagement {
     repositories {
         mavenCentral()
@@ -32,15 +33,19 @@ pluginManagement {
 
 rootProject.name = "spine-core-java"
 
-include("core")
-include("client")
-include("server")
-include("testutil-core")
-include("testutil-client")
-include("testutil-server")
+include(
+    "core",
+    "client",
+    "server",
+    "testutil-core",
+    "testutil-client",
+    "testutil-server",
+)
 
-include("model-assembler")
-include("model-verifier")
+include(
+    "model-assembler",
+    "model-verifier",
+)
 
 project(":model-assembler").projectDir = File("./model/model-assembler")
 project(":model-verifier").projectDir = File("./model/model-verifier")

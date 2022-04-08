@@ -26,9 +26,8 @@
 
 @file:Suppress("unused")
 
-package io.spine.internal.gradle
+package io.spine.internal.gradle.publish
 
-import io.spine.internal.gradle.publish.PublishingRepos
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -55,7 +54,7 @@ class IncrementGuard : Plugin<Project> {
     override fun apply(target: Project) {
         val tasks = target.tasks
         tasks.register(taskName, CheckVersionIncrement::class.java) {
-            repository = PublishingRepos.cloudRepo
+            repository = CloudRepo.published
             tasks.getByName("check").dependsOn(this)
 
             shouldRunAfter("test")

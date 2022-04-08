@@ -26,12 +26,13 @@
 
 package io.spine.internal.gradle
 
-import io.spine.internal.gradle.publish.PublishExtension
+import io.spine.internal.gradle.publish.SpinePublishing
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.getByType
 
 /**
@@ -72,16 +73,20 @@ fun <T : Task> Project.findTask(name: String): T {
 }
 
 /**
- * Obtains the Maven artifact ID of the project taking into account
- * the value of the [PublishExtension.spinePrefix] property.
+ * Obtains Maven artifact ID of this [Project].
  *
- * If the project has a [PublishExtension] installed, then the extension is used for
- * [obtaining][PublishExtension.artifactId] the artifact ID.
- *
- * Otherwise, the project name is returned.
+ * The method checks if [SpinePublishing] extension is configured upon this project. If yes,
+ * returns [SpinePublishing.artifactId] for the project. Otherwise, a project's name is returned.
  */
 val Project.artifactId: String
     get() {
-        val publishExtension = rootProject.extensions.findByType(PublishExtension::class.java)
-        return publishExtension?.artifactId(this) ?: name
+
+        // Publishing of a project can be configured either from the project itself or
+        // from its root project. This is why it is required to check both places.
+
+        val spinePublishing = extensions.findByType<SpinePublishing>()
+            ?: rootProject.extensions.findByType()
+
+        val artifactId = spinePublishing?.artifactId(this)
+        return artifactId ?: name
     }

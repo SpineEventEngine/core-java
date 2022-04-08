@@ -22,3 +22,10 @@ jobs:
         shell: cmd
         # For the reason on `--no-daemon` see https://github.com/actions/cache/issues/454
         run: gradlew.bat build --stacktrace --no-daemon
+
+      # See: https://github.com/marketplace/actions/junit-report-action
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v2.8.4
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'

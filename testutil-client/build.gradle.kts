@@ -25,8 +25,7 @@
  */
 
 import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.Scripts
-import io.spine.internal.gradle.testing.exposeTestArtifacts
+import io.spine.internal.gradle.testing.exposeTestConfiguration
 
 val spineTimeVersion: String by extra
 
@@ -41,7 +40,7 @@ dependencies {
 }
 
 java {
-    exposeTestArtifacts()
+    exposeTestConfiguration()
 }
 
 //TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
@@ -49,4 +48,3 @@ java {
 val duplicatesStrategy = DuplicatesStrategy.INCLUDE
 tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
 tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.sourceJar.get().duplicatesStrategy = duplicatesStrategy

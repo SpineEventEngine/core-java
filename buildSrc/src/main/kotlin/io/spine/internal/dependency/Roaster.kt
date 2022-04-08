@@ -27,6 +27,7 @@
 package io.spine.internal.dependency
 
 // https://github.com/forge/roaster
+@Suppress("unused")
 object Roaster {
 
     /**
@@ -36,7 +37,7 @@ object Roaster {
      *
      * Please see [this issue][https://github.com/SpineEventEngine/config/issues/220] for details.
      */
-    private const val version = "2.23.2.Final"
+    private const val version = "2.24.0.Final"
 
     const val api = "org.jboss.forge.roaster:roaster-api:${version}"
     const val jdt = "org.jboss.forge.roaster:roaster-jdt:${version}"

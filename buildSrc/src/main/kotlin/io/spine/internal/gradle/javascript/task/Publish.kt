@@ -26,7 +26,7 @@
 
 package io.spine.internal.gradle.javascript.task
 
-import io.spine.internal.gradle.java.publish.publish
+import io.spine.internal.gradle.publish.publish
 import io.spine.internal.gradle.named
 import io.spine.internal.gradle.register
 import io.spine.internal.gradle.TaskName

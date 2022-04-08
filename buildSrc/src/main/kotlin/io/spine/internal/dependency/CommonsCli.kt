@@ -33,6 +33,6 @@ package io.spine.internal.dependency
  * [Commons CLI](https://commons.apache.org/proper/commons-cli/)
  */
 object CommonsCli {
-    private const val version = "1.4"
+    private const val version = "1.5.0"
     const val lib = "commons-cli:commons-cli:${version}"
 }

@@ -24,10 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle
+package io.spine.internal.gradle.publish
 
 import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import io.spine.internal.gradle.Repository
 import java.io.FileNotFoundException
 import java.net.URL
 import org.gradle.api.DefaultTask

@@ -24,22 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.java.publish
-
-import org.gradle.api.Task
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.TaskProvider
+package io.spine.internal.dependency
 
 /**
- * Locates `publish` task in this [TaskContainer].
+ * Gradle TestKit extension for Google Truth.
  *
- * This task publishes all defined publications to all defined repositories. To achieve that,
- * the task depends on all `publish`*PubName*`PublicationTo`*RepoName*`Repository` tasks.
+ * Source code:
+ * https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/tree/main/testkit-truth
  *
- * Please note, task execution would not copy publications to the local Maven cache.
- *
- * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks">
- *     Tasks | Maven Publish Plugin</a>
+ * Usage description:
+ * https://dev.to/autonomousapps/gradle-all-the-way-down-testing-your-gradle-plugin-with-gradle-testkit-2hmc
  */
-internal val TaskContainer.publish: TaskProvider<Task>
-    get() = named("publish")
+@Suppress("unused")
+object TestKitTruth {
+    private const val version = "1.1"
+    const val lib = "com.autonomousapps:testkit-truth:$version"
+}

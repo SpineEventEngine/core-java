@@ -27,13 +27,24 @@
 package io.spine.internal.gradle.publish
 
 /**
- * Default artifact task names.
+ * A DSL element of [SpinePublishing] extension which allows enabling publishing
+ * of [testJar] artifact.
  *
- * These tasks, if not present on a project already, are created by the [Publish] plugin.
- * Their output is published as project's artifacts.
+ * This artifact contains compilation output of `test` source set. By default, it is not published.
+ *
+ * Take a look on [SpinePublishing.testJar] for a usage example.
+
+ * @see [registerArtifacts]
  */
-internal enum class ArtifactTaskName {
-    sourceJar,
-    testOutputJar,
-    javadocJar;
+class TestJar {
+
+    /**
+     * Set of modules, for which a test JAR will be published.
+     */
+    var inclusions: Set<String> = emptySet()
+
+    /**
+     * Enables test JAR publishing for all published modules.
+     */
+    var enabled = false
 }

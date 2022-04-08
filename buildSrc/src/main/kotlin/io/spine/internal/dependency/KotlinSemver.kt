@@ -24,35 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish.proto
+package io.spine.internal.dependency
 
-import org.gradle.api.Project
-import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.tasks.bundling.Jar
-
-/**
- * Registers an `assembleProto` Gradle task which locates and assembles all `.proto` files
- * in a Gradle project.
- *
- * The result of assembly is a [Jar] task with an archive output classified as "proto".
- */
-object AssembleProto {
-
-    private const val taskName = "assembleProto"
-
-    /**
-     * Performs the task registration for the passed [project].
-     */
-    fun registerIn(project: Project): TaskProvider<Jar> {
-        val task = project.tasks.register(taskName, Jar::class.java) {
-            description =
-                "Assembles a JAR artifact with all Proto definitions from the classpath."
-            from(project.protoFiles())
-            include {
-                it.file.isProtoFileOrDir()
-            }
-            archiveClassifier.set("proto")
-        }
-        return task
-    }
+// https://github.com/z4kn4fein/kotlin-semver
+@Suppress("unused")
+object KotlinSemver {
+    private const val version = "1.2.1"
+    const val lib     = "io.github.z4kn4fein:semver:$version"
 }

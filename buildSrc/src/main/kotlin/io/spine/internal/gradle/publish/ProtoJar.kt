@@ -27,8 +27,25 @@
 package io.spine.internal.gradle.publish
 
 /**
- * Popular names of Gradle configurations.
+ * A DSL element of [SpinePublishing] extension which allows disabling publishing
+ * of [protoJar] artifact.
+ *
+ * This artifact contains all the `.proto` definitions from `sourceSets.main.proto`. By default,
+ * it is published.
+ *
+ * Take a look on [SpinePublishing.protoJar] for a usage example.
+ *
+ * @see [registerArtifacts]
  */
-internal object ConfigurationName {
-    const val archives = "archives"
+class ProtoJar {
+
+    /**
+     * Set of modules, for which a proto JAR will not be published.
+     */
+    var exclusions: Set<String> = emptySet()
+
+    /**
+     * Disables proto JAR publishing for all published modules.
+     */
+    var disabled = false
 }

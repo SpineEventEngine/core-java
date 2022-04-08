@@ -24,33 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Pmd
+package io.spine.internal.gradle.publish
 
-plugins {
-    pmd
+import io.spine.internal.gradle.sourceSets
+import java.io.File
+import org.gradle.api.Project
+import org.gradle.api.file.SourceDirectorySet
+import org.gradle.kotlin.dsl.get
+
+
+/**
+ * Tells whether there are any Proto sources in "main" source set.
+ */
+internal fun Project.hasProto(): Boolean {
+    val protoSources = protoSources()
+    val result = protoSources.any { it.exists() }
+    return result
 }
 
-pmd {
-    toolVersion = Pmd.version
-    isConsoleOutput = true
-    incrementalAnalysis.set(true)
-
-    // The build is going to fail in case of violations.
-    isIgnoreFailures = false
-
-    // Disable the default rule set to use the custom rules (see below).
-    ruleSets = listOf()
-
-    // Load PMD settings.
-    val pmdSettings = file("$rootDir/config/quality/pmd.xml")
-    val textResource: TextResource = resources.text.fromFile(pmdSettings)
-    ruleSetConfig = textResource
-
-    reportsDir = file("build/reports/pmd")
-
-    // Just analyze the main sources; do not analyze tests.
-    val javaExtension: JavaPluginExtension =
-        project.extensions.getByType(JavaPluginExtension::class.java)
-    val mainSourceSet = javaExtension.sourceSets.getByName("main")
-    sourceSets = listOf(mainSourceSet)
+/**
+ * Locates Proto sources in "main" source set.
+ *
+ * "main" source set is added by `java` plugin. Special treatment for Proto sources is needed,
+ * because they are not Java-related, and, thus, not included in `sourceSets["main"].allSource`.
+ */
+internal fun Project.protoSources(): Set<File> {
+    val mainSourceSet = sourceSets["main"]
+    val protoSourceDirs = mainSourceSet.extensions.findByName("proto") as SourceDirectorySet?
+    return protoSourceDirs?.srcDirs ?: emptySet()
 }

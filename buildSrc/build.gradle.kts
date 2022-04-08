@@ -28,9 +28,6 @@
  * This script uses two declarations of the constant [licenseReportVersion] because
  * currently there is no way to define a constant _before_ a build script of `buildSrc`.
  * We cannot use imports or do something else before the `buildscript` or `plugin` clauses.
- *
- * Therefore, when a version of [io.spine.internal.dependency.LicenseReport] changes, it should be
- * changed in the Kotlin object _and_ in this file below twice.
  */
 
 plugins {
@@ -38,7 +35,7 @@ plugins {
     groovy
     `kotlin-dsl`
     pmd
-    val licenseReportVersion = "2.0"
+    val licenseReportVersion = "2.1"
     id("com.github.jk1.dependency-license-report").version(licenseReportVersion)
 }
 
@@ -57,7 +54,7 @@ repositories {
 val jacksonVersion = "2.13.0"
 
 val googleAuthToolVersion = "2.1.2"
-val licenseReportVersion = "2.0"
+val licenseReportVersion = "2.1"
 val grGitVersion = "3.1.1"
 
 /**
