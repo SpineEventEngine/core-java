@@ -39,6 +39,7 @@ dependencies {
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
 }
+
 java {
     exposeTestConfiguration()
 }
