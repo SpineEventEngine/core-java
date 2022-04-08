@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("RemoveRedundantQualifierName")
+
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.gradle.publish.IncrementGuard
@@ -47,7 +49,6 @@ import io.spine.internal.gradle.test.configureLogging
 import io.spine.internal.gradle.test.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
@@ -76,11 +77,6 @@ buildscript {
     }
 }
 
-repositories.applyStandard()
-
-apply(from = "$rootDir/version.gradle.kts")
-
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm")
@@ -89,9 +85,9 @@ plugins {
     id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
 }
 
-/** The name of the GitHub repository to which this project belongs. */
-val repositoryName: String = "core-java"
+repositories.applyStandard()
 
+apply(from = "$rootDir/version.gradle.kts")
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 val toolBaseVersion: String by extra
@@ -110,7 +106,7 @@ spinePublishing {
     destinations = with(PublishingRepos) {
         setOf(
             cloudRepo,
-            gitHub(repositoryName),
+            gitHub("core-java"),
             cloudArtifactRegistry
         )
     }
@@ -126,8 +122,6 @@ allprojects {
         plugin("project-report")
     }
 
-    // Apply “legacy” dependency definitions which are not yet migrated to Kotlin.
-    // The `ext.deps` project property is used by `.gradle` scripts under `config/gradle`.
     apply {
         from("$rootDir/version.gradle.kts")
     }
@@ -152,21 +146,23 @@ subprojects {
         plugin("pmd-settings")
     }
 
-    tasks.withType<JavaCompile> {
-        configureJavac()
-        configureErrorProne()
+    java {
+        tasks.withType<JavaCompile>().configureEach {
+            configureJavac()
+            configureErrorProne()
+        }
     }
 
-    @Suppress("MagicNumber")
-    val javaVersion = 11
     kotlin {
+        val javaVersion = JavaVersion.VERSION_11.toString()
+
         applyJvmToolchain(javaVersion)
         explicitApi()
-    }
 
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
-        setFreeCompilerArgs()
+        tasks.withType<KotlinCompile>().configureEach {
+            kotlinOptions.jvmTarget = javaVersion
+            setFreeCompilerArgs()
+        }
     }
 
     dependencies {
@@ -181,8 +177,10 @@ subprojects {
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     }
 
-    configurations.forceVersions()
     configurations {
+        forceVersions()
+        excludeProtobufLite()
+
         all {
             resolutionStrategy {
                 force(
@@ -194,7 +192,6 @@ subprojects {
             }
         }
     }
-    configurations.excludeProtobufLite()
 
     val generatedDir = "$projectDir/generated"
     val generatedJavaDir = "$generatedDir/main/java"
@@ -206,35 +203,40 @@ subprojects {
 
     sourceSets {
         main {
-            java.srcDirs(generatedSpineDir)
+            java.srcDirs(
+                generatedSpineDir,
+                generatedJavaDir,
+            )
         }
         test {
-            java.srcDirs(generatedTestSpineDir)
+            java.srcDirs(
+                generatedTestSpineDir,
+                generatedTestJavaDir,
+            )
         }
-    }
-
-    val generateRejections by tasks.getting
-    tasks.compileKotlin {
-        dependsOn(generateRejections)
-    }
-
-    val generateTestRejections by tasks.getting
-    tasks.compileTestKotlin {
-        dependsOn(generateTestRejections)
     }
 
     tasks {
+        val generateRejections by existing
+        compileKotlin {
+            dependsOn(generateRejections)
+        }
+
+        val generateTestRejections by existing
+        compileTestKotlin {
+            dependsOn(generateTestRejections)
+        }
+
         registerTestTasks()
         test {
-            useJUnitPlatform {
-                includeEngines("junit-jupiter")
-            }
+            useJUnitPlatform { includeEngines("junit-jupiter") }
             configureLogging()
         }
     }
 
     apply<IncrementGuard>()
     apply<VersionWriter>()
+
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
@@ -276,7 +278,10 @@ subprojects {
         allowInternalJavadoc.set(true)
         rootFolder.set(rootDir)
     }
-    project.tasks["publish"].dependsOn("${project.path}:updateGitHubPages")
+
+    tasks.named("publish") {
+        dependsOn("${project.path}:updateGitHubPages")
+    }
 }
 
 JacocoConfig.applyTo(project)
