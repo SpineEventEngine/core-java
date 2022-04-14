@@ -100,7 +100,7 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Configures the the system context to store system events.
+     * Configures the system context to store system events.
      *
      * @return self for method chaining
      */
@@ -111,7 +111,7 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Configures the the system context NOT to store system events for better performance.
+     * Configures the system context NOT to store system events for better performance.
      *
      * <p>This is the default setting.
      *
@@ -141,7 +141,7 @@ public final class SystemSettings implements SystemFeatures {
     /**
      * Configures the system context clients NOT to post system events in parallel.
      *
-     * <p>Choosing this configuration option may effect performance.
+     * <p>Choosing this configuration option may affect performance.
      *
      * <p>This is the default setting in test environment.
      *
