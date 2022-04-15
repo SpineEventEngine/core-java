@@ -26,22 +26,9 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
-import io.spine.base.Identifier;
-import io.spine.core.CommandId;
-import io.spine.core.Event;
-import io.spine.core.MessageId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.event.EventBus;
-import io.spine.server.event.EventFilter;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.system.server.event.EntityCreated;
-import io.spine.system.server.event.EntityStateChanged;
 import io.spine.system.server.given.entity.HistoryEventWatcher;
-import io.spine.testing.server.TestEventFactory;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -51,20 +38,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.option.EntityOption.Kind.ENTITY;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
+import static io.spine.system.server.given.SystemContextSettingsTestEnv.entityCreated;
+import static io.spine.system.server.given.SystemContextSettingsTestEnv.entityStateChanged;
+import static io.spine.system.server.given.SystemContextSettingsTestEnv.postSystemEvent;
 import static java.time.Duration.ofSeconds;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("System Bounded Context should")
 class SystemContextSettingsTest {
-
-    private static final TestEventFactory events =
-            TestEventFactory.newInstance(SystemContextSettingsTest.class);
 
     @Nested
     @DisplayName("by default")
@@ -75,7 +58,7 @@ class SystemContextSettingsTest {
         void notStoreEvents() {
             var domain = BoundedContextBuilder.assumingTests().build();
             var system = systemOf(domain);
-            var event = createEvent();
+            var event = entityStateChanged();
             var observer = postSystemEvent(system.eventBus(), event);
             assertTrue(observer.isCompleted());
             assertThat(observer.responses()).isEmpty();
@@ -96,17 +79,12 @@ class SystemContextSettingsTest {
             var system = systemOf(domain);
             var watcher = new HistoryEventWatcher();
             system.eventBus().register(watcher);
-            var messageId = MessageId.newBuilder()
-                    .setTypeUrl(TypeUrl.of(Empty.class).value())
-                    .setId(Identifier.pack(newUuid()))
-                    .build();
-            var event = EntityCreated.newBuilder()
-                    .setEntity(messageId)
-                    .setKind(ENTITY)
-                    .build();
+
+            var event = entityCreated();
             domain.systemClient()
                   .writeSide()
                   .postEvent(event);
+
             sleepUninterruptibly(ofSeconds(1));
             watcher.assertReceivedEvent(EntityCreated.class);
         }
@@ -124,7 +102,7 @@ class SystemContextSettingsTest {
                           .persistEvents();
             var domain = contextBuilder.build();
             var system = systemOf(domain);
-            var event = createEvent();
+            var event = entityStateChanged();
             var observer = postSystemEvent(system.eventBus(), event);
             assertTrue(observer.isCompleted());
             assertThat(observer.responses()).containsExactly(event);
@@ -142,31 +120,25 @@ class SystemContextSettingsTest {
         }
 
         @Test
-        @DisplayName("post system events synchronously")
-        void postEventsInSync() {
+        @DisplayName("post system events directly in the current thread")
+        void postEventsInCurrentThread() {
             var contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemSettings()
-                          .disableParallelPosting();
+            contextBuilder.systemSettings().disableParallelPosting();
             var domain = contextBuilder.build();
             var system = systemOf(domain);
             var watcher = new HistoryEventWatcher();
             system.eventBus().register(watcher);
-            var messageId = MessageId.newBuilder()
-                    .setTypeUrl(TypeUrl.of(Empty.class).value())
-                    .setId(Identifier.pack(newUuid()))
-                    .build();
-            var event = EntityCreated.newBuilder()
-                    .setEntity(messageId)
-                    .setKind(ENTITY)
-                    .build();
+
+            var event = entityCreated();
             domain.systemClient()
                   .writeSide()
                   .postEvent(event);
+
             watcher.assertReceivedEvent(EntityCreated.class);
         }
 
         @Test
-        @DisplayName("post system events with the given executor")
+        @DisplayName("post system events using the passed `Executor`")
         void postEventsWithExecutor() {
             var calls = new AtomicInteger();
             var executor = (Executor) (command) -> {
@@ -175,24 +147,14 @@ class SystemContextSettingsTest {
             };
 
             var contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemSettings()
-                          .enableParallelPosting(executor);
+            contextBuilder.systemSettings().enableParallelPosting(executor);
 
             var domain = contextBuilder.build();
             var system = systemOf(domain);
             var watcher = new HistoryEventWatcher();
             system.eventBus().register(watcher);
 
-            var messageId = MessageId.newBuilder()
-                    .setTypeUrl(TypeUrl.of(Empty.class).value())
-                    .setId(Identifier.pack(newUuid()))
-                    .build();
-            var event = EntityCreated.newBuilder()
-                    .setEntity(messageId)
-                    .setKind(ENTITY)
-                    .build();
-
-            assertThat(calls.get()).isEqualTo(0);
+            var event = entityCreated();
             domain.systemClient()
                   .writeSide()
                   .postEvent(event);
@@ -200,37 +162,5 @@ class SystemContextSettingsTest {
             watcher.assertReceivedEvent(EntityCreated.class);
             assertThat(calls.get()).isEqualTo(1);
         }
-    }
-
-    private static MemoizingObserver<Event> postSystemEvent(EventBus systemBus, Event event) {
-        systemBus.post(event);
-        var filter = EventFilter.newBuilder()
-                .setEventType(event.enclosedTypeUrl()
-                                   .toTypeName().value())
-                .vBuild();
-        var query = EventStreamQuery.newBuilder()
-                .addFilter(filter)
-                .vBuild();
-        MemoizingObserver<Event> observer = memoizingObserver();
-        systemBus.eventStore()
-                 .read(query, observer);
-        return observer;
-    }
-
-    private static Event createEvent() {
-        var eventMessage = EntityStateChanged.newBuilder()
-                .setEntity(MessageId.newBuilder()
-                                    .setId(Identifier.pack(42))
-                                    .setTypeUrl(TypeUrl.of(EmptyEntityState.class)
-                                                       .value()))
-                .setOldState(pack(StringValue.of("0")))
-                .setNewState(pack(StringValue.of("42")))
-                .addSignalId(MessageId.newBuilder()
-                                      .setId(Identifier.pack(CommandId.generate()))
-                                      .setTypeUrl(TypeUrl.of(EntityStateChanged.class)
-                                                         .value()))
-                .vBuild();
-        var event = events.createEvent(eventMessage);
-        return event;
     }
 }

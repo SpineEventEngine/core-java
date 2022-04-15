@@ -36,10 +36,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -47,66 +47,71 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 @DisplayName("`SystemSettings` should")
 class SystemSettingsTest {
 
+    private final Environment env = Environment.instance();
+
+    /**
+     * An {@code Executor}, used by default for parallel posting of system events.
+     */
+    private final Class<?> asyncEventPostingExecutor = ForkJoinPool.class;
+
+    /**
+     * An {@code Executor}, used by default for direct posting of system events.
+     */
+    private final Class<?> syncEventPostingExecutor = CurrentThreadExecutor.class;
+
+
+    @AfterEach
+    void resetEnv() {
+        Environment.instance()
+                   .reset();
+    }
+
     @Nested
     @DisplayName("by default")
-    class Defaults {
-
-        @AfterEach
-        void resetEnv() {
-            Environment.instance()
-                       .reset();
-        }
+    class ByDefault {
 
         @Test
         @DisplayName("disable command log")
-        void commands() {
+        void disableCommandLog() {
             var settings = SystemSettings.defaults();
             assertFalse(settings.includeCommandLog());
         }
 
         @Test
         @DisplayName("disable event store")
-        void events() {
+        void disableEventStore() {
             var settings = SystemSettings.defaults();
             assertFalse(settings.includePersistentEvents());
+        }
+
+        @Test
+        @DisplayName("disallow parallel posting of system events in the `Test` environment")
+        void disallowParallelPostingInTestEnv() {
+            var env = Environment.instance();
+            assumeTrue(env.is(Tests.class));
+            var settings = SystemSettings.defaults();
+            assertEventPostingExecutor(settings, syncEventPostingExecutor);
         }
 
         @Nested
         @DisplayName("allow parallel posting of system events")
         class AllowParallelPosting {
 
-            private final Environment env = Environment.instance();
-
             @Test
             @DisplayName("in the `Production` environment")
-            void forProductionEnv() {
+            void inProductionEnv() {
                 env.setTo(Production.class);
                 var settings = SystemSettings.defaults();
-                var postingExecutor = settings.eventPostingExecutor();
-                assertNotEquals(postingExecutor.getClass(),
-                                CurrentThreadExecutor.class);
+                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
             }
 
             @Test
             @DisplayName("in a custom environment")
-            void forCustomEnv() {
+            void inCustomEnv() {
                 env.setTo(Local.class);
                 var settings = SystemSettings.defaults();
-                var postingExecutor = settings.eventPostingExecutor();
-                assertNotEquals(postingExecutor.getClass(),
-                                CurrentThreadExecutor.class);
+                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
             }
-        }
-
-        @Test
-        @DisplayName("disallow parallel posting of system events in the test environment")
-        void disallowParallelPostingForTest() {
-            var env = Environment.instance();
-            assumeTrue(env.is(Tests.class));
-            var settings = SystemSettings.defaults();
-            var postingExecutor = settings.eventPostingExecutor();
-            assertEquals(postingExecutor.getClass(),
-                         CurrentThreadExecutor.class);
         }
     }
 
@@ -116,7 +121,7 @@ class SystemSettingsTest {
 
         @Test
         @DisplayName("command log")
-        void commands() {
+        void commandLog() {
             var settings = SystemSettings.defaults();
             settings.enableCommandLog();
             assertTrue(settings.includeCommandLog());
@@ -124,30 +129,44 @@ class SystemSettingsTest {
 
         @Test
         @DisplayName("event store")
-        void events() {
+        void eventStore() {
             var settings = SystemSettings.defaults();
             settings.persistEvents();
             assertTrue(settings.includePersistentEvents());
         }
 
-        @Test
-        @DisplayName("system events to be posted in sync")
-        void parallelism() {
-            var settings = SystemSettings.defaults();
-            settings.disableParallelPosting();
-            var postingExecutor = settings.eventPostingExecutor();
-            assertEquals(postingExecutor.getClass(),
-                         CurrentThreadExecutor.class);
-        }
+        @Nested
+        @DisplayName("system events to be posted")
+        class SystemEventsPosted {
 
-        @Test
-        @DisplayName("system events to be posted with the passed `Executor`")
-        void eventPostingExecutor() {
-            var executor = (Executor) command -> { };
-            var settings = SystemSettings.defaults();
-            settings.enableParallelPosting(executor);
-            var postingExecutor = settings.eventPostingExecutor();
-            assertSame(postingExecutor, executor);
+            @Test
+            @DisplayName("directly in the current thread")
+            void usingCurrentThread() {
+                env.setTo(Production.class);
+                var settings = SystemSettings.defaults();
+                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
+                settings.disableParallelPosting();
+                assertEventPostingExecutor(settings, syncEventPostingExecutor);
+            }
+
+            @Test
+            @DisplayName("using the passed `Executor`")
+            void usingPassedExecutor() {
+                env.setTo(Production.class);
+                var executor = (Executor) command -> { };
+                var settings = SystemSettings.defaults();
+                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
+                settings.enableParallelPosting(executor);
+                var postingExecutor = settings.eventPostingExecutor();
+                assertSame(postingExecutor, executor);
+            }
         }
+    }
+
+    private static void assertEventPostingExecutor(SystemSettings settings,
+                                                   Class<?> executorClass) {
+        var postingExecutor = settings.eventPostingExecutor();
+        assertEquals(postingExecutor.getClass(),
+                     executorClass);
     }
 }
