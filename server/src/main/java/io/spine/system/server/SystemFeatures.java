@@ -44,6 +44,7 @@ interface SystemFeatures {
      * @return {@code true} if system events should be stored, {@code false} otherwise
      */
     boolean includePersistentEvents();
+
     /**
      * Checks if the system events are allowed to be posted in parallel.
      *
