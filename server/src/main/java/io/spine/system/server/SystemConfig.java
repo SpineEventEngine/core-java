@@ -26,15 +26,11 @@
 
 package io.spine.system.server;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.hash;
-import static java.util.Objects.nonNull;
 
 /**
  * An immutable set of features of a {@link SystemContext}.
@@ -44,14 +40,14 @@ final class SystemConfig implements SystemFeatures {
 
     private final boolean commandLog;
     private final boolean storeEvents;
-    private final @Nullable ExecutorService executorService;
+    private final Executor postEvents;
 
     SystemConfig(boolean commandLog,
                  boolean storeEvents,
-                 @Nullable ExecutorService executorService) {
+                 Executor postEvents) {
         this.commandLog = commandLog;
         this.storeEvents = storeEvents;
-        this.executorService = executorService;
+        this.postEvents = postEvents;
     }
 
     @Override
@@ -65,13 +61,8 @@ final class SystemConfig implements SystemFeatures {
     }
 
     @Override
-    public boolean postEventsInParallel() {
-        return nonNull(executorService);
-    }
-
-    ExecutorService executorService() {
-        checkState(nonNull(executorService), "...");
-        return executorService;
+    public Executor eventPostingExecutor() {
+        return postEvents;
     }
 
     @Override
@@ -85,11 +76,11 @@ final class SystemConfig implements SystemFeatures {
         var config = (SystemConfig) o;
         return commandLog == config.commandLog &&
                 storeEvents == config.storeEvents &&
-                Objects.equals(executorService, config.executorService);
+                Objects.equals(postEvents, config.postEvents);
     }
 
     @Override
     public int hashCode() {
-        return hash(commandLog, storeEvents, executorService);
+        return hash(commandLog, storeEvents, postEvents);
     }
 }

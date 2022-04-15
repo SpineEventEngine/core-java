@@ -26,31 +26,13 @@
 
 package io.spine.system.server;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.concurrent.Executor;
 
-/**
- * A configuration of a {@link SystemContext}.
- */
-interface SystemFeatures {
-
-    /**
-     * Obtains the {@link io.spine.system.server.CommandLog CommandLog} setting.
-     *
-     * @return {@code true} if the {@code CommandLog} should be stored, {@code false} otherwise
-     */
-    boolean includeCommandLog();
-
-    /**
-     * Obtains the system events persistence setting.
-     *
-     * @return {@code true} if system events should be stored, {@code false} otherwise
-     */
-    boolean includePersistentEvents();
-
-    /**
-     * Checks if the system events are allowed to be posted in parallel.
-     *
-     * @return {@code true} if it's OK to post system event is parallel, {@code false} otherwise
-     */
-    Executor eventPostingExecutor();
+public class CurrentThreadExecutor implements Executor {
+    @Override
+    public void execute(@NonNull Runnable command) {
+        command.run();
+    }
 }

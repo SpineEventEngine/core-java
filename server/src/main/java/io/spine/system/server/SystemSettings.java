@@ -30,14 +30,12 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.environment.Environment;
 import io.spine.environment.Tests;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
 import static java.util.Objects.hash;
-import static java.util.Objects.nonNull;
 
 /**
  * A configuration of features of a system context.
@@ -47,9 +45,9 @@ import static java.util.Objects.nonNull;
  */
 public final class SystemSettings implements SystemFeatures {
 
-    private @Nullable ExecutorService executorService;
     private boolean commandLog;
     private boolean storeEvents;
+    private Executor postEvents;
 
     /**
      * Prevents direct instantiation.
@@ -141,7 +139,7 @@ public final class SystemSettings implements SystemFeatures {
      */
     @CanIgnoreReturnValue
     public SystemSettings enableParallelPosting() {
-        this.executorService = ForkJoinPool.commonPool();
+        this.postEvents = ForkJoinPool.commonPool();
         return this;
     }
 
@@ -153,8 +151,8 @@ public final class SystemSettings implements SystemFeatures {
      * @return self for method chaining
      */
     @CanIgnoreReturnValue
-    public SystemSettings enableParallelPosting(ExecutorService executorService) {
-        this.executorService = executorService;
+    public SystemSettings enableParallelPosting(Executor executor) {
+        this.postEvents = executor;
         return this;
     }
 
@@ -169,7 +167,7 @@ public final class SystemSettings implements SystemFeatures {
      */
     @CanIgnoreReturnValue
     public SystemSettings disableParallelPosting() {
-        this.executorService = null;
+        this.postEvents = new CurrentThreadExecutor();
         return this;
     }
 
@@ -187,15 +185,15 @@ public final class SystemSettings implements SystemFeatures {
 
     @Internal
     @Override
-    public boolean postEventsInParallel() {
-        return nonNull(executorService);
+    public Executor eventPostingExecutor() {
+        return postEvents;
     }
 
     /**
      * Copies these settings into an immutable feature set.
      */
     SystemConfig freeze() {
-        return new SystemConfig(commandLog, storeEvents, executorService);
+        return new SystemConfig(commandLog, storeEvents, postEvents);
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals")
@@ -210,12 +208,12 @@ public final class SystemSettings implements SystemFeatures {
         var settings = (SystemSettings) o;
         return commandLog == settings.commandLog &&
                 storeEvents == settings.storeEvents &&
-                Objects.equals(executorService, settings.executorService);
+                Objects.equals(postEvents, settings.postEvents);
     }
 
     @SuppressWarnings("NonFinalFieldReferencedInHashCode")
     @Override
     public int hashCode() {
-        return hash(commandLog, storeEvents, executorService);
+        return hash(commandLog, storeEvents, postEvents);
     }
 }
