@@ -26,8 +26,14 @@
 
 package io.spine.system.server;
 
-import com.google.common.base.Objects;
 import com.google.errorprone.annotations.Immutable;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.*;
 
 /**
  * An immutable set of features of a {@link SystemContext}.
@@ -37,14 +43,14 @@ final class SystemConfig implements SystemFeatures {
 
     private final boolean commandLog;
     private final boolean storeEvents;
-    private final boolean parallelPosting;
+    private final @Nullable ExecutorService executorService;
 
     SystemConfig(boolean commandLog,
                  boolean storeEvents,
-                 boolean parallelPosting) {
+                 @Nullable ExecutorService executorService) {
         this.commandLog = commandLog;
         this.storeEvents = storeEvents;
-        this.parallelPosting = parallelPosting;
+        this.executorService = executorService;
     }
 
     @Override
@@ -59,7 +65,12 @@ final class SystemConfig implements SystemFeatures {
 
     @Override
     public boolean postEventsInParallel() {
-        return parallelPosting;
+        return nonNull(executorService);
+    }
+
+    ExecutorService executorService() {
+        checkState(nonNull(executorService), "...");
+        return executorService;
     }
 
     @Override
@@ -73,11 +84,11 @@ final class SystemConfig implements SystemFeatures {
         var config = (SystemConfig) o;
         return commandLog == config.commandLog &&
                 storeEvents == config.storeEvents &&
-                parallelPosting == config.parallelPosting;
+                Objects.equals(executorService, config.executorService);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(commandLog, storeEvents, parallelPosting);
+        return hash(commandLog, storeEvents, executorService);
     }
 }

@@ -26,11 +26,18 @@
 
 package io.spine.system.server;
 
-import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.environment.Environment;
 import io.spine.environment.Tests;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+
+import static java.util.Objects.hash;
+import static java.util.Objects.nonNull;
 
 /**
  * A configuration of features of a system context.
@@ -40,9 +47,9 @@ import io.spine.environment.Tests;
  */
 public final class SystemSettings implements SystemFeatures {
 
+    private @Nullable ExecutorService executorService;
     private boolean commandLog;
     private boolean storeEvents;
-    private boolean parallelPosting;
 
     /**
      * Prevents direct instantiation.
@@ -126,7 +133,7 @@ public final class SystemSettings implements SystemFeatures {
     /**
      * Configures the system context clients to post system events in parallel.
      *
-     * <p>The events are posted using {@link java.util.concurrent.ForkJoinPool#commonPool()}.
+     * <p>The events are posted using {@link ForkJoinPool#commonPool()}.
      *
      * <p>This is the default setting in production environment.
      *
@@ -134,7 +141,20 @@ public final class SystemSettings implements SystemFeatures {
      */
     @CanIgnoreReturnValue
     public SystemSettings enableParallelPosting() {
-        this.parallelPosting = true;
+        this.executorService = ForkJoinPool.commonPool();
+        return this;
+    }
+
+    /**
+     * Configures the system context clients to post system events in parallel.
+     *
+     * <p>The events are posted using the given {@code ExecutorService}.
+     *
+     * @return self for method chaining
+     */
+    @CanIgnoreReturnValue
+    public SystemSettings enableParallelPosting(ExecutorService executorService) {
+        this.executorService = executorService;
         return this;
     }
 
@@ -149,7 +169,7 @@ public final class SystemSettings implements SystemFeatures {
      */
     @CanIgnoreReturnValue
     public SystemSettings disableParallelPosting() {
-        this.parallelPosting = false;
+        this.executorService = null;
         return this;
     }
 
@@ -168,14 +188,14 @@ public final class SystemSettings implements SystemFeatures {
     @Internal
     @Override
     public boolean postEventsInParallel() {
-        return parallelPosting;
+        return nonNull(executorService);
     }
 
     /**
      * Copies these settings into an immutable feature set.
      */
     SystemConfig freeze() {
-        return new SystemConfig(commandLog, storeEvents, parallelPosting);
+        return new SystemConfig(commandLog, storeEvents, executorService);
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals")
@@ -190,12 +210,12 @@ public final class SystemSettings implements SystemFeatures {
         var settings = (SystemSettings) o;
         return commandLog == settings.commandLog &&
                 storeEvents == settings.storeEvents &&
-                parallelPosting == settings.parallelPosting;
+                Objects.equals(executorService, settings.executorService);
     }
 
     @SuppressWarnings("NonFinalFieldReferencedInHashCode")
     @Override
     public int hashCode() {
-        return Objects.hashCode(commandLog, storeEvents, parallelPosting);
+        return hash(commandLog, storeEvents, executorService);
     }
 }
