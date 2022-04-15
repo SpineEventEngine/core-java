@@ -146,7 +146,7 @@ public final class SystemSettings implements SystemFeatures {
     /**
      * Configures the system context clients to post system events in parallel.
      *
-     * <p>The events are posted using the given {@code ExecutorService}.
+     * <p>The events are posted using the given {@code Executor}.
      *
      * @return self for method chaining
      */

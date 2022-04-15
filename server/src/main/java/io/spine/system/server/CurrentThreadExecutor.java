@@ -30,7 +30,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.Executor;
 
-public class CurrentThreadExecutor implements Executor {
+/**
+ * An {@code Executor} which immediately runs all given commands in the current thread.
+ */
+class CurrentThreadExecutor implements Executor {
+
     @Override
     public void execute(@NonNull Runnable command) {
         command.run();

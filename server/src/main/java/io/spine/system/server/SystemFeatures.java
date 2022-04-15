@@ -48,9 +48,7 @@ interface SystemFeatures {
     boolean includePersistentEvents();
 
     /**
-     * Checks if the system events are allowed to be posted in parallel.
-     *
-     * @return {@code true} if it's OK to post system event is parallel, {@code false} otherwise
+     * Provides an {@code Executor} with which system events will be posted.
      */
     Executor eventPostingExecutor();
 }
