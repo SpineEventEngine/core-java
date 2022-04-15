@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -142,14 +141,11 @@ class SystemSettingsTest {
         }
 
         @Test
-        @DisplayName("system events to be posted with the given `Executor`")
+        @DisplayName("system events to be posted with the passed `Executor`")
         void eventPostingExecutor() {
-            var calls = new AtomicInteger();
-            var executor = (Executor) command -> calls.incrementAndGet();
-
+            var executor = (Executor) command -> { };
             var settings = SystemSettings.defaults();
             settings.enableParallelPosting(executor);
-
             var postingExecutor = settings.eventPostingExecutor();
             assertSame(postingExecutor, executor);
         }

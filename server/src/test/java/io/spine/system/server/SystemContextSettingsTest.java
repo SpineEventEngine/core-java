@@ -43,7 +43,11 @@ import io.spine.system.server.given.entity.HistoryEventWatcher;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
@@ -62,73 +66,140 @@ class SystemContextSettingsTest {
     private static final TestEventFactory events =
             TestEventFactory.newInstance(SystemContextSettingsTest.class);
 
-    @Test
-    @DisplayName("not store events by default")
-    void notStoreEvents() {
-        var domain = BoundedContextBuilder.assumingTests().build();
-        var system = systemOf(domain);
-        var event = createEvent();
-        var observer = postSystemEvent(system.eventBus(), event);
-        assertTrue(observer.isCompleted());
-        assertThat(observer.responses()).isEmpty();
+    @Nested
+    @DisplayName("by default")
+    class ByDefault {
+
+        @Test
+        @DisplayName("not store events")
+        void notStoreEvents() {
+            var domain = BoundedContextBuilder.assumingTests().build();
+            var system = systemOf(domain);
+            var event = createEvent();
+            var observer = postSystemEvent(system.eventBus(), event);
+            assertTrue(observer.isCompleted());
+            assertThat(observer.responses()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("not store domain commands")
+        void notStoreDomainCommands() {
+            var domain = BoundedContextBuilder.assumingTests().build();
+            var system = systemOf(domain);
+            assertFalse(system.hasEntitiesWithState(CommandLog.class));
+        }
+
+        @Test
+        @DisplayName("post system events in parallel")
+        void postEventsInParallel() {
+            var domain = BoundedContextBuilder.assumingTests().build();
+            var system = systemOf(domain);
+            var watcher = new HistoryEventWatcher();
+            system.eventBus().register(watcher);
+            var messageId = MessageId.newBuilder()
+                    .setTypeUrl(TypeUrl.of(Empty.class).value())
+                    .setId(Identifier.pack(newUuid()))
+                    .build();
+            var event = EntityCreated.newBuilder()
+                    .setEntity(messageId)
+                    .setKind(ENTITY)
+                    .build();
+            domain.systemClient()
+                  .writeSide()
+                  .postEvent(event);
+            sleepUninterruptibly(ofSeconds(1));
+            watcher.assertReceivedEvent(EntityCreated.class);
+        }
     }
 
-    @Test
-    @DisplayName("store events if required")
-    void storeEvents() {
-        var contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemSettings()
-                      .persistEvents();
-        var domain = contextBuilder.build();
-        var system = systemOf(domain);
-        var event = createEvent();
-        var observer = postSystemEvent(system.eventBus(), event);
-        assertTrue(observer.isCompleted());
-        assertThat(observer.responses()).containsExactly(event);
-    }
+    @Nested
+    @DisplayName("if required")
+    class IfRequired {
 
-    @Test
-    @DisplayName("not store domain commands")
-    void notStoreDomainCommands() {
-        var domain = BoundedContextBuilder.assumingTests().build();
-        var system = systemOf(domain);
-        assertFalse(system.hasEntitiesWithState(CommandLog.class));
-    }
+        @Test
+        @DisplayName("store events")
+        void storeEvents() {
+            var contextBuilder = BoundedContextBuilder.assumingTests();
+            contextBuilder.systemSettings()
+                          .persistEvents();
+            var domain = contextBuilder.build();
+            var system = systemOf(domain);
+            var event = createEvent();
+            var observer = postSystemEvent(system.eventBus(), event);
+            assertTrue(observer.isCompleted());
+            assertThat(observer.responses()).containsExactly(event);
+        }
 
-    @Test
-    @DisplayName("store domain commands if required")
-    void storeDomainCommands() {
-        var contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemSettings()
-                      .enableCommandLog();
-        var domain = contextBuilder.build();
-        var system = systemOf(domain);
-        assertTrue(system.hasEntitiesWithState(CommandLog.class));
-    }
+        @Test
+        @DisplayName("store domain commands")
+        void storeDomainCommands() {
+            var contextBuilder = BoundedContextBuilder.assumingTests();
+            contextBuilder.systemSettings()
+                          .enableCommandLog();
+            var domain = contextBuilder.build();
+            var system = systemOf(domain);
+            assertTrue(system.hasEntitiesWithState(CommandLog.class));
+        }
 
-    @Test
-    @DisplayName("post system events in parallel")
-    void asyncEvents() {
-        var contextBuilder = BoundedContextBuilder.assumingTests();
-        contextBuilder.systemSettings()
-                      .enableParallelPosting();
-        var domain = contextBuilder.build();
-        var system = systemOf(domain);
-        var watcher = new HistoryEventWatcher();
-        system.eventBus().register(watcher);
-        var messageId = MessageId.newBuilder()
-                .setTypeUrl(TypeUrl.of(Empty.class).value())
-                .setId(Identifier.pack(newUuid()))
-                .build();
-        var event = EntityCreated.newBuilder()
-                .setEntity(messageId)
-                .setKind(ENTITY)
-                .build();
-        domain.systemClient()
-              .writeSide()
-              .postEvent(event);
-        sleepUninterruptibly(ofSeconds(1));
-        watcher.assertReceivedEvent(EntityCreated.class);
+        @Test
+        @DisplayName("post system events synchronously")
+        void postEventsInSync() {
+            var contextBuilder = BoundedContextBuilder.assumingTests();
+            contextBuilder.systemSettings()
+                          .disableParallelPosting();
+            var domain = contextBuilder.build();
+            var system = systemOf(domain);
+            var watcher = new HistoryEventWatcher();
+            system.eventBus().register(watcher);
+            var messageId = MessageId.newBuilder()
+                    .setTypeUrl(TypeUrl.of(Empty.class).value())
+                    .setId(Identifier.pack(newUuid()))
+                    .build();
+            var event = EntityCreated.newBuilder()
+                    .setEntity(messageId)
+                    .setKind(ENTITY)
+                    .build();
+            domain.systemClient()
+                  .writeSide()
+                  .postEvent(event);
+            watcher.assertReceivedEvent(EntityCreated.class);
+        }
+
+        @Test
+        @DisplayName("post system events with the given executor")
+        void postEventsWithExecutor() {
+            var calls = new AtomicInteger();
+            var executor = (Executor) (command) -> {
+                calls.incrementAndGet();
+                command.run();
+            };
+
+            var contextBuilder = BoundedContextBuilder.assumingTests();
+            contextBuilder.systemSettings()
+                          .enableParallelPosting(executor);
+
+            var domain = contextBuilder.build();
+            var system = systemOf(domain);
+            var watcher = new HistoryEventWatcher();
+            system.eventBus().register(watcher);
+
+            var messageId = MessageId.newBuilder()
+                    .setTypeUrl(TypeUrl.of(Empty.class).value())
+                    .setId(Identifier.pack(newUuid()))
+                    .build();
+            var event = EntityCreated.newBuilder()
+                    .setEntity(messageId)
+                    .setKind(ENTITY)
+                    .build();
+
+            assertThat(calls.get()).isEqualTo(0);
+            domain.systemClient()
+                  .writeSide()
+                  .postEvent(event);
+
+            watcher.assertReceivedEvent(EntityCreated.class);
+            assertThat(calls.get()).isEqualTo(1);
+        }
     }
 
     private static MemoizingObserver<Event> postSystemEvent(EventBus systemBus, Event event) {
