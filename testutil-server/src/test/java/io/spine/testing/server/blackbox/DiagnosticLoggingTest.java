@@ -34,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -69,11 +70,11 @@ abstract class DiagnosticLoggingTest {
     }
 
     /**
-     * Ensures the {@code messagePart} has beed logged.
+     * Ensures the {@code messagePart} has been logged.
      */
     protected void assertLogged(String messagePart) {
         substituteErrorStream.flush();
-        assertThat(output.toString())
+        assertThat(output.toString(StandardCharsets.UTF_8))
                 .contains(messagePart);
     }
 
