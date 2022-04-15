@@ -26,14 +26,15 @@
 
 package io.spine.system.server;
 
-import com.google.errorprone.annotations.Immutable;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
 import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.*;
+import static java.util.Objects.hash;
+import static java.util.Objects.nonNull;
 
 /**
  * An immutable set of features of a {@link SystemContext}.

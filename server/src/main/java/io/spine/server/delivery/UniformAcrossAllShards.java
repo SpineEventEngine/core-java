@@ -59,7 +59,7 @@ public final class UniformAcrossAllShards extends DeliveryStrategy implements Se
      * The hash function to use for the shard index calculation.
      */
     @SuppressWarnings("UnstableApiUsage")   // See the class-level docs.
-    private static final HashFunction HASHER = Hashing.murmur3_32();
+    private static final HashFunction HASHER = Hashing.murmur3_32_fixed();
 
     private final int numberOfShards;
 
