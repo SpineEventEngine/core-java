@@ -31,7 +31,6 @@ import io.spine.annotation.Internal;
 import io.spine.environment.Environment;
 import io.spine.environment.Tests;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
@@ -208,7 +207,7 @@ public final class SystemSettings implements SystemFeatures {
         var settings = (SystemSettings) o;
         return commandLog == settings.commandLog &&
                 storeEvents == settings.storeEvents &&
-                Objects.equals(postEvents, settings.postEvents);
+                postEvents.equals(settings.postEvents);
     }
 
     @SuppressWarnings("NonFinalFieldReferencedInHashCode")

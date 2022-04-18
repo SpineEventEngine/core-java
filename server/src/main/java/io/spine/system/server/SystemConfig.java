@@ -27,7 +27,6 @@
 package io.spine.system.server;
 
 import javax.annotation.concurrent.Immutable;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import static java.util.Objects.hash;
@@ -76,7 +75,7 @@ final class SystemConfig implements SystemFeatures {
         var config = (SystemConfig) o;
         return commandLog == config.commandLog &&
                 storeEvents == config.storeEvents &&
-                Objects.equals(postEvents, config.postEvents);
+                postEvents.equals(config.postEvents);
     }
 
     @Override
