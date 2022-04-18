@@ -140,7 +140,7 @@ public final class SystemSettings implements SystemFeatures {
     /**
      * Configures the system context to post system events in parallel.
      *
-     * <p>The events will be posted using {@link ForkJoinPool#commonPool()}.</p>
+     * <p>The events are posted using {@link ForkJoinPool#commonPool()}.
      *
      * <p>This is the default setting in production environment.
      *

@@ -77,7 +77,6 @@ class SystemSettingsTest {
         @Test
         @DisplayName("disallow parallel posting of system events in the `Test` environment")
         void disallowParallelPostingInTestEnv() {
-            var env = Environment.instance();
             assumeTrue(env.is(Tests.class));
             var settings = SystemSettings.defaults();
             assertFalse(settings.postEventsInParallel());
@@ -134,7 +133,8 @@ class SystemSettingsTest {
             void usingCurrentThread() {
                 env.setTo(Production.class);
                 var settings = SystemSettings.defaults();
-                assertTrue(settings.postEventsInParallel());
+                assumeTrue(settings.postEventsInParallel());
+
                 settings.disableParallelPosting();
                 assertFalse(settings.postEventsInParallel());
             }
@@ -143,12 +143,12 @@ class SystemSettingsTest {
             @DisplayName("using the passed `Executor`")
             void usingPassedExecutor() {
                 env.setTo(Production.class);
-                var executor = (Executor) command -> { };
                 var settings = SystemSettings.defaults();
-
+                assumeTrue(settings.postEventsInParallel());
                 assertDefaultExecutor(settings);
-                settings.useCustomPostingExecutor(executor);
 
+                var executor = (Executor) command -> { };
+                settings.useCustomPostingExecutor(executor);
                 var newExecutor = settings.freeze().getPostingExecutor();
                 assertSame(newExecutor, executor);
             }
@@ -159,10 +159,10 @@ class SystemSettingsTest {
                 env.setTo(Production.class);
                 var executor = (Executor) command -> { };
                 var settings = SystemSettings.defaults();
+                assumeTrue(settings.postEventsInParallel());
                 settings.useCustomPostingExecutor(executor);
-
-                var initialExecutor = settings.freeze().getPostingExecutor();
-                assertSame(initialExecutor, executor);
+                var currentExecutor = settings.freeze().getPostingExecutor();
+                assertSame(currentExecutor, executor);
 
                 settings.useDefaultPostingExecutor();
                 assertDefaultExecutor(settings);
