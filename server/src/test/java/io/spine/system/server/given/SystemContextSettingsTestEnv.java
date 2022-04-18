@@ -48,6 +48,11 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.option.EntityOption.Kind.ENTITY;
 import static io.spine.protobuf.AnyPacker.pack;
 
+/**
+ * Test environment for testing interop between
+ * {@link io.spine.system.server.SystemContext SystemContext} and
+ * {@link io.spine.system.server.SystemSettings SystemSettings}.
+ */
 public class SystemContextSettingsTestEnv {
 
     private static final TestEventFactory events =
