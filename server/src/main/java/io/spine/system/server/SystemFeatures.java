@@ -48,7 +48,7 @@ interface SystemFeatures {
     boolean includePersistentEvents();
 
     /**
-     * Provides an {@code Executor} with which system events will be posted.
+     * Obtains an {@code Executor} with which system events will be posted.
      */
     Executor eventPostingExecutor();
 }
