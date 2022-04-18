@@ -31,9 +31,13 @@ import io.spine.annotation.Internal;
 import io.spine.environment.Environment;
 import io.spine.environment.Tests;
 
+import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.hash;
 
 /**
@@ -44,9 +48,13 @@ import static java.util.Objects.hash;
  */
 public final class SystemSettings implements SystemFeatures {
 
+    private static final Executor parallelExecutor = ForkJoinPool.commonPool();
+
     private boolean commandLog;
     private boolean storeEvents;
-    private Executor postEvents;
+    private boolean parallelPosting;
+    private @Nullable Executor postingExecutor;
+
 
     /**
      * Prevents direct instantiation.
@@ -107,6 +115,7 @@ public final class SystemSettings implements SystemFeatures {
      * Configures the system context to store system events.
      *
      * @return self for method chaining
+     * @see #forgetEvents()
      */
     @CanIgnoreReturnValue
     public SystemSettings persistEvents() {
@@ -120,6 +129,7 @@ public final class SystemSettings implements SystemFeatures {
      * <p>This is the default setting.
      *
      * @return self for method chaining
+     * @see #persistEvents()
      */
     @CanIgnoreReturnValue
     public SystemSettings forgetEvents() {
@@ -128,45 +138,75 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Configures the system context clients to post system events in parallel.
+     * Configures the system context to post system events in parallel.
      *
-     * <p>The events are posted using {@link ForkJoinPool#commonPool()}.
+     * <p>The events will be posted using {@link ForkJoinPool#commonPool()}.</p>
      *
      * <p>This is the default setting in production environment.
      *
      * @return self for method chaining
+     *
+     * @see #useCustomPostingExecutor(Executor)
+     * @see #disableParallelPosting()
      */
     @CanIgnoreReturnValue
     public SystemSettings enableParallelPosting() {
-        this.postEvents = ForkJoinPool.commonPool();
+        this.parallelPosting = true;
+        this.postingExecutor = parallelExecutor;
         return this;
     }
 
     /**
-     * Configures the system context clients to post system events in parallel.
-     *
-     * <p>The events are posted using the given {@code Executor}.
-     *
-     * @return self for method chaining
-     */
-    @CanIgnoreReturnValue
-    public SystemSettings enableParallelPosting(Executor executor) {
-        this.postEvents = executor;
-        return this;
-    }
-
-    /**
-     * Configures the system context clients NOT to post system events in parallel.
+     * Configures the system context NOT to post system events in parallel.
      *
      * <p>Choosing this configuration option may affect performance.
      *
      * <p>This is the default setting in test environment.
      *
      * @return self for method chaining
+     * @see #enableParallelPosting()
      */
     @CanIgnoreReturnValue
     public SystemSettings disableParallelPosting() {
-        this.postEvents = new CurrentThreadExecutor();
+        this.parallelPosting = false;
+        this.postingExecutor = null;
+        return this;
+    }
+
+    /**
+     * Configures the system context to post system events using the given {@code Executor}.
+     *
+     * <p>Please note, this setting can be configured only if {@link #postEventsInParallel()} is
+     * enabled.
+     *
+     * @return self for method chaining
+     *
+     * @see #enableParallelPosting()
+     * @see #useDefaultPostingExecutor()
+     */
+    @CanIgnoreReturnValue
+    public SystemSettings useCustomPostingExecutor(Executor executor) {
+        checkNotNull(executor);
+        checkState(parallelPosting);
+        this.postingExecutor = executor;
+        return this;
+    }
+
+    /**
+     * Configures the system context to post system events using {@link ForkJoinPool#commonPool()}.
+     *
+     * <p>Please note, this setting can be configured only if {@link #postEventsInParallel()} is
+     * enabled.
+     *
+     * @return self for method chaining
+     *
+     * @see #enableParallelPosting()
+     * @see #useCustomPostingExecutor(Executor)
+     */
+    @CanIgnoreReturnValue
+    public SystemSettings useDefaultPostingExecutor() {
+        checkState(parallelPosting);
+        this.postingExecutor = parallelExecutor;
         return this;
     }
 
@@ -184,15 +224,15 @@ public final class SystemSettings implements SystemFeatures {
 
     @Internal
     @Override
-    public Executor eventPostingExecutor() {
-        return postEvents;
+    public boolean postEventsInParallel() {
+        return parallelPosting;
     }
 
     /**
      * Copies these settings into an immutable feature set.
      */
     SystemConfig freeze() {
-        return new SystemConfig(commandLog, storeEvents, postEvents);
+        return new SystemConfig(commandLog, storeEvents, postingExecutor);
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals")
@@ -207,12 +247,13 @@ public final class SystemSettings implements SystemFeatures {
         var settings = (SystemSettings) o;
         return commandLog == settings.commandLog &&
                 storeEvents == settings.storeEvents &&
-                postEvents.equals(settings.postEvents);
+                parallelPosting == settings.parallelPosting &&
+                Objects.equals(postingExecutor, settings.postingExecutor);
     }
 
     @SuppressWarnings("NonFinalFieldReferencedInHashCode")
     @Override
     public int hashCode() {
-        return hash(commandLog, storeEvents, postEvents);
+        return hash(commandLog, storeEvents, parallelPosting);
     }
 }

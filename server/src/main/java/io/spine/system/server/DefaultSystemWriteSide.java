@@ -63,8 +63,13 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         checkNotNull(origin);
 
         var event = event(systemEvent, origin);
-        system.config().eventPostingExecutor()
-                .execute(() -> postEvent(event));
+        var config = system.config();
+
+        if (config.postEventsInParallel()) {
+            config.getPostingExecutor().execute(() -> postEvent(event));
+        } else {
+            postEvent(event);
+        }
 
         return event;
     }

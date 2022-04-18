@@ -26,10 +26,14 @@
 
 package io.spine.system.server;
 
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.hash;
+import static java.util.Objects.nonNull;
 
 /**
  * An immutable set of features of a {@link SystemContext}.
@@ -39,14 +43,14 @@ final class SystemConfig implements SystemFeatures {
 
     private final boolean commandLog;
     private final boolean storeEvents;
-    private final Executor postEvents;
+    private final @Nullable Executor postingExecutor;
 
     SystemConfig(boolean commandLog,
                  boolean storeEvents,
-                 Executor postEvents) {
+                 @Nullable Executor postingExecutor) {
         this.commandLog = commandLog;
         this.storeEvents = storeEvents;
-        this.postEvents = postEvents;
+        this.postingExecutor = postingExecutor;
     }
 
     @Override
@@ -60,8 +64,18 @@ final class SystemConfig implements SystemFeatures {
     }
 
     @Override
-    public Executor eventPostingExecutor() {
-        return postEvents;
+    public boolean postEventsInParallel() {
+        return nonNull(postingExecutor);
+    }
+
+    /**
+     * Returns an {@code Executor} to be used to post system events in parallel.
+     *
+     * <p>Before call the method, make sure {@link #postEventsInParallel()} is enabled.
+     */
+    Executor getPostingExecutor() {
+        checkNotNull(postingExecutor);
+        return postingExecutor;
     }
 
     @Override
@@ -75,11 +89,11 @@ final class SystemConfig implements SystemFeatures {
         var config = (SystemConfig) o;
         return commandLog == config.commandLog &&
                 storeEvents == config.storeEvents &&
-                postEvents.equals(config.postEvents);
+                Objects.equals(postingExecutor, config.postingExecutor);
     }
 
     @Override
     public int hashCode() {
-        return hash(commandLog, storeEvents, postEvents);
+        return hash(commandLog, storeEvents);
     }
 }

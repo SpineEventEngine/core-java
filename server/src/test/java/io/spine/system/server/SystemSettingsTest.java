@@ -41,6 +41,7 @@ import java.util.concurrent.ForkJoinPool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -48,17 +49,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 class SystemSettingsTest {
 
     private final Environment env = Environment.instance();
-
-    /**
-     * An {@code Executor}, used by default for parallel posting of system events.
-     */
-    private final Class<?> asyncEventPostingExecutor = ForkJoinPool.class;
-
-    /**
-     * An {@code Executor}, used by default for direct posting of system events.
-     */
-    private final Class<?> syncEventPostingExecutor = CurrentThreadExecutor.class;
-
 
     @AfterEach
     void resetEnv() {
@@ -90,7 +80,7 @@ class SystemSettingsTest {
             var env = Environment.instance();
             assumeTrue(env.is(Tests.class));
             var settings = SystemSettings.defaults();
-            assertEventPostingExecutor(settings, syncEventPostingExecutor);
+            assertFalse(settings.postEventsInParallel());
         }
 
         @Nested
@@ -102,7 +92,7 @@ class SystemSettingsTest {
             void inProductionEnv() {
                 env.setTo(Production.class);
                 var settings = SystemSettings.defaults();
-                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
+                assertTrue(settings.postEventsInParallel());
             }
 
             @Test
@@ -110,7 +100,7 @@ class SystemSettingsTest {
             void inCustomEnv() {
                 env.setTo(Local.class);
                 var settings = SystemSettings.defaults();
-                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
+                assertTrue(settings.postEventsInParallel());
             }
         }
     }
@@ -144,9 +134,9 @@ class SystemSettingsTest {
             void usingCurrentThread() {
                 env.setTo(Production.class);
                 var settings = SystemSettings.defaults();
-                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
+                assertTrue(settings.postEventsInParallel());
                 settings.disableParallelPosting();
-                assertEventPostingExecutor(settings, syncEventPostingExecutor);
+                assertFalse(settings.postEventsInParallel());
             }
 
             @Test
@@ -155,18 +145,51 @@ class SystemSettingsTest {
                 env.setTo(Production.class);
                 var executor = (Executor) command -> { };
                 var settings = SystemSettings.defaults();
-                assertEventPostingExecutor(settings, asyncEventPostingExecutor);
-                settings.enableParallelPosting(executor);
-                var postingExecutor = settings.eventPostingExecutor();
-                assertSame(postingExecutor, executor);
+
+                assertDefaultExecutor(settings);
+                settings.useCustomPostingExecutor(executor);
+
+                var newExecutor = settings.freeze().getPostingExecutor();
+                assertSame(newExecutor, executor);
+            }
+
+            @Test
+            @DisplayName("using the default `Executor`")
+            void usingDefaultExecutor() {
+                env.setTo(Production.class);
+                var executor = (Executor) command -> { };
+                var settings = SystemSettings.defaults();
+                settings.useCustomPostingExecutor(executor);
+
+                var initialExecutor = settings.freeze().getPostingExecutor();
+                assertSame(initialExecutor, executor);
+
+                settings.useDefaultPostingExecutor();
+                assertDefaultExecutor(settings);
             }
         }
     }
 
-    private static void assertEventPostingExecutor(SystemSettings settings,
-                                                   Class<?> executorClass) {
-        var postingExecutor = settings.eventPostingExecutor();
-        assertEquals(postingExecutor.getClass(),
-                     executorClass);
+    @Nested
+    @DisplayName("not configure posting executor")
+    class NotConfigurePostingExecutor {
+
+        @Test
+        @DisplayName("when parallel posting is disabled")
+        void whenParallelPostingDisabled() {
+            env.setTo(Tests.class);
+            var executor = (Executor) command -> { };
+            var settings = SystemSettings.defaults();
+            assertFalse(settings.postEventsInParallel());
+            assertThrowsExactly(
+                    IllegalStateException.class,
+                    () -> settings.useCustomPostingExecutor(executor)
+            );
+        }
+    }
+
+    private static void assertDefaultExecutor(SystemSettings settings) {
+        var postingExecutor = settings.freeze().getPostingExecutor();
+        assertEquals(postingExecutor.getClass(), ForkJoinPool.class);
     }
 }

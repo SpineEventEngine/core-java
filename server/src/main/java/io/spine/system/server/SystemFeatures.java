@@ -26,8 +26,6 @@
 
 package io.spine.system.server;
 
-import java.util.concurrent.Executor;
-
 /**
  * A configuration of a {@link SystemContext}.
  */
@@ -48,7 +46,9 @@ interface SystemFeatures {
     boolean includePersistentEvents();
 
     /**
-     * Obtains an {@code Executor} with which system events will be posted.
+     * Checks if the system events are allowed to be posted in parallel.
+     *
+     * @return {@code true} if it's OK to post system events in parallel, {@code false} otherwise
      */
-    Executor eventPostingExecutor();
+    boolean postEventsInParallel();
 }

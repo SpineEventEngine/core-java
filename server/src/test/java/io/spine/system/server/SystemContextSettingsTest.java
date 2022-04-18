@@ -147,7 +147,9 @@ class SystemContextSettingsTest {
             };
 
             var contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemSettings().enableParallelPosting(executor);
+            contextBuilder.systemSettings()
+                          .enableParallelPosting()
+                          .useCustomPostingExecutor(executor);
 
             var domain = contextBuilder.build();
             var system = systemOf(domain);
