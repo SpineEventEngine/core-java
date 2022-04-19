@@ -61,12 +61,16 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     public Event postEvent(EventMessage systemEvent, Origin origin) {
         checkNotNull(systemEvent);
         checkNotNull(origin);
+
         Event event = event(systemEvent, origin);
-        if (system.config().postEventsInParallel()) {
-            commonPool().execute(() -> postEvent(event));
+        SystemConfig config = system.config();
+
+        if (config.postEventsInParallel()) {
+            config.postingExecutor().execute(() -> postEvent(event));
         } else {
             postEvent(event);
         }
+
         return event;
     }
 
