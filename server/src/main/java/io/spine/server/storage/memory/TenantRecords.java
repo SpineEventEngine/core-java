@@ -79,7 +79,6 @@ final class TenantRecords<I, R extends Message>
      */
     public Iterator<I> index(RecordQuery<I, R> query) {
         var subset = findRecords(query);
-        @SuppressWarnings("ConstantConditions")  // Elements of the returned list are non-`null`.
         var result = Iterators.transform(subset.iterator(), RecordWithColumns::id);
         return result;
     }
@@ -131,7 +130,7 @@ final class TenantRecords<I, R extends Message>
         var stream = data;
         var sortingSpecs = query.sorting();
         if (sortingSpecs.size() > 0) {
-            stream = stream.sorted(accordingTo(sortingSpecs.asList()));
+            stream = stream.sorted(accordingTo(sortingSpecs));
         }
         var limit = query.limit();
         if (limit != null && limit > 0) {

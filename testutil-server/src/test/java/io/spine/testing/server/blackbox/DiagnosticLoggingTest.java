@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Provides API for testing {@link DiagnosticLogging} functionality.
@@ -69,11 +70,11 @@ abstract class DiagnosticLoggingTest {
     }
 
     /**
-     * Ensures the {@code messagePart} has beed logged.
+     * Ensures the {@code messagePart} has been logged.
      */
     protected void assertLogged(String messagePart) {
         substituteErrorStream.flush();
-        assertThat(output.toString())
+        assertThat(output.toString(UTF_8))
                 .contains(messagePart);
     }
 

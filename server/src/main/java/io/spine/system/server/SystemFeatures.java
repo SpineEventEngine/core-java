@@ -44,10 +44,11 @@ interface SystemFeatures {
      * @return {@code true} if system events should be stored, {@code false} otherwise
      */
     boolean includePersistentEvents();
+
     /**
      * Checks if the system events are allowed to be posted in parallel.
      *
-     * @return {@code true} if it's OK to post system event is parallel, {@code false} otherwise
+     * @return {@code true} if it's OK to post system events in parallel, {@code false} otherwise
      */
     boolean postEventsInParallel();
 }
