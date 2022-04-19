@@ -117,7 +117,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Creates a new builder with the given spec and system features.
+     * Creates a new builder with the given spec and system settings.
      *
      * @param spec
      *         the context spec for the built context
