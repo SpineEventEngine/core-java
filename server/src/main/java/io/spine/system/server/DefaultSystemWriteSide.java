@@ -35,7 +35,6 @@ import io.spine.core.UserId;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.system.server.SystemEventFactory.forMessage;
-import static java.util.concurrent.ForkJoinPool.commonPool;
 
 /**
  * The default implementation of {@link SystemWriteSide}.
