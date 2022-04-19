@@ -66,7 +66,7 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         var config = system.config();
 
         if (config.postEventsInParallel()) {
-            config.getPostingExecutor().execute(() -> postEvent(event));
+            config.postingExecutor().execute(() -> postEvent(event));
         } else {
             postEvent(event);
         }
