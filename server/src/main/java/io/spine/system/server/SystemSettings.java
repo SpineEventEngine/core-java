@@ -32,6 +32,13 @@ import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.base.Tests;
 
+import javax.annotation.Nullable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 /**
  * A configuration of features of a system context.
  *
@@ -39,6 +46,26 @@ import io.spine.base.Tests;
  * performance.
  */
 public final class SystemSettings implements SystemFeatures {
+
+    /**
+     * A default executor for parallel posting of system events.
+     *
+     * <p>This one is used when a custom executor is not provided.
+     */
+    private static final Executor defaultExecutor = ForkJoinPool.commonPool();
+
+    /**
+     * An executor for parallel posting of system events.
+     *
+     * <p>This property can have the following values:
+     *
+     * <ol>
+     *     <li>{@code null}, when parallel posting of system events is disabled.
+     *     <li>The {@linkplain #defaultExecutor default} executor.
+     *     <li>A {@linkplain #useCustomPostingExecutor(Executor) user-provided} executor.
+     * </ol>
+     */
+    private @Nullable Executor postingExecutor;
 
     private boolean commandLog;
     private boolean aggregateMirrors;
@@ -89,7 +116,7 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Disables {@linkplain io.spine.system.server.CommandLog CommandLog}.
+     * Disables {@link io.spine.system.server.CommandLog CommandLog}.
      *
      * <p>This is the default setting.
      *
@@ -106,7 +133,7 @@ public final class SystemSettings implements SystemFeatures {
      * Enables querying of the latest domain {@code Aggregate} states.
      *
      * <p>The system context stores domain {@code Aggregate} states in the form of
-     * {@link io.spine.system.server.Mirror} projections.
+     * {@link io.spine.system.server.Mirror Mirror} projections.
      *
      * <p>This is the default setting.
      *
@@ -132,9 +159,10 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Configures the the system context to store system events.
+     * Configures the system context to store system events.
      *
      * @return self for method chaining
+     * @see #forgetEvents()
      */
     public SystemSettings persistEvents() {
         this.storeEvents = true;
@@ -142,11 +170,12 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Configures the the system context NOT to store system events for better performance.
+     * Configures the system context NOT to store system events for better performance.
      *
      * <p>This is the default setting.
      *
      * @return self for method chaining
+     * @see #persistEvents()
      */
     public SystemSettings forgetEvents() {
         this.storeEvents = false;
@@ -154,32 +183,74 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Configures the system context clients to post system events in parallel.
+     * Configures the system context to post system events in parallel.
      *
-     * <p>The events are posted using {@link java.util.concurrent.ForkJoinPool#commonPool()}.
+     * <p>The events are posted using the {@link ForkJoinPool#commonPool() common pool}.
      *
      * <p>This is the default setting in production environment.
      *
      * @return self for method chaining
+     * @see #disableParallelPosting()
      */
     @CanIgnoreReturnValue
     public SystemSettings enableParallelPosting() {
         this.parallelPosting = true;
+        this.postingExecutor = defaultExecutor;
         return this;
     }
 
     /**
-     * Configures the system context clients NOT to post system events in parallel.
+     * Configures the system context NOT to post system events in parallel.
      *
-     * <p>Choosing this configuration option may effect performance.
+     * <p>Choosing this configuration option may affect performance.
      *
      * <p>This is the default setting in test environment.
      *
      * @return self for method chaining
+     * @see #enableParallelPosting()
      */
     @CanIgnoreReturnValue
     public SystemSettings disableParallelPosting() {
         this.parallelPosting = false;
+        this.postingExecutor = null;
+        return this;
+    }
+
+    /**
+     * Configures the system context to post system events using the given {@code Executor}.
+     *
+     * <p>Please note, this setting can be configured only if parallel posting of events
+     * {@linkplain #postEventsInParallel() is enabled}.
+     *
+     * @return self for method chaining
+     *
+     * @see #enableParallelPosting()
+     * @see #useDefaultPostingExecutor()
+     */
+    @CanIgnoreReturnValue
+    public SystemSettings useCustomPostingExecutor(Executor executor) {
+        checkNotNull(executor);
+        checkState(parallelPosting);
+        this.postingExecutor = executor;
+        return this;
+    }
+
+    /**
+     * Configures the system context to post system events using
+     * the {@link ForkJoinPool#commonPool() common pool}.
+     *
+     * <p>Please note, this setting can be configured only if parallel posting of events
+     * {@linkplain #postEventsInParallel() is enabled}.
+     *
+     * @return self for method chaining
+     *
+     * @see #enableParallelPosting()
+     * @see #useCustomPostingExecutor(Executor)
+     */
+    @CanIgnoreReturnValue
+    public SystemSettings useDefaultPostingExecutor() {
+        checkState(parallelPosting);
+        this.postingExecutor = defaultExecutor;
         return this;
     }
 
@@ -211,7 +282,7 @@ public final class SystemSettings implements SystemFeatures {
      * Copies these settings into an immutable feature set.
      */
     SystemConfig freeze() {
-        return new SystemConfig(commandLog, aggregateMirrors, storeEvents, parallelPosting);
+        return new SystemConfig(commandLog, aggregateMirrors, storeEvents, postingExecutor);
     }
 
     @SuppressWarnings({"OverlyComplexBooleanExpression", "NonFinalFieldReferenceInEquals"})
