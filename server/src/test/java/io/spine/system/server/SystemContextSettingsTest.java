@@ -110,7 +110,7 @@ class SystemContextSettingsTest {
         @DisplayName("store events")
         void storeEvents() {
             BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemFeatures()
+            contextBuilder.systemSettings()
                           .persistEvents();
             BoundedContext domain = contextBuilder.build();
             BoundedContext system = systemOf(domain);
@@ -124,7 +124,7 @@ class SystemContextSettingsTest {
         @DisplayName("store domain commands")
         void storeDomainCommands() {
             BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemFeatures()
+            contextBuilder.systemSettings()
                           .enableCommandLog();
             BoundedContext domain = contextBuilder.build();
             BoundedContext system = systemOf(domain);
@@ -135,7 +135,7 @@ class SystemContextSettingsTest {
         @DisplayName("not mirror domain aggregates")
         void notMirror() {
             BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemFeatures()
+            contextBuilder.systemSettings()
                           .disableAggregateQuerying();
             BoundedContext domain = contextBuilder.build();
             BoundedContext system = systemOf(domain);
@@ -146,7 +146,7 @@ class SystemContextSettingsTest {
         @DisplayName("post system events directly in the current thread")
         void postEventsInCurrentThread() {
             BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemFeatures().disableParallelPosting();
+            contextBuilder.systemSettings().disableParallelPosting();
             BoundedContext domain = contextBuilder.build();
             BoundedContext system = systemOf(domain);
             HistoryEventWatcher watcher = new HistoryEventWatcher();
@@ -170,7 +170,7 @@ class SystemContextSettingsTest {
             };
 
             BoundedContextBuilder contextBuilder = BoundedContextBuilder.assumingTests();
-            contextBuilder.systemFeatures()
+            contextBuilder.systemSettings()
                           .enableParallelPosting()
                           .useCustomPostingExecutor(executor);
 

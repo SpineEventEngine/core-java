@@ -95,7 +95,7 @@ public final class BoundedContextBuilder implements Logging {
      */
     private final Collection<EventDispatcher> eventDispatchers = new ArrayList<>();
 
-    private final SystemSettings systemFeatures;
+    private final SystemSettings systemSettings;
 
     private Stand stand;
     private Supplier<AggregateRootDirectory> rootDirectory;
@@ -121,14 +121,14 @@ public final class BoundedContextBuilder implements Logging {
      *
      * @param spec
      *         the context spec for the built context
-     * @param systemFeatures
-     *         system feature flags; can be changed later via {@link #systemFeatures()}
+     * @param systemSettings
+     *         settings of the System context; may be changed later via {@link #systemSettings()}
      * @see BoundedContext#singleTenant
      * @see BoundedContext#multitenant
      */
-    private BoundedContextBuilder(ContextSpec spec, SystemSettings systemFeatures) {
+    private BoundedContextBuilder(ContextSpec spec, SystemSettings systemSettings) {
         this.spec = checkNotNull(spec);
-        this.systemFeatures = checkNotNull(systemFeatures);
+        this.systemSettings = checkNotNull(systemSettings);
     }
 
     /**
@@ -515,14 +515,12 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     /**
-     * Obtains the system context feature configuration.
+     * Obtains the configuration of the System context.
      *
-     * <p>Users may enable or disable some features of the system context.
-     *
-     * @see SystemSettings
+     * <p>With it, users are able to change the behavior of the system context.
      */
-    public SystemSettings systemFeatures() {
-        return systemFeatures;
+    public SystemSettings systemSettings() {
+        return systemSettings;
     }
 
     /**
@@ -590,7 +588,7 @@ public final class BoundedContextBuilder implements Logging {
     }
 
     private SystemContext buildSystem() {
-        BoundedContextBuilder system = new BoundedContextBuilder(systemSpec(), systemFeatures);
+        BoundedContextBuilder system = new BoundedContextBuilder(systemSpec(), systemSettings);
         Optional<? extends TenantIndex> tenantIndex = tenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
         SystemContext result =
@@ -600,7 +598,7 @@ public final class BoundedContextBuilder implements Logging {
 
     private ContextSpec systemSpec() {
         ContextSpec systemSpec = this.spec.toSystem();
-        if (!systemFeatures.includePersistentEvents()) {
+        if (!systemSettings.includePersistentEvents()) {
             systemSpec = systemSpec.notStoringEvents();
         }
         return systemSpec;
