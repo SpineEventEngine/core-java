@@ -48,12 +48,19 @@ import static java.util.Objects.hash;
  */
 public final class SystemSettings implements SystemFeatures {
 
-    private static final Executor parallelExecutor = ForkJoinPool.commonPool();
+    /**
+     * A default executor for parallel posting of system events.
+     */
+    private static final Executor defaultExecutor = ForkJoinPool.commonPool();
+
+    /**
+     * A custom executor for parallel posting of system events.
+     */
+    private @Nullable Executor customExecutor;
 
     private boolean commandLog;
     private boolean storeEvents;
     private boolean parallelPosting;
-    private @Nullable Executor postingExecutor;
 
 
     /**
@@ -98,7 +105,7 @@ public final class SystemSettings implements SystemFeatures {
     }
 
     /**
-     * Disables {@linkplain io.spine.system.server.CommandLog CommandLog}.
+     * Disables {@link io.spine.system.server.CommandLog CommandLog}.
      *
      * <p>This is the default setting.
      *
@@ -140,7 +147,7 @@ public final class SystemSettings implements SystemFeatures {
     /**
      * Configures the system context to post system events in parallel.
      *
-     * <p>The events are posted using {@link ForkJoinPool#commonPool()}.
+     * <p>The events are posted using the {@link ForkJoinPool#commonPool() common pool}.
      *
      * <p>This is the default setting in production environment.
      *
@@ -152,7 +159,7 @@ public final class SystemSettings implements SystemFeatures {
     @CanIgnoreReturnValue
     public SystemSettings enableParallelPosting() {
         this.parallelPosting = true;
-        this.postingExecutor = parallelExecutor;
+        this.customExecutor = defaultExecutor;
         return this;
     }
 
@@ -169,7 +176,7 @@ public final class SystemSettings implements SystemFeatures {
     @CanIgnoreReturnValue
     public SystemSettings disableParallelPosting() {
         this.parallelPosting = false;
-        this.postingExecutor = null;
+        this.customExecutor = null;
         return this;
     }
 
@@ -188,15 +195,16 @@ public final class SystemSettings implements SystemFeatures {
     public SystemSettings useCustomPostingExecutor(Executor executor) {
         checkNotNull(executor);
         checkState(parallelPosting);
-        this.postingExecutor = executor;
+        this.customExecutor = executor;
         return this;
     }
 
     /**
-     * Configures the system context to post system events using {@link ForkJoinPool#commonPool()}.
+     * Configures the system context to post system events using
+     * the {@link ForkJoinPool#commonPool() common pool}.
      *
-     * <p>Please note, this setting can be configured only if {@link #postEventsInParallel()} is
-     * enabled.
+     * <p>Please note, this setting can be configured only if parallel posting of events
+     * {@linkplain #postEventsInParallel() is enabled}.
      *
      * @return self for method chaining
      *
@@ -206,7 +214,7 @@ public final class SystemSettings implements SystemFeatures {
     @CanIgnoreReturnValue
     public SystemSettings useDefaultPostingExecutor() {
         checkState(parallelPosting);
-        this.postingExecutor = parallelExecutor;
+        this.customExecutor = defaultExecutor;
         return this;
     }
 
@@ -232,7 +240,7 @@ public final class SystemSettings implements SystemFeatures {
      * Copies these settings into an immutable feature set.
      */
     SystemConfig freeze() {
-        return new SystemConfig(commandLog, storeEvents, postingExecutor);
+        return new SystemConfig(commandLog, storeEvents, customExecutor);
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals")
@@ -248,7 +256,7 @@ public final class SystemSettings implements SystemFeatures {
         return commandLog == settings.commandLog &&
                 storeEvents == settings.storeEvents &&
                 parallelPosting == settings.parallelPosting &&
-                Objects.equals(postingExecutor, settings.postingExecutor);
+                Objects.equals(customExecutor, settings.customExecutor);
     }
 
     @SuppressWarnings("NonFinalFieldReferencedInHashCode")

@@ -149,7 +149,7 @@ class SystemSettingsTest {
 
                 var executor = (Executor) command -> { };
                 settings.useCustomPostingExecutor(executor);
-                var newExecutor = settings.freeze().getPostingExecutor();
+                var newExecutor = settings.freeze().postingExecutor();
                 assertSame(newExecutor, executor);
             }
 
@@ -161,7 +161,7 @@ class SystemSettingsTest {
                 var settings = SystemSettings.defaults();
                 assumeTrue(settings.postEventsInParallel());
                 settings.useCustomPostingExecutor(executor);
-                var currentExecutor = settings.freeze().getPostingExecutor();
+                var currentExecutor = settings.freeze().postingExecutor();
                 assertSame(currentExecutor, executor);
 
                 settings.useDefaultPostingExecutor();
@@ -189,7 +189,7 @@ class SystemSettingsTest {
     }
 
     private static void assertDefaultExecutor(SystemSettings settings) {
-        var postingExecutor = settings.freeze().getPostingExecutor();
+        var postingExecutor = settings.freeze().postingExecutor();
         assertEquals(postingExecutor.getClass(), ForkJoinPool.class);
     }
 }

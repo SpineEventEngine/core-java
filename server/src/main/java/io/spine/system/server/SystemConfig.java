@@ -73,7 +73,7 @@ final class SystemConfig implements SystemFeatures {
      *
      * <p>Before call the method, make sure {@link #postEventsInParallel()} is enabled.
      */
-    Executor getPostingExecutor() {
+    Executor postingExecutor() {
         checkNotNull(postingExecutor);
         return postingExecutor;
     }
