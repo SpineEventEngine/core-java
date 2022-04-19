@@ -31,7 +31,7 @@ import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.hash;
 import static java.util.Objects.nonNull;
 
@@ -79,10 +79,13 @@ final class SystemConfig implements SystemFeatures {
     /**
      * Returns an {@code Executor} to be used to post system events in parallel.
      *
-     * <p>Before call the method, make sure {@link #postEventsInParallel()} is enabled.
+     * <p>Before call the method, make sure parallel posting
+     * {@linkplain #postEventsInParallel() is enabled}.
+     *
+     * @throws IllegalStateException if parallel posting of system events is disabled
      */
     Executor postingExecutor() {
-        checkNotNull(postingExecutor);
+        checkState(postEventsInParallel());
         return postingExecutor;
     }
 
