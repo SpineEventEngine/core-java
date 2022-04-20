@@ -35,7 +35,6 @@ import io.spine.core.UserId;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.system.server.SystemEventFactory.forMessage;
-import static java.util.concurrent.ForkJoinPool.commonPool;
 
 /**
  * The default implementation of {@link SystemWriteSide}.
@@ -61,9 +60,12 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
     public Event postEvent(EventMessage systemEvent, Origin origin) {
         checkNotNull(systemEvent);
         checkNotNull(origin);
+
         Event event = event(systemEvent, origin);
-        if (system.config().postEventsInParallel()) {
-            commonPool().execute(() -> postEvent(event));
+        SystemConfig config = system.config();
+
+        if (config.postEventsInParallel()) {
+            config.postingExecutor().execute(() -> postEvent(event));
         } else {
             postEvent(event);
         }

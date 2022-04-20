@@ -26,8 +26,14 @@
 
 package io.spine.system.server;
 
-import com.google.common.base.Objects;
-import com.google.errorprone.annotations.Immutable;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import java.util.Objects;
+import java.util.concurrent.Executor;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.hash;
+import static java.util.Objects.nonNull;
 
 /**
  * An immutable set of features of a {@link SystemContext}.
@@ -38,16 +44,16 @@ final class SystemConfig implements SystemFeatures {
     private final boolean commandLog;
     private final boolean aggregateMirrors;
     private final boolean storeEvents;
-    private final boolean parallelPosting;
+    private final @Nullable Executor postingExecutor;
 
     SystemConfig(boolean commandLog,
                  boolean aggregateMirrors,
                  boolean storeEvents,
-                 boolean parallelPosting) {
+                 @Nullable Executor postingExecutor) {
         this.commandLog = commandLog;
         this.aggregateMirrors = aggregateMirrors;
         this.storeEvents = storeEvents;
-        this.parallelPosting = parallelPosting;
+        this.postingExecutor = postingExecutor;
     }
 
     @Override
@@ -67,7 +73,20 @@ final class SystemConfig implements SystemFeatures {
 
     @Override
     public boolean postEventsInParallel() {
-        return parallelPosting;
+        return nonNull(postingExecutor);
+    }
+
+    /**
+     * Returns an {@code Executor} to be used to post system events in parallel.
+     *
+     * <p>Before calling this method, make sure parallel posting
+     * {@linkplain #postEventsInParallel() is enabled}.
+     *
+     * @throws IllegalStateException if parallel posting of system events is disabled
+     */
+    Executor postingExecutor() {
+        checkState(postEventsInParallel());
+        return postingExecutor;
     }
 
     @SuppressWarnings("OverlyComplexBooleanExpression")
@@ -83,11 +102,11 @@ final class SystemConfig implements SystemFeatures {
         return commandLog == config.commandLog &&
                 aggregateMirrors == config.aggregateMirrors &&
                 storeEvents == config.storeEvents &&
-                parallelPosting == config.parallelPosting;
+                Objects.equals(postingExecutor, config.postingExecutor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(commandLog, aggregateMirrors, storeEvents, parallelPosting);
+        return hash(commandLog, aggregateMirrors, storeEvents);
     }
 }

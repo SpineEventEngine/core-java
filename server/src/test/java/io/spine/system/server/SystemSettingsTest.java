@@ -35,74 +35,80 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ForkJoinPool;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@DisplayName("SystemFeatures should")
+@DisplayName("`SystemSettings` should")
 class SystemSettingsTest {
+
+    private final Environment env = Environment.instance();
+
+    @AfterEach
+    void resetEnv() {
+        Environment.instance()
+                   .reset();
+    }
 
     @Nested
     @DisplayName("by default")
-    class Defaults {
-
-        @AfterEach
-        void resetEnv() {
-            Environment.instance()
-                       .reset();
-        }
+    class ByDefault {
 
         @Test
         @DisplayName("enable aggregate mirroring")
         void mirrors() {
-            SystemSettings features = SystemSettings.defaults();
-            assertTrue(features.includeAggregateMirroring());
+            SystemSettings settings = SystemSettings.defaults();
+            assertTrue(settings.includeAggregateMirroring());
         }
 
         @Test
         @DisplayName("disable command log")
         void commands() {
-            SystemSettings features = SystemSettings.defaults();
-            assertFalse(features.includeCommandLog());
+            SystemSettings settings = SystemSettings.defaults();
+            assertFalse(settings.includeCommandLog());
         }
 
         @Test
         @DisplayName("disable event store")
         void events() {
-            SystemSettings features = SystemSettings.defaults();
-            assertFalse(features.includePersistentEvents());
+            SystemSettings settings = SystemSettings.defaults();
+            assertFalse(settings.includePersistentEvents());
+        }
+
+        @Test
+        @DisplayName("disallow parallel posting of system events in the test environment")
+        void disallowParallelPostingForTest() {
+            assumeTrue(env.is(Tests.class));
+            SystemSettings settings = SystemSettings.defaults();
+            assertFalse(settings.postEventsInParallel());
         }
 
         @Nested
         @DisplayName("allow parallel posting of system events")
         class AllowParallelPosting {
 
-            private final Environment env = Environment.instance();
-
             @Test
             @DisplayName("in the `Production` environment")
             void forProductionEnv() {
                 env.setTo(Production.class);
-                assertTrue(SystemSettings.defaults()
-                                         .postEventsInParallel());
+                SystemSettings settings = SystemSettings.defaults();
+                assertTrue(settings.postEventsInParallel());
             }
 
             @Test
             @DisplayName("in a custom environment")
             void forCustomEnv() {
                 env.setTo(Local.class);
-                assertTrue(SystemSettings.defaults()
-                                         .postEventsInParallel());
+                SystemSettings settings = SystemSettings.defaults();
+                assertTrue(settings.postEventsInParallel());
             }
-        }
-
-        @Test
-        @DisplayName("disallow parallel posting of system events in the test environment")
-        void disallowParallelPostingForTest() {
-            Environment env = Environment.instance();
-            assumeTrue(env.is(Tests.class));
-            assertFalse(SystemSettings.defaults()
-                                      .postEventsInParallel());
         }
     }
 
@@ -113,37 +119,95 @@ class SystemSettingsTest {
         @Test
         @DisplayName("aggregate mirroring")
         void mirrors() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .disableAggregateQuerying();
-            assertFalse(features.includeAggregateMirroring());
+            SystemSettings settings = SystemSettings.defaults();
+            settings.disableAggregateQuerying();
+            assertFalse(settings.includeAggregateMirroring());
         }
 
         @Test
         @DisplayName("command log")
         void commands() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .enableCommandLog();
-            assertTrue(features.includeCommandLog());
+            SystemSettings settings = SystemSettings.defaults();
+            settings.enableCommandLog();
+            assertTrue(settings.includeCommandLog());
         }
 
         @Test
         @DisplayName("event store")
         void events() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .persistEvents();
-            assertTrue(features.includePersistentEvents());
+            SystemSettings settings = SystemSettings.defaults();
+            settings.persistEvents();
+            assertTrue(settings.includePersistentEvents());
         }
 
-        @Test
-        @DisplayName("system events to be posted in synch")
-        void parallelism() {
-            SystemSettings features = SystemSettings
-                    .defaults()
-                    .disableParallelPosting();
-            assertFalse(features.postEventsInParallel());
+        @Nested
+        @DisplayName("system events to be posted")
+        class SystemEventsPosted {
+
+            @Test
+            @DisplayName("directly in the current thread")
+            void usingCurrentThread() {
+                env.setTo(Production.class);
+                SystemSettings settings = SystemSettings.defaults();
+                assumeTrue(settings.postEventsInParallel());
+
+                settings.disableParallelPosting();
+                assertFalse(settings.postEventsInParallel());
+            }
+
+            @Test
+            @DisplayName("using the passed `Executor`")
+            void usingPassedExecutor() {
+                env.setTo(Production.class);
+                SystemSettings settings = SystemSettings.defaults();
+                assumeTrue(settings.postEventsInParallel());
+                assertDefaultExecutor(settings);
+
+                Executor executor = command -> { };
+                settings.useCustomPostingExecutor(executor);
+                Executor newExecutor = settings.freeze().postingExecutor();
+                assertSame(newExecutor, executor);
+            }
+
+            @Test
+            @DisplayName("using the default `Executor`")
+            void usingDefaultExecutor() {
+                env.setTo(Production.class);
+                SystemSettings settings = SystemSettings.defaults();
+                assumeTrue(settings.postEventsInParallel());
+
+                Executor executor = command -> { };
+                settings.useCustomPostingExecutor(executor);
+                Executor currentExecutor = settings.freeze().postingExecutor();
+                assertSame(currentExecutor, executor);
+
+                settings.useDefaultPostingExecutor();
+                assertDefaultExecutor(settings);
+            }
         }
+    }
+
+    @Nested
+    @DisplayName("not configure posting executor")
+    class NotConfigurePostingExecutor {
+
+        @Test
+        @DisplayName("when parallel posting is disabled")
+        void whenParallelPostingDisabled() {
+            env.setTo(Tests.class);
+            SystemSettings settings = SystemSettings.defaults();
+            assumeFalse(settings.postEventsInParallel());
+
+            Executor executor = command -> { };
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> settings.useCustomPostingExecutor(executor)
+            );
+        }
+    }
+
+    private static void assertDefaultExecutor(SystemSettings settings) {
+        Executor postingExecutor = settings.freeze().postingExecutor();
+        assertEquals(postingExecutor.getClass(), ForkJoinPool.class);
     }
 }

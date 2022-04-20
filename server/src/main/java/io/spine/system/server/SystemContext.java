@@ -60,7 +60,7 @@ public final class SystemContext extends BoundedContext {
 
     private SystemContext(BoundedContextBuilder builder) {
         super(builder);
-        this.config = builder.systemFeatures()
+        this.config = builder.systemSettings()
                              .freeze();
     }
 

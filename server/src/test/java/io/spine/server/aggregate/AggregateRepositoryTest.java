@@ -763,7 +763,7 @@ public class AggregateRepositoryTest {
         @DisplayName("if aggregate querying is disabled")
         void ifAggregateQueryingDisabled() {
             BoundedContextBuilder builder = BoundedContextBuilder.assumingTests();
-            builder.systemFeatures()
+            builder.systemSettings()
                    .disableAggregateQuerying();
             BoundedContext context = builder.add(ProjectAggregate.class)
                                             .build();
