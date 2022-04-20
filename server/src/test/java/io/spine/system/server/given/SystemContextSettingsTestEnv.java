@@ -53,7 +53,7 @@ import static io.spine.protobuf.AnyPacker.pack;
  * {@link io.spine.system.server.SystemContext SystemContext} and
  * {@link io.spine.system.server.SystemSettings SystemSettings}.
  */
-public class SystemContextSettingsTestEnv {
+public final class SystemContextSettingsTestEnv {
 
     private static final TestEventFactory events =
             TestEventFactory.newInstance(SystemContextSettingsTestEnv.class);

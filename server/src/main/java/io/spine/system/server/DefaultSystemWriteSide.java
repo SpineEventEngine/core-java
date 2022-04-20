@@ -69,7 +69,6 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         } else {
             postEvent(event);
         }
-
         return event;
     }
 

@@ -79,7 +79,7 @@ final class SystemConfig implements SystemFeatures {
     /**
      * Returns an {@code Executor} to be used to post system events in parallel.
      *
-     * <p>Before call the method, make sure parallel posting
+     * <p>Before calling this method, make sure parallel posting
      * {@linkplain #postEventsInParallel() is enabled}.
      *
      * @throws IllegalStateException if parallel posting of system events is disabled
