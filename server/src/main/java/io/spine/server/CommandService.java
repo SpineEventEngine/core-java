@@ -50,11 +50,10 @@ import static io.spine.server.bus.Acks.reject;
  *
  * <p>This class is an implementation of a corresponding gRPC service.
  *
- * <p>Please note, its public API is dictated by the
- * {@linkplain CommandServiceGrpc.CommandServiceImplBase generated code}. Despite the fact of its
- * "publicity", it's not meant to be used directly. Use {@link io.spine.client.Client Client}
- * to post commands to the application. Actual API of the service is declared in its proto
- * definition. Please take a look on "command_service.proto" file.
+ * <p>Please note, its public API is dictated by the {@linkplain CommandServiceGrpc generated code}.
+ * Despite the fact of its "publicity", it's not meant to be used directly.
+ * Use {@link io.spine.client.Client Client} to post commands to the application. Actual API of
+ * the service is declared in its proto definition. Please take a look on "command_service.proto".
  */
 public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
