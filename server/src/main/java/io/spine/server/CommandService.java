@@ -45,8 +45,16 @@ import java.util.Set;
 import static io.spine.server.bus.Acks.reject;
 
 /**
- * The {@code CommandService} allows client applications to post commands and
- * receive updates from the application backend.
+ * The {@code CommandService} allows client applications to post commands to
+ * the application backend.
+ *
+ * <p>This class is an implementation of a corresponding gRPC service.
+ *
+ * <p>Please note, its public API is dictated by the
+ * {@linkplain CommandServiceGrpc.CommandServiceImplBase generated code}. Despite the fact of its
+ * "publicity", it's not meant to be used directly. Use {@link io.spine.client.Client Client}
+ * to post commands to the application. Actual API of the service is declared in its proto
+ * definition. Please take a look on "command_service.proto" file.
  */
 public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
@@ -55,7 +63,7 @@ public final class CommandService
     private final ImmutableMap<CommandClass, BoundedContext> commandToContext;
 
     /**
-     * Constructs new instance using the map from a {@code CommandClass} to
+     * Constructs a new instance using the map from a {@code CommandClass} to
      * a {@code BoundedContext} instance which handles the command.
      */
     private CommandService(Map<CommandClass, BoundedContext> map) {
@@ -70,7 +78,9 @@ public final class CommandService
         return new Builder();
     }
 
-    /** Builds the service with a single Bounded Context. **/
+    /**
+     * Builds the service with a single Bounded Context.
+     */
     public static CommandService withSingle(BoundedContext context) {
         CommandService result = newBuilder()
                 .add(context)
@@ -78,6 +88,23 @@ public final class CommandService
         return result;
     }
 
+    /**
+     * Posts the given command to the application.
+     *
+     * <p>In the original proto definition of this service, this method is blocking unary. Meaning,
+     * its real signature should be {@code Ack post(Command)}. But due to the restrictions,
+     * imposed by gRPC, we have to implement it using {@code StreamObserver}, even when only
+     * a single {@code Ack} is expected.
+     *
+     * <p>As a result, we don't expect any streaming errors since there's no stream at all. We use
+     * a {@code StreamObserver} to return a single value. The corresponding
+     * {@linkplain StreamObserver#onError(Throwable) error handler} is never called by our code.
+     *
+     * <p>The errors, which may occur on a transport layer or within gRPC itself are runtime. They
+     * are not propagated in an observer as well.
+     *
+     * <p>See issue: <a href="https://github.com/grpc/grpc-java/issues/1474">Improve unary server stub</a>
+     */
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
         CommandClass commandClass = CommandClass.of(request);
