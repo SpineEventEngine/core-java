@@ -45,15 +45,15 @@ import java.util.Set;
 import static io.spine.server.bus.Acks.reject;
 
 /**
- * The {@code CommandService} allows client applications to post commands to
- * the application backend.
+ * The {@code CommandService} provides a synchronous way to post commands
+ * to the application backend.
  *
  * <p>This class is an implementation of a corresponding gRPC service.
  *
- * <p>Please note, its public API is dictated by the {@linkplain CommandServiceGrpc generated code}.
- * Despite the fact of its "publicity", it's not meant to be used directly.
- * Use {@link io.spine.client.Client Client} to post commands to the application. Actual API of
- * the service is declared in its proto definition. Please take a look on "command_service.proto".
+ * <p>Please note, public API of this class is dictated by the
+ * {@linkplain CommandServiceGrpc generated code}. Despite the fact of its "publicity", it's not
+ * meant to be used directly. Use {@link io.spine.client.Client Client} to post commands to the
+ * application. Actual API of the service is defined in its proto definition.
  */
 public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
@@ -93,11 +93,11 @@ public final class CommandService
      * <p>In the original proto definition of this service, this method is blocking unary. Meaning,
      * its real signature should be {@code Ack post(Command)}. But due to the restrictions,
      * imposed by gRPC, we have to implement it using {@code StreamObserver}, even when only
-     * a single {@code Ack} is expected.
+     * a single {@code Ack} is returned.
      *
-     * <p>As a result, we don't expect any streaming errors since there's no stream at all. We use
-     * a {@code StreamObserver} to return a single value. The corresponding
-     * {@linkplain StreamObserver#onError(Throwable) error handler} is never called by our code.
+     * <p>As a result, we don't expect any streaming errors since there's no stream at all.
+     * The corresponding {@linkplain StreamObserver#onError(Throwable) error handler} is never
+     * called by our code.
      *
      * <p>The errors, which may occur on a transport layer or within gRPC itself are runtime. They
      * are not propagated in an observer as well.
