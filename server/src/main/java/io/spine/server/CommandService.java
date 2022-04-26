@@ -89,12 +89,12 @@ public final class CommandService
      * {@inheritDoc}
      *
      * <p>In the original proto definition of this service, this method is unary.
-     * Meaning, for every posted command only a single {@code Ack} is received in response:
+     * Meaning, for every posted command only a single {@link Ack} is received in response:
      *
      * <pre>Ack post(Command);</pre>
      *
-     * <p>But for every service, gRPC generates several client stubs: blocking, asynchronous,
-     * {@link com.google.common.util.concurrent.ListenableFuture ListenableFuture}-based. Each one
+     * <p>But for every service, gRPC generates several clients: blocking, asynchronous,
+     * {@link com.google.common.util.concurrent.ListenableFuture Future}-based. Each one
      * has its own signature for this method. And instead of making users to implement three
      * different signatures of the same method in the
      * {@linkplain CommandServiceGrpc.CommandServiceImplBase server stub}, they prefer a single
