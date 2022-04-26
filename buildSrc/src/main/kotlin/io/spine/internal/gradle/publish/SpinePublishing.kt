@@ -125,6 +125,7 @@ open class SpinePublishing(private val project: Project) {
 
     private val protoJar = ProtoJar()
     private val testJar = TestJar()
+    private val dokkaJar = DokkaJar()
 
     /**
      * Set of modules to be published.
@@ -242,6 +243,30 @@ open class SpinePublishing(private val project: Project) {
      */
     fun testJar(configuration: TestJar.() -> Unit)  = testJar.run(configuration)
 
+
+    /**
+     * Configures publishing of [dokkaJar] artifact, containing Dokka-generated documentation. By
+     * default, publishing of the artifact is disabled.
+     *
+     * Remember that the Dokka Gradle plugin should be applied to publish this artifact as it is
+     * produced by the `dokkaHtml` task. It can be done by using the
+     * [io.spine.internal.dependency.Dokka] dependency object or by applying the
+     * `buildSrc/src/main/kotlin/dokka-for-java` script plugin for Java projects.
+     *
+     * Here's an example of how to use this option:
+     *
+     * ```
+     * spinePublishing {
+     *     dokkaJar {
+     *         enabled = true
+     *     }
+     * }
+     * ```
+     *
+     * The resulting artifact is available under "dokka" classifier.
+     */
+    fun dokkaJar(configuration: DokkaJar.() -> Unit)  = dokkaJar.run(configuration)
+
     /**
      * Called to notify the extension that its configuration is completed.
      *
@@ -262,7 +287,7 @@ open class SpinePublishing(private val project: Project) {
             val name = project.name
             val includeProtoJar = (protoJarExclusions.contains(name) || protoJar.disabled).not()
             val includeTestJar = (testJarInclusions.contains(name) || testJar.enabled)
-            setUpPublishing(project, includeProtoJar, includeTestJar)
+            setUpPublishing(project, includeProtoJar, includeTestJar, dokkaJar.enabled)
         }
     }
 
@@ -303,13 +328,19 @@ open class SpinePublishing(private val project: Project) {
      * `project.afterEvaluate` in order to guarantee that a module will be configured by the time
      * we configure publishing for it.
      */
-    private fun setUpPublishing(project: Project, includeProtoJar: Boolean, includeTestJar: Boolean) {
+    private fun setUpPublishing(
+        project: Project,
+        includeProtoJar: Boolean,
+        includeTestJar: Boolean,
+        includeDokkaJar: Boolean
+    ) {
         val artifactId = artifactId(project)
         val publishingConfig = PublishingConfig(
             artifactId,
             destinations,
             includeProtoJar,
             includeTestJar,
+            includeDokkaJar
         )
         project.afterEvaluate {
             publishingConfig.apply(project)
@@ -376,4 +407,3 @@ open class SpinePublishing(private val project: Project) {
         }
     }
 }
-

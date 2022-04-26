@@ -112,6 +112,19 @@ internal fun Project.javadocJar() = tasks.getOrCreate("javadocJar") {
     dependsOn("javadoc")
 }
 
+/**
+ * Locates or creates `dokkaJar` task in this [Project].
+ *
+ * The output of this task is a `jar` archive. The archive contains the Dokka output, generated upon
+ * Java sources from `main` source set. Requires Dokka to be configured in the target project by
+ * applying `dokka-for-java` plugin.
+ */
+internal fun Project.dokkaJar() = tasks.getOrCreate("dokkaJar") {
+    archiveClassifier.set("dokka")
+    from(files("$buildDir/docs/dokka"))
+    dependsOn("dokkaHtml")
+}
+
 private fun TaskContainer.getOrCreate(name: String, init: Jar.() -> Unit): TaskProvider<Jar> =
     if (names.contains(name)) {
         named<Jar>(name)
