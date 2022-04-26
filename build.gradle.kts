@@ -102,6 +102,7 @@ spinePublishing {
         "model-assembler",
         "model-verifier",
     )
+
     destinations = with(PublishingRepos) {
         setOf(
             cloudRepo,
@@ -109,8 +110,13 @@ spinePublishing {
             cloudArtifactRegistry
         )
     }
+
     testJar {
         inclusions = setOf("server")
+    }
+
+    dokkaJar {
+        enabled = true
     }
 }
 
@@ -143,6 +149,7 @@ subprojects {
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
+        plugin("dokka-for-java")
     }
 
     java {
