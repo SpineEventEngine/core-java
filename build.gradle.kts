@@ -43,8 +43,8 @@ import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.coverage.JacocoConfig
 import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
-import io.spine.internal.gradle.test.configureLogging
-import io.spine.internal.gradle.test.registerTestTasks
+import io.spine.internal.gradle.testing.configureLogging
+import io.spine.internal.gradle.testing.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -176,6 +176,10 @@ subprojects {
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     }
 
+    /**
+     * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` an empty constructor in
+     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking the API.
+     */
     configurations {
         forceVersions()
         excludeProtobufLite()
@@ -186,7 +190,13 @@ subprojects {
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
-                    "io.spine.tools:spine-plugin-base:$toolBaseVersion"
+                    "io.spine.tools:spine-plugin-base:$toolBaseVersion",
+                    "com.google.errorprone:error_prone_core:2.10.0",
+                    "com.google.errorprone:error_prone_annotations:2.10.0",
+                    "com.google.errorprone:error_prone_annotation:2.10.0",
+                    "com.google.errorprone:error_prone_check_api:2.10.0",
+                    "com.google.errorprone:error_prone_test_helpers:2.10.0",
+                    "com.google.errorprone:error_prone_type_annotations:2.10.0"
                 )
             }
         }
