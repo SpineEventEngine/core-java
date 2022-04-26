@@ -184,7 +184,7 @@ subprojects {
     }
 
     /**
-     * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` an empty constructor in
+     * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` the empty constructor in
      * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking the API.
      */
     configurations {
