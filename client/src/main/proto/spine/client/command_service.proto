@@ -30,8 +30,6 @@ package spine.client;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
-// to hide implementation details from the public API of the framework.
 option java_package = "io.spine.client.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "CommandServiceProto";
@@ -39,9 +37,24 @@ option java_outer_classname = "CommandServiceProto";
 import "spine/core/command.proto";
 import "spine/core/ack.proto";
 
-// A service for sending commands from clients.
+// A service for posting commands to the application backend.
+//
 service CommandService {
 
-    // Request to handle a command.
+    // Posts the given command to the application backend.
+    //
+    // When the command is successfully received by the application, it responds with
+    // an acknowledgement. The received `Ack` may have one of the following statuses:
+    //
+    //    1. `Ok` meaning the command is accepted for further processing.
+    //    2. `Error` when a technical error occurs on the side of the application.
+    //    3. `Rejection` if no technical error occurred but due to the business rules the command
+    //        should be immediately disqualified from being executed. A typical scenario would be
+    //        when the permissions of a user who made a request aren't broad enough.
+    //
+    // In case of internal gRPC errors or issues on a transport layer, an `Ack` would not be
+    // received. All errors which occur on the side of gRCP should be handled by the means
+    // of the used client stub.
+    //
     rpc Post(core.Command) returns (core.Ack);
 }
