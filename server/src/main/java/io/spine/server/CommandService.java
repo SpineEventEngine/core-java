@@ -48,12 +48,10 @@ import static io.spine.server.bus.Acks.reject;
  * The {@code CommandService} provides a synchronous way to post commands
  * to the application backend.
  *
- * <p>This class is an implementation of a corresponding gRPC service.
- *
- * <p>Please note, public API of this class is dictated by the
- * {@linkplain CommandServiceGrpc generated code}. Despite the fact of its "publicity", it's not
- * meant to be used directly. Use {@link io.spine.client.Client Client} to post commands to the
- * application. Actual API of the service is defined in its proto definition.
+ * <p>This class is an implementation of a corresponding gRPC service. Hence, public API of this
+ * class is dictated by the {@linkplain CommandServiceGrpc generated code}. Despite the fact of its
+ * "publicity", it's not meant to be used directly. Use {@link io.spine.client.Client Client}
+ * to post commands to the application.
  */
 public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
@@ -88,19 +86,27 @@ public final class CommandService
     }
 
     /**
-     * Posts the given command to the application.
+     * {@inheritDoc}
      *
-     * <p>In the original proto definition of this service, this method is blocking unary. Meaning,
-     * its real signature should be {@code Ack post(Command)}. But due to the restrictions,
-     * imposed by gRPC, we have to implement it using {@code StreamObserver}, even when only
-     * a single {@code Ack} is returned.
+     * <p>In the original proto definition of this service, this method is unary.
+     * Meaning, for every posted command only a single {@code Ack} is received in response:
      *
-     * <p>As a result, we don't expect any streaming errors since there's no stream at all.
-     * The corresponding {@linkplain StreamObserver#onError(Throwable) error handler} is never
-     * called by our code.
+     * <pre>Ack post(Command);</pre>
      *
-     * <p>The errors, which may occur on a transport layer or within gRPC itself are runtime. They
-     * are not propagated in an observer as well.
+     * <p>But for every service, gRPC generates several client stubs: blocking, asynchronous,
+     * {@link com.google.common.util.concurrent.ListenableFuture ListenableFuture}-based. Each one
+     * has its own signature for this method. And instead of making users to implement three
+     * different signatures of the same method in the
+     * {@linkplain CommandServiceGrpc.CommandServiceImplBase server stub}, they prefer a single
+     * universal method that cover all the cases.
+     *
+     * <p>Although, utilizing of {@link StreamObserver} is quite controversial decision for the
+     * method which does not stream anything. It is still better than implementing this method
+     * three times. For more details on this matter, reference the issue below.
+     *
+     * <p>Please note, all the errors, occurring on the side of the application are still
+     * propagated through the {@linkplain Ack acknowledgement}. They are not passed into the
+     * {@linkplain StreamObserver#onError(Throwable) observer}.
      *
      * <p>See issue: <a href="https://github.com/grpc/grpc-java/issues/1474">Improve unary server stub</a>
      */
