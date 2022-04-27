@@ -63,7 +63,7 @@ val grGitVersion = "3.1.1"
  * Please check that this value matches one defined in
  *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.6.10"
+val kotlinVersion = "1.6.21"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -71,7 +71,7 @@ val kotlinVersion = "1.6.10"
  * Always use the same version as the one specified in [io.spine.internal.dependency.Guava].
  * Otherwise, when testing Gradle plugins, clashes may occur.
  */
-val guavaVersion = "31.0.1-jre"
+val guavaVersion = "31.1-jre"
 
 /**
  * The version of ErrorProne Gradle plugin.
@@ -93,6 +93,41 @@ val errorProneVersion = "2.0.2"
  */
 val protobufPluginVersion = "0.8.18"
 
+/**
+ * The version of Dokka Gradle Plugins.
+ *
+ * Please keep in sync with [io.spine.internal.dependency.Dokka.version].
+ *
+ * @see <a href="https://github.com/Kotlin/dokka/releases">
+ *     Dokka Releases</a>
+ */
+val dokkaVersion = "1.6.20"
+
+configurations.all {
+    resolutionStrategy {
+        // Force Kotlin lib versions avoiding using those bundled with Gradle.
+        force(
+            "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+        )
+    }
+}
+
+val jvmVersion = JavaLanguageVersion.of(11)
+
+java {
+    toolchain.languageVersion.set(jvmVersion)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = jvmVersion.toString()
+    }
+}
+
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
@@ -103,6 +138,12 @@ dependencies {
     api("com.github.jk1:gradle-license-report:$licenseReportVersion")
     implementation("org.ajoberstar.grgit:grgit-core:${grGitVersion}")
     implementation("net.ltgt.gradle:gradle-errorprone-plugin:${errorProneVersion}")
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+
+    // Add explicit dependency to avoid warning on different Kotlin runtime versions.
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+
     implementation("gradle.plugin.com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion")
+    implementation("org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}")
+    implementation("org.jetbrains.dokka:dokka-base:${dokkaVersion}")
 }
