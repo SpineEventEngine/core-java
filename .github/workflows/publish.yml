@@ -53,7 +53,7 @@ jobs:
       - name: Publish artifacts to Maven
         # Since we're in the `master` branch already, this means that tests of a PR passed.
         # So, no need to run the tests again when publishing.
-        run: ./gradlew publish -x test --stacktrace
+        run: ./gradlew publish -x test --stacktrace "-Dorg.gradle.jvmargs=-XX:MaxMetaspaceSize=512m"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
