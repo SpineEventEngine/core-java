@@ -20,7 +20,7 @@ jobs:
 
       - name: Build project and run tests
         shell: bash
-        run: ./gradlew build "-Dorg.gradle.jvmargs=-XX:MaxMetaspaceSize=512m"
+        run: ./gradlew build
 
       # See: https://github.com/marketplace/actions/junit-report-action
       - name: Publish Test Report
