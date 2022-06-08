@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Delivery</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>server</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="server::io.spine.server.delivery/Delivery///PointingToDeclaration//-403166102">
+  <div class="breadcrumbs"><a href="../../../index.html">server</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.delivery</a><span class="delimiter">/</span><a href="index.html">Delivery</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Delivery</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="index.html">Delivery</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Delivers the messages to the entities. </p><p class="paragraph">Splits the incoming messages into shards and allows to deliver the messages to their destinations on a per-shard basis. Guarantees that one and only one application server node serves the messages from the given shard at a time, thus preventing any concurrent modifications of entity state. </p><p class="paragraph">Delegates the message dispatching and low-level handling of message duplicates to <a href="new-inbox.html">Inbox</a>es of each target entity. The respective <code class="lang-kotlin">Inbox</code> instances should be created in each of <code class="lang-kotlin">Entity</code> repositories. </p><h1 class="">Configuration</h1><h2 class="">Delivery Strategy</h2><p class="paragraph">By default, a shard is assigned according to the identifier of the target entity. The messages heading to a single entity will always reside in a single shard. However, the framework users may <a href="../-delivery-builder/set-strategy.html">customize</a> this behavior. </p><p class="paragraph">The typical customization would be to specify the same shard index for the related targets. E.g. if there is an <code class="lang-kotlin">OrderAggregate</code>, <code class="lang-kotlin">OrderItemAggregate</code> and <code class="lang-kotlin">OrderItemProjection</code>, they could share the same shard index. In this way the messages headed to these entities will be dispatched and processed together. In turn, that will reduce the eventual consistency lag between <code class="lang-kotlin">C</code> side (i.e. aggregate state updates) and <code class="lang-kotlin">Q</code> side (i.e. the respective updates in projections). </p><h2 class="">Deduplication</h2><p class="paragraph">As long as the underlying storage and transport mechanisms are restricted by the CAP theorem, there may be duplicates in the messages written, read or dispatched. The <code class="lang-kotlin">Delivery</code> responds to it by storing some of the already delivered messages for longer and using them as a source for deduplication. </p><p class="paragraph"><a href="../-delivery-builder/set-deduplication-window.html">Provides</a> the time-based deduplication capabilities to eliminate the messages, which may have been already delivered to their targets. The duplicates will be detected among the messages, which are not older, than <code class="lang-kotlin">now - [deduplication window]</code>. </p><h2 class="">Customizing <code class="lang-kotlin">InboxStorage</code></h2><p class="paragraph"><code class="lang-kotlin">Delivery</code> is responsible for providing the <a href="../-inbox-storage/index.html">InboxStorage</a> for every inbox registered. Framework users may <a href="../-delivery-builder/set-inbox-storage.html">configure</a> the storage, taking into account that it is typically multi-tenant. By default, the <code class="lang-kotlin">InboxStorage</code> for the delivery is provided by the environment-specific <a href="../../io.spine.server/-server-environment/storage-factory.html">storage factory</a> and is multi-tenant. </p><h2 class="">Catch-up</h2><p class="paragraph">In addition to delivering the messages sent in a real-time, <code class="lang-kotlin">Delivery</code> dispatches the historical events sent to the catching-up projections. These events are dispatched through the same shards as the live messages. A special <span data-unresolved-link="io.spine.server.delivery/CatchUpStation///PointingToDeclaration/">CatchUpStation</span> is responsible for handling this use-case. See more on that in the respective section. </p><p class="paragraph">To control how many historical events are read and put into shards, the end-users may configure the <a href="../-delivery-builder/set-catch-up-page-size.html">maximum number of messages</a> read from the history at a time. This is helpful to balance the per-shard throughput, so that the live messages are still dispatched through the same shards in a reasonable time. </p><p class="paragraph">The statuses of the ongoing catch-up processes are stored in a dedicated <a href="../-catch-up-storage/index.html">CatchUpStorage</a>. The <code class="lang-kotlin">DeliveryBuilder</code><a href="../-delivery-builder/set-catch-up-storage.html"> exposes an API</a> for the customization of this storage. </p><h2 class="">Observers</h2><p class="paragraph">Once a message is written to the <code class="lang-kotlin">Inbox</code>, the <a href="subscribe.html">pre-configured shard observers</a> are <a href="../-shard-observer/on-message.html">notified</a>. In this way any third-party environment planners, load balancers, and schedulers may plug into the delivery and perform various routines to enable the further processing of the sharded messages. In a distributed environment a message queue may be used to notify the node cluster of a shard that has some messages pending for the delivery. </p><h2 class="">Work registry</h2><p class="paragraph">Once an application node picks the shard to deliver the messages from it, it registers itself in a <a href="../-sharded-work-registry/index.html">ShardedWorkRegistry</a>. It serves as a list of locks-per-shard that only allows to pick a shard to a single node at a time. The framework users may configure the implementation of the registry by calling <a href="../-delivery-builder/set-work-registry.html">setWorkRegistry</a>. </p><h2 class="">Dispatching messages</h2><h3 class="">Delivery stages</h3><p class="paragraph">The delivery process for each shard index is split into DeliveryStages. In scope of each stage, a certain number of messages is read from the respective shard of the <code class="lang-kotlin">Inbox</code>. The messages are grouped per-target and delivered in batches if possible. The maximum number of the messages within a <code class="lang-kotlin">DeliveryStage</code> can be <a href="../-delivery-builder/set-page-size.html">configured</a>. </p><p class="paragraph">After each <code class="lang-kotlin">DeliveryStage</code> it is possible to stop the delivery by <a href="../-delivery-builder/set-monitor.html">supplying</a> a custom delivery monitor. Please refer to the <a href="../-delivery-monitor/index.html">documentation</a> for the details. </p><h3 class="">Conveyor and stations</h3><p class="paragraph">In a scope of <code class="lang-kotlin">DeliveryStage</code> the page of the <code class="lang-kotlin">InboxMessage</code>s is placed to the <span data-unresolved-link="io.spine.server.delivery/Conveyor///PointingToDeclaration/">Conveyor</span> responsible for tracking the status of each message. The conveyor is run through the pipeline of stations, each modifying the state of the messages. At the end of the pipeline, the changed made to the messages are committed to the underlying <code class="lang-kotlin">InboxStorage</code> in a bulk. Such an approach allows to minimize the number of the requests sent to the storage. </p><p class="paragraph">As long as the new <code class="lang-kotlin">DeliveryStage</code> is started, the new instance of the <code class="lang-kotlin">Conveyor</code> is created. </p><p class="paragraph">Below is the list of the conveyor stations in the pipeline. <strong>1. Catch-up station</strong></p><p class="paragraph">This station is responsible for dispatching the historical events in TO_CATCH_UP status to the respective targets. Also, while the target entity is under a catch-up, all the live messages headed to it are ignored. Once the catch-up is completed, this station handles the transition period, in which the last batch of the historical events and live messages are dispatched together. See <span data-unresolved-link="io.spine.server.delivery/CatchUpStation///PointingToDeclaration/">CatchUpStation</span> for more details. <strong>2. Live delivery station</strong></p><p class="paragraph">This station is responsible for dispatching the messages sent in a real-time. It ignores the messages in TO_CATCH_UP status. Another responsibility of this station is to set for how long the delivered messages should be kept according to the <a href="../-delivery-builder/set-deduplication-window.html">deduplication window</a> settings. See <span data-unresolved-link="io.spine.server.delivery/LiveDeliveryStation///PointingToDeclaration/">LiveDeliveryStation</span> for more details. <strong>3. Cleanup station</strong></p><p class="paragraph">This station removes the messages which are already delivered and are no longer needed for the deduplication. See <span data-unresolved-link="io.spine.server.delivery/CleanupStation///PointingToDeclaration/">CleanupStation</span> for the description. <strong>Deduplication</strong></p><p class="paragraph">During the dispatching, <code class="lang-kotlin">Conveyor</code> keeps track of the delivered messages. The stations performing the actual message dispatching rely onto this knowledge and deduplicate the messages prior to calling the target's endpoint. </p><p class="paragraph">Additionally, the <code class="lang-kotlin">Delivery</code> provides a <span data-unresolved-link="io.spine.server.delivery/DeliveredMessages///PointingToDeclaration/">cache of recently delivered messages</span>. Each instance of the <code class="lang-kotlin">Conveyor</code> has an access to it and uses it in deduplication procedures. </p><h2 class="">Local environment</h2><p class="paragraph">By default, the delivery is configured to <a href="local.html">run locally</a>. It uses <a href="../-local-dispatching-observer/index.html">see-and-dispatch observer</a>, which delivers the messages from the observed shard once a message is passed to its <a href="../-local-dispatching-observer/on-message.html">onMessage(InboxMessage)</a> method. This process is synchronous. </p><p class="paragraph">To deal with the multi-threaded access in a local mode, an <a href="../../io.spine.server.delivery.memory/-in-memory-sharded-work-registry/index.html">InMemoryShardedWorkRegistry</a> is used. It operates on top of the <code class="lang-kotlin">synchronized</code> in-memory data structures and prevents several threads from picking up the same shard. </p><h2 class="">Shard maintenance</h2><p class="paragraph">To perform the maintenance procedures, the <code class="lang-kotlin">Delivery</code> requires all the <code class="lang-kotlin">
+BoundedContext</code>s to register themselves in it. Upon this registration, a special <span data-unresolved-link="io.spine.server.delivery/ShardMaintenanceProcess///PointingToDeclaration/">ShardMaintenanceProcess</span> is registered as an event dispatcher in a passed <code class="lang-kotlin">BoundedContext</code>. Such a registration is performed automatically when the context is <a href="../../io.spine.server/-bounded-context-builder/build.html">built</a>.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-508484090%2FFunctions%2F-403166102" anchor-label="deliverMessagesFrom" id="-508484090%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="deliver-messages-from.html"><span>deliver</span><wbr></wbr><span>Messages</span><wbr></wbr><span><span>From</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-508484090%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><a href="../-delivery-stats/index.html">DeliveryStats</a><span class="token operator">&gt;</span> <a href="deliver-messages-from.html"><span class="token function">deliverMessagesFrom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ShardIndex index</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Delivers the messages put into the shard with the passed index to their targets.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1018469111%2FFunctions%2F-403166102" anchor-label="dispatchListener" id="1018469111%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="dispatch-listener.html"><span>dispatch</span><wbr></wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1018469111%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../../io.spine.server.bus/-multicast-dispatch-listener/index.html">MulticastDispatchListener</a> <a href="dispatch-listener.html"><span class="token function">dispatchListener</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns a listener of the dispatching operations occurring in the <a href="../../io.spine.server.bus/-multicast-bus/index.html">MulticastBus</a>es.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1580153066%2FFunctions%2F-403166102" anchor-label="local" id="1580153066%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="local.html"><span><span>local</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1580153066%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="index.html">Delivery</a> <a href="local.html"><span class="token function">local</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a new instance of <code class="lang-kotlin">Delivery</code> suitable for local and development environment.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-131641388%2FFunctions%2F-403166102" anchor-label="localAsync" id="-131641388%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="local-async.html"><span>local</span><wbr></wbr><span><span>Async</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-131641388%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="index.html">Delivery</a> <a href="local-async.html"><span class="token function">localAsync</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a new instance of <code class="lang-kotlin">Delivery</code> for local and development environment.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-967482614%2FFunctions%2F-403166102" anchor-label="newBuilder" id="-967482614%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="new-builder.html"><span>new</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-967482614%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="../-delivery-builder/index.html">DeliveryBuilder</a> <a href="new-builder.html"><span class="token function">newBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates an instance of new <code class="lang-kotlin">Builder</code> of <code class="lang-kotlin">Delivery</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2071733231%2FFunctions%2F-403166102" anchor-label="newCatchUpProcess" id="-2071733231%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="new-catch-up-process.html"><span>new</span><wbr></wbr><span>Catch</span><wbr></wbr><span>Up</span><wbr></wbr><span><span>Process</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2071733231%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-catch-up-process-builder/index.html">CatchUpProcessBuilder</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> <a href="new-catch-up-process.html"><span class="token function">newCatchUpProcess</span></a><span class="token operator">&lt;</span>I<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.projection/-projection-repository/index.html">ProjectionRepository</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span> repo</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a new instance of the builder for <a href="../-catch-up-process/index.html">CatchUpProcess</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1757202574%2FFunctions%2F-403166102" anchor-label="newInbox" id="1757202574%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="new-inbox.html"><span>new</span><wbr></wbr><span><span>Inbox</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1757202574%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-inbox/-builder/index.html">Inbox.Builder</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> <a href="new-inbox.html"><span class="token function">newInbox</span></a><span class="token operator">&lt;</span>I<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>TypeUrl entityType</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates an instance of <a href="../-inbox/-builder/index.html">Inbox.Builder</a> for the given entity type.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1467549309%2FFunctions%2F-403166102" anchor-label="registerDispatchersIn" id="1467549309%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="register-dispatchers-in.html"><span>register</span><wbr></wbr><span>Dispatchers</span><wbr></wbr><span><span>In</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1467549309%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="register-dispatchers-in.html"><span class="token function">registerDispatchersIn</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server/-bounded-context/index.html">BoundedContext</a> context</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Registers the internal <code class="lang-kotlin">Delivery</code> message dispatchers in the given <code class="lang-kotlin">BoundedContext</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-612581895%2FFunctions%2F-403166102" anchor-label="subscribe" id="-612581895%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="subscribe.html"><span><span>subscribe</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-612581895%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="subscribe.html"><span class="token function">subscribe</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-shard-observer/index.html">ShardObserver</a> observer</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Subscribes to the updates of shard contents.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

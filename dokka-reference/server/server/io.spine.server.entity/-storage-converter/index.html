@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>StorageConverter</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>server</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="server::io.spine.server.entity/StorageConverter///PointingToDeclaration//-403166102">
+  <div class="breadcrumbs"><a href="../../../index.html">server</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.entity</a><span class="delimiter">/</span><a href="index.html">StorageConverter</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Storage</span><wbr></wbr><span><span>Converter</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">StorageConverter</a><span class="token operator">&lt;</span>I<span class="token punctuation">, </span>E<span class="token keyword"> extends </span><a href="../-entity/index.html">Entity</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">, </span>S<span class="token keyword"> extends </span>EntityState<span class="token operator">&gt;</span><span class="token keyword"> implements </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/io/Serializable.html">Serializable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">An abstract base for converters of entities into EntityRecord.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="373526986%2FConstructors%2F-403166102" anchor-label="StorageConverter" id="373526986%2FConstructors%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-storage-converter.html"><span>Storage</span><wbr></wbr><span><span>Converter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="373526986%2FConstructors%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="-storage-converter.html"><span class="token function">StorageConverter</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword"></span>TypeUrl entityStateType<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword"></span><a href="../-entity-factory/index.html">EntityFactory</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> factory<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword"></span>FieldMask fieldMask</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1956931941%2FFunctions%2F-403166102" anchor-label="doBackward" id="1956931941%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="do-backward.html"><span>do</span><wbr></wbr><span><span>Backward</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1956931941%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> <a href="do-backward.html"><span class="token function">doBackward</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>EntityRecord entityRecord</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-305752220%2FFunctions%2F-403166102" anchor-label="doForward" id="-305752220%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="do-forward.html"><span>do</span><wbr></wbr><span><span>Forward</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-305752220%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>EntityRecord <a href="do-forward.html"><span class="token function">doForward</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> entity</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1298589300%2FFunctions%2F-403166102" anchor-label="entityFactory" id="-1298589300%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="entity-factory.html"><span>entity</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1298589300%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-entity-factory/index.html">EntityFactory</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="entity-factory.html"><span class="token function">entityFactory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains the entity factory used by the converter.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-647237621%2FFunctions%2F-403166102" anchor-label="entityStateType" id="-647237621%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="entity-state-type.html"><span>entity</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-647237621%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>TypeUrl <a href="entity-state-type.html"><span class="token function">entityStateType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains the type URL of the state of entities which this converter builds.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2021442283%2FFunctions%2F-403166102" anchor-label="equals" id="-2021442283%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="equals.html"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2021442283%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>boolean <a href="equals.html"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a> obj</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-962966003%2FFunctions%2F-403166102" anchor-label="fieldMask" id="-962966003%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="field-mask.html"><span>field</span><wbr></wbr><span><span>Mask</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-962966003%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>FieldMask <a href="field-mask.html"><span class="token function">fieldMask</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains the field mask used by this converter to trim the state of entities before the state is injected into entities.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1770313044%2FFunctions%2F-403166102" anchor-label="hashCode" id="-1770313044%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="hash-code.html"><span>hash</span><wbr></wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1770313044%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>int <a href="hash-code.html"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="433024177%2FFunctions%2F-403166102" anchor-label="injectState" id="433024177%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="inject-state.html"><span>inject</span><wbr></wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="433024177%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>void <a href="inject-state.html"><span class="token function">injectState</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> entity<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword"></span><a href="../-abstract-entity/index.html">S</a> state<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;<span class="token keyword"></span>EntityRecord entityRecord</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Derived classes must implement providing state injection into the passed entity.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1004564382%2FFunctions%2F-403166102" anchor-label="updateBuilder" id="1004564382%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="update-builder.html"><span>update</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1004564382%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="update-builder.html"><span class="token function">updateBuilder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Builder builder<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> entity</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Derived classes may override to additionally tune the passed entity builder.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="374726217%2FFunctions%2F-403166102" anchor-label="withFieldMask" id="374726217%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="with-field-mask.html"><span>with</span><wbr></wbr><span>Field</span><wbr></wbr><span><span>Mask</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="374726217%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span><a href="index.html">StorageConverter</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token operator">&gt;</span> <a href="with-field-mask.html"><span class="token function">withFieldMask</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>FieldMask fieldMask</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a copy of this converter modified with the passed filed mask.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

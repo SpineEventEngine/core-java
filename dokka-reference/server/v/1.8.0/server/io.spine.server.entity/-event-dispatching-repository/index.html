@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>EventDispatchingRepository</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>server</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="server::io.spine.server.entity/EventDispatchingRepository///PointingToDeclaration//-403166102">
+  <div class="breadcrumbs"><a href="../../../index.html">server</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.entity</a><span class="delimiter">/</span><a href="index.html">EventDispatchingRepository</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Event</span><wbr></wbr><span>Dispatching</span><wbr></wbr><span><span>Repository</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">EventDispatchingRepository</a><span class="token operator">&lt;</span>I<span class="token punctuation">, </span>E<span class="token keyword"> extends </span><a href="../-abstract-entity/index.html">AbstractEntity</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token operator">&gt;</span><span class="token punctuation">, </span>S<span class="token keyword"> extends </span>EntityState<span class="token operator">&gt;</span><span class="token keyword"> extends </span><a href="../-default-record-based-repository/index.html">DefaultRecordBasedRepository</a><span class="token operator">&lt;</span><a href="../-default-record-based-repository/index.html">I</a><span class="token punctuation">, </span><a href="../-default-record-based-repository/index.html">E</a><span class="token punctuation">, </span><a href="../-default-record-based-repository/index.html">S</a><span class="token operator">&gt;</span><span class="token keyword"> implements </span><a href="../../io.spine.server.event/-event-dispatcher/index.html">EventDispatcher</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Abstract base for repositories that deliver events to entities they manage.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Inherited functions">Inherited functions</button><button class="section-tab" data-togglable="Inheritors">Inheritors</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="496267490%2FConstructors%2F-403166102" anchor-label="EventDispatchingRepository" id="496267490%2FConstructors%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-event-dispatching-repository.html"><span>Event</span><wbr></wbr><span>Dispatching</span><wbr></wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="496267490%2FConstructors%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="-event-dispatching-repository.html"><span class="token function">EventDispatchingRepository</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1695755762%2FFunctions%2F-403166102" anchor-label="dispatch" id="1695755762%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="dispatch.html"><span><span>dispatch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1695755762%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>void <a href="dispatch.html"><span class="token function">dispatch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.type/-event-envelope/index.html">EventEnvelope</a> event</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Dispatches the event to the corresponding entities.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1421163843%2FFunctions%2F-403166102" anchor-label="dispatchTo" id="-1421163843%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="dispatch-to.html"><span>dispatch</span><wbr></wbr><span><span>To</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1421163843%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>void <a href="dispatch-to.html"><span class="token function">dispatchTo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a> id<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>Event event</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Dispatches the given event to an entity with the given ID.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1526490439%2FFunctions%2F-403166102" anchor-label="registerWith" id="1526490439%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="register-with.html"><span>register</span><wbr></wbr><span><span>With</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1526490439%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="register-with.html"><span class="token function">registerWith</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server/-bounded-context/index.html">BoundedContext</a> context</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Registers itself as an event dispatcher with the parent <code class="lang-kotlin">BoundedContext</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-567781591%2FFunctions%2F-403166102" anchor-label="route" id="-567781591%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="route.html"><span><span>route</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-567781591%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Set.html">Set</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> <a href="route.html"><span class="token function">route</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.type/-event-envelope/index.html">EventEnvelope</a> event</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Determines the targets of the given event.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1372492451%2FFunctions%2F-403166102" anchor-label="setupEventRouting" id="1372492451%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="setup-event-routing.html"><span>setup</span><wbr></wbr><span>Event</span><wbr></wbr><span><span>Routing</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1372492451%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="setup-event-routing.html"><span class="token function">setupEventRouting</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-event-routing/index.html">EventRouting</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> routing</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A callback for derived repository classes to customize routing schema for events.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Inherited functions</h2>
+      <div class="table" data-togglable="Inherited functions"><a data-name="-771782088%2FFunctions%2F-403166102" anchor-label="applyMigration" id="-771782088%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1986165093%2FFunctions%2F-403166102"><span>apply</span><wbr></wbr><span><span>Migration</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-771782088%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>void <a href="index.html#-1986165093%2FFunctions%2F-403166102"><span class="token function">applyMigration</span></a><span class="token operator">&lt;</span>T<span class="token keyword"> extends </span><a href="../-transactional-entity/index.html">TransactionalEntity</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a> id<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="../-migration/index.html">Migration</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><a href="../../io.spine.server.type/-abstract-message-envelope/index.html">T</a><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token operator">&gt;</span> migration</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Applies a given <a href="../-migration/index.html">Migration</a> to an entity with the given ID.</div><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>void <a href="index.html#1648296871%2FFunctions%2F-403166102"><span class="token function">applyMigration</span></a><span class="token operator">&lt;</span>T<span class="token keyword"> extends </span><a href="../-transactional-entity/index.html">TransactionalEntity</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Set.html">Set</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> ids<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="../-migration/index.html">Migration</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><a href="../../io.spine.server.type/-abstract-message-envelope/index.html">T</a><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token operator">&gt;</span> migration</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Applies a <a href="../-migration/index.html">Migration</a> to several entities in batch.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1106968326%2FFunctions%2F-403166102" anchor-label="canDispatch" id="-1106968326%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1106968326%2FFunctions%2F-403166102"><span>can</span><wbr></wbr><span><span>Dispatch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1106968326%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>boolean <a href="index.html#-1106968326%2FFunctions%2F-403166102"><span class="token function">canDispatch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> envelope</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Checks if this dispatcher can dispatch the given message.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1601902770%2FFunctions%2F-403166102" anchor-label="checkNotRegistered" id="1601902770%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1601902770%2FFunctions%2F-403166102"><span>check</span><wbr></wbr><span>Not</span><wbr></wbr><span><span>Registered</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1601902770%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#1601902770%2FFunctions%2F-403166102"><span class="token function">checkNotRegistered</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Verifies that this instance is NOT registered yet.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="931858537%2FFunctions%2F-403166102" anchor-label="checkOpen" id="931858537%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#931858537%2FFunctions%2F-403166102"><span>check</span><wbr></wbr><span><span>Open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="931858537%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#931858537%2FFunctions%2F-403166102"><span class="token function">checkOpen</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Ensures that the object is <a href="../../io.spine.server/-closeable/is-open.html">open</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-665510223%2FFunctions%2F-403166102" anchor-label="checkRegistered" id="-665510223%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-665510223%2FFunctions%2F-403166102"><span>check</span><wbr></wbr><span><span>Registered</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-665510223%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#-665510223%2FFunctions%2F-403166102"><span class="token function">checkRegistered</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Verifies that this instance is already registered.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1573592760%2FFunctions%2F-403166102" anchor-label="checkStorage" id="-1573592760%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1573592760%2FFunctions%2F-403166102"><span>check</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1573592760%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="../-abstract-entity/index.html">S</a> <a href="index.html#-1573592760%2FFunctions%2F-403166102"><span class="token function">checkStorage</span></a><span class="token operator">&lt;</span>S<span class="token keyword"> extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/AutoCloseable.html">AutoCloseable</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-abstract-entity/index.html">S</a> storage</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Ensures that the storage is not null.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1932895915%2FFunctions%2F-403166102" anchor-label="close" id="1932895915%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#50643528%2FFunctions%2F-403166102"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1932895915%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#50643528%2FFunctions%2F-403166102"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Closes the repository by closing the underlying storage.</div><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>void <a href="index.html#60933607%2FFunctions%2F-403166102"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2012323407%2FFunctions%2F-403166102" anchor-label="context" id="-2012323407%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-2012323407%2FFunctions%2F-403166102"><span><span>context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2012323407%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span><a href="../../io.spine.server/-bounded-context/index.html">BoundedContext</a> <a href="index.html#-2012323407%2FFunctions%2F-403166102"><span class="token function">context</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains the <code class="lang-kotlin">BoundedContext</code> to which this repository belongs.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1097342523%2FFunctions%2F-403166102" anchor-label="create" id="1097342523%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1097342523%2FFunctions%2F-403166102"><span><span>create</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1097342523%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> <a href="index.html#1097342523%2FFunctions%2F-403166102"><span class="token function">create</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a> id</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Create a new entity instance with its default state.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1384311105%2FFunctions%2F-403166102" anchor-label="createStorage" id="1384311105%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1384311105%2FFunctions%2F-403166102"><span>create</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1384311105%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../../io.spine.server.storage/-record-storage/index.html">RecordStorage</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> <a href="index.html#1384311105%2FFunctions%2F-403166102"><span class="token function">createStorage</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span><a href="../../io.spine.server.storage/-storage/index.html">Storage</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span> <a href="index.html#1384311105%2FFunctions%2F-403166102"><span class="token function">createStorage</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates the storage for this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1080526480%2FFunctions%2F-403166102" anchor-label="defaultStorageFactory" id="1080526480%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1080526480%2FFunctions%2F-403166102"><span>default</span><wbr></wbr><span>Storage</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1080526480%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="../../io.spine.server.storage/-storage-factory/index.html">StorageFactory</a> <a href="index.html#1080526480%2FFunctions%2F-403166102"><span class="token function">defaultStorageFactory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains <code class="lang-kotlin">StorageFactory</code> associated with the <code class="lang-kotlin">ServerEnvironment</code> for <a href="../-repository/create-storage.html">creating</a> standard storages.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1002228686%2FFunctions%2F-403166102" anchor-label="dispatchesEvents" id="-1002228686%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1002228686%2FFunctions%2F-403166102"><span>dispatches</span><wbr></wbr><span><span>Events</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1002228686%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>boolean <a href="index.html#-1002228686%2FFunctions%2F-403166102"><span class="token function">dispatchesEvents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Verifies if this instance dispatches at least one event.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-401882905%2FFunctions%2F-403166102" anchor-label="dispatchesExternalEvents" id="-401882905%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-401882905%2FFunctions%2F-403166102"><span>dispatches</span><wbr></wbr><span>External</span><wbr></wbr><span><span>Events</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-401882905%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>boolean <a href="index.html#-401882905%2FFunctions%2F-403166102"><span class="token function">dispatchesExternalEvents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Verifies if this instance dispatches at least one external event.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-232637751%2FFunctions%2F-403166102" anchor-label="domesticEventClasses" id="-232637751%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-232637751%2FFunctions%2F-403166102"><span>domestic</span><wbr></wbr><span>Event</span><wbr></wbr><span><span>Classes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-232637751%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>ImmutableSet&lt;EventClass&gt; <a href="index.html#-232637751%2FFunctions%2F-403166102"><span class="token function">domesticEventClasses</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains classes of domestic events processed by this dispatcher.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1449641653%2FFunctions%2F-403166102" anchor-label="entityClass" id="-1449641653%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1449641653%2FFunctions%2F-403166102"><span>entity</span><wbr></wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1449641653%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#-1449641653%2FFunctions%2F-403166102"><span class="token function">entityClass</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns the class of entities managed by this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="999297145%2FFunctions%2F-403166102" anchor-label="entityFactory" id="999297145%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#999297145%2FFunctions%2F-403166102"><span>entity</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="999297145%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-entity-factory/index.html">EntityFactory</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#999297145%2FFunctions%2F-403166102"><span class="token function">entityFactory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains <a href="../-entity-factory/index.html">EntityFactory</a> associated with this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-990030200%2FFunctions%2F-403166102" anchor-label="entityModelClass" id="-990030200%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-990030200%2FFunctions%2F-403166102"><span>entity</span><wbr></wbr><span>Model</span><wbr></wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-990030200%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../../io.spine.server.entity.model/-entity-class/index.html">EntityClass</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#-990030200%2FFunctions%2F-403166102"><span class="token function">entityModelClass</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains model class for the entities managed by this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="8445880%2FFunctions%2F-403166102" anchor-label="entityStateType" id="8445880%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#8445880%2FFunctions%2F-403166102"><span>entity</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="8445880%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>TypeUrl <a href="index.html#8445880%2FFunctions%2F-403166102"><span class="token function">entityStateType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains the TypeUrl for the state objects wrapped by entities managed by this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1708066631%2FFunctions%2F-403166102" anchor-label="eventClasses" id="1708066631%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1708066631%2FFunctions%2F-403166102"><span>event</span><wbr></wbr><span><span>Classes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1708066631%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>ImmutableSet&lt;EventClass&gt; <a href="index.html#1708066631%2FFunctions%2F-403166102"><span class="token function">eventClasses</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains classes of all events processed by this dispatcher.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1798654094%2FFunctions%2F-403166102" anchor-label="eventFilter" id="1798654094%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1798654094%2FFunctions%2F-403166102"><span>event</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1798654094%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-event-filter/index.html">EventFilter</a> <a href="index.html#1798654094%2FFunctions%2F-403166102"><span class="token function">eventFilter</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates an <a href="../-event-filter/index.html">EventFilter</a> for this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="946384956%2FFunctions%2F-403166102" anchor-label="externalEventClasses" id="946384956%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#946384956%2FFunctions%2F-403166102"><span>external</span><wbr></wbr><span>Event</span><wbr></wbr><span><span>Classes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="946384956%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>ImmutableSet&lt;EventClass&gt; <a href="index.html#946384956%2FFunctions%2F-403166102"><span class="token function">externalEventClasses</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains classes of external events processed by this dispatcher.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="197138020%2FFunctions%2F-403166102" anchor-label="find" id="197138020%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#246031736%2FFunctions%2F-403166102"><span><span>find</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="197138020%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#246031736%2FFunctions%2F-403166102"><span class="token function">find</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a> id</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Finds an entity with the passed ID.</div><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#-1509966128%2FFunctions%2F-403166102"><span class="token function">find</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>TargetFilters filters<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>ResponseFormat format</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Finds the entities passing the given filters and applies the given FieldMask to the results.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1176100894%2FFunctions%2F-403166102" anchor-label="findActive" id="1176100894%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1176100894%2FFunctions%2F-403166102"><span>find</span><wbr></wbr><span><span>Active</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1176100894%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#1176100894%2FFunctions%2F-403166102"><span class="token function">findActive</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a> id</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Finds an entity with the passed ID even if the entity is <a href="../-with-lifecycle/is-active.html">active</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1809041815%2FFunctions%2F-403166102" anchor-label="findOrCreate" id="1809041815%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1809041815%2FFunctions%2F-403166102"><span>find</span><wbr></wbr><span>Or</span><wbr></wbr><span><span>Create</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1809041815%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> <a href="index.html#1809041815%2FFunctions%2F-403166102"><span class="token function">findOrCreate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a> id</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Loads an entity by the passed ID or creates a new one, if the entity was not found.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="606422118%2FFunctions%2F-403166102" anchor-label="findRecords" id="606422118%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#606422118%2FFunctions%2F-403166102"><span>find</span><wbr></wbr><span><span>Records</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="606422118%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span>EntityRecord<span class="token operator">&gt;</span> <a href="index.html#606422118%2FFunctions%2F-403166102"><span class="token function">findRecords</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>TargetFilters filters<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>ResponseFormat format</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains iterator over entity records matching the passed filters.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-302074875%2FFunctions%2F-403166102" anchor-label="hasContext" id="-302074875%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-302074875%2FFunctions%2F-403166102"><span>has</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-302074875%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>boolean <a href="index.html#-302074875%2FFunctions%2F-403166102"><span class="token function">hasContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Verifies whether the repository is registered with a <code class="lang-kotlin">BoundedContext</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2013492733%2FFunctions%2F-403166102" anchor-label="idClass" id="-2013492733%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-2013492733%2FFunctions%2F-403166102"><span>id</span><wbr></wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2013492733%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> <a href="index.html#-2013492733%2FFunctions%2F-403166102"><span class="token function">idClass</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns the class of IDs used by this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="23560366%2FFunctions%2F-403166102" anchor-label="index" id="23560366%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#23560366%2FFunctions%2F-403166102"><span><span>index</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="23560366%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> <a href="index.html#23560366%2FFunctions%2F-403166102"><span class="token function">index</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns an iterator over the identifiers of all the entities managed by this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="929942150%2FFunctions%2F-403166102" anchor-label="isOpen" id="929942150%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#929942150%2FFunctions%2F-403166102"><span>is</span><wbr></wbr><span><span>Open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="929942150%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>boolean <a href="index.html#929942150%2FFunctions%2F-403166102"><span class="token function">isOpen</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Verifies if the repository is open.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1572017934%2FFunctions%2F-403166102" anchor-label="isRegistered" id="1572017934%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1572017934%2FFunctions%2F-403166102"><span>is</span><wbr></wbr><span><span>Registered</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1572017934%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>boolean <a href="index.html#1572017934%2FFunctions%2F-403166102"><span class="token function">isRegistered</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Tells if the repository is registered in a <code class="lang-kotlin">BoundedContext</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1326822870%2FFunctions%2F-403166102" anchor-label="isTypeSupplier" id="-1326822870%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1326822870%2FFunctions%2F-403166102"><span>is</span><wbr></wbr><span>Type</span><wbr></wbr><span><span>Supplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1326822870%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>boolean <a href="index.html#-1326822870%2FFunctions%2F-403166102"><span class="token function">isTypeSupplier</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Tells if this repository should be registered as a type supplier with a <code class="lang-kotlin">Stand</code> of the <code class="lang-kotlin">BoundedContext</code> to which this repository belongs.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-566734334%2FFunctions%2F-403166102" anchor-label="iterator" id="-566734334%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-566734334%2FFunctions%2F-403166102"><span><span>iterator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-566734334%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#-566734334%2FFunctions%2F-403166102"><span class="token function">iterator</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Predicate.html">Predicate</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> filter</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns an iterator over the entities managed by the repository that match the passed filter.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1871378490%2FFunctions%2F-403166102" anchor-label="lifecycleOf" id="1871378490%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1871378490%2FFunctions%2F-403166102"><span>lifecycle</span><wbr></wbr><span><span>Of</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1871378490%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-entity-lifecycle/index.html">EntityLifecycle</a> <a href="index.html#1871378490%2FFunctions%2F-403166102"><span class="token function">lifecycleOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a> id</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains an instance of <a href="../-entity-lifecycle/index.html">EntityLifecycle</a> for the entity with the given ID.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2055833678%2FFunctions%2F-403166102" anchor-label="loadAll" id="2055833678%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1509901235%2FFunctions%2F-403166102"><span>load</span><wbr></wbr><span><span>All</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2055833678%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#-1509901235%2FFunctions%2F-403166102"><span class="token function">loadAll</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ResponseFormat format</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><br><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#-1005327185%2FFunctions%2F-403166102"><span class="token function">loadAll</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Iterable.html">Iterable</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> ids<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>FieldMask fieldMask</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Loads all the entities in this repository with IDs, contained within the passed <code class="lang-kotlin">ids</code> values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1721468325%2FFunctions%2F-403166102" anchor-label="loadAllRecords" id="-1721468325%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1721468325%2FFunctions%2F-403166102"><span>load</span><wbr></wbr><span>All</span><wbr></wbr><span><span>Records</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1721468325%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Iterator.html">Iterator</a><span class="token operator">&lt;</span>EntityRecord<span class="token operator">&gt;</span> <a href="index.html#-1721468325%2FFunctions%2F-403166102"><span class="token function">loadAllRecords</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ResponseFormat format</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains iterator over all present entity records.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="118119310%2FFunctions%2F-403166102" anchor-label="messageClasses" id="118119310%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#118119310%2FFunctions%2F-403166102"><span>message</span><wbr></wbr><span><span>Classes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="118119310%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>ImmutableSet&lt;C&gt; <a href="index.html#118119310%2FFunctions%2F-403166102"><span class="token function">messageClasses</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains a set of message classes that can be processed by this dispatcher.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1905921479%2FFunctions%2F-403166102" anchor-label="onRegistered" id="-1905921479%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-1905921479%2FFunctions%2F-403166102"><span>on</span><wbr></wbr><span><span>Registered</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1905921479%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#-1905921479%2FFunctions%2F-403166102"><span class="token function">onRegistered</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">The callback is invoked by a <a href="../../io.spine.server/-bounded-context/index.html">BoundedContext</a> when adding the repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-83265518%2FFunctions%2F-403166102" anchor-label="onRoutingFailed" id="-83265518%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-83265518%2FFunctions%2F-403166102"><span>on</span><wbr></wbr><span>Routing</span><wbr></wbr><span><span>Failed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-83265518%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#-83265518%2FFunctions%2F-403166102"><span class="token function">onRoutingFailed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.type/-signal-envelope/index.html">SignalEnvelope</a><span class="token operator">&lt;</span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span> envelope<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Throwable.html">Throwable</a> cause</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A callback invoked when an exception is thrown from message routing.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-568184112%2FFunctions%2F-403166102" anchor-label="open" id="-568184112%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-568184112%2FFunctions%2F-403166102"><span><span>open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-568184112%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>void <a href="index.html#-568184112%2FFunctions%2F-403166102"><span class="token function">open</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Initializes the storage of the repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-971431786%2FFunctions%2F-403166102" anchor-label="recordStorage" id="-971431786%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-971431786%2FFunctions%2F-403166102"><span>record</span><wbr></wbr><span><span>Storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-971431786%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../../io.spine.server.storage/-record-storage/index.html">RecordStorage</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token operator">&gt;</span> <a href="index.html#-971431786%2FFunctions%2F-403166102"><span class="token function">recordStorage</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Ensures that the repository has the storage.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="496858127%2FFunctions%2F-403166102" anchor-label="route" id="496858127%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#496858127%2FFunctions%2F-403166102"><span><span>route</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="496858127%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-route/index.html">R</a><span class="token operator">&gt;</span> <a href="index.html#496858127%2FFunctions%2F-403166102"><span class="token function">route</span></a><span class="token operator">&lt;</span>M<span class="token keyword"> extends </span>Message<span class="token punctuation">, </span>C<span class="token keyword"> extends </span>MessageContext<span class="token punctuation">, </span>R<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.route/-route/index.html">Route</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-route/index.html">M</a><span class="token punctuation">, </span><a href="../../io.spine.server.transport/-channel-hub/index.html">C</a><span class="token punctuation">, </span><a href="../../io.spine.server.route/-route/index.html">R</a><span class="token operator">&gt;</span> routing<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="../../io.spine.server.type/-signal-envelope/index.html">SignalEnvelope</a><span class="token operator">&lt;</span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><a href="../../io.spine.server.transport/-channel-hub/index.html">C</a><span class="token operator">&gt;</span> envelope</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1950945893%2FFunctions%2F-403166102" anchor-label="storage" id="1950945893%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1950945893%2FFunctions%2F-403166102"><span><span>storage</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1950945893%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span><a href="../../io.spine.server.storage/-storage/index.html">Storage</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span> <a href="index.html#1950945893%2FFunctions%2F-403166102"><span class="token function">storage</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns the storage assigned to this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1670504503%2FFunctions%2F-403166102" anchor-label="storageAssigned" id="1670504503%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1670504503%2FFunctions%2F-403166102"><span>storage</span><wbr></wbr><span><span>Assigned</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1670504503%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span>boolean <a href="index.html#1670504503%2FFunctions%2F-403166102"><span class="token function">storageAssigned</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns <code class="lang-kotlin">true</code> if the storage is assigned, <code class="lang-kotlin">false</code> otherwise.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1298413717%2FFunctions%2F-403166102" anchor-label="storageConverter" id="1298413717%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#1298413717%2FFunctions%2F-403166102"><span>storage</span><wbr></wbr><span><span>Converter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1298413717%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">final </span><span class="token keyword"></span><a href="../-storage-converter/index.html">StorageConverter</a><span class="token operator">&lt;</span><a href="../../io.spine.server.route/-default-command-route/index.html">I</a><span class="token punctuation">, </span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token punctuation">, </span><a href="../-abstract-entity/index.html">S</a><span class="token operator">&gt;</span> <a href="index.html#1298413717%2FFunctions%2F-403166102"><span class="token function">storageConverter</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains <a href="../-storage-converter/index.html">StorageConverter</a> associated with this repository.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-512143462%2FFunctions%2F-403166102" anchor-label="store" id="-512143462%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-431566722%2FFunctions%2F-403166102"><span><span>store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-512143462%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#-431566722%2FFunctions%2F-403166102"><span class="token function">store</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> entity</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>void <a href="index.html#-431566722%2FFunctions%2F-403166102"><span class="token function">store</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> obj</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Stores the passed object.</div><div class="symbol monospace block"><span class="token keyword"></span>void <a href="index.html#1402071628%2FFunctions%2F-403166102"><span class="token function">store</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Collection.html">Collection</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> entities</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Stores <a href="../-entity/index.html">Entities</a> in bulk.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-566872%2FFunctions%2F-403166102" anchor-label="toEntity" id="-566872%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-566872%2FFunctions%2F-403166102"><span>to</span><wbr></wbr><span><span>Entity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-566872%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span> <a href="index.html#-566872%2FFunctions%2F-403166102"><span class="token function">toEntity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>EntityRecord record</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Converts the passed record into an entity.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-462418977%2FFunctions%2F-403166102" anchor-label="toModelClass" id="-462418977%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-462418977%2FFunctions%2F-403166102"><span>to</span><wbr></wbr><span>Model</span><wbr></wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-462418977%2FFunctions%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../../io.spine.server.entity.model/-entity-class/index.html">EntityClass</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> <a href="index.html#-462418977%2FFunctions%2F-403166102"><span class="token function">toModelClass</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.server.route/EventFnRoute///PointingToGenericParameters(1)/">E</span><span class="token operator">&gt;</span> cls</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains a model class for the passed entity class value.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Inheritors</h2>
+      <div class="table" data-togglable="Inheritors"><a data-name="-1995233562%2FInheritors%2F-403166102" anchor-label="ProcessManagerRepository" id="-1995233562%2FInheritors%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../io.spine.server.procman/-process-manager-repository/index.html">ProcessManagerRepository</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1995233562%2FInheritors%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div></div>
+          </div>
+        </div>
+<a data-name="-1778263696%2FInheritors%2F-403166102" anchor-label="ProjectionRepository" id="-1778263696%2FInheritors%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../../io.spine.server.projection/-projection-repository/index.html">ProjectionRepository</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1778263696%2FInheritors%2F-403166102"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

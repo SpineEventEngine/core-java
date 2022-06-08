@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>matches</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>server</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="server::io.spine.server.model/TypeMatcher/matches/#TypeToken&lt;?&gt;#TypeToken&lt;?&gt;/PointingToDeclaration//-403166102">
+  <div class="breadcrumbs"><a href="../../../index.html">server</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.model</a><span class="delimiter">/</span><a href="index.html">TypeMatcher</a><span class="delimiter">/</span><a href="matches.html">matches</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>matches</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>boolean <a href="matches.html"><span class="token function">matches</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>TypeToken&lt;?&gt; expected<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>TypeToken&lt;?&gt; actual</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Tells whether the <code class="lang-kotlin">actual</code> type matches the <code class="lang-kotlin">expected</code>. </p><h1 class="">Use Cases</h1><h2 class="">Legend</h2><p class="paragraph">Examples below refer to the types for simplicity; in fact, the respective <code class="lang-kotlin">TypeToken</code>s for the types are passed into the method. </p><h2 class="">Rules</h2><ul><li> The same types always match; e.g. <code class="lang-kotlin">UserId.class</code> always matches <code class="lang-kotlin">UserId.class</code>. </li><li> Different types always don't match. e.g. <code class="lang-kotlin">UserId.class</code> always does not match <code class="lang-kotlin">Nothing.class</code>; </li><li> If <code class="lang-kotlin">actual</code> is a subtype of <code class="lang-kotlin">expected</code>, they match. e.g. <code class="lang-kotlin">matches(EventMessage, Nothing)</code> returns <code class="lang-kotlin">true</code>. </li><li> The generic parameters are taken into account in a similar manner: same always match, a subtype matches a parent type, different types aren't matching; e.g. matches(Collection&lt;EventMessage&gt;, Set&lt;ProjectEvent&gt;) is <code class="lang-kotlin">true</code>; matches(Collection&lt;EventMessage&gt;, Set&lt;CommandMessage&gt;) is <code class="lang-kotlin">false</code>. </li><li> If both <code class="lang-kotlin">expected</code> and <code class="lang-kotlin">actual</code> types define generic parameters, and the parameters contain <code class="lang-kotlin">Optional&lt;T&gt;</code>, the latter is &quot;unpacked&quot; for comparison. e.g. matches( Iterable&lt;EventMessage&gt;, Triplet&lt;ProjectCreated, ProjectAssigned, Optional&lt;ProjectStarted&gt; ) is <code class="lang-kotlin">true</code>, matches(Optional&lt;EventMessage&gt;, Optional&lt;AddTask&gt;) is <code class="lang-kotlin">false</code>. </li><li> Generic parameters with wildcard are not supported. </li></ul></div></div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
