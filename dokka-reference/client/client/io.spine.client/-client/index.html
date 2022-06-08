@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Client</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>client</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="client::io.spine.client/Client///PointingToDeclaration//1553385202">
+  <div class="breadcrumbs"><a href="../../../index.html">client</a><span class="delimiter">/</span><a href="../index.html">io.spine.client</a><span class="delimiter">/</span><a href="index.html">Client</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Client</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="index.html">Client</a><span class="token keyword"> implements </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/AutoCloseable.html">AutoCloseable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">The gRPC-based gateway for backend services such as <code class="lang-kotlin">CommandService</code>, <code class="lang-kotlin">QueryService</code>, or <code class="lang-kotlin">SubscriptionService</code>. </p><p class="paragraph">A connection can be established via <a href="connect-to.html">host/port</a> combination, or via already available <a href="using-channel.html">ManagedChannel</a>. </p><p class="paragraph">Multitenant applications need to specify <a href="-builder/for-tenant.html">TenantId</a> for a new client connection. Single-tenant applications do nothing about it. </p><p class="paragraph">Client requests can be created on behalf of a <a href="as-guest.html">guest user</a>, if the user is not yet authenticated, and on behalf of the <a href="on-behalf-of.html">current user</a> after the user is authenticated. </p><p class="paragraph">Please note that Spine client-side library does not define the authentication process. The <code class="lang-kotlin">Client</code> class simply relies on the fact that UserId passed to the method <a href="on-behalf-of.html">onBehalfOf</a> represents a valid logged-in user, ID of whom the client application got (presumably as field of a <code class="lang-kotlin">UserLoggedIn</code> event) following due authentication process. The server-side code also needs to make sure that the UserId matches security constraints of the backend services. Security arrangements is not a part of the Spine client-side library either. </p><p class="paragraph">Subscriptions to <a href="../-subscription-request/index.html">entity states</a> or <a href="../-event-subscription-request/index.html">events</a> must be <a href="cancel.html">cancelled</a> when no longer needed to preserve both client-side and backend resources. </p><p class="paragraph">The client connection must be <a href="close.html">closed</a> when the application finishes its work.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="152298280%2FClasslikes%2F1553385202" anchor-label="Builder" id="152298280%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-builder/index.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="152298280%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-builder/index.html">Builder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">The builder for the client.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="941880234%2FProperties%2F1553385202" anchor-label="DEFAULT_GUEST_ID" id="941880234%2FProperties%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#941880234%2FProperties%2F1553385202">DEFAULT_GUEST_ID</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="941880234%2FProperties%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><a data-name="941880234%2FProperties%2F1553385202" anchor-label="DEFAULT_GUEST_ID" id="941880234%2FProperties%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">static </span>UserId <a href="index.html#941880234%2FProperties%2F1553385202">DEFAULT_GUEST_ID</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="941880234%2FProperties%2F1553385202" anchor-label="DEFAULT_GUEST_ID" id="941880234%2FProperties%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>Default ID for a guest user.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-767681004%2FProperties%2F1553385202" anchor-label="DEFAULT_SHUTDOWN_TIMEOUT" id="-767681004%2FProperties%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="index.html#-767681004%2FProperties%2F1553385202">DEFAULT_SHUTDOWN_TIMEOUT</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-767681004%2FProperties%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><a data-name="-767681004%2FProperties%2F1553385202" anchor-label="DEFAULT_SHUTDOWN_TIMEOUT" id="-767681004%2FProperties%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">static </span><span data-unresolved-link="io.spine.client/Timeout///PointingToDeclaration/">Timeout</span> <a href="index.html#-767681004%2FProperties%2F1553385202">DEFAULT_SHUTDOWN_TIMEOUT</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-767681004%2FProperties%2F1553385202" anchor-label="DEFAULT_SHUTDOWN_TIMEOUT" id="-767681004%2FProperties%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>The default amount of time to wait when <a href="close.html">closing</a> the client.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="2125589962%2FFunctions%2F1553385202" anchor-label="asGuest" id="2125589962%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="as-guest.html"><span>as</span><wbr></wbr><span><span>Guest</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2125589962%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-client-request/index.html">ClientRequest</a> <a href="as-guest.html"><span class="token function">asGuest</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a builder for posting guest requests.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-990004301%2FFunctions%2F1553385202" anchor-label="cancel" id="-990004301%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="cancel.html"><span><span>cancel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-990004301%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block strikethrough"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Deprecated.html"><span class="token annotation">Deprecated</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div><strike><span class="token keyword"></span></strike><strike>void</strike><strike> </strike><a href="cancel.html"><strike><span class="token function">cancel</span></strike></a><strike><span class="token punctuation">(</span></strike><span class="parameters "><span class="parameter "><span class="token keyword"></span>Subscription s</span></span><strike><span class="token punctuation">)</span></strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Requests cancellation of the passed subscription.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2135894632%2FFunctions%2F1553385202" anchor-label="close" id="-2135894632%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2135894632%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Closes the client by shutting down the gRPC connection.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1565135034%2FFunctions%2F1553385202" anchor-label="connectTo" id="1565135034%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="connect-to.html"><span>connect</span><wbr></wbr><span><span>To</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1565135034%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="-builder/index.html">Client.Builder</a> <a href="connect-to.html"><span class="token function">connectTo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> host<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>int port</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a builder for a client connected to the specified address.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1379349185%2FFunctions%2F1553385202" anchor-label="inProcess" id="1379349185%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="in-process.html"><span>in</span><wbr></wbr><span><span>Process</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1379349185%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="-builder/index.html">Client.Builder</a> <a href="in-process.html"><span class="token function">inProcess</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> serverName</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a client which will be connected to the in-process server with the passed name.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1866735926%2FFunctions%2F1553385202" anchor-label="isOpen" id="1866735926%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-open.html"><span>is</span><wbr></wbr><span><span>Open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1866735926%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>boolean <a href="is-open.html"><span class="token function">isOpen</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Verifies if the client connection is open.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1347247368%2FFunctions%2F1553385202" anchor-label="onBehalfOf" id="-1347247368%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-behalf-of.html"><span>on</span><wbr></wbr><span>Behalf</span><wbr></wbr><span><span>Of</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1347247368%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-client-request/index.html">ClientRequest</a> <a href="on-behalf-of.html"><span class="token function">onBehalfOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>UserId user</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a builder for requests on behalf of the passed user.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="726092916%2FFunctions%2F1553385202" anchor-label="shutdown" id="726092916%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="shutdown.html"><span><span>shutdown</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="726092916%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="shutdown.html"><span class="token function">shutdown</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Same as <a href="close.html">close</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="400777050%2FFunctions%2F1553385202" anchor-label="subscriptions" id="400777050%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="subscriptions.html"><span><span>subscriptions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="400777050%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-subscriptions/index.html">Subscriptions</a> <a href="subscriptions.html"><span class="token function">subscriptions</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains subscriptions created by this client.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1060249568%2FFunctions%2F1553385202" anchor-label="tenant" id="1060249568%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="tenant.html"><span><span>tenant</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1060249568%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html">Optional</a><span class="token operator">&lt;</span>TenantId<span class="token operator">&gt;</span> <a href="tenant.html"><span class="token function">tenant</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains the tenant of this client connection in a multitenant application, and empty <code class="lang-kotlin">Optional</code> in a single-tenant one.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1726815737%2FFunctions%2F1553385202" anchor-label="usingChannel" id="-1726815737%2FFunctions%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="using-channel.html"><span>using</span><wbr></wbr><span><span>Channel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1726815737%2FFunctions%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span><a href="-builder/index.html">Client.Builder</a> <a href="using-channel.html"><span class="token function">usingChannel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ManagedChannel channel</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a builder for a client which will use the passed channel for the communication with the backend services.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

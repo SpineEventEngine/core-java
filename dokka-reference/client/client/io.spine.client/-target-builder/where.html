@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>where</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>client</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="client::io.spine.client/TargetBuilder/where/#Filter.../PointingToDeclaration//1553385202">
+  <div class="breadcrumbs"><a href="../../../index.html">client</a><span class="delimiter">/</span><a href="../index.html">io.spine.client</a><span class="delimiter">/</span><a href="index.html">TargetBuilder</a><span class="delimiter">/</span><a href="where.html">where</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>where</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-subscribing-request/index.html">B</a> <a href="where.html"><span class="token function">where</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span>Filter<span class="token operator">&gt;</span> predicate</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Sets the predicates for the io.spine.client.Query. </p><p class="paragraph">If there are no io.spine.client.Filters (i.e. the passed array is empty), all the records will be retrieved regardless of the column values. </p><p class="paragraph">The multiple parameters passed into this method are considered to be joined in a conjunction (ALL operator), i.e. a record matches this query only if it matches all of these parameters.</p><h4 class="">Return</h4><p class="paragraph">self for method chaining</p><h2 class="">See also</h2><div data-togglable="See also"><div class="table" data-togglable="See also"><div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><a href="../-filters/index.html"><span>io.</span><wbr></wbr><span>spine.</span><wbr></wbr><span>client.</span><wbr></wbr><span>Filters</span></a></div></span></div><div><div class="title"><div data-togglable="See also"><p class="paragraph">for a convenient way to create io.spine.client.Filter instances</p></div></div></div></div></div><div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><a href="where.html"><span>where(io.</span><wbr></wbr><span>spine.</span><wbr></wbr><span>client.</span><wbr></wbr><span>Composite</span><wbr></wbr><span>Filter.</span><wbr></wbr><span>.</span><wbr></wbr><span>.</span><wbr></wbr><span>)</span></a></div></span></div><div><div class="title"><div data-togglable="See also"></div></div></div></div></div></div></div><h2 class="">Parameters</h2><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>predicate</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">the io.spine.client.Filters to filter the query results</p></div></div></div></div></div></div></div><br><div class="symbol monospace block"><span class="token keyword"></span><a href="../-subscribing-request/index.html">B</a> <a href="where.html"><span class="token function">where</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span>CompositeFilter<span class="token operator">&gt;</span> predicate</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Sets the predicates for the io.spine.client.Query. </p><p class="paragraph">If there are no io.spine.client.Filters (i.e. the passed array is empty), all the records will be retrieved regardless the column values. </p><p class="paragraph">The input values represent groups of simple filters joined with a composite operator. </p><p class="paragraph">The input filter groups are effectively joined between each other by ALL operator, i.e. a record matches this query if it matches all the composite filters. </p><p class="paragraph">Example of usage: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+    factory.select(Customer.class)
+           // Possibly other parameters
+           .where(all(ge(&quot;companySize&quot;, 50), le(&quot;companySize&quot;, 1000)),
+                  either(gt(&quot;establishedTime&quot;, twoYearsAgo), eq(&quot;country&quot;, &quot;Germany&quot;)))
+           .build();
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">In the example above, the <code class="lang-kotlin">Customer</code> records match the built query if they represent companies that have their company size between 50 and 1000 employees and either have been established less than two years ago, or originate from Germany. </p><p class="paragraph">Note that the filters which belong to different all(...) groups may be represented as a single all(...) group. For example, two following queries would be identical: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+    // Option 1
+    factory.select(Customer.class)
+           .where(all(
+                      eq(&quot;country&quot;, &quot;Germany&quot;)),
+                  all(
+                      ge(&quot;companySize&quot;, 50),
+                      le(&quot;companySize&quot;, 100)))
+           .build();
+
+    // Option 2 (identical)
+    factory.select(Customer.class)
+           .where(all(
+                      eq(&quot;country&quot;, &quot;Germany&quot;),
+                      ge(&quot;companySize&quot;, 50),
+                      le(&quot;companySize&quot;, 100)))
+           .build();
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">The <code class="lang-kotlin">Option 1</code> is recommended in this case, since the filters are grouped logically, though both builders produce effectively the same io.spine.client.Query instances. Note, that those instances may not be equal in terms of <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)">equals</a> method.</p><h4 class="">Return</h4><p class="paragraph">self for method chaining</p><h2 class="">See also</h2><div data-togglable="See also"><div class="table" data-togglable="See also"><div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><a href="../-filters/index.html"><span>io.</span><wbr></wbr><span>spine.</span><wbr></wbr><span>client.</span><wbr></wbr><span>Filters</span></a></div></span></div><div><div class="title"><div data-togglable="See also"><p class="paragraph">for a convenient way to create io.spine.client.CompositeFilter instances</p></div></div></div></div></div></div></div><h2 class="">Parameters</h2><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>predicate</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">a number of io.spine.client.CompositeFilter instances forming the query predicate</p></div></div></div></div></div></div></div></div></div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

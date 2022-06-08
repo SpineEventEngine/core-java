@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>io.spine.client</title>
+    <link href="../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../scripts/prism.js" async="async"></script>
+<link href="../../images/logo-icon.svg">
+<link href="../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../index.html">
+                    <span>client</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="client::io.spine.client////PointingToDeclaration//1553385202">
+  <div class="breadcrumbs"><a href="../../index.html">client</a><span class="delimiter">/</span><a href="index.html">io.spine.client</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Package io.</span><wbr></wbr><span>spine.</span><wbr></wbr><span>client</span></h1>
+    <div class="platform-hinted UnderCoverText" data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><p class="paragraph">This package provides classes and interfaces for performing client requests like posting commands, running queries, or creating subscriptions. </p><p class="paragraph">The term actor used in this API means the user on behalf of whom requests are created and executed. The package provides two levels of API. </p><dl><dt>High-level <a href="-client/index.html">io.spine.client.Client</a> API</dt><dd>is meant for client-side Java applications that would communicate with backend services via a gRPC connection. An instance of the <a href="-client/index.html">io.spine.client.Client</a> class establishes this connection and serves as a fluent API gateway for composing and posting requests. </dd><dt>Low-level <a href="-actor-request-factory/index.html">io.spine.client.ActorRequestFactory</a> API</dt><dd>is meant for server-side code which needs to speak to backend services without involving gRPC. This API is also by the High-level API implementation.</dd></dl><p class="paragraph">The <a href="-filters/index.html">io.spine.client.Filters</a> utility class provides methods for composing filtering conditions for both levels of the API. </p><p class="paragraph">When subscribing the Client API accepts an implementation of a functional interface (see <a href="-state-consumer/index.html">io.spine.client.StateConsumer</a> and <a href="-event-consumer/index.html">io.spine.client.EventConsumer</a>). Errors occurred when streaming or consuming messages are handled via <a href="-error-handler/index.html">io.spine.client.ErrorHandler</a> and <a href="-consumer-error-handler/index.html">io.spine.client.ConsumerErrorHandler</a> correspondingly.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="969466482%2FClasslikes%2F1553385202" anchor-label="ActorRequestFactory" id="969466482%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-actor-request-factory/index.html"><span>Actor</span><wbr></wbr><span>Request</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="969466482%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="-actor-request-factory/index.html">ActorRequestFactory</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A factory for various requests fired from the client-side by an actor.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="178779669%2FClasslikes%2F1553385202" anchor-label="Client" id="178779669%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-client/index.html"><span><span>Client</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="178779669%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="-client/index.html">Client</a><span class="token keyword"> implements </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/AutoCloseable.html">AutoCloseable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">The gRPC-based gateway for backend services such as <code class="lang-kotlin">CommandService</code>, <code class="lang-kotlin">QueryService</code>, or <code class="lang-kotlin">SubscriptionService</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2136641086%2FClasslikes%2F1553385202" anchor-label="ClientRequest" id="2136641086%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-client-request/index.html"><span>Client</span><wbr></wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2136641086%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">class </span><a href="-client-request/index.html">ClientRequest</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Entry point for creating client requests.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="359990817%2FClasslikes%2F1553385202" anchor-label="CommandFactory" id="359990817%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-command-factory/index.html"><span>Command</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="359990817%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-command-factory/index.html">CommandFactory</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A factory of Command instances.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-972778436%2FClasslikes%2F1553385202" anchor-label="CommandRequest" id="-972778436%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-command-request/index.html"><span>Command</span><wbr></wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-972778436%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-command-request/index.html">CommandRequest</a><span class="token keyword"> extends </span><a href="-client-request/index.html">ClientRequest</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Allows to post a command optionally subscribing to events that are immediate results of handling this command.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1466177759%2FClasslikes%2F1553385202" anchor-label="CompositeEntityStateFilter" id="-1466177759%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-composite-entity-state-filter/index.html"><span>Composite</span><wbr></wbr><span>Entity</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1466177759%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-composite-entity-state-filter/index.html">CompositeEntityStateFilter</a><span class="token keyword"> extends </span><span data-unresolved-link="io.spine.client/TypedCompositeFilter///PointingToDeclaration/">TypedCompositeFilter</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedCompositeFilter///PointingToGenericParameters(0)/">M</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A subscription filter which aggregates one or more EntityState filters.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="414438901%2FClasslikes%2F1553385202" anchor-label="CompositeEventFilter" id="414438901%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-composite-event-filter/index.html"><span>Composite</span><wbr></wbr><span>Event</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="414438901%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-composite-event-filter/index.html">CompositeEventFilter</a><span class="token keyword"> extends </span><span data-unresolved-link="io.spine.client/TypedCompositeFilter///PointingToDeclaration/">TypedCompositeFilter</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedCompositeFilter///PointingToGenericParameters(0)/">M</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A composite subscription filter which can aggregate both event message and event context filters.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-987633145%2FClasslikes%2F1553385202" anchor-label="CompositeQueryFilter" id="-987633145%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-composite-query-filter/index.html"><span>Composite</span><wbr></wbr><span>Query</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-987633145%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-composite-query-filter/index.html">CompositeQueryFilter</a><span class="token keyword"> extends </span><span data-unresolved-link="io.spine.client/TypedCompositeFilter///PointingToDeclaration/">TypedCompositeFilter</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedCompositeFilter///PointingToGenericParameters(0)/">M</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A composite query filter which targets one or more entity columns.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-218505647%2FClasslikes%2F1553385202" anchor-label="ConnectionConstants" id="-218505647%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-connection-constants/index.html"><span>Connection</span><wbr></wbr><span><span>Constants</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-218505647%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-connection-constants/index.html">ConnectionConstants</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Constant values shared between the client and the server code.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="645881096%2FClasslikes%2F1553385202" anchor-label="ConsumerErrorHandler" id="645881096%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-consumer-error-handler/index.html"><span>Consumer</span><wbr></wbr><span>Error</span><wbr></wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="645881096%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-consumer-error-handler/index.html">ConsumerErrorHandler</a><span class="token operator">&lt;</span>M<span class="token keyword"> extends </span>Message<span class="token operator">&gt;</span><span class="token keyword"> implements </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html">BiConsumer</a><span class="token operator">&lt;</span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html">T</a><span class="token punctuation">, </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html">U</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Functional interface for handlers of errors caused by consumers of messages.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2068134724%2FClasslikes%2F1553385202" anchor-label="EntityStateFilter" id="-2068134724%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-entity-state-filter/index.html"><span>Entity</span><wbr></wbr><span>State</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2068134724%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-entity-state-filter/index.html">EntityStateFilter</a><span class="token keyword"> extends </span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToDeclaration/">TypedFilter</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToGenericParameters(0)/">M</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A subscription filter which targets an EntityState.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1224118690%2FClasslikes%2F1553385202" anchor-label="ErrorHandler" id="-1224118690%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-error-handler/index.html"><span>Error</span><wbr></wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1224118690%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-error-handler/index.html">ErrorHandler</a><span class="token keyword"> implements </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><span class="token operator">&lt;</span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Consumer.html">T</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Functional interface for error handlers.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1224094894%2FClasslikes%2F1553385202" anchor-label="EventConsumer" id="-1224094894%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-event-consumer/index.html"><span>Event</span><wbr></wbr><span><span>Consumer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1224094894%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-event-consumer/index.html">EventConsumer</a><span class="token operator">&lt;</span>E<span class="token keyword"> extends </span>EventMessage<span class="token operator">&gt;</span><span class="token keyword"> implements </span><span data-unresolved-link="io.spine.client/MessageConsumer///PointingToDeclaration/">MessageConsumer</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/MessageConsumer///PointingToGenericParameters(0)/">M</span><span class="token punctuation">, </span><span data-unresolved-link="io.spine.client/MessageConsumer///PointingToGenericParameters(1)/">C</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Represents an operation which accepts an event message and its context.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="910410704%2FClasslikes%2F1553385202" anchor-label="EventFilter" id="910410704%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-event-filter/index.html"><span>Event</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="910410704%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-event-filter/index.html">EventFilter</a><span class="token keyword"> extends </span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToDeclaration/">TypedFilter</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToGenericParameters(0)/">M</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A subscription filter which targets an Event.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="221739122%2FClasslikes%2F1553385202" anchor-label="EventObserver" id="221739122%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-event-observer/index.html"><span>Event</span><wbr></wbr><span><span>Observer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="221739122%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-event-observer/index.html">EventObserver</a><span class="token operator">&lt;</span>E<span class="token keyword"> extends </span>EventMessage<span class="token operator">&gt;</span><span class="token keyword"> implements </span><a href="-event-consumer/index.html">EventConsumer</a><span class="token operator">&lt;</span><a href="-event-consumer/index.html">E</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Adapts gRPC streaming API to <a href="-event-consumer/index.html">EventConsumer</a> by passing the received Event to the <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html#accept(T,U)">accept</a> method.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="918763272%2FClasslikes%2F1553385202" anchor-label="EventSubscriptionRequest" id="918763272%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-event-subscription-request/index.html"><span>Event</span><wbr></wbr><span>Subscription</span><wbr></wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="918763272%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-event-subscription-request/index.html">EventSubscriptionRequest</a><span class="token operator">&lt;</span>E<span class="token keyword"> extends </span>EventMessage<span class="token operator">&gt;</span><span class="token keyword"> extends </span><a href="-subscribing-request/index.html">SubscribingRequest</a><span class="token operator">&lt;</span><a href="-subscribing-request/index.html">M</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">C</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">W</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">B</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Allows to subscribe to events using filtering conditions.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2027199131%2FClasslikes%2F1553385202" anchor-label="FilteringRequest" id="2027199131%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-filtering-request/index.html"><span>Filtering</span><wbr></wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2027199131%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-filtering-request/index.html">FilteringRequest</a><span class="token operator">&lt;</span>M<span class="token keyword"> extends </span>Message<span class="token punctuation">, </span>R<span class="token keyword"> extends </span>Message<span class="token punctuation">, </span>A<span class="token keyword"> extends </span><a href="-target-builder/index.html">TargetBuilder</a><span class="token operator">&lt;</span><a href="-filtering-request/index.html">R</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">A</a><span class="token operator">&gt;</span><span class="token punctuation">, </span>B<span class="token keyword"> extends </span><a href="-filtering-request/index.html">FilteringRequest</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToGenericParameters(0)/">M</span><span class="token punctuation">, </span><a href="-filtering-request/index.html">R</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">A</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">B</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token keyword"> extends </span><a href="-client-request/index.html">ClientRequest</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Abstract base for client requests that may filter messages by certain criteria.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="588280615%2FClasslikes%2F1553385202" anchor-label="Filters" id="588280615%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-filters/index.html"><span><span>Filters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="588280615%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-filters/index.html">Filters</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A factory of Filter instances.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-253932553%2FClasslikes%2F1553385202" anchor-label="OperatorEvaluator" id="-253932553%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-operator-evaluator/index.html"><span>Operator</span><wbr></wbr><span><span>Evaluator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-253932553%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">enum </span><a href="-operator-evaluator/index.html">OperatorEvaluator</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A boolean non-typed comparison operation on two given instances.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="546204141%2FClasslikes%2F1553385202" anchor-label="QueryBuilder" id="546204141%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-query-builder/index.html"><span>Query</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="546204141%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-query-builder/index.html">QueryBuilder</a><span class="token keyword"> extends </span><a href="-target-builder/index.html">TargetBuilder</a><span class="token operator">&lt;</span><a href="-target-builder/index.html">T</a><span class="token punctuation">, </span><a href="-target-builder/index.html">B</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A builder for the Query instances.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="882725726%2FClasslikes%2F1553385202" anchor-label="QueryFactory" id="882725726%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-query-factory/index.html"><span>Query</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="882725726%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-query-factory/index.html">QueryFactory</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A factory of Query instances.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-491661342%2FClasslikes%2F1553385202" anchor-label="QueryFilter" id="-491661342%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-query-filter/index.html"><span>Query</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-491661342%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-query-filter/index.html">QueryFilter</a><span class="token keyword"> extends </span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToDeclaration/">TypedFilter</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToGenericParameters(0)/">M</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A query filter which targets a column of an entity.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-680637049%2FClasslikes%2F1553385202" anchor-label="QueryMixin" id="-680637049%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-query-mixin/index.html"><span>Query</span><wbr></wbr><span><span>Mixin</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-680637049%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-query-mixin/index.html">QueryMixin</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Useful methods for <code class="lang-kotlin">Query</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-450043527%2FClasslikes%2F1553385202" anchor-label="QueryRequest" id="-450043527%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-query-request/index.html"><span>Query</span><wbr></wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-450043527%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-query-request/index.html">QueryRequest</a><span class="token operator">&lt;</span>S<span class="token keyword"> extends </span>EntityState<span class="token operator">&gt;</span><span class="token keyword"> extends </span><a href="-filtering-request/index.html">FilteringRequest</a><span class="token operator">&lt;</span><a href="-filtering-request/index.html">M</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">R</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">A</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">B</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Allows to create a post a query for messages of the given type.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1023072869%2FClasslikes%2F1553385202" anchor-label="ServerErrorHandler" id="-1023072869%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-server-error-handler/index.html"><span>Server</span><wbr></wbr><span>Error</span><wbr></wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1023072869%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-server-error-handler/index.html">ServerErrorHandler</a><span class="token keyword"> implements </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html">BiConsumer</a><span class="token operator">&lt;</span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html">T</a><span class="token punctuation">, </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html">U</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A handler for an error occurred when posting a message for asynchronous processing at the server side.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-445000645%2FClasslikes%2F1553385202" anchor-label="StateConsumer" id="-445000645%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-state-consumer/index.html"><span>State</span><wbr></wbr><span><span>Consumer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-445000645%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-state-consumer/index.html">StateConsumer</a><span class="token operator">&lt;</span>S<span class="token keyword"> extends </span>EntityState<span class="token operator">&gt;</span><span class="token keyword"> implements </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Consumer.html">Consumer</a><span class="token operator">&lt;</span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/Consumer.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span><span data-unresolved-link="io.spine.client/MessageConsumer///PointingToDeclaration/">MessageConsumer</span><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/MessageConsumer///PointingToGenericParameters(0)/">M</span><span class="token punctuation">, </span><span data-unresolved-link="io.spine.client/MessageConsumer///PointingToGenericParameters(1)/">C</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Represents an operation that accepts a state of an entity.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="182506744%2FClasslikes%2F1553385202" anchor-label="SubscribingRequest" id="182506744%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-subscribing-request/index.html"><span>Subscribing</span><wbr></wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="182506744%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-subscribing-request/index.html">SubscribingRequest</a><span class="token operator">&lt;</span>M<span class="token keyword"> extends </span>Message<span class="token punctuation">, </span>C<span class="token keyword"> extends </span>MessageContext<span class="token punctuation">, </span>W<span class="token keyword"> extends </span>Message<span class="token punctuation">, </span>B<span class="token keyword"> extends </span><a href="-subscribing-request/index.html">SubscribingRequest</a><span class="token operator">&lt;</span><span data-unresolved-link="io.spine.client/TypedFilter///PointingToGenericParameters(0)/">M</span><span class="token punctuation">, </span><span data-unresolved-link="io.spine.client/DelegatingConsumer///PointingToGenericParameters(1)/">C</span><span class="token punctuation">, </span><span data-unresolved-link="io.spine.client/Consumers///PointingToGenericParameters(2)/">W</span><span class="token punctuation">, </span><a href="-subscribing-request/index.html">B</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token keyword"> extends </span><a href="-filtering-request/index.html">FilteringRequest</a><span class="token operator">&lt;</span><a href="-filtering-request/index.html">M</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">R</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">A</a><span class="token punctuation">, </span><a href="-filtering-request/index.html">B</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Abstract base for client requests that subscribe to messages.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1439358818%2FClasslikes%2F1553385202" anchor-label="SubscriptionMixin" id="-1439358818%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-subscription-mixin/index.html"><span>Subscription</span><wbr></wbr><span><span>Mixin</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1439358818%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">interface </span><a href="-subscription-mixin/index.html">SubscriptionMixin</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Useful methods for Subscription.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="562776784%2FClasslikes%2F1553385202" anchor-label="SubscriptionRequest" id="562776784%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-subscription-request/index.html"><span>Subscription</span><wbr></wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="562776784%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-subscription-request/index.html">SubscriptionRequest</a><span class="token operator">&lt;</span>S<span class="token keyword"> extends </span>EntityState<span class="token operator">&gt;</span><span class="token keyword"> extends </span><a href="-subscribing-request/index.html">SubscribingRequest</a><span class="token operator">&lt;</span><a href="-subscribing-request/index.html">M</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">C</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">W</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">B</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Allows to subscribe to updates of entity states using filtering conditions.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1747510324%2FClasslikes%2F1553385202" anchor-label="Subscriptions" id="-1747510324%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-subscriptions/index.html"><span><span>Subscriptions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1747510324%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-subscriptions/index.html">Subscriptions</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Maintains the list of the active subscriptions created by the <a href="-client/index.html">Client</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="382663800%2FClasslikes%2F1553385202" anchor-label="TargetBuilder" id="382663800%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-target-builder/index.html"><span>Target</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="382663800%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-target-builder/index.html">TargetBuilder</a><span class="token operator">&lt;</span>T<span class="token keyword"> extends </span>Message<span class="token punctuation">, </span>B<span class="token keyword"> extends </span><a href="-target-builder/index.html">TargetBuilder</a><span class="token operator">&lt;</span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/function/BiConsumer.html">T</a><span class="token punctuation">, </span><a href="-subscribing-request/index.html">B</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">An abstract base for builders that create Message instances which have a Target and a FieldMask as attributes.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1275935744%2FClasslikes%2F1553385202" anchor-label="Targets" id="1275935744%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-targets/index.html"><span><span>Targets</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1275935744%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-targets/index.html">Targets</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Client-side utilities for working with Query and Topic targets.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="380813908%2FClasslikes%2F1553385202" anchor-label="TopicBuilder" id="380813908%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-topic-builder/index.html"><span>Topic</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="380813908%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-topic-builder/index.html">TopicBuilder</a><span class="token keyword"> extends </span><a href="-target-builder/index.html">TargetBuilder</a><span class="token operator">&lt;</span><a href="-target-builder/index.html">T</a><span class="token punctuation">, </span><a href="-target-builder/index.html">B</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A builder for the Topic instances.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="717335493%2FClasslikes%2F1553385202" anchor-label="TopicFactory" id="717335493%2FClasslikes%2F1553385202" data-filterable-set=":client:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":client:dokkaHtml/main" data-filterable-set=":client:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-topic-factory/index.html"><span>Topic</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="717335493%2FClasslikes%2F1553385202"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":client:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="-topic-factory/index.html">TopicFactory</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A factory of Topic instances.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
