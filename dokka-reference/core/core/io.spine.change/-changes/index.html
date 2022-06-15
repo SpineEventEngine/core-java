@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Changes</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>core</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="core::io.spine.change/Changes///PointingToDeclaration//-121426938">
+  <div class="breadcrumbs"><a href="../../../index.html">core</a><span class="delimiter">/</span><a href="../index.html">io.spine.change</a><span class="delimiter">/</span><a href="index.html">Changes</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Changes</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword">class </span><a href="index.html">Changes</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Utility class for working with field changes.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1176084040%2FFunctions%2F-121426938" anchor-label="of" id="1176084040%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of.html"><span><span>of</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1176084040%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>BytesChange <a href="of.html"><span class="token function">of</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>ByteString previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>ByteString newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates BytesChange object for the passed previous and new field values.</div><div class="symbol monospace block"><span class="token keyword">static </span>TimestampChange <a href="of.html"><span class="token function">of</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>Timestamp previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>Timestamp newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates TimestampChange object for the passed previous and new field values.</div><div class="symbol monospace block"><span class="token keyword">static </span>BooleanChange <a href="of.html"><span class="token function">of</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>boolean previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>boolean newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates BooleanChange object for the passed previous and new field values.</div><div class="symbol monospace block"><span class="token keyword">static </span>DoubleChange <a href="of.html"><span class="token function">of</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>double previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>double newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates DoubleChange object for the passed previous and new field values.</div><div class="symbol monospace block"><span class="token keyword">static </span>FloatChange <a href="of.html"><span class="token function">of</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>float previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>float newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates FloatChange object for the passed previous and new field values.</div><div class="symbol monospace block"><span class="token keyword">static </span>StringChange <a href="of.html"><span class="token function">of</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates StringChange object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1007161842%2FFunctions%2F-121426938" anchor-label="ofFixed32" id="-1007161842%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-fixed32.html"><span>of</span><wbr></wbr><span><span>Fixed32</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1007161842%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>Fixed32Change <a href="of-fixed32.html"><span class="token function">ofFixed32</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>int previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>int newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates Fixed32Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1946193125%2FFunctions%2F-121426938" anchor-label="ofFixed64" id="1946193125%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-fixed64.html"><span>of</span><wbr></wbr><span><span>Fixed64</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1946193125%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>Fixed64Change <a href="of-fixed64.html"><span class="token function">ofFixed64</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>long previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>long newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates Fixed64Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-308867063%2FFunctions%2F-121426938" anchor-label="ofInt32" id="-308867063%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-int32.html"><span>of</span><wbr></wbr><span><span>Int32</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-308867063%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>Int32Change <a href="of-int32.html"><span class="token function">ofInt32</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>int previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>int newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates Int32Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1302389728%2FFunctions%2F-121426938" anchor-label="ofInt64" id="-1302389728%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-int64.html"><span>of</span><wbr></wbr><span><span>Int64</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1302389728%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>Int64Change <a href="of-int64.html"><span class="token function">ofInt64</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>long previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>long newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates Int64Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-447080391%2FFunctions%2F-121426938" anchor-label="ofSfixed32" id="-447080391%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-sfixed32.html"><span>of</span><wbr></wbr><span><span>Sfixed32</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-447080391%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>Sfixed32Change <a href="of-sfixed32.html"><span class="token function">ofSfixed32</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>int previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>int newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates Sfixed32Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-981411760%2FFunctions%2F-121426938" anchor-label="ofSfixed64" id="-981411760%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-sfixed64.html"><span>of</span><wbr></wbr><span><span>Sfixed64</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-981411760%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>Sfixed64Change <a href="of-sfixed64.html"><span class="token function">ofSfixed64</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>long previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>long newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates Sfixed64Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1380538580%2FFunctions%2F-121426938" anchor-label="ofSInt32" id="1380538580%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-s-int32.html"><span>of</span><wbr></wbr><span><span>SInt32</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1380538580%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>SInt32Change <a href="of-s-int32.html"><span class="token function">ofSInt32</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>int previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>int newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates SInt32Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1281204693%2FFunctions%2F-121426938" anchor-label="ofSInt64" id="-1281204693%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-s-int64.html"><span>of</span><wbr></wbr><span><span>SInt64</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1281204693%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>SInt64Change <a href="of-s-int64.html"><span class="token function">ofSInt64</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>long previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>long newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates SInt64Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="351179282%2FFunctions%2F-121426938" anchor-label="ofUInt32" id="351179282%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-u-int32.html"><span>of</span><wbr></wbr><span><span>UInt32</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="351179282%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>UInt32Change <a href="of-u-int32.html"><span class="token function">ofUInt32</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>int previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>int newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates UInt32Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1641955305%2FFunctions%2F-121426938" anchor-label="ofUInt64" id="1641955305%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="of-u-int64.html"><span>of</span><wbr></wbr><span><span>UInt64</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1641955305%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">static </span>UInt64Change <a href="of-u-int64.html"><span class="token function">ofUInt64</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span>long previousValue<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span>long newValue</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates UInt64Change object for the passed previous and new field values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>

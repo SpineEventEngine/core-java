@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Where</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>core</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="core::io.spine.core/Where///PointingToDeclaration//-121426938">
+  <div class="breadcrumbs"><a href="../../../index.html">core</a><span class="delimiter">/</span><a href="../index.html">io.spine.core</a><span class="delimiter">/</span><a href="index.html">Where</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Where</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">@interface </span><a href="index.html">Where</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Filters events delivered to a handler method. </p><p class="paragraph">To apply filtering to an event handler method, annotate the first parameter of the method. </p><p class="paragraph">For example, the following method would be invoked only if the owner of the created project is <code class="lang-kotlin">mary@ackme.net</code>: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">@Subscribe
+void on(@Where(field = &quot;owner.email&quot;, equals = &quot;mary@ackme.net&quot;) ProjectCreated e) { ... }
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Annotations for handler methods which support <code class="lang-kotlin">@Where</code> should be marked with <a href="../-accepts-filters/index.html">AcceptsFilters</a>. </p><h1 class="">Filtering Events by a Field Value</h1><p class="paragraph">If a field filter is defined, only the events matching this filter are passed to the handler method. </p><p class="paragraph">A single class may define a number of handler methods with different field filters. Though, all the field filters must target the same field. For example, this event handling is valid: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">@Subscribe
+    voidonExpired(@Where(field = &quot;subscription.status&quot;, equals = &quot;EXPIRED&quot;)
+                     UserLoggedIn event) {
+        // Handle expired subscription.
+    }
+
+   @Subscribe
+    voidonInactive(@Where(field = &quot;subscription.status&quot;, equals = &quot;INACTIVE&quot;)
+                      UserLoggedIn event) {
+        // Handle inactive subscription.
+    }
+
+   @Subscribe
+    void on(UserLoggedIn event) {
+        // Handle other cases.
+    }
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">And this one is not: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">@Subscribe
+    voidonExpired(@Where(field = &quot;subscription.status&quot;, equals = &quot;EXPIRED&quot;)
+                     UserLoggedIn event) {
+    }
+
+   @Subscribe
+    voidonUnknownBilling(@Where(field = &quot;payment_method.status&quot;, equals = &quot;UNSET&quot;)
+                            UserLoggedIn event) {
+        // Error, different field paths used in the same class for the same event type.
+    }
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Inherited functions">Inherited functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1758071975%2FFunctions%2F-121426938" anchor-label="equals" id="-1758071975%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="equals.html"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1758071975%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> <a href="equals.html"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">The expected value of the field.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1560185384%2FFunctions%2F-121426938" anchor-label="field" id="1560185384%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="field.html"><span><span>field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1560185384%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> <a href="field.html"><span class="token function">field</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">The path to the field of the event message to filter by.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Inherited functions</h2>
+      <div class="table" data-togglable="Inherited functions"><a data-name="-2087345088%2FFunctions%2F-121426938" anchor-label="annotationType" id="-2087345088%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-bounded-context/index.html#-2087345088%2FFunctions%2F-121426938"><span>annotation</span><wbr></wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2087345088%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/annotation/Annotation.html">Annotation</a><span class="token operator">&gt;</span> <a href="../-bounded-context/index.html#-2087345088%2FFunctions%2F-121426938"><span class="token function">annotationType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1297283241%2FFunctions%2F-121426938" anchor-label="equals" id="-1297283241%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-bounded-context/index.html#-1297283241%2FFunctions%2F-121426938"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1297283241%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>boolean <a href="../-bounded-context/index.html#-1297283241%2FFunctions%2F-121426938"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a> p</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-867487634%2FFunctions%2F-121426938" anchor-label="hashCode" id="-867487634%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-bounded-context/index.html#-867487634%2FFunctions%2F-121426938"><span>hash</span><wbr></wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-867487634%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>int <a href="../-bounded-context/index.html#-867487634%2FFunctions%2F-121426938"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1045653699%2FFunctions%2F-121426938" anchor-label="toString" id="-1045653699%2FFunctions%2F-121426938" data-filterable-set=":core:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":core:dokkaHtml/main" data-filterable-set=":core:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-bounded-context/index.html#-1045653699%2FFunctions%2F-121426938"><span>to</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1045653699%2FFunctions%2F-121426938"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":core:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/String.html">String</a> <a href="../-bounded-context/index.html#-1045653699%2FFunctions%2F-121426938"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
