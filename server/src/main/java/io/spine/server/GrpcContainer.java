@@ -43,9 +43,11 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.GrpcContainer.ConfigureServer.doNothing;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -70,6 +72,7 @@ public final class GrpcContainer {
     private final @Nullable Integer port;
     private final @Nullable String serverName;
     private final ImmutableSet<ServerServiceDefinition> services;
+    private final ConfigureServer configureServer;
 
     private @Nullable Server grpcServer;
 
@@ -106,6 +109,9 @@ public final class GrpcContainer {
         this.port = builder.port().orElse(null);
         this.serverName = builder.serverName().orElse(null);
         this.services = builder.services();
+        this.configureServer = builder.configureServer == null
+                               ? doNothing()
+                               : builder.configureServer;
     }
 
     /**
@@ -284,6 +290,7 @@ public final class GrpcContainer {
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
         }
+        builder = configureServer.apply(builder);
         return builder.build();
     }
 
@@ -380,6 +387,7 @@ public final class GrpcContainer {
     public static final class Builder extends ConnectionBuilder {
 
         private final Set<ServerServiceDefinition> services = Sets.newHashSet();
+        private @Nullable ConfigureServer configureServer;
 
         private Builder(@Nullable Integer port, @Nullable String serverName) {
             super(port, serverName);
@@ -417,6 +425,12 @@ public final class GrpcContainer {
             return this;
         }
 
+        @CanIgnoreReturnValue
+        public Builder apply(ConfigureServer action) {
+            this.configureServer = checkNotNull(action);
+            return this;
+        }
+
         /**
          * Obtains the services already added to the builder.
          *
@@ -436,6 +450,21 @@ public final class GrpcContainer {
 
         public GrpcContainer build() {
             return new GrpcContainer(this);
+        }
+    }
+
+    /**
+     * Allows to configure the gRPC's {@link Server} instance,
+     * on top of which this {@code GrpcContainer} will operate.
+     */
+    @FunctionalInterface
+    public interface ConfigureServer extends Function<ServerBuilder<?>, ServerBuilder<?>> {
+
+        /**
+         * Returns an instance which does nothing and returns the same {@code ServerBuilder}.
+         */
+        static ConfigureServer doNothing() {
+            return builder -> builder;
         }
     }
 }
