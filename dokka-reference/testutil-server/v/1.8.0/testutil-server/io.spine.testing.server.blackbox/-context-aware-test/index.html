@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ContextAwareTest</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>testutil-server</span>
+            </a>
+    </div>
+    <div>
+1.8.0    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="testutil-server::io.spine.testing.server.blackbox/ContextAwareTest///PointingToDeclaration//-1550819983">
+  <div class="breadcrumbs"><a href="../../../index.html">testutil-server</a><span class="delimiter">/</span><a href="../index.html">io.spine.testing.server.blackbox</a><span class="delimiter">/</span><a href="index.html">ContextAwareTest</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Context</span><wbr></wbr><span>Aware</span><wbr></wbr><span><span>Test</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":testutil-server:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">ContextAwareTest</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Abstract base for test suites based on <a href="../-black-box-context/index.html">BlackBoxContext</a>. </p><p class="paragraph">Such a test suite creates a new instance of BoundedContext using a builder which implementing classes must <a href="context-builder.html">provide</a>. The context under the test is created before each test method and closed after each test method automatically. </p><p class="paragraph">Testing methods <a href="context.html">obtain the context</a> for: </p><ol><li>Sending signals under the test to the context via <code class="lang-kotlin">receivesXxx()</code> methods, such as <a href="../-black-box-context/receives-command.html">receivesCommand()</a>. </li><li>Asserting results of handling the signals via <code class="lang-kotlin">assertXxx()</code> methods, e.g. <a href="../-black-box-context/assert-events.html">assertEvents()</a>. </li></ol><p class="paragraph">Test suites derived from this class must NOT close the context directly. Doing so will fail the test.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-817814943%2FFunctions%2F-1550819983" anchor-label="closeContext" id="-817814943%2FFunctions%2F-1550819983" data-filterable-set=":testutil-server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":testutil-server:dokkaHtml/main" data-filterable-set=":testutil-server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="close-context.html"><span>close</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-817814943%2FFunctions%2F-1550819983"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":testutil-server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="close-context.html"><span class="token function">closeContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2054763699%2FFunctions%2F-1550819983" anchor-label="context" id="2054763699%2FFunctions%2F-1550819983" data-filterable-set=":testutil-server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":testutil-server:dokkaHtml/main" data-filterable-set=":testutil-server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="context.html"><span><span>context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2054763699%2FFunctions%2F-1550819983"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":testutil-server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span><a href="../-black-box-context/index.html">BlackBoxContext</a> <a href="context.html"><span class="token function">context</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Obtains test configuration and assertion API for the Bounded Context under the test.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-562464020%2FFunctions%2F-1550819983" anchor-label="contextBuilder" id="-562464020%2FFunctions%2F-1550819983" data-filterable-set=":testutil-server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":testutil-server:dokkaHtml/main" data-filterable-set=":testutil-server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="context-builder.html"><span>context</span><wbr></wbr><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-562464020%2FFunctions%2F-1550819983"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":testutil-server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">abstract </span><span class="token keyword"></span>BoundedContextBuilder <a href="context-builder.html"><span class="token function">contextBuilder</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Creates a new builder for the Bounded Context under the test.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1915403761%2FFunctions%2F-1550819983" anchor-label="createContext" id="-1915403761%2FFunctions%2F-1550819983" data-filterable-set=":testutil-server:dokkaHtml/main"></a>
+        <div class="table-row" data-filterable-current=":testutil-server:dokkaHtml/main" data-filterable-set=":testutil-server:dokkaHtml/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="create-context.html"><span>create</span><wbr></wbr><span><span>Context</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1915403761%2FFunctions%2F-1550819983"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":testutil-server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword"></span>void <a href="create-context.html"><span class="token function">createContext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2022, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        </div>
+    </div>
+</div>
+</body>
+</html>
