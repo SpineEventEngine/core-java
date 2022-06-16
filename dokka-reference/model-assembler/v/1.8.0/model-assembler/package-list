@@ -1,0 +1,24 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.model.assemble////PointingToDeclaration/model-assembler/io.spine.model.assemble/index.html
+$dokka.location:io.spine.model.assemble/AssignLookup///PointingToDeclaration/model-assembler/io.spine.model.assemble/-assign-lookup/index.html
+$dokka.location:io.spine.model.assemble/AssignLookup/getAnnotationType/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-assign-lookup/get-annotation-type.html
+$dokka.location:io.spine.model.assemble/AssignLookup/getSupportedOptions/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-assign-lookup/get-supported-options.html
+$dokka.location:io.spine.model.assemble/AssignLookup/isFinished/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-assign-lookup/is-finished.html
+$dokka.location:io.spine.model.assemble/AssignLookup/onRoundFinished/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-assign-lookup/on-round-finished.html
+$dokka.location:io.spine.model.assemble/AssignLookup/processElement/#javax.lang.model.element.Element/PointingToDeclaration/model-assembler/io.spine.model.assemble/-assign-lookup/process-element.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor///PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/index.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/error/#java.lang.String/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/error.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/getAnnotationType/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/get-annotation-type.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/getOption/#java.lang.String/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/get-option.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/getSupportedAnnotationTypes/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/get-supported-annotation-types.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/getSupportedSourceVersion/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/get-supported-source-version.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/init/#javax.annotation.processing.ProcessingEnvironment/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/init.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/isFinished/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/is-finished.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/onRoundFinished/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/on-round-finished.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/onRoundStarted/#/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/on-round-started.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/process/#java.util.Set<? extends javax.lang.model.element.TypeElement>#javax.annotation.processing.RoundEnvironment/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/process.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/processElement/#javax.lang.model.element.Element/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/process-element.html
+$dokka.location:io.spine.model.assemble/SpineAnnotationProcessor/warn/#java.lang.String/PointingToDeclaration/model-assembler/io.spine.model.assemble/-spine-annotation-processor/warn.html
+io.spine.model.assemble
+
