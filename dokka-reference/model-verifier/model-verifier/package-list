@@ -1,0 +1,7 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.model.verify////PointingToDeclaration/model-verifier/io.spine.model.verify/index.html
+$dokka.location:io.spine.model.verify/ModelVerifierPlugin///PointingToDeclaration/model-verifier/io.spine.model.verify/-model-verifier-plugin/index.html
+$dokka.location:io.spine.model.verify/ModelVerifierPlugin/apply/#Project/PointingToDeclaration/model-verifier/io.spine.model.verify/-model-verifier-plugin/apply.html
+io.spine.model.verify
+
