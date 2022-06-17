@@ -332,7 +332,8 @@ public final class GrpcContainer {
      * Injects a server to this container.
      *
      * <p>All calls to {@link #createGrpcServer(Executor)} will resolve to the given server
-     * instance.
+     * instance. The server instance is used as-is, no other
+     * {@linkplain Builder#apply(ConfigureServer) configuration methods} have effect onto it.
      *
      * <p>A test-only method.
      */
