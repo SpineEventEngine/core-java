@@ -443,7 +443,8 @@ public final class GrpcContainer {
 
         /**
          * Sets an additional configuration action for the gRPC {@link Server} instance,
-         * created for this {@code GrpcContainer} to run on top of.
+         * created for this {@code GrpcContainer} to run on top of. This action is applied
+         * right before the {@linkplain #start() server is started}.
          *
          * <p>Allows the direct access to gRPC {@link ServerBuilder}'s API.
          *
