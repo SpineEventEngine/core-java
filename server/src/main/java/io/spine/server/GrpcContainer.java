@@ -497,7 +497,7 @@ public final class GrpcContainer {
      *
      * GrpcContainer container =
      *     GrpcContainer.atPort(1654)
-     *                  .apply((server) -> server.maxInboundMessageSize(16_000_000))
+     * {@literal                 .apply((server) -> server.maxInboundMessageSize(16_000_000))  }
      *                  // ...
      *                  .build();
      *
