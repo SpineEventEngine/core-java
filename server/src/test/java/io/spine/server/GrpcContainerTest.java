@@ -118,7 +118,7 @@ class GrpcContainerTest {
                                                .build();
         GrpcContainer container =
                 GrpcContainer.atPort(port)
-                             .apply((server) -> server.addService(service))
+                             .withServer((server) -> server.addService(service))
                              .build();
         try {
             container.start();

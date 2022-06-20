@@ -333,7 +333,7 @@ public final class GrpcContainer {
      *
      * <p>All calls to {@link #createGrpcServer(Executor)} will resolve to the given server
      * instance. The server instance is used as-is, no other
-     * {@linkplain Builder#apply(ConfigureServer) configuration methods} have any effect on it.
+     * {@linkplain Builder#withServer(ConfigureServer) configuration methods} have any effect on it.
      *
      * <p>A test-only method.
      */
@@ -444,7 +444,7 @@ public final class GrpcContainer {
 
         /**
          * Sets an additional configuration action for the gRPC {@link Server} instance,
-         * created for this {@code GrpcContainer} to run on top of. This action is applied
+         * created for this {@code GrpcContainer} to run on top of. This configuration is applied
          * right before the {@linkplain #start() server is started}.
          *
          * <p>Allows the direct access to gRPC {@link ServerBuilder}'s API.
@@ -456,7 +456,7 @@ public final class GrpcContainer {
          */
         @Experimental
         @CanIgnoreReturnValue
-        public Builder apply(ConfigureServer action) {
+        public Builder withServer(ConfigureServer action) {
             this.configureServer = checkNotNull(action);
             return this;
         }
@@ -497,7 +497,7 @@ public final class GrpcContainer {
      *
      * GrpcContainer container =
      *     GrpcContainer.atPort(1654)
-     * {@literal                 .apply((server) -> server.maxInboundMessageSize(16_000_000))  }
+     * {@literal                 .withServer((server) -> server.maxInboundMessageSize(16_000_000)) }
      *                  // ...
      *                  .build();
      *
@@ -505,7 +505,7 @@ public final class GrpcContainer {
      *
      * <p>Please note this interface is a part of experimental API.
      *
-     * @see Builder#apply(ConfigureServer)
+     * @see Builder#withServer(ConfigureServer)
      */
     @Experimental
     @FunctionalInterface
