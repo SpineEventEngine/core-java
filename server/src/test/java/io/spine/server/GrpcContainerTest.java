@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -107,6 +108,38 @@ class GrpcContainerTest {
 
         assertThat(grpcContainer.grpcServer())
                 .isNotNull();
+    }
+
+    @Test
+    @DisplayName("configure underlying gRPC server")
+    void configureUnderlyingGrpcServer() {
+        int port = 1654;
+        CommandService service = CommandService.newBuilder()
+                                               .build();
+        GrpcContainer container =
+                GrpcContainer.atPort(port)
+                             .withServer((server) -> server.addService(service))
+                             .build();
+        try {
+            container.start();
+            Server server = container.grpcServer();
+            assertThat(server)
+                    .isNotNull();
+
+            List<ServerServiceDefinition> deployedServices = server.getServices();
+            assertThat(deployedServices)
+                    .hasSize(1);
+
+            String actualName = deployedServices.get(0)
+                                                .getServiceDescriptor()
+                                                .getName();
+            assertThat(actualName).contains(service.getClass()
+                                                   .getSimpleName());
+        } catch (IOException e) {
+            fail(e);
+        } finally {
+            container.shutdown();
+        }
     }
 
     @Test
