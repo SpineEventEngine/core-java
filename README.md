@@ -18,7 +18,7 @@ This repository contains the code of:
 The project is under active ongoing development. 
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.8.0][latest-release].  
+The latest stable version is [1.8.2][latest-release].  
 
 ## Quick start and examples
 
@@ -32,7 +32,7 @@ the [Spine Examples][spine-examples] GitHub organization.
 
 Building Spine modules and libraries requires JDK 8. 
 
-The support of JDK 11 is planned for the [version 3.0][v3] of the framework.
+The support of JDK 11 is planned for the [version 2.0][v2] of the framework.
 
 Gradle is used as a build and dependency management system.
 
@@ -59,10 +59,10 @@ latest version of the configuration files.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:developers@spine.io
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.6.0
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.8.2
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
 [todo-list]: https://github.com/spine-examples/todo-list
-[v3]: https://github.com/orgs/SpineEventEngine/projects/11
+[v2]: https://github.com/orgs/SpineEventEngine/projects/13
 [config]: https://github.com/SpineEventEngine/config/
