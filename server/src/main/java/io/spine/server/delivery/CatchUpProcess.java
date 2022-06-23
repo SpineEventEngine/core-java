@@ -1,5 +1,5 @@
 /*
- * Copyright 2021, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.EventStreamQuery.Limit;
 import io.spine.server.event.React;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.stand.Stand;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -621,6 +622,16 @@ public final class CatchUpProcess<I>
     protected CatchUp.Builder newStateBuilderWith(CatchUpId id) {
         return CatchUp.newBuilder()
                       .setId(id);
+    }
+
+    /**
+     * Does NOT register this process in {@code Stand}, as the emitted events should
+     * not be available for subscribing.
+     */
+    @Internal
+    @Override
+    protected void registerIn(Stand stand) {
+        // Do nothing.
     }
 
     /**
