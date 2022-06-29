@@ -1,0 +1,134 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.testing.server.blackbox////PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/index.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext///PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/index.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/append/#Event/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/append.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertCommands/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-commands.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertEntity/#I#java.lang.Class<E>/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-entity.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertEntity/#java.lang.Class<E>#I/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-entity.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertEntityWithState/#I#java.lang.Class<S>/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-entity-with-state.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertEntityWithState/#java.lang.Class<S>#I/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-entity-with-state.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertEvent/#EventMessage/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-event.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertEvent/#java.lang.Class<? extends EventMessage>/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-event.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertEvents/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-events.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertQueryResult/#Query/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-query-result.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertState/#I#S/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-state.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/assertState/#I#java.lang.Class<S>/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/assert-state.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/client/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/client.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/close/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/close.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/from/#BoundedContextBuilder/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/from.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/importsEvent/#Message/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/imports-event.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/importsEvents/#EventMessage#EventMessage#EventMessage.../PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/imports-events.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/in/#ZoneId/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/in.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/isOpen/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/is-open.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/name/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/name.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/readOperation/#java.util.function.Supplier<D>/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/read-operation.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/receivesCommand/#CommandMessage/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/receives-command.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/receivesCommands/#CommandMessage#CommandMessage#CommandMessage.../PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/receives-commands.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/receivesEvent/#EventMessage/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/receives-event.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/receivesEvents/#EventMessage#EventMessage#EventMessage.../PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/receives-events.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/receivesEventsProducedBy/#java.lang.Object#EventMessage#EventMessage.../PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/receives-events-produced-by.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/receivesExternalEvent/#Message/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/receives-external-event.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/receivesExternalEvents/#EventMessage#EventMessage#EventMessage.../PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/receives-external-events.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/subscribeTo/#Topic/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/subscribe-to.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/tolerateFailures/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/tolerate-failures.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/withActor/#UserId/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/with-actor.html
+$dokka.location:io.spine.testing.server.blackbox/BlackBoxContext/withTenant/#TenantId/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-black-box-context/with-tenant.html
+$dokka.location:io.spine.testing.server.blackbox/ContextAwareTest///PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-context-aware-test/index.html
+$dokka.location:io.spine.testing.server.blackbox/ContextAwareTest/closeContext/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-context-aware-test/close-context.html
+$dokka.location:io.spine.testing.server.blackbox/ContextAwareTest/context/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-context-aware-test/context.html
+$dokka.location:io.spine.testing.server.blackbox/ContextAwareTest/contextBuilder/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-context-aware-test/context-builder.html
+$dokka.location:io.spine.testing.server.blackbox/ContextAwareTest/createContext/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-context-aware-test/create-context.html
+$dokka.location:io.spine.testing.server.blackbox/SubscriptionFixture///PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-subscription-fixture/index.html
+$dokka.location:io.spine.testing.server.blackbox/SubscriptionFixture/assertEntityStates/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-subscription-fixture/assert-entity-states.html
+$dokka.location:io.spine.testing.server.blackbox/SubscriptionFixture/assertEventMessages/#/PointingToDeclaration/testutil-server/io.spine.testing.server.blackbox/-subscription-fixture/assert-event-messages.html
+$dokka.location:io.spine.testing.server.entity////PointingToDeclaration/testutil-server/io.spine.testing.server.entity/index.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject///PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/index.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/actual/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/actual.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/archivedFlag/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/archived-flag.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/assertEntity/#E/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/assert-entity.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/deletedFlag/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/deleted-flag.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/doesNotExist/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/does-not-exist.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/exists/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/exists.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/hasStateThat/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/has-state-that.html
+$dokka.location:io.spine.testing.server.entity/EntitySubject/version/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-subject/version.html
+$dokka.location:io.spine.testing.server.entity/EntityVersionSubject///PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-version-subject/index.html
+$dokka.location:io.spine.testing.server.entity/EntityVersionSubject/actual/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-version-subject/actual.html
+$dokka.location:io.spine.testing.server.entity/EntityVersionSubject/assertEntityVersion/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-version-subject/assert-entity-version.html
+$dokka.location:io.spine.testing.server.entity/EntityVersionSubject/isNewerOrEqualTo/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-version-subject/is-newer-or-equal-to.html
+$dokka.location:io.spine.testing.server.entity/EntityVersionSubject/isNewerThan/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-version-subject/is-newer-than.html
+$dokka.location:io.spine.testing.server.entity/EntityVersionSubject/isOlderOrEqualTo/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-version-subject/is-older-or-equal-to.html
+$dokka.location:io.spine.testing.server.entity/EntityVersionSubject/isOlderThan/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-entity-version-subject/is-older-than.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject///PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/index.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject/assertEntityVersions/#java.lang.Iterable<Version>/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/assert-entity-versions.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject/containsAllNewerOrEqualTo/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/contains-all-newer-or-equal-to.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject/containsAllNewerThan/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/contains-all-newer-than.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject/containsAllOlderOrEqualTo/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/contains-all-older-or-equal-to.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject/containsAllOlderThan/#Version/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/contains-all-older-than.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject/containsSingleEntityVersionThat/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/contains-single-entity-version-that.html
+$dokka.location:io.spine.testing.server.entity/IterableEntityVersionSubject/entityVersions/#/PointingToDeclaration/testutil-server/io.spine.testing.server.entity/-iterable-entity-version-subject/entity-versions.html
+$dokka.location:io.spine.testing.server.model////PointingToDeclaration/testutil-server/io.spine.testing.server.model/index.html
+$dokka.location:io.spine.testing.server.model/ModelTests///PointingToDeclaration/testutil-server/io.spine.testing.server.model/-model-tests/index.html
+$dokka.location:io.spine.testing.server.model/ModelTests/dropAllModels/#/PointingToDeclaration/testutil-server/io.spine.testing.server.model/-model-tests/drop-all-models.html
+$dokka.location:io.spine.testing.server.model/ModelTests/getMethod/#java.lang.Class<?>#java.lang.String/PointingToDeclaration/testutil-server/io.spine.testing.server.model/-model-tests/get-method.html
+$dokka.location:io.spine.testing.server.query////PointingToDeclaration/testutil-server/io.spine.testing.server.query/index.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject///PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/index.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject/actual/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/actual.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject/assertQueryResult/#QueryResponse/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/assert-query-result.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject/containsEntityVersionListThat/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/contains-entity-version-list-that.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject/containsSingleEntityStateThat/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/contains-single-entity-state-that.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject/containsSingleEntityVersionThat/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/contains-single-entity-version-that.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject/hasStatus/#StatusCase/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/has-status.html
+$dokka.location:io.spine.testing.server.query/QueryResultSubject/hasStatusThat/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-query-result-subject/has-status-that.html
+$dokka.location:io.spine.testing.server.query/ResponseStatusSubject///PointingToDeclaration/testutil-server/io.spine.testing.server.query/-response-status-subject/index.html
+$dokka.location:io.spine.testing.server.query/ResponseStatusSubject/assertResponseStatus/#Status/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-response-status-subject/assert-response-status.html
+$dokka.location:io.spine.testing.server.query/ResponseStatusSubject/isError/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-response-status-subject/is-error.html
+$dokka.location:io.spine.testing.server.query/ResponseStatusSubject/isOk/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-response-status-subject/is-ok.html
+$dokka.location:io.spine.testing.server.query/ResponseStatusSubject/isRejection/#/PointingToDeclaration/testutil-server/io.spine.testing.server.query/-response-status-subject/is-rejection.html
+$dokka.location:io.spine.testing.server.tenant////PointingToDeclaration/testutil-server/io.spine.testing.server.tenant/index.html
+$dokka.location:io.spine.testing.server.tenant/TenantAwareTest///PointingToDeclaration/testutil-server/io.spine.testing.server.tenant/-tenant-aware-test/index.html
+$dokka.location:io.spine.testing.server.tenant/TenantAwareTest/clearCurrentTenant/#/PointingToDeclaration/testutil-server/io.spine.testing.server.tenant/-tenant-aware-test/clear-current-tenant.html
+$dokka.location:io.spine.testing.server.tenant/TenantAwareTest/createTenantIndex/#boolean/PointingToDeclaration/testutil-server/io.spine.testing.server.tenant/-tenant-aware-test/create-tenant-index.html
+$dokka.location:io.spine.testing.server.tenant/TenantAwareTest/setCurrentTenant/#TenantId/PointingToDeclaration/testutil-server/io.spine.testing.server.tenant/-tenant-aware-test/set-current-tenant.html
+$dokka.location:io.spine.testing.server.tenant/TenantAwareTest/tenantId/#/PointingToDeclaration/testutil-server/io.spine.testing.server.tenant/-tenant-aware-test/tenant-id.html
+$dokka.location:io.spine.testing.server////PointingToDeclaration/testutil-server/io.spine.testing.server/index.html
+$dokka.location:io.spine.testing.server/Assertions///PointingToDeclaration/testutil-server/io.spine.testing.server/-assertions/index.html
+$dokka.location:io.spine.testing.server/Assertions/assertCommandClasses/#java.util.Collection<CommandClass>#java.lang.Class<? extends CommandMessage>.../PointingToDeclaration/testutil-server/io.spine.testing.server/-assertions/assert-command-classes.html
+$dokka.location:io.spine.testing.server/Assertions/assertCommandClassesExactly/#java.lang.Iterable<CommandClass>#java.lang.Class<? extends CommandMessage>.../PointingToDeclaration/testutil-server/io.spine.testing.server/-assertions/assert-command-classes-exactly.html
+$dokka.location:io.spine.testing.server/Assertions/assertEventClasses/#java.util.Collection<EventClass>#java.lang.Class<? extends EventMessage>.../PointingToDeclaration/testutil-server/io.spine.testing.server/-assertions/assert-event-classes.html
+$dokka.location:io.spine.testing.server/Assertions/assertEventClassesExactly/#java.lang.Iterable<EventClass>#java.lang.Class<? extends EventMessage>.../PointingToDeclaration/testutil-server/io.spine.testing.server/-assertions/assert-event-classes-exactly.html
+$dokka.location:io.spine.testing.server/CommandSubject///PointingToDeclaration/testutil-server/io.spine.testing.server/-command-subject/index.html
+$dokka.location:io.spine.testing.server/CommandSubject/assertThat/#java.lang.Iterable<Command>/PointingToDeclaration/testutil-server/io.spine.testing.server/-command-subject/assert-that.html
+$dokka.location:io.spine.testing.server/CommandSubject/commands/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-command-subject/commands.html
+$dokka.location:io.spine.testing.server/CommandSubject/factory/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-command-subject/factory.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject///PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/index.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/EmittedMessageSubject/#FailureMetadata#java.lang.Iterable<T>/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/-emitted-message-subject.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/actual/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/actual.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/factory/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/factory.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/hasSize/#int/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/has-size.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/isEmpty/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/is-empty.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/isNotEmpty/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/is-not-empty.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/message/#int/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/message.html
+$dokka.location:io.spine.testing.server/EmittedMessageSubject/withType/#java.lang.Class<? extends M>/PointingToDeclaration/testutil-server/io.spine.testing.server/-emitted-message-subject/with-type.html
+$dokka.location:io.spine.testing.server/EventSubject///PointingToDeclaration/testutil-server/io.spine.testing.server/-event-subject/index.html
+$dokka.location:io.spine.testing.server/EventSubject/assertThat/#java.lang.Iterable<Event>/PointingToDeclaration/testutil-server/io.spine.testing.server/-event-subject/assert-that.html
+$dokka.location:io.spine.testing.server/EventSubject/events/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-event-subject/events.html
+$dokka.location:io.spine.testing.server/EventSubject/factory/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-event-subject/factory.html
+$dokka.location:io.spine.testing.server/NoOpLifecycle///PointingToDeclaration/testutil-server/io.spine.testing.server/-no-op-lifecycle/index.html
+$dokka.location:io.spine.testing.server/NoOpLifecycle/instance/#/PointingToDeclaration/testutil-server/io.spine.testing.server/-no-op-lifecycle/instance.html
+$dokka.location:io.spine.testing.server/NoOpLifecycle/postEvent/#EventMessage#Origin/PointingToDeclaration/testutil-server/io.spine.testing.server/-no-op-lifecycle/post-event.html
+$dokka.location:io.spine.testing.server/NoOpLifecycle/postEvent/#EventMessage/PointingToDeclaration/testutil-server/io.spine.testing.server/-no-op-lifecycle/post-event.html
+$dokka.location:io.spine.testing.server/TestEventFactory///PointingToDeclaration/testutil-server/io.spine.testing.server/-test-event-factory/index.html
+$dokka.location:io.spine.testing.server/TestEventFactory/createEvent/#EventMessage#Version#Timestamp/PointingToDeclaration/testutil-server/io.spine.testing.server/-test-event-factory/create-event.html
+$dokka.location:io.spine.testing.server/TestEventFactory/createEvent/#EventMessage/PointingToDeclaration/testutil-server/io.spine.testing.server/-test-event-factory/create-event.html
+$dokka.location:io.spine.testing.server/TestEventFactory/newInstance/#Message#TestActorRequestFactory/PointingToDeclaration/testutil-server/io.spine.testing.server/-test-event-factory/new-instance.html
+$dokka.location:io.spine.testing.server/TestEventFactory/newInstance/#Message#java.lang.Class<?>/PointingToDeclaration/testutil-server/io.spine.testing.server/-test-event-factory/new-instance.html
+$dokka.location:io.spine.testing.server/TestEventFactory/newInstance/#TestActorRequestFactory/PointingToDeclaration/testutil-server/io.spine.testing.server/-test-event-factory/new-instance.html
+$dokka.location:io.spine.testing.server/TestEventFactory/newInstance/#java.lang.Class<?>/PointingToDeclaration/testutil-server/io.spine.testing.server/-test-event-factory/new-instance.html
+io.spine.testing.server
+io.spine.testing.server.blackbox
+io.spine.testing.server.entity
+io.spine.testing.server.model
+io.spine.testing.server.query
+io.spine.testing.server.tenant
+
