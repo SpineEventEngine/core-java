@@ -1,0 +1,22 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.testing.core.given////PointingToDeclaration/testutil-core/io.spine.testing.core.given/index.html
+$dokka.location:io.spine.testing.core.given/GivenCommandContext///PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-command-context/index.html
+$dokka.location:io.spine.testing.core.given/GivenCommandContext/withActorAndTime/#UserId#Timestamp/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-command-context/with-actor-and-time.html
+$dokka.location:io.spine.testing.core.given/GivenCommandContext/withRandomActor/#/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-command-context/with-random-actor.html
+$dokka.location:io.spine.testing.core.given/GivenCommandContext/withScheduledDelayOf/#Duration/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-command-context/with-scheduled-delay-of.html
+$dokka.location:io.spine.testing.core.given/GivenEnrichment///PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-enrichment/index.html
+$dokka.location:io.spine.testing.core.given/GivenEnrichment/withOneAttribute/#/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-enrichment/with-one-attribute.html
+$dokka.location:io.spine.testing.core.given/GivenTenantId///PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-tenant-id/index.html
+$dokka.location:io.spine.testing.core.given/GivenTenantId/generate/#/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-tenant-id/generate.html
+$dokka.location:io.spine.testing.core.given/GivenTenantId/nameOf/#java.lang.Class<?>/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-tenant-id/name-of.html
+$dokka.location:io.spine.testing.core.given/GivenTenantId/of/#java.lang.String/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-tenant-id/of.html
+$dokka.location:io.spine.testing.core.given/GivenUserId///PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-user-id/index.html
+$dokka.location:io.spine.testing.core.given/GivenUserId/byTestClass/#java.lang.Class<?>/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-user-id/by-test-class.html
+$dokka.location:io.spine.testing.core.given/GivenUserId/generated/#/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-user-id/generated.html
+$dokka.location:io.spine.testing.core.given/GivenUserId/newUuid/#/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-user-id/new-uuid.html
+$dokka.location:io.spine.testing.core.given/GivenUserId/of/#java.lang.String/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-user-id/of.html
+$dokka.location:io.spine.testing.core.given/GivenVersion///PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-version/index.html
+$dokka.location:io.spine.testing.core.given/GivenVersion/withNumber/#int/PointingToDeclaration/testutil-core/io.spine.testing.core.given/-given-version/with-number.html
+io.spine.testing.core.given
+
