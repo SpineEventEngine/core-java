@@ -1,0 +1,26 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.spine.testing.client.grpc////PointingToDeclaration/testutil-client/io.spine.testing.client.grpc/index.html
+$dokka.location:io.spine.testing.client.grpc/TestClient///PointingToDeclaration/testutil-client/io.spine.testing.client.grpc/-test-client/index.html
+$dokka.location:io.spine.testing.client.grpc/TestClient/TestClient/#UserId#java.lang.String#int/PointingToDeclaration/testutil-client/io.spine.testing.client.grpc/-test-client/-test-client.html
+$dokka.location:io.spine.testing.client.grpc/TestClient/isShutdown/#/PointingToDeclaration/testutil-client/io.spine.testing.client.grpc/-test-client/is-shutdown.html
+$dokka.location:io.spine.testing.client.grpc/TestClient/post/#CommandMessage/PointingToDeclaration/testutil-client/io.spine.testing.client.grpc/-test-client/post.html
+$dokka.location:io.spine.testing.client.grpc/TestClient/queryAll/#java.lang.Class<? extends EntityState>/PointingToDeclaration/testutil-client/io.spine.testing.client.grpc/-test-client/query-all.html
+$dokka.location:io.spine.testing.client.grpc/TestClient/shutdown/#/PointingToDeclaration/testutil-client/io.spine.testing.client.grpc/-test-client/shutdown.html
+$dokka.location:io.spine.testing.client////PointingToDeclaration/testutil-client/io.spine.testing.client/index.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory///PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/index.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/TestActorRequestFactory/#TenantId#UserId#ZoneId/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/-test-actor-request-factory.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/TestActorRequestFactory/#UserId#TenantId/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/-test-actor-request-factory.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/TestActorRequestFactory/#UserId#ZoneId/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/-test-actor-request-factory.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/TestActorRequestFactory/#UserId/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/-test-actor-request-factory.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/TestActorRequestFactory/#java.lang.Class<?>#TenantId/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/-test-actor-request-factory.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/TestActorRequestFactory/#java.lang.Class<?>/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/-test-actor-request-factory.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/TestActorRequestFactory/#java.lang.String#ZoneId/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/-test-actor-request-factory.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/createCommand/#CommandMessage#Timestamp/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/create-command.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/createCommand/#CommandMessage/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/create-command.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/createCommandContext/#/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/create-command-context.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/generateCommand/#/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/generate-command.html
+$dokka.location:io.spine.testing.client/TestActorRequestFactory/toOffset/#ZoneId/PointingToDeclaration/testutil-client/io.spine.testing.client/-test-actor-request-factory/to-offset.html
+io.spine.testing.client
+io.spine.testing.client.grpc
+
