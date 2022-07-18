@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.gradle.publish.IncrementGuard
@@ -92,6 +93,7 @@ apply(from = "$rootDir/version.gradle.kts")
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 val toolBaseVersion: String by extra
+val spineBaseTypesVersion: String by extra
 
 spinePublishing {
     modules = setOf(
@@ -155,9 +157,14 @@ subprojects {
     }
 
     java {
-        tasks.withType<JavaCompile>().configureEach {
-            configureJavac()
-            configureErrorProne()
+        tasks {
+            withType<JavaCompile>().configureEach {
+                configureJavac()
+                configureErrorProne()
+            }
+            withType<org.gradle.jvm.tasks.Jar>().configureEach {
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            }
         }
     }
 
@@ -198,9 +205,13 @@ subprojects {
                 force(
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
+                    "io.spine:spine-base-types:$spineBaseTypesVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
                     "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-                    "io.spine.tools:spine-tool-base:$toolBaseVersion"
+                    "io.spine.tools:spine-tool-base:$toolBaseVersion",
+                    Grpc.core,
+                    Grpc.protobuf,
+                    Grpc.stub
                 )
             }
         }
