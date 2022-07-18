@@ -46,7 +46,7 @@ class QueryTest {
         var target = Targets.allOf(TestEntity.class);
         var query = Query.newBuilder()
                 .setTarget(target)
-                .build();
+                .buildPartial();
         var type = query.targetType();
         assertNotNull(type);
         assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
@@ -60,7 +60,7 @@ class QueryTest {
                 .build();
         var query = Query.newBuilder()
                 .setTarget(target)
-                .build();
+                .buildPartial();
         assertThrows(IllegalStateException.class, query::targetType);
     }
 }
