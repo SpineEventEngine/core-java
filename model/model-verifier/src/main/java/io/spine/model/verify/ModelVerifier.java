@@ -84,6 +84,7 @@ final class ModelVerifier implements Logging {
                              .check(classSet.elements());
     }
 
+    @SuppressWarnings("FloggerLogString") /* Complex formatting logic. */
     private void reportNotFoundIfAny(ClassSet classSet) {
         var notFound = classSet.notFound();
         if (notFound.isEmpty()) {

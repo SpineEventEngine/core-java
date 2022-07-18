@@ -179,8 +179,10 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
      * Creates {@link Either} statements for each of the passed parameters and predicates
      * and returns them all as a new {@code ImmutableList}.
      */
-    @SuppressWarnings("MethodWithMultipleLoops")  /* Transforming params and predicates
-                                                     are very related to each other. */
+    @SuppressWarnings({"Immutable" /* Using `builder` in lambda is fine. */,
+            "MethodWithMultipleLoops"
+            /* Transforming params and predicates are very related to each other. */
+    })
     private ImmutableList<Either<RecordQueryBuilder<I, EntityRecord>>>
     toEither(Iterable<SubjectParameter<?, ?, ?>> params, Iterable<QueryPredicate<S>> predicates) {
         ImmutableList.Builder<Either<RecordQueryBuilder<I, EntityRecord>>> result =

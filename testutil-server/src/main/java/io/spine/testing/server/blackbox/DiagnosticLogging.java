@@ -61,6 +61,7 @@ interface DiagnosticLogging extends Logging {
      * @param msg
      *         the formatted error message to log
      */
+    @SuppressWarnings("FloggerLogString") /* Logging the result of `toJson` call. */
     default void log(String msg, DiagnosticEvent event) {
         var severeLogger = logger()
                 .atSevere()

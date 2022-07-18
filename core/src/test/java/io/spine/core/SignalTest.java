@@ -54,6 +54,8 @@ class SignalTest {
 
     /**
      * Creates a stub instance of {@code Event} with the type {@link ProjectCreated}.
+     *
+     * <p>Some of required fields of {@code Event} are not populated for simplicity.
      */
     private Event stubEvent() {
         var project = ProjectId.newBuilder()
@@ -64,7 +66,7 @@ class SignalTest {
                 .build();
         var event = Event.newBuilder()
                 .setMessage(AnyPacker.pack(message))
-                .build();
+                .buildPartial();
         return event;
     }
 }

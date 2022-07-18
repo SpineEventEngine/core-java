@@ -212,6 +212,7 @@ public final class QueryConverter {
     /**
      * Converts a bunch of simple {@code Filter}s to a distinct {@link Either} statements.
      */
+    @SuppressWarnings("Immutable")  /* Using `builder` in lambda is fine. */
     private static <I, R extends Message> ImmutableList<Either<RecordQueryBuilder<I, R>>>
     simpleFiltersToEither(List<Filter> simpleFilters, RecordSpec<I, R, ?> spec) {
         return simpleFilters
@@ -230,6 +231,7 @@ public final class QueryConverter {
      *
      * <p>The children of each composite are also processed.
      */
+    @SuppressWarnings("Immutable")  /* Using `builder` in lambda is fine. */
     private static <I, R extends Message> ImmutableList<Either<RecordQueryBuilder<I, R>>>
     compositesToEither(List<CompositeFilter> composites, RecordSpec<I, R, ?> spec) {
         return composites

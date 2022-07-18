@@ -72,6 +72,7 @@ final class FailedHandlerGuard extends AbstractEventSubscriber implements Diagno
      * <p>If the guard is tolerating exceptions, logs the handler failure.
      */
     @VisibleForTesting
+    @SuppressWarnings("CompileTimeConstant") /* Logging the msg with some complex formatting. */
     void on(HandlerFailedUnexpectedly event) {
         var msg = format(
                 "The entity (state type `%s`) could not handle the signal `%s`:%n%s%n",
