@@ -34,7 +34,6 @@ plugins {
     java
     groovy
     `kotlin-dsl`
-    pmd
     val licenseReportVersion = "2.1"
     id("com.github.jk1.dependency-license-report").version(licenseReportVersion)
 }
@@ -101,12 +100,12 @@ val protobufPluginVersion = "0.8.18"
  * @see <a href="https://github.com/Kotlin/dokka/releases">
  *     Dokka Releases</a>
  */
-val dokkaVersion = "1.6.20"
+val dokkaVersion = "1.6.21"
 
 configurations.all {
     resolutionStrategy {
-        // Force Kotlin lib versions avoiding using those bundled with Gradle.
         force(
+            // Force Kotlin lib versions avoiding using those bundled with Gradle.
             "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
@@ -146,4 +145,7 @@ dependencies {
     implementation("gradle.plugin.com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}")
     implementation("org.jetbrains.dokka:dokka-base:${dokkaVersion}")
+
+    // https://github.com/srikanth-lingala/zip4j
+    implementation("net.lingala.zip4j:zip4j:2.10.0")
 }

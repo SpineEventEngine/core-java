@@ -111,4 +111,6 @@ class LazyTempPath(private val prefix: String) : Path {
     override fun toRealPath(vararg options: LinkOption?): Path = delegate.toRealPath(*options)
 
     override fun toFile(): File = delegate.toFile()
+
+    override fun toString(): String = delegate.toString()
 }

@@ -26,22 +26,33 @@
 
 package io.spine.internal.gradle.github.pages
 
-object TaskName {
+import io.spine.internal.gradle.RepoSlug
+import io.spine.internal.gradle.git.Branch
+import io.spine.internal.gradle.git.Repository
+import io.spine.internal.gradle.git.UserInfo
 
-    /**
-     * The name of the task which updates the GitHub Pages.
-     */
-    const val updateGitHubPages = "updateGitHubPages"
+/**
+ * Clones the current project repository with the branch dedicated to publishing
+ * documentation to GitHub Pages checked out.
+ *
+ * The repository's GitHub SSH URL is derived from the `REPO_SLUG` environment
+ * variable. The [branch][Branch.documentation] dedicated to publishing documentation
+ * is automatically checked out in this repository. Also, the username and the email
+ * of the git user are automatically configured. The username is set
+ * to "UpdateGitHubPages Plugin", and the email is derived from
+ * the `FORMAL_GIT_HUB_PAGES_AUTHOR` environment variable.
+ *
+ * @throws GradleException if any of the environment variables described above
+ *         is not set.
+ */
+internal fun Repository.Factory.forPublishingDocumentation(): Repository {
+    val host = RepoSlug.fromVar().gitHost()
 
-    /**
-     * The name of the helper task to gather the generated Javadoc before updating
-     * GitHub Pages.
-     */
-    const val copyJavadoc = "copyJavadoc"
+    val username = "UpdateGitHubPages Plugin"
+    val userEmail = AuthorEmail.fromVar().toString()
+    val user = UserInfo(username, userEmail)
 
-    /**
-     * The name of the helper task to gather Dokka-generated documentation before
-     * updating GitHub Pages.
-     */
-    const val copyDokka = "copyDokka"
+    val branch = Branch.documentation
+
+    return of(host, user, branch)
 }

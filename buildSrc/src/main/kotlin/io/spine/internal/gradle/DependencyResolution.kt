@@ -40,6 +40,7 @@ import io.spine.internal.dependency.Gson
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.J2ObjC
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Jackson
 import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Okio
 import io.spine.internal.dependency.Plexus
@@ -120,7 +121,14 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
         Okio.lib,
         CommonsCli.lib,
         CheckerFramework.compatQual,
-        CommonsLogging.lib
+        CommonsLogging.lib,
+        Jackson.databind,
+        Jackson.core,
+        Jackson.dataformatXml,
+        Jackson.dataformatYaml,
+        Jackson.moduleKotlin,
+        Jackson.bom,
+        Jackson.annotations
     )
 }
 

@@ -26,79 +26,88 @@
 
 package io.spine.internal.gradle.github.pages
 
-import io.spine.internal.gradle.Cli
-import io.spine.internal.gradle.RepoSlug
 import java.io.File
 import java.nio.file.Path
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logger
+import io.spine.internal.gradle.git.Repository
 
 /**
  * Performs the update of GitHub pages.
  */
 fun Task.updateGhPages(project: Project) {
     val plugin = project.plugins.getPlugin(UpdateGitHubPages::class.java)
-    val op = with(plugin) {
-        Operation(project, rootFolder, checkoutTempFolder, javadocOutputPath, logger)
+
+    with(plugin) {
+        SshKey(rootFolder).register()
     }
-    op.run()
+
+    val repository = Repository.forPublishingDocumentation()
+
+    val updateJavadoc = with(plugin) {
+        UpdateJavadoc(project, javadocOutputFolder, repository, logger)
+    }
+
+    val updateDokka = with(plugin) {
+        UpdateDokka(project, dokkaOutputFolder, repository, logger)
+    }
+
+    repository.use {
+        updateJavadoc.run()
+        updateDokka.run()
+        repository.push()
+    }
 }
 
-private class Operation(
+private abstract class UpdateDocumentation(
     private val project: Project,
-    private val rootFolder: File,
-    checkoutTempFolder: Path,
-    private val javadocOutputPath: Path,
+    private val docsSourceFolder: Path,
+    private val repository: Repository,
     private val logger: Logger
 ) {
 
-    private val ghRepoFolder: File = File("${checkoutTempFolder}/${Branch.ghPages}")
-    private val docDirPostfix = "reference/$project.name"
-    private val mostRecentDocDir = File("$ghRepoFolder/$docDirPostfix")
+    /**
+     * The folder under the repository's root(`/`) for storing documentation.
+     *
+     * The value should not contain any leading or trailing file separators.
+     *
+     * The absolute path to the project's documentation is made by appending its
+     * name to the end, making `/[docsDestinationFolder]/[project.name]`.
+     */
+    protected abstract val docsDestinationFolder: String
+
+    /**
+     * The name of the tool used to generate the documentation to update.
+     *
+     * This name will appear in logs as part of a message.
+     */
+    protected abstract val toolName: String
+
+    private val mostRecentFolder = File("${repository.location}/${docsDestinationFolder}/${project.name}")
 
     fun run() {
-        SshKey(rootFolder).register()
-        checkoutDocs()
-        val generatedDocs = replaceMostRecentDocs()
-        copyIntoVersionDir(generatedDocs)
-        addCommitAndPush()
-        logger.debug("The GitHub Pages contents were successfully updated.")
-    }
+        logger.debug("Update of the ${toolName} documentation for module `${project.name}` started.")
 
-    /** Executes a command in the project [rootFolder]. */
-    private fun execute(vararg command: String): String = Cli(rootFolder).execute(*command)
+        val documentation = replaceMostRecentDocs()
+        copyIntoVersionDir(documentation)
 
-    /** Executes a command in the [ghRepoFolder] */
-    private fun pagesExecute(vararg command: String): String = Cli(ghRepoFolder).execute(*command)
+        val updateMessage = "Update ${toolName} documentation for module `${project.name}` as for " +
+                "version ${project.version}"
+        repository.commitAllChanges(updateMessage)
 
-    private fun checkoutDocs() {
-        val gitHost = RepoSlug.fromVar().gitHost()
-
-        execute("git", "clone", gitHost, ghRepoFolder.absolutePath)
-        pagesExecute("git", "checkout", Branch.ghPages)
+        logger.debug("Update of the ${toolName} documentation for `${project.name}` successfully finished.")
     }
 
     private fun replaceMostRecentDocs(): ConfigurableFileCollection {
-        logger.debug("Replacing the most recent docs in `$mostRecentDocDir`.")
-        val generatedDocs = project.files(javadocOutputPath)
-        copyDocs(generatedDocs, mostRecentDocDir)
+        val generatedDocs = project.files(docsSourceFolder)
+
+        logger.debug("Replacing the most recent ${toolName} documentation in ${mostRecentFolder}.")
+        copyDocs(generatedDocs, mostRecentFolder)
+
         return generatedDocs
-    }
-
-    private fun copyIntoVersionDir(generatedDocs: ConfigurableFileCollection) {
-        val versionedDocDir = File("$mostRecentDocDir/v/$project.version")
-        logger.debug("Storing the new version of docs in the directory `$versionedDocDir`.")
-        copyDocs(generatedDocs, versionedDocDir)
-    }
-
-    private fun addCommitAndPush() {
-        pagesExecute("git", "add", docDirPostfix)
-        configureCommitter()
-        commitAndPush()
     }
 
     private fun copyDocs(source: FileCollection, destination: File) {
@@ -109,89 +118,36 @@ private class Operation(
         }
     }
 
-    /**
-     * Configures Git to publish the changes under "UpdateGitHubPages Plugin" Git user name
-     * and email stored in "FORMAL_GIT_HUB_PAGES_AUTHOR" env variable.
-     */
-    private fun configureCommitter() {
-        pagesExecute("git", "config", "user.name", "\"UpdateGitHubPages Plugin\"")
-        val authorEmail = AuthorEmail.fromVar().toString()
-        pagesExecute("git", "config", "user.email", authorEmail)
-    }
+    private fun copyIntoVersionDir(generatedDocs: ConfigurableFileCollection) {
+        val versionedDocDir = File("$mostRecentFolder/v/${project.version}")
 
-    private fun commitAndPush() {
-        pagesExecute(
-            "git",
-            "commit",
-            "--allow-empty",
-            "--message=\"Update Javadoc for module ${project.name}" +
-                    " as for version ${project.version}\""
-        )
-        pagesExecute("git", "push")
+        logger.debug("Storing the new version of ${toolName} documentation in `${versionedDocDir}.")
+        copyDocs(generatedDocs, versionedDocDir)
     }
 }
 
-/**
- * Registers SSH key for further operations with GitHub Pages.
- */
-private class SshKey(private val rootFolder: File) {
+private class UpdateJavadoc(
+    project: Project,
+    docsSourceFolder: Path,
+    repository: Repository,
+    logger: Logger
+) : UpdateDocumentation(project, docsSourceFolder, repository, logger) {
 
-    /**
-     * Creates an SSH key with the credentials and registers it
-     * by invoking the `register-ssh-key.sh` script.
-     */
-    fun register() {
-        val gitHubAccessKey = gitHubKey()
-        val sshConfigFile = sshConfigFile()
-        val nl = System.lineSeparator()
-        sshConfigFile.appendText(
-            nl +
-                    "Host github.com-publish" + nl +
-                    "User git" + nl +
-                    "IdentityFile ${gitHubAccessKey.absolutePath}" + nl
-        )
+    override val docsDestinationFolder: String
+        get() = "reference"
+    override val toolName: String
+        get() = "Javadoc"
+}
 
-        execute(
-            "${rootFolder.absolutePath}/config/scripts/register-ssh-key.sh",
-            gitHubAccessKey.absolutePath
-        )
-    }
+private class UpdateDokka(
+    project: Project,
+    docsSourceFolder: Path,
+    repository: Repository,
+    logger: Logger
+) : UpdateDocumentation(project, docsSourceFolder, repository, logger) {
 
-    /**
-     * Locates `deploy_key_rsa` in the [rootFolder] and returns it as a [File].
-     *
-     * If it is not found, a [GradleException] is thrown.
-     *
-     * <p>A CI instance comes with an RSA key. However, of course, the default key has no
-     * privileges in Spine repositories. Thus, we add our own RSA key — `deploy_rsa_key`.
-     * It must have `write` rights in the associated repository.
-     * Also, we don't want that key to be used for anything else but GitHub Pages publishing.
-     *
-     * Thus, we configure the SSH agent to use the `deploy_rsa_key`
-     * only for specific references, namely in `github.com-publish`.
-     */
-    private fun gitHubKey(): File {
-        val gitHubAccessKey = File("${rootFolder.absolutePath}/deploy_key_rsa")
-
-        if (!gitHubAccessKey.exists()) {
-            throw GradleException(
-                "File $gitHubAccessKey does not exist. It should be encrypted" +
-                        " in the repository and decrypted on CI."
-            )
-        }
-        return gitHubAccessKey
-    }
-
-    private fun sshConfigFile(): File {
-        val sshConfigFile = File("${System.getProperty("user.home")}/.ssh/config")
-        if (!sshConfigFile.exists()) {
-            val parentDir = sshConfigFile.canonicalFile.parentFile
-            parentDir.mkdirs()
-            sshConfigFile.createNewFile()
-        }
-        return sshConfigFile
-    }
-
-    /** Executes a command in the project [rootFolder]. */
-    private fun execute(vararg command: String): String = Cli(rootFolder).execute(*command)
+    override val docsDestinationFolder: String
+        get() = "dokka-reference"
+    override val toolName: String
+        get() = "Dokka"
 }
