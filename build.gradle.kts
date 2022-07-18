@@ -56,6 +56,7 @@ buildscript {
     val kotlinVersion = io.spine.internal.dependency.Kotlin.version
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
+    val toolBaseVersion: String by extra
     val mcJavaVersion: String by extra
 
     dependencies {
@@ -69,7 +70,8 @@ buildscript {
                     "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
                     "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
                     "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
+                    "io.spine:spine-time:$spineTimeVersion",
+                    "io.spine.tools:spine-tool-base:$toolBaseVersion"
             )
         }
     }
@@ -198,12 +200,7 @@ subprojects {
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
                     "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-                    "com.google.errorprone:error_prone_core:2.10.0",
-                    "com.google.errorprone:error_prone_annotations:2.10.0",
-                    "com.google.errorprone:error_prone_annotation:2.10.0",
-                    "com.google.errorprone:error_prone_check_api:2.10.0",
-                    "com.google.errorprone:error_prone_test_helpers:2.10.0",
-                    "com.google.errorprone:error_prone_type_annotations:2.10.0"
+                    "io.spine.tools:spine-tool-base:$toolBaseVersion"
                 )
             }
         }
