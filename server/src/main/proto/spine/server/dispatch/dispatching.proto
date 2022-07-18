@@ -74,7 +74,7 @@ message DispatchOutcome {
         Success success = 2 [(validate) = true];
 
         // Erroneous handling result.
-        base.Error error = 3 [(validate) = true];
+        base.Error error = 3;
 
         // Result of the signal handling being interrupted.
         //

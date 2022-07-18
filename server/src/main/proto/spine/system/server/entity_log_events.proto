@@ -139,7 +139,7 @@ message EventImported {
     core.Event payload = 2 [(validate) = true];
 
     // The time when the event was imported.
-    google.protobuf.Timestamp when_imported = 3 [(required) = true, (validate) = true];
+    google.protobuf.Timestamp when_imported = 3 [(required) = true];
 
     // The fully qualified name of the receiver aggregate.
     EntityTypeName entity_type = 4 [(required) = true];
