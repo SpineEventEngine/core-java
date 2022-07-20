@@ -38,9 +38,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Speeds up the discovery of the {@link ColumnMapping} by the type of column.
  *
- * <p>In real-life scenarios, the search for the corresponding column mapping is performed
- * many times for the same inputs. As long as the mappings are configured during
- * the application setup, it makes sense to cache the mapping values per type.
+ * <p>Searches for the column mappings among user-provided custom mappings.
+ * If nothing is found for the given column type, the standard mappings are searched.
+ *
+ * <p>In real-life scenarios, the search for the column mapping corresponding
+ * to the column type is performed many times for the same inputs. As long as the mappings
+ * are configured during the application setup, it makes sense to cache
+ * the mapping values per column type.
  *
  * @param <R>
  *         type of the column to persist the column value as
@@ -50,6 +54,14 @@ final class KnownMappings<R> {
     private final FindMapping<R> findStandardMapping;
     private final FindMapping<R> findCustomMapping;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param findStandardMapping
+     *         function searching for the mapping in standard column mappings
+     * @param findCustomMapping
+     *         function searching for the mapping among custom mappings
+     */
     KnownMappings(FindMapping<R> findStandardMapping, FindMapping<R> findCustomMapping) {
         this.findStandardMapping = checkNotNull(findStandardMapping);
         this.findCustomMapping = checkNotNull(findCustomMapping);
