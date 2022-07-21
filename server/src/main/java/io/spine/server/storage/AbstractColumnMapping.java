@@ -26,6 +26,9 @@
 
 package io.spine.server.storage;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -61,6 +64,18 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
             = standardTypesMapping();
 
     /**
+     * The mappings which were previously found per column types.
+     *
+     * <p>If the mapping for some given type is not yet discovered, it is going to be searched for
+     * and then cached for future use.
+     *
+     * <p>This is an optimization for the well-known hot spot discovered in profiling sessions
+     * in real-world Spine-based applications.
+     */
+    private final KnownMappings<R> knownMappings =
+            new KnownMappings<>(this::standardMappingFor, this::customMappingFor);
+
+    /**
      * The mapping rules for custom user-defined types.
      *
      * @see #setupCustomMapping(ImmutableMap.Builder)
@@ -72,14 +87,8 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
     @Override
     public <T> ColumnTypeMapping<T, ? extends R> of(Class<T> type) {
         checkNotNull(type);
-        ColumnTypeMapping<?, ? extends R> result;
-        var rule = customMappingFor(type);
-        if (rule.isPresent()) {
-            result = rule.get();
-        } else {
-            rule = standardMappingFor(type);
-            result = rule.orElseThrow(() -> unsupportedType(type));
-        }
+        var rule = knownMappings.get(type);
+        var result = rule.orElseThrow(() -> unsupportedType(type));
         return (ColumnTypeMapping<T, ? extends R>) result;
     }
 
