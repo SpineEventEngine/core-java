@@ -44,6 +44,12 @@ public class TaskView extends Projection<String, DTaskView, DTaskView.Builder> {
 
     private static final Map<String, DTaskCreated> creationEvents = Maps.newConcurrentMap();
 
+    /**
+     * If set to {@code true}, prohibits to handle {@code DTaskAssigned} before
+     * the corresponding {@code DTaskCreated} is handled.
+     */
+    private static boolean strictMode = true;
+
     @Subscribe
     void to(DTaskCreated event) {
         var rawId = event.getId();
@@ -54,11 +60,39 @@ public class TaskView extends Projection<String, DTaskView, DTaskView.Builder> {
     @Subscribe
     void to(DTaskAssigned event) {
         var rawId = event.getId();
-        if (!creationEvents.containsKey(rawId)) {
+        if (strictMode && !creationEvents.containsKey(rawId)) {
             throw new IllegalStateException("`DTaskCreated` event was" +
                                                     " not dispatched before `DTaskAssigned`.");
         }
         builder().setAssignee(event.getAssignee());
+    }
+
+    /**
+     * Clears the knowledge of previously received events.
+     *
+     * <p>Such a reset may be necessary if projections of this kind are used
+     * in more than a single test run.
+     */
+    public static synchronized void clearCache() {
+        creationEvents.clear();
+    }
+
+    /**
+     * Enables the strict mode, which prevents {@code DTaskAssigned} handling before
+     * the corresponding {@code DTaskCreated} is handled.
+     */
+    public static synchronized void enableStrictMode() {
+        strictMode = true;
+    }
+
+    /**
+     * Disables the strict mode.
+     *
+     * <p>When disabled, {@code DTaskAssigned} and {@code DTaskCreated} events may be handled
+     * in any order.
+     */
+    public static synchronized void disableStrictMode() {
+        strictMode = false;
     }
 
     public static class Repository extends ProjectionRepository<String, TaskView, DTaskView> {
