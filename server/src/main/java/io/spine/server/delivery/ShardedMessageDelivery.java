@@ -51,6 +51,20 @@ interface ShardedMessageDelivery<M extends ShardedRecord> {
     void deliver(List<M> incoming);
 
     /**
+     * Delivers a single message to its target.
+     *
+     * <p>The descendants typically will initialize the targets for the messages (such as entities)
+     * and handle the dispatching results.
+     *
+     * <p>Any runtime issues should be handled by the descendants by emitting the corresponding
+     * rejection events and potentially notifying the respective entity repositories.
+     *
+     * @param message
+     *         the incoming message to deliver
+     */
+    void deliver(M message);
+
+    /**
      * Serves to notify that the given message was originally sent to be {@linkplain #deliver(List)
      * delivered}, but turned out to be a duplicate.
      */
