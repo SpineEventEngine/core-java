@@ -48,6 +48,9 @@ final class NoOpInboxStorage extends InboxStorage {
         super(InMemoryStorageFactory.newInstance(), false);
     }
 
+    /**
+     * Returns the singleton instance of {@code NoOpInboxStorage}.
+     */
     static synchronized NoOpInboxStorage instance() {
         if (instance == null) {
             instance = new NoOpInboxStorage();
@@ -75,8 +78,8 @@ final class NoOpInboxStorage extends InboxStorage {
      * Always returns an empty list of messages.
      */
     @Override
-    public ImmutableList<InboxMessage> readAll(ShardIndex index, @Nullable Timestamp sinceWhen,
-                                               int pageSize) {
+    public ImmutableList<InboxMessage>
+    readAll(ShardIndex index, @Nullable Timestamp sinceWhen, int pageSize) {
         return ImmutableList.of();
     }
 
