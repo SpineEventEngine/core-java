@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
 import com.google.protobuf.util.Durations;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
@@ -394,6 +395,38 @@ public final class Delivery implements Logging {
                 .setStrategy(strategy)
                 .build();
         delivery.subscribe(new LocalDispatchingObserver());
+        return delivery;
+    }
+
+    /**
+     * Creates a new instance of {@code Delivery} which makes all signals to skip
+     * the {@code Inbox}es and be delivered straight to their respective targets.
+     *
+     * <p>In this mode, no signals are stored in the {@code InboxStorage}. Also, the signals
+     * are not sharded.
+     *
+     * <p>This mode only suits the applications which operate in a single-thread mode
+     * and in scope of a single JVM. Typically, that would be some tools executing
+     * linear-style jobs, which aim for the maximum performance under
+     * the strictly controlled circumstances.
+     *
+     * <p>Any concurrent dispatching of signals (command posting, receiving external events, etc)
+     * will likely break the consistency of their target entities.
+     *
+     * <p>This API is experimental. Use with caution.
+     *
+     * @return a new instance of {@code Delivery}
+     */
+    @Experimental
+    public static Delivery direct() {
+        var delivery = newBuilder()
+                .setStrategy(UniformAcrossAllShards.singleShard())
+                .setInboxStorage(NoOpInboxStorage.instance())
+                .build();
+        delivery.subscribe(update -> {
+            var action = delivery.deliveries.get(update);
+            action.deliver(ImmutableList.of(update));
+        });
         return delivery;
     }
 
