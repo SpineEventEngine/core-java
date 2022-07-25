@@ -406,8 +406,9 @@ public final class Delivery implements Logging {
      * are not sharded.
      *
      * <p>This mode only suits the applications which operate in a single-thread mode
-     * and in scope of a single JVM. Typically, that would be the CLI apps executing linear jobs,
-     * aiming for maximum performance under a strictly controlled circumstances.
+     * and in scope of a single JVM. Typically, that would be some tools executing
+     * linear-style jobs, which aim for the maximum performance under
+     * the strictly controlled circumstances.
      *
      * <p>Any concurrent dispatching of signals (command posting, receiving external events, etc)
      * will likely break the consistency of their target entities.
