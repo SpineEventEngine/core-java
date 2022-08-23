@@ -25,6 +25,7 @@
  */
 
 import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.VersionWriter
@@ -194,6 +195,13 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                    /* Force the version of gRPC used by the `:client` module over the one
+                       set by `mc-java` in the `:core` module when specifying compiler artifact
+                       for the gRPC plugin.
+                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
+                       .configureProtocPlugins() method which sets the version from resources. */
+                    "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
+
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
@@ -203,7 +211,7 @@ subprojects {
                     "com.google.errorprone:error_prone_annotation:2.10.0",
                     "com.google.errorprone:error_prone_check_api:2.10.0",
                     "com.google.errorprone:error_prone_test_helpers:2.10.0",
-                    "com.google.errorprone:error_prone_type_annotations:2.10.0"
+                    "com.google.errorprone:error_prone_type_annotations:2.10.0",
                 )
             }
         }
