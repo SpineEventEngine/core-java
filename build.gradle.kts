@@ -186,8 +186,13 @@ subprojects {
 
     /**
      * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` the empty constructor in
-     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking the API.
+     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking
+     * our code in `mc-java`.
+     *
+     * See this issue (https://github.com/SpineEventEngine/mc-java/issues/42) for details.
      */
+    val errorProneVersion = "2.10.0"
+
     configurations {
         forceVersions()
         excludeProtobufLite()
@@ -206,12 +211,13 @@ subprojects {
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
                     "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-                    "com.google.errorprone:error_prone_core:2.10.0",
-                    "com.google.errorprone:error_prone_annotations:2.10.0",
-                    "com.google.errorprone:error_prone_annotation:2.10.0",
-                    "com.google.errorprone:error_prone_check_api:2.10.0",
-                    "com.google.errorprone:error_prone_test_helpers:2.10.0",
-                    "com.google.errorprone:error_prone_type_annotations:2.10.0",
+
+                    "com.google.errorprone:error_prone_core:$errorProneVersion",
+                    "com.google.errorprone:error_prone_annotations:$errorProneVersion",
+                    "com.google.errorprone:error_prone_annotation:$errorProneVersion",
+                    "com.google.errorprone:error_prone_check_api:$errorProneVersion",
+                    "com.google.errorprone:error_prone_test_helpers:$errorProneVersion",
+                    "com.google.errorprone:error_prone_type_annotations:$errorProneVersion",
                 )
             }
         }
