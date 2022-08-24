@@ -189,7 +189,7 @@ subprojects {
      * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking
      * our code in `mc-java`.
      *
-     * See this issue (https://github.com/SpineEventEngine/mc-java/issues/42) for details.
+     * See [this issue](https://github.com/SpineEventEngine/mc-java/issues/42) for details.
      */
     val errorProneVersion = "2.10.0"
 
