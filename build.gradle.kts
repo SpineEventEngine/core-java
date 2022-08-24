@@ -192,6 +192,12 @@ subprojects {
         forceVersions()
         excludeProtobufLite()
 
+        /*
+          We have to stay at this version for now. Selecting any newer version fails ErrorProne
+          because of this issue in `mc-java`(https://github.com/SpineEventEngine/mc-java/issues/42).
+         */
+        val errorProneVersion = "2.10.0"
+        
         all {
             resolutionStrategy {
                 force(
@@ -206,12 +212,13 @@ subprojects {
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
                     "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-                    "com.google.errorprone:error_prone_core:2.10.0",
-                    "com.google.errorprone:error_prone_annotations:2.10.0",
-                    "com.google.errorprone:error_prone_annotation:2.10.0",
-                    "com.google.errorprone:error_prone_check_api:2.10.0",
-                    "com.google.errorprone:error_prone_test_helpers:2.10.0",
-                    "com.google.errorprone:error_prone_type_annotations:2.10.0",
+
+                    "com.google.errorprone:error_prone_core:$errorProneVersion",
+                    "com.google.errorprone:error_prone_annotations:$errorProneVersion",
+                    "com.google.errorprone:error_prone_annotation:$errorProneVersion",
+                    "com.google.errorprone:error_prone_check_api:$errorProneVersion",
+                    "com.google.errorprone:error_prone_test_helpers:$errorProneVersion",
+                    "com.google.errorprone:error_prone_type_annotations:$errorProneVersion",
                 )
             }
         }
