@@ -26,7 +26,7 @@
 
 package io.spine.server.migration.mirror;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterators;
 import io.spine.server.ContextSpec;
 import io.spine.server.migration.mirror.given.DeliveryService;
 import io.spine.server.migration.mirror.given.MemoizingMonitor;
@@ -173,9 +173,10 @@ final class MirrorMigrationTest {
         migration.run(monitor);
 
         @SuppressWarnings("resource") // Closed elsewhere.
-        var entityRecordStorage = migration.destinationStorage();
-        var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
-        assertThat(entityRecords.size()).isLessThan(expectedNumber);
-        assertThat(entityRecords.size()).isAtLeast(batchSize);
+        var destinationStorage = migration.destinationStorage();
+        var migratedRecords =  Iterators.size(destinationStorage.index());
+
+        assertThat(migratedRecords).isLessThan(expectedNumber);
+        assertThat(migratedRecords).isAtLeast(batchSize);
     }
 }
