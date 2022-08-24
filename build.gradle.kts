@@ -186,18 +186,17 @@ subprojects {
 
     /**
      * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` the empty constructor in
-     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking the API.
+     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking
+     * our code in `mc-java`.
+     *
+     * See this issue (https://github.com/SpineEventEngine/mc-java/issues/42) for details.
      */
+    val errorProneVersion = "2.10.0"
+
     configurations {
         forceVersions()
         excludeProtobufLite()
 
-        /*
-          We have to stay at this version for now. Selecting any newer version fails ErrorProne
-          because of this issue in `mc-java`(https://github.com/SpineEventEngine/mc-java/issues/42).
-         */
-        val errorProneVersion = "2.10.0"
-        
         all {
             resolutionStrategy {
                 force(
