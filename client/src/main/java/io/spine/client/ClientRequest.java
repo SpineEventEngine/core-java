@@ -37,6 +37,7 @@ import io.spine.query.EntityQuery;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.type.MessageExtensions.requirePublished;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
 
 /**
@@ -81,6 +82,7 @@ public class ClientRequest {
      */
     public CommandRequest command(CommandMessage c) {
         checkNotNull(c);
+        requirePublished(c);
         return new CommandRequest(this, c);
     }
 
@@ -89,6 +91,7 @@ public class ClientRequest {
      */
     public <S extends EntityState<?>> SubscriptionRequest<S> subscribeTo(Class<S> type) {
         checkNotNull(type);
+        requirePublished(type);
         return new SubscriptionRequest<>(this, type);
     }
 
@@ -97,6 +100,7 @@ public class ClientRequest {
      */
     public <E extends EventMessage> EventSubscriptionRequest<E> subscribeToEvent(Class<E> type) {
         checkNotNull(type);
+        requirePublished(type);
         return new EventSubscriptionRequest<>(this, type);
     }
 
