@@ -93,6 +93,7 @@ class ApplierTest {
         var applier = method.get();
         var eventMessage = Sample.messageOfType(RefProjectCreated.class);
         var event = Event.newBuilder()
+                .setId(GivenEvent.someId())
                 .setContext(GivenEvent.context())
                 .setMessage(pack(eventMessage))
                 .build();
@@ -144,6 +145,7 @@ class ApplierTest {
         var applier = method.get();
 
         var event = Event.newBuilder()
+                .setId(GivenEvent.someId())
                 .setContext(GivenEvent.context())
                 .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                 .build();

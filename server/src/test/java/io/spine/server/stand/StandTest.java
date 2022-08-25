@@ -26,6 +26,7 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.FieldMask;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -36,6 +37,7 @@ import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
+import io.spine.client.TopicId;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
@@ -499,8 +501,12 @@ class StandTest extends TenantAwareTest {
     @DisplayName("fail if cancelling non-existent subscription")
     void notCancelNonExistent() {
         var stand = createStand();
+        var topicId = TopicId.newBuilder()
+                .setValue(Identifier.newUuid())
+                .build();
         var nonExistingSubscription = Subscription.newBuilder()
                 .setId(Subscriptions.generateId())
+                .setTopic(Topic.newBuilder().setId(topicId).buildPartial())
                 .build();
         assertThrows(InvalidSubscriptionException.class,
                      () -> stand.cancel(nonExistingSubscription, noOpObserver()));

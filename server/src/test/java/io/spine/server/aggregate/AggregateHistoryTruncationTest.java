@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Durations;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.BoundedContextBuilder;
@@ -284,7 +285,7 @@ public abstract class AggregateHistoryTruncationTest {
 
         @CanIgnoreReturnValue
         private Event writeEvent() {
-            return writeEvent(Timestamp.getDefaultInstance());
+            return writeEvent(subtract(currentTime(), Durations.fromDays(365)));
         }
 
         @CanIgnoreReturnValue
