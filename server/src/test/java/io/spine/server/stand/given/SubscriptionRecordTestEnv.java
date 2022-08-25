@@ -27,11 +27,14 @@
 package io.spine.server.stand.given;
 
 import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.client.Subscription;
+import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
 import io.spine.client.TopicId;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
@@ -43,6 +46,8 @@ import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.event.ProjectCreated;
+import io.spine.testing.core.given.GivenUserId;
+import io.spine.time.ZoneIds;
 import io.spine.type.TypeUrl;
 
 import java.util.Collections;
@@ -117,11 +122,18 @@ public final class SubscriptionRecordTestEnv {
     }
 
     public static Subscription subscription(Target target) {
+        var context = ActorContext.newBuilder()
+                .setTimestamp(Time.currentTime())
+                .setActor(GivenUserId.newUuid())
+                .setZoneId(ZoneIds.systemDefault())
+                .build();
         var topic = Topic.newBuilder()
                 .setId(TopicId.newBuilder().setValue(Identifier.newUuid()))
                 .setTarget(target)
+                .setContext(context)
                 .build();
         var result = Subscription.newBuilder()
+                .setId(Subscriptions.generateId())
                 .setTopic(topic)
                 .build();
         return result;

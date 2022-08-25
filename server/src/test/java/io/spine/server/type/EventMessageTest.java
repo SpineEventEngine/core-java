@@ -64,7 +64,7 @@ class EventMessageTest {
                 .setId(newTaskId())
                 .setProjectId(newProjectId())
                 .buildPartial();
-        var event = event(msg);
+        var event = partiallyBuiltEvent(msg);
         assertThrows(ValidationException.class, () -> checkValid(event));
     }
 
@@ -81,16 +81,27 @@ class EventMessageTest {
     }
 
     private static Event event(Message message) {
+        var builder = eventWithMsg(message);
+        var result = builder.build();
+        return result;
+    }
+
+    private static Event partiallyBuiltEvent(Message message) {
+        var builder = eventWithMsg(message);
+        var result = builder.buildPartial();
+        return result;
+    }
+
+    private static Event.Builder eventWithMsg(Message message) {
         var id = EventId.newBuilder()
                 .setValue(Identifier.newUuid())
                 .build();
         var wrappedMessage = AnyPacker.pack(message);
         var context = GivenEvent.context();
-        var result = Event.newBuilder()
+        var builder = Event.newBuilder()
                 .setId(id)
                 .setMessage(wrappedMessage)
-                .setContext(context)
-                .build();
-        return result;
+                .setContext(context);
+        return builder;
     }
 }

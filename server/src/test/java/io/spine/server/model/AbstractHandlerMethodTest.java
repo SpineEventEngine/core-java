@@ -27,7 +27,6 @@
 package io.spine.server.model;
 
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.server.model.given.method.OneParamMethod;
 import io.spine.server.model.given.method.OneParamSignature;
 import io.spine.server.model.given.method.OneParamSpec;
@@ -35,6 +34,7 @@ import io.spine.server.model.given.method.StubHandler;
 import io.spine.server.model.given.method.TwoParamMethod;
 import io.spine.server.model.given.method.TwoParamSpec;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.model.ModProjectCreated;
 import io.spine.test.model.ModProjectStarted;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,7 +122,9 @@ class AbstractHandlerMethodTest {
                     .setId(newUuid())
                     .build();
             var event = Event.newBuilder()
+                    .setId(GivenEvent.someId())
                     .setMessage(pack(eventMessage))
+                    .setContext(GivenEvent.context())
                     .build();
             var envelope = EventEnvelope.of(event);
             oneParamMethod.invoke(target, envelope);
@@ -138,8 +140,9 @@ class AbstractHandlerMethodTest {
                     .setId(newUuid())
                     .build();
             var event = Event.newBuilder()
+                    .setId(GivenEvent.someId())
                     .setMessage(pack(eventMessage))
-                    .setContext(EventContext.getDefaultInstance())
+                    .setContext(GivenEvent.context())
                     .build();
             var envelope = EventEnvelope.of(event);
             twoParamMethod.invoke(target, envelope);

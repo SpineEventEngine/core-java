@@ -37,6 +37,7 @@ import io.spine.core.EventId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.TypeConverter;
 import io.spine.test.core.ProjectCreated;
 import io.spine.test.core.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
@@ -91,27 +92,34 @@ public class EventEnvelopeTestEnv {
 
     @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(CommandContext commandContext) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setCommandContext(commandContext)
                 .build();
     }
 
     @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(EventContext eventContext) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setEventContext(eventContext)
                 .build();
     }
 
     public static EventContext eventContext(Origin previousMessage) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setPastMessage(previousMessage)
                 .build();
     }
 
     public static EventContext eventContext(ActorContext importContext) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setImportContext(importContext)
                 .build();
+    }
+
+    private static EventContext.Builder contextBuilder() {
+        var producerId = TypeConverter.toAny(GivenUserId.newUuid());
+        return EventContext.newBuilder()
+                .setTimestamp(Time.currentTime())
+                .setProducerId(producerId);
     }
 }

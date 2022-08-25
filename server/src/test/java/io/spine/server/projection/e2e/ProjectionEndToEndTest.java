@@ -34,6 +34,7 @@ import io.spine.core.EventContext;
 import io.spine.core.Events;
 import io.spine.core.MessageId;
 import io.spine.core.UserId;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -163,6 +164,7 @@ class ProjectionEndToEndTest {
                 .setTimestamp(producedAt)
                 .setExternal(true)
                 .setImportContext(ActorContext.getDefaultInstance())
+                .setProducerId(TypeConverter.toAny(GivenUserId.newUuid()))
                 .build();
         var event = Event.newBuilder()
                 .setId(Events.generateId())
