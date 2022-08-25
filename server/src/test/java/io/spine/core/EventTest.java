@@ -162,8 +162,11 @@ public class EventTest extends UtilityClassTest<Events> {
         @DisplayName("from the previous message")
         void fromPastMessage() {
             var targetTenantId = tenantId();
+            var actorContext = ActorContext.newBuilder()
+                    .setTenantId(targetTenantId)
+                    .buildPartial();
             var origin = Origin.newBuilder()
-                    .setActorContext(ActorContext.newBuilder().setTenantId(targetTenantId))
+                    .setActorContext(actorContext)
                     .buildPartial();
             var context = contextWithoutOrigin().setPastMessage(origin)
                                                 .buildPartial();

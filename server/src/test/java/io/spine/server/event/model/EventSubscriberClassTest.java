@@ -29,6 +29,7 @@ package io.spine.server.event.model;
 import io.spine.people.PersonName;
 import io.spine.server.event.model.given.classes.ConferenceProgram;
 import io.spine.server.type.EventEnvelope;
+import io.spine.test.event.model.Conference;
 import io.spine.test.event.model.ConferenceAnnounced;
 import io.spine.test.event.model.SpeakerJoined;
 import io.spine.test.event.model.TalkSubmitted;
@@ -84,6 +85,7 @@ class EventSubscriberClassTest {
         var factory = TestEventFactory.newInstance(EventSubscriberClassTest.class);
         var event = factory.createEvent(
                 SpeakerJoined.newBuilder()
+                        .setConference(Conference.newBuilder().setName("Conference"))
                         .setSpeaker(PersonName.newBuilder().setGivenName("Homer"))
                         .vBuild());
         var methods = subscriberClass.subscriberOf(EventEnvelope.of(event));

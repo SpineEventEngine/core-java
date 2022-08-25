@@ -75,7 +75,7 @@ class CommandValidatorViolationCheckTest {
         var cmd = Given.ACommand.createProject();
         var unidentifiableCommand = cmd.toBuilder()
                 .setId(CommandId.getDefaultInstance())
-                .build();
+                .buildPartial();
         var violations = inspectCommand(unidentifiableCommand);
 
         assertThat(violations)
@@ -106,7 +106,7 @@ class CommandValidatorViolationCheckTest {
         var command = factory.createCommand(createProjectMessage(), Time.currentTime());
         var commandWithoutContext = command.toBuilder()
                 .setContext(CommandContext.getDefaultInstance())
-                .build();
+                .buildPartial();
 
         var violations = inspectCommand(commandWithoutContext);
         assertThat(violations)

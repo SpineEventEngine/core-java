@@ -76,7 +76,9 @@ class MatchesStreamQueryTest {
     @DisplayName("not match improper records")
     void notMatchImproperRecords() {
         var properField = generate();
-        var wrongValue = ProjectId.getDefaultInstance();
+        var wrongValue = ProjectId.newBuilder()
+                .setId("some-random-project")
+                .build();
         var event = eventWith(wrongValue);
         var predicate = queryWith(FIELD_NAME, properField);
         assertFalse(predicate.test(event));

@@ -45,7 +45,7 @@ class EventValidatorTest {
     void validateEventMessages() {
         var eventWithDefaultMessage = Event.newBuilder()
                 .setMessage(pack(ProjectCreated.getDefaultInstance()))
-                .build();
+                .buildPartial();
         var eventValidator = new EventValidator();
         var error = eventValidator.validate(
                 EventEnvelope.of(eventWithDefaultMessage)

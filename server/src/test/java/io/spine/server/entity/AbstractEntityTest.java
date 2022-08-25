@@ -180,6 +180,6 @@ class AbstractEntityTest {
     static NaturalNumber newNaturalNumber(int value) {
         return NaturalNumber.newBuilder()
                 .setValue(value)
-                .build();
+                .buildPartial();
     }
 }

@@ -103,7 +103,7 @@ abstract class AbstractCommandBusTestSuite {
         var cmd = createProject();
         var invalidCmd = cmd.toBuilder()
                 .setContext(CommandContext.getDefaultInstance())
-                .build();
+                .buildPartial();
         return invalidCmd;
     }
 

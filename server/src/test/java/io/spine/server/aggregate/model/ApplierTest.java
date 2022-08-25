@@ -93,6 +93,7 @@ class ApplierTest {
         var applier = method.get();
         var eventMessage = Sample.messageOfType(RefProjectCreated.class);
         var event = Event.newBuilder()
+                .setContext(GivenEvent.context())
                 .setMessage(pack(eventMessage))
                 .build();
         var envelope = EventEnvelope.of(event);
@@ -124,6 +125,7 @@ class ApplierTest {
         Void result = null;
         var event = Event.newBuilder()
                 .setId(GivenEvent.someId())
+                .setContext(GivenEvent.context())
                 .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                 .build();
         var envelope = EventEnvelope.of(event);
@@ -142,6 +144,7 @@ class ApplierTest {
         var applier = method.get();
 
         var event = Event.newBuilder()
+                .setContext(GivenEvent.context())
                 .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                 .build();
         var envelope = EventEnvelope.of(event);

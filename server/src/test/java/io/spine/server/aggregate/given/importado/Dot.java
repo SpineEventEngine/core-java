@@ -44,21 +44,22 @@ final class Dot extends Aggregate<ObjectId, Point, Point.Builder> {
         return Moved.newBuilder()
                 .setObject(command.getObject())
                 .setDirection(command.getDirection())
-                .setCurrentPosition(move(state(), command.getDirection()))
+                .setCurrentPosition(move(id(), state(), command.getDirection()))
                 .build();
     }
 
     @Apply(allowImport = true)
     private void event(Moved event) {
-        var newPosition = move(state(), event.getDirection());
+        var newPosition = move(id(), state(), event.getDirection());
 
         builder().setId(event.getObject())
                  .setX(newPosition.getX())
                  .setY(newPosition.getY());
     }
 
-    private static Point move(Point p, Direction direction) {
+    private static Point move(ObjectId id, Point p, Direction direction) {
         var result = Point.newBuilder()
+                .setId(id)
                 .setX(p.getX())
                 .setY(p.getY());
         switch (direction) {
@@ -75,7 +76,7 @@ final class Dot extends Aggregate<ObjectId, Point, Point.Builder> {
                 result.setX(p.getX() - 1);
                 break;
             default:
-                throw newIllegalArgumentException("Invalid direction passed %s", direction);
+                throw newIllegalArgumentException("Invalid direction passed `%s`.", direction);
         }
         return result.build();
     }
