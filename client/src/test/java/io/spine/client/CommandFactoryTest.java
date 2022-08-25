@@ -64,10 +64,8 @@ class CommandFactoryTest {
          * Tests that a command is created with the current time.
          *
          * @implNote We are creating a range of +/- second between the call to make sure the
-         *         timestamp
-         *         would fit into this range. This way the test the test ensures the sub-second
-         *         precision
-         *         of timestamps, which is enough for the purpose of this test.
+         *         timestamp would fit into this range. This way the test ensures the sub-second
+         *         precision of timestamps, which is enough for the purpose of this test.
          */
         @Test
         @DisplayName("with current time")
