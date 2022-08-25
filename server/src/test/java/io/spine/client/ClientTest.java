@@ -190,6 +190,7 @@ class ClientTest extends AbstractClientTest {
             assertThat(users)
                     .comparingExpectedFieldsOnly()
                     .containsExactly(ActiveUsers.newBuilder()
+                                                .setId(THE_ID)
                                                 .setCount(1)
                                                 .build());
         }

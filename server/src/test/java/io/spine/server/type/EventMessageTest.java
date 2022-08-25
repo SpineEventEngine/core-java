@@ -28,11 +28,10 @@ package io.spine.server.type;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.base.Time;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.core.ProjectId;
 import io.spine.test.core.TaskAssigned;
 import io.spine.test.core.TaskId;
@@ -64,7 +63,7 @@ class EventMessageTest {
         var msg = TaskAssigned.newBuilder()
                 .setId(newTaskId())
                 .setProjectId(newProjectId())
-                .build();
+                .buildPartial();
         var event = event(msg);
         assertThrows(ValidationException.class, () -> checkValid(event));
     }
@@ -86,9 +85,7 @@ class EventMessageTest {
                 .setValue(Identifier.newUuid())
                 .build();
         var wrappedMessage = AnyPacker.pack(message);
-        var context = EventContext.newBuilder()
-                .setTimestamp(Time.currentTime())
-                .build();
+        var context = GivenEvent.context();
         var result = Event.newBuilder()
                 .setId(id)
                 .setMessage(wrappedMessage)

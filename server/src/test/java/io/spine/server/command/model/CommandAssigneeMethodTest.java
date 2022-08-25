@@ -36,6 +36,7 @@ import io.spine.base.Identifier;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
 import io.spine.server.command.model.given.handler.AssigneeReturnsEmptyList;
 import io.spine.server.command.model.given.handler.AssigneeReturnsNothing;
@@ -268,6 +269,7 @@ class CommandAssigneeMethodTest {
     private static CommandEnvelope envelope(Message commandMessage) {
         var cmd = pack(commandMessage);
         var command = Command.newBuilder()
+                .setId(CommandId.generate())
                 .setMessage(cmd)
                 .build();
         var envelope = CommandEnvelope.of(command);

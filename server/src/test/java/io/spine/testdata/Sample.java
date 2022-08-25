@@ -140,6 +140,11 @@ public class Sample {
      * <p>All the protobuf types are supported including nested {@link Message}s and
      * the {@code enum}s.
      *
+     * <p>For {@code Integer}s and {@code Long}s only non-negative values are generated.
+     * This is more convenient for using them as values of Spine internal messages,
+     * such as {@code Version}, as only non-negative values may be accepted according
+     * to their validation rules.
+     *
      * @param field {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field
      */
@@ -150,9 +155,9 @@ public class Sample {
         Random random = new SecureRandom();
         switch (javaType) {
             case INT:
-                return random.nextInt();
+                return Math.abs(random.nextInt());
             case LONG:
-                return random.nextLong();
+                return Math.abs(random.nextLong());
             case FLOAT:
                 return random.nextFloat();
             case DOUBLE:

@@ -82,9 +82,10 @@ class StateRoutingTest {
         );
 
         context.assertState(BRETON, ArtistMood.class)
+               .comparingExpectedFieldsOnly()
                .isEqualTo(ArtistMood.newBuilder()
-                                    .setMood(ArtistMood.Mood.ANGER)
-                                    .build());
+                                  .setMood(ArtistMood.Mood.ANGER)
+                                  .buildPartial());
     }
 
     @Test

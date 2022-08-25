@@ -114,7 +114,7 @@ class AbstractEntityTest {
     @Test
     @DisplayName("allow valid state")
     void allowValidState() {
-        var entity = new AnEntity(0L);
+        var entity = new AnEntity(17L);
         var state = LongIdAggregate.newBuilder()
                 .setId(entity.id())
                 .build();

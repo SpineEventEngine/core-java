@@ -44,6 +44,7 @@ import io.spine.system.server.event.CommandRejected;
 import io.spine.test.commandbus.ProjectId;
 import io.spine.test.commandbus.command.CmdBusStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenCommandContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -229,6 +230,7 @@ class CommandAckMonitorTest {
         var command = Command.newBuilder()
                 .setId(commandId)
                 .setMessage(pack(commandMessage))
+                .setContext(GivenCommandContext.withRandomActor())
                 .build();
 
         var exception = throwableCausedByRejection();

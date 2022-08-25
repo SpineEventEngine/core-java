@@ -28,7 +28,6 @@ package io.spine.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.base.CommandMessage;
 import io.spine.base.Error;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
@@ -253,7 +252,7 @@ class CommandRequestTest extends AbstractClientTest {
                         .isInstanceOf(Command.class);
                 var expected = Command.newBuilder()
                         .setMessage(AnyPacker.pack(commandMessage))
-                        .build();
+                        .buildPartial();
                 assertThat(postedMessage)
                         .comparingExpectedFieldsOnly()
                         .isEqualTo(expected);

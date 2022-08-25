@@ -28,6 +28,7 @@ package io.spine.server.type.given;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
@@ -38,6 +39,7 @@ import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.core.ProjectCreated;
 import io.spine.test.core.ProjectId;
+import io.spine.testing.core.given.GivenUserId;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -48,7 +50,7 @@ public class EventEnvelopeTestEnv {
     }
 
     public static Event event(Message eventMessage) {
-        return event(eventMessage, EventContext.getDefaultInstance());
+        return event(eventMessage, GivenEvent.context());
     }
 
     public static Event event(Message eventMessage, EventContext eventContext) {
@@ -73,6 +75,8 @@ public class EventEnvelopeTestEnv {
                 .build();
         return ActorContext.newBuilder()
                 .setTenantId(tenantId)
+                .setActor(GivenUserId.newUuid())
+                .setTimestamp(Time.currentTime())
                 .build();
     }
 

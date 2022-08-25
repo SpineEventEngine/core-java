@@ -579,6 +579,7 @@ class ProcessManagerRepositoryTest
                 .setEntity(entityId)
                 .setOldState(oldState)
                 .setNewState(newState)
+                .addSignalId(GivenEvent.arbitrary().messageId())
                 .build();
         assertThat(filter.filter(discardedEvent))
                 .isEmpty();

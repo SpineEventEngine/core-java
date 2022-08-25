@@ -82,6 +82,7 @@ class EventSubscriberMethodTest {
 
         var event = Event.newBuilder()
                 .setId(GivenEvent.someId())
+                .setContext(GivenEvent.context())
                 .setMessage(pack(msg))
                 .build();
 
@@ -132,6 +133,7 @@ class EventSubscriberMethodTest {
                     .setExternal(external)
                     .build();
             var event = Event.newBuilder()
+                    .setId(GivenEvent.someId())
                     .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                     .setContext(context)
                     .build();

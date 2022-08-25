@@ -42,6 +42,7 @@ import io.spine.server.given.groups.GroupName;
 import io.spine.server.given.groups.GroupNameProjection;
 import io.spine.server.given.groups.GroupProjection;
 import io.spine.server.given.organizations.Organization;
+import io.spine.server.given.organizations.OrganizationId;
 import io.spine.server.given.organizations.OrganizationProjection;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
@@ -144,6 +145,7 @@ class ProjectionEndToEndTest {
                 .vBuild();
         var organizationName = "Contributors";
         var stateBuilder = Organization.newBuilder()
+                .setId(OrganizationId.generate())
                 .setHead(organizationHead)
                 .setName(organizationName)
                 .addMember(UserId.getDefaultInstance());

@@ -31,6 +31,7 @@ import io.spine.client.Subscription;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
+import io.spine.client.TopicId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
@@ -117,6 +118,7 @@ public final class SubscriptionRecordTestEnv {
 
     public static Subscription subscription(Target target) {
         var topic = Topic.newBuilder()
+                .setId(TopicId.newBuilder().setValue(Identifier.newUuid()))
                 .setTarget(target)
                 .build();
         var result = Subscription.newBuilder()
