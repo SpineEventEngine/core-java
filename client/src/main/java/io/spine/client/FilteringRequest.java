@@ -56,7 +56,7 @@ FilteringRequest<M extends Message,
                  R extends Message,
                  A extends TargetBuilder<R, A>,
                  B extends FilteringRequest<M, R, A, B>>
-        extends ClientRequest {
+        extends ClientRequestBase {
 
     /** The type of messages returned by the request. */
     private final Class<M> messageType;
