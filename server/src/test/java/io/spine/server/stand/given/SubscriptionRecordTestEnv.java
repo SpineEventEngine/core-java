@@ -41,6 +41,7 @@ import io.spine.core.MessageId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
@@ -51,6 +52,8 @@ import io.spine.time.ZoneIds;
 import io.spine.type.TypeUrl;
 
 import java.util.Collections;
+
+import static io.spine.base.Identifier.newUuid;
 
 public final class SubscriptionRecordTestEnv {
 
@@ -71,7 +74,9 @@ public final class SubscriptionRecordTestEnv {
         var eventMessage = entityStateChanged(id, oldState, newState, type);
         var packedMessage = TypeConverter.toAny(eventMessage);
         var event = Event.newBuilder()
+                .setId(GivenEvent.someId())
                 .setMessage(packedMessage)
+                .setContext(GivenEvent.context())
                 .build();
         var result = EventEnvelope.of(event);
         return result;
@@ -88,6 +93,7 @@ public final class SubscriptionRecordTestEnv {
         var packedNewState = TypeConverter.toAny(newState);
         var result = EntityStateChanged.newBuilder()
                 .setEntity(entityId)
+                .addSignalId(GivenEvent.arbitrary().messageId())
                 .setOldState(packedOldState)
                 .setNewState(packedNewState)
                 .build();
@@ -104,6 +110,7 @@ public final class SubscriptionRecordTestEnv {
         var event = Event.newBuilder()
                 .setId(eventId)
                 .setMessage(packedMessage)
+                .setContext(GivenEvent.context())
                 .build();
         var result = EventEnvelope.of(event);
         return result;
@@ -128,7 +135,7 @@ public final class SubscriptionRecordTestEnv {
                 .setZoneId(ZoneIds.systemDefault())
                 .build();
         var topic = Topic.newBuilder()
-                .setId(TopicId.newBuilder().setValue(Identifier.newUuid()))
+                .setId(TopicId.newBuilder().setValue(newUuid()))
                 .setTarget(target)
                 .setContext(context)
                 .build();
@@ -149,8 +156,10 @@ public final class SubscriptionRecordTestEnv {
         return target;
     }
 
+
     public static AggProject projectWithName(String name) {
         return AggProject.newBuilder()
+                .setId(projectId(newUuid()))
                 .setName(name)
                 .build();
     }
@@ -158,6 +167,12 @@ public final class SubscriptionRecordTestEnv {
     public static ProjectId projectId(String id) {
         return ProjectId.newBuilder()
                 .setUuid(id)
+                .build();
+    }
+
+    public static io.spine.test.event.ProjectId subscriptionProjectId(String value) {
+        return io.spine.test.event.ProjectId.newBuilder()
+                .setId(value)
                 .build();
     }
 }

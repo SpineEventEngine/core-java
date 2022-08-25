@@ -69,6 +69,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.testdata.Sample.builderForType;
 import static java.util.Collections.singleton;
 
@@ -84,12 +85,16 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static ProjectId projectId() {
-        return ((ProjectId.Builder) builderForType(ProjectId.class))
+        return ProjectId
+                .newBuilder()
+                .setId(newUuid())
                 .build();
     }
 
     public static EvTeamId teamId() {
-        return ((EvTeamId.Builder) builderForType(EvTeamId.class))
+        return EvTeamId
+                .newBuilder()
+                .setId(newUuid())
                 .build();
     }
 
@@ -272,7 +277,7 @@ public class EventRootCommandIdTestEnv {
 
         @React
         EvTeamProjectAdded on(ProjectCreated command) {
-            var event = projectAdded(command);
+            var event = projectAdded(id(), command);
             return event;
         }
 
@@ -283,10 +288,12 @@ public class EventRootCommandIdTestEnv {
                     .addProjectId(event.getProjectId());
         }
 
-        private static EvTeamProjectAdded projectAdded(ProjectCreated command) {
-            return EvTeamProjectAdded.newBuilder()
-                                     .setProjectId(command.getProjectId())
-                                     .build();
+        private static EvTeamProjectAdded projectAdded(EvTeamId id, ProjectCreated command) {
+            return EvTeamProjectAdded
+                    .newBuilder()
+                    .setTeamId(id)
+                    .setProjectId(command.getProjectId())
+                    .build();
         }
     }
 
