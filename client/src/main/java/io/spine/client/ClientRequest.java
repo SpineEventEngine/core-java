@@ -108,6 +108,7 @@ public class ClientRequest extends ClientRequestBase {
      *         the type of the entity state for which the query is run
      */
     public <S extends EntityState<?>> ImmutableList<S> run(EntityQuery<?, S, ?> query) {
+        requirePublished(query.subject().recordType());
         var request = new QueryRequest<>(this, query);
         var results = request.run();
         return results;

@@ -75,6 +75,9 @@ internal class `'ClientRequest' should prohibit using 'internal_type' messages w
 
     @Test
     fun `running queries`() {
-        //TODO:2022-08-25:alexander.yevsyukov: Implement
+        val query = Locomotive.query().name().`is`("M-497").build()
+        assertThrows<UnpublishedLanguageException> {
+            request.run(query)
+        }
     }
 }
