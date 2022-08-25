@@ -121,14 +121,14 @@ message Success {
 message ProducedEvents {
     option (is).java_type = "ProducedEventsMixin";
 
-    repeated core.Event event = 1 [(required) = true, (validate) = true];
+    repeated core.Event event = 1 [(validate) = true];
 }
 
 // Commands produced during a signal handling.
 message ProducedCommands {
     option (is).java_type = "ProducedCommandsMixin";
 
-    repeated core.Command command = 1 [(required) = true, (validate) = true];
+    repeated core.Command command = 1 [(validate) = true];
 }
 
 // Signal handling interruption.
