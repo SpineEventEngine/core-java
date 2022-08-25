@@ -223,22 +223,13 @@ public class EventRootCommandIdTestEnv {
             super(id);
         }
 
-        private static ProjectCreated projectCreated(ProjectId projectId) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(projectId)
-                                 .build();
-        }
-
-        private static TaskAdded taskAdded(ProjectId projectId, Task task) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(projectId)
-                            .setTask(task)
-                            .build();
-        }
-
         @Assign
         ProjectCreated on(CreateProject command, CommandContext ctx) {
-            var event = projectCreated(command.getProjectId());
+            var event = ProjectCreated
+                    .newBuilder()
+                    .setProjectId(command.getProjectId())
+                    .setTeamId(command.getTeamId())
+                    .build();
             return event;
         }
 
@@ -247,7 +238,11 @@ public class EventRootCommandIdTestEnv {
             ImmutableList.Builder<TaskAdded> events = ImmutableList.builder();
 
             for (var task : command.getTaskList()) {
-                var event = taskAdded(command.getProjectId(), task);
+                var event = TaskAdded
+                        .newBuilder()
+                        .setProjectId(command.getProjectId())
+                        .setTask(task)
+                        .build();
                 events.add(event);
             }
 
