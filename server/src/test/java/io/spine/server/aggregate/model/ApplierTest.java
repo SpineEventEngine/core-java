@@ -38,6 +38,7 @@ import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.MatchCriterion;
 import io.spine.server.test.shared.LongIdAggregate;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.testing.logging.mute.MuteLogging;
@@ -122,6 +123,7 @@ class ApplierTest {
 
         Void result = null;
         var event = Event.newBuilder()
+                .setId(GivenEvent.someId())
                 .setMessage(pack(RefProjectCreated.getDefaultInstance()))
                 .build();
         var envelope = EventEnvelope.of(event);

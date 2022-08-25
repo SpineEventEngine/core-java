@@ -30,8 +30,8 @@ import com.google.common.truth.extensions.proto.ProtoTruth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
-import io.spine.base.Identifier;
 import io.spine.client.Subscription;
+import io.spine.client.SubscriptionId;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
@@ -65,6 +65,7 @@ import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.Given.CommandMessage.createProject;
@@ -89,6 +90,7 @@ class SubscriptionServiceTest {
     private MemoizingObserver<Response> cancellationObserver;
 
     @BeforeEach
+    @SuppressWarnings("resource")  /* Fine for tests. */
     void setUp() {
         ModelTests.dropAllModels();
         ServerEnvironment.instance()
@@ -110,7 +112,7 @@ class SubscriptionServiceTest {
     }
 
     private static BoundedContext randomCtx() {
-        return BoundedContext.singleTenant(Identifier.newUuid())
+        return BoundedContext.singleTenant(newUuid())
                              .build();
     }
 
@@ -223,8 +225,12 @@ class SubscriptionServiceTest {
      */
     private Subscription invalidSubscription() {
         var invalidTopic = invalidTopic();
+        var id = SubscriptionId.newBuilder()
+                .setValue(newUuid())
+                .build();
         return Subscription
                 .newBuilder()
+                .setId(id)
                 .setTopic(invalidTopic)
                 .build();
     }

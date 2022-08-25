@@ -31,7 +31,9 @@ import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.TenantId;
+import io.spine.testing.core.given.GivenUserId;
 
+import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.type.given.GivenEvent.message;
 
@@ -44,6 +46,8 @@ public class EventsTestEnv {
     public static CommandContext commandContext(TenantId id) {
         var actorContext = ActorContext.newBuilder()
                 .setTenantId(id)
+                .setActor(GivenUserId.newUuid())
+                .setTimestamp(currentTime())
                 .build();
         var result = CommandContext.newBuilder()
                 .setActorContext(actorContext)
@@ -60,6 +64,7 @@ public class EventsTestEnv {
 
     public static Event event(EventContext context) {
         return Event.newBuilder()
+                .setId(GivenEvent.someId())
                 .setMessage(pack(message()))
                 .setContext(context)
                 .build();
