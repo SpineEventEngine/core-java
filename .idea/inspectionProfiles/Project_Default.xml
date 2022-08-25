@@ -20,7 +20,7 @@
       <option name="ignoreTransformationOfOriginalParameter" value="false" />
     </inspection_tool>
     <inspection_tool class="AssignmentToStaticFieldFromInstanceMethod" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="AutoCloseableResource" enabled="true" level="WARNING" enabled_by_default="true">
+    <inspection_tool class="AutoCloseableResource" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="METHOD_MATCHER_CONFIG" value="java.util.Formatter,format,java.io.Writer,append,com.google.common.base.Preconditions,checkNotNull,org.hibernate.Session,close,java.io.PrintWriter,printf,java.io.PrintStream,printf,io.spine.client.ClientRequest,client" />
     </inspection_tool>
     <inspection_tool class="BadExceptionCaught" enabled="true" level="WARNING" enabled_by_default="true">
@@ -296,7 +296,6 @@
       <option name="m_limit" value="5" />
     </inspection_tool>
     <inspection_tool class="NewMethodNamingConvention" enabled="true" level="WARNING" enabled_by_default="true">
-      <scope name="Tests" level="INFO" enabled="false" />
       <scope name="Production" level="WARNING" enabled="true">
         <extension name="InstanceMethodNamingConvention" enabled="true">
           <option name="m_regex" value="[a-z][A-Za-z\d]*" />
@@ -304,6 +303,7 @@
           <option name="m_maxLength" value="32" />
         </extension>
       </scope>
+      <scope name="Tests" level="INFO" enabled="false" />
       <extension name="InstanceMethodNamingConvention" enabled="true">
         <option name="m_regex" value="[a-z][A-Za-z\d]*" />
         <option name="m_minLength" value="3" />
