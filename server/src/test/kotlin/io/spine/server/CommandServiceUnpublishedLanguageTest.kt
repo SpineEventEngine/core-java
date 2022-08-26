@@ -35,10 +35,12 @@ import io.spine.grpc.StreamObservers.memoizingObserver
 import io.spine.protobuf.Messages.isNotDefault
 import io.spine.test.unpublished.command.Halt
 import io.spine.testing.client.TestActorRequestFactory
+import io.spine.testing.logging.mute.MuteLogging
 import io.spine.type.UnpublishedLanguageException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@MuteLogging
 internal class `'CommandService' should prohibit using 'internal_type' commands` {
 
     private lateinit var service: CommandService
