@@ -57,7 +57,8 @@ import static io.spine.type.MessageExtensions.requirePublished;
 public class ClientRequest extends ClientRequestBase {
 
     /**
-     * Creates a new instance with the given user ID and the instance of the {@code client}.
+     * Creates a new instance with the given user ID and the reference to
+     * the {@code client} instance which is going to send the request.
      */
     ClientRequest(UserId user, Client client) {
         super(user, client);
