@@ -27,6 +27,7 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
 import io.spine.environment.Tests;
@@ -41,6 +42,7 @@ import io.spine.server.delivery.given.TaskAggregate;
 import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.testing.SlowTest;
@@ -54,6 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -62,6 +65,7 @@ import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -322,6 +326,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
     @DisplayName("via multiple shards in multiple threads in an order of message emission")
     public void deliverMessagesInOrderOfEmission() throws InterruptedException {
         changeShardCountTo(20);
+        TaskView.enableStrictMode();
 
         var context = BlackBox.from(
                 BoundedContextBuilder.assumingTests()
@@ -338,6 +343,40 @@ public class DeliveryTest extends AbstractDeliveryTest {
         assertThat(leftovers).isEmpty();
 
         for (var command : commands) {
+            var taskId = command.getId();
+            var subject = context.assertEntity(taskId, TaskView.class);
+            subject.exists();
+
+            var actualView = (TaskView) subject.actual();
+            var state = actualView.state();
+            var actualAssignee = state.getAssignee();
+
+            assertThat(state.getId()).isEqualTo(taskId);
+            assertThat(Messages.isDefault(actualAssignee)).isFalse();
+        }
+    }
+
+    @Test
+    @DisplayName("direct `Delivery`")
+    public void directDelivery() {
+        // Wait until all previous `Delivery` tests complete their async routines.
+        sleepUninterruptibly(500, MILLISECONDS);
+
+        TaskView.disableStrictMode();
+        TaskView.clearCache();
+        var directDelivery = Delivery.direct();
+        ServerEnvironment.when(Tests.class)
+                         .use(directDelivery);
+
+        var context = BlackBox.from(
+                BoundedContextBuilder.assumingTests()
+                                     .add(TaskAggregate.class)
+                                     .add(new TaskAssignment.Repository())
+                                     .add(new TaskView.Repository())
+        );
+        var commands = generateCommands(200);
+        for (var command : commands) {
+            context.receivesCommand(command);
             var taskId = command.getId();
             var subject = context.assertEntity(taskId, TaskView.class);
             subject.exists();

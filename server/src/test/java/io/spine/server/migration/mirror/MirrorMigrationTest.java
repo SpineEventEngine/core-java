@@ -26,7 +26,7 @@
 
 package io.spine.server.migration.mirror;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterators;
 import io.spine.server.ContextSpec;
 import io.spine.server.migration.mirror.given.DeliveryService;
 import io.spine.server.migration.mirror.given.MemoizingMonitor;
@@ -38,10 +38,6 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.server.migration.mirror.given.MirrorMigrationTestEnv.assertEntityRecords;
@@ -162,31 +158,25 @@ final class MirrorMigrationTest {
         new PreparedMirrorStorage(migration.sourceStorage())
                 .put(DeliveryService::generateInProgressParcel, expectedNumber);
 
-        // Too small batch size would slow down the migration.
-        // We are going to terminate the migration when it takes more than three seconds.
-        var batchSize = 10;
+        /* Create a migration monitor which fails after four steps. */
+        var batchSize = 50;
         var monitor = new MirrorMigrationMonitor(batchSize) {
-
-            private LocalDateTime whenStarted;
-
-            @Override
-            public void onMigrationStarted() {
-                whenStarted = LocalDateTime.now(ZoneId.systemDefault());
-            }
+            private int steps;
 
             @Override
             public boolean shouldContinueAfter(MirrorsMigrated step) {
-                var secondsSinceStart = ChronoUnit.SECONDS
-                        .between(whenStarted, LocalDateTime.now(ZoneId.systemDefault()));
-                return secondsSinceStart <= 3;
+                ++steps;
+                return steps <= 5;
             }
         };
 
         migration.run(monitor);
 
-        var entityRecordStorage = migration.destinationStorage();
-        var entityRecords = Lists.newArrayList(entityRecordStorage.readAll());
-        assertThat(entityRecords.size()).isLessThan(expectedNumber);
-        assertThat(entityRecords.size()).isAtLeast(batchSize);
+        @SuppressWarnings("resource") // Closed elsewhere.
+        var destinationStorage = migration.destinationStorage();
+        var migratedRecords =  Iterators.size(destinationStorage.index());
+
+        assertThat(migratedRecords).isLessThan(expectedNumber);
+        assertThat(migratedRecords).isAtLeast(batchSize);
     }
 }

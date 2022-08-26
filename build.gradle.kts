@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.VersionWriter
@@ -195,8 +195,13 @@ subprojects {
 
     /**
      * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` the empty constructor in
-     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking the API.
+     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking
+     * our code in `mc-java`.
+     *
+     * See this issue (https://github.com/SpineEventEngine/mc-java/issues/42) for details.
      */
+    val errorProneVersion = "2.10.0"
+
     configurations {
         forceVersions()
         excludeProtobufLite()
@@ -204,6 +209,13 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                    /* Force the version of gRPC used by the `:client` module over the one
+                       set by `mc-java` in the `:core` module when specifying compiler artifact
+                       for the gRPC plugin.
+                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
+                       .configureProtocPlugins() method which sets the version from resources. */
+                    "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
+
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine:spine-base-types:$spineBaseTypesVersion",

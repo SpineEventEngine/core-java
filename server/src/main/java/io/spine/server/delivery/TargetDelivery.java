@@ -77,6 +77,11 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
     }
 
     @Override
+    public void deliver(InboxMessage message) {
+        doDeliver(inboxOfCmds, inboxOfEvents, message);
+    }
+
+    @Override
     public void onDuplicate(InboxMessage message) {
         if(message.hasCommand()) {
             inboxOfCmds.notifyOfDuplicated(message);

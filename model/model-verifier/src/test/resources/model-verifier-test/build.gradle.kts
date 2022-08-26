@@ -106,6 +106,19 @@ dependencies {
     annotationProcessor("io.spine.tools:spine-model-assembler:$versionToPublish")
 }
 
+configurations.all {
+    resolutionStrategy {
+        force(
+            /* Force the version of gRPC used by the `:client` module over the one
+               set by `mc-java` in the `:core` module when specifying compiler artifact
+               for the gRPC plugin.
+               See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
+               .configureProtocPlugins() method which sets the version from resources. */
+            "io.grpc:protoc-gen-grpc-java:${io.spine.internal.dependency.Grpc.version}",
+        )
+    }
+}
+
 sourceSets {
     main {
         java.srcDirs("$projectDir/generated/main/java", "$projectDir/generated/main/spine")

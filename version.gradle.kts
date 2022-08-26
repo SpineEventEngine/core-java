@@ -33,4 +33,4 @@ val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.97")
 val validationVersion: String by extra("2.0.0-SNAPSHOT.21")
 
 /** The version of this library. */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.101")
+val versionToPublish: String by extra("2.0.0-SNAPSHOT.103")
