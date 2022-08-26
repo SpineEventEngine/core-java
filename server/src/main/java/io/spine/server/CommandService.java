@@ -72,7 +72,6 @@ public final class CommandService
         }
     }
 
-    @NonNull
     private String simpleClassName() {
         return getClass().getSimpleName();
     }
