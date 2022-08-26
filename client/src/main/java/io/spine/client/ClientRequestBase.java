@@ -51,8 +51,7 @@ public abstract class ClientRequestBase {
      * Creates a new instance with the given user ID and the {@code client} instance.
      */
     ClientRequestBase(UserId user, Client client) {
-        this.user = user;
-        checkNotDefaultArg(user);
+        this.user = checkNotDefaultArg(user);
         this.client = checkNotNull(client);
     }
 
@@ -98,8 +97,7 @@ public abstract class ClientRequestBase {
     @CanIgnoreReturnValue
     @OverridingMethodsMustInvokeSuper
     public ClientRequestBase onServerError(ServerErrorHandler handler) {
-        checkNotNull(handler);
-        this.serverErrorHandler = handler;
+        this.serverErrorHandler = checkNotNull(handler);
         return this;
     }
 
