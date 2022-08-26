@@ -55,6 +55,10 @@ import static io.spine.type.MessageExtensions.requirePublished;
 @SuppressWarnings("ClassReferencesSubclass")
 // we want to have DSL for calls encapsulated in this class.
 public class ClientRequest extends ClientRequestBase {
+
+    /**
+     * Creates a new instance with the given user ID and the instance of the {@code client}.
+     */
     ClientRequest(UserId user, Client client) {
         super(user, client);
     }
