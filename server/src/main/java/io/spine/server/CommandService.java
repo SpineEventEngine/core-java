@@ -39,6 +39,7 @@ import io.spine.logging.Logging;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
 import io.spine.type.UnpublishedLanguageException;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
 import java.util.Set;
@@ -67,9 +68,13 @@ public final class CommandService
         if (map.isEmpty()) {
             /* We do not prohibit such a case of "empty" service for unusual cases of serving
                no commands (e.g. because of handling only events) or for creating stub instances. */
-            _warn().log("A `%s` with no bounded contexts has been created.",
-                        getClass().getSimpleName());
+            _warn().log("A `%s` with no bounded contexts has been created.", simpleClassName());
         }
+    }
+
+    @NonNull
+    private String simpleClassName() {
+        return getClass().getSimpleName();
     }
 
     /**
@@ -107,7 +112,7 @@ public final class CommandService
     private void handleInternal(Command command, StreamObserver<Ack> responseObserver) {
         var unpublishedLanguage = new UnpublishedLanguageException(command.enclosedMessage());
         _error().withCause(unpublishedLanguage)
-                .log("Unpublished command posted to `CommandService`.");
+                .log("Unpublished command posted to `%s`.", simpleClassName());
         var error = Errors.fromThrowable(unpublishedLanguage);
         respondWithError(command, error, responseObserver);
     }
@@ -115,7 +120,7 @@ public final class CommandService
     private void handleUnsupported(Command command, StreamObserver<Ack> responseObserver) {
         var unsupported = new UnsupportedCommandException(command);
         _error().withCause(unsupported)
-                .log("Unsupported command posted to `CommandService`.");
+                .log("Unsupported command posted to `%s`.", simpleClassName());
         var error = unsupported.asError();
         respondWithError(command, error, responseObserver);
     }
