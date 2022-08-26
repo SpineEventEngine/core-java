@@ -67,8 +67,8 @@ public final class CommandService
         if (map.isEmpty()) {
             /* We do not prohibit such a case of "empty" service for unusual cases of serving
                no commands (e.g. because of handling only events) or for creating stub instances. */
-            _warn().log("A `%s` with no bounded contexts has been created: `%s`.",
-                        getClass().getSimpleName(), this);
+            _warn().log("A `%s` with no bounded contexts has been created.",
+                        getClass().getSimpleName());
         }
     }
 
