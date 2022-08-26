@@ -117,8 +117,8 @@ public final class CommandFactory {
      *         the command context to use as a base for the new command
      * @return new command instance
      * @throws ValidationException
-     *         if the passed message does not satisfy the constraints set for it in its Protobuf
-     *         definition
+     *         if the passed message does not satisfy the constraints set for it
+     *         in its Protobuf definition
      */
     @Internal
     @VisibleForTesting
