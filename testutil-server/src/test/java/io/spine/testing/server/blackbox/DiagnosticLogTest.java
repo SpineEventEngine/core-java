@@ -47,6 +47,7 @@ import static io.spine.base.Errors.causeOf;
 import static io.spine.base.Errors.fromThrowable;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
+import static io.spine.testing.server.blackbox.given.Given.someMessageId;
 
 @DisplayName("`DiagnosticLog` should")
 class DiagnosticLogTest extends DiagnosticLoggingTest {
@@ -103,6 +104,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
         DiagnosticLog.instance()
                      .on(RoutingFailed.newBuilder()
                                  .setError(error)
+                                 .setHandledSignal(someMessageId())
                                  .vBuild());
         assertLogged(error.getMessage());
     }

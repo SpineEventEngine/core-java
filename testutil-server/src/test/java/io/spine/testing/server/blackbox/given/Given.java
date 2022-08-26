@@ -26,14 +26,17 @@
 
 package io.spine.testing.server.blackbox.given;
 
+import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventDispatcher;
 import io.spine.testing.TestValues;
+import io.spine.testing.core.given.GivenVersion;
 import io.spine.testing.server.blackbox.BbProject;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbReportId;
 import io.spine.testing.server.blackbox.BbTask;
+import io.spine.testing.server.blackbox.BbTaskId;
 import io.spine.testing.server.blackbox.command.BbAddTask;
 import io.spine.testing.server.blackbox.command.BbAssignProject;
 import io.spine.testing.server.blackbox.command.BbAssignSelf;
@@ -49,11 +52,14 @@ import io.spine.testing.server.blackbox.event.BbProjectDone;
 import io.spine.testing.server.blackbox.event.BbProjectFailed;
 import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import io.spine.testing.server.blackbox.event.BbUserDeleted;
+import io.spine.type.TypeUrl;
 
 import java.util.stream.IntStream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.testing.TestValues.newUuidValue;
 
 public class Given {
 
@@ -81,6 +87,7 @@ public class Given {
 
     private static BbTask newTask() {
         return BbTask.newBuilder()
+                .setTaskId(BbTaskId.generate())
                 .setTitle(newUuid())
                 .build();
     }
@@ -180,6 +187,16 @@ public class Given {
     public static BbProjectFailed projectFailed(BbProjectId projectId) {
         return BbProjectFailed.newBuilder()
                 .setProjectId(projectId)
+                .build();
+    }
+
+    public static MessageId someMessageId() {
+        return MessageId
+                .newBuilder()
+                .setVersion(GivenVersion.withNumber(42))
+                .setTypeUrl(TypeUrl.of(BbProjectDone.class)
+                                   .value())
+                .setId(pack(newUuidValue()))
                 .build();
     }
 }
