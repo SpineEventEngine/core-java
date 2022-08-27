@@ -27,9 +27,9 @@
 package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder<T, B>> {
 
-    private final Set<BoundedContext> contexts = Sets.newHashSet();
+    private final Set<BoundedContext> contexts = new HashSet<>();
 
     /**
      * Returns this instance with the overloaded type.
