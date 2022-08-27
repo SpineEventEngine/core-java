@@ -61,6 +61,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -144,7 +145,7 @@ class SubscriptionServiceTest {
             var subscriptionService = builder.build();
             assertNotNull(subscriptionService);
 
-            List<BoundedContext> contexts = builder.contexts();
+            Set<BoundedContext> contexts = builder.contexts();
             assertThat(contexts).hasSize(1);
             assertTrue(contexts.contains(oneContext));
         }
@@ -163,7 +164,7 @@ class SubscriptionServiceTest {
             var service = builder.build();
             assertNotNull(service);
 
-            List<BoundedContext> contexts = builder.contexts();
+            Set<BoundedContext> contexts = builder.contexts();
             assertThat(contexts).containsExactly(bc1, bc2, bc3);
         }
     }
@@ -184,7 +185,7 @@ class SubscriptionServiceTest {
         var subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
-        List<BoundedContext> contexts = builder.contexts();
+        Set<BoundedContext> contexts = builder.contexts();
         assertThat(contexts).containsExactly(bc3);
     }
 

@@ -27,11 +27,8 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -194,42 +191,16 @@ public final class SubscriptionService
     /**
      * The builder for the {@link SubscriptionService}.
      */
-    public static class Builder {
-        private final Set<BoundedContext> contexts = Sets.newHashSet();
-
-        /**
-         * Adds the context to be handled by the subscription service.
-         */
-        @CanIgnoreReturnValue
-        public Builder add(BoundedContext context) {
-            // Save it to a temporary set so that it is easy to remove it if needed.
-            contexts.add(context);
-            return this;
-        }
-
-        /**
-         * Removes the context from being handled by the subscription service.
-         */
-        @CanIgnoreReturnValue
-        public Builder remove(BoundedContext context) {
-            contexts.remove(context);
-            return this;
-        }
-
-        /**
-         * Obtains the context added to the subscription service by the time of the call.
-         */
-        public ImmutableList<BoundedContext> contexts() {
-            return ImmutableList.copyOf(contexts);
-        }
+    public static class Builder extends AbstractServiceBuilder<SubscriptionService, Builder> {
 
         /**
          * Builds the {@link SubscriptionService}.
          *
          * @throws IllegalStateException if no Bounded Contexts were added.
          */
+        @Override
         public SubscriptionService build() throws IllegalStateException {
-            if (contexts.isEmpty()) {
+            if (isEmpty()) {
                 throw new IllegalStateException(
                         "Subscription service must have at least one Bounded Context.");
             }
@@ -240,7 +211,7 @@ public final class SubscriptionService
 
         private ImmutableMap<TypeUrl, BoundedContext> createMap() {
             ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
-            for (var context : contexts) {
+            for (var context : contexts()) {
                 putIntoMap(context, builder);
             }
             return builder.build();
@@ -254,6 +225,11 @@ public final class SubscriptionService
                  .forEach(putIntoMap);
             stand.exposedEventTypes()
                  .forEach(putIntoMap);
+        }
+
+        @Override
+        Builder self() {
+            return this;
         }
     }
 }

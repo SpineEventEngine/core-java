@@ -42,6 +42,9 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
 
     private final Set<BoundedContext> contexts = Sets.newHashSet();
 
+    /**
+     * Returns this instance with the overloaded type.
+     */
     abstract B self();
 
     /**
@@ -59,7 +62,7 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
     }
 
     /**
-     * Adds the passed bounded context to be served by the query service.
+     * Adds the passed bounded context to be served by the service.
      */
     @CanIgnoreReturnValue
     public B add(BoundedContext context) {
@@ -68,7 +71,7 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
     }
 
     /**
-     * Excludes the passed bounded context from being served by the query service.
+     * Excludes the passed bounded context from being served by the service.
      */
     @CanIgnoreReturnValue
     public B remove(BoundedContext context) {
