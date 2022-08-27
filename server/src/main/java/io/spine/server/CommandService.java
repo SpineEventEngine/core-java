@@ -39,7 +39,6 @@ import io.spine.logging.Logging;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
 import io.spine.type.UnpublishedLanguageException;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
 import java.util.Set;
