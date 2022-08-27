@@ -30,18 +30,23 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
+import io.spine.base.Errors;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.logging.Logging;
-import io.spine.server.bus.MessageIdExtensions;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
+import io.spine.type.UnpublishedLanguageException;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.MessageIdExtensions.causedError;
+import static io.spine.type.MessageExtensions.isInternal;
 
 /**
  * The {@code CommandService} allows client applications to post commands and
@@ -60,6 +65,15 @@ public final class CommandService
     private CommandService(Map<CommandClass, BoundedContext> map) {
         super();
         this.commandToContext = ImmutableMap.copyOf(map);
+        if (map.isEmpty()) {
+            /* We do not prohibit such a case of "empty" service for unusual cases of serving
+               no commands (e.g. because of handling only events) or for creating stub instances. */
+            _warn().log("A `%s` with no bounded contexts has been created.", simpleClassName());
+        }
+    }
+
+    private String simpleClassName() {
+        return getClass().getSimpleName();
     }
 
     /**
@@ -81,22 +95,39 @@ public final class CommandService
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
         var commandClass = CommandClass.of(request);
-        var context = commandToContext.get(commandClass);
-        if (context == null) {
+        if (isInternal(commandClass.value())) {
+            handleInternal(request, responseObserver);
+            return;
+        }
+        var boundedContext = commandToContext.get(commandClass);
+        if (boundedContext == null) {
             handleUnsupported(request, responseObserver);
         } else {
-            var commandBus = context.commandBus();
+            var commandBus = boundedContext.commandBus();
             commandBus.post(request, responseObserver);
         }
+    }
+
+    private void handleInternal(Command command, StreamObserver<Ack> responseObserver) {
+        var unpublishedLanguage = new UnpublishedLanguageException(command.enclosedMessage());
+        _error().withCause(unpublishedLanguage)
+                .log("Unpublished command posted to `%s`.", simpleClassName());
+        var error = Errors.fromThrowable(unpublishedLanguage);
+        respondWithError(command, error, responseObserver);
     }
 
     private void handleUnsupported(Command command, StreamObserver<Ack> responseObserver) {
         var unsupported = new UnsupportedCommandException(command);
         _error().withCause(unsupported)
-                .log("Unsupported command posted to `CommandService`.");
+                .log("Unsupported command posted to `%s`.", simpleClassName());
         var error = unsupported.asError();
+        respondWithError(command, error, responseObserver);
+    }
+
+    private static
+    void respondWithError(Command command, Error error, StreamObserver<Ack> responseObserver) {
         var id = command.getId();
-        var response = MessageIdExtensions.causedError(id, error);
+        var response = causedError(id, error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
