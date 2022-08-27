@@ -36,7 +36,9 @@ import java.util.Set;
  * Abstract for builder of service classes.
  *
  * @param <T>
- *         the type of service to be produced.
+ *         the type of service to be produced
+ * @param <B>
+ *         the self-type of the builder for return type covariance
  */
 public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder<T, B>> {
 

@@ -47,7 +47,7 @@ import static io.spine.type.MessageClass.interfacesOf;
  * @param <C>
  *         the type of the contexts of the enriched messages
  * @param <B>
- *         the type of an enricher builder implementation, a descendant of this type, for covariance
+ *         the type of enricher builder implementation, a descendant of this type, for covariance
  */
 public abstract class EnricherBuilder<M extends Message,
                                       C extends EnrichableMessageContext,
