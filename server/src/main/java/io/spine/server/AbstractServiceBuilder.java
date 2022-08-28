@@ -92,10 +92,8 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
      * Obtains the class of the service this builder creates.
      */
     Class<T> serviceClass() {
-        GenericTypeIndex<AbstractServiceBuilder<T, B>> typeIndex = () -> 0;
         @SuppressWarnings("unchecked")
-        var cls = (Class<T>) typeIndex.argumentIn(
-                (Class<? extends AbstractServiceBuilder<T, B>>) getClass());
+        var cls = (Class<T>) GenericParameter.SERVICE_TYPE.argumentIn(getClass());
         return cls;
     }
 
@@ -119,4 +117,15 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
      * Creates a new instance of the service.
      */
     abstract T build();
+
+    @SuppressWarnings("rawtypes")
+    private enum GenericParameter implements GenericTypeIndex<AbstractServiceBuilder> {
+
+        SERVICE_TYPE;
+
+        @Override
+        public int index() {
+            return 0;
+        }
+    }
 }
