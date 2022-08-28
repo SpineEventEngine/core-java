@@ -27,8 +27,7 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableCollection;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -39,16 +38,18 @@ import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
-import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.union;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
+import static java.util.Comparator.comparing;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -62,11 +63,11 @@ public final class SubscriptionService
 
     private static final Joiner LIST_JOINER = Joiner.on(", ");
 
-    private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
+    private final TypeDictionary types;
 
-    private SubscriptionService(ImmutableMap<TypeUrl, BoundedContext> map) {
+    private SubscriptionService(TypeDictionary types) {
         super();
-        this.typeToContextMap = checkNotNull(map);
+        this.types = types;
     }
 
     /**
@@ -105,7 +106,8 @@ public final class SubscriptionService
             var stand = foundContext.get().stand();
             stand.subscribe(topic, responseObserver);
         } else {
-            Set<BoundedContext> contexts = ImmutableSet.copyOf(typeToContextMap.values());
+            List<BoundedContext> contexts = new ArrayList<>(contexts());
+            contexts.sort(comparing(c -> c.name().value()));
             _warn().log("Unable to find a Bounded Context for type `%s`." +
                                 " Creating a subscription in contexts: %s.",
                         topic.getTarget().type(),
@@ -132,7 +134,7 @@ public final class SubscriptionService
                 var targetStand = foundContext.get().stand();
                 targetStand.activate(subscription, callback, responseObserver);
             } else {
-                for (var context : typeToContextMap.values()) {
+                for (var context : contexts()) {
                     var stand = context.stand();
                     stand.activate(subscription, callback, responseObserver);
                 }
@@ -142,6 +144,11 @@ public final class SubscriptionService
                     .log("Error activating the subscription.");
             safeObserver.onError(e);
         }
+    }
+
+    @NonNull
+    private ImmutableCollection<BoundedContext> contexts() {
+        return types.contexts();
     }
 
     @Override
@@ -183,8 +190,7 @@ public final class SubscriptionService
     @VisibleForTesting  /* Otherwise should have been `private`. */
     Optional<BoundedContext> findContextOf(Target target) {
         var type = target.type();
-        var selected = typeToContextMap.get(type);
-        var result = Optional.ofNullable(selected);
+        var result = types.find(type);
         return result;
     }
 
@@ -204,27 +210,14 @@ public final class SubscriptionService
                 throw new IllegalStateException(
                         "Subscription service must have at least one Bounded Context.");
             }
-            var map = createMap();
-            var result = new SubscriptionService(map);
+            var dictionary = TypeDictionary.newBuilder();
+            contexts().forEach(
+                    context -> dictionary.putAll(context, (c) ->
+                            union(c.stand().exposedTypes(), c.stand().exposedEventTypes())
+                    )
+            );
+            var result = new SubscriptionService(dictionary.build());
             return result;
-        }
-
-        private ImmutableMap<TypeUrl, BoundedContext> createMap() {
-            ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
-            for (var context : contexts()) {
-                putIntoMap(context, builder);
-            }
-            return builder.build();
-        }
-
-        private static void putIntoMap(BoundedContext context,
-                                       ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
-            var stand = context.stand();
-            Consumer<TypeUrl> putIntoMap = typeUrl -> mapBuilder.put(typeUrl, context);
-            stand.exposedTypes()
-                 .forEach(putIntoMap);
-            stand.exposedEventTypes()
-                 .forEach(putIntoMap);
         }
 
         @Override
