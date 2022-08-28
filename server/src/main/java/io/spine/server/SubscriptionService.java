@@ -38,7 +38,6 @@ import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,7 +145,6 @@ public final class SubscriptionService
         }
     }
 
-    @NonNull
     private ImmutableCollection<BoundedContext> contexts() {
         return types.contexts();
     }
