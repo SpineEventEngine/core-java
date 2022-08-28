@@ -26,6 +26,7 @@
 
 package io.spine.server;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.type.TypeUrl;
@@ -69,6 +70,10 @@ final class TypeDictionary {
     Optional<BoundedContext> find(TypeUrl type) {
         var result = Optional.ofNullable(map.get(type));
         return result;
+    }
+
+    ImmutableCollection<BoundedContext> contexts() {
+        return map.values();
     }
 
     /**
