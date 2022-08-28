@@ -25,7 +25,6 @@
  */
 package io.spine.server;
 
-import com.google.common.collect.ImmutableMap;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -34,8 +33,6 @@ import io.spine.logging.Logging;
 import io.spine.server.model.UnknownEntityTypeException;
 import io.spine.server.stand.InvalidRequestException;
 import io.spine.type.TypeUrl;
-
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
@@ -51,11 +48,11 @@ public final class QueryService
         extends QueryServiceGrpc.QueryServiceImplBase
         implements Logging {
 
-    private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
+    private final TypeDictionary types;
 
-    private QueryService(Map<TypeUrl, BoundedContext> map) {
+    private QueryService(TypeDictionary types) {
         super();
-        this.typeToContextMap = ImmutableMap.copyOf(map);
+        this.types = types;
     }
 
     /**
@@ -82,12 +79,10 @@ public final class QueryService
         _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
 
         var type = query.targetType();
-        var context = typeToContextMap.get(type);
-        if (context == null) {
-            handleUnsupported(type, responseObserver);
-        } else {
-            handleQuery(context, query, responseObserver);
-        }
+        types.find(type).ifPresentOrElse(
+             ctx -> handleQuery(ctx, query, responseObserver),
+             () -> handleUnsupported(type, responseObserver)
+        );
     }
 
     private void handleQuery(BoundedContext context,
@@ -119,11 +114,6 @@ public final class QueryService
      */
     public static class Builder extends AbstractServiceBuilder<QueryService, Builder> {
 
-        @Override
-        Builder self() {
-            return this;
-        }
-
         /**
          * Builds the {@link QueryService}.
          *
@@ -135,26 +125,18 @@ public final class QueryService
                 var message = "Query service must have at least one `BoundedContext`.";
                 throw new IllegalStateException(message);
             }
-            var map = createMap();
-            var result = new QueryService(map);
-            return result;
+            var dictionary = TypeDictionary.newBuilder();
+            contexts().forEach(
+                    context -> dictionary.putAll(context, (c) -> c.stand().exposedTypes())
+            );
+
+            var service = new QueryService(dictionary.build());
+            return service;
         }
 
-        private ImmutableMap<TypeUrl, BoundedContext> createMap() {
-            ImmutableMap.Builder<TypeUrl, BoundedContext> map = ImmutableMap.builder();
-            for (var context : contexts()) {
-                putExposedTypes(context, map);
-            }
-            return map.build();
-        }
-
-        private static void putExposedTypes(BoundedContext context,
-                                            ImmutableMap.Builder<TypeUrl, BoundedContext> map) {
-            var stand = context.stand();
-            var exposedTypes = stand.exposedTypes();
-            for (var type : exposedTypes) {
-                map.put(type, context);
-            }
+        @Override
+        Builder self() {
+            return this;
         }
     }
 }
