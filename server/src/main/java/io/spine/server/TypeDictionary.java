@@ -27,6 +27,7 @@
 package io.spine.server;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
@@ -39,13 +40,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Allows to find to which Bounded Context a given type belongs.
+ *
+ * <p>Such a dictionary is used in services exposed to client communications
+ * to find out to which bounded context a message received by the service belongs.
  */
 final class TypeDictionary {
 
     private final ImmutableMap<TypeUrl, BoundedContext> map;
 
-    private TypeDictionary(Builder builder) {
-        this.map = ImmutableMap.copyOf(builder.map);
+    private TypeDictionary(Map<TypeUrl, BoundedContext> map) {
+        this.map = ImmutableMap.copyOf(map);
     }
 
     /**
@@ -83,6 +87,7 @@ final class TypeDictionary {
          *         the function obtaining the types from the given instance of the context
          * @return this builder instance
          */
+        @CanIgnoreReturnValue
         Builder putAll(BoundedContext context,
                        Function<BoundedContext, Set<TypeUrl>> typeSupplier) {
             checkNotNull(context);
@@ -96,7 +101,7 @@ final class TypeDictionary {
          * Creates new type dictionary.
          */
         TypeDictionary build() {
-            return new TypeDictionary(this);
+            return new TypeDictionary(map);
         }
     }
 }
