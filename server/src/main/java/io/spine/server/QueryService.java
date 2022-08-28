@@ -121,10 +121,7 @@ public final class QueryService
          */
         @Override
         public QueryService build() throws IllegalStateException {
-            if (isEmpty()) {
-                var message = "Query service must have at least one `BoundedContext`.";
-                throw new IllegalStateException(message);
-            }
+            checkNotEmpty();
             var dictionary = TypeDictionary.newBuilder();
             contexts().forEach(
                     context -> dictionary.putAll(context, (c) -> c.stand().exposedTypes())

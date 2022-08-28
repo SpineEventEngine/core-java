@@ -28,9 +28,12 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.reflect.GenericTypeIndex;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract for builder of service classes.
@@ -50,6 +53,15 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
     abstract B self();
 
     /**
+     * Adds the passed bounded context to be served by the service.
+     */
+    @CanIgnoreReturnValue
+    public B add(BoundedContext context) {
+        contexts.add(context);
+        return self();
+    }
+
+    /**
      * Tells if this builder has no bounded context.
      */
     boolean isEmpty() {
@@ -57,19 +69,34 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
     }
 
     /**
-     * Obtains immutable copy of already added contexts.
+     * Obtains bounded contexts already added before this call.
      */
     ImmutableSet<BoundedContext> contexts() {
         return ImmutableSet.copyOf(contexts);
     }
 
     /**
-     * Adds the passed bounded context to be served by the service.
+     * Verifies if this builder has at least one bounded context added.
+     *
+     * @throws IllegalStateException otherwise
      */
-    @CanIgnoreReturnValue
-    public B add(BoundedContext context) {
-        contexts.add(context);
-        return self();
+    void checkNotEmpty() throws IllegalStateException {
+        if (isEmpty()) {
+            throw newIllegalStateException(
+                    "`%s` must serve at least one Bounded Context.",
+                    serviceClass().getCanonicalName());
+        }
+    }
+
+    /**
+     * Obtains the class of the service this builder creates.
+     */
+    Class<T> serviceClass() {
+        GenericTypeIndex<AbstractServiceBuilder<T, B>> typeIndex = () -> 0;
+        @SuppressWarnings("unchecked")
+        var cls = (Class<T>) typeIndex.argumentIn(
+                (Class<? extends AbstractServiceBuilder<T, B>>) getClass());
+        return cls;
     }
 
     /**

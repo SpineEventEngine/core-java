@@ -206,10 +206,7 @@ public final class SubscriptionService
          */
         @Override
         public SubscriptionService build() throws IllegalStateException {
-            if (isEmpty()) {
-                throw new IllegalStateException(
-                        "Subscription service must have at least one Bounded Context.");
-            }
+            checkNotEmpty();
             var dictionary = TypeDictionary.newBuilder();
             contexts().forEach(
                     context -> dictionary.putAll(context, (c) ->
