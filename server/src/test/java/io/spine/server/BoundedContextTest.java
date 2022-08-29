@@ -504,4 +504,15 @@ class BoundedContextTest {
                 .addEqualityGroup(c2, c2m)
                 .testEquals();
     }
+
+    @Test
+    @DisplayName("be comparable by its name")
+    void comparability() {
+        var c1 = BoundedContext.singleTenant("1").build();
+        var c2 = BoundedContext.singleTenant("2").build();
+
+        assertThat(c1).isLessThan(c2);
+        assertThat(c2).isGreaterThan(c1);
+        assertThat(c1).isEqualTo(BoundedContext.multitenant("1").build());
+    }
 }

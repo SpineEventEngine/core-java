@@ -28,6 +28,7 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.Ordering;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -48,7 +49,6 @@ import static com.google.common.collect.Sets.union;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
-import static java.util.Comparator.comparing;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -106,7 +106,7 @@ public final class SubscriptionService
             stand.subscribe(topic, responseObserver);
         } else {
             List<BoundedContext> contexts = new ArrayList<>(contexts());
-            contexts.sort(comparing(c -> c.name().value()));
+            contexts.sort(Ordering.natural());
             _warn().log("Unable to find a Bounded Context for type `%s`." +
                                 " Creating a subscription in contexts: %s.",
                         topic.getTarget().type(),

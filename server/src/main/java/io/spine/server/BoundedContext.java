@@ -85,7 +85,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         Martin Fowler on Bounded Contexts</a>
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
-public abstract class BoundedContext implements Closeable, Logging {
+public abstract class BoundedContext implements Comparable<BoundedContext>, Closeable, Logging {
 
     /** Basic features of the context. */
     private final ContextSpec spec;
@@ -475,6 +475,15 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
+     * Compares two bounded contexts by their names.
+     */
+    @Override
+    public int compareTo(BoundedContext another) {
+        checkNotNull(another);
+        return name().value().compareTo(another.name().value());
+    }
+
+    /**
      * Returns {@code true} if another bounded context has the same name as this one,
      * {@code false} otherwise.
      */
@@ -483,7 +492,7 @@ public abstract class BoundedContext implements Closeable, Logging {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof BoundedContext)) {
             return false;
         }
         var another = (BoundedContext) o;
