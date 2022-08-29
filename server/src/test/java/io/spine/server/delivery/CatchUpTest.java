@@ -43,6 +43,7 @@ import io.spine.test.delivery.EmitNextNumber;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -103,35 +104,45 @@ public class CatchUpTest extends AbstractDeliveryTest {
                          .clear();
     }
 
-    @Test
-    @DisplayName("given the time is provided with nanosecond resolution, catch up " +
-            "only particular instances by their IDs")
-    public void withNanosByIds() throws InterruptedException {
-        testCatchUpByIds();
+    @Nested
+    @DisplayName("given the time is provided with nanosecond resolution")
+    class NanosecondsResolution {
+
+        @Test
+        @DisplayName("catch up only particular instances by their IDs")
+        public void withNanosByIds() throws InterruptedException {
+            testCatchUpByIds();
+        }
+
+        @Test
+        @DisplayName("catch up all of projection instances " +
+                "and respect the order of the delivered events")
+        public void withNanosAllInOrder() throws InterruptedException {
+            testCatchUpAll();
+        }
     }
 
-    @Test
-    @DisplayName("given the time is provided with nanosecond resolution, " +
-            "catch up all of projection instances " +
-            "and respect the order of the delivered events")
-    public void withNanosAllInOrder() throws InterruptedException {
-        testCatchUpAll();
-    }
+    @Nested
+    @DisplayName("given the time is provided with millisecond resolution")
+    class MillisecondResolution {
 
-    @Test
-    @DisplayName("given the time is provided with millisecond resolution, " +
-            "catch up only particular instances by their IDs")
-    public void withMillisByIds() throws InterruptedException {
-        setupMillis();
-        testCatchUpByIds();
-    }
+        @BeforeEach
+        void useMillis() {
+            setupMillis();
+        }
 
-    @Test
-    @DisplayName("given the time is provided with millisecond resolution, catch up all " +
-            "of projection instances and respect the order of the delivered events")
-    public void withMillisAllInOrder() throws InterruptedException {
-        setupMillis();
-        testCatchUpAll();
+        @Test
+        @DisplayName("catch up only particular instances by their IDs")
+        public void withMillisByIds() throws InterruptedException {
+            testCatchUpByIds();
+        }
+
+        @Test
+        @DisplayName("catch up all of projection instances and " +
+                "respect the order of the delivered events")
+        public void withMillisAllInOrder() throws InterruptedException {
+            testCatchUpAll();
+        }
     }
 
     @Test
@@ -271,7 +282,6 @@ public class CatchUpTest extends AbstractDeliveryTest {
         assertThat(totalsAfterCatchUp).isEqualTo(expectedTotals);
     }
 
-    @SuppressWarnings("OverlyLongMethod")   // Complex environment setup.
     private static void testCatchUpAll() throws InterruptedException {
         ConsecutiveProjection.usePositives();
 

@@ -23,14 +23,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/** Versions of the Spine libraries that `core-java` depends on. */
-val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.95")
-val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.95")
-val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.95")
-val toolBaseVersion: String by extra("2.0.0-SNAPSHOT.93")
-val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.97")
-val validationVersion: String by extra("2.0.0-SNAPSHOT.22")
+package spine.test.unpublished;
 
-/** The version of this library. */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.106")
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.unpublished";
+option java_outer_classname = "LocomotiveProto";
+option java_multiple_files = true;
+
+message Locomotive {
+    option (entity) = { kind: PROCESS_MANAGER visibility: FULL };
+    option (internal_type) = true;
+    string name = 1;
+}

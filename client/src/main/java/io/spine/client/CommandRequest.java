@@ -65,7 +65,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * the subscriptions depends on the nature of the posted command and the outcome
  * expected by the client application.
  */
-public final class CommandRequest extends ClientRequest implements Logging {
+public final class CommandRequest extends ClientRequestBase implements Logging {
 
     private final CommandMessage message;
     private final MultiEventConsumers.Builder eventConsumers;
