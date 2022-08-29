@@ -475,6 +475,27 @@ public abstract class BoundedContext implements Closeable, Logging {
     }
 
     /**
+     * Returns {@code true} if another bounded context has the same name as this one,
+     * {@code false} otherwise.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        var another = (BoundedContext) o;
+        return name().equals(another.name());
+    }
+
+    @Override
+    public int hashCode() {
+        return name().hashCode();
+    }
+
+    /**
      * Provides access to features of {@link BoundedContext} used internally by the framework.
      */
     @Internal

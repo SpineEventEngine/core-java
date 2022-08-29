@@ -29,6 +29,7 @@ package io.spine.server;
 import com.example.ForeignContextConfig;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.google.common.testing.EqualsTester;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.logging.Logging;
@@ -488,5 +489,19 @@ class BoundedContextTest {
         private void assertThrowsOn(Executable executable) {
             assertThrows(SecurityException.class, executable);
         }
+    }
+
+    @Test
+    @DisplayName("be equal to another context by its name")
+    void equality() {
+        var c1 = BoundedContext.singleTenant("One").build();
+        var c2 = BoundedContext.singleTenant("Two").build();
+        var c1m = BoundedContext.multitenant("One").build();
+        var c2m = BoundedContext.multitenant("Two").build();
+
+        new EqualsTester()
+                .addEqualityGroup(c1, c1m)
+                .addEqualityGroup(c2, c2m)
+                .testEquals();
     }
 }
