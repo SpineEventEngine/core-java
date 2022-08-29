@@ -1,3 +1,7 @@
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.kotlin.dsl.withGroovyBuilder
+
 /*
  * Copyright 2022, TeamDev. All rights reserved.
  *
@@ -24,29 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.gradle.testing.exposeTestConfiguration
-
-group = "io.spine.tools"
-
-dependencies {
-    api(project(":server"))
-    api(project(":testutil-client"))
-    testImplementation(Grpc.netty)
-    testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
-}
-
-java {
-    exposeTestConfiguration()
-}
-
-//TODO:2021-08-03:alexander.yevsyukov: Turn to WARN and investigate duplicates.
-// see https://github.com/SpineEventEngine/base/issues/657
-val duplicatesStrategy = DuplicatesStrategy.INCLUDE
-tasks.processResources.get().duplicatesStrategy = duplicatesStrategy
-tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
-
-
 /**
  * The following lines are the workaround
  * for https://github.com/SpineEventEngine/ProtoData/issues/72.
@@ -57,4 +38,20 @@ tasks.processTestResources.get().duplicatesStrategy = duplicatesStrategy
  *
  * This code should be removed, once the issue is resolved.
  */
-moveGeneratedProtoFromBuildFolder()
+fun Project.moveGeneratedProtoFromBuildFolder() {
+    listOf<String>("main", "test").forEach { scope ->
+        tasks.named("launchProtoData${scope.capitalize()}") {
+            doLast {
+                this.ant.withGroovyBuilder {
+                    "move"(
+                        "file" to "${buildDir}/generated-proto/$scope/spine",
+                        "todir" to "${projectDir}/generated/${scope}/spine",
+
+                        // In case the source folder does not exist, prevent failures.
+                        "failonerror" to "false"
+                    )
+                }
+            }
+        }
+    }
+}
