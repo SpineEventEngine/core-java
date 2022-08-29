@@ -27,8 +27,6 @@
 package io.spine.server;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.base.Errors;
@@ -39,10 +37,8 @@ import io.spine.logging.Logging;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
 import io.spine.type.UnpublishedLanguageException;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.MessageIdExtensions.causedError;
@@ -135,43 +131,12 @@ public final class CommandService
     /**
      * The builder for a {@code CommandService}.
      */
-    public static class Builder {
-
-        private final Set<BoundedContext> contexts = Sets.newHashSet();
-
-        /**
-         * Adds the {@code BoundedContext} to the builder.
-         */
-        @CanIgnoreReturnValue
-        public Builder add(BoundedContext context) {
-            // Saves it to a temporary set so that it is easy to remove it if needed.
-            contexts.add(context);
-            return this;
-        }
-
-        /**
-         * Removes the {@code BoundedContext} from the builder.
-         */
-        @CanIgnoreReturnValue
-        public Builder remove(BoundedContext context) {
-            contexts.remove(context);
-            return this;
-        }
-
-        /**
-         * Verifies if the passed {@code BoundedContext} was previously added to the builder.
-         *
-         * @param context the instance to check
-         * @return {@code true} if the instance was added to the builder, {@code false} otherwise
-         */
-        public boolean contains(BoundedContext context) {
-            var contains = contexts.contains(context);
-            return contains;
-        }
+    public static class Builder extends AbstractServiceBuilder<CommandService, Builder> {
 
         /**
          * Builds a new {@link CommandService}.
          */
+        @Override
         public CommandService build() {
             var map = createMap();
             var result = new CommandService(map);
@@ -184,7 +149,7 @@ public final class CommandService
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
             ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
-            for (var boundedContext : contexts) {
+            for (var boundedContext : contexts()) {
                 putIntoMap(boundedContext, builder);
             }
             return builder.build();
@@ -201,6 +166,11 @@ public final class CommandService
             for (var commandClass : cmdClasses) {
                 builder.put(commandClass, context);
             }
+        }
+
+        @Override
+        Builder self() {
+            return this;
         }
     }
 }

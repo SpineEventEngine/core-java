@@ -25,9 +25,6 @@
  */
 package io.spine.server;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -36,9 +33,6 @@ import io.spine.logging.Logging;
 import io.spine.server.model.UnknownEntityTypeException;
 import io.spine.server.stand.InvalidRequestException;
 import io.spine.type.TypeUrl;
-
-import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
@@ -54,11 +48,11 @@ public final class QueryService
         extends QueryServiceGrpc.QueryServiceImplBase
         implements Logging {
 
-    private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
+    private final TypeDictionary types;
 
-    private QueryService(Map<TypeUrl, BoundedContext> map) {
+    private QueryService(TypeDictionary types) {
         super();
-        this.typeToContextMap = ImmutableMap.copyOf(map);
+        this.types = types;
     }
 
     /**
@@ -85,12 +79,10 @@ public final class QueryService
         _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
 
         var type = query.targetType();
-        var context = typeToContextMap.get(type);
-        if (context == null) {
-            handleUnsupported(type, responseObserver);
-        } else {
-            handleQuery(context, query, responseObserver);
-        }
+        types.find(type).ifPresentOrElse(
+             ctx -> handleQuery(ctx, query, responseObserver),
+             () -> handleUnsupported(type, responseObserver)
+        );
     }
 
     private void handleQuery(BoundedContext context,
@@ -120,65 +112,28 @@ public final class QueryService
     /**
      * The builder for a {@code QueryService}.
      */
-    public static class Builder {
-
-        private final Set<BoundedContext> contexts = Sets.newHashSet();
-
-        /**
-         * Adds the passed bounded context to be served by the query service.
-         */
-        @CanIgnoreReturnValue
-        public Builder add(BoundedContext context) {
-            contexts.add(context);
-            return this;
-        }
-
-        /**
-         * Excludes the passed bounded context from being served by the query service.
-         */
-        @CanIgnoreReturnValue
-        public Builder remove(BoundedContext context) {
-            contexts.remove(context);
-            return this;
-        }
-
-        /**
-         * Tells if the builder already contains the passed bounded context.
-         */
-        public boolean contains(BoundedContext context) {
-            return contexts.contains(context);
-        }
+    public static class Builder extends AbstractServiceBuilder<QueryService, Builder> {
 
         /**
          * Builds the {@link QueryService}.
          *
          * @throws IllegalStateException if no bounded contexts were added.
          */
+        @Override
         public QueryService build() throws IllegalStateException {
-            if (contexts.isEmpty()) {
-                var message = "Query service must have at least one `BoundedContext`.";
-                throw new IllegalStateException(message);
-            }
-            var map = createMap();
-            var result = new QueryService(map);
-            return result;
+            checkNotEmpty();
+            var dictionary = TypeDictionary.newBuilder();
+            contexts().forEach(
+                    context -> dictionary.putAll(context, (c) -> c.stand().exposedTypes())
+            );
+
+            var service = new QueryService(dictionary.build());
+            return service;
         }
 
-        private ImmutableMap<TypeUrl, BoundedContext> createMap() {
-            ImmutableMap.Builder<TypeUrl, BoundedContext> map = ImmutableMap.builder();
-            for (var context : contexts) {
-                putExposedTypes(context, map);
-            }
-            return map.build();
-        }
-
-        private static void putExposedTypes(BoundedContext context,
-                                            ImmutableMap.Builder<TypeUrl, BoundedContext> map) {
-            var stand = context.stand();
-            var exposedTypes = stand.exposedTypes();
-            for (var type : exposedTypes) {
-                map.put(type, context);
-            }
+        @Override
+        Builder self() {
+            return this;
         }
     }
 }
