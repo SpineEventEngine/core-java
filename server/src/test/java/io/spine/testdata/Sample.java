@@ -53,6 +53,11 @@ import static java.lang.String.format;
  */
 public class Sample {
 
+    /**
+     * The upper bound used for generating random {@code int} and {@code long} values.
+     */
+    private static final int INT_RANDOM_BOUND = 1654;
+
     /** Prevents instantiation of this utility class. */
     private Sample() {
     }
@@ -155,9 +160,8 @@ public class Sample {
         Random random = new SecureRandom();
         switch (javaType) {
             case INT:
-                return Math.abs(random.nextInt());
             case LONG:
-                return Math.abs(random.nextLong());
+                return positiveInt(random);
             case FLOAT:
                 return random.nextFloat();
             case DOUBLE:
@@ -179,6 +183,10 @@ public class Sample {
             default:
                 throw new IllegalArgumentException(format("Field type %s is not supported.", type));
         }
+    }
+
+    private static int positiveInt(Random random) {
+        return random.nextInt(INT_RANDOM_BOUND) + 1;
     }
 
     private static Object enumValueFor(FieldDescriptor field, Random random) {
