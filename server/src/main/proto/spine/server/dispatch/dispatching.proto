@@ -118,6 +118,10 @@ message Success {
 }
 
 // Events produced during a signal handling.
+//
+// Spine supports the handler methods returning `Optional` values,
+// so there may be no produced events.
+//
 message ProducedEvents {
     option (is).java_type = "ProducedEventsMixin";
 
@@ -125,6 +129,10 @@ message ProducedEvents {
 }
 
 // Commands produced during a signal handling.
+//
+// Spine supports the handler methods returning `Optional` values,
+// so there may be no produced commands.
+//
 message ProducedCommands {
     option (is).java_type = "ProducedCommandsMixin";
 
