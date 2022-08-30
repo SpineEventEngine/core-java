@@ -415,7 +415,6 @@ public abstract class BoundedContext implements Comparable<BoundedContext>, Clos
      *         caused by closing one of the components
      */
     @Override
-    @SuppressWarnings("FloggerLogString") /* Re-using the logged value. */
     public void close() throws Exception {
         commandBus.close();
         eventBus.close();
