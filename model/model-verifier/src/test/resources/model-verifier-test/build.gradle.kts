@@ -49,7 +49,6 @@ buildscript {
     val spineTimeVersion: String by extra
     val toolBaseVersion: String by extra
     val mcJavaVersion: String by extra
-    val validationVersion: String by extra
     val versionToPublish: String by extra
 
     io.spine.internal.gradle.doForceVersions(configurations)
@@ -64,8 +63,7 @@ buildscript {
             force(
                 "io.spine:spine-base:$spineBaseVersion",
                 "io.spine:spine-time:$spineTimeVersion",
-                "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-                "io.spine.validation:spine-validation-runtime:$validationVersion",
+                "io.spine.tools:spine-plugin-base:$toolBaseVersion"
             )
         }
     }

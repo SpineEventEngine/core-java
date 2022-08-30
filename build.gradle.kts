@@ -94,7 +94,6 @@ val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 val toolBaseVersion: String by extra
 val spineBaseTypesVersion: String by extra
-val validationVersion: String by extra
 
 spinePublishing {
     modules = setOf(
@@ -222,7 +221,6 @@ subprojects {
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
                     "io.spine.tools:spine-plugin-base:$toolBaseVersion",
                     "io.spine.tools:spine-tool-base:$toolBaseVersion",
-                    "io.spine.validation:spine-validation-runtime:$validationVersion",
                     Grpc.core,
                     Grpc.protobuf,
                     Grpc.stub
