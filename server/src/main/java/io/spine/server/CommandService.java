@@ -26,7 +26,6 @@
 
 package io.spine.server;
 
-import com.google.common.collect.ImmutableMap;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.base.Errors;
@@ -36,11 +35,11 @@ import io.spine.core.Command;
 import io.spine.logging.Logging;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
+import io.spine.type.MessageClass;
 import io.spine.type.UnpublishedLanguageException;
 
-import java.util.Map;
-
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.server.bus.MessageIdExtensions.causedError;
 import static io.spine.type.MessageExtensions.isInternal;
 
@@ -52,18 +51,26 @@ public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
         implements Logging {
 
-    private final ImmutableMap<CommandClass, BoundedContext> commandToContext;
+    private final TypeDictionary types;
 
     /**
      * Constructs new instance using the map from a {@code CommandClass} to
      * a {@code BoundedContext} instance which handles the command.
      */
-    private CommandService(Map<CommandClass, BoundedContext> map) {
+    private CommandService(TypeDictionary types) {
         super();
-        this.commandToContext = ImmutableMap.copyOf(map);
-        if (map.isEmpty()) {
-            /* We do not prohibit such a case of "empty" service for unusual cases of serving
-               no commands (e.g. because of handling only events) or for creating stub instances. */
+        this.types = types;
+        warnIfEmpty();
+    }
+
+    /**
+     * Logs a warning message if there are no types handled by this service.
+     *
+     * <p>We do not prohibit such a case of "empty" service for unusual cases,
+     * or for creating stub instances for testing.
+     */
+    void warnIfEmpty() {
+        if (types.isEmpty()) {
             _warn().log("A `%s` with no bounded contexts has been created.", simpleClassName());
         }
     }
@@ -95,13 +102,11 @@ public final class CommandService
             handleInternal(request, responseObserver);
             return;
         }
-        var boundedContext = commandToContext.get(commandClass);
-        if (boundedContext == null) {
-            handleUnsupported(request, responseObserver);
-        } else {
-            var commandBus = boundedContext.commandBus();
-            commandBus.post(request, responseObserver);
-        }
+        var boundedContext = types.find(commandClass.typeUrl());
+        boundedContext.ifPresentOrElse(
+                ctx -> ctx.commandBus().post(request, responseObserver),
+                () -> handleUnsupported(request, responseObserver)
+        );
     }
 
     private void handleInternal(Command command, StreamObserver<Ack> responseObserver) {
@@ -138,34 +143,19 @@ public final class CommandService
          */
         @Override
         public CommandService build() {
-            var map = createMap();
-            var result = new CommandService(map);
+            var dictionary = TypeDictionary.newBuilder();
+            contexts().forEach(
+                    context -> dictionary.putAll(context, (c) ->
+                            c.commandBus()
+                             .registeredCommandClasses()
+                                    .stream()
+                                    .map(MessageClass::typeUrl)
+                                    .collect(toImmutableSet())
+                    )
+            );
+
+            var result = new CommandService(dictionary.build());
             return result;
-        }
-
-        /**
-         * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that
-         * handle such commands.
-         */
-        private ImmutableMap<CommandClass, BoundedContext> createMap() {
-            ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
-            for (var boundedContext : contexts()) {
-                putIntoMap(boundedContext, builder);
-            }
-            return builder.build();
-        }
-
-        /**
-         * Associates {@code CommandClass}es with the instance of {@code BoundedContext}
-         * that handles such commands.
-         */
-        private static void putIntoMap(BoundedContext context,
-                                       ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
-            var commandBus = context.commandBus();
-            var cmdClasses = commandBus.registeredCommandClasses();
-            for (var commandClass : cmdClasses) {
-                builder.put(commandClass, context);
-            }
         }
 
         @Override
