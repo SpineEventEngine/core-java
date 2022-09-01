@@ -192,7 +192,7 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    @DisplayName("allow instance service not types")
+    @DisplayName("allow a service instance serving no types")
     void notInitFromEmptyBuilder() {
         assertDoesNotThrow(
                 () -> SubscriptionService.newBuilder()
