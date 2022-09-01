@@ -69,8 +69,8 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.Given.CommandMessage.createProject;
 import static io.spine.server.Given.CommandMessage.sendReport;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`SubscriptionService` should")
@@ -81,10 +81,13 @@ class SubscriptionServiceTest {
 
     private BoundedContext context;
     private SubscriptionService subscriptionService;
+
     /** The observer for creating a subscription. */
     private MemoizingObserver<Subscription> observer;
+
     /** The observer for activating a subscription. */
     private MemoizingObserver<SubscriptionUpdate> activationObserver;
+
     /** The observer for cancelling a subscription. */
     private MemoizingObserver<Response> cancellationObserver;
 
@@ -189,11 +192,12 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    @DisplayName("fail to initialize from empty builder")
+    @DisplayName("allow instance service not types")
     void notInitFromEmptyBuilder() {
-        assertThrows(IllegalStateException.class,
-                     () -> SubscriptionService.newBuilder()
-                                              .build());
+        assertDoesNotThrow(
+                () -> SubscriptionService.newBuilder()
+                        .build()
+        );
     }
 
     /*

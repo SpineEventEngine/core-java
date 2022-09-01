@@ -60,19 +60,6 @@ public final class CommandService
     private CommandService(TypeDictionary types) {
         super();
         this.types = types;
-        warnIfEmpty();
-    }
-
-    /**
-     * Logs a warning message if there are no types handled by this service.
-     *
-     * <p>We do not prohibit such a case of "empty" service for unusual cases,
-     * or for creating stub instances for testing.
-     */
-    void warnIfEmpty() {
-        if (types.isEmpty()) {
-            _warn().log("A `%s` with no bounded contexts has been created.", simpleClassName());
-        }
     }
 
     private String simpleClassName() {
@@ -155,6 +142,7 @@ public final class CommandService
             );
 
             var result = new CommandService(dictionary.build());
+            warnIfEmpty(result);
             return result;
         }
 

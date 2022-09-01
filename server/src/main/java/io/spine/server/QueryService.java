@@ -121,13 +121,13 @@ public final class QueryService
          */
         @Override
         public QueryService build() throws IllegalStateException {
-            checkNotEmpty();
             var dictionary = TypeDictionary.newBuilder();
             contexts().forEach(
                     context -> dictionary.putAll(context, (c) -> c.stand().exposedTypes())
             );
 
             var service = new QueryService(dictionary.build());
+            warnIfEmpty(service);
             return service;
         }
 
