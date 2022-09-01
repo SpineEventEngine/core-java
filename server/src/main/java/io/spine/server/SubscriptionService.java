@@ -204,7 +204,6 @@ public final class SubscriptionService
          */
         @Override
         public SubscriptionService build() throws IllegalStateException {
-            checkNotEmpty();
             var dictionary = TypeDictionary.newBuilder();
             contexts().forEach(
                     context -> dictionary.putAll(context, (c) ->
@@ -212,6 +211,7 @@ public final class SubscriptionService
                     )
             );
             var result = new SubscriptionService(dictionary.build());
+            warnIfEmpty(result);
             return result;
         }
 

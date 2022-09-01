@@ -72,8 +72,18 @@ final class TypeDictionary {
         return result;
     }
 
+    /**
+     * Obtains the bounded contexts listed in this dictionary.
+     */
     ImmutableCollection<BoundedContext> contexts() {
         return map.values();
+    }
+
+    /**
+     * Tells if this dictionary empty or not.
+     */
+    boolean isEmpty() {
+        return map.isEmpty();
     }
 
     /**
