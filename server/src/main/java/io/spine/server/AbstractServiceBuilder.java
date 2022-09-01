@@ -28,12 +28,10 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.reflect.GenericTypeIndex;
+import io.spine.logging.Logging;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract for builder of service classes.
@@ -43,7 +41,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <B>
  *         the self-type of the builder for return type covariance
  */
-public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder<T, B>> {
+public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder<T, B>>
+        implements Logging {
 
     private final Set<BoundedContext> contexts = new HashSet<>();
 
@@ -76,25 +75,17 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
     }
 
     /**
-     * Verifies if this builder has at least one bounded context added.
+     * Logs a warning message if there are no types handled by this service.
      *
-     * @throws IllegalStateException otherwise
+     * <p>We do not prohibit such a case of "empty" service for unusual cases,
+     * or for creating stub instances for testing.
      */
-    void checkNotEmpty() throws IllegalStateException {
+    void warnIfEmpty(T service) {
         if (isEmpty()) {
-            throw newIllegalStateException(
-                    "`%s` must serve at least one Bounded Context.",
-                    serviceClass().getCanonicalName());
+            _warn().log("The created `%s` serves no types because" +
+                                " no bounded contexts were added to its builder.",
+                        service.getClass().getSimpleName());
         }
-    }
-
-    /**
-     * Obtains the class of the service this builder creates.
-     */
-    Class<T> serviceClass() {
-        @SuppressWarnings("unchecked")
-        var cls = (Class<T>) GenericParameter.SERVICE_TYPE.argumentIn(getClass());
-        return cls;
     }
 
     /**
@@ -117,15 +108,4 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
      * Creates a new instance of the service.
      */
     abstract T build();
-
-    @SuppressWarnings("rawtypes")
-    private enum GenericParameter implements GenericTypeIndex<AbstractServiceBuilder> {
-
-        SERVICE_TYPE;
-
-        @Override
-        public int index() {
-            return 0;
-        }
-    }
 }

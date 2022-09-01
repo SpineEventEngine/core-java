@@ -45,11 +45,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.Given.CUSTOMERS_CONTEXT_NAME;
 import static io.spine.server.Given.PROJECTS_CONTEXT_NAME;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`QueryService` should")
@@ -92,20 +92,12 @@ class QueryServiceTest {
     }
 
     @Test
-    @DisplayName("fail to create with Bounded Context removed from builder")
-    void notCreateWithRemovedBc() {
-        var boundedContext = BoundedContextBuilder.assumingTests().build();
-        var builder = QueryService.newBuilder();
-        assertThrows(IllegalStateException.class, () -> builder.add(boundedContext)
-                                                               .remove(boundedContext)
-                                                               .build());
-    }
-
-    @Test
-    @DisplayName("fail to create with no Bounded Context")
+    @DisplayName("allow to create an instance serving no types")
     void notCreateWithNoBc() {
-        assertThrows(IllegalStateException.class, () -> QueryService.newBuilder()
-                                                                    .build());
+        assertDoesNotThrow(
+                () -> QueryService.newBuilder()
+                        .build()
+        );
     }
 
     @Test
