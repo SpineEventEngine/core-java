@@ -30,7 +30,7 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.logging.Logging;
-import io.spine.server.model.UnknownEntityTypeException;
+import io.spine.server.model.UnknownEntityStateTypeException;
 import io.spine.server.stand.InvalidRequestException;
 import io.spine.type.TypeUrl;
 
@@ -103,7 +103,7 @@ public final class QueryService
     }
 
     private void handleUnsupported(TypeUrl type, StreamObserver<QueryResponse> observer) {
-        var exception = new UnknownEntityTypeException(type);
+        var exception = new UnknownEntityStateTypeException(type);
         _error().withCause(exception)
                 .log("Unknown type encountered.");
         observer.onError(exception);
