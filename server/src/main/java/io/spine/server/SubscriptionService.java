@@ -93,7 +93,7 @@ public final class SubscriptionService
             subscribeTo(topic, safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
-                    .log("Error processing subscription request.");
+                    .log();
             responseObserver.onError(e);
         }
     }
