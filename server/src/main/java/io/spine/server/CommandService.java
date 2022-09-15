@@ -85,7 +85,7 @@ public final class CommandService
         impl.serve(command, responseObserver);
     }
 
-    private static class CommandServiceImpl extends ServiceDelegate<Command, Ack> {
+    private static final class CommandServiceImpl extends ServiceDelegate<Command, Ack> {
 
         CommandServiceImpl(BindableService service, TypeDictionary types) {
             super(service, types);
