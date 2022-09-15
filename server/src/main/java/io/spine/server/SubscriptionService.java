@@ -29,6 +29,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Ordering;
+import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -39,6 +40,9 @@ import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
+import io.spine.protobuf.Messages;
+import io.spine.type.TypeUrl;
+import io.spine.type.UnpublishedLanguageException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +53,7 @@ import static com.google.common.collect.Sets.union;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
+import static io.spine.type.MessageExtensions.isInternal;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -63,10 +68,12 @@ public final class SubscriptionService
     private static final Joiner LIST_JOINER = Joiner.on(", ");
 
     private final TypeDictionary types;
+    private final SubscriptionImpl subscriptions;
 
     private SubscriptionService(TypeDictionary types) {
         super();
         this.types = types;
+        this.subscriptions = new SubscriptionImpl(this, types);
     }
 
     /**
@@ -90,34 +97,11 @@ public final class SubscriptionService
         _debug().log("Creating the subscription to the topic: `%s`.", topic);
         try {
             StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(observer);
-            subscribeTo(topic, safeObserver);
+            subscriptions.serve(topic, safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log();
             observer.onError(e);
-        }
-    }
-
-    private void subscribeTo(Topic topic, StreamObserver<Subscription> observer) {
-        var target = topic.getTarget();
-        var foundContext = findContextOf(target);
-        if (foundContext.isPresent()) {
-            var stand = foundContext.get().stand();
-            stand.subscribe(topic, observer);
-        } else {
-            List<BoundedContext> contexts = new ArrayList<>(contexts());
-            contexts.sort(Ordering.natural());
-            _warn().log("Unable to find a Bounded Context for type `%s`." +
-                                " Creating a subscription in contexts: %s.",
-                        topic.getTarget().type(),
-                        LIST_JOINER.join(contexts));
-            var subscription = Subscriptions.from(topic);
-            for (var context : contexts) {
-                var stand = context.stand();
-                stand.subscribe(subscription);
-            }
-            observer.onNext(subscription);
-            observer.onCompleted();
         }
     }
 
@@ -190,6 +174,65 @@ public final class SubscriptionService
         var type = target.type();
         var result = types.find(type);
         return result;
+    }
+
+    private static final class SubscriptionImpl extends ServiceDelegate<Topic, Subscription> {
+
+        SubscriptionImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected TypeUrl enclosedMessageType(Topic topic) {
+            return topic.getTarget()
+                        .type();
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Topic topic,
+                             StreamObserver<Subscription> observer) {
+            var stand = context.stand();
+            stand.subscribe(topic, observer);
+        }
+
+        @Override
+        protected boolean detectInternal(Topic topic) {
+            var targetClass = topic.getTarget().messageClass();
+            var defTarget = Messages.defaultInstance(targetClass);
+
+            var result = isInternal(defTarget);
+            return result;
+        }
+
+        @Override
+        protected void handleInternal(Topic topic, StreamObserver<Subscription> observer) {
+            var targetClass = topic.getTarget().messageClass();
+            var defTarget = Messages.defaultInstance(targetClass);
+
+            var unpublishedLanguage = new UnpublishedLanguageException(defTarget);
+            _error().withCause(unpublishedLanguage)
+                    .log("A topic for an unpublished type posted to `%s`.", serviceName());
+            observer.onError(unpublishedLanguage);
+
+        }
+
+        @Override
+        protected void handleUnsupported(Topic topic, StreamObserver<Subscription> observer) {
+            List<BoundedContext> contexts = new ArrayList<>(contexts());
+            contexts.sort(Ordering.natural());
+            _warn().log("Unable to find a Bounded Context for type `%s`." +
+                                " Creating a subscription in contexts: %s.",
+                        topic.getTarget().type(),
+                        LIST_JOINER.join(contexts));
+            var subscription = Subscriptions.from(topic);
+            for (var context : contexts) {
+                var stand = context.stand();
+                stand.subscribe(subscription);
+            }
+            observer.onNext(subscription);
+            observer.onCompleted();
+        }
     }
 
     /**
