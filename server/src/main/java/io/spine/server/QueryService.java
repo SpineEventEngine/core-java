@@ -88,8 +88,8 @@ public final class QueryService
     private void handleQuery(BoundedContext context,
                              Query query,
                              StreamObserver<QueryResponse> responseObserver) {
-        var stand = context.stand();
         try {
+            var stand = context.stand();
             stand.execute(query, responseObserver);
         } catch (InvalidRequestException e) {
             _error().log("Invalid request. `%s`", e.asError());
