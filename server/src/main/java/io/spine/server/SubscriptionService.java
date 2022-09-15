@@ -86,15 +86,15 @@ public final class SubscriptionService
     }
 
     @Override
-    public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
+    public void subscribe(Topic topic, StreamObserver<Subscription> observer) {
         _debug().log("Creating the subscription to the topic: `%s`.", topic);
         try {
-            StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(responseObserver);
+            StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(observer);
             subscribeTo(topic, safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log();
-            responseObserver.onError(e);
+            observer.onError(e);
         }
     }
 
@@ -150,9 +150,9 @@ public final class SubscriptionService
     }
 
     @Override
-    public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
+    public void cancel(Subscription subscription, StreamObserver<Response> observer) {
         _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
-        StreamObserver<Response> safeObserver = new ThreadSafeObserver<>(responseObserver);
+        StreamObserver<Response> safeObserver = new ThreadSafeObserver<>(observer);
         var selected = findContextOf(subscription);
         if (selected.isEmpty()) {
             _warn().log("Trying to cancel a subscription `%s` which could not be found.",
