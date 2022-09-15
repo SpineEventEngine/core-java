@@ -91,9 +91,14 @@ public final class CommandService
         }
         var boundedContext = types.find(commandClass.typeUrl());
         boundedContext.ifPresentOrElse(
-                ctx -> ctx.commandBus().post(request, responseObserver),
+                ctx -> handleCommand(ctx, request, responseObserver),
                 () -> handleUnsupported(request, responseObserver)
         );
+    }
+
+    private static
+    void handleCommand(BoundedContext ctx, Command request, StreamObserver<Ack> responseObserver) {
+        ctx.commandBus().post(request, responseObserver);
     }
 
     private void handleInternal(Command command, StreamObserver<Ack> responseObserver) {
