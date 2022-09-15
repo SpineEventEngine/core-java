@@ -26,6 +26,7 @@
 
 package io.spine.server;
 
+import com.google.common.collect.ImmutableCollection;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.logging.Logging;
@@ -103,5 +104,9 @@ abstract class ServiceDelegate<T, R> implements Logging {
     final String serviceName() {
         var result = service.getClass().getSimpleName();
         return result;
+    }
+
+    final ImmutableCollection<BoundedContext> contexts() {
+        return types.contexts();
     }
 }
