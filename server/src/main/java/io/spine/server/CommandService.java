@@ -26,6 +26,7 @@
 
 package io.spine.server;
 
+import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.base.Errors;
@@ -36,6 +37,7 @@ import io.spine.logging.Logging;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
 import io.spine.type.MessageClass;
+import io.spine.type.TypeUrl;
 import io.spine.type.UnpublishedLanguageException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -44,14 +46,14 @@ import static io.spine.server.bus.MessageIdExtensions.causedError;
 import static io.spine.type.MessageExtensions.isInternal;
 
 /**
- * The {@code CommandService} allows client applications to post commands and
- * receive updates from the application backend.
+ * The service which accepts a command from a client application and posts them to
+ * a command bus of the bounded context which handles the command.
  */
 public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
         implements Logging {
 
-    private final TypeDictionary types;
+    private final CommandServiceImpl impl;
 
     /**
      * Constructs new instance using the map from a {@code CommandClass} to
@@ -59,11 +61,7 @@ public final class CommandService
      */
     private CommandService(TypeDictionary types) {
         super();
-        this.types = types;
-    }
-
-    private String simpleClassName() {
-        return getClass().getSimpleName();
+        this.impl = new CommandServiceImpl(this, types);
     }
 
     /**
@@ -83,46 +81,58 @@ public final class CommandService
     }
 
     @Override
-    public void post(Command request, StreamObserver<Ack> responseObserver) {
-        var commandClass = CommandClass.of(request);
-        if (isInternal(commandClass.value())) {
-            handleInternal(request, responseObserver);
-            return;
+    public void post(Command command, StreamObserver<Ack> responseObserver) {
+        impl.serve(command, responseObserver);
+    }
+
+    private static class CommandServiceImpl extends ServiceDelegate<Command, Ack> {
+
+        CommandServiceImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
         }
-        var boundedContext = types.find(commandClass.typeUrl());
-        boundedContext.ifPresentOrElse(
-                ctx -> handleCommand(ctx, request, responseObserver),
-                () -> handleUnsupported(request, responseObserver)
-        );
-    }
 
-    private static
-    void handleCommand(BoundedContext ctx, Command request, StreamObserver<Ack> responseObserver) {
-        ctx.commandBus().post(request, responseObserver);
-    }
+        @Override
+        protected TypeUrl enclosedMessageType(Command request) {
+            var type = CommandClass.of(request).typeUrl();
+            return type;
+        }
 
-    private void handleInternal(Command command, StreamObserver<Ack> responseObserver) {
-        var unpublishedLanguage = new UnpublishedLanguageException(command.enclosedMessage());
-        _error().withCause(unpublishedLanguage)
-                .log("Unpublished command posted to `%s`.", simpleClassName());
-        var error = Errors.fromThrowable(unpublishedLanguage);
-        respondWithError(command, error, responseObserver);
-    }
+        @Override
+        protected void serve(BoundedContext context, Command cmd, StreamObserver<Ack> observer) {
+            context.commandBus().post(cmd, observer);
+        }
 
-    private void handleUnsupported(Command command, StreamObserver<Ack> responseObserver) {
-        var unsupported = new UnsupportedCommandException(command);
-        _error().withCause(unsupported)
-                .log("Unsupported command posted to `%s`.", simpleClassName());
-        var error = unsupported.asError();
-        respondWithError(command, error, responseObserver);
-    }
+        @Override
+        protected boolean detectInternal(Command cmd) {
+            var commandClass = CommandClass.of(cmd);
+            var result = isInternal(commandClass.value());
+            return result;
+        }
 
-    private static
-    void respondWithError(Command command, Error error, StreamObserver<Ack> responseObserver) {
-        var id = command.getId();
-        var response = causedError(id, error);
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        @Override
+        protected void handleInternal(Command cmd, StreamObserver<Ack> observer) {
+            var unpublishedLanguage = new UnpublishedLanguageException(cmd.enclosedMessage());
+            _error().withCause(unpublishedLanguage)
+                    .log("Unpublished command posted to `%s`.", serviceName());
+            var error = Errors.fromThrowable(unpublishedLanguage);
+            respondWithError(cmd, error, observer);
+        }
+
+        @Override
+        protected void handleUnsupported(Command cmd, StreamObserver<Ack> observer) {
+            var unsupported = new UnsupportedCommandException(cmd);
+            _error().withCause(unsupported)
+                    .log("Unsupported command posted to `%s`.", serviceName());
+            var error = unsupported.asError();
+            respondWithError(cmd, error, observer);
+        }
+
+        private static void respondWithError(Command cmd, Error err, StreamObserver<Ack> observer) {
+            var id = cmd.getId();
+            var response = causedError(id, err);
+            observer.onNext(response);
+            observer.onCompleted();
+        }
     }
 
     /**
