@@ -98,12 +98,12 @@ public final class SubscriptionService
         }
     }
 
-    private void subscribeTo(Topic topic, StreamObserver<Subscription> responseObserver) {
+    private void subscribeTo(Topic topic, StreamObserver<Subscription> observer) {
         var target = topic.getTarget();
         var foundContext = findContextOf(target);
         if (foundContext.isPresent()) {
             var stand = foundContext.get().stand();
-            stand.subscribe(topic, responseObserver);
+            stand.subscribe(topic, observer);
         } else {
             List<BoundedContext> contexts = new ArrayList<>(contexts());
             contexts.sort(Ordering.natural());
@@ -116,8 +116,8 @@ public final class SubscriptionService
                 var stand = context.stand();
                 stand.subscribe(subscription);
             }
-            responseObserver.onNext(subscription);
-            responseObserver.onCompleted();
+            observer.onNext(subscription);
+            observer.onCompleted();
         }
     }
 
