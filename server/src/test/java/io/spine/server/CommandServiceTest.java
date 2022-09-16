@@ -34,13 +34,16 @@ import io.spine.core.CommandValidationError;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.test.commandservice.CmdServDontHandle;
+import io.spine.test.commandservice.command.CsSuspendProject;
 import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.type.UnpublishedLanguageException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -50,7 +53,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.Messages.isNotDefault;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -132,26 +134,51 @@ class CommandServiceTest {
                 .isEqualTo(cmd.getId());
     }
 
-    @Test
-    @DisplayName("return error status if command is not supported")
-    @MuteLogging
-    void returnCommandUnsupportedError() {
-        var factory = new TestActorRequestFactory(getClass());
+    @Nested
+    @DisplayName("return error status if command is")
+    class ErrorStatus {
 
-        var unsupportedCmd = factory.createCommand(CmdServDontHandle.getDefaultInstance());
+        private final TestActorRequestFactory factory = new TestActorRequestFactory(getClass());
 
-        service.post(unsupportedCmd, responseObserver);
+        @Test
+        @DisplayName("not supported")
+        @MuteLogging
+        void returnCommandUnsupportedError() {
+            var unsupportedCmd = factory.createCommand(CmdServDontHandle.getDefaultInstance());
 
-        assertTrue(responseObserver.isCompleted());
-        var result = responseObserver.firstResponse();
-        assertNotNull(result);
-        assertTrue(isNotDefault(result));
-        var status = result.getStatus();
-        assertThat(status.getStatusCase())
-                .isEqualTo(ERROR);
-        var error = status.getError();
-        assertThat(error.getType())
-                .isEqualTo(CommandValidationError.getDescriptor().getFullName());
+            service.post(unsupportedCmd, responseObserver);
+
+            assertTrue(responseObserver.isCompleted());
+            var result = responseObserver.firstResponse();
+            assertNotNull(result);
+            assertTrue(isNotDefault(result));
+            var status = result.getStatus();
+            assertThat(status.getStatusCase())
+                    .isEqualTo(ERROR);
+            var error = status.getError();
+            assertThat(error.getType())
+                    .isEqualTo(CommandValidationError.getDescriptor().getFullName());
+        }
+
+        @Test
+        @DisplayName("marked as `internal_type`")
+        @MuteLogging
+        void internalCommand() {
+            var internalCommand = factory.createCommand(CsSuspendProject.getDefaultInstance());
+
+            service.post(internalCommand, responseObserver);
+
+            assertTrue(responseObserver.isCompleted());
+            var result = responseObserver.firstResponse();
+            assertNotNull(result);
+            assertTrue(isNotDefault(result));
+            var status = result.getStatus();
+            assertThat(status.getStatusCase())
+                    .isEqualTo(ERROR);
+            var error = status.getError();
+            assertThat(error.getType())
+                    .isEqualTo(UnpublishedLanguageException.class.getName());
+        }
     }
 
     @Test
