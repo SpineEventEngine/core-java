@@ -68,12 +68,14 @@ public final class SubscriptionService
     private final TypeDictionary types;
     private final SubscriptionImpl subscriptions;
     private final ActivationImpl activation;
+    private final CancellationImpl cancellation;
 
     private SubscriptionService(TypeDictionary types) {
         super();
         this.types = types;
         this.subscriptions = new SubscriptionImpl(this, types);
         this.activation = new ActivationImpl(this, types);
+        this.cancellation = new CancellationImpl(this, types);
     }
 
     /**
@@ -124,28 +126,13 @@ public final class SubscriptionService
     public void cancel(Subscription subscription, StreamObserver<Response> observer) {
         _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
         StreamObserver<Response> safeObserver = new ThreadSafeObserver<>(observer);
-        var selected = findContextOf(subscription);
-        if (selected.isEmpty()) {
-            _warn().log("Trying to cancel a subscription `%s` which could not be found.",
-                        lazy(subscription::toShortString));
-            safeObserver.onCompleted();
-            return;
-        }
         try {
-            var context = selected.get();
-            var stand = context.stand();
-            stand.cancel(subscription, safeObserver);
+            cancellation.serve(subscription, safeObserver, null);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error processing cancel subscription request.");
             safeObserver.onError(e);
         }
-    }
-
-    private Optional<BoundedContext> findContextOf(Subscription subscription) {
-        var target = subscription.getTopic().getTarget();
-        var result = findContextOf(target);
-        return result;
     }
 
     /**
@@ -161,37 +148,6 @@ public final class SubscriptionService
         var type = target.type();
         var result = types.find(type);
         return result;
-    }
-
-    private static final class ActivationImpl extends ServiceDelegate<Subscription, Response> {
-
-        ActivationImpl(BindableService service, TypeDictionary types) {
-            super(service, types);
-        }
-
-        @Override
-        protected TypeUrl enclosedMessageType(Subscription subscription) {
-            return subscription.targetType();
-        }
-
-        @Override
-        protected void serve(BoundedContext context,
-                             Subscription subscription,
-                             StreamObserver<Response> observer,
-                             @Nullable Object params) {
-            var callback = (SubscriptionCallback) checkNotNull(params);
-            var stand = context.stand();
-            stand.activate(subscription, callback, observer);
-        }
-
-        @Override
-        protected void serveNoContext(Subscription subscription,
-                                      StreamObserver<Response> observer,
-                                      @Nullable Object params) {
-            for (var context : contexts()) {
-                serve(context, subscription, observer, params);
-            }
-        }
     }
 
     private static final class SubscriptionImpl extends ServiceDelegate<Topic, Subscription> {
@@ -231,6 +187,68 @@ public final class SubscriptionService
                 stand.subscribe(subscription);
             }
             observer.onNext(subscription);
+            observer.onCompleted();
+        }
+    }
+
+    private abstract static class SubscriptionDelegate
+            extends ServiceDelegate<Subscription, Response> {
+
+        SubscriptionDelegate(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected TypeUrl enclosedMessageType(Subscription subscription) {
+            return subscription.targetType();
+        }
+    }
+
+    private static final class ActivationImpl extends SubscriptionDelegate {
+
+        ActivationImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Subscription subscription,
+                             StreamObserver<Response> observer,
+                             @Nullable Object params) {
+            var callback = (SubscriptionCallback) checkNotNull(params);
+            var stand = context.stand();
+            stand.activate(subscription, callback, observer);
+        }
+
+        @Override
+        protected void serveNoContext(Subscription subscription,
+                                      StreamObserver<Response> observer,
+                                      @Nullable Object params) {
+            contexts().forEach(context -> serve(context, subscription, observer, params));
+        }
+    }
+
+    private static final class CancellationImpl extends SubscriptionDelegate {
+
+        CancellationImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Subscription subscription,
+                             StreamObserver<Response> observer,
+                             @Nullable Object params) {
+            var stand = context.stand();
+            stand.cancel(subscription, observer);
+        }
+
+        @Override
+        protected void serveNoContext(Subscription subscription,
+                                      StreamObserver<Response> observer,
+                                      @Nullable Object params) {
+            _warn().log("Trying to cancel a subscription `%s` which could not be found.",
+                        lazy(subscription::toShortString));
             observer.onCompleted();
         }
     }
