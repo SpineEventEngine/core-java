@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Set;
 
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.Messages.isNotDefault;
@@ -127,11 +128,12 @@ class CommandServiceTest {
         assertTrue(observer.isCompleted());
         var acked = observer.firstResponse();
         var messageId = acked.getMessageId();
-        assertEquals(cmd.getId(), Identifier.unpack(messageId));
+        assertThat(Identifier.unpack(messageId))
+                .isEqualTo(cmd.getId());
     }
 
     @Test
-    @DisplayName("return error status if command is unsupported")
+    @DisplayName("return error status if command is not supported")
     @MuteLogging
     void returnCommandUnsupportedError() {
         var factory = new TestActorRequestFactory(getClass());
@@ -145,9 +147,11 @@ class CommandServiceTest {
         assertNotNull(result);
         assertTrue(isNotDefault(result));
         var status = result.getStatus();
-        assertEquals(ERROR, status.getStatusCase());
+        assertThat(status.getStatusCase())
+                .isEqualTo(ERROR);
         var error = status.getError();
-        assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
+        assertThat(error.getType())
+                .isEqualTo(CommandValidationError.getDescriptor().getFullName());
     }
 
     @Test
