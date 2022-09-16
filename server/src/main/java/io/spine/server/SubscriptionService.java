@@ -27,7 +27,6 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Ordering;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
@@ -40,9 +39,9 @@ import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
-import io.spine.protobuf.Messages;
+import io.spine.server.stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
-import io.spine.type.UnpublishedLanguageException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +52,6 @@ import static com.google.common.collect.Sets.union;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
-import static io.spine.type.MessageExtensions.isInternal;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -69,11 +67,13 @@ public final class SubscriptionService
 
     private final TypeDictionary types;
     private final SubscriptionImpl subscriptions;
+    private final ActivationImpl activation;
 
     private SubscriptionService(TypeDictionary types) {
         super();
         this.types = types;
         this.subscriptions = new SubscriptionImpl(this, types);
+        this.activation = new ActivationImpl(this, types);
     }
 
     /**
@@ -97,10 +97,10 @@ public final class SubscriptionService
         _debug().log("Creating the subscription to the topic: `%s`.", topic);
         try {
             StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(observer);
-            subscriptions.serve(topic, safeObserver);
+            subscriptions.serve(topic, safeObserver, null);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
-                    .log();
+                    .log("Error processing subscription request.");
             observer.onError(e);
         }
     }
@@ -112,25 +112,12 @@ public final class SubscriptionService
         try {
             var callback = forwardingTo(safeObserver);
             StreamObserver<Response> responseObserver = forwardErrorsOnly(safeObserver);
-            var foundContext = findContextOf(subscription);
-            if (foundContext.isPresent()) {
-                var targetStand = foundContext.get().stand();
-                targetStand.activate(subscription, callback, responseObserver);
-            } else {
-                for (var context : contexts()) {
-                    var stand = context.stand();
-                    stand.activate(subscription, callback, responseObserver);
-                }
-            }
+            activation.serve(subscription, responseObserver, callback);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error activating the subscription.");
             safeObserver.onError(e);
         }
-    }
-
-    private ImmutableCollection<BoundedContext> contexts() {
-        return types.contexts();
     }
 
     @Override
@@ -176,6 +163,37 @@ public final class SubscriptionService
         return result;
     }
 
+    private static final class ActivationImpl extends ServiceDelegate<Subscription, Response> {
+
+        ActivationImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected TypeUrl enclosedMessageType(Subscription subscription) {
+            return subscription.targetType();
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Subscription subscription,
+                             StreamObserver<Response> observer,
+                             @Nullable Object params) {
+            var callback = (SubscriptionCallback) checkNotNull(params);
+            var stand = context.stand();
+            stand.activate(subscription, callback, observer);
+        }
+
+        @Override
+        protected void serveNoContext(Subscription subscription,
+                                      StreamObserver<Response> observer,
+                                      @Nullable Object params) {
+            for (var context : contexts()) {
+                serve(context, subscription, observer, params);
+            }
+        }
+    }
+
     private static final class SubscriptionImpl extends ServiceDelegate<Topic, Subscription> {
 
         SubscriptionImpl(BindableService service, TypeDictionary types) {
@@ -191,34 +209,16 @@ public final class SubscriptionService
         @Override
         protected void serve(BoundedContext context,
                              Topic topic,
-                             StreamObserver<Subscription> observer) {
+                             StreamObserver<Subscription> observer,
+                             @Nullable Object params) {
             var stand = context.stand();
             stand.subscribe(topic, observer);
         }
 
         @Override
-        protected boolean detectInternal(Topic topic) {
-            var targetClass = topic.getTarget().messageClass();
-            var defTarget = Messages.defaultInstance(targetClass);
-
-            var result = isInternal(defTarget);
-            return result;
-        }
-
-        @Override
-        protected void handleInternal(Topic topic, StreamObserver<Subscription> observer) {
-            var targetClass = topic.getTarget().messageClass();
-            var defTarget = Messages.defaultInstance(targetClass);
-
-            var unpublishedLanguage = new UnpublishedLanguageException(defTarget);
-            _error().withCause(unpublishedLanguage)
-                    .log("A topic for an unpublished type posted to `%s`.", serviceName());
-            observer.onError(unpublishedLanguage);
-
-        }
-
-        @Override
-        protected void serveAllContexts(Topic topic, StreamObserver<Subscription> observer) {
+        protected void serveNoContext(Topic topic,
+                                      StreamObserver<Subscription> observer,
+                                      @Nullable Object params) {
             List<BoundedContext> contexts = new ArrayList<>(contexts());
             contexts.sort(Ordering.natural());
             _warn().log("Unable to find a Bounded Context for type `%s`." +
