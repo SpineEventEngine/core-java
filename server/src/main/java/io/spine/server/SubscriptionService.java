@@ -63,8 +63,6 @@ public final class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
         implements Logging {
 
-    private static final Joiner LIST_JOINER = Joiner.on(", ");
-
     private final TypeDictionary types;
     private final SubscriptionImpl subscriptions;
     private final ActivationImpl activation;
@@ -97,13 +95,13 @@ public final class SubscriptionService
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> observer) {
         _debug().log("Creating the subscription to the topic: `%s`.", topic);
+        StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(observer);
         try {
-            StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(observer);
             subscriptions.serve(topic, safeObserver, null);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
                     .log("Error processing subscription request.");
-            observer.onError(e);
+            safeObserver.onError(e);
         }
     }
 
@@ -143,7 +141,7 @@ public final class SubscriptionService
      * @return the context which exposes the target type,
      *         or {@code Optional.empty} if no known context does so
      */
-    @VisibleForTesting  /* Otherwise should have been `private`. */
+    @VisibleForTesting  // test-only
     Optional<BoundedContext> findContextOf(Target target) {
         var type = target.type();
         var result = types.find(type);
@@ -180,7 +178,8 @@ public final class SubscriptionService
             _warn().log("Unable to find a Bounded Context for type `%s`." +
                                 " Creating a subscription in contexts: %s.",
                         topic.getTarget().type(),
-                        LIST_JOINER.join(contexts));
+                        Joiner.on(", ")
+                              .join(contexts));
             var subscription = Subscriptions.from(topic);
             for (var context : contexts) {
                 var stand = context.stand();
