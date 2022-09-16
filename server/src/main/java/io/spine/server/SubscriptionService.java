@@ -104,7 +104,7 @@ public final class SubscriptionService
      *         the error message to be put into a log if an exception occurs when
      *         running the consumer
      * @param <S>
-     *         the type of objects accepted by the consumers
+     *         the type of objects accepted by the observers
      */
     private <S> void runThreadSafe(Consumer<ThreadSafeObserver<S>> consumer,
                                    StreamObserver<S> observer,
