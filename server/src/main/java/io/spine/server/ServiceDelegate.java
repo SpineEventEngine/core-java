@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableCollection;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.logging.Logging;
-import io.spine.protobuf.Messages;
 import io.spine.type.TypeUrl;
 import io.spine.type.UnpublishedLanguageException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,7 +48,8 @@ import static io.spine.type.MessageExtensions.isInternal;
  *
  * <p>Then, a service attempts to find a bounded context which would handle
  * the request. If not found, an error returned. Otherwise, the request is
- * {@linkplain #serve(BoundedContext, Object, StreamObserver, Object) dispatched} to the bounded context.
+ * {@linkplain #serve(BoundedContext, Object, StreamObserver, Object) dispatched} to
+ * the bounded context.
  *
  * @param <T>
  *         the type of the request handled by the service
@@ -142,22 +142,30 @@ abstract class ServiceDelegate<T, R> implements Logging {
      */
     protected void handleInternal(T request, StreamObserver<R> observer) {
         var targetType = enclosedMessageType(request);
-        var defTarget = Messages.defaultInstance(targetType.getMessageClass());
-        var unpublishedLanguage = new UnpublishedLanguageException(defTarget);
+        var unpublishedLanguage = new UnpublishedLanguageException(targetType.toTypeName());
         _error().withCause(unpublishedLanguage)
                 .log("Unpublished type (`%s`) posted to `%s`.", targetType, serviceName());
         observer.onError(unpublishedLanguage);
     }
 
+    /**
+     * Finds a bounded context to which the given type belongs.
+     */
     final Optional<BoundedContext> find(TypeUrl type) {
         return types.find(type);
     }
 
+    /**
+     * Obtains the simple class name of the associated service for diagnostic messages.
+     */
     final String serviceName() {
         var result = service.getClass().getSimpleName();
         return result;
     }
 
+    /**
+     * Obtains all the bounded contexts known to the service.
+     */
     final ImmutableCollection<BoundedContext> contexts() {
         return types.contexts();
     }
