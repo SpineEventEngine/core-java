@@ -80,7 +80,7 @@ abstract class ServiceDelegate<T, R> implements Logging {
         var boundedContext = find(type);
         boundedContext.ifPresentOrElse(
             ctx -> serve(ctx, request, observer),
-            () -> handleUnsupported(request, observer)
+            () -> serveAllContexts(request, observer)
         );
     }
 
@@ -91,11 +91,11 @@ abstract class ServiceDelegate<T, R> implements Logging {
 
     protected abstract void serve(BoundedContext context, T request, StreamObserver<R> observer);
 
+    protected abstract void serveAllContexts(T request, StreamObserver<R> observer);
+
     protected abstract boolean detectInternal(T request);
 
     protected abstract void handleInternal(T request, StreamObserver<R> observer);
-
-    protected abstract void handleUnsupported(T request, StreamObserver<R> observer);
 
     final Optional<BoundedContext> find(TypeUrl type) {
         return types.find(type);

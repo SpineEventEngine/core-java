@@ -118,8 +118,12 @@ public final class CommandService
             respondWithError(cmd, error, observer);
         }
 
+        /**
+         * Since a command can be handled by only one bounded context, responds
+         * with the acknowledgement containing {@link UnsupportedCommandException}.
+         */
         @Override
-        protected void handleUnsupported(Command cmd, StreamObserver<Ack> observer) {
+        protected void serveAllContexts(Command cmd, StreamObserver<Ack> observer) {
             var unsupported = new UnsupportedCommandException(cmd);
             _error().withCause(unsupported)
                     .log("Unsupported command posted to `%s`.", serviceName());

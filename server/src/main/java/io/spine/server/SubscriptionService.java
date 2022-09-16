@@ -218,7 +218,7 @@ public final class SubscriptionService
         }
 
         @Override
-        protected void handleUnsupported(Topic topic, StreamObserver<Subscription> observer) {
+        protected void serveAllContexts(Topic topic, StreamObserver<Subscription> observer) {
             List<BoundedContext> contexts = new ArrayList<>(contexts());
             contexts.sort(Ordering.natural());
             _warn().log("Unable to find a Bounded Context for type `%s`." +

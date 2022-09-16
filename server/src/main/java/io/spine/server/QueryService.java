@@ -131,7 +131,7 @@ public final class QueryService
         }
 
         @Override
-        protected void handleUnsupported(Query query, StreamObserver<QueryResponse> observer) {
+        protected void serveAllContexts(Query query, StreamObserver<QueryResponse> observer) {
             var exception = new UnknownEntityStateTypeException(query.targetType());
             _error().withCause(exception)
                     .log();
