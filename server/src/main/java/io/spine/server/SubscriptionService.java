@@ -46,6 +46,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
@@ -92,45 +93,61 @@ public final class SubscriptionService
         return result;
     }
 
+    /**
+     * Executes the given consumer using a {@link ThreadSafeObserver} over the given one.
+     *
+     * @param consumer
+     *         the code to execute
+     * @param observer
+     *         an observer for handling the request
+     * @param errorMessage
+     *         the error message to be put into a log if an exception occurs when
+     *         running the consumer
+     * @param <S>
+     *         the type of objects accepted by the consumers
+     */
+    private <S> void runThreadSafe(Consumer<ThreadSafeObserver<S>> consumer,
+                                   StreamObserver<S> observer,
+                                   String errorMessage) {
+        var safeObserver = new ThreadSafeObserver<>(observer);
+        try {
+            consumer.accept(safeObserver);
+        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
+            _error().withCause(e)
+                    .log(errorMessage);
+            safeObserver.onError(e);
+        }
+    }
+
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> observer) {
         _debug().log("Creating the subscription to the topic: `%s`.", topic);
-        StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(observer);
-        try {
-            subscriptions.serve(topic, safeObserver, null);
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error().withCause(e)
-                    .log("Error processing subscription request.");
-            safeObserver.onError(e);
-        }
+        runThreadSafe(
+                (safeObserver) -> subscriptions.serve(topic, safeObserver, null),
+                observer, "Error processing subscription request."
+        );
     }
 
     @Override
     public void activate(Subscription subscription, StreamObserver<SubscriptionUpdate> observer) {
         _debug().log("Activating the subscription: `%s`.", subscription);
-        StreamObserver<SubscriptionUpdate> safeObserver = new ThreadSafeObserver<>(observer);
-        try {
-            var callback = forwardingTo(safeObserver);
-            StreamObserver<Response> responseObserver = forwardErrorsOnly(safeObserver);
-            activation.serve(subscription, responseObserver, callback);
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error().withCause(e)
-                    .log("Error activating the subscription.");
-            safeObserver.onError(e);
-        }
+        runThreadSafe(
+                (safeObserver) -> {
+                    var callback = forwardingTo(safeObserver);
+                    StreamObserver<Response> responseObserver = forwardErrorsOnly(safeObserver);
+                    activation.serve(subscription, responseObserver, callback);
+                },
+                observer, "Error activating the subscription."
+        );
     }
 
     @Override
     public void cancel(Subscription subscription, StreamObserver<Response> observer) {
         _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
-        StreamObserver<Response> safeObserver = new ThreadSafeObserver<>(observer);
-        try {
-            cancellation.serve(subscription, safeObserver, null);
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error().withCause(e)
-                    .log("Error processing cancel subscription request.");
-            safeObserver.onError(e);
-        }
+        runThreadSafe(
+                (safeObserver) -> cancellation.serve(subscription, safeObserver, null),
+                observer, "Error processing cancel subscription request."
+        );
     }
 
     /**
