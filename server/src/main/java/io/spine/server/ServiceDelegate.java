@@ -108,7 +108,7 @@ abstract class ServiceDelegate<T, R> implements Logging {
      * @param observer
      *         the observer for obtaining results
      * @param params
-     *         optional implementation-dependent parameters, or {@code null} of the service
+     *         optional implementation-dependent parameters, or {@code null} if the service
      *         implementation does not need additional parameters
      */
     protected abstract void serve(BoundedContext context,
