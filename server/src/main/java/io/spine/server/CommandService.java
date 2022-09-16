@@ -39,11 +39,11 @@ import io.spine.server.type.CommandClass;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import io.spine.type.UnpublishedLanguageException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.server.bus.MessageIdExtensions.causedError;
-import static io.spine.type.MessageExtensions.isInternal;
 
 /**
  * The service which accepts a command from a client application and posts them to
@@ -82,7 +82,7 @@ public final class CommandService
 
     @Override
     public void post(Command command, StreamObserver<Ack> responseObserver) {
-        impl.serve(command, responseObserver);
+        impl.serve(command, responseObserver, null);
     }
 
     private static final class CommandServiceImpl extends ServiceDelegate<Command, Ack> {
@@ -98,15 +98,11 @@ public final class CommandService
         }
 
         @Override
-        protected void serve(BoundedContext context, Command cmd, StreamObserver<Ack> observer) {
+        protected void serve(BoundedContext context,
+                             Command cmd,
+                             StreamObserver<Ack> observer,
+                             @Nullable Object params) {
             context.commandBus().post(cmd, observer);
-        }
-
-        @Override
-        protected boolean detectInternal(Command cmd) {
-            var commandClass = CommandClass.of(cmd);
-            var result = isInternal(commandClass.value());
-            return result;
         }
 
         @Override
@@ -123,7 +119,9 @@ public final class CommandService
          * with the acknowledgement containing {@link UnsupportedCommandException}.
          */
         @Override
-        protected void serveAllContexts(Command cmd, StreamObserver<Ack> observer) {
+        protected void serveNoContext(Command cmd,
+                                      StreamObserver<Ack> observer,
+                                      @Nullable Object params) {
             var unsupported = new UnsupportedCommandException(cmd);
             _error().withCause(unsupported)
                     .log("Unsupported command posted to `%s`.", serviceName());

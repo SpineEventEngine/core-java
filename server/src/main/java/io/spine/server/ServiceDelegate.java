@@ -30,22 +30,26 @@ import com.google.common.collect.ImmutableCollection;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.logging.Logging;
+import io.spine.protobuf.Messages;
 import io.spine.type.TypeUrl;
+import io.spine.type.UnpublishedLanguageException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.type.MessageExtensions.isInternal;
 
 /**
  * An abstract base for classes implementing server-side services.
  *
- * <p>This class implements a {@linkplain #serve(Object, StreamObserver) common way}
+ * <p>This class implements a {@linkplain #serve(Object, StreamObserver, Object) common way}
  * services work. Initially, each request is checked not to be for an unpublished part
  * of the domain language. In such a case, an error is returned.
  *
  * <p>Then, a service attempts to find a bounded context which would handle
  * the request. If not found, an error returned. Otherwise, the request is
- * {@linkplain #serve(BoundedContext, Object, StreamObserver) dispatched} to the bounded context.
+ * {@linkplain #serve(BoundedContext, Object, StreamObserver, Object) dispatched} to the bounded context.
  *
  * @param <T>
  *         the type of the request handled by the service
@@ -71,7 +75,7 @@ abstract class ServiceDelegate<T, R> implements Logging {
     /**
      * Handles the posted request.
      */
-    final void serve(T request, StreamObserver<R> observer) {
+    final void serve(T request, StreamObserver<R> observer, @Nullable Object params) {
         if (detectInternal(request)) {
             handleInternal(request, observer);
             return;
@@ -79,23 +83,71 @@ abstract class ServiceDelegate<T, R> implements Logging {
         var type = enclosedMessageType(request);
         var boundedContext = find(type);
         boundedContext.ifPresentOrElse(
-            ctx -> serve(ctx, request, observer),
-            () -> serveAllContexts(request, observer)
+            ctx -> serve(ctx, request, observer, params),
+            () -> serveNoContext(request, observer, params)
         );
     }
 
     /**
      * Obtains the type of the message enclosed into the request.
+     *
+     * <p>For a command, for example, it would be a type of the command message.
+     * The returned type would be used for finding a bounded context to which the enclosed
+     * message belongs.
      */
     protected abstract TypeUrl enclosedMessageType(T request);
 
-    protected abstract void serve(BoundedContext context, T request, StreamObserver<R> observer);
+    /**
+     * Handles the request by passing it to corresponding feature of
+     * the specified bounded context.
+     *
+     * @param context
+     *         the bounded context which would serve the request
+     * @param request
+     *         the request to serve
+     * @param observer
+     *         the observer for obtaining results
+     * @param params
+     *         optional implementation-dependent parameters, or {@code null} of the service
+     *         implementation does not need additional parameters
+     */
+    protected abstract void serve(BoundedContext context,
+                                  T request,
+                                  StreamObserver<R> observer,
+                                  @Nullable Object params);
 
-    protected abstract void serveAllContexts(T request, StreamObserver<R> observer);
+    /**
+     * Handles the case when no bounded context was found for the incoming request.
+     *
+     * <p>Implementations may return an error to the given observer.
+     */
+    protected abstract void serveNoContext(T request,
+                                           StreamObserver<R> observer,
+                                           @Nullable Object params);
 
-    protected abstract boolean detectInternal(T request);
+    /**
+     * Verifies of the given request contains a message marked as "internal".
+     */
+    protected boolean detectInternal(T request) {
+        var msgClass = enclosedMessageType(request).getMessageClass();
+        var result = isInternal(msgClass);
+        return result;
+    }
 
-    protected abstract void handleInternal(T request, StreamObserver<R> observer);
+    /**
+     * Handles the case of internal message enclosed into the specified request.
+     *
+     * <p>Default implementation reports {@link UnpublishedLanguageException} to
+     * the given observer.
+     */
+    protected void handleInternal(T request, StreamObserver<R> observer) {
+        var targetType = enclosedMessageType(request);
+        var defTarget = Messages.defaultInstance(targetType.getMessageClass());
+        var unpublishedLanguage = new UnpublishedLanguageException(defTarget);
+        _error().withCause(unpublishedLanguage)
+                .log("Unpublished type (`%s`) posted to `%s`.", targetType, serviceName());
+        observer.onError(unpublishedLanguage);
+    }
 
     final Optional<BoundedContext> find(TypeUrl type) {
         return types.find(type);

@@ -31,17 +31,15 @@ import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.logging.Logging;
-import io.spine.protobuf.Messages;
 import io.spine.server.model.UnknownEntityStateTypeException;
 import io.spine.server.stand.InvalidRequestException;
 import io.spine.type.TypeUrl;
-import io.spine.type.UnpublishedLanguageException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
-import static io.spine.type.MessageExtensions.isInternal;
 
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
@@ -81,7 +79,7 @@ public final class QueryService
     @Override
     public void read(Query query, StreamObserver<QueryResponse> observer) {
         _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
-        impl.serve(query, observer);
+        impl.serve(query, observer, null);
     }
 
     private static final class QueryServiceImpl extends ServiceDelegate<Query, QueryResponse> {
@@ -98,7 +96,8 @@ public final class QueryService
         @Override
         protected void serve(BoundedContext context,
                              Query query,
-                             StreamObserver<QueryResponse> observer) {
+                             StreamObserver<QueryResponse> observer,
+                             @Nullable Object params) {
             try {
                 var stand = context.stand();
                 stand.execute(query, observer);
@@ -114,24 +113,9 @@ public final class QueryService
         }
 
         @Override
-        protected boolean detectInternal(Query query) {
-            var msgClass = enclosedMessageType(query).getMessageClass();
-            var result = isInternal(msgClass);
-            return result;
-        }
-
-        @Override
-        protected void handleInternal(Query request, StreamObserver<QueryResponse> observer) {
-            var targetType = enclosedMessageType(request);
-            var defTarget = Messages.defaultInstance(targetType.getMessageClass());
-            var unpublishedLanguage = new UnpublishedLanguageException(defTarget);
-            _error().withCause(unpublishedLanguage)
-                    .log("A query to an unpublished type posted to `%s`.", serviceName());
-            observer.onError(unpublishedLanguage);
-        }
-
-        @Override
-        protected void serveAllContexts(Query query, StreamObserver<QueryResponse> observer) {
+        protected void serveNoContext(Query query,
+                                      StreamObserver<QueryResponse> observer,
+                                      @Nullable Object params) {
             var exception = new UnknownEntityStateTypeException(query.targetType());
             _error().withCause(exception)
                     .log();
