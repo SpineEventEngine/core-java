@@ -28,6 +28,7 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Ordering;
+import com.google.errorprone.annotations.CompileTimeConstant;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
@@ -108,7 +109,7 @@ public final class SubscriptionService
      */
     private <S> void runThreadSafe(Consumer<ThreadSafeObserver<S>> consumer,
                                    StreamObserver<S> observer,
-                                   String errorMessage) {
+                                   @CompileTimeConstant String errorMessage) {
         var safeObserver = new ThreadSafeObserver<>(observer);
         try {
             consumer.accept(safeObserver);
