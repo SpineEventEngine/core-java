@@ -33,6 +33,7 @@ import io.spine.server.Given.ThrowingProjectDetailsRepository;
 import io.spine.server.model.UnknownEntityStateTypeException;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.type.UnpublishedLanguageException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -108,6 +109,17 @@ class QueryServiceTest {
         var query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
+    }
+
+    @Test
+    @MuteLogging
+    @DisplayName("reject queries for internal types")
+    void rejectInternal() {
+        var query = Given.AQuery.readInternalType();
+        service.read(query, responseObserver);
+
+        assertThat(responseObserver.getError())
+                .isInstanceOf(UnpublishedLanguageException.class);
     }
 
     @Test
