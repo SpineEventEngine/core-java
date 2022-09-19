@@ -126,7 +126,7 @@ abstract class ServiceDelegate<T, R> implements Logging {
                                            @Nullable Object params);
 
     /**
-     * Verifies of the given request contains a message marked as "internal".
+     * Verifies that the given request contains a message marked as "internal".
      */
     protected boolean detectInternal(T request) {
         var msgClass = enclosedMessageType(request).getMessageClass();

@@ -46,7 +46,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.server.bus.MessageIdExtensions.causedError;
 
 /**
- * The service which accepts a command from a client application and posts them to
+ * The service which accepts a command from a client application and posts it to
  * a command bus of the bounded context which handles the command.
  */
 public final class CommandService
@@ -81,8 +81,8 @@ public final class CommandService
     }
 
     @Override
-    public void post(Command command, StreamObserver<Ack> responseObserver) {
-        impl.serve(command, responseObserver, null);
+    public void post(Command command, StreamObserver<Ack> observer) {
+        impl.serve(command, observer, null);
     }
 
     private static final class CommandServiceImpl extends ServiceDelegate<Command, Ack> {

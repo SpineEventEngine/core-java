@@ -124,7 +124,8 @@ class QueryServiceTest {
 
     @Test
     @MuteLogging
-    @DisplayName("throw an `IllegalStateException` if the requested entity type is unknown")
+    @DisplayName(
+            "throw an `UnknownEntityStateTypeException` if the requested entity type is unknown")
     void failOnUnknownType() {
         var query = Given.AQuery.readUnknownType();
         service.read(query, responseObserver);
