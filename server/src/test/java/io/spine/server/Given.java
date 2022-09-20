@@ -70,6 +70,7 @@ import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.test.subscriptionservice.ReportId;
 import io.spine.test.subscriptionservice.command.SendReport;
 import io.spine.test.subscriptionservice.event.ReportSent;
+import io.spine.test.projection.BankAccount;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.Now;
@@ -218,6 +219,12 @@ public class Given {
         static Query readUnknownType() {
             var result = requestFactory.query()
                                        .all(Task.class);
+            return result;
+        }
+
+        static Query readInternalType() {
+            var result = requestFactory.query()
+                    .all(BankAccount.class);
             return result;
         }
     }

@@ -62,6 +62,16 @@ message Project {
     string id_string = 5 [(column) = true];
 }
 
+// A message which is marked as internal for the purpose of `QueryServiceTest` checking
+// rejecting queries for internal types.
+message BankAccount {
+    option (entity).kind = ENTITY;
+    option (entity).visibility = FULL;
+    option (internal_type) = true; // This should prevail over the visibility.
+
+    string id = 1 [(required) = true];
+}
+
 message TaskId {
     int32 id = 1;
 }

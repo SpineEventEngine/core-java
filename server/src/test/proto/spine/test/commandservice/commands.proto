@@ -37,14 +37,19 @@ option java_multiple_files = true;
 import "spine/test/commandservice/project.proto";
 
 message CsCreateProject {
-    ProjectId project_id = 1;
+    ProjectId project = 1;
 }
 
 message CsAddTask {
-    ProjectId project_id = 1;
+    ProjectId project = 1;
     Task task = 2;
 }
 
 message CsStartProject {
-    ProjectId project_id = 1;
+    ProjectId project = 1;
+}
+
+// A command which is internal to its bounded context.
+message CsSuspendProject {
+    option (internal_type) = true;
 }
