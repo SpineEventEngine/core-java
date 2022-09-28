@@ -24,8 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.Scripts
-import io.spine.internal.gradle.testing.exposeTestArtifacts
+import io.spine.internal.gradle.testing.exposeTestConfiguration
 
 val spineBaseTypesVersion: String by extra
 val spineTimeVersion: String by extra
@@ -52,6 +51,7 @@ modelCompiler {
         }
     }
 }
+
 java {
-    exposeTestArtifacts()
+    exposeTestConfiguration()
 }

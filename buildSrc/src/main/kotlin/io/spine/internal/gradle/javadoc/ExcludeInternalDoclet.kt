@@ -65,7 +65,7 @@ class ExcludeInternalDoclet(val version: String) {
     }
 
     /**
-     * Creates a custom Javadoc task for the [project] which excludes the the types
+     * Creates a custom Javadoc task for the [project] which excludes the types
      * annotated as `@Internal`.
      *
      * The task is registered under [taskName].

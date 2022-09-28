@@ -38,7 +38,8 @@ import org.gradle.kotlin.dsl.withGroovyBuilder
 /**
  * Writes the dependencies of a Gradle project in a `pom.xml` format.
  *
- * Includes the dependencies of the subprojects. Does not include the transitive dependencies.
+ * Includes the dependencies of the subprojects. Does not include
+ * the transitive dependencies.
  *
  * ```
  *  <dependencies>
@@ -50,6 +51,9 @@ import org.gradle.kotlin.dsl.withGroovyBuilder
  *      ...
  *  </dependencies>
  * ```
+ *
+ * When there are several versions of the same dependency, only the one with
+ * the newest version is retained.
  *
  * @see PomGenerator
  */
@@ -96,32 +100,35 @@ private constructor(
  * Returns the [scoped dependencies][ScopedDependency] of a Gradle project.
  */
 fun Project.dependencies(): SortedSet<ScopedDependency> {
-    val dependencies = mutableSetOf<ScopedDependency>()
+    val dependencies = mutableSetOf<ModuleDependency>()
     dependencies.addAll(this.depsFromAllConfigurations())
 
     this.subprojects.forEach { subproject ->
         val subprojectDeps = subproject.depsFromAllConfigurations()
         dependencies.addAll(subprojectDeps)
     }
-    return dependencies.toSortedSet()
+
+    val result = deduplicate(dependencies)
+        .map { it.scoped }
+        .toSortedSet()
+    return result
 }
 
 /**
- * Returns the scoped dependencies of the project from all the project configurations.
+ * Returns the external dependencies of the project from all the project configurations.
  */
-private fun Project.depsFromAllConfigurations(): Set<ScopedDependency> {
-    val result = mutableSetOf<ScopedDependency>()
+private fun Project.depsFromAllConfigurations(): Set<ModuleDependency> {
+    val result = mutableSetOf<ModuleDependency>()
     this.configurations.forEach { configuration ->
         if (configuration.isCanBeResolved) {
             // Force resolution of the configuration.
             configuration.resolvedConfiguration
         }
-        configuration.dependencies.forEach {
-            if (it.isExternal()) {
-                val dependency = ScopedDependency.of(it, configuration)
-                result.add(dependency)
+        configuration.dependencies.filter { it.isExternal() }
+            .forEach { dependency ->
+                val moduleDependency = ModuleDependency(project, configuration, dependency)
+                result.add(moduleDependency)
             }
-        }
     }
     return result
 }
@@ -131,4 +138,48 @@ private fun Project.depsFromAllConfigurations(): Set<ScopedDependency> {
  */
 private fun Dependency.isExternal(): Boolean {
     return this.javaClass.kotlin.isSubclassOf(AbstractExternalModuleDependency::class)
+}
+
+/**
+ * Filters out duplicated dependencies by group and name.
+ *
+ * When there are several versions of the same dependency, the method will retain only
+ * the one with the newest version.
+ *
+ * Sometimes, a project uses several versions of the same dependency. This may happen
+ * when different modules of the project use different versions of the same dependency.
+ * But for our `pom.xml`, which has clearly representative character, a single version
+ * of a dependency is quite enough.
+ *
+ * The rejected duplicates are logged.
+ */
+private fun Project.deduplicate(dependencies: Set<ModuleDependency>): List<ModuleDependency> {
+    val groups = dependencies.distinctBy { it.gav }
+        .groupBy { it.run { "$group:$name" } }
+
+    logDuplicates(groups)
+
+    val filtered = groups.map { group ->
+        group.value.maxByOrNull { dep -> dep.version!! }!!
+    }
+    return filtered
+}
+
+private fun Project.logDuplicates(dependencies: Map<String, List<ModuleDependency>>) {
+    dependencies.filter { it.value.size > 1 }
+        .forEach { (dependency, versions) -> logDuplicate(dependency, versions) }
+}
+
+private fun Project.logDuplicate(dependency: String, versions: List<ModuleDependency>) {
+    logger.lifecycle("")
+    logger.lifecycle("The project uses several versions of `$dependency` dependency.")
+
+    versions.forEach {
+        logger.lifecycle(
+            "module: {}, configuration: {}, version: {}",
+            it.module.name,
+            it.configuration.name,
+            it.version
+        )
+    }
 }

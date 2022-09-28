@@ -25,10 +25,10 @@
  */
 
 import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.VersionWriter
-import io.spine.internal.gradle.applyGitHubPackages
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
@@ -39,17 +39,15 @@ import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.kotlin.applyJvmToolchain
 import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
-import io.spine.internal.gradle.publish.Publish.Companion.publishProtoArtifact
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.coverage.JacocoConfig
 import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
-import io.spine.internal.gradle.test.configureLogging
-import io.spine.internal.gradle.test.registerTestTasks
+import io.spine.internal.gradle.testing.configureLogging
+import io.spine.internal.gradle.testing.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 buildscript {
     apply(from = "$rootDir/version.gradle.kts")
 
@@ -69,18 +67,14 @@ buildscript {
     configurations.all {
         resolutionStrategy {
             force(
-                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
+                "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+                "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
+                "io.spine:spine-base:$spineBaseVersion",
+                "io.spine:spine-time:$spineTimeVersion"
             )
         }
     }
 }
-
-repositories.applyStandard()
-
-apply(from = "$rootDir/version.gradle.kts")
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
@@ -91,23 +85,15 @@ plugins {
     id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
 }
 
-/** The name of the GitHub repository to which this project belongs. */
-val repositoryName: String = "core-java"
+repositories.applyStandard()
 
+apply(from = "$rootDir/version.gradle.kts")
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 val toolBaseVersion: String by extra
 
 spinePublishing {
-    with(PublishingRepos) {
-        targetRepositories.addAll(setOf(
-            cloudRepo,
-            gitHub(repositoryName),
-            cloudArtifactRegistry
-        ))
-    }
-
-    projectsToPublish.addAll(
+    modules = setOf(
         "core",
         "client",
         "server",
@@ -115,8 +101,24 @@ spinePublishing {
         "testutil-client",
         "testutil-server",
         "model-assembler",
-        "model-verifier"
+        "model-verifier",
     )
+
+    destinations = with(PublishingRepos) {
+        setOf(
+            cloudRepo,
+            gitHub("core-java"),
+            cloudArtifactRegistry
+        )
+    }
+
+    testJar {
+        inclusions = setOf("server")
+    }
+
+//    dokkaJar {
+//        enabled = true
+//    }
 }
 
 allprojects {
@@ -126,8 +128,6 @@ allprojects {
         plugin("project-report")
     }
 
-    // Apply “legacy” dependency definitions which are not yet migrated to Kotlin.
-    // The `ext.deps` project property is used by `.gradle` scripts under `config/gradle`.
     apply {
         from("$rootDir/version.gradle.kts")
     }
@@ -138,11 +138,7 @@ allprojects {
 
 subprojects {
 
-    with(repositories) {
-        applyGitHubPackages("base", rootProject)
-        applyGitHubPackages("time", rootProject)
-        applyStandard()
-    }
+    repositories.applyStandard()
 
     apply {
         plugin("java-library")
@@ -154,23 +150,26 @@ subprojects {
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
+        plugin("dokka-for-java")
     }
 
-    tasks.withType<JavaCompile> {
-        configureJavac()
-        configureErrorProne()
+    java {
+        tasks.withType<JavaCompile>().configureEach {
+            configureJavac()
+            configureErrorProne()
+        }
     }
 
-    @Suppress("MagicNumber")
-    val javaVersion = 11
     kotlin {
+        val javaVersion = JavaVersion.VERSION_11.toString()
+
         applyJvmToolchain(javaVersion)
         explicitApi()
-    }
 
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
-        setFreeCompilerArgs()
+        tasks.withType<KotlinCompile>().configureEach {
+            kotlinOptions.jvmTarget = javaVersion
+            setFreeCompilerArgs()
+        }
     }
 
     dependencies {
@@ -185,20 +184,44 @@ subprojects {
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     }
 
-    configurations.forceVersions()
+    /**
+     * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` the empty constructor in
+     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking
+     * our code in `mc-java`.
+     *
+     * See [this issue](https://github.com/SpineEventEngine/mc-java/issues/42) for details.
+     */
+    val errorProneVersion = "2.10.0"
+
     configurations {
+        forceVersions()
+        excludeProtobufLite()
+
         all {
             resolutionStrategy {
                 force(
+                    /* Force the version of gRPC used by the `:client` module over the one
+                       set by `mc-java` in the `:core` module when specifying compiler artifact
+                       for the gRPC plugin.
+                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
+                       .configureProtocPlugins() method which sets the version from resources. */
+                    "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
+
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
-                    "io.spine.tools:spine-plugin-base:$toolBaseVersion"
+                    "io.spine.tools:spine-plugin-base:$toolBaseVersion",
+
+                    "com.google.errorprone:error_prone_core:$errorProneVersion",
+                    "com.google.errorprone:error_prone_annotations:$errorProneVersion",
+                    "com.google.errorprone:error_prone_annotation:$errorProneVersion",
+                    "com.google.errorprone:error_prone_check_api:$errorProneVersion",
+                    "com.google.errorprone:error_prone_test_helpers:$errorProneVersion",
+                    "com.google.errorprone:error_prone_type_annotations:$errorProneVersion",
                 )
             }
         }
     }
-    configurations.excludeProtobufLite()
 
     val generatedDir = "$projectDir/generated"
     val generatedJavaDir = "$generatedDir/main/java"
@@ -210,36 +233,40 @@ subprojects {
 
     sourceSets {
         main {
-            java.srcDirs(generatedSpineDir)
+            java.srcDirs(
+                generatedSpineDir,
+                generatedJavaDir,
+            )
         }
         test {
-            java.srcDirs(generatedTestSpineDir)
+            java.srcDirs(
+                generatedTestSpineDir,
+                generatedTestJavaDir,
+            )
         }
-    }
-
-    val generateRejections by tasks.getting
-    tasks.compileKotlin {
-        dependsOn(generateRejections)
-    }
-
-    val generateTestRejections by tasks.getting
-    tasks.compileTestKotlin {
-        dependsOn(generateTestRejections)
     }
 
     tasks {
+        val generateRejections by existing
+        compileKotlin {
+            dependsOn(generateRejections)
+        }
+
+        val generateTestRejections by existing
+        compileTestKotlin {
+            dependsOn(generateTestRejections)
+        }
+
         registerTestTasks()
         test {
-            useJUnitPlatform {
-                includeEngines("junit-jupiter")
-            }
+            useJUnitPlatform { includeEngines("junit-jupiter") }
             configureLogging()
         }
     }
 
     apply<IncrementGuard>()
     apply<VersionWriter>()
-    publishProtoArtifact(project)
+
     LicenseReporter.generateReportIn(project)
     JavadocConfig.applyTo(project)
     CheckStyleConfig.applyTo(project)
@@ -275,13 +302,16 @@ subprojects {
      */
     fun shouldPublishJavadoc() =
         !project.name.startsWith("testutil") &&
-        !project.name.startsWith("model")
+                !project.name.startsWith("model")
 
     updateGitHubPages(project.version.toString()) {
         allowInternalJavadoc.set(true)
         rootFolder.set(rootDir)
     }
-    project.tasks["publish"].dependsOn("${project.path}:updateGitHubPages")
+
+    tasks.named("publish") {
+        dependsOn("${project.path}:updateGitHubPages")
+    }
 }
 
 JacocoConfig.applyTo(project)

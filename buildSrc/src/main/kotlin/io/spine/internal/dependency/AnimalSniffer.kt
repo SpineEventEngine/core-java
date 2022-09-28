@@ -28,6 +28,6 @@ package io.spine.internal.dependency
 
 // https://www.mojohaus.org/animal-sniffer/animal-sniffer-maven-plugin/
 object AnimalSniffer {
-    private const val version = "1.19"
+    private const val version = "1.21"
     const val lib = "org.codehaus.mojo:animal-sniffer-annotations:${version}"
 }

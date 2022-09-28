@@ -54,7 +54,8 @@ class UpdateGitHubPagesExtension
 private constructor(
 
     /**
-     * Tells whether the types marked `@Internal` should be included into the doc generation.
+     * Tells whether the types marked `@Internal` should be included into
+     * the doc generation.
      */
     val allowInternalJavadoc: Property<Boolean>,
 
@@ -64,10 +65,11 @@ private constructor(
     var rootFolder: Property<File>,
 
     /**
-     * The external inputs, which output should be included
-     * into the GitHub Pages update.
+     * The external inputs, which output should be included into
+     * the GitHub Pages update.
      *
-     * The values are interpreted according to [org.gradle.api.tasks.Copy.from] specification.
+     * The values are interpreted according to
+     * [org.gradle.api.tasks.Copy.from] specification.
      *
      * This property is optional.
      */
@@ -80,8 +82,8 @@ private constructor(
      * used when updating documentation at GitHub Pages.
      *
      * This value is used when adding dependency on the doclet when the plugin tasks
-     * are registered. Since the doclet dependency is required, its value passed as a parameter for
-     * the extension, rather than a property.
+     * are registered. Since the doclet dependency is required, its value passed as
+     * a parameter for the extension, rather than a property.
      */
     internal lateinit var excludeInternalDocletVersion: String
 
@@ -104,23 +106,24 @@ private constructor(
     }
 
     /**
-     * Returns `true` if the `@Internal`-annotated types should be included into the generated
-     * documentation, `false` otherwise.
+     * Returns `true` if the `@Internal`-annotated code should be included into the
+     * generated documentation, `false` otherwise.
      */
     fun allowInternalJavadoc(): Boolean {
         return allowInternalJavadoc.get()
     }
 
     /**
-     * Returns the local root folder of the repository, to which the handled Gradle Project belongs.
+     * Returns the local root folder of the repository, to which the handled Gradle
+     * Project belongs.
      */
     fun rootFolder(): File {
         return rootFolder.get()
     }
 
     /**
-     * Returns the external inputs, which results should be included
-     * into the GitHub Pages update.
+     * Returns the external inputs, which results should be included into the
+     * GitHub Pages update.
      */
     fun includedInputs(): Set<Any> {
         return includeInputs.get()

@@ -41,12 +41,7 @@ object PublishingRepos {
         credentialsFile = "credentials.properties"
     )
 
-    val cloudRepo = Repository(
-        name = "CloudRepo",
-        releases = "https://spine.mycloudrepo.io/public/repositories/releases",
-        snapshots = "https://spine.mycloudrepo.io/public/repositories/snapshots",
-        credentialsFile = "cloudrepo.properties"
-    )
+    val cloudRepo = CloudRepo.destination
 
     val cloudArtifactRegistry = CloudArtifactRegistry.repository
 
@@ -55,4 +50,3 @@ object PublishingRepos {
      */
     fun gitHub(repoName: String): Repository = GitHubPackages.repository(repoName)
 }
-

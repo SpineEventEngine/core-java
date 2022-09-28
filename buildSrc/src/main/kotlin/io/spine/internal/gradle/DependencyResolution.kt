@@ -35,15 +35,19 @@ import io.spine.internal.dependency.CommonsCli
 import io.spine.internal.dependency.CommonsLogging
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.FindBugs
+import io.spine.internal.dependency.Flogger
 import io.spine.internal.dependency.Gson
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.J2ObjC
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Jackson
 import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Okio
 import io.spine.internal.dependency.Plexus
 import io.spine.internal.dependency.Protobuf
 import io.spine.internal.dependency.Truth
+import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -59,7 +63,7 @@ fun doForceVersions(configurations: ConfigurationContainer) {
 /**
  * Forces dependencies used in the project.
  */
-fun ConfigurationContainer.forceVersions() {
+fun NamedDomainObjectContainer<Configuration>.forceVersions() {
     all {
         resolutionStrategy {
             failOnVersionConflict()
@@ -82,6 +86,8 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         ErrorProne.core,
         Guava.lib,
         FindBugs.annotations,
+        Flogger.lib,
+        Flogger.Runtime.systemBackend,
         Kotlin.reflect,
         Kotlin.stdLib,
         Kotlin.stdLibCommon,
@@ -115,11 +121,18 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
         Okio.lib,
         CommonsCli.lib,
         CheckerFramework.compatQual,
-        CommonsLogging.lib
+        CommonsLogging.lib,
+        Jackson.databind,
+        Jackson.core,
+        Jackson.dataformatXml,
+        Jackson.dataformatYaml,
+        Jackson.moduleKotlin,
+        Jackson.bom,
+        Jackson.annotations
     )
 }
 
-fun ConfigurationContainer.excludeProtobufLite() {
+fun NamedDomainObjectContainer<Configuration>.excludeProtobufLite() {
 
     fun excludeProtoLite(configurationName: String) {
         named(configurationName).get().exclude(

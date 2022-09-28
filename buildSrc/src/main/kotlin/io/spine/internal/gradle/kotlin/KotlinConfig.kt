@@ -52,13 +52,19 @@ fun KotlinJvmProjectExtension.applyJvmToolchain(version: String) =
 /**
  * Opts-in to experimental features that we use in our codebase.
  */
+@Suppress("unused")
 fun KotlinCompile.setFreeCompilerArgs() {
     kotlinOptions {
         freeCompilerArgs = listOf(
             "-Xskip-prerelease-check",
             "-Xjvm-default=all",
-            "-Xopt-in=kotlin.contracts.ExperimentalContracts",
-            "-Xopt-in=kotlin.ExperimentalStdlibApi"
+            "-Xinline-classes",
+            "-opt-in=" +
+                    "kotlin.contracts.ExperimentalContracts," +
+                    "kotlin.io.path.ExperimentalPathApi," +
+                    "kotlin.ExperimentalUnsignedTypes," +
+                    "kotlin.ExperimentalStdlibApi," +
+                    "kotlin.experimental.ExperimentalTypeInference",
         )
     }
 }

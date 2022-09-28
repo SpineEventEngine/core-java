@@ -26,6 +26,7 @@
 
 package io.spine.internal.gradle
 
+import io.spine.internal.gradle.publish.CloudRepo
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.PublishingRepos.gitHub
 import java.io.File
@@ -111,8 +112,8 @@ object Repos {
     )
     val oldSpineSnapshots = PublishingRepos.mavenTeamDev.snapshots
 
-    val spine = PublishingRepos.cloudRepo.releases
-    val spineSnapshots = PublishingRepos.cloudRepo.snapshots
+    val spine = CloudRepo.published.releases
+    val spineSnapshots = CloudRepo.published.snapshots
 
     val artifactRegistry = PublishingRepos.cloudArtifactRegistry.releases
     val artifactRegistrySnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
