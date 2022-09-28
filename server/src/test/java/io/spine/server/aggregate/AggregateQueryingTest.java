@@ -27,7 +27,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.truth.Truth8;
 import io.spine.base.CommandMessage;
 import io.spine.base.EntityState;
 import io.spine.client.ArchivedColumn;
@@ -44,8 +43,6 @@ import io.spine.test.aggregate.query.MRPhoto;
 import io.spine.test.aggregate.query.MRPhotoId;
 import io.spine.test.aggregate.query.MRSoundRecord;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.type.KnownTypes;
-import io.spine.type.MessageType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -92,30 +89,6 @@ class AggregateQueryingTest {
         commands = requestFactory.command();
         givenPhotos = givenPhotos();
         prepareAggregates(givenPhotos);
-    }
-
-    @Test
-    void hasGoogleTypes() {
-        var types = KnownTypes.instance()
-                              .asTypeSet()
-                              .messageTypes();
-        var found = types.stream()
-                .filter(MessageType::isGoogle)
-                .count();
-        assertThat(found)
-              .isGreaterThan(0);
-    }
-
-    @Test
-    void knowsEnumValueClass() {
-        var types = KnownTypes.instance()
-                              .asTypeSet()
-                              .messageTypes();
-        var found = types.stream()
-                .filter( t -> t.name().value().equals("google.protobuf.EnumValue"))
-                .findFirst();
-        Truth8.assertThat(found)
-              .isPresent();
     }
 
     @Nested
