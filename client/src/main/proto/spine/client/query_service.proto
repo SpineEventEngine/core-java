@@ -46,7 +46,8 @@ service QueryService {
 
 // This types makes the `google.protobuf.EnumValue` type known to the client- and
 // server side. The type is available via the descriptors in the `base` artifact.
-// But due to some unknown reason it is filtered out
+// But due to some unknown reason it is filtered out.
+// See https://github.com/SpineEventEngine/core-java/issues/1475 for details.
 message TypeAttractor {
     google.protobuf.EnumValue enum_value = 1;
 }
