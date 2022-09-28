@@ -35,10 +35,18 @@ option java_multiple_files = true;
 option java_outer_classname = "QueryServiceProto";
 
 import "spine/client/query.proto";
+import "google/protobuf/type.proto";
 
 // A service for querying the read-side from clients.
 service QueryService {
 
     // Reads a certain data from the read-side by setting the criteria via Query.
     rpc Read(Query) returns (QueryResponse);
+}
+
+// This types makes the `google.protobuf.EnumValue` type known to the client- and
+// server side. The type is available via the descriptors in the `base` artifact.
+// But due to some unknown reason it is filtered out
+message TypeAttractor {
+    google.protobuf.EnumValue enum_value = 1;
 }
