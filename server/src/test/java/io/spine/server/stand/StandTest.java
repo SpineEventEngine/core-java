@@ -115,7 +115,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@DisplayName("Stand should")  // It's OK for this test.
+@DisplayName("`Stand` should")  // It's OK for this test.
 class StandTest extends TenantAwareTest {
 
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
