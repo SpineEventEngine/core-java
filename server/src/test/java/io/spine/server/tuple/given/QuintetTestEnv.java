@@ -31,11 +31,11 @@ import io.spine.test.tuple.quintet.InstrumentNumber;
 import io.spine.test.tuple.quintet.Viola;
 import io.spine.test.tuple.quintet.Violin;
 import io.spine.test.tuple.quintet.ViolinCello;
-import io.spine.validate.Validate;
 
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViola;
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolin;
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViolinCello;
+import static io.spine.validate.Validate.check;
 
 public class QuintetTestEnv {
 
@@ -92,7 +92,7 @@ public class QuintetTestEnv {
             var result = Violin.newBuilder()
                     .setNumber(number)
                     .build();
-            Validate.checkValid(result);
+            check(result);
             return result;
         }
 
@@ -100,7 +100,7 @@ public class QuintetTestEnv {
             var result = Viola.newBuilder()
                     .setSingle(true)
                     .build();
-            Validate.checkValid(result);
+            check(result);
             return result;
         }
 
@@ -108,7 +108,7 @@ public class QuintetTestEnv {
             var result = Viola.newBuilder()
                     .setNumber(number)
                     .build();
-            Validate.checkValid(result);
+            check(result);
             return result;
         }
 
@@ -116,7 +116,7 @@ public class QuintetTestEnv {
             var result = ViolinCello.newBuilder()
                     .setNumber(number)
                     .build();
-            Validate.checkValid(result);
+            check(result);
             return result;
         }
 
@@ -124,7 +124,7 @@ public class QuintetTestEnv {
             var result = ViolinCello.newBuilder()
                     .setSingle(true)
                     .build();
-            Validate.checkValid(result);
+            check(result);
             return result;
         }
     }

@@ -60,7 +60,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.logging.Logging.loggerFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.validate.Validate.checkValid;
+import static io.spine.validate.Validate.check;
 import static io.spine.validate.Validate.validateChange;
 import static io.spine.validate.Validate.violationsOf;
 
@@ -461,7 +461,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
 
     final void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
-        checkValid(newVersion);
+        check(newVersion);
         if (version.equals(newVersion)) {
             return;
         }

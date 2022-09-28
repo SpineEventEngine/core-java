@@ -25,6 +25,7 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.truth.Truth8;
 import com.google.protobuf.FieldMask;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -61,6 +62,7 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.tenant.TenantAwareTest;
+import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -113,8 +115,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@DisplayName("Stand should")
-@SuppressWarnings("OverlyCoupledClass")  // It's OK for this test.
+@DisplayName("Stand should")  // It's OK for this test.
 class StandTest extends TenantAwareTest {
 
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
@@ -599,11 +600,13 @@ class StandTest extends TenantAwareTest {
 
         var actualFilter = repository.memoizedFilters();
         assertThat(actualFilter).isPresent();
-        assertThat(actualFilter.get()).isEqualTo(query.filters());
+        Truth8.assertThat(actualFilter)
+              .hasValue(query.filters());
 
         var actualFormat = repository.memoizedFormat();
         assertThat(actualFormat).isPresent();
-        assertThat(actualFormat.get()).isEqualTo(query.getFormat());
+        Truth8.assertThat(actualFormat)
+              .hasValue(query.getFormat());
     }
 
     @Test
@@ -690,8 +693,8 @@ class StandTest extends TenantAwareTest {
             assertEquals(INVALID_QUERY.getNumber(),
                          exception.asError()
                                   .getCode());
-            var validationError = exception.asError()
-                                           .getValidationError();
+            var validationError = AnyPacker.unpack(exception.asError().getDetails());
+            assertThat(validationError).isInstanceOf(ValidationError.class);
             assertTrue(isNotDefault(validationError));
         }
     }
@@ -735,8 +738,8 @@ class StandTest extends TenantAwareTest {
                          exception.asError()
                                   .getCode());
 
-            var validationError = exception.asError()
-                                           .getValidationError();
+            var validationError = AnyPacker.unpack(exception.asError().getDetails());
+            assertThat(validationError).isInstanceOf(ValidationError.class);
             assertTrue(isNotDefault(validationError));
         }
     }
@@ -806,7 +809,8 @@ class StandTest extends TenantAwareTest {
                          exception.asError()
                                   .getCode());
 
-            var validationError = exception.asError().getValidationError();
+            var validationError = (ValidationError)
+                    AnyPacker.unpack(exception.asError().getDetails());
             assertTrue(isNotDefault(validationError));
         }
 

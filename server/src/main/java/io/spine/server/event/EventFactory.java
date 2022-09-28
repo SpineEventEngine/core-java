@@ -32,6 +32,7 @@ import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.type.MessageEnvelope;
+import io.spine.validate.Validate;
 import io.spine.validate.ValidationException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -75,7 +76,7 @@ public class EventFactory extends EventFactoryBase {
     public static EventFactory forImport(ActorContext actorContext, Any producerId) {
         checkNotNull(actorContext);
         checkNotNull(producerId);
-        checkValid(actorContext);
+        Validate.check(actorContext);
 
         var origin = EventOrigin.forImport(actorContext);
         return new EventFactory(origin, producerId);
