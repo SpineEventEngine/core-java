@@ -34,5 +34,6 @@
 
     <!-- Suppress all checks for the Protobuf-generated files. -->
     <suppress files=".*[\\/]generated[\\/].*" checks=".*"/>
+    <suppress files=".*[\\/]generated-proto[\\/].*" checks=".*"/>
 
 </suppressions>
