@@ -60,15 +60,3 @@ tasks.javadoc {
         }
     }
 }
-
-/**
- * The following lines are the workaround
- * for https://github.com/SpineEventEngine/ProtoData/issues/72.
- *
- * We have to move the code residing in `<project>/build/generated-proto/<sourceset>/spine`
- * to the usual location of `<project>/generated/<sourceset>/spine` to avoid
- * numerous issues.
- *
- * This code should be removed, once the issue is resolved.
- */
-moveGeneratedProtoFromBuildFolder()
