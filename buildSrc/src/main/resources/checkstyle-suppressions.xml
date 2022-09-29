@@ -31,11 +31,7 @@
         "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <!-- Do not check any temporary generated code put under the `build` directories.  -->
-    <suppress files=".*[\\/]build[\\/].*" checks=".*"/>
-
     <!-- Suppress all checks for the Protobuf-generated files. -->
     <suppress files=".*[\\/]generated[\\/].*" checks=".*"/>
     <suppress files=".*[\\/]generated-proto[\\/].*" checks=".*"/>
-
 </suppressions>
