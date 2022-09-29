@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
@@ -208,6 +209,8 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                    "org.jetbrains.dokka:dokka-base:${Dokka.version}",
+                    "org.jetbrains.dokka:dokka-analysis:${Dokka.version}",
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
