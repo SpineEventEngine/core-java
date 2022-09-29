@@ -27,9 +27,11 @@
 package io.spine.client;
 
 import io.spine.test.client.TestEntity;
+import io.spine.type.KnownTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,6 +41,22 @@ class QueryTest {
 
     private static final String TARGET_ENTITY_TYPE_URL =
             "type.spine.io/spine.test.queries.TestEntity";
+
+    private static final KnownTypes knownTypes = KnownTypes.instance();
+
+    @Test
+    void knowTypeProto() {
+        var files = knownTypes.fileNames();
+        assertThat(files)
+                .contains("google/protobuf/type.proto");
+    }
+
+    @Test
+    void knowEnumValueType() {
+        var types = knownTypes.typeNames();
+        assertThat(types)
+             .contains("google.protobuf.EnumValue");
+    }
 
     @Test
     @DisplayName("obtain entity type url for known query target type")

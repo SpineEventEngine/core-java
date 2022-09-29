@@ -39,7 +39,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.Durations2.hours;
 import static io.spine.protobuf.Durations2.minutes;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
-import static io.spine.validate.Validate.checkValid;
+import static io.spine.validate.Validate.check;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -63,8 +63,8 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
         var first = GivenCommandContext.withRandomActor();
         var second = GivenCommandContext.withRandomActor();
 
-        checkValid(first);
-        checkValid(second);
+        check(first);
+        check(second);
 
         var firstActorContext = first.actorContext();
         var secondActorContext = second.actorContext();
@@ -78,7 +78,7 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
         var when = add(currentTime(), minutes(100));
 
         var context = GivenCommandContext.withActorAndTime(actorId, when);
-        checkValid(context);
+        check(context);
 
         var actualActorContext = context.getActorContext();
 
@@ -95,7 +95,7 @@ class GivenCommandContextTest extends UtilityClassTest<GivenCommandContext> {
                 .build();
 
         var context = GivenCommandContext.withScheduledDelayOf(delay);
-        checkValid(context);
+        check(context);
 
         var actualSchedule = context.getSchedule();
         assertEquals(expectedSchedule, actualSchedule);

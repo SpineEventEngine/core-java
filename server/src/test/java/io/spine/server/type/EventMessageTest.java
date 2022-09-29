@@ -39,7 +39,7 @@ import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.validate.Validate.checkValid;
+import static io.spine.validate.Validate.check;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Event message should")
@@ -54,7 +54,7 @@ class EventMessageTest {
                 .setUserName("John Doe")
                 .build();
         var event = event(msg);
-        checkValid(event);
+        check(event);
     }
 
     @Test
@@ -65,7 +65,7 @@ class EventMessageTest {
                 .setProjectId(newProjectId())
                 .buildPartial();
         var event = partiallyBuiltEvent(msg);
-        assertThrows(ValidationException.class, () -> checkValid(event));
+        assertThrows(ValidationException.class, () -> check(event));
     }
 
     private static TaskId newTaskId() {

@@ -34,6 +34,7 @@ import io.spine.core.Events
 import io.spine.core.Version
 import io.spine.protobuf.AnyPacker.pack
 import io.spine.validate.Validate.checkValid
+import io.spine.validate.checkValid
 
 /**
  * Abstract base for event factories.
@@ -67,7 +68,7 @@ internal abstract class EventFactoryBase(
      * Creates a new `Event` instance.
      */
     protected fun assemble(message: EventMessage, context: EventContext): Event {
-        checkValid(message)
+        message.checkValid()
         val eventId = Events.generateId()
         val packed = pack(message)
         return with(Event.newBuilder()) {

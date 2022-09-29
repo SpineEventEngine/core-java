@@ -63,6 +63,7 @@ buildscript {
             force(
                 "io.spine:spine-base:$spineBaseVersion",
                 "io.spine:spine-time:$spineTimeVersion",
+                "io.spine.tools:spine-tool-base:$toolBaseVersion",
                 "io.spine.tools:spine-plugin-base:$toolBaseVersion"
             )
         }
