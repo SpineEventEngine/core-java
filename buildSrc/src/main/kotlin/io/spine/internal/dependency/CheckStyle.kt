@@ -30,5 +30,5 @@ package io.spine.internal.dependency
 // See `io.spine.internal.gradle.checkstyle.CheckStyleConfig`.
 @Suppress("unused")
 object CheckStyle {
-    const val version = "10.1"
+    const val version = "10.3.4"
 }
