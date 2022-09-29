@@ -25,14 +25,16 @@
  */
 package io.spine.server;
 
+import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
 import io.spine.logging.Logging;
-import io.spine.server.model.UnknownEntityTypeException;
+import io.spine.server.model.UnknownEntityStateTypeException;
 import io.spine.server.stand.InvalidRequestException;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
@@ -48,11 +50,11 @@ public final class QueryService
         extends QueryServiceGrpc.QueryServiceImplBase
         implements Logging {
 
-    private final TypeDictionary types;
+    private final QueryServiceImpl impl;
 
     private QueryService(TypeDictionary types) {
         super();
-        this.types = types;
+        this.impl = new QueryServiceImpl(this, types);
     }
 
     /**
@@ -75,38 +77,50 @@ public final class QueryService
      * Executes the passed query returning results to the passed observer.
      */
     @Override
-    public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
+    public void read(Query query, StreamObserver<QueryResponse> observer) {
         _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
-
-        var type = query.targetType();
-        types.find(type).ifPresentOrElse(
-             ctx -> handleQuery(ctx, query, responseObserver),
-             () -> handleUnsupported(type, responseObserver)
-        );
+        impl.serve(query, observer, null);
     }
 
-    private void handleQuery(BoundedContext context,
-                             Query query,
-                             StreamObserver<QueryResponse> responseObserver) {
-        var stand = context.stand();
-        try {
-            stand.execute(query, responseObserver);
-        } catch (InvalidRequestException e) {
-            _error().log("Invalid request. `%s`", e.asError());
-            var exception = invalidArgumentWithCause(e);
-            responseObserver.onError(exception);
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error().withCause(e)
-                    .log("Error processing query.");
-            responseObserver.onError(e);
+    private static final class QueryServiceImpl extends ServiceDelegate<Query, QueryResponse> {
+
+        QueryServiceImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
         }
-    }
 
-    private void handleUnsupported(TypeUrl type, StreamObserver<QueryResponse> observer) {
-        var exception = new UnknownEntityTypeException(type);
-        _error().withCause(exception)
-                .log("Unknown type encountered.");
-        observer.onError(exception);
+        @Override
+        protected TypeUrl enclosedMessageType(Query request) {
+            return request.targetType();
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Query query,
+                             StreamObserver<QueryResponse> observer,
+                             @Nullable Object params) {
+            try {
+                var stand = context.stand();
+                stand.execute(query, observer);
+            } catch (InvalidRequestException e) {
+                _error().log("Invalid request. `%s`", e.asError());
+                var exception = invalidArgumentWithCause(e);
+                observer.onError(exception);
+            } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
+                _error().withCause(e)
+                        .log("Error processing query.");
+                observer.onError(e);
+            }
+        }
+
+        @Override
+        protected void serveNoContext(Query query,
+                                      StreamObserver<QueryResponse> observer,
+                                      @Nullable Object params) {
+            var exception = new UnknownEntityStateTypeException(query.targetType());
+            _error().withCause(exception)
+                    .log();
+            observer.onError(exception);
+        }
     }
 
     /**

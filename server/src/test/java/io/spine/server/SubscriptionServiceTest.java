@@ -49,11 +49,13 @@ import io.spine.test.aggregate.event.AggOwnerNotified;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.commandservice.customer.Customer;
+import io.spine.test.projection.BankAccount;
 import io.spine.test.subscriptionservice.event.ReportSent;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.logging.LoggingTest;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.type.UnpublishedLanguageException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -321,7 +323,7 @@ class SubscriptionServiceTest {
     class PickContextBy {
 
         @Test
-        @DisplayName("events emitted by one of Context entities")
+        @DisplayName("events emitted by one of the bounded context entities")
         void eventsFromEntity() {
             assertTargetFound(AggTaskAdded.class);
         }
@@ -339,7 +341,7 @@ class SubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("state of entities that belong to Context")
+        @DisplayName("state of entities that belong to a bounded context")
         void entityType() {
             assertTargetFound(AggProject.class);
         }
@@ -533,9 +535,73 @@ class SubscriptionServiceTest {
             subscriptionService.cancel(observer.firstResponse(), faultyObserver);
             assertThat(faultyObserver.firstResponse()).isNotNull();
             assertThat(faultyObserver.isCompleted()).isFalse();
-            assertThat(faultyObserver.getError()).isInstanceOf(RuntimeException.class);
-            assertThat(faultyObserver.getError()
-                                     .getMessage()).isEqualTo(rejectionMessage);
+            var error = faultyObserver.getError();
+            assertThat(error).isInstanceOf(RuntimeException.class);
+            assertThat(error.getMessage()).isEqualTo(rejectionMessage);
+        }
+    }
+
+    @Nested
+    @DisplayName("reject calls for subscriptions on internal messages when")
+    @MuteLogging
+    class HandlingInternal {
+
+        private Topic topicOnInternal() {
+            return topic().forTarget(Targets.allOf(BankAccount.class));
+        }
+
+        @Test
+        @DisplayName("subscribing")
+        void subscribing() {
+            var topic = topicOnInternal();
+
+            subscriptionService.subscribe(topic, observer);
+
+            assertThat(observer.responses()).isEmpty();
+            assertThat(observer.isCompleted()).isFalse();
+            assertThat(observer.getError()).isInstanceOf(UnpublishedLanguageException.class);
+        }
+
+        @Test
+        @DisplayName("activating")
+        void activating() {
+            var subscription = forgedSubscription();
+
+            subscriptionService.activate(subscription, activationObserver);
+
+            assertThat(activationObserver.responses()).isEmpty();
+            assertThat(activationObserver.isCompleted()).isFalse();
+            assertThat(activationObserver.getError())
+                    .isInstanceOf(UnpublishedLanguageException.class);
+        }
+
+        @Test
+        @DisplayName("cancelling")
+        void cancelling() {
+            var subscription = forgedSubscription();
+
+            subscriptionService.cancel(subscription, cancellationObserver);
+
+            assertThat(cancellationObserver.responses()).isEmpty();
+            assertThat(cancellationObserver.isCompleted()).isFalse();
+            assertThat(cancellationObserver.getError())
+                    .isInstanceOf(UnpublishedLanguageException.class);
+        }
+
+        /**
+         * Creates a subscription on a valid topic and then substitutes a topic
+         * on an internal type.
+         */
+        private Subscription forgedSubscription() {
+            var topic = newTopic();
+            subscriptionService.subscribe(topic, observer);
+            var subscription = observer.firstResponse();
+
+            // Substitute another topic for existing subscription.
+            var forgedSubscription = subscription.toBuilder()
+                    .setTopic(topicOnInternal())
+                    .build();
+            return forgedSubscription;
         }
     }
 }

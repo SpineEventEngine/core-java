@@ -30,9 +30,10 @@ import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.Given.ProjectDetailsRepository;
 import io.spine.server.Given.ThrowingProjectDetailsRepository;
-import io.spine.server.model.UnknownEntityTypeException;
+import io.spine.server.model.UnknownEntityStateTypeException;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.type.UnpublishedLanguageException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -112,14 +113,26 @@ class QueryServiceTest {
 
     @Test
     @MuteLogging
-    @DisplayName("throw an `IllegalStateException` if the requested entity type is unknown")
+    @DisplayName("reject queries for internal types")
+    void rejectInternal() {
+        var query = Given.AQuery.readInternalType();
+        service.read(query, responseObserver);
+
+        assertThat(responseObserver.getError())
+                .isInstanceOf(UnpublishedLanguageException.class);
+    }
+
+    @Test
+    @MuteLogging
+    @DisplayName(
+            "throw an `UnknownEntityStateTypeException` if the requested entity type is unknown")
     void failOnUnknownType() {
         var query = Given.AQuery.readUnknownType();
         service.read(query, responseObserver);
         var error = responseObserver.getError();
         var assertError = assertThat(error);
         assertError.isNotNull();
-        assertError.isInstanceOf(UnknownEntityTypeException.class);
+        assertError.isInstanceOf(UnknownEntityStateTypeException.class);
         var unknownTypeUrl = query.targetType().value();
         assertError.hasMessageThat().contains(unknownTypeUrl);
     }

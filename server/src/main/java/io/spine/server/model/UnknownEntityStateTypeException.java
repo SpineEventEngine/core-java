@@ -33,11 +33,16 @@ import static java.lang.String.format;
 /**
  * An exception thrown when a {@link io.spine.client.Query Query} targets an unknown entity type.
  */
-public final class UnknownEntityTypeException extends RuntimeException {
+public final class UnknownEntityStateTypeException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
 
-    public UnknownEntityTypeException(TypeUrl type) {
-        super(format("Type `%s` does not belong to any known Bounded Context.", type));
+    /**
+     * Creates a new exception reporting the given unknown entity state type.
+     */
+    public UnknownEntityStateTypeException(TypeUrl type) {
+        super(format(
+                "The entity state type `%s` does not belong to any known Bounded Context.", type
+        ));
     }
 }

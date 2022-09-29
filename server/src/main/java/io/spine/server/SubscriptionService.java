@@ -27,8 +27,9 @@ package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Ordering;
+import com.google.errorprone.annotations.CompileTimeConstant;
+import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -39,10 +40,14 @@ import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.logging.Logging;
+import io.spine.server.stand.SubscriptionCallback;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
@@ -60,13 +65,17 @@ public final class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
         implements Logging {
 
-    private static final Joiner LIST_JOINER = Joiner.on(", ");
-
     private final TypeDictionary types;
+    private final SubscriptionImpl subscriptions;
+    private final ActivationImpl activation;
+    private final CancellationImpl cancellation;
 
     private SubscriptionService(TypeDictionary types) {
         super();
         this.types = types;
+        this.subscriptions = new SubscriptionImpl(this, types);
+        this.activation = new ActivationImpl(this, types);
+        this.cancellation = new CancellationImpl(this, types);
     }
 
     /**
@@ -85,96 +94,61 @@ public final class SubscriptionService
         return result;
     }
 
-    @Override
-    public void subscribe(Topic topic, StreamObserver<Subscription> responseObserver) {
-        _debug().log("Creating the subscription to the topic: `%s`.", topic);
+    /**
+     * Executes the given consumer using a {@link ThreadSafeObserver} over the given one.
+     *
+     * @param consumer
+     *         the code to execute
+     * @param observer
+     *         an observer for handling the request
+     * @param errorMessage
+     *         the error message to be put into a log if an exception occurs when
+     *         running the consumer
+     * @param <S>
+     *         the type of objects accepted by the observers
+     */
+    private <S> void runThreadSafe(Consumer<ThreadSafeObserver<S>> consumer,
+                                   StreamObserver<S> observer,
+                                   @CompileTimeConstant String errorMessage) {
+        var safeObserver = new ThreadSafeObserver<>(observer);
         try {
-            StreamObserver<Subscription> safeObserver = new ThreadSafeObserver<>(responseObserver);
-            subscribeTo(topic, safeObserver);
+            consumer.accept(safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             _error().withCause(e)
-                    .log("Error processing subscription request.");
-            responseObserver.onError(e);
+                    .log(errorMessage);
+            safeObserver.onError(e);
         }
     }
 
-    private void subscribeTo(Topic topic, StreamObserver<Subscription> responseObserver) {
-        var target = topic.getTarget();
-        var foundContext = findContextOf(target);
-        if (foundContext.isPresent()) {
-            var stand = foundContext.get().stand();
-            stand.subscribe(topic, responseObserver);
-        } else {
-            List<BoundedContext> contexts = new ArrayList<>(contexts());
-            contexts.sort(Ordering.natural());
-            _warn().log("Unable to find a Bounded Context for type `%s`." +
-                                " Creating a subscription in contexts: %s.",
-                        topic.getTarget().type(),
-                        LIST_JOINER.join(contexts));
-            var subscription = Subscriptions.from(topic);
-            for (var context : contexts) {
-                var stand = context.stand();
-                stand.subscribe(subscription);
-            }
-            responseObserver.onNext(subscription);
-            responseObserver.onCompleted();
-        }
+    @Override
+    public void subscribe(Topic topic, StreamObserver<Subscription> observer) {
+        _debug().log("Creating the subscription to the topic: `%s`.", topic);
+        runThreadSafe(
+                (safeObserver) -> subscriptions.serve(topic, safeObserver, null),
+                observer, "Error processing subscription request."
+        );
     }
 
     @Override
     public void activate(Subscription subscription, StreamObserver<SubscriptionUpdate> observer) {
         _debug().log("Activating the subscription: `%s`.", subscription);
-        StreamObserver<SubscriptionUpdate> safeObserver = new ThreadSafeObserver<>(observer);
-        try {
-            var callback = forwardingTo(safeObserver);
-            StreamObserver<Response> responseObserver = forwardErrorsOnly(safeObserver);
-            var foundContext = findContextOf(subscription);
-            if (foundContext.isPresent()) {
-                var targetStand = foundContext.get().stand();
-                targetStand.activate(subscription, callback, responseObserver);
-            } else {
-                for (var context : contexts()) {
-                    var stand = context.stand();
-                    stand.activate(subscription, callback, responseObserver);
-                }
-            }
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error().withCause(e)
-                    .log("Error activating the subscription.");
-            safeObserver.onError(e);
-        }
-    }
-
-    private ImmutableCollection<BoundedContext> contexts() {
-        return types.contexts();
+        runThreadSafe(
+                (safeObserver) -> {
+                    var callback = forwardingTo(safeObserver);
+                    StreamObserver<Response> responseObserver = forwardErrorsOnly(safeObserver);
+                    activation.serve(subscription, responseObserver, callback);
+                },
+                observer, "Error activating the subscription."
+        );
     }
 
     @Override
-    public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
+    public void cancel(Subscription subscription, StreamObserver<Response> observer) {
         _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
-        StreamObserver<Response> safeObserver = new ThreadSafeObserver<>(responseObserver);
-        var selected = findContextOf(subscription);
-        if (selected.isEmpty()) {
-            _warn().log("Trying to cancel a subscription `%s` which could not be found.",
-                        lazy(subscription::toShortString));
-            safeObserver.onCompleted();
-            return;
-        }
-        try {
-            var context = selected.get();
-            var stand = context.stand();
-            stand.cancel(subscription, safeObserver);
-        } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error().withCause(e)
-                    .log("Error processing cancel subscription request.");
-            safeObserver.onError(e);
-        }
-    }
-
-    private Optional<BoundedContext> findContextOf(Subscription subscription) {
-        var target = subscription.getTopic().getTarget();
-        var result = findContextOf(target);
-        return result;
+        runThreadSafe(
+                (safeObserver) -> cancellation.serve(subscription, safeObserver, null),
+                observer, "Error processing cancel subscription request."
+        );
     }
 
     /**
@@ -185,11 +159,115 @@ public final class SubscriptionService
      * @return the context which exposes the target type,
      *         or {@code Optional.empty} if no known context does so
      */
-    @VisibleForTesting  /* Otherwise should have been `private`. */
+    @VisibleForTesting  // test-only
     Optional<BoundedContext> findContextOf(Target target) {
         var type = target.type();
         var result = types.find(type);
         return result;
+    }
+
+    private static final class SubscriptionImpl extends ServiceDelegate<Topic, Subscription> {
+
+        SubscriptionImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected TypeUrl enclosedMessageType(Topic topic) {
+            return topic.getTarget()
+                        .type();
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Topic topic,
+                             StreamObserver<Subscription> observer,
+                             @Nullable Object params) {
+            var stand = context.stand();
+            stand.subscribe(topic, observer);
+        }
+
+        @Override
+        protected void serveNoContext(Topic topic,
+                                      StreamObserver<Subscription> observer,
+                                      @Nullable Object params) {
+            List<BoundedContext> contexts = new ArrayList<>(contexts());
+            contexts.sort(Ordering.natural());
+            _warn().log("Unable to find a Bounded Context for type `%s`." +
+                                " Creating a subscription in contexts: %s.",
+                        topic.getTarget().type(),
+                        Joiner.on(", ")
+                              .join(contexts));
+            var subscription = Subscriptions.from(topic);
+            for (var context : contexts) {
+                var stand = context.stand();
+                stand.subscribe(subscription);
+            }
+            observer.onNext(subscription);
+            observer.onCompleted();
+        }
+    }
+
+    private abstract static class SubscriptionDelegate
+            extends ServiceDelegate<Subscription, Response> {
+
+        SubscriptionDelegate(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected TypeUrl enclosedMessageType(Subscription subscription) {
+            return subscription.targetType();
+        }
+    }
+
+    private static final class ActivationImpl extends SubscriptionDelegate {
+
+        ActivationImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Subscription subscription,
+                             StreamObserver<Response> observer,
+                             @Nullable Object params) {
+            var callback = (SubscriptionCallback) checkNotNull(params);
+            var stand = context.stand();
+            stand.activate(subscription, callback, observer);
+        }
+
+        @Override
+        protected void serveNoContext(Subscription subscription,
+                                      StreamObserver<Response> observer,
+                                      @Nullable Object params) {
+            contexts().forEach(context -> serve(context, subscription, observer, params));
+        }
+    }
+
+    private static final class CancellationImpl extends SubscriptionDelegate {
+
+        CancellationImpl(BindableService service, TypeDictionary types) {
+            super(service, types);
+        }
+
+        @Override
+        protected void serve(BoundedContext context,
+                             Subscription subscription,
+                             StreamObserver<Response> observer,
+                             @Nullable Object params) {
+            var stand = context.stand();
+            stand.cancel(subscription, observer);
+        }
+
+        @Override
+        protected void serveNoContext(Subscription subscription,
+                                      StreamObserver<Response> observer,
+                                      @Nullable Object params) {
+            _warn().log("Trying to cancel a subscription `%s` which could not be found.",
+                        lazy(subscription::toShortString));
+            observer.onCompleted();
+        }
     }
 
     /**
