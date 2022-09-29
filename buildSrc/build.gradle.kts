@@ -62,7 +62,7 @@ val grGitVersion = "3.1.1"
  * Please check that this value matches one defined in
  *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.7.10"
+val kotlinVersion = "1.7.20"
 
 /**
  * The version of Guava used in `buildSrc`.
