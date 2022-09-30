@@ -68,8 +68,7 @@ class StateRoutingTest {
     @Test
     @DisplayName("support explicit routing")
     void explicit() {
-        var manifesto = Manifesto
-                .newBuilder()
+        var manifesto = Manifesto.newBuilder()
                 .setAuthor(GOLL)
                 .setTitle("My France")
                 .setText("Lorem ipsum")
