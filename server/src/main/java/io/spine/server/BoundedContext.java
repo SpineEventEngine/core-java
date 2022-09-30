@@ -61,6 +61,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -423,7 +424,7 @@ public abstract class BoundedContext implements Comparable<BoundedContext>, Clos
         importBus.close();
         shutDownRepositories();
 
-        _debug().log(closed(nameForLogging()));
+        _debug().log("%s", lazy(() -> closed(nameForLogging())));
     }
 
     @Override
