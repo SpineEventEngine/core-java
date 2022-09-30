@@ -109,7 +109,7 @@ public final class SubscriptionService
      */
     private <S> void runThreadSafe(Consumer<ThreadSafeObserver<S>> consumer,
                                    StreamObserver<S> observer,
-                                   @CompileTimeConstant String errorMessage) {
+                                   @CompileTimeConstant final String errorMessage) {
         var safeObserver = new ThreadSafeObserver<>(observer);
         try {
             consumer.accept(safeObserver);
