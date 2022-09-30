@@ -33,7 +33,7 @@ import io.spine.base.Identifier;
 import io.spine.environment.CustomEnvironmentType;
 import io.spine.environment.Environment;
 import io.spine.environment.EnvironmentType;
-import io.spine.environment.Production;
+import io.spine.environment.DefaultMode;
 import io.spine.environment.Tests;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
@@ -59,7 +59,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>Some parts of the {@code ServerEnvironment} can be customized based on the {@code
  * EnvironmentType}. To do so, one of the overloads of the {@code use} method can be called.
- * Two environment types exist out of the box: {@link Tests} and {@link Production}.
+ * Two environment types exist out of the box: {@link Tests} and {@link DefaultMode}.
  * For example:
  * <pre>
  *
@@ -173,7 +173,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * @apiNote This is a convenience method for server-side configuration code, which
      *         simply delegates to {@link Environment#type()}.
      */
-    public Class<? extends EnvironmentType> type() {
+    public Class<? extends EnvironmentType<?>> type() {
         return Environment.instance().type();
     }
 
@@ -337,7 +337,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Starts flowing API chain for configuring {@code ServerEnvironment} for the passed type.
      */
-    public static TypeConfigurator when(Class<? extends EnvironmentType> type) {
+    public static TypeConfigurator when(Class<? extends EnvironmentType<?>> type) {
         checkNotNull(type);
         return new TypeConfigurator(type);
     }
@@ -348,9 +348,9 @@ public final class ServerEnvironment implements AutoCloseable {
     public static class TypeConfigurator {
 
         private final ServerEnvironment se;
-        private final Class<? extends EnvironmentType> type;
+        private final Class<? extends EnvironmentType<?>> type;
 
-        private TypeConfigurator(Class<? extends EnvironmentType> type) {
+        private TypeConfigurator(Class<? extends EnvironmentType<?>> type) {
             this.se = instance();
             if (CustomEnvironmentType.class.isAssignableFrom(type)) {
                 registerCustomType(type);
@@ -358,10 +358,10 @@ public final class ServerEnvironment implements AutoCloseable {
             this.type = checkNotNull(type);
         }
 
-        private static void registerCustomType(Class<? extends EnvironmentType> type) {
+        private static void registerCustomType(Class<? extends EnvironmentType<?>> type) {
             @SuppressWarnings("unchecked") // checked by calling site.
             var customType =
-                    (Class<? extends CustomEnvironmentType>) type;
+                    (Class<? extends CustomEnvironmentType<?>>) type;
             Environment.instance()
                        .register(customType);
         }
@@ -370,7 +370,7 @@ public final class ServerEnvironment implements AutoCloseable {
          * Obtains the type of the environment being currently configured.
          */
         @VisibleForTesting
-        public Class<? extends EnvironmentType> type() {
+        public Class<? extends EnvironmentType<?>> type() {
             return type;
         }
 
@@ -507,7 +507,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @FunctionalInterface
     @SuppressWarnings("NewClassNamingConvention") // two letters for this name is fine.
-    public interface Fn<R> extends Function<Class<? extends EnvironmentType>, R> {
+    public interface Fn<R> extends Function<Class<? extends EnvironmentType<?>>, R> {
     }
 
     /**
@@ -521,7 +521,7 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         private static IllegalStateException
-        storageFactory(Class<? extends EnvironmentType> type) {
+        storageFactory(Class<? extends EnvironmentType<?>> type) {
             return raise(
                     "The storage factory for the environment `%s` was not configured.",
                     type, "storageFactory"
@@ -529,7 +529,7 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         private static IllegalStateException
-        transportFactory(Class<? extends EnvironmentType> type) {
+        transportFactory(Class<? extends EnvironmentType<?>> type) {
             return raise(
                     "Transport factory is not assigned for the current environment `%s`.",
                     type, "transportFactory"
@@ -549,7 +549,7 @@ public final class ServerEnvironment implements AutoCloseable {
          *         the name of the parameter passed to the {@code use()} method
          */
         private static IllegalStateException
-        raise(String prefixFmt, Class<? extends EnvironmentType> type, String featureParamName) {
+        raise(String prefixFmt, Class<? extends EnvironmentType<?>> type, String featureParamName) {
             var typeName = type.getSimpleName();
             var fmt = prefixFmt + " Please call `ServerEnvironment.when(%s.class).use(%s);`.";
             return newIllegalStateException(fmt, typeName, typeName, featureParamName);

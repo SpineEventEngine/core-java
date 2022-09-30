@@ -27,8 +27,8 @@
 package io.spine.server.storage.system;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.environment.DefaultMode;
 import io.spine.environment.Environment;
-import io.spine.environment.Production;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
@@ -63,14 +63,14 @@ class SystemAwareStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("wrap production storage")
+    @DisplayName("wrap DefaultMode storage")
     void wrapProdStorage() {
         Environment.instance()
-                   .setTo(Production.class);
+                   .setTo(DefaultMode.class);
 
         var serverEnv = ServerEnvironment.instance();
         StorageFactory productionStorage = new MemoizingStorageFactory();
-        ServerEnvironment.when(Production.class)
+        ServerEnvironment.when(DefaultMode.class)
                          .use(productionStorage);
         var storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory)
