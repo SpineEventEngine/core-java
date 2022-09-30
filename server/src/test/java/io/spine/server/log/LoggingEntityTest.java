@@ -209,6 +209,7 @@ class LoggingEntityTest extends LoggingTest {
 
         @Test
         @DisplayName("`_trace`")
+        @SuppressWarnings("FloggerLogString")
         void trace() {
             testLevel(Logging::_trace, FINEST);
         }
