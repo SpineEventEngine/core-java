@@ -194,6 +194,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      * @throws ModelError
      *         if the handler for the message was not found
      */
+    @SuppressWarnings("FloggerLogString") // we use the formatted string two times.
     public H getHandlerFor(SignalEnvelope<?, ?, ?> message) {
         var handler = findHandlerFor(message);
         return handler.orElseThrow(() -> {
