@@ -50,7 +50,7 @@ final class TimetableProjection extends Projection<AirportId, Timetable, Timetab
                 .setDestination(event.getTo()
                                      .getId())
                 .setScheduledDeparture(event.getScheduledDeparture())
-                .vBuild();
+                .build();
         builder().addScheduledFlight(schedule);
     }
 

@@ -183,12 +183,12 @@ class EntityRecordSpecTest {
         var state = projection.state();
         var id = TaskViewId.newBuilder()
                 .setId(93)
-                .vBuild();
+                .build();
         var record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(id))
                 .setState(AnyPacker.pack(state))
                 .setVersion(Versions.newVersion(3, currentTime()))
-                .vBuild();
+                .build();
         var actual = spec().idFromRecord(record);
         assertThat(actual).isEqualTo(id);
     }

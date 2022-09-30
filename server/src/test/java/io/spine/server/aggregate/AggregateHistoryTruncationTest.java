@@ -88,7 +88,7 @@ public abstract class AggregateHistoryTruncationTest {
     private static final SequenceId ID = SequenceId
             .newBuilder()
             .setValue(newUuid())
-            .vBuild();
+            .build();
 
     @Nested
     @DisplayName("after the history truncation should ")
@@ -108,7 +108,7 @@ public abstract class AggregateHistoryTruncationTest {
                     .setId(ID)
                     .setNumberOne(0)
                     .setNumberTwo(1)
-                    .vBuild();
+                    .build();
             context.receivesCommand(setStartingNumbers)
                    .assertEvents()
                    .withType(StartingNumbersSet.class)
@@ -116,7 +116,7 @@ public abstract class AggregateHistoryTruncationTest {
             // Send a lot of `MoveSequence` events, so several snapshots are created.
             var moveSequence = MoveSequence.newBuilder()
                     .setId(ID)
-                    .vBuild();
+                    .build();
             var snapshotTrigger = repo.snapshotTrigger();
             for (var i = 0; i < snapshotTrigger * 5 + 1; i++) {
                 context.receivesCommand(moveSequence);

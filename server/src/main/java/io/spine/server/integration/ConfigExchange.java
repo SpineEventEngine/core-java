@@ -111,7 +111,7 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
     private static ExternalEventType typeOfTransmittedEvents(ChannelId channel) {
         return ExternalEventType.newBuilder()
                 .setTypeUrl(channel.getTargetType())
-                .vBuild();
+                .build();
     }
 
     /**

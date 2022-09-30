@@ -123,6 +123,6 @@ public final class AggregateTestEnv {
         return StateImported
                 .newBuilder()
                 .setState(AnyPacker.pack(state))
-                .vBuild();
+                .build();
     }
 }

@@ -49,7 +49,7 @@ public final class RandomFillProcess
                 .setName(newUuid())
                 .setStatus(DONE)
                 .addTask(task())
-                .vBuild();
+                .build();
         return newState;
     }
 
@@ -58,7 +58,7 @@ public final class RandomFillProcess
                 .setTaskId(taskId())
                 .setTitle(newUuid())
                 .setDescription(newUuid())
-                .vBuild();
+                .build();
     }
 
     private static TaskId taskId() {

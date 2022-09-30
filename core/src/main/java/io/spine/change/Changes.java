@@ -58,7 +58,7 @@ public final class Changes {
         var result = StringChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -75,7 +75,7 @@ public final class Changes {
         var result = TimestampChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -90,7 +90,7 @@ public final class Changes {
         var result = DoubleChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -105,7 +105,7 @@ public final class Changes {
         var result = FloatChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -120,7 +120,7 @@ public final class Changes {
         var result = Int32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -135,7 +135,7 @@ public final class Changes {
         var result = Int64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -150,7 +150,7 @@ public final class Changes {
         var result = UInt32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -165,7 +165,7 @@ public final class Changes {
         var result = UInt64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -180,7 +180,7 @@ public final class Changes {
         var result = SInt32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -195,7 +195,7 @@ public final class Changes {
         var result = SInt64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -210,7 +210,7 @@ public final class Changes {
         var result = Fixed32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -225,7 +225,7 @@ public final class Changes {
         var result = Fixed64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -240,7 +240,7 @@ public final class Changes {
         var result = Sfixed32Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -255,7 +255,7 @@ public final class Changes {
         var result = Sfixed64Change.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -272,7 +272,7 @@ public final class Changes {
         var result = BytesChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -287,7 +287,7 @@ public final class Changes {
         var result = BooleanChange.newBuilder()
                 .setPreviousValue(previousValue)
                 .setNewValue(newValue)
-                .vBuild();
+                .build();
         return result;
     }
 }

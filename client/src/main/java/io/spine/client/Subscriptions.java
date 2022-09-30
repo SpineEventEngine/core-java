@@ -127,7 +127,7 @@ public final class Subscriptions implements Logging {
         var subscription = Subscription.newBuilder()
                 .setId(id)
                 .setTopic(topic)
-                .vBuild();
+                .build();
         return subscription;
     }
 

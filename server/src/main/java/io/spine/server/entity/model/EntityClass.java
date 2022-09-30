@@ -203,7 +203,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     public final EntityTypeName typeName() {
         return EntityTypeName.newBuilder()
                 .setJavaClassName(value().getCanonicalName())
-                .vBuild();
+                .build();
     }
 
     /**

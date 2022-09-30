@@ -319,7 +319,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
 
             var format = ResponseFormat.newBuilder()
                     .addOrderBy(orderByName(ASCENDING))
-                    .vBuild();
+                    .build();
             var readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
@@ -336,7 +336,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
 
             var format = ResponseFormat.newBuilder()
                     .addOrderBy(orderByName(DESCENDING))
-                    .vBuild();
+                    .build();
             var readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
@@ -355,7 +355,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
             var format = ResponseFormat.newBuilder()
                     .addOrderBy(orderByName(ASCENDING))
                     .setLimit(limit)
-                    .vBuild();
+                    .build();
             var readEntities = repository().loadAll(format);
             Collection<E> foundList = newArrayList(readEntities);
 
@@ -399,7 +399,7 @@ class RecordBasedRepositoryTest<E extends AbstractEntity<I, S>, I, S extends Ent
         private Iterator<E> find(TargetFilters filters, FieldMask firstFieldOnly) {
             var format = ResponseFormat.newBuilder()
                     .setFieldMask(firstFieldOnly)
-                    .vBuild();
+                    .build();
             return repository().find(filters, format);
         }
 

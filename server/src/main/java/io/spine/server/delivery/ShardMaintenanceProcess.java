@@ -75,7 +75,7 @@ final class ShardMaintenanceProcess extends AbstractEventReactor {
                 .setIndex(event.getIndex())
                 .setProcess(event.getProcess())
                 .setRunInfo(event.getRunInfo())
-                .vBuild();
+                .build();
         return processed;
     }
 

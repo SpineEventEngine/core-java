@@ -414,7 +414,7 @@ class AggregateRepositoryTest {
             var msg = AggProjectArchived.newBuilder()
                     .setProjectId(parentId)
                     .addChildProjectId(childId)
-                    .vBuild();
+                    .build();
             var event = factory.createEvent(msg);
 
             // Posting this event should archive the aggregate.
@@ -678,7 +678,7 @@ class AggregateRepositoryTest {
         // Passing negative long value to `FailingAggregate` should cause a rejection.
         var rejectNegative = RejectNegativeLong.newBuilder()
                 .setNumber(-100_000_000L)
-                .vBuild();
+                .build();
         var command = requestFactory().createCommand(rejectNegative);
         var envelope = CommandEnvelope.of(
                 command);

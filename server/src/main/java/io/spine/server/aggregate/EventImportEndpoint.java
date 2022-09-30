@@ -70,7 +70,7 @@ final class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
         var outcome = DispatchOutcome.newBuilder()
                 .setPropagatedSignal(event.messageId())
                 .setSuccess(success)
-                .vBuild();
+                .build();
         return outcome;
     }
 

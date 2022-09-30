@@ -39,7 +39,7 @@ public class TaskAggregate extends Aggregate<String, DTask, DTask.Builder> {
     DTaskCreated handle(DCreateTask command) {
         return DTaskCreated.newBuilder()
                            .setId(command.getId())
-                           .vBuild();
+                           .build();
     }
 
     @Apply

@@ -151,7 +151,7 @@ abstract class AbstractCommandBusTestSuite {
                 .getContextBuilder()
                 .getActorContextBuilder()
                 .setTenantId(TenantId.getDefaultInstance());
-        return commandBuilder.vBuild();
+        return commandBuilder.build();
     }
 
     protected static Command clearTenantId(Command cmd) {
@@ -159,7 +159,7 @@ abstract class AbstractCommandBusTestSuite {
         result.getContextBuilder()
               .getActorContextBuilder()
               .clearTenantId();
-        return result.vBuild();
+        return result.build();
     }
 
     @BeforeEach

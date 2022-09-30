@@ -82,7 +82,7 @@ final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregat
                 .setState(mirror.getState())
                 .setVersion(mirror.getVersion())
                 .setLifecycleFlags(mirror.getLifecycle())
-                .vBuild();
+                .build();
         var recordWithColumns = EntityRecordWithColumns.create(record, aggregateClass);
         return recordWithColumns;
     }

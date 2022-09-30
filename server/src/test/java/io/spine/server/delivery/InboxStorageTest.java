@@ -204,7 +204,7 @@ public class InboxStorageTest
         var originalMarkedDelivered = toMarkDelivered.stream()
                 .map(m -> m.toBuilder()
                         .setStatus(DELIVERED)
-                        .vBuild())
+                        .build())
                 .collect(toImmutableList());
 
         // Check that both `TO_DELIVER` message and those marked `DELIVERED` are stored as expected.
@@ -218,7 +218,7 @@ public class InboxStorageTest
         return toMarkDelivered.stream()
                 .map(m -> m.toBuilder()
                         .setStatus(DELIVERED)
-                        .vBuild())
+                        .build())
                 .collect(toList());
     }
 
@@ -266,7 +266,7 @@ public class InboxStorageTest
         var command = factory.createCommand(AddNumber.newBuilder()
                                                          .setCalculatorId(targetId)
                                                          .setValue(random.nextInt())
-                                                         .vBuild());
+                                                         .build());
         var inboxId = InboxIds.wrap(targetId, TypeUrl.of(Calc.class));
         var signalId = newSignalId(targetId, command.getId().value());
         return InboxMessage.newBuilder()
@@ -311,10 +311,10 @@ public class InboxStorageTest
         var modifiedId = message.getId()
                 .toBuilder()
                 .setIndex(newIndex(shardIndex, totalShards))
-                .vBuild();
+                .build();
         var result = message.toBuilder()
                 .setId(modifiedId)
-                .vBuild();
+                .build();
         return result;
     }
 

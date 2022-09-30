@@ -48,7 +48,7 @@ public final class RandomFillProjection
                 .setName(newUuid())
                 .setStatus(CREATED)
                 .addTask(task())
-                .vBuild();
+                .build();
         return result;
     }
 
@@ -57,7 +57,7 @@ public final class RandomFillProjection
                 .setTaskId(taskId())
                 .setTitle(newUuid())
                 .setDescription(newUuid())
-                .vBuild();
+                .build();
     }
 
     private static TaskId taskId() {

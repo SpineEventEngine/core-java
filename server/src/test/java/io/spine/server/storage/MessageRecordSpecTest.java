@@ -76,13 +76,13 @@ class MessageRecordSpecTest {
     private static StgProject project(StgProjectId id) {
         return StgProject.newBuilder()
                 .setId(id)
-                .vBuild();
+                .build();
     }
 
     private static StgProjectId projectId() {
         return StgProjectId.newBuilder()
                 .setId("storage-project")
-                .vBuild();
+                .build();
     }
 
     private static MessageRecordSpec<StgProjectId, StgProject> spec() {

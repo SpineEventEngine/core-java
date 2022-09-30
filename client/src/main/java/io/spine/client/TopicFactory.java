@@ -103,7 +103,7 @@ public final class TopicFactory {
         if (fieldMask != null) {
             builder.setFieldMask(fieldMask);
         }
-        var query = builder.vBuild();
+        var query = builder.build();
         return query;
     }
 
@@ -122,7 +122,7 @@ public final class TopicFactory {
     @Internal
     public Topic forTarget(Target target) {
         checkNotNull(target);
-        return builderForTarget(target).vBuild();
+        return builderForTarget(target).build();
     }
 
     private Topic.Builder builderForTarget(Target target) {
@@ -136,6 +136,6 @@ public final class TopicFactory {
         var formattedId = format("t-%s", Identifier.newUuid());
         return TopicId.newBuilder()
                 .setValue(formattedId)
-                .vBuild();
+                .build();
     }
 }

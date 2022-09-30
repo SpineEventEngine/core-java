@@ -200,12 +200,12 @@ final class UncommittedHistory {
         return AggregateHistory.newBuilder()
                 .addAllEvent(events)
                 .setSnapshot(snapshot)
-                .vBuild();
+                .build();
     }
 
     private static AggregateHistory historyFrom(List<Event> events) {
         return AggregateHistory.newBuilder()
                 .addAllEvent(events)
-                .vBuild();
+                .build();
     }
 }

@@ -420,7 +420,7 @@ class StandTest extends TenantAwareTest {
             var orderId = OrderId.generate();
             var placeOrder = PlaceOrder.newBuilder()
                     .setId(orderId)
-                    .vBuild();
+                    .build();
             var command = requestFactory.command().create(placeOrder);
 
             assertThat(waiter.ordersPlaced()).isEqualTo(0);
@@ -431,7 +431,7 @@ class StandTest extends TenantAwareTest {
             assertThat(observed).isNotNull();
             var expected = OrderPlaced.newBuilder()
                     .setId(orderId)
-                    .vBuild();
+                    .build();
             assertThat(observed.enclosedMessage()).isEqualTo(expected);
         }
     }

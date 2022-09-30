@@ -463,7 +463,7 @@ class EventBusTest {
         var threadCount = 50;
         @Validated DonationMade eventMessage = DonationMade.newBuilder()
                 .setUsdsDonated(3.14)
-                .vBuild();
+                .build();
         var event = eventFactory.createEvent(eventMessage);
         var executor = Executors.newFixedThreadPool(threadCount);
         // Catch non-easily reproducible bugs.

@@ -148,7 +148,7 @@ class EntityTest {
         void ofMessageType() {
             var messageId = ProjectId.newBuilder()
                     .setId("messageId")
-                    .vBuild();
+                    .build();
             var entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
             assertEquals(messageId, entityWithMessageID.id());
@@ -199,15 +199,15 @@ class EntityTest {
                 .build();
         var signUpUser = SignUpUser.newBuilder()
                 .setId(id)
-                .vBuild();
+                .build();
         var chooseInitial = ChooseDayOfBirth.newBuilder()
                 .setId(id)
                 .setDayOfBirth(LocalDates.of(2000, JANUARY, 1))
-                .vBuild();
+                .build();
         var chooseAgain = ChooseDayOfBirth.newBuilder()
                 .setId(id)
                 .setDayOfBirth(LocalDates.of(1988, FEBRUARY, 29))
-                .vBuild();
+                .build();
         var bbc = BlackBox
                 .from(context)
                 .receivesCommand(signUpUser)

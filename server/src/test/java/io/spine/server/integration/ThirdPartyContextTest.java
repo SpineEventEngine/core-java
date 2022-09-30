@@ -105,7 +105,7 @@ class ThirdPartyContextTest {
         var noTenantContext = ActorContext.newBuilder()
                 .setActor(UserId.newBuilder().setValue("42"))
                 .setTimestamp(Time.currentTime())
-                .vBuild();
+                .build();
         var calendar = ThirdPartyContext.multitenant("Calendar");
         assertThrows(IllegalArgumentException.class,
                      () -> calendar.emittedEvent(GivenEvent.message(), noTenantContext));
@@ -118,7 +118,7 @@ class ThirdPartyContextTest {
                 .setActor(UserId.newBuilder().setValue("42"))
                 .setTimestamp(Time.currentTime())
                 .setTenantId(TenantId.newBuilder().setValue("AcmeCorp"))
-                .vBuild();
+                .build();
         var calendar = ThirdPartyContext.singleTenant("Notes");
         assertThrows(IllegalArgumentException.class,
                      () -> calendar.emittedEvent(GivenEvent.message(), actorWithTenant));
@@ -162,12 +162,12 @@ class ThirdPartyContextTest {
         var documentId = DocumentId.generate();
         var crete = CreateDocument.newBuilder()
                 .setId(documentId)
-                .vBuild();
+                .build();
         var edit = EditText.newBuilder()
                 .setId(documentId)
                 .setPosition(0)
                 .setNewText("Fresh new document")
-                .vBuild();
+                .build();
         context.commandBus()
                .post(ImmutableList.of(requests.createCommand(crete), requests.createCommand(edit)),
                      noOpObserver());
@@ -178,7 +178,7 @@ class ThirdPartyContextTest {
                 .isNotEmpty();
         postForSingleTenant(johnDoe, UserDeleted.newBuilder()
                 .setUser(johnDoe)
-                .vBuild());
+                .build());
         var historyAfterDeleted = editHistoryRepository
                 .find(documentId)
                 .orElseGet(Assertions::fail);
@@ -192,7 +192,7 @@ class ThirdPartyContextTest {
         var documentId = DocumentId.generate();
         var event = TextEdited.newBuilder()
                 .setId(documentId)
-                .vBuild();
+                .build();
         postForSingleTenant(GivenUserId.newUuid(), event);
         assertThat(editHistoryRepository.find(documentId)).isEmpty();
     }
@@ -246,7 +246,7 @@ class ThirdPartyContextTest {
                     .setActor(actor)
                     .setTenantId(tenantId)
                     .setTimestamp(currentTime())
-                    .vBuild();
+                    .build();
             uploads.emittedEvent(event, actorContext);
         } catch (Exception e) {
             fail(e);

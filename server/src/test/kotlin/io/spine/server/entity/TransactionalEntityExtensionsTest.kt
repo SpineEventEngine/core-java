@@ -79,7 +79,7 @@ private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.B
         val builder = update {
             value = s
         }
-        setState(builder.vBuild())
+        setState(builder.build())
     }
 
     fun applyAlteration(s: String): Unit = alter {
@@ -88,7 +88,7 @@ private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.B
 
     fun txApplyAlteration(s: String) {
         applyAlteration(s)
-        setState(builder().vBuild())
+        setState(builder().build())
     }
 
     fun value(): String = state().value

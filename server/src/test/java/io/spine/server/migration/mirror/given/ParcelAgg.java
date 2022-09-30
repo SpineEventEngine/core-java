@@ -36,7 +36,7 @@ public class ParcelAgg extends Aggregate<ParcelId, Parcel, Parcel.Builder> {
     ParcelDelivered on(DeliveryCanceled event) {
         return ParcelDelivered.newBuilder()
                 .setId(event.getId())
-                .vBuild();
+                .build();
     }
 
     @Apply

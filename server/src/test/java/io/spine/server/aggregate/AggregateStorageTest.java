@@ -477,7 +477,7 @@ public class AggregateStorageTest
             var origin = Origin.newBuilder()
                     .setActorContext(context)
                     .setMessage(messageId)
-                    .vBuild();
+                    .build();
             var enrichedContext = EventContext.newBuilder()
                     .setEnrichment(withOneAttribute())
                     .setTimestamp(Time.currentTime())

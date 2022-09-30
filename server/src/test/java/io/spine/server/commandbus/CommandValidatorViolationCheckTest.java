@@ -132,7 +132,7 @@ class CommandValidatorViolationCheckTest {
                 .addLabel("red")
                 .addLabel("green")
                 .addLabel("blue")
-                .vBuild();
+                .build();
         var command = factory.createCommand(msg);
         var violations = inspectCommand(command);
         assertThat(violations)

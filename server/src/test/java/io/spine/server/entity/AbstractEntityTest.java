@@ -170,7 +170,7 @@ class AbstractEntityTest {
 
         private AvEntity(ProjectId id) {
             super(id);
-            updateState(Project.newBuilder().setId(id).vBuild());
+            updateState(Project.newBuilder().setId(id).build());
         }
 
         static ProjectId projectId(String value) {

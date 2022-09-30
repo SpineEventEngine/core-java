@@ -43,7 +43,7 @@ public final class AloneWaiter extends AbstractCommandAssignee {
         var id = command.getId();
         var placed = OrderPlaced.newBuilder()
                 .setId(id)
-                .vBuild();
+                .build();
         ordersPlaced++;
         return placed;
     }

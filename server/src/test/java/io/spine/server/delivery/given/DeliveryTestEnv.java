@@ -76,7 +76,7 @@ public class DeliveryTestEnv {
         return NodeId
                 .newBuilder()
                 .setValue(newUuid())
-                .vBuild();
+                .build();
     }
 
     public static class CalculatorRepository

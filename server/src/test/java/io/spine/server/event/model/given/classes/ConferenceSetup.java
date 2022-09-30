@@ -60,7 +60,7 @@ public class ConferenceSetup implements EventReactor {
         return SpeakersInvited.newBuilder()
                 .setConference(event.getConference())
                 .setDeadline(LocalDates.of(speakerSubmissionDeadline))
-                .vBuild();
+                .build();
     }
 
     @React
@@ -71,7 +71,7 @@ public class ConferenceSetup implements EventReactor {
                 .setConference(event.getConference())
                 .setSpeaker(event.getSpeaker())
                 .setDeadline(LocalDates.of(talkSubmissionDeadline))
-                .vBuild();
+                .build();
     }
 
     @Override

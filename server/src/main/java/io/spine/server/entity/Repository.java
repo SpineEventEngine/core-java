@@ -431,7 +431,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                 .setEntityType(entityModelClass().typeName())
                 .setHandledSignal(envelope.messageId())
                 .setError(fromThrowable(cause))
-                .vBuild();
+                .build();
         context().systemClient()
                  .writeSide()
                  .postEvent(systemEvent, envelope.asMessageOrigin());

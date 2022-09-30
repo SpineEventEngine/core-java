@@ -64,12 +64,12 @@ class EntityRecordWithColumnsTest {
     private static final StgTaskId TASK_ID =
             StgTaskId.newBuilder()
                      .setId(42)
-                     .vBuild();
+                     .build();
 
     private static final StgProjectId PROJECT_ID =
             StgProjectId.newBuilder()
                         .setId("42")
-                        .vBuild();
+                        .build();
 
     private static final Any PACKED_TASK_ID = Identifier.pack(TASK_ID);
 

@@ -58,10 +58,10 @@ final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus
         return Pair.of(
                 UserLoggedIn.newBuilder()
                         .setUser(user)
-                        .vBuild(),
+                        .build(),
                 UserAccountCreated.newBuilder()
                         .setUser(user)
-                        .vBuild()
+                        .build()
         );
     }
 
@@ -70,6 +70,6 @@ final class LoginProcess extends ProcessManager<UserId, LoginStatus, LoginStatus
         builder().setLoggedIn(false);
         return UserLoggedOut.newBuilder()
                 .setUser(c.getUser())
-                .vBuild();
+                .build();
     }
 }

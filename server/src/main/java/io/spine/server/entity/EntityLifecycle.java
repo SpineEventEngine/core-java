@@ -157,7 +157,7 @@ public class EntityLifecycle {
         var event = EntityCreated.newBuilder()
                 .setEntity(entityId)
                 .setKind(entityKind)
-                .vBuild();
+                .build();
         postEvent(event);
     }
 
@@ -175,11 +175,11 @@ public class EntityLifecycle {
         var target = CommandTarget.newBuilder()
                 .setEntityId(entityId)
                 .setTypeUrl(this.entityId.getTypeUrl())
-                .vBuild();
+                .build();
         var event = TargetAssignedToCommand.newBuilder()
                 .setId(commandId)
                 .setTarget(target)
-                .vBuild();
+                .build();
         postEvent(event);
     }
 
@@ -195,7 +195,7 @@ public class EntityLifecycle {
                 .setPayload(command)
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
-                .vBuild();
+                .build();
         var systemEventOrigin = command.asMessageOrigin();
         postEvent(systemCommand, systemEventOrigin);
     }
@@ -209,7 +209,7 @@ public class EntityLifecycle {
     public final void onCommandHandled(Command command) {
         var systemEvent = CommandHandled.newBuilder()
                 .setId(command.getId())
-                .vBuild();
+                .build();
         var systemEventOrigin = command.asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
@@ -226,7 +226,7 @@ public class EntityLifecycle {
         var systemEvent = CommandRejected.newBuilder()
                 .setId(commandId)
                 .setRejectionEvent(rejection)
-                .vBuild();
+                .build();
         var origin = rejection.asMessageOrigin();
         postEvent(systemEvent, origin);
     }
@@ -243,7 +243,7 @@ public class EntityLifecycle {
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
-                .vBuild();
+                .build();
         var origin = event.asMessageOrigin();
         postEvent(systemCommand, origin);
     }
@@ -254,7 +254,7 @@ public class EntityLifecycle {
                 .setPayload(event)
                 .setWhenImported(currentTime())
                 .setEntityType(typeName)
-                .vBuild();
+                .build();
         var systemEventOrigin = event.asMessageOrigin();
         postEvent(systemEvent, systemEventOrigin);
     }
@@ -271,7 +271,7 @@ public class EntityLifecycle {
                 .setPayload(event)
                 .setWhenDispatched(currentTime())
                 .setEntityType(typeName)
-                .vBuild();
+                .build();
         var origin = event.asMessageOrigin();
         postEvent(systemCommand, origin);
     }
@@ -311,7 +311,7 @@ public class EntityLifecycle {
                 .setEntity(entityId)
                 .addAllSignalId(ImmutableList.copyOf(signalIds))
                 .setRemovedFromStorage(true)
-                .vBuild();
+                .build();
         postEvent(event);
     }
 
@@ -351,7 +351,7 @@ public class EntityLifecycle {
                 .setLastMessage(lastMessage)
                 .setRootMessage(root)
                 .addAllViolation(error.getConstraintViolationList())
-                .vBuild();
+                .build();
         postEvent(event);
     }
 
@@ -382,7 +382,7 @@ public class EntityLifecycle {
                 .setEntity(entityId)
                 .setEvent(event.id())
                 .setDuplicateEvent(event.messageId())
-                .vBuild();
+                .build();
         postEvent(systemEvent);
     }
 
@@ -397,7 +397,7 @@ public class EntityLifecycle {
         var event = EntityPreparedForCatchUp.newBuilder()
                         .setId(catchUpId)
                         .setInstanceId(packedId)
-                        .vBuild();
+                        .build();
         postEvent(event);
     }
 
@@ -408,7 +408,7 @@ public class EntityLifecycle {
                 .setEntity(entityId)
                 .setCommand(command.id())
                 .setDuplicateCommand(command.messageId())
-                .vBuild();
+                .build();
         postEvent(systemEvent);
     }
 
@@ -441,7 +441,7 @@ public class EntityLifecycle {
                 .setErroneousEvent(erroneous)
                 .setError(error)
                 .setInterruptedEvents(interruptedCount)
-                .vBuild();
+                .build();
         postEvent(event);
     }
 
@@ -461,7 +461,7 @@ public class EntityLifecycle {
                     .setNewState(newState)
                     .addAllSignalId(messageIds)
                     .setNewVersion(newVersion)
-                    .vBuild();
+                    .build();
             postEvent(event, origin);
         }
     }
@@ -481,7 +481,7 @@ public class EntityLifecycle {
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .vBuild();
+                    .build();
             postEvent(event);
         }
     }
@@ -502,7 +502,7 @@ public class EntityLifecycle {
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
                     .setMarkedAsDeleted(true)
-                    .vBuild();
+                    .build();
             postEvent(event);
         }
     }
@@ -522,7 +522,7 @@ public class EntityLifecycle {
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .vBuild();
+                    .build();
             postEvent(event);
         }
     }
@@ -542,7 +542,7 @@ public class EntityLifecycle {
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
-                    .vBuild();
+                    .build();
             postEvent(event);
         }
     }
@@ -583,7 +583,7 @@ public class EntityLifecycle {
                 .setEntity(entityId)
                 .setHandledSignal(handledSignal)
                 .setError(error)
-                .vBuild();
+                .build();
         postEvent(systemEvent);
     }
 

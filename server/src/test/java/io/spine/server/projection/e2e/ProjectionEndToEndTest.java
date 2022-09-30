@@ -143,7 +143,7 @@ class ProjectionEndToEndTest {
         var entityId = MessageId.newBuilder()
                 .setTypeUrl(TypeUrl.of(Organization.class).value())
                 .setId(pack(organizationHead))
-                .vBuild();
+                .build();
         var organizationName = "Contributors";
         var stateBuilder = Organization.newBuilder()
                 .setId(OrganizationId.generate())

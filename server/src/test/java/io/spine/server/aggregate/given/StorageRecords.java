@@ -64,7 +64,7 @@ public class StorageRecords {
     newRecordWith(EventId eventId, I aggregateId, Timestamp timestamp) {
         var recordId = AggregateEventRecordId.newBuilder()
                 .setValue(eventId.getValue())
-                .vBuild();
+                .build();
         return AggregateEventRecord.newBuilder()
                 .setId(recordId)
                 .setAggregateId(Identifier.pack(aggregateId))

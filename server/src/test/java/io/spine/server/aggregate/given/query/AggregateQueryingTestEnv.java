@@ -112,7 +112,7 @@ public final class AggregateQueryingTestEnv {
                 .setSourceType(type)
                 .setWidth(width)
                 .setHeight(height)
-                .vBuild();
+                .build();
         return photo;
     }
 
@@ -132,19 +132,19 @@ public final class AggregateQueryingTestEnv {
                 .setWidth(state.getWidth())
                 .setHeight(state.getHeight())
                 .setSourceType(state.getSourceType())
-                .vBuild();
+                .build();
     }
 
     public static MRArchivePhoto archive(MRPhoto photo) {
         return MRArchivePhoto.newBuilder()
                 .setId(photo.getId())
-                .vBuild();
+                .build();
     }
 
     public static MRDeletePhoto delete(MRPhoto photo) {
         return MRDeletePhoto.newBuilder()
                 .setId(photo.getId())
-                .vBuild();
+                .build();
     }
 
     public static class PhotoAggregate extends Aggregate<MRPhotoId, MRPhoto, MRPhoto.Builder> {
@@ -159,7 +159,7 @@ public final class AggregateQueryingTestEnv {
                     .setWidth(cmd.getWidth())
                     .setHeight(cmd.getHeight())
                     .setSourceType(cmd.getSourceType())
-                    .vBuild();
+                    .build();
             return event;
         }
 
@@ -178,7 +178,7 @@ public final class AggregateQueryingTestEnv {
         MRPhotoArchived handle(MRArchivePhoto photo) {
             return MRPhotoArchived.newBuilder()
                     .setId(photo.getId())
-                    .vBuild();
+                    .build();
         }
 
         @Apply
@@ -190,7 +190,7 @@ public final class AggregateQueryingTestEnv {
         MRPhotoDeleted handle(MRDeletePhoto photo) {
             return MRPhotoDeleted.newBuilder()
                     .setId(photo.getId())
-                    .vBuild();
+                    .build();
         }
 
         @Apply
@@ -223,7 +223,7 @@ public final class AggregateQueryingTestEnv {
         MRSoundUploaded handle(MRUploadSound cmd) {
             return MRSoundUploaded.newBuilder()
                     .setId(cmd.getId())
-                    .vBuild();
+                    .build();
         }
 
         @Apply

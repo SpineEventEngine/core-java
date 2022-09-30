@@ -54,7 +54,7 @@ public final class RecordBasedRepositoryTestEnv {
         return OrderBy.newBuilder()
                 .setColumn(ENTITY_NAME_COLUMN)
                 .setDirection(direction)
-                .vBuild();
+                .build();
     }
 
     public static ResponseFormat emptyFormat() {

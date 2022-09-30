@@ -72,7 +72,7 @@ public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
                 .newBuilder()
                 .setNodeId(node)
                 .setValue(String.valueOf(currentThread))
-                .vBuild();
+                .build();
         return worker;
     }
 

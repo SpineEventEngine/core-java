@@ -44,7 +44,7 @@ public final class SetTestProcessName
                 .clear()
                 .setId(id())
                 .setName(NEW_NAME)
-                .vBuild();
+                .build();
         return newState;
     }
 }

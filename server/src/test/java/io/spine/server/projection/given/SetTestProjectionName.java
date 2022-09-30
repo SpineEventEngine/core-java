@@ -44,7 +44,7 @@ public final class SetTestProjectionName
                 .clear()
                 .setId(id())
                 .setName(NEW_NAME)
-                .vBuild();
+                .build();
         return result;
     }
 }

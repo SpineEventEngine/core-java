@@ -148,12 +148,12 @@ class EntityQueryProcessorTest {
         var dish = Dish.newBuilder()
                 .setTitle("Dead beef")
                 .setPrice(42)
-                .vBuild();
+                .build();
         var id = MenuId.generate();
         var event = DishAdded.newBuilder()
                 .setId(id)
                 .setDish(dish)
-                .vBuild();
+                .build();
         context.receivesEvent(event);
         return event;
     }

@@ -44,7 +44,7 @@ public final class JowDonsIndex extends Projection<IndexName, JowDons, JowDons.B
     public static final IndexName JOW_DONS = IndexName
             .newBuilder()
             .setName("Jow Dons")
-            .vBuild();
+            .build();
 
     @Subscribe
     void on(PriceRaised event) {

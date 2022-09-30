@@ -118,7 +118,7 @@ class ClientEndToEnd {
                 .setId(TaskId.generate())
                 .setName("My task")
                 .setAuthor(GivenUserId.generated())
-                .vBuild();
+                .build();
         client.asGuest()
               .command(task)
               .observe(TaskCreated.class, event -> fired.set(true))

@@ -758,7 +758,7 @@ public final class CatchUpProcess<I>
         if (limit != null) {
             builder.setLimit(limit);
         }
-        return builder.vBuild();
+        return builder.build();
     }
 
     /*

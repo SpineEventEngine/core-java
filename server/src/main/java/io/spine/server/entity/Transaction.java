@@ -255,7 +255,7 @@ public abstract class Transaction<I,
                 .setId(Identifier.pack(entity.id()))
                 .setTypeUrl(typeUrl.value())
                 .setVersion(entity.version())
-                .vBuild();
+                .build();
     }
 
     protected final E entity() {
@@ -319,7 +319,7 @@ public abstract class Transaction<I,
             return DispatchOutcome.newBuilder()
                     .setPropagatedSignal(phase.signal().messageId())
                     .setError(rootCause)
-                    .vBuild();
+                    .build();
         }
     }
 

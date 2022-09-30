@@ -49,7 +49,7 @@ final class FlightAggregate extends Aggregate<FlightId, Flight, Flight.Builder> 
                 .setTo(command.getTo())
                 .setScheduledDeparture(command.getScheduledDeparture())
                 .setScheduledArrival(command.getScheduledArrival())
-                .vBuild();
+                .build();
     }
 
     @Apply
@@ -67,7 +67,7 @@ final class FlightAggregate extends Aggregate<FlightId, Flight, Flight.Builder> 
                 .setId(command.getId())
                 .setScheduledDeparture(command.getScheduledDeparture())
                 .setScheduledArrival(command.getScheduledArrival())
-                .vBuild();
+                .build();
     }
 
     @Apply
@@ -80,7 +80,7 @@ final class FlightAggregate extends Aggregate<FlightId, Flight, Flight.Builder> 
     FlightCanceled handle(CancelFlight command) {
         return FlightCanceled.newBuilder()
                              .setId(command.getId())
-                             .vBuild();
+                             .build();
     }
 
     @Apply

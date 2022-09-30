@@ -59,7 +59,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
         DiagnosticLog.instance()
                      .on(ConstraintViolated.newBuilder()
                                  .setEntity(entity)
-                                 .vBuild());
+                                 .build());
         assertLogged(Identifier.toString(entity.getId()));
     }
 
@@ -69,12 +69,12 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
         var command = MessageId.newBuilder()
                 .setId(pack(CommandId.generate()))
                 .setTypeUrl(TypeUrl.of(BbCreateProject.class).value())
-                .vBuild();
+                .build();
         DiagnosticLog.instance()
                      .on(CannotDispatchDuplicateCommand.newBuilder()
                                  .setEntity(entity())
                                  .setDuplicateCommand(command)
-                                 .vBuild());
+                                 .build());
         assertLogged(command.getTypeUrl());
         assertLogged(command.asCommandId().getUuid());
     }
@@ -87,12 +87,12 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
                                    .setValue(newUuid())
                                    .build()))
                 .setTypeUrl(TypeUrl.of(BbProjectCreated.class).value())
-                .vBuild();
+                .build();
         DiagnosticLog.instance()
                      .on(CannotDispatchDuplicateEvent.newBuilder()
                                  .setEntity(entity())
                                  .setDuplicateEvent(event)
-                                 .vBuild());
+                                 .build());
         assertLogged(event.getTypeUrl());
         assertLogged(event.asEventId().getValue());
     }
@@ -105,7 +105,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
                      .on(RoutingFailed.newBuilder()
                                  .setError(error)
                                  .setHandledSignal(someMessageId())
-                                 .vBuild());
+                                 .build());
         assertLogged(error.getMessage());
     }
 
@@ -119,7 +119,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
                      .on(AggregateHistoryCorrupted.newBuilder()
                                  .setEntity(entityId)
                                  .setError(error)
-                                 .vBuild());
+                                 .build());
         assertLogged(Identifier.toString(entityId.getId()));
         assertLogged(error.getMessage());
     }

@@ -413,7 +413,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
             var taskId = Identifier.newUuid();
             commands.add(DCreateTask.newBuilder()
                                  .setId(taskIndex + "--" + taskId)
-                                 .vBuild());
+                                 .build());
         }
         return commands;
     }

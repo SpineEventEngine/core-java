@@ -87,7 +87,7 @@ class EventSubscriberClassTest {
                 SpeakerJoined.newBuilder()
                         .setConference(Conference.newBuilder().setName("Conference"))
                         .setSpeaker(PersonName.newBuilder().setGivenName("Homer"))
-                        .vBuild());
+                        .build());
         var methods = subscriberClass.subscriberOf(EventEnvelope.of(event));
         assertThat(methods)
               .isPresent();

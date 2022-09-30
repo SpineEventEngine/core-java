@@ -47,7 +47,7 @@ public class CalcAggregate extends Aggregate<String, Calc, Calc.Builder> {
         return NumberAdded.newBuilder()
                 .setCalculatorId(id())
                 .setValue(value)
-                .vBuild();
+                .build();
     }
 
     @Apply
@@ -71,6 +71,6 @@ public class CalcAggregate extends Aggregate<String, Calc, Calc.Builder> {
         return NumberAdded.newBuilder()
                 .setCalculatorId(event.getCalculatorId())
                 .setValue(event.getValue())
-                .vBuild();
+                .build();
     }
 }

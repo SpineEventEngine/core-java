@@ -48,7 +48,7 @@ internal abstract class EventFactoryBase(
      * which produced the event.
      */
     protected fun createContext(version: Version?): EventContext =
-        newContext(version).vBuild()
+        newContext(version).build()
 
     /**
      * Creates a builder for a new context of the event with optionally set
@@ -75,7 +75,7 @@ internal abstract class EventFactoryBase(
             id = eventId
             this.message = packed
             this.context = context
-            vBuild()
+            build()
         }
     }
 }

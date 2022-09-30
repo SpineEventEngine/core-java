@@ -80,10 +80,10 @@ public class CounterCatchUp {
             var context = event.getContext();
             var modifiedContext = context.toBuilder()
                     .setTimestamp(when)
-                    .vBuild();
+                    .build();
             var eventAtTime = event.toBuilder()
                     .setContext(modifiedContext)
-                    .vBuild();
+                    .build();
             ctx.append(eventAtTime);
         }
     }
@@ -114,7 +114,7 @@ public class CounterCatchUp {
             events.add(NumberAdded.newBuilder()
                                .setCalculatorId(idIterator.next())
                                .setValue(0)
-                               .vBuild());
+                               .build());
         }
         return events;
     }

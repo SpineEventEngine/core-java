@@ -184,7 +184,7 @@ class NastyClient {
                                      NumberReacted.newBuilder()
                                              .setCalculatorId(targetsIterator.next())
                                              .setValue(value)
-                                             .vBuild())
+                                             .build())
                    .collect(toList());
     }
 
@@ -195,7 +195,7 @@ class NastyClient {
                                      NumberImported.newBuilder()
                                              .setCalculatorId(targetsIterator.next())
                                              .setValue(value)
-                                             .vBuild())
+                                             .build())
                    .collect(toList());
     }
 
@@ -205,7 +205,7 @@ class NastyClient {
                                      AddNumber.newBuilder()
                                               .setCalculatorId(targetsIterator.next())
                                               .setValue(value)
-                                              .vBuild())
+                                              .build())
                    .collect(toList());
     }
 

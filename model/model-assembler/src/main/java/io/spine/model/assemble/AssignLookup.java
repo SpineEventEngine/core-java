@@ -140,7 +140,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
     private void writeAssigneesTo(File file) {
         ensureFile(file);
         removeDuplicates();
-        var serializedModel = commandAssignees.vBuild();
+        var serializedModel = commandAssignees.build();
         if (!isDefault(serializedModel)) {
             try (var out = new FileOutputStream(file)) {
                 serializedModel.writeTo(out);

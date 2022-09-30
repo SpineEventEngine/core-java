@@ -68,6 +68,6 @@ class DispatchingIdTest {
     private Command command(String taskId) {
         return factory.createCommand(DCreateTask.newBuilder()
                                                 .setId(taskId)
-                                                .vBuild());
+                                                .build());
     }
 }

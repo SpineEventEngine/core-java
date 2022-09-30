@@ -785,7 +785,7 @@ public class AggregateTest {
                .registerEventDispatcher(monitor);
         var eventMessage = AggProjectDeleted.newBuilder()
                 .setProjectId(ID)
-                .vBuild();
+                .build();
         var event = event(eventMessage, 2);
         var envelope = EventEnvelope.of(event);
         Supplier<MessageEndpoint<ProjectId, ?>> endpoint =
@@ -896,7 +896,7 @@ public class AggregateTest {
         void notChangeStateIfNoReaction() {
             var booksOnFire = TemperatureChanged.newBuilder()
                     .setFahrenheit(451)
-                    .vBuild();
+                    .build();
             context().receivesExternalEvent(booksOnFire)
                      .assertEntity(thermometer, SafeThermometer.class)
                      .doesNotExist();
@@ -907,12 +907,12 @@ public class AggregateTest {
         void safelySaveValidState() {
             var gettingWarmer = TemperatureChanged.newBuilder()
                     .setFahrenheit(72)
-                    .vBuild();
+                    .build();
             context().receivesExternalEvent(gettingWarmer);
             var expected = Thermometer.newBuilder()
                     .setId(thermometer)
                     .setFahrenheit(72)
-                    .vBuild();
+                    .build();
             context().assertState(thermometer, expected);
         }
     }

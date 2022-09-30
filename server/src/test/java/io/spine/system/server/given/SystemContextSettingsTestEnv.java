@@ -66,10 +66,10 @@ public class SystemContextSettingsTestEnv {
         var filter = EventFilter.newBuilder()
                 .setEventType(event.enclosedTypeUrl()
                                    .toTypeName().value())
-                .vBuild();
+                .build();
         var query = EventStreamQuery.newBuilder()
                 .addFilter(filter)
-                .vBuild();
+                .build();
         MemoizingObserver<Event> observer = memoizingObserver();
         systemBus.eventStore()
                  .read(query, observer);
@@ -88,7 +88,7 @@ public class SystemContextSettingsTestEnv {
                                      .setId(Identifier.pack(CommandId.generate()))
                                      .setTypeUrl(TypeUrl.of(EntityStateChanged.class)
                                                         .value()))
-                .vBuild();
+                .build();
         var event = events.createEvent(eventMessage);
         return event;
     }

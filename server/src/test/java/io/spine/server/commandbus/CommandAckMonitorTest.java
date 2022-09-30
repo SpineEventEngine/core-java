@@ -72,7 +72,7 @@ class CommandAckMonitorTest {
         var requests = new TestActorRequestFactory(CommandAckMonitorTest.class);
         var command = CmdBusStartProject.newBuilder()
                 .setProjectId(ProjectId.newBuilder().setId(newUuid()))
-                .vBuild();
+                .build();
         mockCommand = requests.command().create(command);
         commandId = mockCommand.id();
     }

@@ -156,7 +156,7 @@ public final class ServerEnvironment implements AutoCloseable {
     private ServerEnvironment() {
         nodeId = NodeId.newBuilder()
                        .setValue(Identifier.newUuid())
-                       .vBuild();
+                       .build();
         commandScheduler = ExecutorCommandScheduler::new;
     }
 

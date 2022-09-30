@@ -48,7 +48,7 @@ public class TaskAssignment
         return DTaskAssigned.newBuilder()
                 .setId(rawId)
                 .setAssignee(GivenUserId.generated())
-                .vBuild();
+                .build();
     }
 
     public static class Repository

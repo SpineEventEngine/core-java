@@ -142,7 +142,7 @@ final class EntityUpdateHandler extends UpdateHandler {
         var stateUpdate = EntityStateUpdate.newBuilder()
                 .setId(packedId)
                 .setState(packedState)
-                .vBuild();
+                .build();
         return toSubscriptionUpdate(stateUpdate);
     }
 
@@ -152,19 +152,19 @@ final class EntityUpdateHandler extends UpdateHandler {
         var stateUpdate = EntityStateUpdate.newBuilder()
                 .setId(packedId)
                 .setNoLongerMatching(true)
-                .vBuild();
+                .build();
         return toSubscriptionUpdate(stateUpdate);
     }
 
     private SubscriptionUpdate toSubscriptionUpdate(EntityStateUpdate stateUpdate) {
         var updates = EntityUpdates.newBuilder()
                 .addUpdate(stateUpdate)
-                .vBuild();
+                .build();
         var result = SubscriptionUpdate.newBuilder()
                 .setSubscription(subscription())
                 .setResponse(Responses.ok())
                 .setEntityUpdates(updates)
-                .vBuild();
+                .build();
         return result;
     }
 }

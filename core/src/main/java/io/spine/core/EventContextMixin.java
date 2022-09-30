@@ -131,7 +131,7 @@ interface EventContextMixin extends EventContextOrBuilder,
                     var id = MessageId.newBuilder()
                             .setId(Identifier.pack(getRootCommandId()))
                             .setTypeUrl("Unknown")
-                            .vBuild();
+                            .build();
                     return Optional.of(id);
                 } else {
                     _warn().log("Cannot determine root message ID.");
