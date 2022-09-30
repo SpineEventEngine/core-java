@@ -194,15 +194,6 @@ subprojects {
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     }
 
-    /**
-     * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` the empty constructor in
-     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking
-     * our code in `mc-java`.
-     *
-     * See [this issue](https://github.com/SpineEventEngine/mc-java/issues/42) for details.
-     */
-    val errorProneVersion = "2.10.0"
-
     configurations {
         forceVersions()
         excludeProtobufLite()
