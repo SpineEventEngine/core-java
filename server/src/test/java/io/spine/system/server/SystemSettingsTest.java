@@ -27,7 +27,7 @@
 package io.spine.system.server;
 
 import io.spine.environment.Environment;
-import io.spine.environment.Production;
+import io.spine.environment.DefaultMode;
 import io.spine.environment.Tests;
 import io.spine.server.given.environment.Local;
 import org.junit.jupiter.api.AfterEach;
@@ -89,7 +89,7 @@ class SystemSettingsTest {
             @Test
             @DisplayName("in the `Production` environment")
             void inProductionEnv() {
-                env.setTo(Production.class);
+                env.setTo(DefaultMode.class);
                 var settings = SystemSettings.defaults();
                 assertTrue(settings.postEventsInParallel());
             }
@@ -131,7 +131,7 @@ class SystemSettingsTest {
             @Test
             @DisplayName("directly in the current thread")
             void usingCurrentThread() {
-                env.setTo(Production.class);
+                env.setTo(DefaultMode.class);
                 var settings = SystemSettings.defaults();
                 assumeTrue(settings.postEventsInParallel());
 
@@ -142,7 +142,7 @@ class SystemSettingsTest {
             @Test
             @DisplayName("using the passed `Executor`")
             void usingPassedExecutor() {
-                env.setTo(Production.class);
+                env.setTo(DefaultMode.class);
                 var settings = SystemSettings.defaults();
                 assumeTrue(settings.postEventsInParallel());
                 assertDefaultExecutor(settings);
@@ -156,7 +156,7 @@ class SystemSettingsTest {
             @Test
             @DisplayName("using the default `Executor`")
             void usingDefaultExecutor() {
-                env.setTo(Production.class);
+                env.setTo(DefaultMode.class);
                 var executor = (Executor) command -> { };
                 var settings = SystemSettings.defaults();
                 assumeTrue(settings.postEventsInParallel());
