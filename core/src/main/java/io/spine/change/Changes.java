@@ -36,7 +36,6 @@ import static io.spine.change.ChangePreconditions.checkNotEqual;
 /**
  * Utility class for working with field changes.
  */
-@SuppressWarnings("OverlyCoupledClass")
 /* ... because we want one utility class for all the Changes classes. */
 public final class Changes {
 
