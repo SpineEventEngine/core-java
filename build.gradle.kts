@@ -47,6 +47,7 @@ import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -163,7 +164,7 @@ subprojects {
                 configureJavac()
                 configureErrorProne()
             }
-            withType<org.gradle.jvm.tasks.Jar>().configureEach {
+            withType<Jar>().configureEach {
                 duplicatesStrategy = DuplicatesStrategy.INCLUDE
             }
         }
