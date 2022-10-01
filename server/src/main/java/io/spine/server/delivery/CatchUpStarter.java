@@ -100,11 +100,11 @@ final class CatchUpStarter<I> {
         var id = CatchUpId.newBuilder()
                 .setUuid(Identifier.newUuid())
                 .setProjectionType(projectionStateType.value())
-                .vBuild();
+                .build();
         var eventMessage = CatchUpRequested.newBuilder()
                 .setId(id)
                 .setRequest(request)
-                .vBuild();
+                .build();
         var eventFactory = new CatchUpEventFactory(projectionStateType, context.isMultitenant());
         var event = eventFactory.createEvent(eventMessage);
         context.eventBus()
@@ -127,7 +127,7 @@ final class CatchUpStarter<I> {
             var name = eventClass.typeName();
             requestBuilder.addEventType(name.value());
         }
-        return requestBuilder.vBuild();
+        return requestBuilder.build();
     }
 
     private void checkNotActive(@Nullable Set<I> ids) throws CatchUpAlreadyStartedException {

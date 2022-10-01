@@ -34,7 +34,6 @@ plugins {
     java
     groovy
     `kotlin-dsl`
-    pmd
     val licenseReportVersion = "2.1"
     id("com.github.jk1.dependency-license-report").version(licenseReportVersion)
 }
@@ -63,7 +62,7 @@ val grGitVersion = "3.1.1"
  * Please check that this value matches one defined in
  *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.6.21"
+val kotlinVersion = "1.7.20"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -91,7 +90,7 @@ val errorProneVersion = "2.0.2"
  * @see <a href="https://github.com/google/protobuf-gradle-plugin/releases">
  *     Protobuf Gradle Plugins Releases</a>
  */
-val protobufPluginVersion = "0.8.18"
+val protobufPluginVersion = "0.8.19"
 
 /**
  * The version of Dokka Gradle Plugins.
@@ -101,12 +100,12 @@ val protobufPluginVersion = "0.8.18"
  * @see <a href="https://github.com/Kotlin/dokka/releases">
  *     Dokka Releases</a>
  */
-val dokkaVersion = "1.6.20"
+val dokkaVersion = "1.7.10"
 
 configurations.all {
     resolutionStrategy {
-        // Force Kotlin lib versions avoiding using those bundled with Gradle.
         force(
+            // Force Kotlin lib versions avoiding using those bundled with Gradle.
             "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
@@ -143,7 +142,10 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
 
-    implementation("gradle.plugin.com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion")
+    implementation("com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}")
     implementation("org.jetbrains.dokka:dokka-base:${dokkaVersion}")
+
+    // https://github.com/srikanth-lingala/zip4j
+    implementation("net.lingala.zip4j:zip4j:2.10.0")
 }

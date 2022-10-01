@@ -34,7 +34,9 @@ import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
 import io.spine.logging.Logging;
+import io.spine.protobuf.AnyPacker;
 import io.spine.validate.NonValidated;
+import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
@@ -156,8 +158,12 @@ public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, 
      */
     @Override
     public void onTransactionFailed(Error cause, EntityRecord entityRecord) {
-        if (cause.hasValidationError()) {
-            var error = cause.getValidationError();
+        if (!cause.hasDetails()) {
+            return;
+        }
+        var details = AnyPacker.unpack(cause.getDetails());
+        if (details instanceof ValidationError) {
+            var error = (ValidationError) details;
             checkState(lastMessage != null, "Transaction failed but no messages were propagated.");
             var causeMessage = lastMessage.messageId();
             var rootMessage = lastMessage.rootMessage();

@@ -56,7 +56,7 @@ public final class Books {
                 .setTitle("Domain-Driven Design")
                 .addAuthor(PersonName.newBuilder().setGivenName("Eric"))
                 .setPublisher(PUBLISHER)
-                .vBuild();
+                .build();
     }
 
     public static Book implementingDdd() {
@@ -66,7 +66,7 @@ public final class Books {
                 .setTitle("Implementing DDD")
                 .addAuthor(PersonName.newBuilder().setGivenName("Vaughn"))
                 .setPublisher(PUBLISHER)
-                .vBuild();
+                .build();
     }
 
     public static Book dddDistilled() {
@@ -76,7 +76,7 @@ public final class Books {
                 .setTitle("DDD Distilled")
                 .addAuthor(PersonName.newBuilder().setGivenName("Vaughn"))
                 .setPublisher(PUBLISHER)
-                .vBuild();
+                .build();
     }
 
     private static Isbn isbn(String value) {

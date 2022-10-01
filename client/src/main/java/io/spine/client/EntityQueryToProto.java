@@ -167,7 +167,7 @@ public final class EntityQueryToProto implements Function<EntityQuery<?, ?, ?>, 
                          .collect(toImmutableList());
         var childCompositeFilter =
                 builder.addAllCompositeFilter(childFilters)
-                       .vBuild();
+                       .build();
         return childCompositeFilter;
     }
 

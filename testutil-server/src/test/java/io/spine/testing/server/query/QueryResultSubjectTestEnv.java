@@ -54,11 +54,11 @@ final class QueryResultSubjectTestEnv {
         var stateWithVersion = EntityStateWithVersion.newBuilder()
                 .setState(pack(state1()))
                 .setVersion(version1())
-                .vBuild();
+                .build();
         var queryResponse = QueryResponse.newBuilder()
                 .setResponse(responseOk())
                 .addMessage(stateWithVersion)
-                .vBuild();
+                .build();
         return queryResponse;
     }
 
@@ -66,40 +66,40 @@ final class QueryResultSubjectTestEnv {
         var stateWithVersion1 = EntityStateWithVersion.newBuilder()
                 .setState(pack(state1()))
                 .setVersion(version1())
-                .vBuild();
+                .build();
         var stateWithVersion2 = EntityStateWithVersion.newBuilder()
                 .setState(pack(state2()))
                 .setVersion(version2())
-                .vBuild();
+                .build();
         var queryResponse = QueryResponse.newBuilder()
                 .setResponse(responseOk())
                 .addMessage(stateWithVersion1)
                 .addMessage(stateWithVersion2)
-                .vBuild();
+                .build();
         return queryResponse;
     }
 
     private static BbTask state1() {
         var id = BbTaskId.newBuilder()
                 .setUuid(newUuid())
-                .vBuild();
+                .build();
         var state = BbTask.newBuilder()
                 .setTaskId(id)
                 .setTitle(TASK_1_TITLE)
                 .setDescription(TASK_1_DESCRIPTION)
-                .vBuild();
+                .build();
         return state;
     }
 
     static BbTask state2() {
         var id = BbTaskId.newBuilder()
                 .setUuid(newUuid())
-                .vBuild();
+                .build();
         var state = BbTask.newBuilder()
                 .setTaskId(id)
                 .setTitle(TASK_2_TITLE)
                 .setDescription(TASK_2_DESCRIPTION)
-                .vBuild();
+                .build();
         return state;
     }
 
@@ -107,19 +107,19 @@ final class QueryResultSubjectTestEnv {
         return Version.newBuilder()
                 .setNumber(15)
                 .setTimestamp(currentTime())
-                .vBuild();
+                .build();
     }
 
     static Version version2() {
         return Version.newBuilder()
                 .setNumber(42)
                 .setTimestamp(currentTime())
-                .vBuild();
+                .build();
     }
 
     private static Response responseOk() {
         return Response.newBuilder()
                 .setStatus(ok())
-                .vBuild();
+                .build();
     }
 }

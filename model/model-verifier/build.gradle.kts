@@ -37,7 +37,13 @@ val spineBaseVersion: String by extra
 dependencies {
     implementation(gradleApi())
     implementation("io.spine.tools:spine-plugin-base:$toolBaseVersion")
-    implementation("io.spine.tools:spine-mc-java:$mcJavaVersion")
+    implementation("io.spine.tools:spine-mc-java:$mcJavaVersion") {
+        /**
+         * Instead of the one used in `mc-java`'s transient dependencies (via ProtoData compiler),
+         * we want to use the current `spine-server`.
+         */
+        exclude(group = "io.spine", module = "spine-server")
+    }
     implementation("io.spine.tools:spine-mc-java-base:$mcJavaVersion")
     implementation(project(":server"))
     implementation(project(":model-assembler"))

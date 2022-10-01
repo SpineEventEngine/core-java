@@ -69,7 +69,7 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
                 .setId(id())
                 .setWhen(Now.get(scheduledDeparture.getZone())
                             .asZonedDateTime())
-                .vBuild();
+                .build();
     }
 
     @React
@@ -86,14 +86,14 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
         return BoardingCompleted.newBuilder()
                 .setId(command.getId())
                 .setWhen(whenCompleted)
-                .vBuild();
+                .build();
     }
 
     @Command
     CancelBoarding handle(FlightCanceled event) {
         return CancelBoarding.newBuilder()
                 .setId(event.getId())
-                .vBuild();
+                .build();
     }
 
     @Assign
@@ -102,7 +102,7 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
         return BoardingCanceled.newBuilder()
                 .setId(command.getId())
                 .setWhen(whenCanceled)
-                .vBuild();
+                .build();
     }
 
     @React

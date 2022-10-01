@@ -30,6 +30,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.core.EventsTest;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -100,5 +101,13 @@ public final class GivenEvent {
                 .newBuilder()
                 .setId(newUuid())
                 .build();
+    }
+
+    public static EventId someId() {
+        var result = EventId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
+        return result;
     }
 }

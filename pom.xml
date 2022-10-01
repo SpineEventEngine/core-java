@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.107</version>
+<version>2.0.0-SNAPSHOT.108</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -44,55 +44,61 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-core</artifactId>
-    <version>1.45.1</version>
+    <version>1.46.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-protobuf</artifactId>
-    <version>1.45.1</version>
+    <version>1.46.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-stub</artifactId>
-    <version>1.45.1</version>
+    <version>1.46.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.96</version>
+    <version>2.0.0-SNAPSHOT.107</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base-types</artifactId>
-    <version>2.0.0-SNAPSHOT.88</version>
+    <version>2.0.0-SNAPSHOT.97</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>2.0.0-SNAPSHOT.88</version>
+    <version>2.0.0-SNAPSHOT.96</version>
+    <scope>compile</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.spine</groupId>
+    <artifactId>spine-validate</artifactId>
+    <version>2.0.0-SNAPSHOT.107</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java</artifactId>
-    <version>2.0.0-SNAPSHOT.83</version>
+    <version>2.0.0-SNAPSHOT.99</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-base</artifactId>
-    <version>2.0.0-SNAPSHOT.83</version>
+    <version>2.0.0-SNAPSHOT.99</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-base</artifactId>
-    <version>2.0.0-SNAPSHOT.83</version>
+    <version>2.0.0-SNAPSHOT.95</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -104,13 +110,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-reflect</artifactId>
-    <version>1.6.21</version>
+    <version>1.7.20</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-stdlib-jdk8</artifactId>
-    <version>1.6.21</version>
+    <version>1.7.20</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -140,31 +146,31 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty</artifactId>
-    <version>1.45.1</version>
+    <version>1.46.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty-shaded</artifactId>
-    <version>1.45.1</version>
+    <version>1.46.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-plugin-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.83</version>
+    <version>2.0.0-SNAPSHOT.95</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.96</version>
+    <version>2.0.0-SNAPSHOT.107</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>2.0.0-SNAPSHOT.88</version>
+    <version>2.0.0-SNAPSHOT.96</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -181,33 +187,48 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
-    <version>3.18.0</version>
+    <version>3.20.1</version>
   </dependency>
   <dependency>
     <groupId>com.puppycrawl.tools</groupId>
     <artifactId>checkstyle</artifactId>
-    <version>10.1</version>
+    <version>10.3.4</version>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.38.0</version>
+    <version>1.46.0</version>
+  </dependency>
+  <dependency>
+    <groupId>io.spine.protodata</groupId>
+    <artifactId>protodata-fat-cli</artifactId>
+    <version>0.2.12</version>
+  </dependency>
+  <dependency>
+    <groupId>io.spine.protodata</groupId>
+    <artifactId>protodata-protoc</artifactId>
+    <version>0.2.12</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-dokka-extensions</artifactId>
-    <version>2.0.0-SNAPSHOT.3</version>
+    <version>2.0.0-SNAPSHOT.4</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-checks</artifactId>
-    <version>2.0.0-SNAPSHOT.83</version>
+    <version>2.0.0-SNAPSHOT.99</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
-    <artifactId>spine-mc-java-protoc</artifactId>
-    <version>2.0.0-SNAPSHOT.83</version>
+    <artifactId>spine-mc-java-plugins</artifactId>
+    <version>2.0.0-SNAPSHOT.99</version>
+  </dependency>
+  <dependency>
+    <groupId>io.spine.validation</groupId>
+    <artifactId>spine-validation-java-extensions</artifactId>
+    <version>2.0.0-SNAPSHOT.27</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
@@ -226,33 +247,38 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
+    <artifactId>dokka-analysis</artifactId>
+    <version>1.7.10</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.dokka</groupId>
     <artifactId>dokka-base</artifactId>
-    <version>1.6.20</version>
+    <version>1.7.10</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
     <artifactId>dokka-core</artifactId>
-    <version>1.6.20</version>
+    <version>1.7.10</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
     <artifactId>kotlin-as-java-plugin</artifactId>
-    <version>1.6.20</version>
+    <version>1.7.10</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-compiler-embeddable</artifactId>
-    <version>1.6.21</version>
+    <version>1.7.20</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-klib-commonizer-embeddable</artifactId>
-    <version>1.6.21</version>
+    <version>1.7.20</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-scripting-compiler-embeddable</artifactId>
-    <version>1.6.21</version>
+    <version>1.7.20</version>
   </dependency>
 </dependencies>
 

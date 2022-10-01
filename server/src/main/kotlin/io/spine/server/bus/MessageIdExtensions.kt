@@ -89,6 +89,6 @@ private fun Message.ackWithStatus(status: Status): Ack {
     return with(Ack.newBuilder()) {
         messageId = packedId
         this.status = status
-        vBuild()
+        build()
     }
 }

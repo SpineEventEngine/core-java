@@ -47,6 +47,7 @@ import static io.spine.base.Errors.causeOf;
 import static io.spine.base.Errors.fromThrowable;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
+import static io.spine.testing.server.blackbox.given.Given.someMessageId;
 
 @DisplayName("`DiagnosticLog` should")
 class DiagnosticLogTest extends DiagnosticLoggingTest {
@@ -58,7 +59,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
         DiagnosticLog.instance()
                      .on(ConstraintViolated.newBuilder()
                                  .setEntity(entity)
-                                 .vBuild());
+                                 .build());
         assertLogged(Identifier.toString(entity.getId()));
     }
 
@@ -68,12 +69,12 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
         var command = MessageId.newBuilder()
                 .setId(pack(CommandId.generate()))
                 .setTypeUrl(TypeUrl.of(BbCreateProject.class).value())
-                .vBuild();
+                .build();
         DiagnosticLog.instance()
                      .on(CannotDispatchDuplicateCommand.newBuilder()
                                  .setEntity(entity())
                                  .setDuplicateCommand(command)
-                                 .vBuild());
+                                 .build());
         assertLogged(command.getTypeUrl());
         assertLogged(command.asCommandId().getUuid());
     }
@@ -86,12 +87,12 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
                                    .setValue(newUuid())
                                    .build()))
                 .setTypeUrl(TypeUrl.of(BbProjectCreated.class).value())
-                .vBuild();
+                .build();
         DiagnosticLog.instance()
                      .on(CannotDispatchDuplicateEvent.newBuilder()
                                  .setEntity(entity())
                                  .setDuplicateEvent(event)
-                                 .vBuild());
+                                 .build());
         assertLogged(event.getTypeUrl());
         assertLogged(event.asEventId().getValue());
     }
@@ -103,7 +104,8 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
         DiagnosticLog.instance()
                      .on(RoutingFailed.newBuilder()
                                  .setError(error)
-                                 .vBuild());
+                                 .setHandledSignal(someMessageId())
+                                 .build());
         assertLogged(error.getMessage());
     }
 
@@ -117,7 +119,7 @@ class DiagnosticLogTest extends DiagnosticLoggingTest {
                      .on(AggregateHistoryCorrupted.newBuilder()
                                  .setEntity(entityId)
                                  .setError(error)
-                                 .vBuild());
+                                 .build());
         assertLogged(Identifier.toString(entityId.getId()));
         assertLogged(error.getMessage());
     }

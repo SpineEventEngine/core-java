@@ -56,7 +56,7 @@ public final class SafeThermometer extends Aggregate<ThermometerId, Thermometer,
                 TermTemperatureChanged.newBuilder()
                         .setThermometer(id())
                         .setChange(change)
-                        .vBuild()
+                        .build()
         );
     }
 

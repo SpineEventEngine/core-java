@@ -90,6 +90,6 @@ abstract class DiagnosticLoggingTest {
         return MessageId.newBuilder()
                 .setId(pack(newUuid()))
                 .setTypeUrl(TypeUrl.of(Empty.class).value())
-                .vBuild();
+                .build();
     }
 }

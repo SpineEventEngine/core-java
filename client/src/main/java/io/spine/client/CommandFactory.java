@@ -38,6 +38,7 @@ import io.spine.validate.ValidationException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
+import static io.spine.validate.Validate.check;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -47,7 +48,7 @@ import static io.spine.validate.Validate.checkValid;
  * such as the actor, the tenant, and others.
  *
  * <p>The command messages passed to the factory are
- * {@linkplain io.spine.validate.Validate#checkValid(com.google.protobuf.Message) validated}
+ * {@linkplain io.spine.validate.Validate#check(com.google.protobuf.Message) validated}
  * according to their Proto definitions. If a given message is invalid,
  * a {@link ValidationException} is thrown.
  *
@@ -73,7 +74,7 @@ public final class CommandFactory {
      */
     public Command create(CommandMessage message) throws ValidationException {
         checkNotNull(message);
-        checkValid(message);
+        check(message);
 
         var context = createContext();
         var result = createCommand(message, context);
@@ -98,7 +99,7 @@ public final class CommandFactory {
      */
     public Command create(CommandMessage message, int targetVersion) throws ValidationException {
         checkNotNull(message);
-        checkValid(message);
+        check(message);
 
         var context = createContext(targetVersion);
         var result = createCommand(message, context);
@@ -126,7 +127,7 @@ public final class CommandFactory {
             throws ValidationException {
         checkNotNull(message);
         checkNotNull(context);
-        checkValid(message);
+        check(message);
 
         var newContext = withCurrentTime(context);
         var result = createCommand(message, newContext);

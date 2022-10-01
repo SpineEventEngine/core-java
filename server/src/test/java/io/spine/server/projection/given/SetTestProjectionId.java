@@ -41,7 +41,7 @@ public final class SetTestProjectionId
         var id = id();
         var result = project.toBuilder()
                 .setIdString(id.toString())
-                .vBuild();
+                .build();
         return result;
     }
 }

@@ -29,9 +29,15 @@ package io.spine.server.route;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.EventContext;
+import io.spine.core.MessageId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.route.given.switchman.LogState;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.testing.core.given.GivenVersion;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -78,13 +84,26 @@ class StateUpdateRoutingTest {
                 .putCounters(counterKey, counter);
         var log = builder.build();
         var oldState = builder.putCounters(counterKey, 147).build();
+        var entityId = entityId();
         var event = EntityStateChanged.newBuilder()
+                .setEntity(entityId)
                 .setOldState(AnyPacker.pack(oldState))
                 .setNewState(AnyPacker.pack(log))
+                .addSignalId(GivenEvent.arbitrary().messageId())
                 .setWhen(currentTime())
                 .build();
         var eventRoute = routing.eventRoute();
         var targets = eventRoute.apply(event, emptyContext);
         assertThat(targets).containsExactly(counter);
+    }
+
+    @NonNull
+    private static MessageId entityId() {
+        return MessageId.newBuilder()
+                .setId(TypeConverter.toAny(112))
+                .setTypeUrl(TypeUrl.of(LogState.class)
+                                   .value())
+                .setVersion(GivenVersion.withNumber(1))
+                .build();
     }
 }

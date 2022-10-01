@@ -86,7 +86,7 @@ public final class CardAggregate
                     .addAllBook(unknownBooks)
                     .build();
         } else {
-            return event.vBuild();
+            return event.build();
         }
     }
 
@@ -105,7 +105,7 @@ public final class CardAggregate
             return BookReturned.newBuilder()
                     .setCard(id())
                     .setBook(book)
-                    .vBuild();
+                    .build();
         }
     }
 

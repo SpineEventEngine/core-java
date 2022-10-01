@@ -43,7 +43,7 @@ public final class UserAggregate extends Aggregate<UserId, User, User.Builder> {
         return UserSignedUp
                 .newBuilder()
                 .setId(command.getId())
-                .vBuild();
+                .build();
     }
 
     @Assign
@@ -52,7 +52,7 @@ public final class UserAggregate extends Aggregate<UserId, User, User.Builder> {
                 .newBuilder()
                 .setId(command.getId())
                 .setDayOfBirth(command.getDayOfBirth())
-                .vBuild();
+                .build();
     }
 
     @Apply

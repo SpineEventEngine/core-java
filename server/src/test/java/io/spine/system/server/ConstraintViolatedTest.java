@@ -61,7 +61,7 @@ class ConstraintViolatedTest {
                 ValidateAndSet.newBuilder()
                               .setId(ValidatedId.generate())
                               .setTextToValidate(invalidText)
-                              .vBuild()
+                              .build()
         );
         context.assertEntity(DEFAULT, ViolationsWatch.class)
                .hasStateThat()
@@ -88,7 +88,7 @@ class ConstraintViolatedTest {
                                          .setValue(newUuid()))
                         .setAddress(EmailAddress.newBuilder()
                                                 .setValue("a@b.c"))
-                        .vBuild()
+                        .build()
         );
         context.assertEntity(DEFAULT, ViolationsWatch.class)
                .hasStateThat()

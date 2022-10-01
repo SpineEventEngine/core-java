@@ -36,6 +36,7 @@ import io.spine.base.Identifier;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
 import io.spine.server.command.model.given.handler.AssigneeReturnsEmptyList;
 import io.spine.server.command.model.given.handler.AssigneeReturnsNothing;
@@ -53,6 +54,7 @@ import io.spine.server.procman.given.dispatch.PmDispatcher;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,8 +63,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -268,7 +270,9 @@ class CommandAssigneeMethodTest {
     private static CommandEnvelope envelope(Message commandMessage) {
         var cmd = pack(commandMessage);
         var command = Command.newBuilder()
+                .setId(CommandId.generate())
                 .setMessage(cmd)
+                .setContext(GivenCommandContext.withRandomActor())
                 .build();
         var envelope = CommandEnvelope.of(command);
         return envelope;

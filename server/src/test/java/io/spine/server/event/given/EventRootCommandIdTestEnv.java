@@ -69,6 +69,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.testdata.Sample.builderForType;
 import static java.util.Collections.singleton;
 
@@ -84,12 +85,16 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static ProjectId projectId() {
-        return ((ProjectId.Builder) builderForType(ProjectId.class))
+        return ProjectId
+                .newBuilder()
+                .setId(newUuid())
                 .build();
     }
 
     public static EvTeamId teamId() {
-        return ((EvTeamId.Builder) builderForType(EvTeamId.class))
+        return EvTeamId
+                .newBuilder()
+                .setId(newUuid())
                 .build();
     }
 
@@ -218,22 +223,13 @@ public class EventRootCommandIdTestEnv {
             super(id);
         }
 
-        private static ProjectCreated projectCreated(ProjectId projectId) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(projectId)
-                                 .build();
-        }
-
-        private static TaskAdded taskAdded(ProjectId projectId, Task task) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(projectId)
-                            .setTask(task)
-                            .build();
-        }
-
         @Assign
         ProjectCreated on(CreateProject command, CommandContext ctx) {
-            var event = projectCreated(command.getProjectId());
+            var event = ProjectCreated
+                    .newBuilder()
+                    .setProjectId(command.getProjectId())
+                    .setTeamId(command.getTeamId())
+                    .build();
             return event;
         }
 
@@ -242,7 +238,11 @@ public class EventRootCommandIdTestEnv {
             ImmutableList.Builder<TaskAdded> events = ImmutableList.builder();
 
             for (var task : command.getTaskList()) {
-                var event = taskAdded(command.getProjectId(), task);
+                var event = TaskAdded
+                        .newBuilder()
+                        .setProjectId(command.getProjectId())
+                        .setTask(task)
+                        .build();
                 events.add(event);
             }
 
@@ -272,7 +272,7 @@ public class EventRootCommandIdTestEnv {
 
         @React
         EvTeamProjectAdded on(ProjectCreated command) {
-            var event = projectAdded(command);
+            var event = projectAdded(id(), command);
             return event;
         }
 
@@ -283,10 +283,12 @@ public class EventRootCommandIdTestEnv {
                     .addProjectId(event.getProjectId());
         }
 
-        private static EvTeamProjectAdded projectAdded(ProjectCreated command) {
-            return EvTeamProjectAdded.newBuilder()
-                                     .setProjectId(command.getProjectId())
-                                     .build();
+        private static EvTeamProjectAdded projectAdded(EvTeamId id, ProjectCreated command) {
+            return EvTeamProjectAdded
+                    .newBuilder()
+                    .setTeamId(id)
+                    .setProjectId(command.getProjectId())
+                    .build();
         }
     }
 

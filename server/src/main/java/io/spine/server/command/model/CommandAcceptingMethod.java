@@ -92,7 +92,7 @@ public abstract class CommandAcceptingMethod<T extends EventProducer,
         var rejection = reject(command, throwable);
         var success = Success.newBuilder()
                 .setRejection(rejection)
-                .vBuild();
+                .build();
         return Optional.of(success);
     }
 

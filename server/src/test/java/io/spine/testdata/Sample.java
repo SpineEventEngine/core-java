@@ -53,6 +53,11 @@ import static java.lang.String.format;
  */
 public class Sample {
 
+    /**
+     * The upper bound used for generating random {@code int} and {@code long} values.
+     */
+    private static final int INT_RANDOM_BOUND = 1654;
+
     /** Prevents instantiation of this utility class. */
     private Sample() {
     }
@@ -140,6 +145,11 @@ public class Sample {
      * <p>All the protobuf types are supported including nested {@link Message}s and
      * the {@code enum}s.
      *
+     * <p>For {@code Integer}s and {@code Long}s only non-negative values are generated.
+     * This is more convenient for using them as values of Spine internal messages,
+     * such as {@code Version}, as only non-negative values may be accepted according
+     * to their validation rules.
+     *
      * @param field {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field
      */
@@ -150,9 +160,8 @@ public class Sample {
         Random random = new SecureRandom();
         switch (javaType) {
             case INT:
-                return random.nextInt();
             case LONG:
-                return random.nextLong();
+                return positiveInt(random);
             case FLOAT:
                 return random.nextFloat();
             case DOUBLE:
@@ -174,6 +183,10 @@ public class Sample {
             default:
                 throw new IllegalArgumentException(format("Field type %s is not supported.", type));
         }
+    }
+
+    private static int positiveInt(Random random) {
+        return random.nextInt(INT_RANDOM_BOUND) + 1;
     }
 
     private static Object enumValueFor(FieldDescriptor field, Random random) {

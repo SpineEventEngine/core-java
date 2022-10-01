@@ -36,6 +36,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.command.AbstractCommandAssignee;
@@ -50,6 +51,7 @@ import io.spine.test.commandbus.command.CmdBusCreateProject;
 import io.spine.test.commandbus.event.CmdBusProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.validate.ValidationError;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -61,6 +63,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -103,7 +106,7 @@ abstract class AbstractCommandBusTestSuite {
         var cmd = createProject();
         var invalidCmd = cmd.toBuilder()
                 .setContext(CommandContext.getDefaultInstance())
-                .build();
+                .buildPartial();
         return invalidCmd;
     }
 
@@ -133,9 +136,11 @@ abstract class AbstractCommandBusTestSuite {
         assertFalse(error.getMessage()
                          .isEmpty());
         if (validationError == INVALID_COMMAND) {
-            assertFalse(error.getValidationError()
-                             .getConstraintViolationList()
-                             .isEmpty());
+            assertTrue(error.hasDetails());
+            var details = AnyPacker.unpack(error.getDetails());
+            assertThat(details).isInstanceOf(ValidationError.class);
+            assertThat(((ValidationError)details).getConstraintViolationList())
+                    .isNotEmpty();
         }
     }
 
@@ -146,7 +151,7 @@ abstract class AbstractCommandBusTestSuite {
                 .getContextBuilder()
                 .getActorContextBuilder()
                 .setTenantId(TenantId.getDefaultInstance());
-        return commandBuilder.vBuild();
+        return commandBuilder.build();
     }
 
     protected static Command clearTenantId(Command cmd) {
@@ -154,7 +159,7 @@ abstract class AbstractCommandBusTestSuite {
         result.getContextBuilder()
               .getActorContextBuilder()
               .clearTenantId();
-        return result.vBuild();
+        return result.build();
     }
 
     @BeforeEach
@@ -242,11 +247,6 @@ abstract class AbstractCommandBusTestSuite {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();
-
-        @Override
-        public void registerWith(BoundedContext context) {
-            super.registerWith(context);
-        }
 
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {

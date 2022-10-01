@@ -40,21 +40,21 @@ final class GivenResponseStatus {
     static Status ok() {
         var status = Status.newBuilder()
                 .setOk(Empty.getDefaultInstance())
-                .vBuild();
+                .build();
         return status;
     }
 
     static Status error() {
         var status = Status.newBuilder()
                 .setError(Error.getDefaultInstance())
-                .vBuild();
+                .build();
         return status;
     }
 
     static Status rejection() {
         var status = Status.newBuilder()
                 .setRejection(Event.getDefaultInstance())
-                .vBuild();
+                .build();
         return status;
     }
 }

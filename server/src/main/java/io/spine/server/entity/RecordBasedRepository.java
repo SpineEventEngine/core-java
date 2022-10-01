@@ -47,6 +47,7 @@ import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.type.TypeUrl;
+import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -65,6 +66,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.validate.Validate.check;
 import static io.spine.validate.Validate.checkValid;
 import static java.util.Objects.requireNonNull;
 
@@ -397,7 +399,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     public Iterator<E> find(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
-        checkValid(filters);
+        check(filters);
         checkNotNull(format);
 
         var records = findRecords(filters, format);
@@ -435,7 +437,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Internal
     public Iterator<EntityRecord> findRecords(TargetFilters filters, ResponseFormat format) {
         checkNotNull(filters);
-        checkValid(filters);
+        check(filters);
         checkNotNull(format);
 
         var storage = recordStorage();

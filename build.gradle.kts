@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
@@ -46,6 +47,7 @@ import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -57,10 +59,11 @@ buildscript {
     val kotlinVersion = io.spine.internal.dependency.Kotlin.version
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
+    val toolBaseVersion: String by extra
     val mcJavaVersion: String by extra
 
     dependencies {
-        classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
+        classpath("io.spine.tools:spine-mc-java-plugins:${mcJavaVersion}:all")
     }
 
     io.spine.internal.gradle.doForceVersions(configurations)
@@ -70,7 +73,8 @@ buildscript {
                     "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
                     "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
                     "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
+                    "io.spine:spine-time:$spineTimeVersion",
+                    "io.spine.tools:spine-tool-base:$toolBaseVersion"
             )
         }
     }
@@ -91,6 +95,7 @@ apply(from = "$rootDir/version.gradle.kts")
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
 val toolBaseVersion: String by extra
+val spineBaseTypesVersion: String by extra
 
 spinePublishing {
     modules = setOf(
@@ -154,9 +159,14 @@ subprojects {
     }
 
     java {
-        tasks.withType<JavaCompile>().configureEach {
-            configureJavac()
-            configureErrorProne()
+        tasks {
+            withType<JavaCompile>().configureEach {
+                configureJavac()
+                configureErrorProne()
+            }
+            withType<Jar>().configureEach {
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            }
         }
     }
 
@@ -184,15 +194,6 @@ subprojects {
         testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
     }
 
-    /**
-     * Force Error Prone dependencies to `2.10.0`, because in `2.11.0` the empty constructor in
-     * [com.google.errorprone.bugpatterns.CheckReturnValue] was removed leading to breaking
-     * our code in `mc-java`.
-     *
-     * See [this issue](https://github.com/SpineEventEngine/mc-java/issues/42) for details.
-     */
-    val errorProneVersion = "2.10.0"
-
     configurations {
         forceVersions()
         excludeProtobufLite()
@@ -200,6 +201,8 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
+                    "org.jetbrains.dokka:dokka-base:${Dokka.version}",
+                    "org.jetbrains.dokka:dokka-analysis:${Dokka.version}",
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
@@ -208,16 +211,15 @@ subprojects {
                     "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
 
                     "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine:spine-validate:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
+                    "io.spine:spine-base-types:$spineBaseTypesVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
                     "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-
-                    "com.google.errorprone:error_prone_core:$errorProneVersion",
-                    "com.google.errorprone:error_prone_annotations:$errorProneVersion",
-                    "com.google.errorprone:error_prone_annotation:$errorProneVersion",
-                    "com.google.errorprone:error_prone_check_api:$errorProneVersion",
-                    "com.google.errorprone:error_prone_test_helpers:$errorProneVersion",
-                    "com.google.errorprone:error_prone_type_annotations:$errorProneVersion",
+                    "io.spine.tools:spine-tool-base:$toolBaseVersion",
+                    Grpc.core,
+                    Grpc.protobuf,
+                    Grpc.stub
                 )
             }
         }

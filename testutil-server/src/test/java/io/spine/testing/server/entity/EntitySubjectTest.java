@@ -75,6 +75,6 @@ class EntitySubjectTest extends SubjectTest<EntitySubject, Entity<?, ?>> {
     private static TuProjectId id(String value) {
         return TuProjectId.newBuilder()
                           .setValue(value)
-                          .vBuild();
+                          .build();
     }
 }

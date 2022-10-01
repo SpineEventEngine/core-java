@@ -42,7 +42,7 @@ public final class ValidatedAggregate extends Aggregate<ValidatedId, Validated, 
                 .newBuilder()
                 .setId(id())
                 .setValidText(command.getTextToValidate())
-                .vBuild();
+                .build();
     }
 
     @Apply

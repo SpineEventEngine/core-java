@@ -44,7 +44,7 @@ public final class MagazineAggregate extends Aggregate<String, Magazine, Magazin
                 .setMagazineName(id())
                 .setAuthor(author(cmd, ctx))
                 .setArticle(cmd.getArticle())
-                .vBuild();
+                .build();
     }
 
     @Apply
@@ -62,6 +62,6 @@ public final class MagazineAggregate extends Aggregate<String, Magazine, Magazin
 
         return ArtistName.newBuilder()
                 .setValue(ctx.actor().getValue())
-                .vBuild();
+                .build();
     }
 }

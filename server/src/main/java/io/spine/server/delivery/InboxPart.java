@@ -98,7 +98,7 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
                 .setStatus(determineStatus(envelope, label))
                 .setVersion(VersionCounter.next());
         setRecordPayload(envelope, builder);
-        var message = builder.vBuild();
+        var message = builder.build();
 
         TenantAwareRunner
                 .with(envelope.tenantId())

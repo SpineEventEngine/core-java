@@ -56,7 +56,7 @@ public final class MemoizingTracer extends AbstractTracer {
         var id = MessageId.newBuilder()
                 .setId(pack(entityId))
                 .setTypeUrl(entityStateType.value())
-                .vBuild();
+                .build();
         return receivers.contains(id);
     }
 
@@ -65,7 +65,7 @@ public final class MemoizingTracer extends AbstractTracer {
         checkNotNull(receiver);
         var idWithoutVersion = receiver.toBuilder()
                 .clearVersion()
-                .vBuild();
+                .build();
         receivers.add(idWithoutVersion);
     }
 

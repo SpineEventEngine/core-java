@@ -51,7 +51,7 @@ public final class ShareAggregate extends Aggregate<ShareId, Share, Share.Builde
         var traded = ShareTraded.newBuilder()
                 .setShare(id())
                 .setAmount(amount)
-                .vBuild();
+                .build();
         var percent = max(amount / 100.0f, 50.0f);
         var raised = PriceRaised.newBuilder()
                 .setShare(id())
@@ -66,7 +66,7 @@ public final class ShareAggregate extends Aggregate<ShareId, Share, Share.Builde
         var traded = ShareTraded.newBuilder()
                 .setShare(id())
                 .setAmount(amount)
-                .vBuild();
+                .build();
         var percent = max(amount / 100.0f, 50.0f);
         var raised = PriceDropped.newBuilder()
                 .setShare(id())

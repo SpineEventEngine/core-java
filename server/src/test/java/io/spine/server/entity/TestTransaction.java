@@ -117,7 +117,7 @@ public class TestTransaction {
                     .newBuilder()
                     .setPropagatedSignal(event.outerObject().messageId())
                     .setSuccess(Success.getDefaultInstance())
-                    .vBuild();
+                    .build();
         }
 
         @Override

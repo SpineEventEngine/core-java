@@ -148,6 +148,9 @@ public final class Targets {
     }
 
     private static IdFilter idFilter(List<Any> ids) {
+        if (ids.isEmpty()) {
+            return IdFilter.getDefaultInstance();
+        }
         return IdFilter
                 .newBuilder()
                 .addAllId(ids)

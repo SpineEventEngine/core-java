@@ -260,7 +260,7 @@ class ProcessManagerRepositoryTest
                           .buildPartial();
         var eventWithTenant = event.toBuilder()
                                      .setContext(eventContextWithTenantId)
-                                     .vBuild();
+                                     .build();
         repository().dispatch(EventEnvelope.of(eventWithTenant));
     }
 
@@ -574,11 +574,12 @@ class ProcessManagerRepositoryTest
                 .setTypeUrl(TypeUrl.ofEnclosed(newState)
                                    .value())
                 .setId(pack(projectId))
-                .vBuild();
+                .build();
         var discardedEvent = EntityStateChanged.newBuilder()
                 .setEntity(entityId)
                 .setOldState(oldState)
                 .setNewState(newState)
+                .addSignalId(GivenEvent.arbitrary().messageId())
                 .build();
         assertThat(filter.filter(discardedEvent))
                 .isEmpty();

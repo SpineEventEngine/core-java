@@ -74,7 +74,7 @@ message DispatchOutcome {
         Success success = 2 [(validate) = true];
 
         // Erroneous handling result.
-        base.Error error = 3 [(validate) = true];
+        base.Error error = 3;
 
         // Result of the signal handling being interrupted.
         //
@@ -118,17 +118,25 @@ message Success {
 }
 
 // Events produced during a signal handling.
+//
+// Spine supports the handler methods returning `Optional` values,
+// so there may be no produced events.
+//
 message ProducedEvents {
     option (is).java_type = "ProducedEventsMixin";
 
-    repeated core.Event event = 1 [(required) = true, (validate) = true];
+    repeated core.Event event = 1 [(validate) = true];
 }
 
 // Commands produced during a signal handling.
+//
+// Spine supports the handler methods returning `Optional` values,
+// so there may be no produced commands.
+//
 message ProducedCommands {
     option (is).java_type = "ProducedCommandsMixin";
 
-    repeated core.Command command = 1 [(required) = true, (validate) = true];
+    repeated core.Command command = 1 [(validate) = true];
 }
 
 // Signal handling interruption.

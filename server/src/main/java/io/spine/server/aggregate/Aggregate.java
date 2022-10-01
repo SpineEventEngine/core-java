@@ -229,7 +229,7 @@ public abstract class Aggregate<I,
             var outcome = DispatchOutcome.newBuilder()
                     .setPropagatedSignal(command.messageId())
                     .setError(error.get())
-                    .vBuild();
+                    .build();
             return outcome;
         } else {
             var method = thisClass().handlerOf(command);
@@ -255,7 +255,7 @@ public abstract class Aggregate<I,
             var outcome = DispatchOutcome.newBuilder()
                     .setPropagatedSignal(event.messageId())
                     .setError(error.get())
-                    .vBuild();
+                    .build();
             return outcome;
         }
         var method = thisClass().reactorOf(event);

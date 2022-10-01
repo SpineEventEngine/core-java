@@ -101,7 +101,7 @@ public final class MirrorToEntityRecordTestEnv {
                 .setLifecycle(lifecycle)
                 .setVersion(version)
                 .setAggregateType(state.typeUrl().value())
-                .vBuild();
+                .build();
         return mirror;
     }
 
@@ -118,7 +118,7 @@ public final class MirrorToEntityRecordTestEnv {
         return MirrorId.newBuilder()
                 .setValue(id(state))
                 .setTypeUrl(state.typeUrl().value())
-                .vBuild();
+                .build();
     }
 
     private static Any id(EntityState<?> state) {
@@ -131,13 +131,13 @@ public final class MirrorToEntityRecordTestEnv {
         return LifecycleFlags.newBuilder()
                 .setArchived(archived)
                 .setDeleted(deleted)
-                .vBuild();
+                .build();
     }
 
     private static Version version() {
         return Version.newBuilder()
                 .setNumber(12)
                 .setTimestamp(Time.currentTime())
-                .vBuild();
+                .build();
     }
 }

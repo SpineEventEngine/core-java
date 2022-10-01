@@ -149,7 +149,7 @@ public final class ThirdPartyContext implements Closeable {
         var context = ActorContext.newBuilder()
                 .setActor(userId)
                 .setTimestamp(currentTime())
-                .vBuild();
+                .build();
         emittedEvent(eventMessage, context);
     }
 

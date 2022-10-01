@@ -94,9 +94,9 @@ private class RFactory(val command: Command, val throwable: RejectionThrowable) 
         val rejectionContext = RejectionEventContext.newBuilder()
             .setCommand(command)
             .setStacktrace(throwable.stackTraceToString())
-            .vBuild()
+            .build()
         return newContext(null)
             .setRejection(rejectionContext)
-            .vBuild()
+            .build()
     }
 }

@@ -81,7 +81,7 @@ public final class TestCatchUpJobs {
                 .setId(catchUpId)
                 .setStatus(status)
                 .setRequest(request)
-                .vBuild();
+                .build();
         return result;
     }
 }

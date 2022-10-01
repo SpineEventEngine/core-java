@@ -27,6 +27,7 @@
 package io.spine.internal.gradle
 
 import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -94,13 +95,17 @@ open class RunGradle : DefaultTask() {
     private fun execute() {
         // Ensure build error output log.
         // Since we're executing this task in another process, we redirect error output to
-        // the file under the `build` directory.
-        val buildDir = File(directory, "build")
+        // the file under the `_out` directory. Using the `build` directory for this purpose
+        // proved to cause problems under Windows when executing the `clean` command, which
+        // fails because another process holds files.
+        val buildDir = File(directory, "_out")
         if (!buildDir.exists()) {
             buildDir.mkdir()
         }
         val errorOut = File(buildDir, "error-out.txt")
+        errorOut.truncate()
         val debugOut = File(buildDir, "debug-out.txt")
+        debugOut.truncate()
 
         val command = buildCommand()
         val process = startProcess(command, errorOut, debugOut)
@@ -154,7 +159,7 @@ open class RunGradle : DefaultTask() {
     }
 
     private fun buildScript(): String {
-        val runsOnWindows = OperatingSystem.current().isWindows()
+        val runsOnWindows = OperatingSystem.current().isWindows
         return if (runsOnWindows) "gradlew.bat" else "gradlew"
     }
 
@@ -165,4 +170,11 @@ open class RunGradle : DefaultTask() {
             .redirectError(errorOut)
             .redirectOutput(debugOut)
             .start()
+}
+
+private fun File.truncate() {
+    val stream = FileOutputStream(this)
+    stream.use {
+        it.channel.truncate(0)
+    }
 }

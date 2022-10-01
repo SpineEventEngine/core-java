@@ -54,7 +54,7 @@ public class TaskAggregate extends Aggregate<TaskId, Task, Task.Builder> {
                         .setId(cmd.getId())
                         .setName(cmd.getName())
                         .setAuthor(cmd.getAuthor())
-                        .vBuild()
+                        .build()
         );
     }
 

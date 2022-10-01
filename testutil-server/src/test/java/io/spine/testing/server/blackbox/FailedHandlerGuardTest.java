@@ -56,7 +56,7 @@ final class FailedHandlerGuardTest extends DiagnosticLoggingTest {
                 HandlerFailedUnexpectedly.newBuilder()
                         .setEntity(entity())
                         .setError(error)
-                        .vBuild()
+                        .build()
         );
         assertLogged(error.getMessage());
     }
@@ -69,7 +69,7 @@ final class FailedHandlerGuardTest extends DiagnosticLoggingTest {
                 HandlerFailedUnexpectedly.newBuilder()
                         .setEntity(entity())
                         .setError(error)
-                        .vBuild()
+                        .build()
         ));
     }
 

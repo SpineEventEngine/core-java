@@ -34,6 +34,7 @@ import io.spine.core.EventContext;
 import io.spine.core.Events;
 import io.spine.core.MessageId;
 import io.spine.core.UserId;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -42,6 +43,7 @@ import io.spine.server.given.groups.GroupName;
 import io.spine.server.given.groups.GroupNameProjection;
 import io.spine.server.given.groups.GroupProjection;
 import io.spine.server.given.organizations.Organization;
+import io.spine.server.given.organizations.OrganizationId;
 import io.spine.server.given.organizations.OrganizationProjection;
 import io.spine.server.projection.given.EntitySubscriberProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
@@ -141,9 +143,10 @@ class ProjectionEndToEndTest {
         var entityId = MessageId.newBuilder()
                 .setTypeUrl(TypeUrl.of(Organization.class).value())
                 .setId(pack(organizationHead))
-                .vBuild();
+                .build();
         var organizationName = "Contributors";
         var stateBuilder = Organization.newBuilder()
+                .setId(OrganizationId.generate())
                 .setHead(organizationHead)
                 .setName(organizationName)
                 .addMember(UserId.getDefaultInstance());
@@ -161,6 +164,7 @@ class ProjectionEndToEndTest {
                 .setTimestamp(producedAt)
                 .setExternal(true)
                 .setImportContext(ActorContext.getDefaultInstance())
+                .setProducerId(TypeConverter.toAny(GivenUserId.newUuid()))
                 .build();
         var event = Event.newBuilder()
                 .setId(Events.generateId())

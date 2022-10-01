@@ -150,10 +150,10 @@ public class Stand implements AutoCloseable {
         var record = EntityRecord.newBuilder()
                 .setEntityId(id)
                 .setState(state)
-                .vBuild();
+                .build();
         var change = EntityRecordChange.newBuilder()
                 .setNewValue(record)
-                .vBuild();
+                .build();
         var origin = Identity.byString("Stand-received-entity-update");
         lifecycle.onStateChanged(change,
                                  ImmutableSet.of(origin),

@@ -112,7 +112,7 @@ class LoggingEntityTest extends LoggingTest {
         var command = ReturnBook.newBuilder()
                 .setCard(cardId(user))
                 .setBook(THE_HOBBIT)
-                .vBuild();
+                .build();
         context().receivesCommand(command);
         var assertRecord = assertLog().record();
         assertRecord.isError();
@@ -132,7 +132,7 @@ class LoggingEntityTest extends LoggingTest {
         var command = BorrowBooks.newBuilder()
                 .setCard(id)
                 .addBookId(Books.BIG_RED_BOOK)
-                .vBuild();
+                .build();
         return command;
     }
 
@@ -209,6 +209,7 @@ class LoggingEntityTest extends LoggingTest {
 
         @Test
         @DisplayName("`_trace`")
+        @SuppressWarnings("FloggerLogString")
         void trace() {
             testLevel(Logging::_trace, FINEST);
         }

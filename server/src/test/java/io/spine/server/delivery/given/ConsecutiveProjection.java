@@ -85,6 +85,7 @@ public class ConsecutiveProjection
         updateState(event.getId(), event.getValue());
     }
 
+    @SuppressWarnings("FloggerLogString")
     private void updateState(String id, int newValue) {
         builder().setId(id);
 

@@ -29,6 +29,7 @@ package io.spine.server.type;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.server.type.given.rejection.PhoneNotFound;
 import io.spine.server.type.given.rejection.TestRejections;
 import io.spine.test.core.ProjectCreated;
@@ -76,7 +77,9 @@ class EventClassTest {
                     .build();
             var any = AnyPacker.pack(projectCreated);
             var event = Event.newBuilder()
+                    .setId(GivenEvent.someId())
                     .setMessage(any)
+                    .setContext(GivenEvent.context())
                     .build();
             var eventClass = EventClass.from(event);
             assertThat(eventClass.value()).isEqualTo(ProjectCreated.class);

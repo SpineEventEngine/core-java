@@ -151,7 +151,7 @@ public abstract class Projection<I,
         return DispatchOutcome.newBuilder()
                 .setPropagatedSignal(event.outerObject().messageId())
                 .setError(error)
-                .vBuild();
+                .build();
     }
 
     @Override

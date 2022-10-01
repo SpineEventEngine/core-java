@@ -95,7 +95,7 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
                 .setIndex(index)
                 .setWorker(worker)
                 .setWhenLastPicked(currentTime())
-                .vBuild();
+                .build();
         write(newRecord);
         return newRecord;
     }

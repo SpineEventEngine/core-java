@@ -120,7 +120,7 @@ public final class MessageMismatch {
                 .setActual(pack(actual))
                 .setNewValue(pack(newValue))
                 .setVersion(version)
-                .vBuild();
+                .build();
         return result;
     }
 

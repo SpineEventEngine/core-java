@@ -34,7 +34,7 @@ public class DeliveryService {
     public static Courier generateCourier() {
         return Courier.newBuilder()
                 .setId(CourierId.generate())
-                .vBuild();
+                .build();
     }
 
     public static Parcel generateDeliveredParcel() {
@@ -42,7 +42,7 @@ public class DeliveryService {
                 .setId(ParcelId.generate())
                 .setRecipient(RecipientId.generate())
                 .setDelivered(true)
-                .vBuild();
+                .build();
     }
 
     public static Parcel generateInProgressParcel() {
@@ -50,12 +50,12 @@ public class DeliveryService {
                 .setId(ParcelId.generate())
                 .setRecipient(RecipientId.generate())
                 .setDelivered(false)
-                .vBuild();
+                .build();
     }
 
     public static Vehicle generateVehicle() {
         return Vehicle.newBuilder()
                 .setId(VehicleId.generate())
-                .vBuild();
+                .build();
     }
 }

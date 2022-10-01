@@ -34,7 +34,14 @@ object TaskName {
     const val updateGitHubPages = "updateGitHubPages"
 
     /**
-     * The name of the helper task to gather the generated Javadoc before updating GitHub Pages.
+     * The name of the helper task to gather the generated Javadoc before updating
+     * GitHub Pages.
      */
     const val copyJavadoc = "copyJavadoc"
+
+    /**
+     * The name of the helper task to gather Dokka-generated documentation before
+     * updating GitHub Pages.
+     */
+    const val copyDokka = "copyDokka"
 }

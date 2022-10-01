@@ -27,24 +27,33 @@
 package io.spine.server.stand.given;
 
 import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.client.Subscription;
+import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
+import io.spine.client.TopicId;
+import io.spine.core.ActorContext;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.event.ProjectCreated;
+import io.spine.testing.core.given.GivenUserId;
+import io.spine.time.ZoneIds;
 import io.spine.type.TypeUrl;
 
 import java.util.Collections;
+
+import static io.spine.base.Identifier.newUuid;
 
 public final class SubscriptionRecordTestEnv {
 
@@ -65,7 +74,9 @@ public final class SubscriptionRecordTestEnv {
         var eventMessage = entityStateChanged(id, oldState, newState, type);
         var packedMessage = TypeConverter.toAny(eventMessage);
         var event = Event.newBuilder()
+                .setId(GivenEvent.someId())
                 .setMessage(packedMessage)
+                .setContext(GivenEvent.context())
                 .build();
         var result = EventEnvelope.of(event);
         return result;
@@ -82,6 +93,7 @@ public final class SubscriptionRecordTestEnv {
         var packedNewState = TypeConverter.toAny(newState);
         var result = EntityStateChanged.newBuilder()
                 .setEntity(entityId)
+                .addSignalId(GivenEvent.arbitrary().messageId())
                 .setOldState(packedOldState)
                 .setNewState(packedNewState)
                 .build();
@@ -98,6 +110,7 @@ public final class SubscriptionRecordTestEnv {
         var event = Event.newBuilder()
                 .setId(eventId)
                 .setMessage(packedMessage)
+                .setContext(GivenEvent.context())
                 .build();
         var result = EventEnvelope.of(event);
         return result;
@@ -116,10 +129,18 @@ public final class SubscriptionRecordTestEnv {
     }
 
     public static Subscription subscription(Target target) {
+        var context = ActorContext.newBuilder()
+                .setTimestamp(Time.currentTime())
+                .setActor(GivenUserId.newUuid())
+                .setZoneId(ZoneIds.systemDefault())
+                .build();
         var topic = Topic.newBuilder()
+                .setId(TopicId.newBuilder().setValue(newUuid()))
                 .setTarget(target)
+                .setContext(context)
                 .build();
         var result = Subscription.newBuilder()
+                .setId(Subscriptions.generateId())
                 .setTopic(topic)
                 .build();
         return result;
@@ -135,8 +156,10 @@ public final class SubscriptionRecordTestEnv {
         return target;
     }
 
+
     public static AggProject projectWithName(String name) {
         return AggProject.newBuilder()
+                .setId(projectId(newUuid()))
                 .setName(name)
                 .build();
     }
@@ -144,6 +167,12 @@ public final class SubscriptionRecordTestEnv {
     public static ProjectId projectId(String id) {
         return ProjectId.newBuilder()
                 .setUuid(id)
+                .build();
+    }
+
+    public static io.spine.test.event.ProjectId subscriptionProjectId(String value) {
+        return io.spine.test.event.ProjectId.newBuilder()
+                .setId(value)
                 .build();
     }
 }

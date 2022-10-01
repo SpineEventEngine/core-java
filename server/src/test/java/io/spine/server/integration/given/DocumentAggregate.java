@@ -60,7 +60,7 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
                 .setId(command.getId())
                 .setOwner(context.actor())
                 .setWhenCreated(Now.get().asLocalDateTime())
-                .vBuild();
+                .build();
     }
 
     @Assign
@@ -74,7 +74,7 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
         return TextEdited.newBuilder()
                 .setId(command.getId())
                 .setEdit(edit)
-                .vBuild();
+                .build();
     }
 
     /**
@@ -92,7 +92,7 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
                 .setOwner(context.actor())
                 .setText(event.getText())
                 .setWhenUploaded(Now.get().asLocalDateTime())
-                .vBuild();
+                .build();
     }
 
     @React
@@ -104,7 +104,7 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
                 .setId(documentId)
                 .setWhenCreated(when)
                 .setOwner(user)
-                .vBuild();
+                .build();
         var edit = Edit.newBuilder()
                 .setEditor(user)
                 .setPosition(0)
@@ -113,7 +113,7 @@ public class DocumentAggregate extends Aggregate<DocumentId, Document, Document.
         var edited = TextEdited.newBuilder()
                 .setId(documentId)
                 .setEdit(edit)
-                .vBuild();
+                .build();
         return Pair.of(created, edited);
     }
 

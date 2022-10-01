@@ -45,6 +45,7 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.core.Versions.increment;
 import static io.spine.core.Versions.zero;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 public final class ReadOperationTestEnv {
 
@@ -68,6 +69,7 @@ public final class ReadOperationTestEnv {
                 .build();
         version = increment(version);
         var context = EventContext.newBuilder()
+                .setProducerId(toAny(newUuid()))
                 .setTimestamp(currentTime())
                 .setVersion(version)
                 .build();

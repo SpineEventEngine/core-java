@@ -121,7 +121,7 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
      * as-is.
      */
     protected final void flushState() {
-        var newState = builder().vBuild();
+        var newState = builder().build();
         store(newState);
     }
 

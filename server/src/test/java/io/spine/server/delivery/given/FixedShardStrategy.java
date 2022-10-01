@@ -57,7 +57,7 @@ public class FixedShardStrategy extends DeliveryStrategy implements Serializable
                 .newBuilder()
                 .setIndex(0)
                 .setOfTotal(this.shardCount)
-                .vBuild();
+                .build();
     }
 
     @Override

@@ -55,7 +55,7 @@ public final class NoOpLifecycle extends EntityLifecycle {
               EntityTypeName
                       .newBuilder()
                       .setJavaClassName(Entity.class.getCanonicalName())
-                      .vBuild());
+                      .build());
     }
 
     public static NoOpLifecycle instance() {

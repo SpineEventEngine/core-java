@@ -51,12 +51,12 @@ public final class ConsecutiveNumberProcess
         var positiveNumberEmitted = PositiveNumberEmitted.newBuilder()
                 .setId(id)
                 .setValue(nextValue)
-                .vBuild();
+                .build();
 
         var negativeNumberEmitted = NegativeNumberEmitted.newBuilder()
                 .setId(id)
                 .setValue(-1 * nextValue)
-                .vBuild();
+                .build();
         return Pair.of(positiveNumberEmitted, negativeNumberEmitted);
     }
 }

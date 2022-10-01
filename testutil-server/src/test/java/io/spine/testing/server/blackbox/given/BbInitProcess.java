@@ -76,7 +76,7 @@ public final class BbInitProcess extends ProcessManager<BbProjectId, BbInit, BbI
     BbFinalizeProject on(BbProjectDone event) {
         var cmd = BbFinalizeProject.newBuilder()
                 .setProjectId(event.getId())
-                .vBuild();
+                .build();
         return cmd;
     }
 

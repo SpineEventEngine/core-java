@@ -65,20 +65,20 @@ class DispatchingQueueSynchronisationTest {
         var shares =
                 Stream.generate(() -> ShareId.newBuilder()
                         .setValue(newUuid())
-                        .vBuild())
+                        .build())
                       .limit(taskCount)
                       .collect(toImmutableList());
         shares.forEach(share -> executor.execute(() -> {
             var buy = Buy.newBuilder()
                     .setShare(share)
                     .setAmount(42)
-                    .vBuild();
+                    .build();
             context.receivesCommand(buy);
             sleepUninterruptibly(Duration.ofSeconds(1));
             var sell = Sell.newBuilder()
                     .setShare(share)
                     .setAmount(12)
-                    .vBuild();
+                    .build();
             context.receivesCommand(sell);
         }));
         executor.awaitTermination(5, SECONDS);

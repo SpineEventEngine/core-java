@@ -36,7 +36,7 @@ import io.spine.time.ZoneIds;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.validate.Validate.checkValid;
+import static io.spine.validate.Validate.check;
 
 /**
  * A factory of test actor request factories.
@@ -85,12 +85,12 @@ final class Actor {
 
     private static void checkUser(UserId userId) {
         checkNotNull(userId);
-        checkValid(userId);
+        check(userId);
     }
 
     private static void checkZone(ZoneId zone) {
         checkNotNull(zone);
-        checkValid(zone);
+        check(zone);
     }
 
     /** Creates a new factory for requests of the single tenant. */
@@ -101,7 +101,7 @@ final class Actor {
     /** Creates a new factory for requests of the given tenant. */
     TestActorRequestFactory requestsFor(TenantId tenant) {
         checkNotNull(tenant);
-        checkValid(tenant);
+        check(tenant);
         return new TestActorRequestFactory(tenant, id, zoneId);
     }
 }

@@ -120,7 +120,7 @@ public abstract class AbstractEventSubscriber
                 .setEntity(eventAnchor())
                 .setHandledSignal(event.messageId())
                 .setError(error)
-                .vBuild();
+                .build();
         system.postEvent(systemEvent, event.asMessageOrigin());
     }
 

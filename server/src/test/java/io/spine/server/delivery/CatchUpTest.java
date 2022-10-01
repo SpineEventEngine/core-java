@@ -356,7 +356,7 @@ public class CatchUpTest extends AbstractDeliveryTest {
         for (var i = 0; i < howMany; i++) {
             commands.add(EmitNextNumber.newBuilder()
                                  .setId(idIterator.next())
-                                 .vBuild());
+                                 .build());
         }
         return commands;
     }

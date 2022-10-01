@@ -27,6 +27,7 @@
 package io.spine.server.commandbus.given;
 
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContextBuilder;
@@ -73,7 +74,9 @@ public class SingleTenantCommandBusTestEnv {
 
         private final InvalidProjectName rejection = InvalidProjectName
                 .newBuilder()
-                .setProjectId(ProjectId.getDefaultInstance())
+                .setProjectId(ProjectId.newBuilder()
+                                      .setId(Identifier.newUuid())
+                                      .build())
                 .build();
 
         @SuppressWarnings("unused")     // does nothing, but throws a rejection.

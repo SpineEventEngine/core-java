@@ -73,6 +73,6 @@ final class ResponseFormats {
             checkArgument(limit > 0, "Limit must be positive, if set.");
             result.setLimit(limit);
         }
-        return result.vBuild();
+        return result.build();
     }
 }

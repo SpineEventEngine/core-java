@@ -68,21 +68,23 @@ class StateRoutingTest {
     @Test
     @DisplayName("support explicit routing")
     void explicit() {
+        var manifesto = Manifesto.newBuilder()
+                .setAuthor(GOLL)
+                .setTitle("My France")
+                .setText("Lorem ipsum")
+                .build();
         context.receivesCommand(
                 PublishArticle.newBuilder()
-                              .setMagazineName("Manifeste du surréalisme")
-                              .setArticle(AnyPacker.pack(
-                                      Manifesto.newBuilder()
-                                               .setAuthor(GOLL)
-                                               .setText("Lorem ipsum")
-                                               .build()))
-                              .build()
+                        .setMagazineName("Manifeste du surréalisme")
+                        .setArticle(AnyPacker.pack(manifesto))
+                        .build()
         );
 
         context.assertState(BRETON, ArtistMood.class)
+               .comparingExpectedFieldsOnly()
                .isEqualTo(ArtistMood.newBuilder()
-                                    .setMood(ArtistMood.Mood.ANGER)
-                                    .build());
+                                  .setMood(ArtistMood.Mood.ANGER)
+                                  .buildPartial());
     }
 
     @Test
@@ -98,11 +100,11 @@ class StateRoutingTest {
                         .build()
         );
 
-        context.assertState(
-                artist,
-                Works.newBuilder()
-                     .addWork(automaticDrawing)
-                     .build()
-        );
+        var works = Works
+                .newBuilder()
+                .setArtist(artist)
+                .addWork(automaticDrawing)
+                .build();
+        context.assertState(artist, works);
     }
 }

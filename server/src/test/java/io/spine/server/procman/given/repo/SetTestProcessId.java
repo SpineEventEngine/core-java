@@ -42,7 +42,7 @@ public final class SetTestProcessId
         var result = project
                 .toBuilder()
                 .setIdString(id.toString())
-                .vBuild();
+                .build();
         return result;
     }
 }

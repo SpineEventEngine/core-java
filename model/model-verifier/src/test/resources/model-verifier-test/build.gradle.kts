@@ -54,7 +54,7 @@ buildscript {
     io.spine.internal.gradle.doForceVersions(configurations)
     dependencies {
         classpath(io.spine.internal.dependency.Protobuf.GradlePlugin.lib)
-        classpath("io.spine.tools:spine-mc-java:${mcJavaVersion}")
+        classpath("io.spine.tools:spine-mc-java-plugins:${mcJavaVersion}:all")
         classpath("io.spine.tools:spine-model-verifier:${versionToPublish}")
     }
 
@@ -62,7 +62,9 @@ buildscript {
         resolutionStrategy {
             force(
                 "io.spine:spine-base:$spineBaseVersion",
+                "io.spine:spine-validate:$spineBaseVersion",
                 "io.spine:spine-time:$spineTimeVersion",
+                "io.spine.tools:spine-tool-base:$toolBaseVersion",
                 "io.spine.tools:spine-plugin-base:$toolBaseVersion"
             )
         }

@@ -578,7 +578,7 @@ public final class Delivery implements Logging {
     private static DeliveryRunInfo deliveryInfoWith(Iterable<CatchUp> catchUpJobs) {
         return DeliveryRunInfo.newBuilder()
                               .addAllCatchUpJob(catchUpJobs)
-                              .vBuild();
+                              .build();
     }
 
     private void notifyOfDuplicatesIn(Conveyor conveyor) {
@@ -594,7 +594,7 @@ public final class Delivery implements Logging {
                 .newBuilder()
                 .setIndex(index)
                 .setMessagesDelivered(deliveredInBatch)
-                .vBuild();
+                .build();
     }
 
     private boolean monitorTellsToContinueAfter(DeliveryStage stage) {

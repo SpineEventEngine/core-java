@@ -350,7 +350,7 @@ class ProjectionRepositoryTest
             var entityId = MessageId.newBuilder()
                     .setTypeUrl(newState.getTypeUrl())
                     .setId(pack(id))
-                    .vBuild();
+                    .build();
             var changedEvent = EntityStateChanged.newBuilder()
                     .setEntity(entityId)
                     .setWhen(currentTime())

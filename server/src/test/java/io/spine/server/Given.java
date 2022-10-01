@@ -127,7 +127,7 @@ public class Given {
         public static SendReport sendReport() {
             return SendReport.newBuilder()
                     .setId(ReportId.generate())
-                    .vBuild();
+                    .build();
         }
     }
 
@@ -286,7 +286,7 @@ public class Given {
             return AggOwnerNotified
                     .newBuilder()
                     .setOwner(context.actor())
-                    .vBuild();
+                    .build();
         }
     }
 
@@ -297,7 +297,7 @@ public class Given {
             return ReportSent
                     .newBuilder()
                     .setId(command.getId())
-                    .vBuild();
+                    .build();
         }
     }
 

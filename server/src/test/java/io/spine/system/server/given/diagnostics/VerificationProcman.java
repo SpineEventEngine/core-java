@@ -48,6 +48,6 @@ public class VerificationProcman
                 .newBuilder()
                 .setUserId(command.getUserId())
                 .setAddress(command.getAddress())
-                .vBuild();
+                .build();
     }
 }

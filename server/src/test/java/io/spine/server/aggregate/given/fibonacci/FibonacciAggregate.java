@@ -47,7 +47,7 @@ public final class FibonacciAggregate extends Aggregate<SequenceId, Sequence, Se
                 .setId(cmd.getId())
                 .setNumberOne(cmd.getNumberOne())
                 .setNumberTwo(cmd.getNumberTwo())
-                .vBuild();
+                .build();
         return event;
     }
 
@@ -55,7 +55,7 @@ public final class FibonacciAggregate extends Aggregate<SequenceId, Sequence, Se
     SequenceMoved handle(MoveSequence cmd) {
         var event = SequenceMoved.newBuilder()
                 .setId(cmd.getId())
-                .vBuild();
+                .build();
         return event;
     }
 

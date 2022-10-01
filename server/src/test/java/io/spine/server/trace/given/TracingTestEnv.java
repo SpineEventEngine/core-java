@@ -51,26 +51,26 @@ public final class TracingTestEnv {
     public static final AirportId FROM = AirportId
             .newBuilder()
             .setCode("KBP")
-            .vBuild();
+            .build();
 
     private static final Airport FROM_AIRPORT = Airport
             .newBuilder()
             .setId(FROM)
             .setCity("Kyiv")
             .setCountry("Ukraine")
-            .vBuild();
+            .build();
 
     private static final AirportId TO = AirportId
             .newBuilder()
             .setCode("HRK")
-            .vBuild();
+            .build();
 
     private static final Airport TO_AIRPORT = Airport.
             newBuilder()
             .setId(TO)
             .setCity("Kharkiv")
             .setCountry("Ukraine")
-            .vBuild();
+            .build();
 
     private static final ZoneId ZONE = ZoneIds.of(java.time.ZoneId.systemDefault());
     public static final FlightId FLIGHT = FlightId.generate();
@@ -92,7 +92,7 @@ public final class TracingTestEnv {
         var builder = localDepartureTime.toBuilder();
         builder.getTimeBuilder()
                .setHour(8);
-        var localArrivalTime = builder.vBuild();
+        var localArrivalTime = builder.build();
         var departureTime = ZonedDateTimes.of(localDepartureTime, ZONE);
         var arrivalTime = ZonedDateTimes.of(localArrivalTime, ZONE);
         return ScheduleFlight.newBuilder()
@@ -101,12 +101,12 @@ public final class TracingTestEnv {
                 .setId(FLIGHT)
                 .setScheduledDeparture(departureTime)
                 .setScheduledArrival(arrivalTime)
-                .vBuild();
+                .build();
     }
 
     public static CancelFlight cancelFlight() {
         return CancelFlight.newBuilder()
                 .setId(FLIGHT)
-                .vBuild();
+                .build();
     }
 }

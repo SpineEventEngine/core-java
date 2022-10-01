@@ -248,7 +248,7 @@ public final class QueryFactory {
         return builder
                 .setId(newQueryId())
                 .setContext(actorContext)
-                .vBuild();
+                .build();
     }
 
     private static QueryId newQueryId() {
@@ -270,6 +270,6 @@ public final class QueryFactory {
         if (limit > 0) {
             result.setLimit(limit);
         }
-        return result.vBuild();
+        return result.build();
     }
 }

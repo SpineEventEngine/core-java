@@ -28,6 +28,7 @@ package io.spine.server.type.given;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
@@ -36,8 +37,10 @@ import io.spine.core.EventId;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.TypeConverter;
 import io.spine.test.core.ProjectCreated;
 import io.spine.test.core.ProjectId;
+import io.spine.testing.core.given.GivenUserId;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -48,7 +51,7 @@ public class EventEnvelopeTestEnv {
     }
 
     public static Event event(Message eventMessage) {
-        return event(eventMessage, EventContext.getDefaultInstance());
+        return event(eventMessage, GivenEvent.context());
     }
 
     public static Event event(Message eventMessage, EventContext eventContext) {
@@ -73,6 +76,8 @@ public class EventEnvelopeTestEnv {
                 .build();
         return ActorContext.newBuilder()
                 .setTenantId(tenantId)
+                .setActor(GivenUserId.newUuid())
+                .setTimestamp(Time.currentTime())
                 .build();
     }
 
@@ -87,27 +92,34 @@ public class EventEnvelopeTestEnv {
 
     @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(CommandContext commandContext) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setCommandContext(commandContext)
                 .build();
     }
 
     @SuppressWarnings("deprecation") // For backward compatibility.
     public static EventContext eventContext(EventContext eventContext) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setEventContext(eventContext)
                 .build();
     }
 
     public static EventContext eventContext(Origin previousMessage) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setPastMessage(previousMessage)
                 .build();
     }
 
     public static EventContext eventContext(ActorContext importContext) {
-        return EventContext.newBuilder()
+        return contextBuilder()
                 .setImportContext(importContext)
                 .build();
+    }
+
+    private static EventContext.Builder contextBuilder() {
+        var producerId = TypeConverter.toAny(GivenUserId.newUuid());
+        return EventContext.newBuilder()
+                .setTimestamp(Time.currentTime())
+                .setProducerId(producerId);
     }
 }
