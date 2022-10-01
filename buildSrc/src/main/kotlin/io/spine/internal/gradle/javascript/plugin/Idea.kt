@@ -49,7 +49,7 @@ fun JsPlugins.idea() {
 
         module {
             sourceDirs.add(srcDir)
-            testSourceDirs.add(testSrcDir)
+            testSources.from(testSrcDir)
 
             excludeDirs.addAll(
                 listOf(
