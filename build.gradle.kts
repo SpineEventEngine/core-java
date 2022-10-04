@@ -105,8 +105,6 @@ spinePublishing {
         "testutil-core",
         "testutil-client",
         "testutil-server",
-        "model-assembler",
-        "model-verifier",
     )
 
     destinations = with(PublishingRepos) {
@@ -285,8 +283,7 @@ subprojects {
                     generatedTestSpineDir
                 )
             )
-
-            testSourceDirs.add(file(generatedTestJavaDir))
+            testSources.from(generatedTestJavaDir)
 
             isDownloadJavadoc = true
             isDownloadSources = true
