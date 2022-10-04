@@ -27,7 +27,6 @@
 package io.spine.internal.gradle.kotlin
 
 import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -37,7 +36,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  */
 fun KotlinJvmProjectExtension.applyJvmToolchain(version: Int) {
     jvmToolchain {
-        (this as JavaToolchainSpec).languageVersion.set(JavaLanguageVersion.of(version))
+        languageVersion.set(JavaLanguageVersion.of(version))
     }
 }
 

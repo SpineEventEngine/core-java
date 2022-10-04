@@ -145,8 +145,7 @@ fun doApplyStandard(repositories: RepositoryHandler) = repositories.applyStandar
  * @param shortRepositoryName
  *          the short name of the GitHub repository (e.g. "core-java")
  * @param project
- *          the project which is going to consume or publish artifacts from
- *          the registered repository
+ *          the project which is going to consume artifacts from the repository
  * @see applyGitHubPackages
  */
 @Suppress("unused")
@@ -155,6 +154,27 @@ fun doApplyGitHubPackages(
     shortRepositoryName: String,
     project: Project
 ) = repositories.applyGitHubPackages(shortRepositoryName, project)
+
+/**
+ * Applies the repository hosted at GitHub Packages, to which Spine artifacts were published.
+ *
+ * This method should be used by those wishing to have Spine artifacts published
+ * to GitHub Packages as dependencies.
+ *
+ * @param shortRepositoryName
+ *          short names of the GitHub repository (e.g. "base", "core-java", "model-tools")
+ * @param project
+ *          the project which is going to consume artifacts from repositories
+ */
+fun RepositoryHandler.applyGitHubPackages(shortRepositoryName: String, project: Project) {
+    val repository = gitHub(shortRepositoryName)
+    val credentials = repository.credentials(project)
+
+    credentials?.let {
+        spineMavenRepo(it, repository.releases)
+        spineMavenRepo(it, repository.snapshots)
+    }
+}
 
 /**
  * Applies the repositories hosted at GitHub Packages, to which Spine artifacts were published.
@@ -168,13 +188,9 @@ fun doApplyGitHubPackages(
  *          the project which is going to consume or publish artifacts from
  *          the registered repository
  */
-fun RepositoryHandler.applyGitHubPackages(shortRepositoryName: String, project: Project) {
-    val repository = gitHub(shortRepositoryName)
-    val credentials = repository.credentials(project)
-
-    credentials?.let {
-        spineMavenRepo(it, repository.releases)
-        spineMavenRepo(it, repository.snapshots)
+fun RepositoryHandler.applyGitHubPackages(project: Project, vararg shortRepositoryName: String) {
+    for (name in shortRepositoryName) {
+        applyGitHubPackages(name, project)
     }
 }
 

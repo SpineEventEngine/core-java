@@ -41,11 +41,3 @@ include(
     "testutil-client",
     "testutil-server",
 )
-
-include(
-    "model-assembler",
-    "model-verifier",
-)
-
-project(":model-assembler").projectDir = File("./model/model-assembler")
-project(":model-verifier").projectDir = File("./model/model-verifier")
