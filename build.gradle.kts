@@ -315,13 +315,15 @@ subprojects {
 
     project.afterEvaluate {
         tasks.findByName("launchProtoDataMain")?.apply {
+            val launchProtoDataMain = this
             arrayOf("compileKotlin").forEach {
-                tasks.findByName(it)?.dependsOn(this)
+                tasks.findByName(it)?.dependsOn(launchProtoDataMain)
             }
         }
 
         tasks.findByName("launchProtoDataTest")?.apply {
-            tasks.findByName("compileTestKotlin")?.dependsOn(this)
+            val lanunceProtoDataTest = this
+            tasks.findByName("compileTestKotlin")?.dependsOn(lanunceProtoDataTest)
         }
     }
 }
