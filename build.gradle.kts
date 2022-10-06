@@ -93,6 +93,7 @@ repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
 val spineBaseVersion: String by extra
+val validationVersion: String by extra
 val spineTimeVersion: String by extra
 val toolBaseVersion: String by extra
 val spineBaseTypesVersion: String by extra
@@ -198,6 +199,7 @@ subprojects {
 
         all {
             resolutionStrategy {
+                exclude("io.spine:spine-validate:$spineBaseVersion")
                 force(
                     "org.jetbrains.dokka:dokka-base:${Dokka.version}",
                     "org.jetbrains.dokka:dokka-analysis:${Dokka.version}",

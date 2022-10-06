@@ -29,6 +29,7 @@ val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.108")
 val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.97")
 val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.96")
 val toolBaseVersion: String by extra("2.0.0-SNAPSHOT.108")
+val validationVersion: String by extra("2.0.0-SNAPSHOT.29")
 val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.101")
 
 /** The version of this library. */
