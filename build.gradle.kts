@@ -311,6 +311,18 @@ subprojects {
     tasks.named("publish") {
         dependsOn("${project.path}:updateGitHubPages")
     }
+
+    project.afterEvaluate {
+        tasks.findByName("launchProtoDataMain")?.apply {
+            arrayOf("compileKotlin", "sourcesJar", "dokkaHtml").forEach {
+                tasks.findByName(it)?.dependsOn(this)
+            }
+        }
+
+        tasks.findByName("launchProtoDataTest")?.apply {
+            tasks.findByName("compileTestKotlin")?.dependsOn(this)
+        }
+    }
 }
 
 JacocoConfig.applyTo(project)
