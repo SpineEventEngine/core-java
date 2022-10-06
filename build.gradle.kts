@@ -314,7 +314,7 @@ subprojects {
     project.afterEvaluate {
         tasks.findByName("launchProtoDataMain")?.apply {
             val launchProtoDataMain = this
-            arrayOf("compileKotlin", "sourcesJar", "dokkaHtml").forEach {
+            arrayOf("compileKotlin").forEach {
                 tasks.findByName(it)?.dependsOn(launchProtoDataMain)
             }
         }
