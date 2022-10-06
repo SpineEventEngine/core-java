@@ -31,7 +31,6 @@ val spineBaseTypesVersion: String by extra
 val spineTimeVersion: String by extra
 
 dependencies {
-    api("io.spine:spine-validate:$spineBaseVersion")
     api("io.spine:spine-time:$spineTimeVersion")
     api("io.spine:spine-base-types:$spineBaseTypesVersion")
 
