@@ -68,18 +68,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base-types</artifactId>
-    <version>2.0.0-SNAPSHOT.97</version>
+    <version>2.0.0-SNAPSHOT.108</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>2.0.0-SNAPSHOT.96</version>
-    <scope>compile</scope>
-  </dependency>
-  <dependency>
-    <groupId>io.spine</groupId>
-    <artifactId>spine-validate</artifactId>
     <version>2.0.0-SNAPSHOT.108</version>
     <scope>compile</scope>
   </dependency>
@@ -152,7 +146,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>2.0.0-SNAPSHOT.96</version>
+    <version>2.0.0-SNAPSHOT.108</version>
     <scope>test</scope>
   </dependency>
   <dependency>

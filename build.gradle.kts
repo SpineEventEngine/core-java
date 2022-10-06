@@ -211,7 +211,6 @@ subprojects {
                     "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
 
                     "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-validate:$spineBaseVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine:spine-base-types:$spineBaseTypesVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",
@@ -316,7 +315,7 @@ subprojects {
 
     project.afterEvaluate {
         tasks.findByName("launchProtoDataMain")?.apply {
-            arrayOf("compileKotlin", "sourcesJar", "dokkaHtml").forEach {
+            arrayOf("compileKotlin").forEach {
                 tasks.findByName(it)?.dependsOn(this)
             }
         }
