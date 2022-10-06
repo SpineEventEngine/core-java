@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /* OK as custom routes do not refer to the test suite. */
-@DisplayName("CommandRouting should")
+@DisplayName("`CommandRouting` should")
 class CommandRoutingTest {
 
     private static final TestActorRequestFactory requestFactory =
