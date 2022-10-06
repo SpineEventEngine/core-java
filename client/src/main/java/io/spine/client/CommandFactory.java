@@ -39,7 +39,6 @@ import io.spine.validate.ValidationException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;
 import static io.spine.validate.Validate.check;
-import static io.spine.validate.Validate.checkValid;
 
 /**
  * A factory of {@link Command} instances.
