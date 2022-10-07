@@ -33,7 +33,7 @@ import org.gradle.api.Task
  *
  * It is required in order to avoid warnings in build logs, detecting the undeclared
  * usage of Spine-specific task output by other tasks,
- * e.g. the output of `launchProtoDataMain` is used by `kotlinCompile`.
+ * e.g. the output of `launchProtoDataMain` is used by `compileKotlin`.
  */
 fun Project.configureTaskDependencies() {
 
