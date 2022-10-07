@@ -25,7 +25,7 @@
  */
 
 /** Versions of the Spine libraries that `core-java` depends on. */
-val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.108")
+val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.109")
 val spineBaseTypesVersion: String by extra("2.0.0-SNAPSHOT.108")
 val spineTimeVersion: String by extra("2.0.0-SNAPSHOT.108")
 val toolBaseVersion: String by extra("2.0.0-SNAPSHOT.109")
