@@ -1,3 +1,6 @@
+import org.gradle.api.Project
+import org.gradle.api.Task
+
 /*
  * Copyright 2022, TeamDev. All rights reserved.
  *
@@ -23,23 +26,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.client;
+/**
+ * Configures the dependencies between third-party Gradle tasks
+ * and those defined via ProtoData and Spine Model Compiler.
+ *
+ * It is required in order to avoid warnings in build logs, detecting the undeclared
+ * usage of Spine-specific task output by other tasks,
+ * e.g. the output of `launchProtoDataMain` is used by `compileKotlin`.
+ */
+fun Project.configureTaskDependencies() {
 
-import "spine/options.proto";
+    /**
+     * Creates a dependency between the Gradle task of *this* name
+     * onto the task with `taskName`.
+     *
+     * If either of tasks does not exist in the enclosing `Project`,
+     * this method does nothing.
+     *
+     * This extension is kept local to `configureTaskDependencies` extension
+     * to prevent its direct usage from outside.
+     */
+    fun String.dependOn(taskName: String) {
+        val whoDepends = this
+        val dependOntoTask: Task? = tasks.findByName(taskName)
+        dependOntoTask?.apply {
+            tasks.findByName(whoDepends)?.dependsOn(this)
+        }
+    }
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.client.grpc";
-option java_multiple_files = true;
-option java_outer_classname = "QueryServiceProto";
-
-import "spine/client/query.proto";
-import "google/protobuf/type.proto";
-
-// A service for querying the read-side from clients.
-service QueryService {
-
-    // Reads a certain data from the read-side by setting the criteria via Query.
-    rpc Read(Query) returns (QueryResponse);
+    afterEvaluate {
+        "compileKotlin".dependOn("launchProtoDataMain")
+        "compileTestKotlin".dependOn("launchProtoDataTest")
+    }
 }
