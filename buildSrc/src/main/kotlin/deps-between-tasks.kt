@@ -60,5 +60,3 @@ fun Project.configureTaskDependencies() {
         "compileTestKotlin".dependOn("launchProtoDataTest")
     }
 }
-
-
