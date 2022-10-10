@@ -314,19 +314,7 @@ subprojects {
         dependsOn("${project.path}:updateGitHubPages")
     }
 
-    project.afterEvaluate {
-        tasks.findByName("launchProtoDataMain")?.apply {
-            val launchProtoDataMain = this
-            arrayOf("compileKotlin").forEach {
-                tasks.findByName(it)?.dependsOn(launchProtoDataMain)
-            }
-        }
-
-        tasks.findByName("launchProtoDataTest")?.apply {
-            val lanunceProtoDataTest = this
-            tasks.findByName("compileTestKotlin")?.dependsOn(lanunceProtoDataTest)
-        }
-    }
+    project.configureTaskDependencies()
 }
 
 JacocoConfig.applyTo(project)
