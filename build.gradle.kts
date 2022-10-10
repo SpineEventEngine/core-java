@@ -211,6 +211,7 @@ subprojects {
                     "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
 
                     "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine.validation:spine-validation-java-runtime:$validationVersion",
                     "io.spine:spine-time:$spineTimeVersion",
                     "io.spine:spine-base-types:$spineBaseTypesVersion",
                     "io.spine.tools:spine-testlib:$spineBaseVersion",

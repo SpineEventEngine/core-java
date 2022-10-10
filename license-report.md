@@ -84,7 +84,7 @@
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : org.checkerframework. **Name** : checker-compat-qual. **Version** : 2.5.5.
      * **Project URL:** [https://checkerframework.org](https://checkerframework.org)
      * **License:** [GNU General Public License, version 2 (GPL2), with the classpath exception](http://www.gnu.org/software/classpath/license.html)
@@ -341,7 +341,7 @@
 1.  **Group** : io.spine.protodata. **Name** : protodata-fat-cli. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.protodata. **Name** : protodata-protoc. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-extensions. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -618,7 +618,7 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 07 13:25:39 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 10 11:52:16 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -671,7 +671,7 @@ This report was generated on **Fri Oct 07 13:25:39 TRT 2022** using [Gradle-Lice
 1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.21.7.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : org.checkerframework. **Name** : checker-compat-qual. **Version** : 2.5.5.
      * **Project URL:** [https://checkerframework.org](https://checkerframework.org)
      * **License:** [GNU General Public License, version 2 (GPL2), with the classpath exception](http://www.gnu.org/software/classpath/license.html)
@@ -924,7 +924,7 @@ This report was generated on **Fri Oct 07 13:25:39 TRT 2022** using [Gradle-Lice
 1.  **Group** : io.spine.protodata. **Name** : protodata-fat-cli. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.protodata. **Name** : protodata-protoc. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-extensions. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -1201,7 +1201,7 @@ This report was generated on **Fri Oct 07 13:25:39 TRT 2022** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 10 11:52:17 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1290,7 +1290,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : org.checkerframework. **Name** : checker-compat-qual. **Version** : 2.5.5.
      * **Project URL:** [https://checkerframework.org](https://checkerframework.org)
      * **License:** [GNU General Public License, version 2 (GPL2), with the classpath exception](http://www.gnu.org/software/classpath/license.html)
@@ -1555,7 +1555,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
 1.  **Group** : io.spine.protodata. **Name** : protodata-fat-cli. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.protodata. **Name** : protodata-protoc. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-extensions. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -1832,7 +1832,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 10 11:52:17 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1940,7 +1940,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : junit. **Name** : junit. **Version** : 4.13.1.
      * **Project URL:** [http://junit.org](http://junit.org)
      * **License:** [Eclipse Public License 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -2230,7 +2230,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
 1.  **Group** : io.spine.protodata. **Name** : protodata-fat-cli. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.protodata. **Name** : protodata-protoc. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-extensions. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -2507,7 +2507,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 10 11:52:17 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2615,7 +2615,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : junit. **Name** : junit. **Version** : 4.13.1.
      * **Project URL:** [http://junit.org](http://junit.org)
      * **License:** [Eclipse Public License 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -2905,7 +2905,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
 1.  **Group** : io.spine.protodata. **Name** : protodata-fat-cli. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.protodata. **Name** : protodata-protoc. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-extensions. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -3182,7 +3182,7 @@ This report was generated on **Fri Oct 07 13:25:40 TRT 2022** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 07 13:25:41 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 10 11:52:18 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3290,7 +3290,7 @@ This report was generated on **Fri Oct 07 13:25:41 TRT 2022** using [Gradle-Lice
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : junit. **Name** : junit. **Version** : 4.13.1.
      * **Project URL:** [http://junit.org](http://junit.org)
      * **License:** [Eclipse Public License 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -3625,7 +3625,7 @@ This report was generated on **Fri Oct 07 13:25:41 TRT 2022** using [Gradle-Lice
 1.  **Group** : io.spine.protodata. **Name** : protodata-fat-cli. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.protodata. **Name** : protodata-protoc. **Version** : 0.2.16.**No license information found**
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-extensions. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
-1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.29.**No license information found**
+1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.31.**No license information found**
 1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
      * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
      * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
@@ -3902,4 +3902,4 @@ This report was generated on **Fri Oct 07 13:25:41 TRT 2022** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 07 13:25:41 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 10 11:52:18 TRT 2022** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
