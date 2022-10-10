@@ -58,5 +58,7 @@ fun Project.configureTaskDependencies() {
     afterEvaluate {
         "compileKotlin".dependOn("launchProtoDataMain")
         "compileTestKotlin".dependOn("launchProtoDataTest")
+        "sourcesJar".dependOn("launchProtoDataMain")
+        "dokkaHtml".dependOn("launchProtoDataMain")
     }
 }
