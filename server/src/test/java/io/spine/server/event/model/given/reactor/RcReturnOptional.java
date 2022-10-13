@@ -40,13 +40,13 @@ public class RcReturnOptional extends TestEventReactor {
 
     @React
     Optional<RefProjectStarted> react(RefProjectCreated event) {
-        if (event.hasProjectId()) {
-            return Optional.of(
-                    RefProjectStarted.newBuilder()
-                                     .setProjectId(event.getProjectId())
-                                     .build()
-            );
+        if (!event.hasProjectId() || event.getProjectId().getId().contains("xxx")) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return Optional.of(
+                RefProjectStarted.newBuilder()
+                        .setProjectId(event.getProjectId())
+                        .build()
+        );
     }
 }
