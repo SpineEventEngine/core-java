@@ -42,7 +42,7 @@ import io.spine.internal.gradle.git.UserInfo
  * to "UpdateGitHubPages Plugin", and the email is derived from
  * the `FORMAL_GIT_HUB_PAGES_AUTHOR` environment variable.
  *
- * @throws GradleException if any of the environment variables described above
+ * @throws org.gradle.api.GradleException if any of the environment variables described above
  *         is not set.
  */
 internal fun Repository.Factory.forPublishingDocumentation(): Repository {

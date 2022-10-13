@@ -54,17 +54,17 @@ class LazyTempPath(private val prefix: String) : Path {
             return tempPath
         }
 
-    override fun compareTo(other: Path?): Int = delegate.compareTo(other)
+    override fun compareTo(other: Path): Int = delegate.compareTo(other)
 
     override fun iterator(): MutableIterator<Path> = delegate.iterator()
 
     override fun register(
-        watcher: WatchService?,
-        events: Array<out WatchEvent.Kind<*>>?,
+        watcher: WatchService,
+        events: Array<out WatchEvent.Kind<*>>,
         vararg modifiers: WatchEvent.Modifier?
     ): WatchKey = delegate.register(watcher, events, *modifiers)
 
-    override fun register(watcher: WatchService?, vararg events: WatchEvent.Kind<*>?): WatchKey =
+    override fun register(watcher: WatchService, vararg events: WatchEvent.Kind<*>?): WatchKey =
         delegate.register(watcher, *events)
 
     override fun getFileSystem(): FileSystem = delegate.fileSystem
