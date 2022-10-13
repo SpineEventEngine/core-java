@@ -52,6 +52,8 @@ object Dokka {
         const val lib = "${group}:dokka-base:${version}"
     }
 
+    const val analysis = "org.jetbrains.dokka:dokka-analysis:${version}"
+
     object CorePlugin {
         const val lib = "${group}:dokka-core:${version}"
     }
