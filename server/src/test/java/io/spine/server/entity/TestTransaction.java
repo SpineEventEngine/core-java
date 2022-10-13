@@ -26,6 +26,7 @@
 package io.spine.server.entity;
 
 import io.spine.base.EntityState;
+import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
@@ -127,8 +128,9 @@ public class TestTransaction {
 
         void dispatchForTest() {
             var eventMessage = EntProjectCreated.newBuilder()
-                    .setProjectId(ProjectId.getDefaultInstance())
-                    .buildPartial();
+                    .setProjectId(ProjectId.newBuilder()
+                                          .setId(Identifier.newUuid()))
+                    .build();
             var factory = TestEventFactory.newInstance(TestTransaction.class);
             var event = factory.createEvent(eventMessage);
             dispatch(entity(), EventEnvelope.of(event));
