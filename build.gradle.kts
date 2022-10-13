@@ -56,25 +56,21 @@ buildscript {
     io.spine.internal.gradle.doApplyStandard(repositories)
     io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
 
-    val kotlinVersion = io.spine.internal.dependency.Kotlin.version
-    val baseVersion: String by extra
-    val timeVersion: String by extra
-    val toolBaseVersion: String by extra
-    val mcJavaVersion: String by extra
+    val spine = io.spine.internal.dependency.Spine(project)
 
     dependencies {
-        classpath("io.spine.tools:spine-mc-java-plugins:${mcJavaVersion}:all")
+        classpath(spine.mcJavaPlugin)
     }
 
     io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
             force(
-                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-                    "io.spine:spine-base:$baseVersion",
-                    "io.spine:spine-time:$timeVersion",
-                    "io.spine.tools:spine-tool-base:$toolBaseVersion"
+                io.spine.internal.dependency.Kotlin.stdLib,
+                io.spine.internal.dependency.Kotlin.stdLibCommon,
+                spine.base,
+                spine.time,
+                spine.toolBase,
             )
         }
     }
@@ -92,11 +88,6 @@ plugins {
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
-val baseVersion: String by extra
-val validationVersion: String by extra
-val timeVersion: String by extra
-val toolBaseVersion: String by extra
-val baseTypesVersion: String by extra
 
 spinePublishing {
     modules = setOf(
@@ -139,6 +130,8 @@ allprojects {
     group = "io.spine"
     version = extra["versionToPublish"]!!
 }
+
+val spine = io.spine.internal.dependency.Spine(project)
 
 subprojects {
 
@@ -186,11 +179,11 @@ subprojects {
             errorprone(core)
         }
 
-        api("io.spine:spine-base:$baseVersion")
-        api("io.spine:spine-time:$timeVersion")
+        api(spine.base)
+        api(spine.time)
 
         testImplementation(JUnit.runner)
-        testImplementation("io.spine.tools:spine-testlib:$baseVersion")
+        testImplementation(spine.testlib)
     }
 
     configurations {
@@ -199,24 +192,25 @@ subprojects {
 
         all {
             resolutionStrategy {
-                exclude("io.spine:spine-validate:$baseVersion")
+                exclude("io.spine", "spine-validate")
                 force(
-                    "org.jetbrains.dokka:dokka-base:${Dokka.version}",
-                    "org.jetbrains.dokka:dokka-analysis:${Dokka.version}",
+                    Dokka.BasePlugin.lib,
+                    Dokka.analysis,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
                        See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
                        .configureProtocPlugins() method which sets the version from resources. */
-                    "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
+                    Grpc.protobufPlugin,
 
-                    "io.spine:spine-base:$baseVersion",
-                    "io.spine.validation:spine-validation-java-runtime:$validationVersion",
-                    "io.spine:spine-time:$timeVersion",
-                    "io.spine:spine-base-types:$baseTypesVersion",
-                    "io.spine.tools:spine-testlib:$baseVersion",
-                    "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-                    "io.spine.tools:spine-tool-base:$toolBaseVersion",
+                    spine.base,
+                    spine.validation.runtime,
+                    spine.time,
+                    spine.baseTypes,
+                    spine.testlib,
+                    spine.toolBase,
+                    spine.pluginBase,
+
                     Grpc.core,
                     Grpc.protobuf,
                     Grpc.stub
