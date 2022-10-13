@@ -29,11 +29,11 @@ import io.spine.internal.dependency.Truth
 
 group = "io.spine.tools"
 
-val spineBaseVersion: String by extra
+val baseVersion: String by extra
 
 dependencies {
     api(project(":client"))
-    api("io.spine.tools:spine-testlib:$spineBaseVersion")
+    api("io.spine.tools:spine-testlib:$baseVersion")
 
     JUnit.api.forEach {
         api(it)

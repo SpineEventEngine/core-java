@@ -28,8 +28,8 @@ import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Kotlin
 
-val spineBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
+val baseVersion: String by extra
+val baseTypesVersion: String by extra
 val validationVersion: String by extra
 
 dependencies {
@@ -49,8 +49,8 @@ dependencies {
         testCompileOnly(annotations)
     }
     testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
-    testImplementation("io.spine:spine-base-types:$spineBaseTypesVersion")
+    testImplementation("io.spine.tools:spine-testlib:$baseVersion")
+    testImplementation("io.spine:spine-base-types:$baseTypesVersion")
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))

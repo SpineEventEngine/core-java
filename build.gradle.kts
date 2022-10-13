@@ -57,8 +57,8 @@ buildscript {
     io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
 
     val kotlinVersion = io.spine.internal.dependency.Kotlin.version
-    val spineBaseVersion: String by extra
-    val spineTimeVersion: String by extra
+    val baseVersion: String by extra
+    val timeVersion: String by extra
     val toolBaseVersion: String by extra
     val mcJavaVersion: String by extra
 
@@ -72,8 +72,8 @@ buildscript {
             force(
                     "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
                     "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion",
+                    "io.spine:spine-base:$baseVersion",
+                    "io.spine:spine-time:$timeVersion",
                     "io.spine.tools:spine-tool-base:$toolBaseVersion"
             )
         }
@@ -92,11 +92,11 @@ plugins {
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
-val spineBaseVersion: String by extra
+val baseVersion: String by extra
 val validationVersion: String by extra
-val spineTimeVersion: String by extra
+val timeVersion: String by extra
 val toolBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
+val baseTypesVersion: String by extra
 
 spinePublishing {
     modules = setOf(
@@ -186,11 +186,11 @@ subprojects {
             errorprone(core)
         }
 
-        api("io.spine:spine-base:$spineBaseVersion")
-        api("io.spine:spine-time:$spineTimeVersion")
+        api("io.spine:spine-base:$baseVersion")
+        api("io.spine:spine-time:$timeVersion")
 
         testImplementation(JUnit.runner)
-        testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
+        testImplementation("io.spine.tools:spine-testlib:$baseVersion")
     }
 
     configurations {
@@ -199,7 +199,7 @@ subprojects {
 
         all {
             resolutionStrategy {
-                exclude("io.spine:spine-validate:$spineBaseVersion")
+                exclude("io.spine:spine-validate:$baseVersion")
                 force(
                     "org.jetbrains.dokka:dokka-base:${Dokka.version}",
                     "org.jetbrains.dokka:dokka-analysis:${Dokka.version}",
@@ -210,11 +210,11 @@ subprojects {
                        .configureProtocPlugins() method which sets the version from resources. */
                     "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
 
-                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine:spine-base:$baseVersion",
                     "io.spine.validation:spine-validation-java-runtime:$validationVersion",
-                    "io.spine:spine-time:$spineTimeVersion",
-                    "io.spine:spine-base-types:$spineBaseTypesVersion",
-                    "io.spine.tools:spine-testlib:$spineBaseVersion",
+                    "io.spine:spine-time:$timeVersion",
+                    "io.spine:spine-base-types:$baseTypesVersion",
+                    "io.spine.tools:spine-testlib:$baseVersion",
                     "io.spine.tools:spine-plugin-base:$toolBaseVersion",
                     "io.spine.tools:spine-tool-base:$toolBaseVersion",
                     Grpc.core,

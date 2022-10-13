@@ -26,18 +26,18 @@
 
 import io.spine.internal.gradle.testing.exposeTestConfiguration
 
-val spineBaseVersion: String by extra
+val baseVersion: String by extra
 val validationVersion: String by extra
-val spineBaseTypesVersion: String by extra
-val spineTimeVersion: String by extra
+val baseTypesVersion: String by extra
+val timeVersion: String by extra
 
 dependencies {
-    api("io.spine:spine-time:$spineTimeVersion")
-    api("io.spine:spine-base-types:$spineBaseTypesVersion")
+    api("io.spine:spine-time:$timeVersion")
+    api("io.spine:spine-base-types:$baseTypesVersion")
     implementation("io.spine.validation:spine-validation-java-runtime:$validationVersion")
 
     testImplementation(project(":testutil-core"))
-    testImplementation("io.spine.tools:spine-testutil-time:$spineTimeVersion")
+    testImplementation("io.spine.tools:spine-testutil-time:$timeVersion")
 }
 
 modelCompiler {
