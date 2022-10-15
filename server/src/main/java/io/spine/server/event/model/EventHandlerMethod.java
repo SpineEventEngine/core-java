@@ -27,7 +27,7 @@
 package io.spine.server.event.model;
 
 import io.spine.base.EventMessage;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.AbstractReceptor;
 import io.spine.server.model.DispatchKey;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.ParameterSpec;
@@ -46,7 +46,7 @@ import java.lang.reflect.Method;
  *         the type of the produced message classes
  */
 public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
-        extends AbstractHandlerMethod<T, EventMessage, EventClass, EventEnvelope, R>
+        extends AbstractReceptor<T, EventMessage, EventClass, EventEnvelope, R>
         implements RejectionHandler<T, R> {
 
     /**

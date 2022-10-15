@@ -61,7 +61,7 @@ public final class CommandAssigneeMethod
     public Success toSuccessfulOutcome(@Nullable Object rawResult,
                                        CommandAssignee target,
                                        CommandEnvelope handledSignal) {
-        Success outcome =
+        var outcome =
                 EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
         if (outcome.getProducedEvents().getEventCount() == 0) {
             var errorMessage = format(

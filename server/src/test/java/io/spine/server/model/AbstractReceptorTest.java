@@ -44,7 +44,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
+import static io.spine.server.model.AbstractReceptor.firstParamType;
 import static io.spine.server.model.given.method.StubHandler.getMethodWithCheckedException;
 import static io.spine.server.model.given.method.StubHandler.getMethodWithRuntimeException;
 import static io.spine.testing.TestValues.nullRef;
@@ -56,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`AbstractHandlerMethod` should")
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-class AbstractHandlerMethodTest {
+class AbstractReceptorTest {
 
     private final OneParamSignature signature = new OneParamSignature();
 
@@ -182,7 +182,7 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<?, ?, ?, ?, ?> anotherMethod =
+            AbstractReceptor<?, ?, ?, ?, ?> anotherMethod =
                     new TwoParamMethod(StubHandler.getTwoParameterMethod(),
                                        TwoParamSpec.INSTANCE);
             assertEquals(twoParamMethod, anotherMethod);

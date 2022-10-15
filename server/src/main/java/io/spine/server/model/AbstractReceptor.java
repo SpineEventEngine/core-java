@@ -76,11 +76,11 @@ import static java.util.stream.Collectors.joining;
  */
 @Immutable
 public abstract
-class AbstractHandlerMethod<T,
-                            M extends Message,
-                            C extends MessageClass<M>,
-                            E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
-                            R extends MessageClass<?>>
+class AbstractReceptor<T,
+                       M extends Message,
+                       C extends MessageClass<M>,
+                       E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
+                       R extends MessageClass<?>>
         implements Receptor<T, C, E, R> {
 
     /** The method to be called. */
@@ -130,7 +130,7 @@ class AbstractHandlerMethod<T,
      * @param parameterSpec
      *         the specification of method parameters
      */
-    protected AbstractHandlerMethod(Method method, ParameterSpec<E> parameterSpec) {
+    protected AbstractReceptor(Method method, ParameterSpec<E> parameterSpec) {
         this.method = checkNotNull(method);
         this.messageClass = firstParamType(method);
         this.attributes = discoverAttributes(method);
@@ -389,10 +389,10 @@ class AbstractHandlerMethod<T,
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof AbstractHandlerMethod)) {
+        if (!(obj instanceof AbstractReceptor)) {
             return false;
         }
-        var other = (AbstractHandlerMethod<?, ?, ?, ?, ?>) obj;
+        var other = (AbstractReceptor<?, ?, ?, ?, ?>) obj;
         return Objects.equals(this.method, other.method);
     }
 

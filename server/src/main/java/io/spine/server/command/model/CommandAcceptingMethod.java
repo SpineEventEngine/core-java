@@ -32,7 +32,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.RejectionThrowable;
 import io.spine.server.EventProducer;
 import io.spine.server.dispatch.Success;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.AbstractReceptor;
 import io.spine.server.model.ArgumentFilter;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
@@ -58,7 +58,7 @@ import static io.spine.server.event.RejectionFactory.reject;
 @Immutable
 public abstract class CommandAcceptingMethod<T extends EventProducer,
                                              R extends MessageClass<?>>
-        extends AbstractHandlerMethod<T, CommandMessage, CommandClass, CommandEnvelope, R> {
+        extends AbstractReceptor<T, CommandMessage, CommandClass, CommandEnvelope, R> {
 
     CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
         super(checkNotFiltered(method, "command accepting"), params);

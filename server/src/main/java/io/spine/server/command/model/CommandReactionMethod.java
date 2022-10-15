@@ -29,7 +29,7 @@ package io.spine.server.command.model;
 import io.spine.base.EventMessage;
 import io.spine.server.dispatch.Success;
 import io.spine.server.event.EventReceiver;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.AbstractReceptor;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
@@ -41,11 +41,11 @@ import java.lang.reflect.Method;
  * A method which <em>may</em> generate one or more command messages in response to an event.
  */
 public final class CommandReactionMethod
-        extends AbstractHandlerMethod<EventReceiver,
-                                      EventMessage,
-                                      EventClass,
-                                      EventEnvelope,
-                                      CommandClass>
+        extends AbstractReceptor<EventReceiver,
+                                              EventMessage,
+                                              EventClass,
+                                              EventEnvelope,
+                                              CommandClass>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope> {
 
     CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
