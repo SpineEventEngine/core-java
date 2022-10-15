@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         the type of command assignees
  */
 public final class CommandAssigneeClass<C extends AbstractCommandAssignee>
-        extends AbstractCommandHandlingClass<C, EventClass, CommandAssigneeMethod> {
+        extends AbstractCommandHandlingClass<C, EventClass, AssigneeReceptor> {
 
     private static final long serialVersionUID = 0L;
 

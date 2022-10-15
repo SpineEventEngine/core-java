@@ -45,7 +45,7 @@ import java.lang.reflect.Method;
  * @param <R>
  *         the type of the produced message classes
  */
-public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
+public abstract class EventReceptor<T, R extends MessageClass<?>>
         extends AbstractReceptor<T, EventMessage, EventClass, EventEnvelope, R>
         implements RejectionHandler<T, R> {
 
@@ -55,7 +55,7 @@ public abstract class EventHandlerMethod<T, R extends MessageClass<?>>
      * @param method
      *         subscriber method
      */
-    EventHandlerMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+    EventReceptor(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
         super(method, parameterSpec);
     }
 

@@ -27,7 +27,7 @@
 package io.spine.server.entity.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.command.model.CommandAssigneeMethod;
+import io.spine.server.command.model.AssigneeReceptor;
 import io.spine.server.command.model.CommandAssigneeSignature;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
@@ -47,10 +47,10 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  */
 public abstract class CommandAssigneeEntityClass<E extends Entity<?, ?>>
         extends EntityClass<E>
-        implements CommandHandlingClass<EventClass, CommandAssigneeMethod> {
+        implements CommandHandlingClass<EventClass, AssigneeReceptor> {
 
     private static final long serialVersionUID = 0L;
-    private final HandlerMap<CommandClass, EventClass, CommandAssigneeMethod> commands;
+    private final HandlerMap<CommandClass, EventClass, AssigneeReceptor> commands;
 
     protected CommandAssigneeEntityClass(Class<E> cls) {
         super(cls);
@@ -81,7 +81,7 @@ public abstract class CommandAssigneeEntityClass<E extends Entity<?, ?>>
     }
 
     @Override
-    public CommandAssigneeMethod handlerOf(CommandEnvelope cmd) {
+    public AssigneeReceptor handlerOf(CommandEnvelope cmd) {
         return commands.getHandlerFor(cmd);
     }
 }

@@ -28,7 +28,7 @@ package io.spine.server.command.model;
 
 import io.spine.server.command.Assignee;
 import io.spine.server.dispatch.Success;
-import io.spine.server.model.EventProducingMethod;
+import io.spine.server.model.EventEmitter;
 import io.spine.server.model.IllegalOutcomeException;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.type.CommandClass;
@@ -43,9 +43,9 @@ import static java.lang.String.format;
 /**
  * The wrapper for a method assigned to handle commands.
  */
-public final class CommandAssigneeMethod
+public final class AssigneeReceptor
         extends CommandReceptor<Assignee, EventClass>
-        implements EventProducingMethod<Assignee, CommandClass, CommandEnvelope> {
+        implements EventEmitter<Assignee, CommandClass, CommandEnvelope> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -53,7 +53,7 @@ public final class CommandAssigneeMethod
      * @param method
      *         method assigned to handle commands
      */
-    CommandAssigneeMethod(Method method, ParameterSpec<CommandEnvelope> params) {
+    AssigneeReceptor(Method method, ParameterSpec<CommandEnvelope> params) {
         super(method, params);
     }
 
@@ -62,7 +62,7 @@ public final class CommandAssigneeMethod
                                        Assignee target,
                                        CommandEnvelope handledSignal) {
         var outcome =
-                EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
+                EventEmitter.super.toSuccessfulOutcome(rawResult, target, handledSignal);
         if (outcome.getProducedEvents().getEventCount() == 0) {
             var errorMessage = format(
                     "Command-handling method %s did not produce any events when processing command %s",

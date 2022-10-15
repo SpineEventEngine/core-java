@@ -36,10 +36,10 @@ import io.spine.server.type.CommandEnvelope;
 import java.lang.reflect.Method;
 
 /**
- * The signature of {@link CommandAssigneeMethod}.
+ * The signature of {@link AssigneeReceptor}.
  */
 public final class CommandAssigneeSignature
-        extends CommandAcceptingSignature<CommandAssigneeMethod> {
+        extends CommandAcceptingSignature<AssigneeReceptor> {
 
     private static final ReturnTypes TYPES = new ReturnTypes(
             TypeToken.of(EventMessage.class),
@@ -56,7 +56,7 @@ public final class CommandAssigneeSignature
     }
 
     @Override
-    public CommandAssigneeMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
-        return new CommandAssigneeMethod(method, params);
+    public AssigneeReceptor create(Method method, ParameterSpec<CommandEnvelope> params) {
+        return new AssigneeReceptor(method, params);
     }
 }

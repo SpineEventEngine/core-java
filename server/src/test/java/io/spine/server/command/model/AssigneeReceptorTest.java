@@ -73,10 +73,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`CommandAssigneeMethod` should")
 @SuppressWarnings("OptionalGetWithoutIsPresent")
-class AssigneeMethodTest {
+class AssigneeReceptorTest {
 
     private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(AssigneeMethodTest.class);
+            new TestActorRequestFactory(AssigneeReceptorTest.class);
 
     private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
 
@@ -92,7 +92,7 @@ class AssigneeMethodTest {
                 .setDefault(CommandEnvelope.class, generate())
                 .setDefault(CommandContext.class, emptyContext)
                 .setDefault(Any.class, Any.getDefaultInstance())
-                .testAllPublicStaticMethods(CommandAssigneeMethod.class);
+                .testAllPublicStaticMethods(AssigneeReceptor.class);
     }
 
     private static CommandEnvelope generate() {

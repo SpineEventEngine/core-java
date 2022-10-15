@@ -49,9 +49,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
  */
 @Immutable
-public interface EventProducingMethod<T extends EventProducer,
-                                      C extends MessageClass<?>,
-                                      E extends MessageEnvelope<?, ?, ?>>
+public interface EventEmitter<T extends EventProducer,
+                              C extends MessageClass<?>,
+                              E extends MessageEnvelope<?, ?, ?>>
         extends Receptor<T, C, E, EventClass> {
 
     /**
