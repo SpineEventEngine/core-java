@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.113</version>
+<version>2.0.0-SNAPSHOT.114</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -62,25 +62,25 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.112</version>
+    <version>2.0.0-SNAPSHOT.113</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base-types</artifactId>
-    <version>2.0.0-SNAPSHOT.108</version>
+    <version>2.0.0-SNAPSHOT.110</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>2.0.0-SNAPSHOT.108</version>
+    <version>2.0.0-SNAPSHOT.109</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-runtime</artifactId>
-    <version>2.0.0-SNAPSHOT.31</version>
+    <version>2.0.0-SNAPSHOT.32</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -140,13 +140,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.112</version>
+    <version>2.0.0-SNAPSHOT.113</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>2.0.0-SNAPSHOT.108</version>
+    <version>2.0.0-SNAPSHOT.109</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -178,12 +178,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-fat-cli</artifactId>
-    <version>0.2.16</version>
+    <version>0.2.18</version>
   </dependency>
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-protoc</artifactId>
-    <version>0.2.16</version>
+    <version>0.2.18</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
@@ -193,18 +193,18 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-checks</artifactId>
-    <version>2.0.0-SNAPSHOT.101</version>
+    <version>2.0.0-SNAPSHOT.102</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-plugins</artifactId>
-    <version>2.0.0-SNAPSHOT.101</version>
+    <version>2.0.0-SNAPSHOT.102</version>
   </dependency>
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-extensions</artifactId>
-    <version>2.0.0-SNAPSHOT.29</version>
+    <version>2.0.0-SNAPSHOT.32</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
@@ -234,6 +234,11 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
     <artifactId>dokka-core</artifactId>
+    <version>1.7.10</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.dokka</groupId>
+    <artifactId>javadoc-plugin</artifactId>
     <version>1.7.10</version>
   </dependency>
   <dependency>
