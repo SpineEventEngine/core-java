@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.logging.Logging;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelClass;
@@ -38,6 +38,7 @@ import io.spine.server.procman.ProcessManager;
 
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
@@ -47,6 +48,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 /**
  * Ensures that there are no duplicating command-handling methods among the passed classes.
  */
+@SuppressWarnings("unused") // Use by `model-tools`.
 public final class DuplicateHandlerCheck implements Logging {
 
     /**
@@ -65,8 +67,8 @@ public final class DuplicateHandlerCheck implements Logging {
                          (c) -> asAggregateClass((Class<? extends Aggregate>) c))
                     .put(ProcessManager.class,
                          (c) -> asProcessManagerClass((Class<? extends ProcessManager>) c))
-                    .put(AbstractCommandAssignee.class,
-                         (c) -> asCommandAssigneeClass((Class<? extends AbstractCommandAssignee>) c))
+                    .put(AbstractAssignee.class,
+                         (c) -> asCommandAssigneeClass((Class<? extends AbstractAssignee>) c))
                     .put(AbstractCommander.class,
                          (c) -> asCommanderClass((Class<? extends AbstractCommander>) c))
                     .build();
@@ -107,6 +109,7 @@ public final class DuplicateHandlerCheck implements Logging {
         for (var keyClass : appenders.keySet()) {
             if (keyClass.isAssignableFrom(cls)) {
                 var appender = appenders.get(keyClass);
+                checkState(appender != null, "No appender found for `%s`.", keyClass.getName());
                 appender.apply(cls);
                 debug.log("`%s` has been added to the Model.", cls);
                 return;

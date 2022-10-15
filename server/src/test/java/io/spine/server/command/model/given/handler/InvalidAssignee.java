@@ -36,7 +36,7 @@ import io.spine.model.contexts.projects.command.SigSetProjectOwner;
 import io.spine.model.contexts.projects.event.SigProjectStarted;
 import io.spine.model.contexts.projects.event.SigTaskAssigned;
 import io.spine.model.contexts.projects.event.SigTaskStarted;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.model.DoNothing;
 import io.spine.server.model.Nothing;
@@ -54,7 +54,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * for the same commands. This is the way to avoid myriads of small classes which enumerate
  * all possible combinations or params.
  */
-public final class InvalidAssignee extends AbstractCommandAssignee {
+public final class InvalidAssignee extends AbstractAssignee {
 
     @Assign
     SigTaskStarted noParams() {

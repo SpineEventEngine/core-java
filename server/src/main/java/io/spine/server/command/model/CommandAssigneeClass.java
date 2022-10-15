@@ -26,18 +26,18 @@
 
 package io.spine.server.command.model;
 
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.type.EventClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides message-handling information on a {@code CommandAssignee} class.
+ * Provides message-handling information on a {@code Assignee} class.
  *
  * @param <C>
  *         the type of command assignees
  */
-public final class CommandAssigneeClass<C extends AbstractCommandAssignee>
+public final class CommandAssigneeClass<C extends AbstractAssignee>
         extends AbstractCommandHandlingClass<C, EventClass, AssigneeReceptor> {
 
     private static final long serialVersionUID = 0L;
@@ -49,7 +49,7 @@ public final class CommandAssigneeClass<C extends AbstractCommandAssignee>
     /**
      * Obtains command assignee class for the passed raw class.
      */
-    public static <C extends AbstractCommandAssignee>
+    public static <C extends AbstractAssignee>
     CommandAssigneeClass<C> asCommandAssigneeClass(Class<C> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")

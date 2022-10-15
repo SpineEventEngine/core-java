@@ -44,7 +44,7 @@ import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.event.AbstractEventReactor;
@@ -290,7 +290,7 @@ public class Given {
         }
     }
 
-    static class ReportSender extends AbstractCommandAssignee {
+    static class ReportSender extends AbstractAssignee {
 
         @Assign
         ReportSent on(SendReport command) {

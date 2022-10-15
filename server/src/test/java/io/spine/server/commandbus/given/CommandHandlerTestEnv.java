@@ -32,7 +32,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.logging.Logging;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventDispatcher;
@@ -95,7 +95,7 @@ public class CommandHandlerTestEnv {
         }
     }
 
-    public static class TestCommandAssignee extends AbstractCommandAssignee implements Logging {
+    public static class TestCommandAssignee extends AbstractAssignee implements Logging {
 
         private final ImmutableList<EventMessage> eventsOnStartProjectCmd =
                 createEventsOnStartProjectCmd();

@@ -32,7 +32,7 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.procman.ProcessManager;
@@ -181,7 +181,7 @@ public class CommandDispatcherRegistryTestEnv {
      * Test command assignees.
      ************************/
 
-    public static class CreateProjectAssignee extends AbstractCommandAssignee {
+    public static class CreateProjectAssignee extends AbstractAssignee {
 
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
@@ -189,7 +189,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class AllCommandAssignee extends AbstractCommandAssignee {
+    public static class AllCommandAssignee extends AbstractAssignee {
 
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
@@ -207,7 +207,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class EmptyCommandAssignee extends AbstractCommandAssignee {
+    public static class EmptyCommandAssignee extends AbstractAssignee {
 
         @Override
         public ImmutableSet<CommandClass> messageClasses() {

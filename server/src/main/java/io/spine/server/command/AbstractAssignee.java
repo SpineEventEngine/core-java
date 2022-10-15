@@ -64,7 +64,7 @@ import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssign
  * @see io.spine.server.aggregate.Aggregate Aggregate
  * @see CommandDispatcher
  */
-public abstract class AbstractCommandAssignee
+public abstract class AbstractAssignee
         extends AbstractCommandDispatcher
         implements Assignee {
 
