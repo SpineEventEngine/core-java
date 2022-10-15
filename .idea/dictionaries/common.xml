@@ -49,6 +49,7 @@
       <w>stderr</w>
       <w>stringifier</w>
       <w>stringifiers</w>
+      <w>substituter</w>
       <w>switchman</w>
       <w>testutil</w>
       <w>threeten</w>
