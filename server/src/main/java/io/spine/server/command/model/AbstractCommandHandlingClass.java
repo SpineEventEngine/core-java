@@ -50,7 +50,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 @Immutable(containerOf = "H")
 public abstract class AbstractCommandHandlingClass<C,
                                                    R extends MessageClass<?>,
-                                                   H extends CommandAcceptingMethod<?, R>>
+                                                   H extends CommandReceptor<?, R>>
         extends ModelClass<C>
         implements CommandHandlingClass<R, H> {
 
@@ -78,7 +78,7 @@ public abstract class AbstractCommandHandlingClass<C,
     public ImmutableSet<EventClass> rejections() {
         var result = commands.methods()
                 .stream()
-                .map(CommandAcceptingMethod::rejections)
+                .map(CommandReceptor::rejections)
                 .flatMap(ImmutableSet::stream)
                 .collect(toImmutableSet());
         return result;

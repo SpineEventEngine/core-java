@@ -56,11 +56,11 @@ import static io.spine.server.event.RejectionFactory.reject;
  *         the type of the produced message classes
  */
 @Immutable
-public abstract class CommandAcceptingMethod<T extends EventProducer,
-                                             R extends MessageClass<?>>
+public abstract class CommandReceptor<T extends EventProducer,
+                                      R extends MessageClass<?>>
         extends AbstractReceptor<T, CommandMessage, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
+    CommandReceptor(Method method, ParameterSpec<CommandEnvelope> params) {
         super(checkNotFiltered(method, "command accepting"), params);
     }
 

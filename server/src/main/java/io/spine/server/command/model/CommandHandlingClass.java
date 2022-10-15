@@ -41,7 +41,7 @@ import io.spine.type.MessageClass;
  *         the type of methods which perform command handling
  */
 public interface CommandHandlingClass<R extends MessageClass<?>,
-                                      H extends CommandAcceptingMethod<?, R>> {
+                                      H extends CommandReceptor<?, R>> {
 
     /**
      * Obtains classes of commands handled by the class.

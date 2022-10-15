@@ -44,7 +44,7 @@ import static java.lang.String.format;
  * The wrapper for a method assigned to handle commands.
  */
 public final class CommandAssigneeMethod
-        extends CommandAcceptingMethod<CommandAssignee, EventClass>
+        extends CommandReceptor<CommandAssignee, EventClass>
         implements EventProducingMethod<CommandAssignee, CommandClass, CommandEnvelope> {
 
     /**

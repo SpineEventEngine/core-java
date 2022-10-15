@@ -41,7 +41,7 @@ import static java.lang.String.format;
  * A method that produces one or more command messages in response to an incoming command.
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<CommandReceiver, CommandClass>
+        extends CommandReceptor<CommandReceiver, CommandClass>
         implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope> {
 
     CommandSubstituteMethod(Method method, ParameterSpec<CommandEnvelope> paramSpec) {
