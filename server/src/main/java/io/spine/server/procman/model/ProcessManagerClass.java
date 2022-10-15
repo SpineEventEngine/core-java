@@ -31,7 +31,7 @@ import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituter;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.command.model.CommandingClass;
-import io.spine.server.entity.model.CommandAssigneeEntityClass;
+import io.spine.server.entity.model.AssigneeEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
@@ -53,7 +53,7 @@ import static com.google.common.collect.Sets.union;
  *         the type of process managers
  */
 public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
-        extends CommandAssigneeEntityClass<P>
+        extends AssigneeEntityClass<P>
         implements ReactingClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;

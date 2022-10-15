@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventReceiver;
-import io.spine.server.model.HandlerMap;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.model.Receptor;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ModelClass;
@@ -58,7 +58,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
-    private final HandlerMap<EventClass, P, M> handlers;
+    private final ReceptorMap<EventClass, P, M> handlers;
     private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
@@ -71,7 +71,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      */
     public EventReceivingClassDelegate(Class<T> delegatingClass, MethodSignature<M, ?> signature) {
         super(delegatingClass);
-        this.handlers = HandlerMap.create(delegatingClass, signature);
+        this.handlers = ReceptorMap.create(delegatingClass, signature);
         this.events = handlers.messageClasses();
         this.domesticEvents = handlers.messageClasses((h) -> !h.isExternal());
         this.externalEvents = handlers.messageClasses(Receptor::isExternal);

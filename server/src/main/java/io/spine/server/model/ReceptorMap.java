@@ -61,9 +61,9 @@ import static java.util.Comparator.comparing;
  *         the type of handler methods
  */
 @Immutable(containerOf = {"M", "H"})
-public final class HandlerMap<M extends MessageClass<?>,
-                              R extends MessageClass<?>,
-                              H extends Receptor<?, M, ?, R>>
+public final class ReceptorMap<M extends MessageClass<?>,
+                               R extends MessageClass<?>,
+                               H extends Receptor<?, M, ?, R>>
         implements Serializable, Logging {
 
     private static final long serialVersionUID = 0L;
@@ -84,15 +84,15 @@ public final class HandlerMap<M extends MessageClass<?>,
     public static <M extends MessageClass<?>,
                    P extends MessageClass<?>,
                    H extends Receptor<?, M, ?, P>>
-    HandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+    ReceptorMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
         var map = findMethodsBy(declaringClass, signature);
         var messageClasses = messageClasses(map.values());
-        return new HandlerMap<>(map, messageClasses);
+        return new ReceptorMap<>(map, messageClasses);
     }
 
-    private HandlerMap(ImmutableSetMultimap<DispatchKey, H> map, ImmutableSet<M> messageClasses) {
+    private ReceptorMap(ImmutableSetMultimap<DispatchKey, H> map, ImmutableSet<M> messageClasses) {
         this.map = map;
         this.messageClasses = messageClasses;
     }

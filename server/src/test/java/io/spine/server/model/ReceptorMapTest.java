@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`HandlerMap` should")
-class HandlerMapTest {
+class ReceptorMapTest {
 
     /**
      * Registers the stringifier for {@code Integer}, which is used for parsing filter field values.
@@ -74,7 +74,7 @@ class HandlerMapTest {
         @Test
         @DisplayName("duplicate message classes in handlers")
         void rejectDuplicateHandlers() {
-            assertDuplicate(() -> HandlerMap.create(
+            assertDuplicate(() -> ReceptorMap.create(
                     DuplicateCommandHandlers.class, new AssigneeSignature()
             ));
         }

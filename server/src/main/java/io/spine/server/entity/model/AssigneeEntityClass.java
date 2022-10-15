@@ -31,7 +31,7 @@ import io.spine.server.command.model.AssigneeReceptor;
 import io.spine.server.command.model.AssigneeSignature;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
-import io.spine.server.model.HandlerMap;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -45,16 +45,16 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  * @param <E>
  *         the type of entity
  */
-public abstract class CommandAssigneeEntityClass<E extends Entity<?, ?>>
+public abstract class AssigneeEntityClass<E extends Entity<?, ?>>
         extends EntityClass<E>
         implements CommandHandlingClass<EventClass, AssigneeReceptor> {
 
     private static final long serialVersionUID = 0L;
-    private final HandlerMap<CommandClass, EventClass, AssigneeReceptor> commands;
+    private final ReceptorMap<CommandClass, EventClass, AssigneeReceptor> commands;
 
-    protected CommandAssigneeEntityClass(Class<E> cls) {
+    protected AssigneeEntityClass(Class<E> cls) {
         super(cls);
-        this.commands = HandlerMap.create(cls, new AssigneeSignature());
+        this.commands = ReceptorMap.create(cls, new AssigneeSignature());
     }
 
     @Override
