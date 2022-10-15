@@ -66,8 +66,7 @@ class EntityQueryProcessor implements QueryProcessor {
     }
 
     private Iterator<EntityRecord> loadByQuery(Query query) {
-        var entities =
-                repository.findRecords(query.filters(), query.responseFormat());
+        var entities = repository.findRecords(query.filters(), query.responseFormat());
         return entities;
     }
 
