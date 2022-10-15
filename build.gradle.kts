@@ -231,7 +231,9 @@ subprojects {
 
     val generatedDir = "$projectDir/generated"
     val generatedJavaDir = "$generatedDir/main/java"
+    val generatedKotlinDir = "$generatedDir/main/kotlin"
     val generatedTestJavaDir = "$generatedDir/test/java"
+    val generatedTestKotlinDir = "$generatedDir/test/kotlin"
     val generatedGrpcDir = "$generatedDir/main/grpc"
     val generatedTestGrpcDir = "$generatedDir/test/grpc"
     val generatedSpineDir = "$generatedDir/main/spine"
@@ -242,12 +244,14 @@ subprojects {
             java.srcDirs(
                 generatedSpineDir,
                 generatedJavaDir,
+                generatedKotlinDir,
             )
         }
         test {
             java.srcDirs(
                 generatedTestSpineDir,
                 generatedTestJavaDir,
+                generatedTestKotlinDir,
             )
         }
     }
@@ -309,14 +313,19 @@ subprojects {
             generatedSourceDirs.addAll(
                 files(
                     generatedJavaDir,
+                    generatedKotlinDir,
                     generatedGrpcDir,
                     generatedSpineDir,
                     generatedTestJavaDir,
+                    generatedTestKotlinDir,
                     generatedTestGrpcDir,
                     generatedTestSpineDir
                 )
             )
-            testSources.from(generatedTestJavaDir)
+            testSources.from(
+                generatedTestJavaDir,
+                generatedTestKotlinDir
+            )
 
             isDownloadJavadoc = true
             isDownloadSources = true
