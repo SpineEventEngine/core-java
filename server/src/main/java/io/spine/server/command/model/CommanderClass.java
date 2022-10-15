@@ -50,7 +50,7 @@ import static java.util.stream.Collectors.toSet;
  *         the type of commanders
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituteMethod>
+        extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituter>
         implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;

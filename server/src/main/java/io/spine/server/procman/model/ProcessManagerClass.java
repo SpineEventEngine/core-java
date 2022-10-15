@@ -28,7 +28,7 @@ package io.spine.server.procman.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.command.model.CommandReactionMethod;
-import io.spine.server.command.model.CommandSubstituteMethod;
+import io.spine.server.command.model.CommandSubstituter;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.command.model.CommandingClass;
 import io.spine.server.entity.model.CommandAssigneeEntityClass;
@@ -132,7 +132,7 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
      * Obtains a method which handles the passed class of commands by producing
      * one or more other commands.
      */
-    public CommandSubstituteMethod commanderOf(CommandEnvelope command) {
+    public CommandSubstituter commanderOf(CommandEnvelope command) {
         return commanderDelegate.handlerOf(command);
     }
 
