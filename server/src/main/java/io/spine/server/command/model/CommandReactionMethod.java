@@ -42,10 +42,10 @@ import java.lang.reflect.Method;
  */
 public final class CommandReactionMethod
         extends AbstractReceptor<EventReceiver,
-                                              EventMessage,
-                                              EventClass,
-                                              EventEnvelope,
-                                              CommandClass>
+                                 EventMessage,
+                                 EventClass,
+                                 EventEnvelope,
+                                 CommandClass>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope> {
 
     CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
