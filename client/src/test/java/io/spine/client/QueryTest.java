@@ -28,6 +28,7 @@ package io.spine.client;
 
 import io.spine.test.client.TestEntity;
 import io.spine.type.KnownTypes;
+import io.spine.validate.NonValidated;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -75,8 +76,9 @@ class QueryTest {
     void throwErrorForUnknownType() {
         var target = Target.newBuilder()
                 .setType("nonexistent/message.type")
+                .setIncludeAll(true)
                 .build();
-        var query = Query.newBuilder()
+        @NonValidated Query query = Query.newBuilder()
                 .setTarget(target)
                 .buildPartial();
         assertThrows(IllegalStateException.class, query::targetType);
