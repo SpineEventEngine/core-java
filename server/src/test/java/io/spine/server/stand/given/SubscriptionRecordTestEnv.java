@@ -101,8 +101,13 @@ public final class SubscriptionRecordTestEnv {
     }
 
     public static EventEnvelope projectCreatedEnvelope(EventId eventId) {
-        var project = io.spine.test.event.ProjectId.newBuilder().setId(Identifier.newUuid()).build();
-        var eventMessage = ProjectCreated.newBuilder().setProjectId(project).build();
+        //TODO:2022-10-15:alexander.yevsyukov: Fix usage of the type from another package.
+        var project = io.spine.test.event.ProjectId.newBuilder()
+                .setId(Identifier.newUuid())
+                .build();
+        var eventMessage = ProjectCreated.newBuilder()
+                .setProjectId(project)
+                .build();
         return projectCreatedEnvelope(eventId, eventMessage);
     }
 
