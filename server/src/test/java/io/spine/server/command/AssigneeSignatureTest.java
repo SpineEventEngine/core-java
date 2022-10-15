@@ -26,13 +26,30 @@
 
 package io.spine.server.command;
 
-/**
- * Declares one or more methods, each {@linkplain Assign assigned} to handle commands
- * of a specific type.
- *
- * <p>A handling method may reject the received command or produce events in response.
- *
- * @see Assign @Assign
- */
-public interface CommandAssignee extends CommandReceiver {
+import io.spine.server.command.model.CommandAssigneeSignature;
+import io.spine.server.command.model.given.handler.InvalidAssignee;
+import io.spine.server.command.model.given.handler.ValidAssignee;
+import io.spine.server.model.MethodSignatureTest;
+import org.junit.jupiter.api.DisplayName;
+
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
+@DisplayName("`CommandAssigneeSignature` should")
+class AssigneeSignatureTest extends MethodSignatureTest<CommandAssigneeSignature> {
+
+    @Override
+    protected Stream<Method> validMethods() {
+        return methodsAnnotatedWith(Assign.class, ValidAssignee.class).stream();
+    }
+
+    @Override
+    protected Stream<Method> invalidMethods() {
+        return methodsAnnotatedWith(Assign.class, InvalidAssignee.class).stream();
+    }
+
+    @Override
+    protected CommandAssigneeSignature signature() {
+        return new CommandAssigneeSignature();
+    }
 }

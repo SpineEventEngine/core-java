@@ -66,7 +66,7 @@ import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssign
  */
 public abstract class AbstractCommandAssignee
         extends AbstractCommandDispatcher
-        implements CommandAssignee {
+        implements Assignee {
 
     private final CommandAssigneeClass<?> thisClass = asCommandAssigneeClass(getClass());
 

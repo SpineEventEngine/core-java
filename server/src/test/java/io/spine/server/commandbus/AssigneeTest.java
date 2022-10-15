@@ -48,10 +48,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 @DisplayName("`CommandAssignee` should")
-class CommandAssigneeTest {
+class AssigneeTest {
 
     private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(CommandAssigneeTest.class);
+            new TestActorRequestFactory(AssigneeTest.class);
 
     private CommandBus commandBus;
     private EventBus eventBus;

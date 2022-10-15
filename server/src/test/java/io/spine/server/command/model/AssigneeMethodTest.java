@@ -72,10 +72,11 @@ import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("`CommandAssigneeMethod` should")
-class CommandAssigneeMethodTest {
+@SuppressWarnings("OptionalGetWithoutIsPresent")
+class AssigneeMethodTest {
 
     private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(CommandAssigneeMethodTest.class);
+            new TestActorRequestFactory(AssigneeMethodTest.class);
 
     private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
 

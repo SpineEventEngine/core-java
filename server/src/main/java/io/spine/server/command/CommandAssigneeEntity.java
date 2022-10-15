@@ -56,7 +56,7 @@ class CommandAssigneeEntity<I,
                             S extends EntityState<I>,
                             B extends ValidatingBuilder<S>>
         extends TransactionalEntity<I, S, B>
-        implements CommandAssignee {
+        implements Assignee {
 
     /**
      * Cached value of the ID in the form of {@code Any} instance.

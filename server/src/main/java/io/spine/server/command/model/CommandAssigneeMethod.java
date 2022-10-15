@@ -26,7 +26,7 @@
 
 package io.spine.server.command.model;
 
-import io.spine.server.command.CommandAssignee;
+import io.spine.server.command.Assignee;
 import io.spine.server.dispatch.Success;
 import io.spine.server.model.EventProducingMethod;
 import io.spine.server.model.IllegalOutcomeException;
@@ -44,8 +44,8 @@ import static java.lang.String.format;
  * The wrapper for a method assigned to handle commands.
  */
 public final class CommandAssigneeMethod
-        extends CommandReceptor<CommandAssignee, EventClass>
-        implements EventProducingMethod<CommandAssignee, CommandClass, CommandEnvelope> {
+        extends CommandReceptor<Assignee, EventClass>
+        implements EventProducingMethod<Assignee, CommandClass, CommandEnvelope> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -59,7 +59,7 @@ public final class CommandAssigneeMethod
 
     @Override
     public Success toSuccessfulOutcome(@Nullable Object rawResult,
-                                       CommandAssignee target,
+                                       Assignee target,
                                        CommandEnvelope handledSignal) {
         var outcome =
                 EventProducingMethod.super.toSuccessfulOutcome(rawResult, target, handledSignal);
