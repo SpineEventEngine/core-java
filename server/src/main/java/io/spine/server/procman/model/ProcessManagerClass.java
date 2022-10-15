@@ -27,7 +27,7 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.command.model.CommandReactionMethod;
+import io.spine.server.command.model.CommandingReaction;
 import io.spine.server.command.model.CommandSubstituter;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.command.model.CommandingClass;
@@ -140,7 +140,7 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
      * Obtains a method which may generate one or more commands in response to incoming
      * event with the passed class.
      */
-    public Optional<CommandReactionMethod> commanderOf(EventEnvelope event) {
+    public Optional<CommandingReaction> commanderOf(EventEnvelope event) {
         return commanderDelegate.commanderOn(event);
     }
 

@@ -26,6 +26,7 @@
 
 package io.spine.server.command.model.given.reaction;
 
+import io.spine.server.command.model.CommandingReaction;
 import io.spine.server.event.EventReceiver;
 import io.spine.testing.server.model.ModelTests;
 
@@ -33,7 +34,7 @@ import java.lang.reflect.Method;
 
 /**
  * Abstract base for test environment classes for testing
- * {@link io.spine.server.command.model.CommandReactionMethod}.
+ * {@link CommandingReaction}.
  *
  * <p>Derived classes must declare a method called {@linkplain #METHOD_NAME commandOn} so that
  * the method can be {@linkplain #getMethod() obtained} from the code of tests.

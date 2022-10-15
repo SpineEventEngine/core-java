@@ -54,7 +54,7 @@ public final class CommanderClass<C extends Commander>
         implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<C, CommandClass, CommandReactionMethod> delegate;
+    private final EventReceivingClassDelegate<C, CommandClass, CommandingReaction> delegate;
 
     private CommanderClass(Class<C> cls) {
         super(cls, new CommandSubstituteSignature());
@@ -95,7 +95,7 @@ public final class CommanderClass<C extends Commander>
     /**
      * Obtains the method which reacts on the passed event class.
      */
-    public Optional<CommandReactionMethod> commanderOn(EventEnvelope event) {
+    public Optional<CommandingReaction> commanderOn(EventEnvelope event) {
         return delegate.handlerOf(event);
     }
 

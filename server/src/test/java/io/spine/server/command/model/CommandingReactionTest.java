@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("`CommandReactionMethod` should")
 @SuppressWarnings("InnerClassMayBeStatic")
-class CommandReactionMethodTest {
+class CommandingReactionTest {
 
     private static final
     CommandReactionSignature signature = new CommandReactionSignature();
@@ -89,7 +89,7 @@ class CommandReactionMethodTest {
 
         private EventReceiver target;
         private Method rawMethod;
-        private CommandReactionMethod method;
+        private CommandingReaction method;
         private ProjectId id;
 
         @BeforeEach
@@ -134,7 +134,7 @@ class CommandReactionMethodTest {
 
         private TestCommandReactor target;
         private Method rawMethod;
-        private CommandReactionMethod method;
+        private CommandingReaction method;
 
         private ProjectId id;
 
@@ -258,7 +258,7 @@ class CommandReactionMethodTest {
     }
 
     private static EventEnvelope envelope(EventMessage eventMessage) {
-        var factory = TestEventFactory.newInstance(CommandReactionMethodTest.class);
+        var factory = TestEventFactory.newInstance(CommandingReactionTest.class);
         var event = factory.createEvent(eventMessage);
         var envelope = EventEnvelope.of(event);
         return envelope;

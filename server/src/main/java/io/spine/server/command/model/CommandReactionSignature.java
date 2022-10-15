@@ -51,10 +51,10 @@ import static io.spine.server.model.TypeMatcher.classImplementing;
 import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
- * A signature of {@link CommandReactionMethod}.
+ * A signature of {@link CommandingReaction}.
  */
 public class CommandReactionSignature
-        extends MethodSignature<CommandReactionMethod, EventEnvelope> {
+        extends MethodSignature<CommandingReaction, EventEnvelope> {
 
     private static final ReturnTypes TYPES = new ReturnTypes(
             TypeToken.of(CommandMessage.class),
@@ -77,8 +77,8 @@ public class CommandReactionSignature
     }
 
     @Override
-    public CommandReactionMethod create(Method method, ParameterSpec<EventEnvelope> params) {
-        return new CommandReactionMethod(method, params);
+    public CommandingReaction create(Method method, ParameterSpec<EventEnvelope> params) {
+        return new CommandingReaction(method, params);
     }
 
     /**
@@ -108,7 +108,7 @@ public class CommandReactionSignature
     }
 
     /**
-     * Allowed combinations of parameters for {@linkplain CommandReactionMethod Command reaction}
+     * Allowed combinations of parameters for {@linkplain CommandingReaction Command reaction}
      * methods.
      */
     @Immutable

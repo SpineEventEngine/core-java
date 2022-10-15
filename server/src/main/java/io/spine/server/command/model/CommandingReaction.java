@@ -40,7 +40,7 @@ import java.lang.reflect.Method;
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.
  */
-public final class CommandReactionMethod
+public final class CommandingReaction
         extends AbstractReceptor<EventReceiver,
                                  EventMessage,
                                  EventClass,
@@ -48,7 +48,7 @@ public final class CommandReactionMethod
                                  CommandClass>
         implements CommandingMethod<EventReceiver, EventClass, EventEnvelope> {
 
-    CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
+    CommandingReaction(Method method, ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
     }
 
