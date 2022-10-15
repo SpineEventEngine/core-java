@@ -40,7 +40,7 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
+import static io.spine.server.command.model.AssigneeClass.asCommandAssigneeClass;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;

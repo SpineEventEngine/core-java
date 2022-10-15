@@ -39,7 +39,7 @@ import tres.quattro.Counter;
 import uno.dos.Encounter;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
+import static io.spine.server.command.model.AssigneeClass.asCommandAssigneeClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

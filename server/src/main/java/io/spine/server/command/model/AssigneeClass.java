@@ -37,12 +37,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <C>
  *         the type of command assignees
  */
-public final class CommandAssigneeClass<C extends AbstractAssignee>
+public final class AssigneeClass<C extends AbstractAssignee>
         extends AbstractCommandHandlingClass<C, EventClass, AssigneeReceptor> {
 
     private static final long serialVersionUID = 0L;
 
-    private CommandAssigneeClass(Class<C> cls) {
+    private AssigneeClass(Class<C> cls) {
         super(cls, new CommandAssigneeSignature());
     }
 
@@ -50,11 +50,11 @@ public final class CommandAssigneeClass<C extends AbstractAssignee>
      * Obtains command assignee class for the passed raw class.
      */
     public static <C extends AbstractAssignee>
-    CommandAssigneeClass<C> asCommandAssigneeClass(Class<C> cls) {
+    AssigneeClass<C> asCommandAssigneeClass(Class<C> cls) {
         checkNotNull(cls);
         @SuppressWarnings("unchecked")
-        var result = (CommandAssigneeClass<C>)
-                get(cls, CommandAssigneeClass.class, () -> new CommandAssigneeClass<>(cls));
+        var result = (AssigneeClass<C>)
+                get(cls, AssigneeClass.class, () -> new AssigneeClass<>(cls));
         return result;
     }
 }

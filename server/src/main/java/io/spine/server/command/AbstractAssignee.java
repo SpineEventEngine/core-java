@@ -29,7 +29,7 @@ package io.spine.server.command;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.Version;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.model.CommandAssigneeClass;
+import io.spine.server.command.model.AssigneeClass;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventBus;
@@ -37,7 +37,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 
-import static io.spine.server.command.model.CommandAssigneeClass.asCommandAssigneeClass;
+import static io.spine.server.command.model.AssigneeClass.asCommandAssigneeClass;
 
 /**
  * The abstract base for non-aggregate classes that expose methods assigned to handle commands
@@ -68,7 +68,7 @@ public abstract class AbstractAssignee
         extends AbstractCommandDispatcher
         implements Assignee {
 
-    private final CommandAssigneeClass<?> thisClass = asCommandAssigneeClass(getClass());
+    private final AssigneeClass<?> thisClass = asCommandAssigneeClass(getClass());
 
     /**
      * Dispatches the command to the handler method and
