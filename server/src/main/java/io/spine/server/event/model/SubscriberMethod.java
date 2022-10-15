@@ -49,10 +49,10 @@ import java.lang.reflect.Method;
 @Immutable
 public abstract class SubscriberMethod
         extends AbstractReceptor<EventSubscriber,
-                                              EventMessage,
-                                              EventClass,
-                                              EventEnvelope,
-                                              EmptyClass>
+                                 EventMessage,
+                                 EventClass,
+                                 EventEnvelope,
+                                 EmptyClass>
         implements VoidMethod<EventSubscriber, EventClass, EventEnvelope> {
 
 
