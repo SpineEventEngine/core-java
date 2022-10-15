@@ -33,7 +33,7 @@ import io.spine.base.RejectionThrowable;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.Success;
-import io.spine.server.log.HandlerLifecycle;
+import io.spine.server.log.ReceptorLifecycle;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -283,8 +283,8 @@ class AbstractReceptor<T,
         var signal = envelope.outerObject().messageId();
         var outcome = DispatchOutcome.newBuilder()
                 .setPropagatedSignal(signal);
-        var lifecycle = target instanceof HandlerLifecycle
-                                            ? (HandlerLifecycle) target
+        var lifecycle = target instanceof ReceptorLifecycle
+                                            ? (ReceptorLifecycle) target
                                             : null;
         if (lifecycle != null) {
             lifecycle.beforeInvoke(this);

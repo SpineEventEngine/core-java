@@ -46,12 +46,12 @@ import static java.util.stream.Collectors.joining;
  * The site never provides a line number or a file name.
  */
 @Immutable
-final class HandlerMethodSite extends LogSite {
+final class ReceptorSite extends LogSite {
 
     @SuppressWarnings("Immutable")
     private final Method method;
 
-    HandlerMethodSite(Receptor<?, ?, ?, ?> method) {
+    ReceptorSite(Receptor<?, ?, ?, ?> method) {
         super();
         checkNotNull(method);
         this.method = method.rawMethod();
@@ -89,10 +89,10 @@ final class HandlerMethodSite extends LogSite {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof HandlerMethodSite)) {
+        if (!(o instanceof ReceptorSite)) {
             return false;
         }
-        var site = (HandlerMethodSite) o;
+        var site = (ReceptorSite) o;
         return Objects.equal(method, site.method);
     }
 

@@ -42,8 +42,8 @@ import io.spine.core.Versions;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
-import io.spine.server.log.HandlerLifecycle;
-import io.spine.server.log.HandlerLog;
+import io.spine.server.log.ReceptorLifecycle;
+import io.spine.server.log.ReceptorLog;
 import io.spine.server.model.Receptor;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -77,7 +77,7 @@ import static io.spine.validate.Validate.violationsOf;
             fields. See Effective Java 2nd Ed. Item #71. */,
         "ClassWithTooManyMethods"})
 public abstract class AbstractEntity<I, S extends EntityState<I>>
-        implements Entity<I, S>, HandlerLifecycle {
+        implements Entity<I, S>, ReceptorLifecycle {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -124,7 +124,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     private volatile boolean lifecycleFlagsChanged;
 
-    private @Nullable HandlerLog handlerLog;
+    private @Nullable ReceptorLog receptorLog;
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -534,13 +534,13 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     public void beforeInvoke(Receptor<?, ?, ?, ?> method) {
         checkNotNull(method);
         var logger = loggerFor(getClass());
-        this.handlerLog = new HandlerLog(logger, method);
+        this.receptorLog = new ReceptorLog(logger, method);
     }
 
     @OverridingMethodsMustInvokeSuper
     @Override
     public void afterInvoke(Receptor<?, ?, ?, ?> method) {
-        this.handlerLog = null;
+        this.receptorLog = null;
     }
 
     /**
@@ -560,8 +560,8 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      * @see io.spine.server.log.LoggingEntity
      */
     public final FluentLogger.Api at(Level logLevel) {
-        return handlerLog != null
-               ? handlerLog.at(logLevel)
+        return receptorLog != null
+               ? receptorLog.at(logLevel)
                : loggerFor(getClass()).at(logLevel);
     }
 

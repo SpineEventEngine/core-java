@@ -61,7 +61,7 @@ import io.spine.server.model.Receptor;
  *     <li>{@code afterInvoke([instance representing on(UserSignedUp) method])}.
  * </ol>
  */
-public interface HandlerLifecycle {
+public interface ReceptorLifecycle {
 
     /**
      * A callback for a handler method invocation start.
