@@ -24,11 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.protobuf.gradle.generateProtoTasks
+import com.google.protobuf.gradle.protobuf
+import com.google.protobuf.gradle.protoc
 import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
@@ -40,6 +42,8 @@ import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.kotlin.applyJvmToolchain
 import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
+import io.spine.internal.gradle.protobuf.suppressDeprecationsInKotlin
+import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.coverage.JacocoConfig
@@ -56,25 +60,21 @@ buildscript {
     io.spine.internal.gradle.doApplyStandard(repositories)
     io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
 
-    val kotlinVersion = io.spine.internal.dependency.Kotlin.version
-    val spineBaseVersion: String by extra
-    val spineTimeVersion: String by extra
-    val toolBaseVersion: String by extra
-    val mcJavaVersion: String by extra
+    val spine = io.spine.internal.dependency.Spine(project)
 
     dependencies {
-        classpath("io.spine.tools:spine-mc-java-plugins:${mcJavaVersion}:all")
+        classpath(spine.mcJavaPlugin)
     }
 
     io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
             force(
-                    "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-                    "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion",
-                    "io.spine.tools:spine-tool-base:$toolBaseVersion"
+                io.spine.internal.dependency.Kotlin.stdLib,
+                io.spine.internal.dependency.Kotlin.stdLibCommon,
+                spine.base,
+                spine.time,
+                spine.toolBase,
             )
         }
     }
@@ -92,11 +92,6 @@ plugins {
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
-val spineBaseVersion: String by extra
-val validationVersion: String by extra
-val spineTimeVersion: String by extra
-val toolBaseVersion: String by extra
-val spineBaseTypesVersion: String by extra
 
 spinePublishing {
     modules = setOf(
@@ -139,6 +134,14 @@ allprojects {
     group = "io.spine"
     version = extra["versionToPublish"]!!
 }
+
+// Temporarily use this version, since 3.21.x is known to provide
+// a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
+// See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
+//     https://github.com/protocolbuffers/protobuf/issues/10593
+val protocArtifact = "com.google.protobuf:protoc:3.19.6"
+
+val spine = io.spine.internal.dependency.Spine(project)
 
 subprojects {
 
@@ -186,11 +189,11 @@ subprojects {
             errorprone(core)
         }
 
-        api("io.spine:spine-base:$spineBaseVersion")
-        api("io.spine:spine-time:$spineTimeVersion")
+        api(spine.base)
+        api(spine.time)
 
         testImplementation(JUnit.runner)
-        testImplementation("io.spine.tools:spine-testlib:$spineBaseVersion")
+        testImplementation(spine.testlib)
     }
 
     configurations {
@@ -199,24 +202,25 @@ subprojects {
 
         all {
             resolutionStrategy {
-                exclude("io.spine:spine-validate:$spineBaseVersion")
+                exclude("io.spine", "spine-validate")
                 force(
-                    "org.jetbrains.dokka:dokka-base:${Dokka.version}",
-                    "org.jetbrains.dokka:dokka-analysis:${Dokka.version}",
+                    Dokka.BasePlugin.lib,
+                    Dokka.analysis,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
                        See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
                        .configureProtocPlugins() method which sets the version from resources. */
-                    "io.grpc:protoc-gen-grpc-java:${Grpc.version}",
+                    Grpc.protobufPlugin,
 
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine.validation:spine-validation-java-runtime:$validationVersion",
-                    "io.spine:spine-time:$spineTimeVersion",
-                    "io.spine:spine-base-types:$spineBaseTypesVersion",
-                    "io.spine.tools:spine-testlib:$spineBaseVersion",
-                    "io.spine.tools:spine-plugin-base:$toolBaseVersion",
-                    "io.spine.tools:spine-tool-base:$toolBaseVersion",
+                    spine.base,
+                    spine.validation.runtime,
+                    spine.time,
+                    spine.baseTypes,
+                    spine.testlib,
+                    spine.toolBase,
+                    spine.pluginBase,
+
                     Grpc.core,
                     Grpc.protobuf,
                     Grpc.stub
@@ -227,7 +231,9 @@ subprojects {
 
     val generatedDir = "$projectDir/generated"
     val generatedJavaDir = "$generatedDir/main/java"
+    val generatedKotlinDir = "$generatedDir/main/kotlin"
     val generatedTestJavaDir = "$generatedDir/test/java"
+    val generatedTestKotlinDir = "$generatedDir/test/kotlin"
     val generatedGrpcDir = "$generatedDir/main/grpc"
     val generatedTestGrpcDir = "$generatedDir/test/grpc"
     val generatedSpineDir = "$generatedDir/main/spine"
@@ -238,12 +244,14 @@ subprojects {
             java.srcDirs(
                 generatedSpineDir,
                 generatedJavaDir,
+                generatedKotlinDir,
             )
         }
         test {
             java.srcDirs(
                 generatedTestSpineDir,
                 generatedTestJavaDir,
+                generatedTestKotlinDir,
             )
         }
     }
@@ -266,6 +274,33 @@ subprojects {
         }
     }
 
+    protobuf {
+        generatedFilesBaseDir = generatedDir
+
+        protoc {
+            // Temporarily use this version, since 3.21.x is known to provide
+            // a broken `protoc-gen-js` artifact.
+            // See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
+            //
+            // Once it is addressed, this artifact should be `Protobuf.compiler`.
+            //
+            // Also, this fixes the explicit API more for the generated Kotlin code.
+            //
+            artifact = protocArtifact
+        }
+
+        generateProtoTasks {
+            all().forEach { task ->
+                task.builtins {
+                    maybeCreate("kotlin")
+                }
+                task.doLast {
+                    suppressDeprecationsInKotlin(generatedDir, task.sourceSet.name)
+                }
+            }
+        }
+    }
+
     apply<IncrementGuard>()
     apply<VersionWriter>()
 
@@ -278,14 +313,19 @@ subprojects {
             generatedSourceDirs.addAll(
                 files(
                     generatedJavaDir,
+                    generatedKotlinDir,
                     generatedGrpcDir,
                     generatedSpineDir,
                     generatedTestJavaDir,
+                    generatedTestKotlinDir,
                     generatedTestGrpcDir,
                     generatedTestSpineDir
                 )
             )
-            testSources.from(generatedTestJavaDir)
+            testSources.from(
+                generatedTestJavaDir,
+                generatedTestKotlinDir
+            )
 
             isDownloadJavadoc = true
             isDownloadSources = true

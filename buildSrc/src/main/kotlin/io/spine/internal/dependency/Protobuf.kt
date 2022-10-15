@@ -30,7 +30,7 @@ package io.spine.internal.dependency
 @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
 object Protobuf {
     private const val group = "com.google.protobuf"
-    const val version       = "3.21.7"
+    const val version       = "3.19.6"
     val libs = listOf(
         "${group}:protobuf-java:${version}",
         "${group}:protobuf-java-util:${version}",

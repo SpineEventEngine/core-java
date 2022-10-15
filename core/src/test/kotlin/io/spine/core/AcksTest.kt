@@ -23,49 +23,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.core
 
-package io.spine.core;
+import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
+import io.spine.core.Acks.toCommandId
+import io.spine.core.Responses.statusOk
+import io.spine.protobuf.pack
+import io.spine.testing.UtilityClassTest
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-import io.spine.base.Error;
-import io.spine.testing.UtilityClassTest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+@DisplayName("`Acks` utility class should")
+internal class AcksTest : UtilityClassTest<Acks>(Acks::class.java) {
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-@DisplayName("`Responses` utility should")
-class ResponsesTest extends UtilityClassTest<Responses> {
-
-    private ResponsesTest() {
-        super(Responses.class);
+    fun newAck(signalId: SignalId): Ack = ack {
+        messageId = signalId.pack()
+        status = statusOk()
     }
 
-    @Test
-    @DisplayName("return OK response")
-    void returnOkResponse() {
-        checkNotNull(Responses.ok());
-    }
+    @Nested
+    internal inner class `obtain 'CommandId'`() {
 
-    @Test
-    @DisplayName("recognize OK response")
-    void recognizeOkResponse() {
-        var ok = Responses.ok();
-        assertTrue(ok.isOk());
-        assertFalse(ok.isError());
-    }
+        @Test
+        fun `returning ID value`() {
+            val commandId = CommandId.generate()
+            val ack = newAck(commandId)
+            assertThat(toCommandId(ack)).isEqualTo(commandId)
+        }
 
-    @Test
-    @DisplayName("recognize not OK response")
-    void recognizeNotOkResponse() {
-        var status = Status.newBuilder()
-                .setError(Error.getDefaultInstance())
-                .build();
-        var error = Response.newBuilder()
-                .setStatus(status)
-                .build();
-        assertFalse(error.isOk());
-        assertTrue(error.isError());
+        @Test
+        fun `throw 'IllegalArgumentException' if 'messageId' is not 'CommandId'`() {
+            assertThrows<IllegalArgumentException> {
+                toCommandId(newAck(Events.generateId()))
+            }
+        }
     }
 }

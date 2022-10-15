@@ -209,11 +209,11 @@ class LoggingEntityTest extends LoggingTest {
 
         @Test
         @DisplayName("`_trace`")
-        @SuppressWarnings("FloggerLogString")
         void trace() {
             testLevel(Logging::_trace, FINEST);
         }
 
+        @SuppressWarnings("FloggerLogString")
         private void testLevel(Function<Logging, FluentLogger.Api> underscoreFunc,
                                Level expectedLevel) {
             var aggregate = new CardAggregate();

@@ -110,7 +110,7 @@ public final class Targets {
 
         var typeUrl = TypeUrl.of(targetClass);
         var builder = Target.newBuilder()
-                                       .setType(typeUrl.value());
+                .setType(typeUrl.value());
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {

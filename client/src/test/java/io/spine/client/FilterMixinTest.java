@@ -111,6 +111,7 @@ class FilterMixinTest {
     private static Target testEntityTarget() {
         var target = Target.newBuilder()
                 .setType(TEST_ENTITY_TYPE.value())
+                .setIncludeAll(true)
                 .build();
         return target;
     }
@@ -121,6 +122,7 @@ class FilterMixinTest {
     private static Target createProjectTarget() {
         var target = Target.newBuilder()
                 .setType(PROJECT_CREATED_TYPE.value())
+                .setIncludeAll(true)
                 .build();
         return target;
     }

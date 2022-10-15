@@ -120,13 +120,17 @@ public class CommandHandlerTestEnv {
         @Assign
         CmdBusProjectCreated handle(CmdBusCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return CmdBusProjectCreated.getDefaultInstance();
+            return CmdBusProjectCreated.newBuilder()
+                    .setProjectId(msg.getProjectId())
+                    .build();
         }
 
         @Assign
         CmdBusTaskAdded handle(CmdBusAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
-            return CmdBusTaskAdded.getDefaultInstance();
+            return CmdBusTaskAdded.newBuilder()
+                    .setProjectId(msg.getProjectId())
+                    .build();
         }
 
         @Assign
@@ -149,8 +153,10 @@ public class CommandHandlerTestEnv {
             var startedEvent = CmdBusProjectStarted.newBuilder()
                     .setProjectId(id)
                     .build();
-            var defaultEvent = CmdBusProjectStarted.getDefaultInstance();
-            return ImmutableList.of(startedEvent, defaultEvent);
+            var startedAgainEvent = CmdBusProjectStarted.newBuilder()
+                    .setProjectId(id)
+                    .build();
+            return ImmutableList.of(startedEvent, startedAgainEvent);
         }
 
         private static Pair<CmdBusTaskAssigned, Optional<CmdBusTaskStarted>>

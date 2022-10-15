@@ -73,10 +73,14 @@ public final class ReadOperationTestEnv {
                 .setTimestamp(currentTime())
                 .setVersion(version)
                 .build();
+        var eventMessage = StgProjectCreated.newBuilder()
+                .setProjectId(StgProjectId.newBuilder()
+                                      .setId(newUuid()))
+                .build();
         return Event.newBuilder()
                 .setId(id)
                 .setContext(context)
-                .setMessage(pack(StgProjectCreated.getDefaultInstance()))
+                .setMessage(pack(eventMessage))
                 .build();
     }
 

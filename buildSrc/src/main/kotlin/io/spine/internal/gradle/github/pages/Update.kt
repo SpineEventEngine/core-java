@@ -75,7 +75,7 @@ private abstract class UpdateDocumentation(
      * The value should not contain any leading or trailing file separators.
      *
      * The absolute path to the project's documentation is made by appending its
-     * name to the end, making `/[docsDestinationFolder]/[project.name]`.
+     * name to the end, making `/docsDestinationFolder/project.name`.
      */
     protected abstract val docsDestinationFolder: String
 
@@ -86,25 +86,29 @@ private abstract class UpdateDocumentation(
      */
     protected abstract val toolName: String
 
-    private val mostRecentFolder = File("${repository.location}/${docsDestinationFolder}/${project.name}")
+    private val mostRecentFolder by lazy {
+        File("${repository.location}/${docsDestinationFolder}/${project.name}")
+    }
 
     fun run() {
-        logger.debug("Update of the ${toolName} documentation for module `${project.name}` started.")
+        val module = project.name
+        logger.debug("Update of the $toolName documentation for module `$module` started.")
 
         val documentation = replaceMostRecentDocs()
         copyIntoVersionDir(documentation)
 
-        val updateMessage = "Update ${toolName} documentation for module `${project.name}` as for " +
-                "version ${project.version}"
+        val version = project.version
+        val updateMessage = "Update $toolName documentation for module `$module` as for " +
+                "version $version"
         repository.commitAllChanges(updateMessage)
 
-        logger.debug("Update of the ${toolName} documentation for `${project.name}` successfully finished.")
+        logger.debug("Update of the $toolName documentation for `$module` successfully finished.")
     }
 
     private fun replaceMostRecentDocs(): ConfigurableFileCollection {
         val generatedDocs = project.files(docsSourceFolder)
 
-        logger.debug("Replacing the most recent ${toolName} documentation in ${mostRecentFolder}.")
+        logger.debug("Replacing the most recent $toolName documentation in ${mostRecentFolder}.")
         copyDocs(generatedDocs, mostRecentFolder)
 
         return generatedDocs
@@ -121,7 +125,7 @@ private abstract class UpdateDocumentation(
     private fun copyIntoVersionDir(generatedDocs: ConfigurableFileCollection) {
         val versionedDocDir = File("$mostRecentFolder/v/${project.version}")
 
-        logger.debug("Storing the new version of ${toolName} documentation in `${versionedDocDir}.")
+        logger.debug("Storing the new version of $toolName documentation in `${versionedDocDir}.")
         copyDocs(generatedDocs, versionedDocDir)
     }
 }

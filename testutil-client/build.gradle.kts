@@ -27,14 +27,14 @@
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.gradle.testing.exposeTestConfiguration
 
-val spineTimeVersion: String by extra
+val timeVersion: String by extra
 
 group = "io.spine.tools"
 
 dependencies {
     api(project(":client"))
     api(project(":testutil-core"))
-    api("io.spine.tools:spine-testutil-time:$spineTimeVersion")
+    api("io.spine.tools:spine-testutil-time:$timeVersion")
 
     implementation(Grpc.protobuf)
 }

@@ -252,7 +252,9 @@ abstract class AbstractCommandBusTestSuite {
         CmdBusProjectCreated handle(CmdBusCreateProject command, CommandContext ctx) {
             handlerInvoked = true;
             receivedCommands.add(command);
-            return CmdBusProjectCreated.getDefaultInstance();
+            return CmdBusProjectCreated.newBuilder()
+                    .setProjectId(command.getProjectId())
+                    .build();
         }
 
         boolean received(CommandMessage command) {
