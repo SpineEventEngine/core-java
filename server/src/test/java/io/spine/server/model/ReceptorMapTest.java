@@ -95,7 +95,7 @@ class ReceptorMapTest {
         }
 
         void assertDuplicate(Runnable runnable) {
-            assertThrows(DuplicateHandlerMethodError.class, runnable::run);
+            assertThrows(DuplicateReceptorError.class, runnable::run);
         }
     }
 

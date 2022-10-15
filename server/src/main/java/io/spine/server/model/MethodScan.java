@@ -80,7 +80,7 @@ final class MethodScan<H extends Receptor<?, ?, ?, ?>> {
     /**
      * Performs the operation.
      *
-     * <p>Multiple calls to this method may cause {@link DuplicateHandlerMethodError}s.
+     * <p>Multiple calls to this method may cause {@link DuplicateReceptorError}s.
      */
     private ImmutableSetMultimap<DispatchKey, H> perform() {
         var declaredMethods = declaringClass.getDeclaredMethods();
@@ -110,7 +110,7 @@ final class MethodScan<H extends Receptor<?, ?, ?, ?>> {
                                             .rawMethod();
             var methodName = alreadyPresent.getName();
             var duplicateMethodName = handler.rawMethod().getName();
-            throw new DuplicateHandlerMethodError(
+            throw new DuplicateReceptorError(
                     declaringClass, key, methodName, duplicateMethodName
             );
         } else {
