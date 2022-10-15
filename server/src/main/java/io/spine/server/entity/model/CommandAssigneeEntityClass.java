@@ -28,7 +28,7 @@ package io.spine.server.entity.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.command.model.AssigneeReceptor;
-import io.spine.server.command.model.CommandAssigneeSignature;
+import io.spine.server.command.model.AssigneeSignature;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.HandlerMap;
@@ -54,7 +54,7 @@ public abstract class CommandAssigneeEntityClass<E extends Entity<?, ?>>
 
     protected CommandAssigneeEntityClass(Class<E> cls) {
         super(cls);
-        this.commands = HandlerMap.create(cls, new CommandAssigneeSignature());
+        this.commands = HandlerMap.create(cls, new AssigneeSignature());
     }
 
     @Override

@@ -26,7 +26,7 @@
 
 package io.spine.server.command;
 
-import io.spine.server.command.model.CommandAssigneeSignature;
+import io.spine.server.command.model.AssigneeSignature;
 import io.spine.server.command.model.given.handler.InvalidAssignee;
 import io.spine.server.command.model.given.handler.ValidAssignee;
 import io.spine.server.model.MethodSignatureTest;
@@ -36,7 +36,7 @@ import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 @DisplayName("`CommandAssigneeSignature` should")
-class AssigneeSignatureTest extends MethodSignatureTest<CommandAssigneeSignature> {
+class AssigneeSignatureTest extends MethodSignatureTest<AssigneeSignature> {
 
     @Override
     protected Stream<Method> validMethods() {
@@ -49,7 +49,7 @@ class AssigneeSignatureTest extends MethodSignatureTest<CommandAssigneeSignature
     }
 
     @Override
-    protected CommandAssigneeSignature signature() {
-        return new CommandAssigneeSignature();
+    protected AssigneeSignature signature() {
+        return new AssigneeSignature();
     }
 }

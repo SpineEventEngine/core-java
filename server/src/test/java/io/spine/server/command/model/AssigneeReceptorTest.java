@@ -112,7 +112,7 @@ class AssigneeReceptorTest {
         @DisplayName("one `Message`")
         void returningMessage() {
             var assignee = new ValidAssigneeTwoParams();
-            var method = new CommandAssigneeSignature().classify(assignee.method());
+            var method = new AssigneeSignature().classify(assignee.method());
             assertThat(method).isPresent();
 
             var handler = method.get();
@@ -131,7 +131,7 @@ class AssigneeReceptorTest {
         @DisplayName("`Message` list")
         void returningMessageList() {
             var assignee = new ValidAssigneeOneParamReturnsList();
-            var method = new CommandAssigneeSignature().classify(assignee.method());
+            var method = new AssigneeSignature().classify(assignee.method());
             assertThat(method).isPresent();
 
             var handler = method.get();
@@ -155,7 +155,7 @@ class AssigneeReceptorTest {
         @DisplayName("no events")
         void noEvents() {
             var assignee = new AssigneeReturnsEmptyList();
-            var method = new CommandAssigneeSignature().classify(assignee.method());
+            var method = new AssigneeSignature().classify(assignee.method());
             assertThat(method).isPresent();
 
             var handler = method.get();
@@ -171,7 +171,7 @@ class AssigneeReceptorTest {
         @DisplayName("`Nothing` event")
         void nothingEvent() {
             var handlerObject = new AssigneeReturnsNothing();
-            var method = new CommandAssigneeSignature().classify(handlerObject.method());
+            var method = new AssigneeSignature().classify(handlerObject.method());
             assertThat(method).isPresent();
 
             var handler = method.get();
@@ -212,7 +212,7 @@ class AssigneeReceptorTest {
         @DisplayName("no annotation")
         void noAnnotation() {
             var handler = new InvalidAssigneeNoAnnotation().method();
-            assertThat(new CommandAssigneeSignature().matches(handler)).isFalse();
+            assertThat(new AssigneeSignature().matches(handler)).isFalse();
         }
     }
 

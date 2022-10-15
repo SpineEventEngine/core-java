@@ -38,15 +38,14 @@ import java.lang.reflect.Method;
 /**
  * The signature of {@link AssigneeReceptor}.
  */
-public final class CommandAssigneeSignature
-        extends CommandAcceptingSignature<AssigneeReceptor> {
+public final class AssigneeSignature extends CommandAcceptingSignature<AssigneeReceptor> {
 
     private static final ReturnTypes TYPES = new ReturnTypes(
             TypeToken.of(EventMessage.class),
             new TypeToken<Iterable<EventMessage>>() {}
     );
 
-    public CommandAssigneeSignature() {
+    public AssigneeSignature() {
         super(Assign.class);
     }
 

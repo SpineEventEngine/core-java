@@ -43,7 +43,7 @@ public final class AssigneeClass<C extends AbstractAssignee>
     private static final long serialVersionUID = 0L;
 
     private AssigneeClass(Class<C> cls) {
-        super(cls, new CommandAssigneeSignature());
+        super(cls, new AssigneeSignature());
     }
 
     /**
