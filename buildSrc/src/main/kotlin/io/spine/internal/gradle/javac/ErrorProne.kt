@@ -82,6 +82,7 @@ private object ErrorProneConfig {
 
             "-Xep:CheckReturnValue:OFF",
             "-Xep:FloggerSplitLogStatement:OFF",
+            "-Xep:FloggerLogString:OFF"
         )
     }
 }
