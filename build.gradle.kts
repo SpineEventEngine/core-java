@@ -24,11 +24,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.protobuf.gradle.generateProtoTasks
+import com.google.protobuf.gradle.protobuf
+import com.google.protobuf.gradle.protoc
 import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
-import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
@@ -40,6 +42,8 @@ import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.kotlin.applyJvmToolchain
 import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
+import io.spine.internal.gradle.protobuf.suppressDeprecationsInKotlin
+import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.coverage.JacocoConfig
@@ -130,6 +134,12 @@ allprojects {
     group = "io.spine"
     version = extra["versionToPublish"]!!
 }
+
+// Temporarily use this version, since 3.21.x is known to provide
+// a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
+// See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
+//     https://github.com/protocolbuffers/protobuf/issues/10593
+val protocArtifact = "com.google.protobuf:protoc:3.19.6"
 
 val spine = io.spine.internal.dependency.Spine(project)
 
@@ -257,6 +267,33 @@ subprojects {
         test {
             useJUnitPlatform { includeEngines("junit-jupiter") }
             configureLogging()
+        }
+    }
+
+    protobuf {
+        generatedFilesBaseDir = generatedDir
+
+        protoc {
+            // Temporarily use this version, since 3.21.x is known to provide
+            // a broken `protoc-gen-js` artifact.
+            // See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
+            //
+            // Once it is addressed, this artifact should be `Protobuf.compiler`.
+            //
+            // Also, this fixes the explicit API more for the generated Kotlin code.
+            //
+            artifact = protocArtifact
+        }
+
+        generateProtoTasks {
+            all().forEach { task ->
+                task.builtins {
+                    maybeCreate("kotlin")
+                }
+                task.doLast {
+                    suppressDeprecationsInKotlin(generatedDir, task.sourceSet.name)
+                }
+            }
         }
     }
 
