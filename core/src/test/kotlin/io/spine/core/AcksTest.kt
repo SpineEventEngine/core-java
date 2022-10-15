@@ -23,66 +23,41 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.core
 
-package io.spine.core;
-
-import com.google.protobuf.Empty;
-import io.spine.protobuf.AnyPacker;
-import io.spine.testing.UtilityClassTest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
-import static io.spine.core.Acks.toCommandId;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
+import io.spine.core.Acks.toCommandId
+import io.spine.core.Responses.statusOk
+import io.spine.protobuf.pack
+import io.spine.testing.UtilityClassTest
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @DisplayName("`Acks` utility class should")
-class AcksTest extends UtilityClassTest<Acks> {
+internal class AcksTest : UtilityClassTest<Acks>(Acks::class.java) {
 
-    AcksTest() {
-        super(Acks.class);
+    fun newAck(signalId: SignalId): Ack = ack {
+        messageId = signalId.pack()
+        status = statusOk()
     }
-
 
     @Nested
-    @DisplayName("obtain `CommandId`")
-    class GetCommandId {
+    internal inner class `obtain 'CommandId'`() {
 
         @Test
-        @DisplayName("returning ID value")
-        void value() {
-            var commandId = CommandId.generate();
-            var ack = newAck(commandId);
-            assertThat(toCommandId(ack))
-                    .isEqualTo(commandId);
+        fun `returning ID value`() {
+            val commandId = CommandId.generate()
+            val ack = newAck(commandId)
+            assertThat(toCommandId(ack)).isEqualTo(commandId)
         }
 
         @Test
-        @DisplayName("throw `IllegalArgumentException`")
-        void args() {
-            assertThrows(IllegalArgumentException.class, () ->
-                    toCommandId(newAck(Events.generateId()))
-            );
+        fun `throw 'IllegalArgumentException' if 'messageId' is not 'CommandId'`() {
+            assertThrows<IllegalArgumentException> {
+                toCommandId(newAck(Events.generateId()))
+            }
         }
-    }
-
-    /*
-     * Test environment
-     ************************/
-
-    static Ack newAck(SignalId signalId) {
-        return Ack
-                .newBuilder()
-                .setMessageId(AnyPacker.pack(signalId))
-                .setStatus(newOkStatus())
-                .build();
-    }
-
-    private static Status newOkStatus() {
-        return Status
-                .newBuilder()
-                .setOk(Empty.getDefaultInstance())
-                .build();
     }
 }

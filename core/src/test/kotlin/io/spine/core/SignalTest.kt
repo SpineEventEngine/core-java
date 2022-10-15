@@ -23,50 +23,43 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.core
 
-package io.spine.core;
+import com.google.common.truth.Truth.assertThat
+import io.spine.base.EventMessage
+import io.spine.protobuf.AnyPacker
+import io.spine.test.core.ProjectCreated
+import io.spine.test.core.TaskAssigned
+import io.spine.test.core.projectCreated
+import io.spine.test.core.projectId
+import io.spine.validate.NonValidated
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
-import io.spine.base.EventMessage;
-import io.spine.protobuf.AnyPacker;
-import io.spine.test.core.ProjectCreated;
-import io.spine.test.core.ProjectId;
-import io.spine.test.core.TaskAssigned;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static com.google.common.truth.Truth.assertThat;
-
-@DisplayName("Signal should")
-class SignalTest {
+@DisplayName("`Signal` should")
+internal class SignalTest {
 
     @Test
-    @DisplayName("verify type of the enclosed message")
-    void checkType() {
-        var event = stubEvent();
-
-        assertThat(event.is(ProjectCreated.class))
-                .isTrue();
-        assertThat(event.is(EventMessage.class))
-                .isTrue();
-        assertThat(event.is(TaskAssigned.class))
-                .isFalse();
+    fun `verify type of the enclosed message`() {
+        val event = stubEvent()
+        assertThat(event.`is`(ProjectCreated::class.java))
+            .isTrue()
+        assertThat(event.`is`(EventMessage::class.java))
+            .isTrue()
+        assertThat(event.`is`(TaskAssigned::class.java))
+            .isFalse()
     }
 
     /**
-     * Creates a stub instance of {@code Event} with the type {@link ProjectCreated}.
+     * Creates a stub instance of `Event` with the type [ProjectCreated].
      *
-     * <p>Some of required fields of {@code Event} are not populated for simplicity.
+     * Some of required fields of `Event` are not populated for simplicity.
      */
-    private Event stubEvent() {
-        var project = ProjectId.newBuilder()
-                .setId(getClass().getName())
-                .build();
-        var message = ProjectCreated.newBuilder()
-                .setProjectId(project)
-                .build();
-        var event = Event.newBuilder()
-                .setMessage(AnyPacker.pack(message))
-                .buildPartial();
-        return event;
+    private fun stubEvent(): @NonValidated Event {
+        val project = projectId { id = javaClass.name }
+        val message = projectCreated { projectId = project }
+        return Event.newBuilder()
+            .setMessage(AnyPacker.pack(message))
+            .buildPartial()
     }
 }

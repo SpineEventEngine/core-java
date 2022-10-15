@@ -23,49 +23,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.core
 
-package io.spine.core;
-
-import io.spine.base.Error;
-import io.spine.testing.UtilityClassTest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.google.common.truth.extensions.proto.ProtoTruth
+import io.spine.base.Error
+import io.spine.core.Responses.ok
+import io.spine.testing.UtilityClassTest
+import io.spine.validate.NonValidated
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 @DisplayName("`Responses` utility should")
-class ResponsesTest extends UtilityClassTest<Responses> {
+internal class ResponsesTest : UtilityClassTest<Responses>(Responses::class.java) {
 
-    private ResponsesTest() {
-        super(Responses.class);
+    @Test
+    fun `return OK response`() {
+        ProtoTruth.assertThat(ok())
+            .isNotEqualToDefaultInstance()
     }
 
     @Test
-    @DisplayName("return OK response")
-    void returnOkResponse() {
-        checkNotNull(Responses.ok());
+    fun `recognize OK response`() {
+        val ok = ok()
+        assertTrue(ok.isOk)
+        assertFalse(ok.isError)
     }
 
+    /**
+     * This test uses partially built values even though the [Status]
+     * does not set validation on the [Status.error][Status.getError] field.
+     * This is so because the `base` subproject is built without using the Validation SDK.
+     *
+     * We want to make it future-compatible, should we decide validating
+     * the types provided by `base`.
+     */
     @Test
-    @DisplayName("recognize OK response")
-    void recognizeOkResponse() {
-        var ok = Responses.ok();
-        assertTrue(ok.isOk());
-        assertFalse(ok.isError());
-    }
+    fun `recognize not OK response`() {
+        val asIfError: @NonValidated Status = Status.newBuilder()
+            .setError(Error.getDefaultInstance())
+            .buildPartial()
 
-    @Test
-    @DisplayName("recognize not OK response")
-    void recognizeNotOkResponse() {
-        var status = Status.newBuilder()
-                .setError(Error.getDefaultInstance())
-                .build();
-        var error = Response.newBuilder()
-                .setStatus(status)
-                .build();
-        assertFalse(error.isOk());
-        assertTrue(error.isError());
+        val error: @NonValidated Response = Response.newBuilder()
+            .setStatus(asIfError)
+            .buildPartial()
+
+        assertFalse(error.isOk)
+        assertTrue(error.isError)
     }
 }

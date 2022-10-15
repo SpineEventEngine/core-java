@@ -23,48 +23,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.core
 
-package io.spine.core;
-
-import com.google.common.testing.NullPointerTester;
-import io.spine.testing.UtilityClassTest;
-import io.spine.testing.core.given.GivenVersion;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static com.google.common.truth.Truth.assertThat;
-import static io.spine.core.Versions.checkIsIncrement;
-import static io.spine.core.Versions.increment;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.google.common.testing.NullPointerTester
+import com.google.common.truth.Truth.assertThat
+import io.spine.core.Versions.checkIsIncrement
+import io.spine.core.Versions.increment
+import io.spine.testing.UtilityClassTest
+import io.spine.testing.core.given.GivenVersion.withNumber
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @DisplayName("`Versions` utility should")
-class VersionsTest extends UtilityClassTest<Versions> {
+internal class VersionsTest : UtilityClassTest<Versions>(Versions::class.java) {
 
-    private VersionsTest() {
-        super(Versions.class);
-    }
-
-    @Override
-    protected void configure(NullPointerTester tester) {
-        super.configure(tester);
-        tester.setDefault(Version.class, Version.getDefaultInstance());
+    override fun configure(tester: NullPointerTester) {
+        super.configure(tester)
+        tester.setDefault(Version::class.java, Version.getDefaultInstance())
     }
 
     @Test
-    @DisplayName("check `Version` increment")
-    void checkVersionIncrement() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> checkIsIncrement(
-                             GivenVersion.withNumber(2),
-                             GivenVersion.withNumber(1)
-                     ));
+    fun `check 'Version' increment`() {
+        assertThrows<IllegalArgumentException> {
+            checkIsIncrement(
+                withNumber(2),
+                withNumber(1)
+            )
+        }
     }
 
     @Test
-    @DisplayName("increment `Version`")
-    void incr() {
-        var v1 = GivenVersion.withNumber(1);
-        assertThat(increment(v1).getNumber())
-                .isEqualTo(v1.getNumber() + 1);
+    fun `increment 'Version'`() {
+        val v1 = withNumber(1)
+        assertThat(increment(v1).number).isEqualTo(v1.number + 1)
     }
 }
