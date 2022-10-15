@@ -44,6 +44,7 @@ import io.spine.test.stand.MenuId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.type.TypeName;
+import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,10 +127,10 @@ class EntityQueryProcessorTest {
     @Test
     @DisplayName("fail if the query does not specify filters and `include_all` is not set")
     void failOnInvalidQuery() {
-        var target = Target.newBuilder()
+        @NonValidated Target target = Target.newBuilder()
                 .setType(TypeName.of(Mirror.class).value())
                 .buildPartial();
-        var query = Query.newBuilder()
+        @NonValidated Query query = Query.newBuilder()
                 .setId(QueryId.newBuilder().setValue(newUuid()))
                 .setContext(factory.newActorContext())
                 .setTarget(target)
