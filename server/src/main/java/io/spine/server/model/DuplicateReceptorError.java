@@ -25,7 +25,7 @@
  */
 package io.spine.server.model;
 
-import com.google.common.base.Joiner;
+import io.spine.string.Diags;
 
 import java.util.Collection;
 
@@ -36,8 +36,6 @@ import static java.lang.String.format;
  * in the declaring class.
  */
 public final class DuplicateReceptorError extends ModelError {
-
-    private static final Joiner METHOD_JOINER = Joiner.on(", ");
 
     private static final long serialVersionUID = 0L;
 
@@ -51,10 +49,17 @@ public final class DuplicateReceptorError extends ModelError {
                      firstMethodName, secondMethodName));
     }
 
-    @SuppressWarnings("unused")
-    DuplicateReceptorError(Collection<? extends Receptor<?, ?, ?, ?>> handlers) {
-        super(format("Handler methods %s are clashing.%n" +
-                             "Only one of them should handle this message type.",
-                     METHOD_JOINER.join(handlers)));
+    @SuppressWarnings("unused") /* Reserved for future use in code generation when
+        more than two duplicating receptors would be reported at once. */
+    DuplicateReceptorError(Collection<? extends Receptor<?, ?, ?, ?>> receptors) {
+        super(listReceptors(receptors));
+    }
+
+    private static String listReceptors(Collection<? extends Receptor<?, ?, ?, ?>> receptors) {
+        var backticked = receptors.stream()
+                .collect(Diags.toEnumerationBackticked());
+        return format("Receptors %s are clashing.%n" +
+                              "Only one of them should receive this message type.",
+                      backticked);
     }
 }
