@@ -44,7 +44,7 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.server.log.HandlerLifecycle;
 import io.spine.server.log.HandlerLog;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.Validate;
@@ -531,7 +531,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void beforeInvoke(HandlerMethod<?, ?, ?, ?> method) {
+    public void beforeInvoke(Receptor<?, ?, ?, ?> method) {
         checkNotNull(method);
         var logger = loggerFor(getClass());
         this.handlerLog = new HandlerLog(logger, method);
@@ -539,7 +539,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void afterInvoke(HandlerMethod<?, ?, ?, ?> method) {
+    public void afterInvoke(Receptor<?, ?, ?, ?> method) {
         this.handlerLog = null;
     }
 

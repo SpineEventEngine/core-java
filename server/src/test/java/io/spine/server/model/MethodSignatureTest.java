@@ -94,8 +94,8 @@ public abstract class MethodSignatureTest<S extends MethodSignature<?, ?>> {
     }
 
     @SuppressWarnings("rawtypes") // save on generic params of `HandlerMethod`.
-    private Optional<? extends HandlerMethod> wrap(Method method) {
-        Optional<? extends HandlerMethod> result = signature().classify(method);
+    private Optional<? extends Receptor> wrap(Method method) {
+        Optional<? extends Receptor> result = signature().classify(method);
         return result;
     }
 

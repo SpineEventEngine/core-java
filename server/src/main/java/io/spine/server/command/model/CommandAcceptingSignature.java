@@ -33,7 +33,7 @@ import io.spine.base.RejectionThrowable;
 import io.spine.core.CommandContext;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.ExtractedArguments;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 import io.spine.server.model.MethodParams;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ParameterSpec;
@@ -50,10 +50,10 @@ import static io.spine.server.model.TypeMatcher.exactly;
 /**
  * The signature of a method, that accepts {@code Command} envelopes as parameter values.
  *
- * @param <H> the type of {@link HandlerMethod} which signature this is
+ * @param <H> the type of {@link Receptor} which signature this is
  */
 abstract class CommandAcceptingSignature
-        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
+        <H extends Receptor<?, CommandClass, CommandEnvelope, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // to save on allocations.

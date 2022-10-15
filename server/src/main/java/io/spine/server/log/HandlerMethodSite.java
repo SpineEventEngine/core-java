@@ -30,7 +30,7 @@ import com.google.common.base.Objects;
 import com.google.common.flogger.LogSite;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.code.java.ClassName;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
@@ -51,7 +51,7 @@ final class HandlerMethodSite extends LogSite {
     @SuppressWarnings("Immutable")
     private final Method method;
 
-    HandlerMethodSite(HandlerMethod<?, ?, ?, ?> method) {
+    HandlerMethodSite(Receptor<?, ?, ?, ?> method) {
         super();
         checkNotNull(method);
         this.method = method.rawMethod();

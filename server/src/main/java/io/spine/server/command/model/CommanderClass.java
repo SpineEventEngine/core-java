@@ -32,7 +32,7 @@ import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -134,7 +134,7 @@ public final class CommanderClass<C extends Commander>
     private void validateExternalMethods() {
         var methods = commands().stream()
                 .flatMap(type -> handlersForType(type).stream())
-                .filter(HandlerMethod::isExternal)
+                .filter(Receptor::isExternal)
                 .collect(toSet());
         if (!methods.isEmpty()) {
             throw new ExternalCommandReceiverMethodError(this, methods);

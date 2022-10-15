@@ -37,6 +37,6 @@ class HandlerMethodTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        new NullPointerTester().testAllPublicStaticMethods(HandlerMethod.class);
+        new NullPointerTester().testAllPublicStaticMethods(Receptor.class);
     }
 }

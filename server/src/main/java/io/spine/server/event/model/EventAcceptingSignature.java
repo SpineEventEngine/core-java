@@ -27,7 +27,7 @@
 package io.spine.server.event.model;
 
 import io.spine.server.model.AllowedParams;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.type.EventEnvelope;
 
@@ -36,9 +36,9 @@ import java.lang.annotation.Annotation;
 /**
  * An abstract base of signatures for methods that accept {@code Event}s.
  *
- * @param <H> the type of {@link HandlerMethod} which signature this belongs to
+ * @param <H> the type of {@link Receptor} which signature this belongs to
  */
-abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?>>
+abstract class EventAcceptingSignature<H extends Receptor<?, ?, EventEnvelope, ?>>
         extends MethodSignature<H, EventEnvelope> {
 
     EventAcceptingSignature(Class<? extends Annotation> annotation) {

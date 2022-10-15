@@ -26,10 +26,10 @@
 
 package io.spine.server.log;
 
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 
 /**
- * Callbacks for a {@link HandlerMethod} invocation.
+ * Callbacks for a {@link Receptor} invocation.
  *
  * <p>If the target of the method implements {@code HandlerLifecycle}, it is invoked alongside
  * handler method. For example:
@@ -68,7 +68,7 @@ public interface HandlerLifecycle {
      *
      * <p>The handler method is invoked immediately after this method.
      */
-    void beforeInvoke(HandlerMethod<?, ?, ?, ?> method);
+    void beforeInvoke(Receptor<?, ?, ?, ?> method);
 
     /**
      * A callback for a handler method invocation end.
@@ -76,5 +76,5 @@ public interface HandlerLifecycle {
      * <p>This method is invoked immediately after the handler method, even if it has thrown
      * an exception.
      */
-    void afterInvoke(HandlerMethod<?, ?, ?, ?> method);
+    void afterInvoke(Receptor<?, ?, ?, ?> method);
 }

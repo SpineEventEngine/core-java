@@ -29,7 +29,7 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventReactor;
 import io.spine.server.model.HandlerMap;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -59,7 +59,7 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
         this.reactors = HandlerMap.create(cls, new EventReactorSignature());
         this.events = reactors.messageClasses();
         this.domesticEvents = reactors.messageClasses((h) -> !h.isExternal());
-        this.externalEvents = reactors.messageClasses(HandlerMethod::isExternal);
+        this.externalEvents = reactors.messageClasses(Receptor::isExternal);
     }
 
     /** Creates new instance for the given raw class. */

@@ -31,7 +31,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMap;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 import io.spine.server.model.MethodSignature;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
@@ -54,7 +54,7 @@ import java.util.Optional;
 @Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T extends EventReceiver,
                                          P extends MessageClass<?>,
-                                         M extends HandlerMethod<?, EventClass, ?, P>>
+                                         M extends Receptor<?, EventClass, ?, P>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
@@ -74,7 +74,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         this.handlers = HandlerMap.create(delegatingClass, signature);
         this.events = handlers.messageClasses();
         this.domesticEvents = handlers.messageClasses((h) -> !h.isExternal());
-        this.externalEvents = handlers.messageClasses(HandlerMethod::isExternal);
+        this.externalEvents = handlers.messageClasses(Receptor::isExternal);
         this.domesticStates = extractStates(false);
         this.externalStates = extractStates(true);
     }
@@ -160,7 +160,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         var result = stateHandlers.stream()
                 .filter(h -> h instanceof StateSubscriberMethod)
                 .map(h -> (StateSubscriberMethod) h)
-                .filter(external ? HandlerMethod::isExternal : HandlerMethod::isDomestic)
+                .filter(external ? Receptor::isExternal : Receptor::isDomestic)
                 .map(StateSubscriberMethod::stateClass)
                 .collect(ImmutableSet.<StateClass<?>>toImmutableSet());
         return result;

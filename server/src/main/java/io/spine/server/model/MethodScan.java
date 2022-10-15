@@ -43,13 +43,13 @@ import java.util.Map;
  * @param <H>
  *         the type of handler method to find
  */
-final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
+final class MethodScan<H extends Receptor<?, ?, ?, ?>> {
 
     private final Class<?> declaringClass;
     private final MethodSignature<H, ?> signature;
     private final Multimap<DispatchKey, H> handlers;
     private final Map<DispatchKey, H> seenMethods;
-    private final Map<MessageClass<?>, HandlerMethod<?, ?, ?, ?>> messageToHandler;
+    private final Map<MessageClass<?>, Receptor<?, ?, ?, ?>> messageToHandler;
 
     /**
      * Finds handler methods in the scanned class by the given signature.
@@ -62,7 +62,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
      *         the handler {@linkplain MethodSignature signature}
      * @return the map with handler methods of the given type
      */
-    static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, H>
+    static <H extends Receptor<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, H>
     findMethodsBy(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         var operation = new MethodScan<>(declaringClass, signature);
         var result = operation.perform();
@@ -118,7 +118,7 @@ final class MethodScan<H extends HandlerMethod<?, ?, ?, ?>> {
         }
     }
 
-    private void checkForFilterClashes(HandlerMethod<?, ?, ?, ?> handler) {
+    private void checkForFilterClashes(Receptor<?, ?, ?, ?> handler) {
         var filter = handler.filter();
         if (filter.acceptsAll()) {
             return;

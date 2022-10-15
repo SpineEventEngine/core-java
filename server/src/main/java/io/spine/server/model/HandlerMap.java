@@ -63,7 +63,7 @@ import static java.util.Comparator.comparing;
 @Immutable(containerOf = {"M", "H"})
 public final class HandlerMap<M extends MessageClass<?>,
                               R extends MessageClass<?>,
-                              H extends HandlerMethod<?, M, ?, R>>
+                              H extends Receptor<?, M, ?, R>>
         implements Serializable, Logging {
 
     private static final long serialVersionUID = 0L;
@@ -83,7 +83,7 @@ public final class HandlerMap<M extends MessageClass<?>,
      */
     public static <M extends MessageClass<?>,
                    P extends MessageClass<?>,
-                   H extends HandlerMethod<?, M, ?, P>>
+                   H extends Receptor<?, M, ?, P>>
     HandlerMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
@@ -129,7 +129,7 @@ public final class HandlerMap<M extends MessageClass<?>,
     public ImmutableSet<R> producedTypes() {
         var result = map.values()
                 .stream()
-                .map(HandlerMethod::producedMessages)
+                .map(Receptor::producedMessages)
                 .flatMap(Set::stream)
                 .collect(toImmutableSet());
         return result;
@@ -217,10 +217,10 @@ public final class HandlerMap<M extends MessageClass<?>,
         return handlersOf(messageClass, EmptyClass.instance());
     }
 
-    private static <M extends MessageClass<?>, H extends HandlerMethod<?, M, ?, ?>>
+    private static <M extends MessageClass<?>, H extends Receptor<?, M, ?, ?>>
     ImmutableSet<M> messageClasses(Collection<H> handlerMethods) {
         var result = handlerMethods.stream()
-                .map(HandlerMethod::messageClass)
+                .map(Receptor::messageClass)
                 .collect(toImmutableSet());
         return result;
     }

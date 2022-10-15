@@ -50,10 +50,10 @@ import java.util.Set;
  *         the type of the produced message classes
  */
 @Immutable
-public interface HandlerMethod<T,
-                               C extends MessageClass<?>,
-                               E extends MessageEnvelope<?, ?, ?>,
-                               R extends MessageClass<?>> {
+public interface Receptor<T,
+                          C extends MessageClass<?>,
+                          E extends MessageEnvelope<?, ?, ?>,
+                          R extends MessageClass<?>> {
 
     /**
      * Obtains the type of the incoming message class.

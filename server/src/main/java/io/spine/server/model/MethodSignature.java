@@ -43,7 +43,7 @@ import static io.spine.server.model.AccessModifier.PROTECTED_CONTRACT;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Specification of a {@linkplain HandlerMethod handler method} signature.
+ * Specification of a {@linkplain Receptor handler method} signature.
  *
  * <p>Sets the requirements to meet for the {@linkplain Method java.lang.reflect.Method}
  * in order to be qualified as a {@code Message} handler method.
@@ -65,7 +65,7 @@ import static java.util.stream.Collectors.toList;
  * @param <E>
  *         the type of envelope, which is used to invoke the handler method
  */
-public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
+public abstract class MethodSignature<H extends Receptor<?, ?, E, ?>,
                                       E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;
@@ -177,7 +177,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     }
 
     /**
-     * Creates the {@linkplain HandlerMethod HandlerMethod} instance according to the passed
+     * Creates the {@linkplain Receptor HandlerMethod} instance according to the passed
      * raw method and the parameter specification.
      *
      * <p>By implementing this method descendants define how the parameter spec is used to fit
@@ -202,7 +202,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     }
 
     /**
-     * Creates a {@linkplain HandlerMethod handler method} from a raw method, if the passed
+     * Creates a {@linkplain Receptor handler method} from a raw method, if the passed
      * method {@linkplain #matches(Method) matches} the signature.
      *
      * @param method

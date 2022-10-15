@@ -38,7 +38,7 @@ import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A {@link HandlerMethod} which produces commands in response to a signal.
+ * A {@link Receptor} which produces commands in response to a signal.
  *
  * @param <T>
  *         the type of the target object
@@ -51,7 +51,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface CommandProducingMethod<T,
                                         C extends MessageClass<?>,
                                         E extends MessageEnvelope<?, ?, ?>>
-        extends HandlerMethod<T, C, E, CommandClass> {
+        extends Receptor<T, C, E, CommandClass> {
 
     /**
      * Creates success result from the empty result of the method execution.

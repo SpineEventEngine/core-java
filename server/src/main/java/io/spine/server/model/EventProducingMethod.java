@@ -39,7 +39,7 @@ import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * A {@link HandlerMethod} which produces events in response to a signal.
+ * A {@link Receptor} which produces events in response to a signal.
  *
  * @param <T>
  *         the type of the target object
@@ -52,7 +52,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface EventProducingMethod<T extends EventProducer,
                                       C extends MessageClass<?>,
                                       E extends MessageEnvelope<?, ?, ?>>
-        extends HandlerMethod<T, C, E, EventClass> {
+        extends Receptor<T, C, E, EventClass> {
 
     /**
      * Produces an outcome in case the event producing method call finished successfully.

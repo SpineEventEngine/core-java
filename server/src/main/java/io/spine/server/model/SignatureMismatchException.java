@@ -29,8 +29,8 @@ package io.spine.server.model;
 import com.google.common.base.Joiner;
 
 /**
- * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
- * its {@link HandlerMethod#rawMethod() wrapped method} does not match
+ * Thrown for {@linkplain Receptor handler method} in case
+ * its {@link Receptor#rawMethod() wrapped method} does not match
  * {@linkplain MethodSignature method signature}, set for the handler.
  */
 public class SignatureMismatchException extends RuntimeException {

@@ -28,7 +28,7 @@ package io.spine.server.log;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.common.flogger.LogSite;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 
 import java.util.logging.Level;
 
@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A log for handler methods.
  *
- * <p>The log is set up with a {@link HandlerMethod} from which it should be accessed. By default,
+ * <p>The log is set up with a {@link Receptor} from which it should be accessed. By default,
  * the log will include the given method as the logging {@linkplain LogSite site}.
  */
 public final class HandlerLog {
@@ -45,7 +45,7 @@ public final class HandlerLog {
     private final FluentLogger logger;
     private final LogSite logSite;
 
-    public HandlerLog(FluentLogger logger, HandlerMethod<?, ?, ?, ?> method) {
+    public HandlerLog(FluentLogger logger, Receptor<?, ?, ?, ?> method) {
         this.logger = checkNotNull(logger);
         checkNotNull(method);
         this.logSite = new HandlerMethodSite(method);

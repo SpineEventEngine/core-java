@@ -81,7 +81,7 @@ class AbstractHandlerMethod<T,
                             C extends MessageClass<M>,
                             E extends MessageEnvelope<?, ? extends Signal<?, ?, ?>, ?>,
                             R extends MessageClass<?>>
-        implements HandlerMethod<T, C, E, R> {
+        implements Receptor<T, C, E, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
