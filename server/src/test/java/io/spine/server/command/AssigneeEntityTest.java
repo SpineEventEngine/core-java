@@ -26,13 +26,13 @@
 
 package io.spine.server.command;
 
-import io.spine.server.command.given.CommandAssigneeEntityTestEnv.AssigneeEntity;
+import io.spine.server.command.given.AssigneeEntityTestEnv.AssigneeEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.command.given.CommandAssigneeEntityTestEnv.msg;
-import static io.spine.server.command.given.CommandAssigneeEntityTestEnv.str;
+import static io.spine.server.command.given.AssigneeEntityTestEnv.msg;
+import static io.spine.server.command.given.AssigneeEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("`CommandAssigneeEntity` should")

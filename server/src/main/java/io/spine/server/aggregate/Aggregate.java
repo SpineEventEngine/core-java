@@ -34,7 +34,7 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.command.CommandAssigneeEntity;
+import io.spine.server.command.AssigneeEntity;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventPlayer;
@@ -85,7 +85,7 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  * <h2>Assigning command handlers</h2>
  *
  * <p>Command-handling methods of an {@code Aggregate} are defined in
- * the same way as described in {@link CommandAssigneeEntity}.
+ * the same way as described in {@link AssigneeEntity}.
  *
  * <p>Event(s) returned by command-handling methods are posted to
  * the {@link io.spine.server.event.EventBus EventBus} automatically
@@ -120,11 +120,10 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  * @param <B>
  *         the type of the aggregate state builder
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for this central concept.
 public abstract class Aggregate<I,
                                 S extends EntityState<I>,
                                 B extends ValidatingBuilder<S>>
-        extends CommandAssigneeEntity<I, S, B>
+        extends AssigneeEntity<I, S, B>
         implements EventPlayer, EventReactor, HasLifecycleColumns<I, S> {
 
     private final UncommittedHistory uncommittedHistory = new UncommittedHistory(this::toSnapshot);

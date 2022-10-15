@@ -38,7 +38,7 @@ import io.spine.test.model.filter.ModProject;
  * This aggregate declares a command-handling method that breaks the contract imposed by
  * {@link Assign}, by using {@link Where} filters.
  */
-public final class ModSplitCommandAggregate extends Aggregate<String, ModProject, ModProject.Builder> {
+public final class ModSplitAggregate extends Aggregate<String, ModProject, ModProject.Builder> {
 
     private static final String FANCY_ID = "1";
     private static final String INTERNAL_FANCY_ID = "very fancy project";

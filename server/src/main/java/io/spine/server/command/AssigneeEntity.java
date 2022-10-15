@@ -51,10 +51,9 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  *         the type of the builders for the entity state
  * @see io.spine.server.command.Assign @Assign
  */
-public abstract
-class CommandAssigneeEntity<I,
-                            S extends EntityState<I>,
-                            B extends ValidatingBuilder<S>>
+public abstract class AssigneeEntity<I,
+                                     S extends EntityState<I>,
+                                     B extends ValidatingBuilder<S>>
         extends TransactionalEntity<I, S, B>
         implements Assignee {
 
@@ -64,14 +63,14 @@ class CommandAssigneeEntity<I,
     @LazyInit
     private @MonotonicNonNull Any idAsAny;
 
-    protected CommandAssigneeEntity() {
+    protected AssigneeEntity() {
         super();
     }
 
     /**
      * Creates a new entity with the passed ID.
      */
-    protected CommandAssigneeEntity(I id) {
+    protected AssigneeEntity(I id) {
         super(id);
         this.idAsAny = Identifier.pack(id);
     }
