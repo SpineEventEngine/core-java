@@ -34,14 +34,15 @@ import java.lang.reflect.Method;
 
 /**
  * Abstract base for test environment classes for testing
- * {@link CommandingReaction}.
+ * {@link CommandingReaction} receptors.
  *
  * <p>Derived classes must declare a method called {@linkplain #METHOD_NAME commandOn} so that
  * the method can be {@linkplain #getMethod() obtained} from the code of tests.
  */
 public class TestCommandReactor implements EventReceiver {
 
-    private static final String METHOD_NAME = "commandOn";
+    @SuppressWarnings("WeakerAccess") // it's part of the API.
+    public static final String METHOD_NAME = "commandOn";
 
     public Method getMethod() {
         return ModelTests.getMethod(getClass(), METHOD_NAME);
