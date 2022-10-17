@@ -26,9 +26,8 @@
 
 package io.spine.server.model;
 
-import io.spine.string.Diags;
-
 import static com.google.common.collect.Streams.stream;
+import static io.spine.string.Diags.toEnumerationBackticked;
 
 /**
  * Thrown for a {@linkplain Receptor receptor} in case
@@ -44,7 +43,7 @@ public class SignatureMismatchException extends RuntimeException {
     }
 
     private static String formatMsg(Iterable<SignatureMismatch> mismatches) {
-        var mm = stream(mismatches).collect(Diags.toEnumerationBackticked());
+        var mm = stream(mismatches).collect(toEnumerationBackticked());
         return "Error declaring a method. Mismatches: " + mm + '.';
     }
 }
