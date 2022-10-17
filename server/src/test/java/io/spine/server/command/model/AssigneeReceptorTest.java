@@ -71,7 +71,7 @@ import static io.spine.server.model.given.Given.CommandMessage.startProject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`CommandAssigneeMethod` should")
+@DisplayName("`AssigneeReceptor` should")
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 class AssigneeReceptorTest {
 
