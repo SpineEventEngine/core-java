@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <R>
  *         the type of the receptors to find
  */
-final class MethodScan<R extends Receptor<?, ?, ?, ?>> {
+final class ReceptorScan<R extends Receptor<?, ?, ?, ?>> {
 
     private final Class<?> declaringClass;
     private final ReceptorSignature<R, ?> signature;
@@ -66,12 +66,12 @@ final class MethodScan<R extends Receptor<?, ?, ?, ?>> {
     findMethodsBy(Class<?> declaringClass, ReceptorSignature<R, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
-        var operation = new MethodScan<>(declaringClass, signature);
+        var operation = new ReceptorScan<>(declaringClass, signature);
         var result = operation.perform();
         return result;
     }
 
-    private MethodScan(Class<?> declaringClass, ReceptorSignature<R, ?> signature) {
+    private ReceptorScan(Class<?> declaringClass, ReceptorSignature<R, ?> signature) {
         this.declaringClass = declaringClass;
         this.signature = signature;
         this.receptors = HashMultimap.create();

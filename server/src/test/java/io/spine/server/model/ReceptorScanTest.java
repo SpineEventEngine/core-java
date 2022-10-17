@@ -37,10 +37,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.model.MethodScan.findMethodsBy;
+import static io.spine.server.model.ReceptorScan.findMethodsBy;
 
 @DisplayName("`MethodScan` should")
-class MethodScanTest {
+class ReceptorScanTest {
 
     /**
      * Registers the stringifier for {@code Integer}, which is used for parsing filter field values.

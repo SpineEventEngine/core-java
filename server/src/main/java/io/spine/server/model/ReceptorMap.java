@@ -46,7 +46,7 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static io.spine.server.model.MethodScan.findMethodsBy;
+import static io.spine.server.model.ReceptorScan.findMethodsBy;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 
