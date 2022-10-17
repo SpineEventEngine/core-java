@@ -133,7 +133,7 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
      * one or more other commands.
      */
     public CommandSubstituter commanderOf(CommandEnvelope command) {
-        return commanderDelegate.handlerOf(command);
+        return commanderDelegate.receptorOf(command);
     }
 
     /**

@@ -81,7 +81,7 @@ public abstract class AbstractAssignee
      */
     @Override
     public void dispatch(CommandEnvelope envelope) {
-        var method = thisClass.handlerOf(envelope);
+        var method = thisClass.receptorOf(envelope);
         DispatchOutcomeHandler
                 .from(method.invoke(this, envelope))
                 .onEvents(this::postEvents)

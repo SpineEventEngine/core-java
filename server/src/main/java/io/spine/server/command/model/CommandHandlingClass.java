@@ -38,7 +38,7 @@ import io.spine.type.MessageClass;
  * @param <P>
  *         the type of message classes produced from the command handling
  * @param <R>
- *         the type of receptors that accept the commands
+ *         the type of receptors that accept commands
  */
 public interface CommandHandlingClass<P extends MessageClass<?>,
                                       R extends CommandReceptor<?, P>> {
@@ -49,7 +49,7 @@ public interface CommandHandlingClass<P extends MessageClass<?>,
     ImmutableSet<CommandClass> commands();
 
     /**
-     * Obtains classes of all messages produced as a result of command handling.
+     * Obtains types of all messages produced as a result of command handling.
      */
     ImmutableSet<P> commandOutput();
 
@@ -60,7 +60,7 @@ public interface CommandHandlingClass<P extends MessageClass<?>,
     ImmutableSet<EventClass> rejections();
 
     /**
-     * Obtains the receptor for the class of the passed command.
+     * Obtains the receptor for the type of the passed command.
      */
-    R handlerOf(CommandEnvelope command);
+    R receptorOf(CommandEnvelope command);
 }

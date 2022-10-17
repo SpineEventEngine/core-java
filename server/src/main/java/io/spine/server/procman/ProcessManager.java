@@ -167,7 +167,7 @@ public abstract class ProcessManager<I,
         var commandClass = command.messageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
-            var method = thisClass.handlerOf(command);
+            var method = thisClass.receptorOf(command);
             var outcome = method.invoke(this, command);
             return outcome;
         }

@@ -82,10 +82,11 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  *         state types as generic parameters.
  * </ol>
  *
- * <h2>Assigning command handlers</h2>
+ * <h2>Assigning methods to handle commands</h2>
  *
- * <p>Command-handling methods of an {@code Aggregate} are defined in
+ * <p>Command receptors of an {@code Aggregate} are defined in
  * the same way as described in {@link AssigneeEntity}.
+ * Please also refer to {@link io.spine.server.command.Assign Assign}.
  *
  * <p>Event(s) returned by command-handling methods are posted to
  * the {@link io.spine.server.event.EventBus EventBus} automatically
@@ -100,6 +101,7 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  * <p>An event applier is a method that changes the state of the aggregate
  * in response to an event. An event applier takes a single parameter of the
  * event message it handles and returns {@code void}.
+ * Please see {@link Apply} for more details.
  *
  * <p>The modification of the state is done using a builder instance obtained
  * from {@link #builder()}.
@@ -120,6 +122,7 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  * @param <B>
  *         the type of the aggregate state builder
  */
+@SuppressWarnings("OverlyCoupledClass")
 public abstract class Aggregate<I,
                                 S extends EntityState<I>,
                                 B extends ValidatingBuilder<S>>
@@ -231,7 +234,7 @@ public abstract class Aggregate<I,
                     .build();
             return outcome;
         } else {
-            var method = thisClass().handlerOf(command);
+            var method = thisClass().receptorOf(command);
             var outcome = method.invoke(this, command);
             return outcome;
         }

@@ -84,6 +84,6 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
 
     @Override
     public Optional<SubscriberMethod> subscriberOf(EventEnvelope event) {
-        return delegate.findHandlerOf(event);
+        return delegate.findReceptorOf(event);
     }
 }

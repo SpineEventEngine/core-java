@@ -48,17 +48,17 @@ import java.util.Optional;
  *         the type of target objects that handle messages
  * @param <P>
  *         the type of message classes produced by handler methods
- * @param <M>
- *         the type of handler method objects
+ * @param <R>
+ *         the type of the receptors
  */
-@Immutable(containerOf = "M")
+@Immutable(containerOf = "R")
 public class EventReceivingClassDelegate<T extends EventReceiver,
                                          P extends MessageClass<?>,
-                                         M extends Receptor<?, EventClass, ?, P>>
+                                         R extends Receptor<?, EventClass, ?, P>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
-    private final ReceptorMap<EventClass, P, M> receptors;
+    private final ReceptorMap<EventClass, P, R> receptors;
     private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
@@ -69,11 +69,11 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * Creates new instance for the passed raw class with methods obtained
      * through the passed factory.
      */
-    public EventReceivingClassDelegate(Class<T> delegatingClass, ReceptorSignature<M, ?> signature) {
+    public EventReceivingClassDelegate(Class<T> delegatingClass, ReceptorSignature<R, ?> signature) {
         super(delegatingClass);
         this.receptors = ReceptorMap.create(delegatingClass, signature);
         this.events = receptors.messageClasses();
-        this.domesticEvents = receptors.messageClasses((h) -> !h.isExternal());
+        this.domesticEvents = receptors.messageClasses((r) -> !r.isExternal());
         this.externalEvents = receptors.messageClasses(Receptor::isExternal);
         this.domesticStates = extractStates(false);
         this.externalStates = extractStates(true);
@@ -126,25 +126,13 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     }
 
     /**
-     * Obtains the method which handles the type of the passed event.
-     *
-     * @param event
-     *         the event which must be handled
-     * @throws IllegalStateException
-     *         if there is no such method in the class
-     */
-    public Optional<M> handlerOf(EventEnvelope event) {
-        return receptors.findReceptorFor(event);
-    }
-
-    /**
      * Looks up the method which handles the passed event class.
      *
      * @param event
      *         the event which must be handled
      * @return event handler method or {@code Optional.empty()} if there is no such method
      */
-    public Optional<M> findHandlerOf(EventEnvelope event) {
+    public Optional<R> findReceptorOf(EventEnvelope event) {
         return receptors.findReceptorFor(event);
     }
 

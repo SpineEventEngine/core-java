@@ -79,7 +79,7 @@ public abstract class AbstractCommander
 
     @Override
     public void dispatch(CommandEnvelope command) {
-        var method = thisClass.handlerOf(command);
+        var method = thisClass.receptorOf(command);
         DispatchOutcomeHandler
                 .from(method.invoke(this, command))
                 .onCommands(this::postCommands)
