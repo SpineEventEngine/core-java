@@ -29,14 +29,14 @@ package io.spine.server.command;
 import io.spine.server.command.model.AssigneeSignature;
 import io.spine.server.command.model.given.handler.InvalidAssignee;
 import io.spine.server.command.model.given.handler.ValidAssignee;
-import io.spine.server.model.MethodSignatureTest;
+import io.spine.server.model.ReceptorSignatureTest;
 import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 @DisplayName("`CommandAssigneeSignature` should")
-class AssigneeSignatureTest extends MethodSignatureTest<AssigneeSignature> {
+class AssigneeSignatureTest extends ReceptorSignatureTest<AssigneeSignature> {
 
     @Override
     protected Stream<Method> validMethods() {

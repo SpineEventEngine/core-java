@@ -29,14 +29,14 @@ package io.spine.server.event.model;
 import io.spine.server.event.React;
 import io.spine.server.event.given.InvalidReactor;
 import io.spine.server.event.given.ValidReactor;
-import io.spine.server.model.MethodSignatureTest;
+import io.spine.server.model.ReceptorSignatureTest;
 import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 @DisplayName("`EventReactorSignature` should")
-class EventReactorSignatureTest extends MethodSignatureTest<EventReactorSignature> {
+class EventReactorSignatureTest extends ReceptorSignatureTest<EventReactorSignature> {
 
     @Override
     protected Stream<Method> validMethods() {

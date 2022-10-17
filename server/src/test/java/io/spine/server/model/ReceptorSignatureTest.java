@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
-public abstract class MethodSignatureTest<S extends ReceptorSignature<?, ?>> {
+public abstract class ReceptorSignatureTest<S extends ReceptorSignature<?, ?>> {
 
     @SuppressWarnings("unused")   /* It is a method source. */
     protected abstract Stream<Method> validMethods();
