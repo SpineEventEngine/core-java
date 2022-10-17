@@ -35,7 +35,7 @@ import org.junit.jupiter.api.DisplayName;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-@DisplayName("`CommandAssigneeSignature` should")
+@DisplayName("`AssigneeSignature` should")
 class AssigneeSignatureTest extends ReceptorSignatureTest<AssigneeSignature> {
 
     @Override
