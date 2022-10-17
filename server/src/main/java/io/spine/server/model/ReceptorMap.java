@@ -87,7 +87,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
         checkNotNull(declaringClass);
         checkNotNull(signature);
         var map = findMethodsBy(declaringClass, signature);
-        var messageClasses = messageClasses(map.values());
+        var messageClasses = messageClassesFrom(map.values());
         return new ReceptorMap<>(map, messageClasses);
     }
 
@@ -119,7 +119,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
      */
     public ImmutableSet<M> messageClasses(Predicate<? super R> predicate) {
         Multimap<DispatchKey, R> filtered = Multimaps.filterValues(map, predicate::test);
-        return messageClasses(filtered.values());
+        return messageClassesFrom(filtered.values());
     }
 
     /**
@@ -196,10 +196,10 @@ public final class ReceptorMap<M extends MessageClass<?>,
      */
     @SuppressWarnings("FloggerLogString") // we use the formatted string two times.
     public R receptorFor(SignalEnvelope<?, ?, ?> message) {
-        var handler = findReceptorFor(message);
-        return handler.orElseThrow(() -> {
+        var receptor = findReceptorFor(message);
+        return receptor.orElseThrow(() -> {
             var msg = format(
-                    "No handler method found for the type `%s`.", message.messageClass()
+                    "No receptor method found for the type `%s`.", message.messageClass()
             );
             _error().log(msg);
             return new ModelError(msg);
@@ -217,9 +217,9 @@ public final class ReceptorMap<M extends MessageClass<?>,
         return receptorsOf(messageClass, EmptyClass.instance());
     }
 
-    private static <M extends MessageClass<?>, H extends Receptor<?, M, ?, ?>>
-    ImmutableSet<M> messageClasses(Collection<H> handlerMethods) {
-        var result = handlerMethods.stream()
+    private static <M extends MessageClass<?>, R extends Receptor<?, M, ?, ?>>
+    ImmutableSet<M> messageClassesFrom(Collection<R> receptors) {
+        var result = receptors.stream()
                 .map(Receptor::messageClass)
                 .collect(toImmutableSet());
         return result;

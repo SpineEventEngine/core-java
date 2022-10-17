@@ -67,8 +67,8 @@ public final class ExternalCommandReceiverMethodError extends ModelError {
     }
 
     private static
-    String handledCommandTypes(Collection<? extends CommandReceptor<?, ?>> handlers) {
-        var result = handlers
+    String handledCommandTypes(Collection<? extends CommandReceptor<?, ?>> receptors) {
+        var result = receptors
                 .stream()
                 .map(CommandReceptor::messageClass)
                 .collect(toEnumerationBackticked());

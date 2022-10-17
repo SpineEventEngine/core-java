@@ -236,28 +236,28 @@ public final class Inbox<I> {
         }
 
         /**
-         * Sends to the reacting handler of the entity with the specified ID.
+         * Sends to the reacting receptor of the entity with the specified ID.
          */
         public void toReactor(I entityId) {
             eventPart.store(event, entityId, REACT_UPON_EVENT);
         }
 
         /**
-         * Sends to the event-importing handler of the entity with the specified ID.
+         * Sends to the event-importing receptor of the entity with the specified ID.
          */
         public void toImporter(I entityId) {
             eventPart.store(event, entityId, IMPORT_EVENT);
         }
 
         /**
-         * Sends to the event-subscribing handler of the entity with the specified ID.
+         * Sends to the event-subscribing receptor of the entity with the specified ID.
          */
         public void toSubscriber(I entityId) {
             eventPart.store(event, entityId, UPDATE_SUBSCRIBER);
         }
 
         /**
-         * Sends to the catch-up handler of the entity with the specified ID.
+         * Sends to the catch-up receptor of the entity with the specified ID.
          */
         public void toCatchUp(I entityId) {
             eventPart.store(event, entityId, CATCH_UP);

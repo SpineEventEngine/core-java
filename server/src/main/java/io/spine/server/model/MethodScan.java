@@ -47,7 +47,7 @@ final class MethodScan<R extends Receptor<?, ?, ?, ?>> {
 
     private final Class<?> declaringClass;
     private final ReceptorSignature<R, ?> signature;
-    private final Multimap<DispatchKey, R> handlers;
+    private final Multimap<DispatchKey, R> receptors;
     private final Map<DispatchKey, R> seenMethods;
     private final Map<MessageClass<?>, Receptor<?, ?, ?, ?>> messageToHandler;
 
@@ -74,7 +74,7 @@ final class MethodScan<R extends Receptor<?, ?, ?, ?>> {
     private MethodScan(Class<?> declaringClass, ReceptorSignature<R, ?> signature) {
         this.declaringClass = declaringClass;
         this.signature = signature;
-        this.handlers = HashMultimap.create();
+        this.receptors = HashMultimap.create();
         this.seenMethods = new HashMap<>();
         this.messageToHandler = new HashMap<>();
     }
@@ -91,7 +91,7 @@ final class MethodScan<R extends Receptor<?, ?, ?, ?>> {
                 scanMethod(method);
             }
         }
-        return ImmutableSetMultimap.copyOf(handlers);
+        return ImmutableSetMultimap.copyOf(receptors);
     }
 
     private void scanMethod(Method method) {
@@ -102,7 +102,7 @@ final class MethodScan<R extends Receptor<?, ?, ?, ?>> {
     private void remember(R receptor) {
         checkNotRemembered(receptor);
         checkForFilterClashes(receptor);
-        handlers.put(receptor.key().withoutFilter(), receptor);
+        receptors.put(receptor.key().withoutFilter(), receptor);
     }
 
     private void checkNotRemembered(R receptor) {

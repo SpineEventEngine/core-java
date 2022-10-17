@@ -223,9 +223,9 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
         }
         var matchingSpec = params().findMatching(method);
         return matchingSpec.map(spec -> {
-            var handler = create(method, spec);
-            handler.discoverAttributes();
-            return handler;
+            var receptor = create(method, spec);
+            receptor.discoverAttributes();
+            return receptor;
         });
     }
 

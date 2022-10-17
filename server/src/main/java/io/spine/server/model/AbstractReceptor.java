@@ -201,19 +201,21 @@ class AbstractReceptor<T,
     }
 
     /**
-     * Returns the class of the first parameter of the passed handler method object.
+     * Returns the class of the first parameter of the passed receptor.
      *
      * <p>It is expected that the first parameter of the passed method is always of
      * a class implementing {@link Message}.
      *
-     * @param handler the method object to take first parameter type from
+     * @param receptor
+     *         the method to take first parameter type from
      * @return the class of the first method parameter
-     * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
+     * @throws ClassCastException
+     *         if the first parameter is not a class implementing {@link Message}
      */
-    protected static <M extends Message> Class<M> firstParamType(Method handler) {
+    protected static <M extends Message> Class<M> firstParamType(Method receptor) {
         @SuppressWarnings("unchecked")
             // We always expect first param as a Message of required type.
-        var result = (Class<M>) handler.getParameterTypes()[0];
+        var result = (Class<M>) receptor.getParameterTypes()[0];
         return result;
     }
 

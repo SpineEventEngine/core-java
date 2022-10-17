@@ -85,7 +85,7 @@ public abstract class AbstractCommandHandlingClass<C,
     }
 
     /**
-     * Obtains the handler method for the passed command.
+     * Obtains the receptor for the passed command.
      */
     @Override
     public R receptorOf(CommandEnvelope command) {
@@ -93,14 +93,14 @@ public abstract class AbstractCommandHandlingClass<C,
     }
 
     /**
-     * Obtains handler methods for the given class of commands.
+     * Obtains receptors for the given class of commands.
      */
     ImmutableSet<R> receptorsForType(CommandClass cls) {
         return commands.receptorsOf(cls);
     }
 
     /**
-     * Checks if this command handler has a handler method for the given class of commands.
+     * Checks if this command handler has a receptor for the given class of commands.
      */
     boolean hasReceptor(CommandClass commandClass) {
         return commands.containsClass(commandClass);

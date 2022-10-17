@@ -71,8 +71,7 @@ public abstract class AbstractAssignee
     private final AssigneeClass<?> thisClass = asCommandAssigneeClass(getClass());
 
     /**
-     * Dispatches the command to the handler method and
-     * posts resulting events to the {@link EventBus}.
+     * Dispatches the command to its receptor and posts resulting events to the {@link EventBus}.
      *
      * @param envelope
      *         the command to dispatch
