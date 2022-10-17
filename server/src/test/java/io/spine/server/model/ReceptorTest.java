@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
-@DisplayName("HandlerMethod static methods should")
-class HandlerMethodTest {
+@DisplayName("`Receptor` static methods should")
+class ReceptorTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
