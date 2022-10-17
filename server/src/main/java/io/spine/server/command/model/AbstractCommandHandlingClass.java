@@ -89,14 +89,14 @@ public abstract class AbstractCommandHandlingClass<C,
      */
     @Override
     public H handlerOf(CommandEnvelope command) {
-        return commands.getHandlerFor(command);
+        return commands.receptorFor(command);
     }
 
     /**
      * Obtains handler methods for the given class of commands.
      */
     ImmutableSet<H> handlersForType(CommandClass cls) {
-        return commands.handlersOf(cls);
+        return commands.receptorsOf(cls);
     }
 
     /**

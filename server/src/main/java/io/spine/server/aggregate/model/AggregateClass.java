@@ -164,7 +164,7 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
      * Obtains event applier method for the passed class of events.
      */
     public final Applier applierOf(EventEnvelope event) {
-        return stateEvents.findHandlerFor(event).orElseThrow(() -> new ModelError(
+        return stateEvents.findReceptorFor(event).orElseThrow(() -> new ModelError(
                 "Aggregate `%s` does not handle event `%s`.", this, event.typeUrl()
         ));
     }

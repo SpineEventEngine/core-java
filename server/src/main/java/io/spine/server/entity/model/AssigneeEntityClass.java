@@ -82,6 +82,6 @@ public abstract class AssigneeEntityClass<E extends Entity<?, ?>>
 
     @Override
     public AssigneeReceptor handlerOf(CommandEnvelope cmd) {
-        return commands.getHandlerFor(cmd);
+        return commands.receptorFor(cmd);
     }
 }

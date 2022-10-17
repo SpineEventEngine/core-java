@@ -58,7 +58,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
-    private final ReceptorMap<EventClass, P, M> handlers;
+    private final ReceptorMap<EventClass, P, M> receptors;
     private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
@@ -71,16 +71,16 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      */
     public EventReceivingClassDelegate(Class<T> delegatingClass, ReceptorSignature<M, ?> signature) {
         super(delegatingClass);
-        this.handlers = ReceptorMap.create(delegatingClass, signature);
-        this.events = handlers.messageClasses();
-        this.domesticEvents = handlers.messageClasses((h) -> !h.isExternal());
-        this.externalEvents = handlers.messageClasses(Receptor::isExternal);
+        this.receptors = ReceptorMap.create(delegatingClass, signature);
+        this.events = receptors.messageClasses();
+        this.domesticEvents = receptors.messageClasses((h) -> !h.isExternal());
+        this.externalEvents = receptors.messageClasses(Receptor::isExternal);
         this.domesticStates = extractStates(false);
         this.externalStates = extractStates(true);
     }
 
     public boolean contains(EventClass eventClass) {
-        return handlers.containsClass(eventClass);
+        return receptors.containsClass(eventClass);
     }
 
     /**
@@ -122,11 +122,11 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * Obtains the classes of messages produced by handler methods of this class.
      */
     public ImmutableSet<P> producedTypes() {
-        return handlers.producedTypes();
+        return receptors.producedTypes();
     }
 
     /**
-     * Obtains the method which handles the passed event class.
+     * Obtains the method which handles the type of the passed event.
      *
      * @param event
      *         the event which must be handled
@@ -134,7 +134,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *         if there is no such method in the class
      */
     public Optional<M> handlerOf(EventEnvelope event) {
-        return handlers.findHandlerFor(event);
+        return receptors.findReceptorFor(event);
     }
 
     /**
@@ -145,7 +145,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * @return event handler method or {@code Optional.empty()} if there is no such method
      */
     public Optional<M> findHandlerOf(EventEnvelope event) {
-        return handlers.findHandlerFor(event);
+        return receptors.findReceptorFor(event);
     }
 
     /**
@@ -153,10 +153,10 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      */
     private ImmutableSet<StateClass<?>> extractStates(boolean external) {
         var updateEvent = StateClass.updateEvent();
-        if (!handlers.containsClass(updateEvent)) {
+        if (!receptors.containsClass(updateEvent)) {
             return ImmutableSet.of();
         }
-        var stateHandlers = handlers.handlersOf(updateEvent);
+        var stateHandlers = receptors.receptorsOf(updateEvent);
         var result = stateHandlers.stream()
                 .filter(h -> h instanceof StateSubscriberMethod)
                 .map(h -> (StateSubscriberMethod) h)

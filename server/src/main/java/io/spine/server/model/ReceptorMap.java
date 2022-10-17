@@ -55,36 +55,35 @@ import static java.util.Comparator.comparing;
  *
  * @param <M>
  *         the type of messages
+ * @param <P>
+ *         the type of message classes produced by receptors
  * @param <R>
- *         the type of message classes produced by handler methods
- * @param <H>
- *         the type of handler methods
+ *         the type of receptors
  */
-@Immutable(containerOf = {"M", "H"})
+@Immutable(containerOf = {"M", "R"})
 public final class ReceptorMap<M extends MessageClass<?>,
-                               R extends MessageClass<?>,
-                               H extends Receptor<?, M, ?, R>>
+                               P extends MessageClass<?>,
+                               R extends Receptor<?, M, ?, P>>
         implements Serializable, Logging {
 
     private static final long serialVersionUID = 0L;
 
-    private final ImmutableSetMultimap<DispatchKey, H> map;
+    private final ImmutableSetMultimap<DispatchKey, R> map;
     private final ImmutableSet<M> messageClasses;
 
     /**
-     * Creates a map of methods found in the passed class.
+     * Creates a map with receptors matching the given signature found in the given class.
      *
      * @param declaringClass
      *         the class to inspect
      * @param signature
      *         the signature of methods
-     * @return new {@code MessageHandlerMap} of methods of the given class matching the given
-     *         signature
+     * @return new instance with methods of the given class matching the given signature
      */
     public static <M extends MessageClass<?>,
                    P extends MessageClass<?>,
-                   H extends Receptor<?, M, ?, P>>
-    ReceptorMap<M, P, H> create(Class<?> declaringClass, ReceptorSignature<H, ?> signature) {
+                   R extends Receptor<?, M, ?, P>>
+    ReceptorMap<M, P, R> create(Class<?> declaringClass, ReceptorSignature<R, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
         var map = findMethodsBy(declaringClass, signature);
@@ -92,20 +91,20 @@ public final class ReceptorMap<M extends MessageClass<?>,
         return new ReceptorMap<>(map, messageClasses);
     }
 
-    private ReceptorMap(ImmutableSetMultimap<DispatchKey, H> map, ImmutableSet<M> messageClasses) {
+    private ReceptorMap(ImmutableSetMultimap<DispatchKey, R> map, ImmutableSet<M> messageClasses) {
         this.map = map;
         this.messageClasses = messageClasses;
     }
 
     /**
-     * Obtains classes of messages for which handlers are stored in this map.
+     * Obtains classes of messages for which receptors are stored in this map.
      */
     public ImmutableSet<M> messageClasses() {
         return messageClasses;
     }
 
     /**
-     * Returns {@code true} if the handler map contains a method that handles the passed class
+     * Returns {@code true} if the map contains a receptor that accepts the passed class
      * of messages, {@code false} otherwise.
      */
     public boolean containsClass(M messageClass) {
@@ -113,20 +112,20 @@ public final class ReceptorMap<M extends MessageClass<?>,
     }
 
     /**
-     * Obtains classes of messages which handlers satisfy the passed {@code predicate}.
+     * Obtains classes of messages which receptors satisfy the given {@code predicate}.
      *
      * @param predicate
-     *         a predicate for handler methods to filter the corresponding message classes
+     *         a predicate for receptors to filter the corresponding message classes
      */
-    public ImmutableSet<M> messageClasses(Predicate<? super H> predicate) {
-        Multimap<DispatchKey, H> filtered = Multimaps.filterValues(map, predicate::test);
+    public ImmutableSet<M> messageClasses(Predicate<? super R> predicate) {
+        Multimap<DispatchKey, R> filtered = Multimaps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
     }
 
     /**
-     * Obtains the classes of messages produced by the handler methods in this map.
+     * Obtains the classes of messages produced by the receptors in this map.
      */
-    public ImmutableSet<R> producedTypes() {
+    public ImmutableSet<P> producedTypes() {
         var result = map.values()
                 .stream()
                 .map(Receptor::producedMessages)
@@ -138,28 +137,29 @@ public final class ReceptorMap<M extends MessageClass<?>,
     /**
      * Obtains methods for handling messages of the given class and with the given origin.
      *
-     * <p>If there is no handler matching both the message and origin class, handlers will be
+     * <p>If there is no receptor matching both the message and origin class, receptor will be
      * searched by the message class only.
      *
-     * <p>If no handlers for a specified criteria is found, returns an empty set.
+     * <p>If no receptor for a specified criteria is found, returns an empty set.
      *
      * @param messageClass
-     *         the message class of the handled message
+     *         the class of the accepted messages
      * @param originClass
-     *         the class of the message, from which the handled message is originate
+     *         the class of the message, from which the accepted message originates
      */
-    private ImmutableSet<H> handlersOf(M messageClass, MessageClass<?> originClass) {
+    private ImmutableSet<R> receptorsOf(M messageClass, MessageClass<?> originClass) {
+        var cls = messageClass.value();
         var key =
                 originClass.equals(EmptyClass.instance())
-                ? new DispatchKey(messageClass.value(), null)
-                : new DispatchKey(messageClass.value(), originClass.value());
-        // If we have a handler with origin type, use the key. Otherwise, find handlers only
-        // by the first parameter.
+                ? new DispatchKey(cls, null)
+                : new DispatchKey(cls, originClass.value());
+        // If we have a receptor with origin type, use the key.
+        // Otherwise, find receptors only by the first parameter.
         var presentKey = map.containsKey(key)
                          ? key
-                         : new DispatchKey(messageClass.value(), null);
-        var handlers = map.get(presentKey);
-        return handlers;
+                         : new DispatchKey(cls, null);
+        var receptors = map.get(presentKey);
+        return receptors;
     }
 
     /**
@@ -167,9 +167,9 @@ public final class ReceptorMap<M extends MessageClass<?>,
      *
      * @param message
      *         a signal message which must be handled
-     * @return a handler method for the given signal or {@code Optional.empty()}
+     * @return a receptor for the given signal or {@code Optional.empty()}
      */
-    public Optional<H> findHandlerFor(SignalEnvelope<?, ?, ?> message) {
+    public Optional<R> findReceptorFor(SignalEnvelope<?, ?, ?> message) {
         var messageClass = message.messageClass();
         MessageClass<?> originClass;
         if (message instanceof EnvelopeWithOrigin) {
@@ -178,10 +178,10 @@ public final class ReceptorMap<M extends MessageClass<?>,
             originClass = EmptyClass.instance();
         }
         @SuppressWarnings("unchecked")
-        var handlers = handlersOf(((M) messageClass), originClass);
-        return handlers.stream()
-                       .sorted(comparing((H h) -> h.filter().pathLength()).reversed())
-                       .filter(h -> h.filter().test(message.message()))
+        var receptors = receptorsOf(((M) messageClass), originClass);
+        return receptors.stream()
+                       .sorted(comparing((R r) -> r.filter().pathLength()).reversed())
+                       .filter(r -> r.filter().test(message.message()))
                        .findFirst();
     }
 
@@ -190,13 +190,13 @@ public final class ReceptorMap<M extends MessageClass<?>,
      *
      * @param message
      *         a signal message which must be handled
-     * @return a handler method for the given signal
+     * @return a receptor for the given signal
      * @throws ModelError
-     *         if the handler for the message was not found
+     *         if the receptor for the message was not found
      */
     @SuppressWarnings("FloggerLogString") // we use the formatted string two times.
-    public H getHandlerFor(SignalEnvelope<?, ?, ?> message) {
-        var handler = findHandlerFor(message);
+    public R receptorFor(SignalEnvelope<?, ?, ?> message) {
+        var handler = findReceptorFor(message);
         return handler.orElseThrow(() -> {
             var msg = format(
                     "No handler method found for the type `%s`.", message.messageClass()
@@ -213,8 +213,8 @@ public final class ReceptorMap<M extends MessageClass<?>,
      *         the message class of the handled message
      * @return handlers method
      */
-    public ImmutableSet<H> handlersOf(M messageClass) {
-        return handlersOf(messageClass, EmptyClass.instance());
+    public ImmutableSet<R> receptorsOf(M messageClass) {
+        return receptorsOf(messageClass, EmptyClass.instance());
     }
 
     private static <M extends MessageClass<?>, H extends Receptor<?, M, ?, ?>>
@@ -228,7 +228,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
     /**
      * Obtains handler methods matching the passed criteria.
      */
-    public ImmutableCollection<H> methods() {
+    public ImmutableCollection<R> methods() {
         return map.values();
     }
 }

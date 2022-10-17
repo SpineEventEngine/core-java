@@ -74,7 +74,7 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
 
     @Override
     public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return reactors.findHandlerFor(event);
+        return reactors.findReceptorFor(event);
     }
 
     @Override
