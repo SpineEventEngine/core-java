@@ -45,18 +45,19 @@ import static java.lang.String.format;
  * {@linkplain CommandReceptor method} that handles
  * a command which is already handled by another class in the {@link Model}.
  */
-public final class DuplicateCommandHandlerError extends ModelError {
+public final class DuplicateCommandReceptorError extends ModelError {
 
     private static final long serialVersionUID = 0L;
 
-    DuplicateCommandHandlerError(
+    DuplicateCommandReceptorError(
             CommandHandlingClass<?, ?> duplicatingClass,
             Map<Set<CommandClass>, CommandHandlingClass<?, ?>> registeredHandlers) {
         super(fmt(duplicatingClass, registeredHandlers));
     }
 
-    private static String fmt(CommandHandlingClass<?, ?> duplicatingClass,
-                              Map<Set<CommandClass>, CommandHandlingClass<?, ?>> registeredHandlers) {
+    private static String
+    fmt(CommandHandlingClass<?, ?> duplicatingClass,
+        Map<Set<CommandClass>, CommandHandlingClass<?, ?>> registeredHandlers) {
         checkNotNull(duplicatingClass);
         checkNotNull(registeredHandlers);
         @SuppressWarnings("MagicNumber") // the buffer size that should cover most cases.
