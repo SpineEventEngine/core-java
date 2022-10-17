@@ -45,7 +45,7 @@ import static java.lang.String.format;
 
 /**
  * The criteria of {@linkplain Method method} matching to a certain {@linkplain ReceptorSignature
- * set of requirements}, applied to the model message handlers.
+ * set of requirements}, applied to the receptors.
  *
  * <p>Each criterion defines the {@linkplain #severity() severity} of its violation.
  * Depending on it, the callees may refuse working with the tested methods.
@@ -235,7 +235,8 @@ public enum MatchCriterion {
          */
         private String enumerateThrown() {
             return declared.stream()
-                           .collect(toEnumerationBackticked());
+                    .collect(toEnumerationBackticked());
         }
     }
 }
+

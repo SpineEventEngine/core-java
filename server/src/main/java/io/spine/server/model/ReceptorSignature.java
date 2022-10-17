@@ -103,34 +103,36 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
     protected abstract ReturnTypes returnTypes();
 
     /**
-     * Obtains the type of a {@code Throwable} which a method can declare.
+     * Obtains the type of {@code Throwable} which a method can declare.
      *
-     * <p>A handler method may declare more than one {@code Throwable}, but they must
+     * <p>A receptor may declare more than one {@code Throwable}, but they must
      * extend the same type required by this type of signature.
      *
      * <p>Default implementation returns empty {@code Optional}, which means that normally
-     * a handler method does not throw.
+     * a receptor does not throw.
      */
     protected Optional<Class<? extends Throwable>> allowedThrowable() {
         return Optional.empty();
     }
 
     /**
-     * Checks whether the passed {@code method} matches the constraints set by this
-     * {@code MethodSignature} instance.
+     * Checks whether the passed {@code method} matches the constraints set by this instance.
      *
      * <p>{@link SignatureMismatch.Severity#WARN WARN}-level mismatches are silently ignored
-     * by this method. To obtain a detailed information callees should use
-     * {@linkplain #match(Method) match(Method)}.
+     * by this method. To obtain a detailed information callees should use {@link #match(Method)}.
      *
      * @param method
      *         the method to check
-     * @return true if there was no {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
+     * @return {@code true} if the given method is annotated using the matching signature
+     *         <strong>AND</strong> there is no
+     *         {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches;
+     *         {@code false} if the method is not annotated, or its annotation does not match
+     *         this signature
      * @throws SignatureMismatchException
      *         in case of any {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
-     * @implNote This method never returns {@code false} (rather throwing an exception),
-     *         because in future the extended diagnostic, based upon {@linkplain SignatureMismatch
-     *         signature mismatches} found is going to be implemented.
+     * @implNote This method never returns {@code false} for methods that contain
+     *         matching {@linkplain #annotation() annotation}, but do not match otherwise.
+     *         It throws instead.
      */
     public final boolean matches(Method method) throws SignatureMismatchException {
         if (skipMethod(method)) {
@@ -165,8 +167,8 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
      * Determines, if the given raw {@code method} should be skipped as non-matching.
      *
      * <p>Such an approach allows to improve performance by skipping the methods, that a priori
-     * cannot be qualified as message handler methods, such as methods with no
-     * {@linkplain #annotation() required annotation}.
+     * cannot be qualified as receptors matching this signature because they lack
+     * the {@linkplain #annotation() required annotation}.
      *
      * @param method
      *         the method to determine if it should be inspected at all
@@ -178,20 +180,20 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
     }
 
     /**
-     * Creates the {@linkplain Receptor HandlerMethod} instance according to the passed
+     * Creates a {@link Receptor} instance according to the passed
      * raw method and the parameter specification.
      *
      * <p>By implementing this method descendants define how the parameter spec is used to fit
      * the {@code Message} envelope onto the parameter list during the method invocation.
      *
      * <p>This method is designed to NOT perform any matching, but rather create a specific
-     * instance of {@code HandlerMethod}.
+     * instance of {@link Receptor}.
      *
      * @param method
-     *         the raw method to wrap into a {@code HandlerMethod} instance being created
+     *         the raw method to wrap into a receptor instance being created
      * @param params
      *         the specification of method parameters
-     * @return new instance of {@code HandlerMethod}
+     * @return new receptor instance
      */
     public abstract R create(Method method, ParameterSpec<E> params);
 
@@ -203,16 +205,16 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
     }
 
     /**
-     * Creates a {@linkplain Receptor handler method} from a raw method, if the passed
+     * Creates a {@linkplain Receptor receptor} from a raw method, if the passed
      * method {@linkplain #matches(Method) matches} the signature.
      *
      * @param method
-     *         the method to convert to a {@code HandlerMethod}
-     * @return the instance of {@code HandlerMethod} or empty {@code Optional} if the passed raw
-     *         method does not match the signature
+     *         the method to convert to a receptor
+     * @return the instance of receptor or empty {@code Optional} if the passed raw
+     *         method does not {@linkplain #matches(Method) match}  the signature
      * @throws SignatureMismatchException
-     *         in case there are {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
-     *         encountered
+     *         in case there are {@link SignatureMismatch.Severity#ERROR ERROR}-level
+     *         mismatches encountered
      */
     public final Optional<R> classify(Method method) throws SignatureMismatchException {
         var matches = matches(method);
@@ -231,7 +233,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
      * Match the method against the {@linkplain MatchCriterion criteria} and obtain a collection
      * of mismatches, if any.
      *
-     * <p><b>NOTE</b>: this method does not test the presence of annotation.
+     * <p><strong>NOTE:</strong> this method does not test the presence of annotation.
      *
      * @param method
      *         the method to match.
