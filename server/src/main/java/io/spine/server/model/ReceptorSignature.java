@@ -46,7 +46,8 @@ import static java.util.stream.Collectors.toList;
  * Specification of a {@link Receptor} signature.
  *
  * <p>Sets the requirements to meet for the {@linkplain Method java.lang.reflect.Method}
- * in order to be qualified as a {@code Message} handler method.
+ * in order to be qualified as a receptor for the type of messages specified by the type
+ * of the envelopes {@code <E>}.
  *
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
@@ -60,12 +61,12 @@ import static java.util.stream.Collectors.toList;
  *          may be returned.
  * </ul>
  *
- * @param <H>
- *         the type of the handler method
+ * @param <R>
+ *         the type of the receptors
  * @param <E>
- *         the type of envelope, which is used to invoke the handler method
+ *         the type of envelope, which is used to invoke the receptors
  */
-public abstract class ReceptorSignature<H extends Receptor<?, ?, E, ?>,
+public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
                                         E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;
@@ -79,7 +80,7 @@ public abstract class ReceptorSignature<H extends Receptor<?, ?, E, ?>,
     }
 
     /**
-     * Obtains the specification of handler parameters to meet.
+     * Obtains the specification of receptor parameters to meet.
      */
     public abstract AllowedParams<E> params();
 
@@ -192,7 +193,7 @@ public abstract class ReceptorSignature<H extends Receptor<?, ?, E, ?>,
      *         the specification of method parameters
      * @return new instance of {@code HandlerMethod}
      */
-    public abstract H create(Method method, ParameterSpec<E> params);
+    public abstract R create(Method method, ParameterSpec<E> params);
 
     /**
      * Obtains the annotation, which is required to be declared for the matched raw method.
@@ -213,7 +214,7 @@ public abstract class ReceptorSignature<H extends Receptor<?, ?, E, ?>,
      *         in case there are {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
      *         encountered
      */
-    public final Optional<H> classify(Method method) throws SignatureMismatchException {
+    public final Optional<R> classify(Method method) throws SignatureMismatchException {
         var matches = matches(method);
         if (!matches) {
             return Optional.empty();
