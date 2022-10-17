@@ -46,15 +46,14 @@ import java.util.Set;
  *         the type of the incoming message class
  * @param <E>
  *         the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <R>
+ * @param <P>
  *         the type of the produced message classes
  */
 @Immutable
 public interface Receptor<T,
                           C extends MessageClass<?>,
                           E extends MessageEnvelope<?, ?, ?>,
-                          R extends MessageClass<?>> {
-
+                          P extends MessageClass<?>> {
     /**
      * Obtains the type of the incoming message class.
      */
@@ -83,9 +82,9 @@ public interface Receptor<T,
     ArgumentFilter filter();
 
     /**
-     * Retrieves the message classes produced by this handler method.
+     * Retrieves the message classes produced by this receptor.
      */
-    Set<R> producedMessages();
+    Set<P> producedMessages();
 
     /**
      * Converts the raw method result to a {@linkplain Success successful propagation outcome}.
@@ -104,7 +103,7 @@ public interface Receptor<T,
             throws IllegalOutcomeException;
 
     /**
-     * Invokes the method to handle {@code message} with the {@code context}.
+     * Invokes the method to handle a message and its context passed in the {@code envelope}.
      *
      * @param target
      *         the target object on which call the method
@@ -123,8 +122,8 @@ public interface Receptor<T,
     }
 
     /**
-     * Tells if the passed method is domestic, that is not marked as
-     * {@linkplain ExternalAttribute#EXTERNAL external}).
+     * Tells if this receptor handles a domestic message, which means that the method
+     * is not marked as {@linkplain ExternalAttribute#EXTERNAL external}).
      */
     default boolean isDomestic() {
         return !isExternal();
@@ -148,7 +147,7 @@ public interface Receptor<T,
     }
 
     /**
-     * Creates a handler method dispatch key out of the {@linkplain #messageClass() message class}.
+     * Creates a dispatch key for the receptor by the {@linkplain #messageClass() message class}.
      */
     default DispatchKey key() {
         var rawCls = messageClass().value();
