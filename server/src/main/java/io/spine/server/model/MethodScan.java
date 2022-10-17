@@ -35,41 +35,43 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * A class method scan operation.
+ * Scans a class for receptors by the given {@link ReceptorSignature}.
  *
- * <p>Finds handler methods in the given class by the given {@link MethodSignature}.
- *
- * @param <H>
- *         the type of handler method to find
+ * @param <R>
+ *         the type of the receptors to find
  */
-final class MethodScan<H extends Receptor<?, ?, ?, ?>> {
+final class MethodScan<R extends Receptor<?, ?, ?, ?>> {
 
     private final Class<?> declaringClass;
-    private final MethodSignature<H, ?> signature;
-    private final Multimap<DispatchKey, H> handlers;
-    private final Map<DispatchKey, H> seenMethods;
+    private final ReceptorSignature<R, ?> signature;
+    private final Multimap<DispatchKey, R> handlers;
+    private final Map<DispatchKey, R> seenMethods;
     private final Map<MessageClass<?>, Receptor<?, ?, ?, ?>> messageToHandler;
 
     /**
-     * Finds handler methods in the scanned class by the given signature.
+     * Finds receptors in the scanned class by the given signature.
      *
-     * @param <H>
-     *         the type of the handler methods
+     * @param <R>
+     *         the type of the receptors
      * @param declaringClass
      *         the scanned class
      * @param signature
-     *         the handler {@linkplain MethodSignature signature}
-     * @return the map with handler methods of the given type
+     *         the receptor {@linkplain ReceptorSignature signature}
+     * @return the map with receptors of the given type
      */
-    static <H extends Receptor<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, H>
-    findMethodsBy(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+    static <R extends Receptor<?, ?, ?, ?>> ImmutableSetMultimap<DispatchKey, R>
+    findMethodsBy(Class<?> declaringClass, ReceptorSignature<R, ?> signature) {
+        checkNotNull(declaringClass);
+        checkNotNull(signature);
         var operation = new MethodScan<>(declaringClass, signature);
         var result = operation.perform();
         return result;
     }
 
-    private MethodScan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+    private MethodScan(Class<?> declaringClass, ReceptorSignature<R, ?> signature) {
         this.declaringClass = declaringClass;
         this.signature = signature;
         this.handlers = HashMultimap.create();
@@ -82,7 +84,7 @@ final class MethodScan<H extends Receptor<?, ?, ?, ?>> {
      *
      * <p>Multiple calls to this method may cause {@link DuplicateReceptorError}s.
      */
-    private ImmutableSetMultimap<DispatchKey, H> perform() {
+    private ImmutableSetMultimap<DispatchKey, R> perform() {
         var declaredMethods = declaringClass.getDeclaredMethods();
         for (var method : declaredMethods) {
             if (!method.isBridge() && !method.isSynthetic()) {
@@ -97,50 +99,50 @@ final class MethodScan<H extends Receptor<?, ?, ?, ?>> {
                  .ifPresent(this::remember);
     }
 
-    private void remember(H handler) {
-        checkNotRemembered(handler);
-        checkForFilterClashes(handler);
-        handlers.put(handler.key().withoutFilter(), handler);
+    private void remember(R receptor) {
+        checkNotRemembered(receptor);
+        checkForFilterClashes(receptor);
+        handlers.put(receptor.key().withoutFilter(), receptor);
     }
 
-    private void checkNotRemembered(H handler) {
-        var key = handler.key();
+    private void checkNotRemembered(R receptor) {
+        var key = receptor.key();
         if (seenMethods.containsKey(key)) {
             var alreadyPresent = seenMethods.get(key)
                                             .rawMethod();
             var methodName = alreadyPresent.getName();
-            var duplicateMethodName = handler.rawMethod().getName();
+            var duplicateMethodName = receptor.rawMethod().getName();
             throw new DuplicateReceptorError(
                     declaringClass, key, methodName, duplicateMethodName
             );
         } else {
-            seenMethods.put(key, handler);
+            seenMethods.put(key, receptor);
         }
     }
 
-    private void checkForFilterClashes(Receptor<?, ?, ?, ?> handler) {
-        var filter = handler.filter();
+    private void checkForFilterClashes(Receptor<?, ?, ?, ?> receptor) {
+        var filter = receptor.filter();
         if (filter.acceptsAll()) {
             return;
         }
-        var handledClass = handler.messageClass();
+        var receptorClass = receptor.messageClass();
 
         // It is OK to keep only the last filtering handler in the map (and not all of them)
         // because filtered fields are required to be the same.
-        var existingHandler = messageToHandler.put(handledClass, handler);
-        if (existingHandler != null && !filter.sameField(existingHandler.filter())) {
-            // There is already a handler for this message class.
+        var existingReceptor = messageToHandler.put(receptorClass, receptor);
+        if (existingReceptor != null && !filter.sameField(existingReceptor.filter())) {
+            // There is already a receptor for this message class.
             // Check that the field which is used as the condition for filtering is the same.
-            // It's not allowed to have filtered handlers by various fields because it
-            // makes the dispatching ambiguous: "Do we need to dispatch to this handler
-            // and that handler too?"
+            // It's not allowed to have filtered receptors by various fields because it
+            // makes the dispatching ambiguous: "Do we need to dispatch to this receptor
+            // and that receptor too?"
             //
-            // We allow multiple handlers for the same message type with filters by
+            // We allow multiple receptors for the same message type with filters by
             // different values. It allows to split logic into smaller methods instead of having
-            // if-else chains (that branch by different values) inside a bigger handler method.
+            // if-else chains (that branch by different values) inside a bigger receptor method.
             //
             throw new HandlerFieldFilterClashError(
-                    declaringClass, handler.rawMethod(), existingHandler.rawMethod()
+                    declaringClass, receptor.rawMethod(), existingReceptor.rawMethod()
             );
         }
     }

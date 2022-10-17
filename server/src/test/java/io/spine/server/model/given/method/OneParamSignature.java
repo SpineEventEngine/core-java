@@ -29,7 +29,7 @@ package io.spine.server.model.given.method;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.model.AccessModifier;
 import io.spine.server.model.AllowedParams;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ReceptorSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.EventEnvelope;
@@ -40,7 +40,7 @@ import java.lang.reflect.Method;
 import static io.spine.server.model.AccessModifier.PUBLIC;
 import static io.spine.server.model.ReturnTypes.onlyVoid;
 
-public class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
+public class OneParamSignature extends ReceptorSignature<OneParamMethod, EventEnvelope> {
 
     public OneParamSignature() {
         super(Annotation.class);

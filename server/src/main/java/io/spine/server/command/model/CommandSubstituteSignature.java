@@ -37,8 +37,7 @@ import io.spine.server.type.CommandEnvelope;
 import java.lang.reflect.Method;
 
 /**
- * A signature of {@link CommandSubstituter
- * CommandSubstituteMethod}.
+ * A signature of {@link CommandSubstituter}.
  */
 public class CommandSubstituteSignature extends CommandAcceptingSignature<CommandSubstituter> {
 

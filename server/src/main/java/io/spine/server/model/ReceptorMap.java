@@ -84,7 +84,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
     public static <M extends MessageClass<?>,
                    P extends MessageClass<?>,
                    H extends Receptor<?, M, ?, P>>
-    ReceptorMap<M, P, H> create(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+    ReceptorMap<M, P, H> create(Class<?> declaringClass, ReceptorSignature<H, ?> signature) {
         checkNotNull(declaringClass);
         checkNotNull(signature);
         var map = findMethodsBy(declaringClass, signature);

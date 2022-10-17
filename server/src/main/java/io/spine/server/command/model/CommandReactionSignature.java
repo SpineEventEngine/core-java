@@ -38,7 +38,7 @@ import io.spine.server.command.Command;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ReceptorSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.ReturnTypes;
 import io.spine.server.model.TypeMatcher;
@@ -54,7 +54,7 @@ import static io.spine.server.model.TypeMatcher.exactly;
  * A signature of {@link CommandingReaction}.
  */
 public class CommandReactionSignature
-        extends MethodSignature<CommandingReaction, EventEnvelope> {
+        extends ReceptorSignature<CommandingReaction, EventEnvelope> {
 
     private static final ReturnTypes TYPES = new ReturnTypes(
             TypeToken.of(CommandMessage.class),

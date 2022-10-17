@@ -32,7 +32,7 @@ import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.ReceptorMap;
 import io.spine.server.model.Receptor;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ReceptorSignature;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -69,7 +69,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * Creates new instance for the passed raw class with methods obtained
      * through the passed factory.
      */
-    public EventReceivingClassDelegate(Class<T> delegatingClass, MethodSignature<M, ?> signature) {
+    public EventReceivingClassDelegate(Class<T> delegatingClass, ReceptorSignature<M, ?> signature) {
         super(delegatingClass);
         this.handlers = ReceptorMap.create(delegatingClass, signature);
         this.events = handlers.messageClasses();

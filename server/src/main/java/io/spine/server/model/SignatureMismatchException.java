@@ -31,7 +31,7 @@ import com.google.common.base.Joiner;
 /**
  * Thrown for {@linkplain Receptor handler method} in case
  * its {@link Receptor#rawMethod() wrapped method} does not match
- * {@linkplain MethodSignature method signature}, set for the handler.
+ * {@linkplain ReceptorSignature method signature}, set for the handler.
  */
 public class SignatureMismatchException extends RuntimeException {
 

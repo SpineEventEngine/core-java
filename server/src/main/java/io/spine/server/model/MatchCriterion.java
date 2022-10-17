@@ -44,7 +44,7 @@ import static io.spine.string.Diags.toEnumerationBackticked;
 import static java.lang.String.format;
 
 /**
- * The criteria of {@linkplain Method method} matching to a certain {@linkplain MethodSignature
+ * The criteria of {@linkplain Method method} matching to a certain {@linkplain ReceptorSignature
  * set of requirements}, applied to the model message handlers.
  *
  * <p>Each criterion defines the {@linkplain #severity() severity} of its violation.
@@ -58,13 +58,13 @@ public enum MatchCriterion {
 
     /**
      * The criterion, which checks that the method return type is among the
-     * {@linkplain MethodSignature#returnTypes() expected}.
+     * {@linkplain ReceptorSignature#returnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints"
                         + " set for `%s`-annotated method.") {
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
+        Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             if (signature.returnTypeMatches(method)) {
                 return Optional.empty();
             }
@@ -74,7 +74,7 @@ public enum MatchCriterion {
 
     /**
      * The criterion for the method parameters to conform the
-     * {@linkplain MethodSignature#params() requirements}.
+     * {@linkplain ReceptorSignature#params() requirements}.
      *
      * @see AllowedParams#findMatching(Method)
      */
@@ -82,7 +82,7 @@ public enum MatchCriterion {
                "The method `%s` has invalid parameters. Please refer to the documentation"
                        + " of `@%s` for allowed parameter types.") {
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
+        Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             var matching = signature.params().findMatching(method);
             if (matching.isPresent()) {
                 return Optional.empty();
@@ -93,14 +93,14 @@ public enum MatchCriterion {
 
     /**
      * The criterion, which ensures that the method access modifier is among the
-     * {@linkplain MethodSignature#modifier() expected}.
+     * {@linkplain ReceptorSignature#modifier() expected}.
      */
     ACCESS_MODIFIER(WARN,
                     "The access modifier of `%s` method is `%s`. "
                             + "We recommend it to be one of: `%s`. "
                             + "Refer to the `%s` annotation docs for details.") {
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
+        Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             var recommended = signature.modifier();
             var hasMatch = recommended.stream().anyMatch(m -> m.test(method));
             if (hasMatch) {
@@ -111,7 +111,7 @@ public enum MatchCriterion {
 
         private Optional<SignatureMismatch>
         createMismatch(Method method,
-                       MethodSignature<?, ?> signature,
+                       ReceptorSignature<?, ?> signature,
                        ImmutableSet<AccessModifier> recommended) {
             var methodReference = methodAsString(method);
             var annotationName = signature.annotation().getSimpleName();
@@ -123,12 +123,12 @@ public enum MatchCriterion {
 
     /**
      * The criterion checking that the tested method throws only
-     * {@linkplain MethodSignature#allowedThrowable() allowed exceptions}.
+     * {@linkplain ReceptorSignature#allowedThrowable() allowed exceptions}.
      */
     PROHIBITED_EXCEPTION(ERROR, "%s") {
 
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
+        Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             @Nullable Class<? extends Throwable> allowed =
                     signature.allowedThrowable().orElse(null);
             var checker = check(method, allowed);
@@ -163,7 +163,7 @@ public enum MatchCriterion {
      * @return {@link Optional#empty() Optional.empty()} if there was no mismatch,
      *         or the {@code Optional<SignatureMismatch>} of the mismatch detected.
      */
-    abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature);
+    abstract Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature);
 
     protected final SignatureMismatch.Severity severity() {
         return severity;

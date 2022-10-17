@@ -27,7 +27,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ReceptorSignature;
 
 /**
  * A factory of {@link EventReactorSignature}s for test purposes.
@@ -44,7 +44,7 @@ public final class EventReactorSignatures {
     private EventReactorSignatures() {
     }
 
-    public static MethodSignature<?, ?> createForTest() {
+    public static ReceptorSignature<?, ?> createForTest() {
         return new EventReactorSignature();
     }
 }

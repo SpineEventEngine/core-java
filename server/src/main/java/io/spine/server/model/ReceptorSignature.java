@@ -43,14 +43,14 @@ import static io.spine.server.model.AccessModifier.PROTECTED_CONTRACT;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Specification of a {@linkplain Receptor handler method} signature.
+ * Specification of a {@link Receptor} signature.
  *
  * <p>Sets the requirements to meet for the {@linkplain Method java.lang.reflect.Method}
  * in order to be qualified as a {@code Message} handler method.
  *
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
- *     <li>{@linkplain #MethodSignature(Class) the method annotation},
+ *     <li>{@linkplain #ReceptorSignature(Class) the method annotation},
  *     <li>{@linkplain #params() the specification of method parameters},
  *     <li>{@linkplain #modifier() the set of allowed access modifiers},
  *     <li>{@linkplain #returnTypes() the set of valid return types},
@@ -65,8 +65,8 @@ import static java.util.stream.Collectors.toList;
  * @param <E>
  *         the type of envelope, which is used to invoke the handler method
  */
-public abstract class MethodSignature<H extends Receptor<?, ?, E, ?>,
-                                      E extends MessageEnvelope<?, ?, ?>> implements Logging {
+public abstract class ReceptorSignature<H extends Receptor<?, ?, E, ?>,
+                                        E extends MessageEnvelope<?, ?, ?>> implements Logging {
 
     private final Class<? extends Annotation> annotation;
 
@@ -74,7 +74,7 @@ public abstract class MethodSignature<H extends Receptor<?, ?, E, ?>,
      * Creates an instance of signature, defining the required annotation to be present
      * in the methods, that are matched against this signature.
      */
-    protected MethodSignature(Class<? extends Annotation> annotation) {
+    protected ReceptorSignature(Class<? extends Annotation> annotation) {
         this.annotation = checkNotNull(annotation);
     }
 

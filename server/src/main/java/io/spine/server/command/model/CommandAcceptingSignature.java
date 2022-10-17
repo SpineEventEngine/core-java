@@ -35,7 +35,7 @@ import io.spine.server.model.AllowedParams;
 import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.Receptor;
 import io.spine.server.model.MethodParams;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ReceptorSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.TypeMatcher;
 import io.spine.server.type.CommandClass;
@@ -54,7 +54,7 @@ import static io.spine.server.model.TypeMatcher.exactly;
  */
 abstract class CommandAcceptingSignature
         <H extends Receptor<?, CommandClass, CommandEnvelope, ?>>
-        extends MethodSignature<H, CommandEnvelope> {
+        extends ReceptorSignature<H, CommandEnvelope> {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // to save on allocations.
     private static final Optional<Class<? extends Throwable>>
