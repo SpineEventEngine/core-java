@@ -35,7 +35,7 @@ import static io.spine.server.command.given.AssigneeEntityTestEnv.msg;
 import static io.spine.server.command.given.AssigneeEntityTestEnv.str;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DisplayName("`CommandAssigneeEntity` should")
+@DisplayName("`AssigneeEntity` should")
 class AssigneeEntityTest {
 
     /**
