@@ -39,7 +39,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.given.DirectScheduledExecutor;
 import io.spine.server.commandbus.given.MemoizingCommandFlowWatcher;
@@ -243,7 +243,7 @@ abstract class AbstractCommandBusTestSuite {
     /**
      * A sample command assignee that tells whether a handling method was invoked.
      */
-    final class CreateProjectAssignee extends AbstractCommandAssignee {
+    final class CreateProjectAssignee extends AbstractAssignee {
 
         private boolean handlerInvoked = false;
         private final Set<CommandMessage> receivedCommands = newHashSet();

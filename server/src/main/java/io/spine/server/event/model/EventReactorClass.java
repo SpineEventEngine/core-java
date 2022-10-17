@@ -28,8 +28,8 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventReactor;
-import io.spine.server.model.HandlerMap;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.ReceptorMap;
+import io.spine.server.model.Receptor;
 import io.spine.server.model.ModelClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -49,17 +49,17 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
 
     private static final long serialVersionUID = 0L;
 
-    private final HandlerMap<EventClass, EventClass, EventReactorMethod> reactors;
+    private final ReceptorMap<EventClass, EventClass, EventReactorMethod> reactors;
     private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
 
     private EventReactorClass(Class<? extends S> cls) {
         super(cls);
-        this.reactors = HandlerMap.create(cls, new EventReactorSignature());
+        this.reactors = ReceptorMap.create(cls, new EventReactorSignature());
         this.events = reactors.messageClasses();
         this.domesticEvents = reactors.messageClasses((h) -> !h.isExternal());
-        this.externalEvents = reactors.messageClasses(HandlerMethod::isExternal);
+        this.externalEvents = reactors.messageClasses(Receptor::isExternal);
     }
 
     /** Creates new instance for the given raw class. */
@@ -74,7 +74,7 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
 
     @Override
     public Optional<EventReactorMethod> reactorOf(EventEnvelope event) {
-        return reactors.findHandlerFor(event);
+        return reactors.findReceptorFor(event);
     }
 
     @Override

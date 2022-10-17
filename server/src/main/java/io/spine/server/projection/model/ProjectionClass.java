@@ -75,32 +75,32 @@ public final class ProjectionClass<P extends Projection<?, ?, ?>>
     }
 
     @Override
-    public final ImmutableSet<EventClass> events() {
+    public ImmutableSet<EventClass> events() {
         return delegate.events();
     }
 
     @Override
-    public final ImmutableSet<EventClass> domesticEvents() {
+    public ImmutableSet<EventClass> domesticEvents() {
         return delegate.domesticEvents();
     }
 
     @Override
-    public final ImmutableSet<EventClass> externalEvents() {
+    public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
     }
 
     @Override
-    public final ImmutableSet<StateClass<?>> domesticStates() {
+    public ImmutableSet<StateClass<?>> domesticStates() {
         return delegate.domesticStates();
     }
 
     @Override
-    public final ImmutableSet<StateClass<?>> externalStates() {
+    public ImmutableSet<StateClass<?>> externalStates() {
         return delegate.externalStates();
     }
 
     @Override
     public Optional<SubscriberMethod> subscriberOf(EventEnvelope event) {
-        return delegate.findHandlerOf(event);
+        return delegate.findReceptorOf(event);
     }
 }

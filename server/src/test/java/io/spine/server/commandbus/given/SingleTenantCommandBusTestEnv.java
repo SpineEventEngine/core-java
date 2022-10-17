@@ -31,7 +31,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.test.commandbus.command.CmdBusAddTask;
@@ -60,7 +60,7 @@ public class SingleTenantCommandBusTestEnv {
     /**
      * A {@code CommandAssignee}, which throws a rejection upon a command.
      */
-    public static class FaultyAssignee extends AbstractCommandAssignee {
+    public static class FaultyAssignee extends AbstractAssignee {
 
         private FaultyAssignee() {
             super();
@@ -100,7 +100,7 @@ public class SingleTenantCommandBusTestEnv {
     /**
      * A {@code CommandAssignee} that posts a nested command.
      */
-    public static class CommandPostingAssignee extends AbstractCommandAssignee {
+    public static class CommandPostingAssignee extends AbstractAssignee {
 
         private final CommandBus commandBus;
         private final List<Message> handledCommands = new ArrayList<>();

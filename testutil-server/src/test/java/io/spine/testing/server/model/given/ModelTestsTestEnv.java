@@ -28,7 +28,7 @@ package io.spine.testing.server.model.given;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.testing.server.given.entity.command.TuRemoveProject;
 
@@ -42,7 +42,7 @@ public class ModelTestsTestEnv {
     private ModelTestsTestEnv() {
     }
 
-    public static class TestCommandAssignee extends AbstractCommandAssignee {
+    public static class TestCommandAssignee extends AbstractAssignee {
         private TestCommandAssignee() {
             super();
         }
@@ -53,7 +53,7 @@ public class ModelTestsTestEnv {
         }
     }
 
-    public static class DuplicatedCommandAssignee extends AbstractCommandAssignee {
+    public static class DuplicatedCommandAssignee extends AbstractAssignee {
         private DuplicatedCommandAssignee() {
             super();
         }

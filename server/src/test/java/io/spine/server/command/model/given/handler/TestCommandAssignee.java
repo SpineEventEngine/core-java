@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
@@ -44,7 +44,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  * <p>Derived classes must declare a method named {@linkplain #ASSIGNEE_METHOD_NAME handleTest}
  * so that the method can be {@linkplain #method() obtained} by the code of tests.
  */
-public abstract class TestCommandAssignee extends AbstractCommandAssignee {
+public abstract class TestCommandAssignee extends AbstractAssignee {
 
     private static final String ASSIGNEE_METHOD_NAME = "handleTest";
 

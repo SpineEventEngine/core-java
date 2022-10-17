@@ -26,12 +26,13 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Joiner;
+import static com.google.common.collect.Streams.stream;
+import static io.spine.string.Diags.toEnumerationBackticked;
 
 /**
- * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
- * its {@link HandlerMethod#rawMethod() wrapped method} does not match
- * {@linkplain MethodSignature method signature}, set for the handler.
+ * Thrown for a {@linkplain Receptor receptor} in case
+ * its {@link Receptor#rawMethod() wrapped method} does not match
+ * {@linkplain ReceptorSignature method signature}, set for the handler.
  */
 public class SignatureMismatchException extends RuntimeException {
 
@@ -42,7 +43,7 @@ public class SignatureMismatchException extends RuntimeException {
     }
 
     private static String formatMsg(Iterable<SignatureMismatch> mismatches) {
-        return "Error declaring a method. Mismatches: " + Joiner.on(", ")
-                                                                .join(mismatches);
+        var mm = stream(mismatches).collect(toEnumerationBackticked());
+        return "Error declaring a method. Mismatches: " + mm + '.';
     }
 }

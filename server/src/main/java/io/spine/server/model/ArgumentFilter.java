@@ -43,7 +43,7 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.AbstractHandlerMethod.firstParamType;
+import static io.spine.server.model.AbstractReceptor.firstParamType;
 import static io.spine.string.Stringifiers.fromString;
 
 /**

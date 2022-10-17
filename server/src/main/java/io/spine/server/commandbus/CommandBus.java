@@ -228,7 +228,7 @@ public final class CommandBus
      * @return a set of classes of supported commands
      */
     @Internal
-    public final Set<CommandClass> registeredCommandClasses() {
+    public Set<CommandClass> registeredCommandClasses() {
         return registry().registeredMessageClasses();
     }
 

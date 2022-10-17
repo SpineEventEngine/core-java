@@ -29,7 +29,7 @@ package io.spine.server.model.given;
 import io.spine.core.External;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.command.AbstractCommandAssignee;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
@@ -77,7 +77,7 @@ public class ModelTestEnv {
         }
     }
 
-    public static class MCommandAssignee extends AbstractCommandAssignee {
+    public static class MCommandAssignee extends AbstractAssignee {
 
         @Assign
         RefProjectCreated on(RefCreateProject cmd) {

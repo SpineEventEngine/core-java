@@ -28,11 +28,11 @@ package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.entity.model.CommandAssigneeEntityClass;
+import io.spine.server.entity.model.AssigneeEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
-import io.spine.server.model.HandlerMap;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.model.ModelError;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
@@ -49,19 +49,19 @@ import static com.google.common.collect.Sets.union;
  * @param <A> the type of aggregates
  */
 public class AggregateClass<A extends Aggregate<?, ?, ?>>
-        extends CommandAssigneeEntityClass<A>
+        extends AssigneeEntityClass<A>
         implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final HandlerMap<EventClass, EmptyClass, Applier> stateEvents;
+    private final ReceptorMap<EventClass, EmptyClass, Applier> stateEvents;
     private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
     /** Creates new instance. */
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
-        this.stateEvents = HandlerMap.create(cls, new EventApplierSignature());
+        this.stateEvents = ReceptorMap.create(cls, new EventApplierSignature());
         this.importableEvents = stateEvents.messageClasses(Applier::allowsImport);
         this.delegate = new ReactorClassDelegate<>(cls);
     }
@@ -164,7 +164,7 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
      * Obtains event applier method for the passed class of events.
      */
     public final Applier applierOf(EventEnvelope event) {
-        return stateEvents.findHandlerFor(event).orElseThrow(() -> new ModelError(
+        return stateEvents.findReceptorFor(event).orElseThrow(() -> new ModelError(
                 "Aggregate `%s` does not handle event `%s`.", this, event.typeUrl()
         ));
     }

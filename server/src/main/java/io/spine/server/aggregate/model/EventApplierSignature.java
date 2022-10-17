@@ -35,7 +35,7 @@ import io.spine.server.model.AccessModifier;
 import io.spine.server.model.AllowedParams;
 import io.spine.server.model.ExtractedArguments;
 import io.spine.server.model.MethodParams;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ReceptorSignature;
 import io.spine.server.model.ParameterSpec;
 import io.spine.server.model.ReturnTypes;
 import io.spine.server.type.EventEnvelope;
@@ -48,7 +48,7 @@ import static io.spine.server.model.TypeMatcher.classImplementing;
 /**
  * The signature of the {@link Applier} method.
  */
-final class EventApplierSignature extends MethodSignature<Applier, EventEnvelope> {
+final class EventApplierSignature extends ReceptorSignature<Applier, EventEnvelope> {
 
     EventApplierSignature() {
         super(Apply.class);

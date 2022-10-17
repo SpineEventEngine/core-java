@@ -37,10 +37,9 @@ import io.spine.server.type.CommandEnvelope;
 import java.lang.reflect.Method;
 
 /**
- * A signature of {@link io.spine.server.command.model.CommandSubstituteMethod
- * CommandSubstituteMethod}.
+ * A signature of {@link CommandSubstituter}.
  */
-public class CommandSubstituteSignature extends CommandAcceptingSignature<CommandSubstituteMethod> {
+public class CommandSubstituteSignature extends CommandAcceptingSignature<CommandSubstituter> {
 
     private static final ReturnTypes TYPES = new ReturnTypes(
             TypeToken.of(CommandMessage.class),
@@ -52,8 +51,8 @@ public class CommandSubstituteSignature extends CommandAcceptingSignature<Comman
     }
 
     @Override
-    public CommandSubstituteMethod create(Method method, ParameterSpec<CommandEnvelope> params) {
-        return new CommandSubstituteMethod(method, params);
+    public CommandSubstituter create(Method method, ParameterSpec<CommandEnvelope> params) {
+        return new CommandSubstituter(method, params);
     }
 
     @Override

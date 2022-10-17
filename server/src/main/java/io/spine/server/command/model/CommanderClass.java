@@ -32,7 +32,7 @@ import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.Receptor;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -50,11 +50,11 @@ import static java.util.stream.Collectors.toSet;
  *         the type of commanders
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituteMethod>
+        extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituter>
         implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
-    private final EventReceivingClassDelegate<C, CommandClass, CommandReactionMethod> delegate;
+    private final EventReceivingClassDelegate<C, CommandClass, CommandingReaction> delegate;
 
     private CommanderClass(Class<C> cls) {
         super(cls, new CommandSubstituteSignature());
@@ -95,15 +95,15 @@ public final class CommanderClass<C extends Commander>
     /**
      * Obtains the method which reacts on the passed event class.
      */
-    public Optional<CommandReactionMethod> commanderOn(EventEnvelope event) {
-        return delegate.handlerOf(event);
+    public Optional<CommandingReaction> commanderOn(EventEnvelope event) {
+        return delegate.findReceptorOf(event);
     }
 
     /**
      * Tells if instances of this commander class substitute the commands of the passed class.
      */
     public boolean substitutesCommand(CommandClass commandClass) {
-        return hasHandler(commandClass);
+        return hasReceptor(commandClass);
     }
 
     /**
@@ -133,8 +133,8 @@ public final class CommanderClass<C extends Commander>
      */
     private void validateExternalMethods() {
         var methods = commands().stream()
-                .flatMap(type -> handlersForType(type).stream())
-                .filter(HandlerMethod::isExternal)
+                .flatMap(type -> receptorsForType(type).stream())
+                .filter(Receptor::isExternal)
                 .collect(toSet());
         if (!methods.isEmpty()) {
             throw new ExternalCommandReceiverMethodError(this, methods);

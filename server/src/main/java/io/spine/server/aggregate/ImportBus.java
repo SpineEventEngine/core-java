@@ -61,7 +61,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * produce the event). Such a command or an event:
  * <ol>
  *   <li>serves as a dispatched message type which is used as the first argument of the
- *       corresponding aggregate handler method;
+ *       corresponding method in the aggregate;
  *   <li>carries the information about the fact we want to remember.
  * </ol>
  *

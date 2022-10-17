@@ -44,7 +44,7 @@ import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Obtains a set of command or event types produced by a {@link HandlerMethod}.
+ * Obtains a set of command or event types produced by a {@link Receptor}.
  *
  * <p>The set contains <em>class</em> information collected from method signatures.
  * If a method result refers to an interface (directly or as a generic parameter), this

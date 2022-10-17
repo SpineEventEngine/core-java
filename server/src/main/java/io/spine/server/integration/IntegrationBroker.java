@@ -75,7 +75,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  *
  * <p><b>Sample Usage</b>
  *
- * <p>Bounded Context "Projects" has a projection with an event handler that is subscribed to an
+ * <p>Bounded Context "Projects" has a projection with an event receptor that is subscribed to an
  * external event as follows:
  * <pre>
  * {@code
@@ -105,7 +105,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  * its {@code IntegrationBroker}.
  *
  * <p>The integration broker on the "Projects" side will receive the {@code UserDeleted}
- * external message. The event will be dispatched to the external event handler of the projection.
+ * external message. The event will be dispatched to the external event receptor of the projection.
  *
  * <p><b>Limitations</b>
  *

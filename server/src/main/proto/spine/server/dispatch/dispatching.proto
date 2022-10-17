@@ -68,8 +68,8 @@ message DispatchOutcome {
 
         // Result of a successful handling.
         //
-        // If the handling resulted in signals, commands, events, or a rejection, stores those
-        // signals.
+        // If the handling resulted in signals, commands, events, or a rejection, stores
+        // those signals.
         //
         Success success = 2 [(validate) = true];
 
@@ -87,7 +87,7 @@ message DispatchOutcome {
 
         // Result of a signal being ignored.
         //
-        // If field filters of a handler do not match a given signal, the signal is ignored.
+        // If field filters of a receptor do not match a given signal, the signal is ignored.
         //
         Ignore ignored = 5 [(validate) = true];
     }
@@ -96,30 +96,30 @@ message DispatchOutcome {
 // A successful signal handling result.
 //
 // This message may be empty if:
-//   1. The handling method does not return a result by its nature (e.g. a subscribing method), or
+//   1. The receptor does not return a result by its nature (e.g. a subscribing method), or
 //   2. The method returns `Nothing` (wrapped inside a tuple) because the entity ignores the signal.
-//      For example, a reacting method or a commanding method may chose not to product outgoing
-//      signal in response to incoming event.
+//      For example, a reacting receptor or a commanding receptor may chose not to produce
+//      an outgoing signal in response to incoming event.
 //
 message Success {
     option (is).java_type = "SuccessMixin";
 
     oneof exhaust {
 
-        // Events produced by the handler.
+        // Events produced by the receptor.
         ProducedEvents produced_events = 1 [(validate) = true];
 
-        // Commands produced by the handler.
+        // Commands produced by the receptor.
         ProducedCommands produced_commands = 2 [(validate) = true];
 
-        // The rejection produced by the handler.
+        // The rejection produced by the receptor.
         core.Event rejection = 3 [(validate) = true];
     }
 }
 
 // Events produced during a signal handling.
 //
-// Spine supports the handler methods returning `Optional` values,
+// Spine supports receptors returning `Optional` values,
 // so there may be no produced events.
 //
 message ProducedEvents {
@@ -130,7 +130,7 @@ message ProducedEvents {
 
 // Commands produced during a signal handling.
 //
-// Spine supports the handler methods returning `Optional` values,
+// Spine supports receptors returning `Optional` values,
 // so there may be no produced commands.
 //
 message ProducedCommands {
@@ -145,8 +145,8 @@ message Interruption {
 
     // The message which caused the interruption.
     //
-    // Typically, the message which failed the transaction before the associated signal had a chance
-    // to be handled.
+    // Typically, the message which failed the transaction before the associated signal
+    // had a chance to be handled.
     //
     core.MessageId stopped_at = 1 [(required) = true, (validate) = true];
 }
