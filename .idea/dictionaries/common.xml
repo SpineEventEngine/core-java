@@ -5,6 +5,7 @@
       <w>arraybuffer</w>
       <w>aspx</w>
       <w>bytebuffer</w>
+      <w>callees</w>
       <w>closeables</w>
       <w>cqrs</w>
       <w>dartdocs</w>
@@ -44,11 +45,13 @@
       <w>processmanager</w>
       <w>procman</w>
       <w>proto's</w>
+      <w>protodata</w>
       <w>protos</w>
       <w>sfixed</w>
       <w>stderr</w>
       <w>stringifier</w>
       <w>stringifiers</w>
+      <w>substituter</w>
       <w>switchman</w>
       <w>testutil</w>
       <w>threeten</w>
