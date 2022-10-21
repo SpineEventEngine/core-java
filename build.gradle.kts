@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.protobuf.gradle.generateProtoTasks
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 import io.spine.internal.dependency.Dokka
@@ -51,6 +50,10 @@ import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
+import io.spine.protodata.gradle.CodegenSettings
+import io.spine.protodata.gradle.plugin.LaunchProtoData
+import io.spine.tools.mc.gradle.ModelCompilerOptions
+import io.spine.tools.mc.java.gradle.McJavaOptions
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -152,12 +155,13 @@ subprojects {
         plugin("jacoco")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
-        plugin("io.spine.mc-java")
         plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
         plugin("dokka-for-java")
+        plugin("io.spine.mc-java")
+        plugin("io.spine.protodata")
     }
 
     java {
@@ -188,9 +192,11 @@ subprojects {
         ErrorProne.apply {
             errorprone(core)
         }
-
+        // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
+        add("protoData", spine.validation.java)
         api(spine.base)
         api(spine.time)
+        implementation(spine.validation.runtime)
 
         testImplementation(JUnit.runner)
         testImplementation(spine.testlib)
@@ -229,29 +235,34 @@ subprojects {
         }
     }
 
-    val generatedDir = "$projectDir/generated"
-    val generatedJavaDir = "$generatedDir/main/java"
-    val generatedKotlinDir = "$generatedDir/main/kotlin"
-    val generatedTestJavaDir = "$generatedDir/test/java"
-    val generatedTestKotlinDir = "$generatedDir/test/kotlin"
-    val generatedGrpcDir = "$generatedDir/main/grpc"
-    val generatedTestGrpcDir = "$generatedDir/test/grpc"
-    val generatedSpineDir = "$generatedDir/main/spine"
-    val generatedTestSpineDir = "$generatedDir/test/spine"
+    val generated = "$projectDir/generated"
+    val generatedMain = "$generated/main"
+    val generatedJava = "$generatedMain/java"
+    val generatedKotlin = "$generatedMain/kotlin"
+    val generatedGrpc = "$generatedMain/grpc"
+    val generatedSpine = "$generatedMain/spine"
+
+    val generatedTest = "$generated/test"
+    val generatedTestJava = "$generatedTest/java"
+    val generatedTestKotlin = "$generatedTest/kotlin"
+    val generatedTestGrpc = "$generatedTest/grpc"
+    val generatedTestSpine = "$generatedTest/spine"
 
     sourceSets {
         main {
             java.srcDirs(
-                generatedSpineDir,
-                generatedJavaDir,
-                generatedKotlinDir,
+                generatedJava,
+                generatedKotlin,
+                generatedGrpc,
+                generatedSpine,
             )
         }
         test {
             java.srcDirs(
-                generatedTestSpineDir,
-                generatedTestJavaDir,
-                generatedTestKotlinDir,
+                generatedTestJava,
+                generatedTestKotlin,
+                generatedTestGrpc,
+                generatedTestSpine,
             )
         }
     }
@@ -274,29 +285,58 @@ subprojects {
         }
     }
 
-    protobuf {
-        generatedFilesBaseDir = generatedDir
-
-        protoc {
-            // Temporarily use this version, since 3.21.x is known to provide
-            // a broken `protoc-gen-js` artifact.
-            // See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
-            //
-            // Once it is addressed, this artifact should be `Protobuf.compiler`.
-            //
-            // Also, this fixes the explicit API more for the generated Kotlin code.
-            //
-            artifact = protocArtifact
+    /**
+     * The below arrangement is "unusual" `because:
+     *  1. `modelCompiler` could not be found after applying plugin via `apply { }` block.
+     *  2. java { }` cannot be used because it conflicts with `java` of type `JavaPluginExtension`
+     *     already added to the `Project`.
+     */
+    val modelCompiler = extensions.getByType(ModelCompilerOptions::class.java)
+    modelCompiler.apply {
+        // Get nested `this` instead of `Project` instance.
+        val mcOptions = (this@apply as ExtensionAware)
+        val java = mcOptions.extensions.getByName("java") as McJavaOptions
+        java.codegen {
+            validation { skipValidation() }
         }
+    }
 
-        generateProtoTasks {
-            all().forEach { task ->
-                task.builtins {
-                    maybeCreate("kotlin")
-                }
-                task.doLast {
-                    suppressDeprecationsInKotlin(generatedDir, task.sourceSet.name)
-                }
+    val protoData = extensions.getByName("protoData") as CodegenSettings
+    protoData.apply {
+        renderers(
+            "io.spine.validation.java.PrintValidationInsertionPoints",
+            "io.spine.validation.java.JavaValidationRenderer",
+
+            // Suppress warnings in the generated code.
+            "io.spine.protodata.codegen.java.file.PrintBeforePrimaryDeclaration",
+            "io.spine.protodata.codegen.java.suppress.SuppressRenderer"
+        )
+        plugins(
+            "io.spine.validation.ValidationPlugin",
+        )
+    }
+
+    /**
+     * Temporarily use this version, since 3.21.x is known to provide
+     * a broken `protoc-gen-js` artifact.
+     *
+     * See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
+     * Once it is addressed, this artifact should be `Protobuf.compiler`.
+     *
+     * Also, this fixes the explicit API more for the generated Kotlin code.
+     */
+    protobuf {
+        generatedFilesBaseDir = generated
+        protoc { artifact = protocArtifact }
+    }
+
+    /**
+     * Manually suppress deprecations in the generated Kotlin code until ProtoData does it.
+     */
+    tasks.withType<LaunchProtoData>().forEach { task ->
+        task.doLast {
+            sourceSets.forEach { sourceSet ->
+                suppressDeprecationsInKotlin(generated, sourceSet.name)
             }
         }
     }
@@ -312,19 +352,21 @@ subprojects {
         module {
             generatedSourceDirs.addAll(
                 files(
-                    generatedJavaDir,
-                    generatedKotlinDir,
-                    generatedGrpcDir,
-                    generatedSpineDir,
-                    generatedTestJavaDir,
-                    generatedTestKotlinDir,
-                    generatedTestGrpcDir,
-                    generatedTestSpineDir
+                    generatedJava,
+                    generatedKotlin,
+                    generatedGrpc,
+                    generatedSpine,
+                    generatedTestJava,
+                    generatedTestKotlin,
+                    generatedTestGrpc,
+                    generatedTestSpine
                 )
             )
             testSources.from(
-                generatedTestJavaDir,
-                generatedTestKotlinDir
+                generatedTestJava,
+                generatedTestKotlin,
+                generatedTestGrpc,
+                generatedTestSpine,
             )
 
             isDownloadJavadoc = true
