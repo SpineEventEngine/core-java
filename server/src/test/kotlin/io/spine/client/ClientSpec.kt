@@ -103,12 +103,10 @@ internal class ClientSpec : AbstractClientTest() {
             val userLoggedIn = client.onBehalfOf(currentUser)
                 .subscribeToEvent(UserLoggedIn::class.java)
                 .where(eq(UserLoggedIn.Field.user(), currentUser))
-                .observe { e -> }
                 .post()
             val userLoggedOut = client.onBehalfOf(currentUser)
                 .subscribeToEvent(UserLoggedOut::class.java)
                 .where(eq(UserLoggedOut.Field.user(), currentUser))
-                .observe { e -> }
                 .post()
             val loginStatus = client.onBehalfOf(currentUser)
                 .subscribeTo(LoginStatus::class.java)
@@ -118,7 +116,7 @@ internal class ClientSpec : AbstractClientTest() {
                         currentUser.value
                     )
                 )
-                .observe { s -> }
+                .observe { }
                 .post()
 
             subscriptions.addAll(listOf(
