@@ -23,176 +23,159 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.client
 
-package io.spine.client;
-
-import com.google.common.collect.ImmutableList;
-import io.spine.server.BoundedContextBuilder;
-import io.spine.test.client.ClientTestContext;
-import io.spine.test.client.users.ActiveUsers;
-import io.spine.test.client.users.LoginStatus;
-import io.spine.test.client.users.command.LogInUser;
-import io.spine.test.client.users.event.UserLoggedIn;
-import io.spine.test.client.users.event.UserLoggedOut;
-import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.logging.mute.MuteLogging;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
-import static io.spine.client.EventFilter.eq;
-import static io.spine.test.client.ActiveUsersProjection.THE_ID;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.google.common.collect.ImmutableList
+import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
+import io.spine.client.EntityStateFilter.eq
+import io.spine.client.EventFilter.eq
+import io.spine.server.BoundedContextBuilder
+import io.spine.test.client.ActiveUsersProjection.*
+import io.spine.test.client.ClientTestContext
+import io.spine.test.client.users.ActiveUsers
+import io.spine.test.client.users.LoginStatus
+import io.spine.test.client.users.activeUsers
+import io.spine.test.client.users.command.logInUser
+import io.spine.test.client.users.event.UserLoggedIn
+import io.spine.test.client.users.event.UserLoggedOut
+import io.spine.testing.core.given.GivenUserId
+import io.spine.testing.logging.mute.MuteLogging
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 @MuteLogging
 @DisplayName("`Client` should")
-class ClientTest extends AbstractClientTest {
+internal class ClientSpec : AbstractClientTest() {
 
-    @Override
-    protected ImmutableList<BoundedContextBuilder> contexts() {
-        return ImmutableList.of(ClientTestContext.users());
+    override fun contexts(): ImmutableList<BoundedContextBuilder> {
+        return ImmutableList.of(ClientTestContext.users())
     }
 
     @Test
-    @DisplayName("be opened upon creation")
-    void opened() {
-        assertTrue(client().isOpen());
+    fun `be opened upon creation`() {
+        assertTrue(client().isOpen)
     }
 
     @Test
-    @DisplayName("close upon request")
-    void closing() {
-        var client = client();
-        client.close();
-        assertFalse(client.isOpen());
+    fun `close upon request`() {
+        val client = client()
+        client.close()
+        assertFalse(client.isOpen)
     }
 
     @Test
-    @DisplayName("have `shutdown()` alias method")
-    void shutdown() {
-        var client = client();
-        client.shutdown();
-        assertFalse(client.isOpen());
+    fun `have 'shutdown()' alias method`() {
+        val client = client()
+        client.shutdown()
+        assertFalse(client.isOpen)
     }
 
     @Test
-    @DisplayName("create requests on behalf of a user")
-    void onBehalf() {
-        var expected = GivenUserId.generated();
-        var request = client().onBehalfOf(expected);
+    fun `create requests on behalf of a user`() {
+        val expected = GivenUserId.generated()
+        val request = client().onBehalfOf(expected)
         assertThat(request.user())
-                .isEqualTo(expected);
+            .isEqualTo(expected)
     }
 
     @Test
-    @DisplayName("create requests for a guest user")
-    void guestRequest() {
-        var request = client().asGuest();
+    fun `create requests for a guest user`() {
+        val request = client().asGuest()
         assertThat(request.user())
-                .isEqualTo(Client.DEFAULT_GUEST_ID);
+            .isEqualTo(Client.DEFAULT_GUEST_ID)
     }
 
     @Nested
-    @DisplayName("manage subscriptions")
-    class ActiveSubscriptions {
+    internal inner class `Manage subscriptions` {
 
-        private List<Subscription> subscriptions;
+        private var subscriptions: MutableList<Subscription> = ArrayList()
 
         @BeforeEach
-        void createSubscriptions() {
-            subscriptions = new ArrayList<>();
-            var currentUser = GivenUserId.generated();
-            var client = client();
-            var userLoggedIn =
-                    client.onBehalfOf(currentUser)
-                          .subscribeToEvent(UserLoggedIn.class)
-                          .where(eq(UserLoggedIn.Field.user(), currentUser))
-                          .observe((e) -> {})
-                          .post();
-            var userLoggedOut =
-                    client.onBehalfOf(currentUser)
-                          .subscribeToEvent(UserLoggedOut.class)
-                          .where(eq(UserLoggedOut.Field.user(), currentUser))
-                          .observe((e) -> {})
-                          .post();
-            var loginStatus =
-                    client.onBehalfOf(currentUser)
-                          .subscribeTo(LoginStatus.class)
-                          .where(EntityStateFilter.eq(LoginStatus.Field.userId(),
-                                                      currentUser.getValue()))
-                          .observe((s) -> {})
-                          .post();
+        fun createSubscriptions() {
+            subscriptions.clear()
+            val currentUser = GivenUserId.generated()
+            val client = client()
+            val userLoggedIn = client.onBehalfOf(currentUser)
+                .subscribeToEvent(UserLoggedIn::class.java)
+                .where(eq(UserLoggedIn.Field.user(), currentUser))
+                .observe { e -> }
+                .post()
+            val userLoggedOut = client.onBehalfOf(currentUser)
+                .subscribeToEvent(UserLoggedOut::class.java)
+                .where(eq(UserLoggedOut.Field.user(), currentUser))
+                .observe { e -> }
+                .post()
+            val loginStatus = client.onBehalfOf(currentUser)
+                .subscribeTo(LoginStatus::class.java)
+                .where(
+                    eq(
+                        LoginStatus.Field.userId(),
+                        currentUser.value
+                    )
+                )
+                .observe { s -> }
+                .post()
 
-            subscriptions.add(userLoggedIn);
-            subscriptions.add(userLoggedOut);
-            subscriptions.add(loginStatus);
+            subscriptions.addAll(listOf(
+                userLoggedIn,
+                userLoggedOut,
+                loginStatus
+            ))
         }
 
         @Test
-        @DisplayName("remembering them until canceled")
-        void remembering() {
-            var client = client();
-            var remembered = client.subscriptions();
-            subscriptions.forEach(
-                    (s) -> assertTrue(remembered.contains(s))
-            );
-            subscriptions.forEach(
-                    (s) -> {
-                        remembered.cancel(s);
-                        assertFalse(remembered.contains(s));
-                    }
-            );
+        fun `remembering them until canceled`() {
+            val client = client()
+            val remembered = client.subscriptions()
+            subscriptions.forEach { s ->
+                assertTrue(remembered.contains(s))
+            }
+            subscriptions.forEach{ s ->
+                remembered.cancel(s)
+                assertFalse(remembered.contains(s))
+            }
         }
 
         @Test
-        @DisplayName("clear subscriptions when closing")
-        void clearing() {
-            var client = client();
-            var subscriptions = client.subscriptions();
-            this.subscriptions.forEach(
-                    (s) -> assertTrue(subscriptions.contains(s))
-            );
-
-            client.close();
-
-            assertThat(subscriptions.isEmpty())
-                    .isTrue();
+        fun `clear subscriptions when closing`() {
+            val client = client()
+            val subscriptions = client.subscriptions()
+            this.subscriptions.forEach {
+                    s -> assertTrue(subscriptions.contains(s))
+            }
+            client.close()
+            assertThat(subscriptions.isEmpty).isTrue()
         }
     }
 
     @Nested
     @DisplayName("query")
-    class Queries {
+    internal inner class Queries {
 
         @Test
-        @DisplayName("entities by ID")
-        void byId() {
-            var client = client();
-            var user = GivenUserId.generated();
-
-            var command = LogInUser.newBuilder()
-                    .setUser(user)
-                    .build();
+        fun `entities by ID`() {
+            val client = client()
+            val user = GivenUserId.generated()
+            val command = logInUser { this.user = user }
             client.asGuest()
-                  .command(command)
-                  .postAndForget();
-            var query= ActiveUsers.query()
-                                   .id().is(THE_ID)
-                                   .build();
-            var users = client.onBehalfOf(user).run(query);
+                .command(command)
+                .postAndForget()
+            val query = ActiveUsers.query()
+                .id().`is`(THE_ID)
+                .build()
+            val users = client.onBehalfOf(user).run(query)
             assertThat(users)
-                    .comparingExpectedFieldsOnly()
-                    .containsExactly(ActiveUsers.newBuilder()
-                                                .setId(THE_ID)
-                                                .setCount(1)
-                                                .build());
+                .comparingExpectedFieldsOnly()
+                .containsExactly(
+                    activeUsers {
+                        id = THE_ID
+                        count = 1
+                    })
         }
     }
 }

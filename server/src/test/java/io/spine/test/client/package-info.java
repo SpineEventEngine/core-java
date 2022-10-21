@@ -25,7 +25,7 @@
  */
 
 /**
- * Testing environment for {@link io.spine.client.ClientTest}.
+ * Testing environment for {@link io.spine.client.ClientSpec}.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
