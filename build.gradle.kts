@@ -96,10 +96,15 @@ plugins {
 }
 
 object BuildSettings {
-    // Temporarily use this version, since 3.21.x is known to provide
-    // a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
-    // See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
-    //     https://github.com/protocolbuffers/protobuf/issues/10593
+    /**
+     * Temporarily use this version, since 3.21.x is known to provide
+     * a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
+     *
+     * @see <a href="https://github.com/protocolbuffers/protobuf-javascript/issues/127">
+     *      protobuf-javascript#127</a>
+     * @see <a href="https://github.com/protocolbuffers/protobuf/issues/10593">
+     *      protobuf#10593</a>
+     */
     const val protocArtifact = "com.google.protobuf:protoc:3.19.6"
 }
 
