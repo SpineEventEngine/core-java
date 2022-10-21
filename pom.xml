@@ -61,14 +61,14 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
-    <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.114</version>
+    <artifactId>spine-base-types</artifactId>
+    <version>2.0.0-SNAPSHOT.111</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
-    <artifactId>spine-base-types</artifactId>
-    <version>2.0.0-SNAPSHOT.111</version>
+    <artifactId>spine-change</artifactId>
+    <version>2.0.0-SNAPSHOT.116</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
