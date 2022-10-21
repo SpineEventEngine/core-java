@@ -259,6 +259,7 @@ public final class BoundedContextBuilder implements Logging {
      *         the type of the dispatchers
      * @return this builder
      */
+    @CanIgnoreReturnValue
     private <D extends MessageDispatcher<?, ?>>
     BoundedContextBuilder ifRepository(D dispatcher,
                                        Consumer<Repository<?, ?>> repositoryConsumer,
@@ -301,6 +302,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Adds a listener for commands posted to the {@code CommandBus} of the context being built.
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder addCommandListener(Listener<CommandEnvelope> listener) {
         checkNotNull(listener);
         commandBus.addListener(listener);
@@ -340,6 +342,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Adds a listener of the events posted to the {@code EventBus} of the context being built.
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder addEventListener(Listener<EventEnvelope> listener) {
         checkNotNull(listener);
         eventBus.addListener(listener);

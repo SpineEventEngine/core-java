@@ -142,12 +142,12 @@ public final class EventBus
     }
 
     @VisibleForTesting
-    final Set<? extends EventDispatcher> dispatchersOf(EventClass eventClass) {
+    Set<? extends EventDispatcher> dispatchersOf(EventClass eventClass) {
         return registry().dispatchersOf(eventClass);
     }
 
     @VisibleForTesting
-    final boolean hasDispatchers(EventClass eventClass) {
+    boolean hasDispatchers(EventClass eventClass) {
         Set<?> dispatchers = dispatchersOf(eventClass);
         return !dispatchers.isEmpty();
     }
@@ -159,7 +159,7 @@ public final class EventBus
      *
      * @return a set of classes of supported events
      */
-    public final Set<EventClass> registeredEventClasses() {
+    public Set<EventClass> registeredEventClasses() {
         return registry().registeredMessageClasses();
     }
 
@@ -201,7 +201,7 @@ public final class EventBus
      * @param event the event to be handled
      * @see io.spine.server.bus.Bus#post(Signal, StreamObserver)
      */
-    public final void post(Event event) {
+    public void post(Event event) {
         post(event, observer());
     }
 
@@ -217,7 +217,7 @@ public final class EventBus
      * @param events the events to be handled
      * @see io.spine.server.bus.Bus#post(Signal, StreamObserver)
      */
-    public final void post(Iterable<Event> events) {
+    public void post(Iterable<Event> events) {
         post(events, observer());
     }
 
@@ -230,7 +230,7 @@ public final class EventBus
      * Obtains the {@code EventEnricher} used by this Event Bus.
      */
     @VisibleForTesting
-    public final Optional<EventEnricher> enricher() {
+    public Optional<EventEnricher> enricher() {
         return Optional.ofNullable(enricher);
     }
 
@@ -288,7 +288,6 @@ public final class EventBus
     }
 
     /** The {@code Builder} for {@code EventBus}. */
-    @CanIgnoreReturnValue
     public static class Builder
             extends BusBuilder<Builder, Event, EventEnvelope, EventClass, EventDispatcher> {
 
@@ -337,6 +336,7 @@ public final class EventBus
         /**
          * Assigns the observer for the {@link #post(Signal, StreamObserver)} operations.
          */
+        @CanIgnoreReturnValue
         public Builder setObserver(StreamObserver<Ack> observer) {
             this.observer = observer;
             return this;

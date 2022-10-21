@@ -131,6 +131,7 @@ final class MultiEventConsumers implements Logging {
             return doPut(eventType, consumer);
         }
 
+        @CanIgnoreReturnValue
         private <E extends EventMessage>
         Builder doPut(Class<E> eventType, EventConsumer<E> ec) {
             if (map.containsKey(eventType)) {

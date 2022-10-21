@@ -33,11 +33,12 @@ import io.spine.test.unpublished.command.Halt
 import io.spine.test.unpublished.event.WheelsKnocked
 import io.spine.type.UnpublishedLanguageException
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class `'ClientRequest' should prohibit using 'internal_type' messages when` :
-    AbstractClientTest() {
+@DisplayName("`ClientRequest` should prohibit using `internal_type` messages when")
+internal class ClientRequestPublishedLanguageSpec : AbstractClientTest() {
 
     private lateinit var request: ClientRequest
 

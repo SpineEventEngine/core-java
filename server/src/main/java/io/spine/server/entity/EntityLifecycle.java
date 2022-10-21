@@ -99,7 +99,7 @@ import static io.spine.server.entity.EventFilter.allowAll;
  * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @Internal
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+@SuppressWarnings("ClassWithTooManyMethods")
     // Posts system messages in multiple cases.
 public class EntityLifecycle {
 
@@ -645,21 +645,25 @@ public class EntityLifecycle {
         private Builder() {
         }
 
+        @CanIgnoreReturnValue
         Builder setEntityId(Object entityId) {
             this.entityId = checkNotNull(entityId);
             return this;
         }
 
+        @CanIgnoreReturnValue
         Builder setEntityType(EntityClass<?> entityType) {
             this.entityType = checkNotNull(entityType);
             return this;
         }
 
+        @CanIgnoreReturnValue
         Builder setSystemWriteSide(SystemWriteSide writeSide) {
             this.writeSide = checkNotNull(writeSide);
             return this;
         }
 
+        @CanIgnoreReturnValue
         Builder setEventFilter(EventFilter eventFilter) {
             this.eventFilter = checkNotNull(eventFilter);
             return this;

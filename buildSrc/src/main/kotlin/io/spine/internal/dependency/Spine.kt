@@ -49,7 +49,14 @@ class Spine(p: ExtensionAware) {
          * The default version  of `base` to use.
          * @see [Spine.base]
          */
-        const val base = "2.0.0-SNAPSHOT.112"
+        const val base = "2.0.0-SNAPSHOT.114"
+
+        /**
+         * The default version of `core-java` to use.
+         * @see [Spine.CoreJava.client]
+         * @see [Spine.CoreJava.server]
+         */
+        const val core = "2.0.0-SNAPSHOT.114"
 
         /**
          * The version of `model-compiler` to use.
@@ -66,19 +73,25 @@ class Spine(p: ExtensionAware) {
          * The version of `base-types` to use.
          * @see [Spine.baseTypes]
          */
-        const val baseTypes = "2.0.0-SNAPSHOT.108"
+        const val baseTypes = "2.0.0-SNAPSHOT.110"
 
         /**
          * The version of `time` to use.
          * @see [Spine.time]
          */
-        const val time = "2.0.0-SNAPSHOT.108"
+        const val time = "2.0.0-SNAPSHOT.109"
+
+        /**
+         * Tghe version of `change` to use.
+         * @see [Spine.change]
+         */
+        const val change = "2.0.0-SNAPSHOT.116"
 
         /**
          * The version of `tool-base` to use.
          * @see [Spine.toolBase]
          */
-        const val toolBase = "2.0.0-SNAPSHOT.109"
+        const val toolBase = "2.0.0-SNAPSHOT.111"
 
         /**
          * The version of `validation` to use.
@@ -99,28 +112,30 @@ class Spine(p: ExtensionAware) {
          *
          * @see [ProtoData]
          */
-        const val protoDataVersion = "0.2.18"
+        const val protoDataVersion = "0.2.20"
     }
 
     val base = "$group:spine-base:${p.baseVersion}"
+    val baseTypes = "$group:spine-base-types:${p.baseTypesVersion}"
+    val time = "$group:spine-time:${p.timeVersion}"
+    val change = "$group:spine-change:${p.changeVersion}"
+
     val testlib = "$toolsGroup:spine-testlib:${p.baseVersion}"
+    val testUtilTime = "io.spine.tools:spine-testutil-time:${p.timeVersion}"
+    val toolBase = "$toolsGroup:spine-tool-base:${p.toolBaseVersion}"
+    val pluginBase = "$toolsGroup:spine-plugin-base:${p.toolBaseVersion}"
+    val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${p.toolBaseVersion}"
+    val modelCompiler = "$toolsGroup:spine-model-compiler:${p.mcVersion}"
+    val mcJavaPlugin = "$toolsGroup:spine-mc-java-plugins:${p.mcJavaVersion}:all"
 
     @Deprecated("Please use `validation.runtime`", replaceWith = ReplaceWith("validation.runtime"))
     val validate = "$group:spine-validate:${p.baseVersion}"
 
-    val baseTypes = "$group:spine-base-types:${p.baseTypesVersion}"
-
-    val time = "$toolsGroup:spine-testlib:${p.timeVersion}"
-
-    val toolBase = "$toolsGroup:spine-tool-base:${p.toolBaseVersion}"
-    val pluginBase = "$toolsGroup:spine-plugin-base:${p.toolBaseVersion}"
-    val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${p.toolBaseVersion}"
-
-    val modelCompiler = "$toolsGroup:spine-model-compiler:${p.mcVersion}"
-
-    val mcJavaPlugin = "io.spine.tools:spine-mc-java-plugins:${p.mcJavaVersion}:all"
-
     val validation = Validation(p)
+
+    val coreJava = CoreJava(p)
+    val client = coreJava.client // Added for brevity.
+    val server = coreJava.server // Added for brevity.
 
     private val ExtensionAware.baseVersion: String
         get() = "baseVersion".asExtra(this, DefaultVersion.base)
@@ -130,6 +145,9 @@ class Spine(p: ExtensionAware) {
 
     private val ExtensionAware.timeVersion: String
         get() = "timeVersion".asExtra(this, DefaultVersion.time)
+
+    private val ExtensionAware.changeVersion: String
+        get() = "changeVersion".asExtra(this, DefaultVersion.change)
 
     private val ExtensionAware.mcVersion: String
         get() = "mcVersion".asExtra(this, DefaultVersion.mc)
@@ -146,11 +164,9 @@ class Spine(p: ExtensionAware) {
      * See [`SpineEventEngine/validation`](https://github.com/SpineEventEngine/validation/).
      */
     class Validation(p: ExtensionAware) {
-
         companion object {
             const val group = "io.spine.validation"
         }
-
         val runtime = "$group:spine-validation-java-runtime:${p.validationVersion}"
         val java = "$group:spine-validation-java:${p.validationVersion}"
         val model = "$group:spine-validation-model:${p.validationVersion}"
@@ -166,11 +182,24 @@ class Spine(p: ExtensionAware) {
      * See [`SpineEventEngine/ProtoData`](https://github.com/SpineEventEngine/ProtoData/).
      */
     object ProtoData {
-
         const val pluginId = "io.spine.protodata"
-
         const val version = protoDataVersion
         const val pluginLib = "$group:protodata:$version"
+    }
+
+    /**
+     * Dependencies on `core-java` modules.
+     *
+     * See [`SpineEventEngine/core-java`](https://github.com/SpineEventEngine/core-java/).
+     */
+    class CoreJava(p: ExtensionAware) {
+        val core = "$group:spine-core:${p.coreVersion}"
+        val client = "$group:spine-client:${p.coreVersion}"
+        val server = "$group:spine-server:${p.coreVersion}"
+        val testUtilServer = "$toolsGroup:spine-testutil-server:${p.coreVersion}"
+
+        private val ExtensionAware.coreVersion: String
+            get() = "coreVersion".asExtra(this, DefaultVersion.core)
     }
 }
 

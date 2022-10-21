@@ -154,6 +154,7 @@ public class RecordStorageDelegateTest
 
             var result = storage().read(record.getId(), idAndDueDate());
             assertThat(result).isPresent();
+            @SuppressWarnings("OptionalGetWithoutIsPresent") // checked on the prev. line.
             var actual = result.get();
             assertOnlyIdAndDueDate(actual);
         }
@@ -434,6 +435,7 @@ public class RecordStorageDelegateTest
 
         @Test
         @DisplayName("`readAll(IDs)` method")
+        @SuppressWarnings("DistinctVarargsChecker")
         void readAllByIds() {
             assertISE(() -> storage().readAll(ImmutableSet.of(newId(), newId())));
         }

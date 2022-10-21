@@ -24,13 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.protobuf.gradle.generateProtoTasks
+@file:Suppress("RemoveRedundantQualifierName")
+
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
@@ -51,6 +53,10 @@ import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
+import io.spine.protodata.gradle.CodegenSettings
+import io.spine.protodata.gradle.plugin.LaunchProtoData
+import io.spine.tools.mc.gradle.ModelCompilerOptions
+import io.spine.tools.mc.java.gradle.McJavaOptions
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -87,6 +93,19 @@ plugins {
     idea
     id(io.spine.internal.dependency.Protobuf.GradlePlugin.id)
     id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
+}
+
+object BuildSettings {
+    /**
+     * Temporarily use this version, since 3.21.x is known to provide
+     * a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
+     *
+     * @see <a href="https://github.com/protocolbuffers/protobuf-javascript/issues/127">
+     *      protobuf-javascript#127</a>
+     * @see <a href="https://github.com/protocolbuffers/protobuf/issues/10593">
+     *      protobuf#10593</a>
+     */
+    const val protocArtifact = "com.google.protobuf:protoc:3.19.6"
 }
 
 repositories.applyStandard()
@@ -135,31 +154,65 @@ allprojects {
     version = extra["versionToPublish"]!!
 }
 
-// Temporarily use this version, since 3.21.x is known to provide
-// a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
-// See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
-//     https://github.com/protocolbuffers/protobuf/issues/10593
-val protocArtifact = "com.google.protobuf:protoc:3.19.6"
-
-val spine = io.spine.internal.dependency.Spine(project)
+val spine = Spine(project)
 
 subprojects {
-
     repositories.applyStandard()
+    applyPlugins()
+    setupJava()
+    setupKotlin()
 
+    val spine = Spine(this)
+    defineDependencies(spine)
+    forceConfigurations(spine)
+
+    val generated = "$projectDir/generated"
+    applyGeneratedDirectories(generated)
+    setupTestTasks()
+    setupCodeGeneration(generated)
+    setupPublishing()
+    addTaskDependencies()
+}
+
+JacocoConfig.applyTo(project)
+PomGenerator.applyTo(project)
+LicenseReporter.mergeAllReports(project)
+
+/**
+ * The alias for typed extensions functions related to subprojects.
+ */
+typealias Subproject = Project
+
+/**
+ * Applies plugins common to all modules to this subproject.
+ */
+fun Subproject.applyPlugins() {
     apply {
         plugin("java-library")
         plugin("jacoco")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
-        plugin("io.spine.mc-java")
         plugin("kotlin")
         plugin("pmd")
         plugin("maven-publish")
         plugin("pmd-settings")
         plugin("dokka-for-java")
+        plugin("io.spine.mc-java")
+        plugin("io.spine.protodata")
     }
 
+    apply<IncrementGuard>()
+    apply<VersionWriter>()
+
+    LicenseReporter.generateReportIn(project)
+    JavadocConfig.applyTo(project)
+    CheckStyleConfig.applyTo(project)
+}
+
+/**
+ * Configures Java tasks in this project.
+ */
+fun Subproject.setupJava() {
     java {
         tasks {
             withType<JavaCompile>().configureEach {
@@ -171,7 +224,12 @@ subprojects {
             }
         }
     }
+}
 
+/**
+ * Configures Kotlin tasks in this project.
+ */
+fun Subproject.setupKotlin() {
     kotlin {
         val javaVersion = JavaVersion.VERSION_11.toString()
 
@@ -183,19 +241,169 @@ subprojects {
             setFreeCompilerArgs()
         }
     }
+}
 
+/**
+ * Configures test tasks in this project.
+ */
+fun Subproject.setupTestTasks() {
+    tasks {
+        registerTestTasks()
+        test {
+            useJUnitPlatform { includeEngines("junit-jupiter") }
+            configureLogging()
+        }
+    }
+}
+
+/**
+ * Defines dependencies of this subproject.
+ */
+fun Subproject.defineDependencies(spine: Spine) {
     dependencies {
         ErrorProne.apply {
             errorprone(core)
         }
-
-        api(spine.base)
-        api(spine.time)
+        // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
+        add("protoData", spine.validation.java)
+        implementation(spine.validation.runtime)
 
         testImplementation(JUnit.runner)
         testImplementation(spine.testlib)
     }
+}
 
+/**
+ * Adds directories with the generated source code to source sets of the project and
+ * to IntelliJ IDEA module settings.
+ *
+ * @param generatedDir
+ *          the name of the root directory with the generated code
+ */
+fun Subproject.applyGeneratedDirectories(generatedDir: String) {
+    val generatedMain = "$generatedDir/main"
+    val generatedJava = "$generatedMain/java"
+    val generatedKotlin = "$generatedMain/kotlin"
+    val generatedGrpc = "$generatedMain/grpc"
+    val generatedSpine = "$generatedMain/spine"
+
+    val generatedTest = "$generatedDir/test"
+    val generatedTestJava = "$generatedTest/java"
+    val generatedTestKotlin = "$generatedTest/kotlin"
+    val generatedTestGrpc = "$generatedTest/grpc"
+    val generatedTestSpine = "$generatedTest/spine"
+
+    sourceSets {
+        main {
+            java.srcDirs(
+                generatedJava,
+                generatedGrpc,
+                generatedSpine,
+            )
+            kotlin.srcDirs(
+                generatedKotlin,
+            )
+        }
+        test {
+            java.srcDirs(
+                generatedTestJava,
+                generatedTestGrpc,
+                generatedTestSpine,
+            )
+            kotlin.srcDirs(
+                generatedTestKotlin,
+            )
+        }
+    }
+
+    idea {
+        module {
+            generatedSourceDirs.addAll(files(
+                    generatedJava,
+                    generatedKotlin,
+                    generatedGrpc,
+                    generatedSpine,
+            ))
+            testSources.from(
+                generatedTestJava,
+                generatedTestKotlin,
+                generatedTestGrpc,
+                generatedTestSpine,
+            )
+            isDownloadJavadoc = true
+            isDownloadSources = true
+        }
+    }
+}
+
+/**
+ * Configures code generation in this project.
+ */
+fun Subproject.setupCodeGeneration(generatedDir: String) {
+    /**
+     * The below arrangement is "unusual" `because:
+     *  1. `modelCompiler` could not be found after applying plugin via `apply { }` block.
+     *  2. java { }` cannot be used because it conflicts with `java` of type `JavaPluginExtension`
+     *     already added to the `Project`.
+     */
+    val modelCompiler = extensions.getByType(ModelCompilerOptions::class.java)
+    modelCompiler.apply {
+        // Get nested `this` instead of `Project` instance.
+        val mcOptions = (this@apply as ExtensionAware)
+        val java = mcOptions.extensions.getByName("java") as McJavaOptions
+        java.codegen {
+            validation { skipValidation() }
+        }
+    }
+
+    val protoData = extensions.getByName("protoData") as CodegenSettings
+    protoData.apply {
+        renderers(
+            "io.spine.validation.java.PrintValidationInsertionPoints",
+            "io.spine.validation.java.JavaValidationRenderer",
+
+            // Suppress warnings in the generated code.
+            "io.spine.protodata.codegen.java.file.PrintBeforePrimaryDeclaration",
+            "io.spine.protodata.codegen.java.suppress.SuppressRenderer"
+        )
+        plugins(
+            "io.spine.validation.ValidationPlugin",
+        )
+    }
+
+    /**
+     * Temporarily use this version, since 3.21.x is known to provide
+     * a broken `protoc-gen-js` artifact.
+     *
+     * See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
+     * Once it is addressed, this artifact should be `Protobuf.compiler`.
+     *
+     * Also, this fixes the explicit API more for the generated Kotlin code.
+     */
+    protobuf {
+        // Do not remove this setting until ProtoData can copy all the directories from
+        // `build/generated-proto`. Otherwise, the GRPC code won't be picked up.
+        // See: https://github.com/SpineEventEngine/ProtoData/issues/94
+        generatedFilesBaseDir = generatedDir
+        protoc { artifact = BuildSettings.protocArtifact }
+    }
+
+    /**
+     * Manually suppress deprecations in the generated Kotlin code until ProtoData does it.
+     */
+    tasks.withType<LaunchProtoData>().forEach { task ->
+        task.doLast {
+            sourceSets.forEach { sourceSet ->
+                suppressDeprecationsInKotlin(generatedDir, sourceSet.name)
+            }
+        }
+    }
+}
+
+/**
+ * Forces dependencies of this project.
+ */
+fun Subproject.forceConfigurations(spine: Spine) {
     configurations {
         forceVersions()
         excludeProtobufLite()
@@ -217,6 +425,7 @@ subprojects {
                     spine.validation.runtime,
                     spine.time,
                     spine.baseTypes,
+                    spine.change,
                     spine.testlib,
                     spine.toolBase,
                     spine.pluginBase,
@@ -228,34 +437,26 @@ subprojects {
             }
         }
     }
+}
 
-    val generatedDir = "$projectDir/generated"
-    val generatedJavaDir = "$generatedDir/main/java"
-    val generatedKotlinDir = "$generatedDir/main/kotlin"
-    val generatedTestJavaDir = "$generatedDir/test/java"
-    val generatedTestKotlinDir = "$generatedDir/test/kotlin"
-    val generatedGrpcDir = "$generatedDir/main/grpc"
-    val generatedTestGrpcDir = "$generatedDir/test/grpc"
-    val generatedSpineDir = "$generatedDir/main/spine"
-    val generatedTestSpineDir = "$generatedDir/test/spine"
-
-    sourceSets {
-        main {
-            java.srcDirs(
-                generatedSpineDir,
-                generatedJavaDir,
-                generatedKotlinDir,
-            )
-        }
-        test {
-            java.srcDirs(
-                generatedTestSpineDir,
-                generatedTestJavaDir,
-                generatedTestKotlinDir,
-            )
-        }
+/**
+ * Configures publishing for this subproject.
+ */
+fun Subproject.setupPublishing() {
+    updateGitHubPages(project.version.toString()) {
+        allowInternalJavadoc.set(true)
+        rootFolder.set(rootDir)
     }
 
+    tasks.named("publish") {
+        dependsOn("${project.path}:updateGitHubPages")
+    }
+}
+
+/**
+ * Adds explicit dependencies for the tasks of this subproject.
+ */
+fun Subproject.addTaskDependencies() {
     tasks {
         val generateRejections by existing
         compileKotlin {
@@ -266,97 +467,6 @@ subprojects {
         compileTestKotlin {
             dependsOn(generateTestRejections)
         }
-
-        registerTestTasks()
-        test {
-            useJUnitPlatform { includeEngines("junit-jupiter") }
-            configureLogging()
-        }
     }
-
-    protobuf {
-        generatedFilesBaseDir = generatedDir
-
-        protoc {
-            // Temporarily use this version, since 3.21.x is known to provide
-            // a broken `protoc-gen-js` artifact.
-            // See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
-            //
-            // Once it is addressed, this artifact should be `Protobuf.compiler`.
-            //
-            // Also, this fixes the explicit API more for the generated Kotlin code.
-            //
-            artifact = protocArtifact
-        }
-
-        generateProtoTasks {
-            all().forEach { task ->
-                task.builtins {
-                    maybeCreate("kotlin")
-                }
-                task.doLast {
-                    suppressDeprecationsInKotlin(generatedDir, task.sourceSet.name)
-                }
-            }
-        }
-    }
-
-    apply<IncrementGuard>()
-    apply<VersionWriter>()
-
-    LicenseReporter.generateReportIn(project)
-    JavadocConfig.applyTo(project)
-    CheckStyleConfig.applyTo(project)
-
-    idea {
-        module {
-            generatedSourceDirs.addAll(
-                files(
-                    generatedJavaDir,
-                    generatedKotlinDir,
-                    generatedGrpcDir,
-                    generatedSpineDir,
-                    generatedTestJavaDir,
-                    generatedTestKotlinDir,
-                    generatedTestGrpcDir,
-                    generatedTestSpineDir
-                )
-            )
-            testSources.from(
-                generatedTestJavaDir,
-                generatedTestKotlinDir
-            )
-
-            isDownloadJavadoc = true
-            isDownloadSources = true
-        }
-    }
-
-    /**
-     * Determines whether this project should expose its Javadoc to `SpineEventEngine.github.io`
-     * website.
-     *
-     * Currently, the `testutil` projects are excluded from publishing, as well as the modules
-     * that perform the model compile-time checks.
-     *
-     * @return `true` is the project Javadoc should be published, `false` otherwise
-     */
-    fun shouldPublishJavadoc() =
-        !project.name.startsWith("testutil") &&
-        !project.name.startsWith("model")
-
-    updateGitHubPages(project.version.toString()) {
-        allowInternalJavadoc.set(true)
-        rootFolder.set(rootDir)
-    }
-
-    tasks.named("publish") {
-        dependsOn("${project.path}:updateGitHubPages")
-    }
-
-    project.configureTaskDependencies()
+    configureTaskDependencies()
 }
-
-JacocoConfig.applyTo(project)
-PomGenerator.applyTo(project)
-LicenseReporter.mergeAllReports(project)

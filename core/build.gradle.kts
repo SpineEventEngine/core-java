@@ -24,20 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.testing.exposeTestConfiguration
 
-val baseVersion: String by extra
-val validationVersion: String by extra
-val baseTypesVersion: String by extra
-val timeVersion: String by extra
-
 dependencies {
-    api("io.spine:spine-time:$timeVersion")
-    api("io.spine:spine-base-types:$baseTypesVersion")
-    implementation("io.spine.validation:spine-validation-java-runtime:$validationVersion")
+    val spine = Spine(project)
+    api(spine.time)
+    api(spine.baseTypes)
+    api(spine.change)
+    api(spine.validation.runtime)
 
     testImplementation(project(":testutil-core"))
-    testImplementation("io.spine.tools:spine-testutil-time:$timeVersion")
+    testImplementation(spine.testUtilTime)
 }
 
 modelCompiler {

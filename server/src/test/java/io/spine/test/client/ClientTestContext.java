@@ -31,7 +31,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 
 /**
- * Configures Bounded Context for the purpose of {@link io.spine.client.ClientTest}.
+ * Configures Bounded Context for the purpose of {@link io.spine.client.ClientSpec}.
  */
 public final class ClientTestContext {
 

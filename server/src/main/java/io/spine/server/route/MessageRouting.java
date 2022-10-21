@@ -26,6 +26,7 @@
 
 package io.spine.server.route;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.MessageContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -75,6 +76,7 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
      *
      * @param newDefault the new route to be used as default
      */
+    @CanIgnoreReturnValue
     MessageRouting<M, C, R> replaceDefault(Route<M, C, R> newDefault) {
         checkNotNull(newDefault);
         defaultRoute = newDefault;

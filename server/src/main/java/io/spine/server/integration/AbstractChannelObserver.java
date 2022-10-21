@@ -94,12 +94,13 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
     @Override
     public final void onNext(ExternalMessage message) {
         checkNotNull(message);
+        var messageClass = message.getClass().getName();
+        var originalMessage = message.getOriginalMessage().getTypeUrl();
         checkState(!completed.get(),
-                   "Channel %s received message (%s[%s]) despite being closed.",
-                   message.getClass()
-                          .getName(),
-                   message.getOriginalMessage()
-                          .getTypeUrl());
+                   "Channel `%s` received message (%s[%s]) despite being closed.",
+                   this,
+                   messageClass,
+                   originalMessage);
         var source = message.getBoundedContextName();
         var sameContext = boundedContextName.equals(source)
                 || boundedContextName.isSystemOf(source)
