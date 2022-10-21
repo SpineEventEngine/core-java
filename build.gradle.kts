@@ -24,12 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("RemoveRedundantQualifierName")
+
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
@@ -92,6 +95,14 @@ plugins {
     id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
 }
 
+object BuildSettings {
+    // Temporarily use this version, since 3.21.x is known to provide
+    // a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
+    // See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
+    //     https://github.com/protocolbuffers/protobuf/issues/10593
+    const val protocArtifact = "com.google.protobuf:protoc:3.19.6"
+}
+
 repositories.applyStandard()
 
 apply(from = "$rootDir/version.gradle.kts")
@@ -138,18 +149,39 @@ allprojects {
     version = extra["versionToPublish"]!!
 }
 
-// Temporarily use this version, since 3.21.x is known to provide
-// a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
-// See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
-//     https://github.com/protocolbuffers/protobuf/issues/10593
-val protocArtifact = "com.google.protobuf:protoc:3.19.6"
-
-val spine = io.spine.internal.dependency.Spine(project)
+val spine = Spine(project)
 
 subprojects {
-
     repositories.applyStandard()
+    applyPlugins()
+    setupJava()
+    setupKotlin()
 
+    val spine = Spine(this)
+    defineDependencies(spine)
+    forceConfigurations(spine)
+
+    val generated = "$projectDir/generated"
+    applyGeneratedDirectories(generated)
+    setupTestTasks()
+    setupCodeGeneration(generated)
+    setupPublishing()
+    addTaskDependencies()
+}
+
+JacocoConfig.applyTo(project)
+PomGenerator.applyTo(project)
+LicenseReporter.mergeAllReports(project)
+
+/**
+ * The alias for typed extensions functions related to subprojects.
+ */
+typealias Subproject = Project
+
+/**
+ * Applies plugins common to all modules to this subproject.
+ */
+fun Subproject.applyPlugins() {
     apply {
         plugin("java-library")
         plugin("jacoco")
@@ -164,6 +196,18 @@ subprojects {
         plugin("io.spine.protodata")
     }
 
+    apply<IncrementGuard>()
+    apply<VersionWriter>()
+
+    LicenseReporter.generateReportIn(project)
+    JavadocConfig.applyTo(project)
+    CheckStyleConfig.applyTo(project)
+}
+
+/**
+ * Configures Java tasks in this project.
+ */
+fun Subproject.setupJava() {
     java {
         tasks {
             withType<JavaCompile>().configureEach {
@@ -175,7 +219,12 @@ subprojects {
             }
         }
     }
+}
 
+/**
+ * Configures Kotlin tasks in this project.
+ */
+fun Subproject.setupKotlin() {
     kotlin {
         val javaVersion = JavaVersion.VERSION_11.toString()
 
@@ -187,7 +236,25 @@ subprojects {
             setFreeCompilerArgs()
         }
     }
+}
 
+/**
+ * Configures test tasks in this project.
+ */
+fun Subproject.setupTestTasks() {
+    tasks {
+        registerTestTasks()
+        test {
+            useJUnitPlatform { includeEngines("junit-jupiter") }
+            configureLogging()
+        }
+    }
+}
+
+/**
+ * Defines dependencies of this subproject.
+ */
+fun Subproject.defineDependencies(spine: Spine) {
     dependencies {
         ErrorProne.apply {
             errorprone(core)
@@ -201,62 +268,75 @@ subprojects {
         testImplementation(JUnit.runner)
         testImplementation(spine.testlib)
     }
+}
 
-    configurations {
-        forceVersions()
-        excludeProtobufLite()
+/**
+ * Adds directories with the generated source code to source sets of the project and
+ * to IntelliJ IDEA module settings.
+ *
+ * @param generatedDir
+ *          the name of the root directory with the generated code
+ */
+fun Subproject.applyGeneratedDirectories(generatedDir: String) {
+    val generatedMain = "$generatedDir/main"
+    val generatedJava = "$generatedMain/java"
+    val generatedKotlin = "$generatedMain/kotlin"
+    val generatedGrpc = "$generatedMain/grpc"
+    val generatedSpine = "$generatedMain/spine"
 
-        all {
-            resolutionStrategy {
-                exclude("io.spine", "spine-validate")
-                force(
-                    Dokka.BasePlugin.lib,
-                    Dokka.analysis,
-                    /* Force the version of gRPC used by the `:client` module over the one
-                       set by `mc-java` in the `:core` module when specifying compiler artifact
-                       for the gRPC plugin.
-                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
-                       .configureProtocPlugins() method which sets the version from resources. */
-                    Grpc.protobufPlugin,
+    val generatedTest = "$generatedDir/test"
+    val generatedTestJava = "$generatedTest/java"
+    val generatedTestKotlin = "$generatedTest/kotlin"
+    val generatedTestGrpc = "$generatedTest/grpc"
+    val generatedTestSpine = "$generatedTest/spine"
 
-                    spine.base,
-                    spine.validation.runtime,
-                    spine.time,
-                    spine.baseTypes,
-                    spine.testlib,
-                    spine.toolBase,
-                    spine.pluginBase,
-
-                    Grpc.core,
-                    Grpc.protobuf,
-                    Grpc.stub
-                )
-            }
+    sourceSets {
+        main {
+            java.srcDirs(
+                generatedJava,
+                generatedGrpc,
+                generatedSpine,
+            )
+            kotlin.srcDirs(
+                generatedKotlin,
+            )
         }
-    }
-
-    val generated = "$projectDir/generated"
-
-    configureGeneratedDirectories(generated)
-
-    tasks {
-        val generateRejections by existing
-        compileKotlin {
-            dependsOn(generateRejections)
-        }
-
-        val generateTestRejections by existing
-        compileTestKotlin {
-            dependsOn(generateTestRejections)
-        }
-
-        registerTestTasks()
         test {
-            useJUnitPlatform { includeEngines("junit-jupiter") }
-            configureLogging()
+            java.srcDirs(
+                generatedTestJava,
+                generatedTestGrpc,
+                generatedTestSpine,
+            )
+            kotlin.srcDirs(
+                generatedTestKotlin,
+            )
         }
     }
 
+    idea {
+        module {
+            generatedSourceDirs.addAll(files(
+                    generatedJava,
+                    generatedKotlin,
+                    generatedGrpc,
+                    generatedSpine,
+            ))
+            testSources.from(
+                generatedTestJava,
+                generatedTestKotlin,
+                generatedTestGrpc,
+                generatedTestSpine,
+            )
+            isDownloadJavadoc = true
+            isDownloadSources = true
+        }
+    }
+}
+
+/**
+ * Configures code generation in this project.
+ */
+fun Subproject.setupCodeGeneration(generatedDir: String) {
     /**
      * The below arrangement is "unusual" `because:
      *  1. `modelCompiler` could not be found after applying plugin via `apply { }` block.
@@ -298,8 +378,11 @@ subprojects {
      * Also, this fixes the explicit API more for the generated Kotlin code.
      */
     protobuf {
-        generatedFilesBaseDir = generated
-        protoc { artifact = protocArtifact }
+        // Do not remove this setting until ProtoData can copy all the directories from
+        // `build/generated-proto`. Otherwise, the GRPC code won't be picked up.
+        // See: https://github.com/SpineEventEngine/ProtoData/issues/94
+        generatedFilesBaseDir = generatedDir
+        protoc { artifact = BuildSettings.protocArtifact }
     }
 
     /**
@@ -308,31 +391,54 @@ subprojects {
     tasks.withType<LaunchProtoData>().forEach { task ->
         task.doLast {
             sourceSets.forEach { sourceSet ->
-                suppressDeprecationsInKotlin(generated, sourceSet.name)
+                suppressDeprecationsInKotlin(generatedDir, sourceSet.name)
             }
         }
     }
+}
 
-    apply<IncrementGuard>()
-    apply<VersionWriter>()
+/**
+ * Forces dependencies of this project.
+ */
+fun Subproject.forceConfigurations(spine: Spine) {
+    configurations {
+        forceVersions()
+        excludeProtobufLite()
 
-    LicenseReporter.generateReportIn(project)
-    JavadocConfig.applyTo(project)
-    CheckStyleConfig.applyTo(project)
+        all {
+            resolutionStrategy {
+                exclude("io.spine", "spine-validate")
+                force(
+                    Dokka.BasePlugin.lib,
+                    Dokka.analysis,
+                    /* Force the version of gRPC used by the `:client` module over the one
+                       set by `mc-java` in the `:core` module when specifying compiler artifact
+                       for the gRPC plugin.
+                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
+                       .configureProtocPlugins() method which sets the version from resources. */
+                    Grpc.protobufPlugin,
 
-    /**
-     * Determines whether this project should expose its Javadoc to `SpineEventEngine.github.io`
-     * website.
-     *
-     * Currently, the `testutil` projects are excluded from publishing, as well as the modules
-     * that perform the model compile-time checks.
-     *
-     * @return `true` is the project Javadoc should be published, `false` otherwise
-     */
-    fun shouldPublishJavadoc() =
-        !project.name.startsWith("testutil") &&
-        !project.name.startsWith("model")
+                    spine.base,
+                    spine.validation.runtime,
+                    spine.time,
+                    spine.baseTypes,
+                    spine.testlib,
+                    spine.toolBase,
+                    spine.pluginBase,
 
+                    Grpc.core,
+                    Grpc.protobuf,
+                    Grpc.stub
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Configures publishing for this subproject.
+ */
+fun Subproject.setupPublishing() {
     updateGitHubPages(project.version.toString()) {
         allowInternalJavadoc.set(true)
         rootFolder.set(rootDir)
@@ -341,76 +447,22 @@ subprojects {
     tasks.named("publish") {
         dependsOn("${project.path}:updateGitHubPages")
     }
-
-    project.configureTaskDependencies()
 }
 
-JacocoConfig.applyTo(project)
-PomGenerator.applyTo(project)
-LicenseReporter.mergeAllReports(project)
-
 /**
- * Adds directories with the generated source code to source sets of the project and
- * to IntelliJ IDEA module settings.
- *
- * @param generatedDir
- *          the name of the root directory with the generated code
+ * Adds explicit dependencies for the tasks of this subproject.
  */
-fun Project.configureGeneratedDirectories(generatedDir: String) {
-    val generatedMain = "$generatedDir/main"
-    val generatedJava = "$generatedMain/java"
-    val generatedKotlin = "$generatedMain/kotlin"
-    val generatedGrpc = "$generatedMain/grpc"
-    val generatedSpine = "$generatedMain/spine"
-
-    val generatedTest = "$generatedDir/test"
-    val generatedTestJava = "$generatedTest/java"
-    val generatedTestKotlin = "$generatedTest/kotlin"
-    val generatedTestGrpc = "$generatedTest/grpc"
-    val generatedTestSpine = "$generatedTest/spine"
-
-    sourceSets {
-        main {
-            java.srcDirs(
-                generatedJava,
-                generatedGrpc,
-                generatedSpine,
-            )
-            kotlin.srcDirs(
-                generatedKotlin,
-            )
+fun Subproject.addTaskDependencies() {
+    tasks {
+        val generateRejections by existing
+        compileKotlin {
+            dependsOn(generateRejections)
         }
-        test {
-            java.srcDirs(
-                generatedTestJava,
-                generatedTestGrpc,
-                generatedTestSpine,
-            )
-            kotlin.srcDirs(
-                generatedTestKotlin,
-            )
+
+        val generateTestRejections by existing
+        compileTestKotlin {
+            dependsOn(generateTestRejections)
         }
     }
-
-    idea {
-        module {
-            generatedSourceDirs.addAll(
-                files(
-                    generatedJava,
-                    generatedKotlin,
-                    generatedGrpc,
-                    generatedSpine,
-                )
-            )
-            testSources.from(
-                generatedTestJava,
-                generatedTestKotlin,
-                generatedTestGrpc,
-                generatedTestSpine,
-            )
-
-            isDownloadJavadoc = true
-            isDownloadSources = true
-        }
-    }
+    configureTaskDependencies()
 }
