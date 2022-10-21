@@ -261,8 +261,6 @@ fun Subproject.defineDependencies(spine: Spine) {
         }
         // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
         add("protoData", spine.validation.java)
-        api(spine.base)
-        api(spine.time)
         implementation(spine.validation.runtime)
 
         testImplementation(JUnit.runner)
@@ -422,6 +420,7 @@ fun Subproject.forceConfigurations(spine: Spine) {
                     spine.validation.runtime,
                     spine.time,
                     spine.baseTypes,
+                    spine.change,
                     spine.testlib,
                     spine.toolBase,
                     spine.pluginBase,
