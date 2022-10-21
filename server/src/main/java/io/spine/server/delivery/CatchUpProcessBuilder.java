@@ -26,6 +26,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.delivery.CatchUpProcess.DispatchCatchingUp;
 import io.spine.server.projection.ProjectionRepository;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -66,6 +67,7 @@ public final class CatchUpProcessBuilder<I> {
     /**
      * Sets the {@code CatchUpStorage} to use during the catch-up.
      */
+    @CanIgnoreReturnValue
     CatchUpProcessBuilder<I> setStorage(CatchUpStorage storage) {
         this.storage = checkNotNull(storage);
         return this;
@@ -86,6 +88,7 @@ public final class CatchUpProcessBuilder<I> {
      *
      * <p>Must be a positive value.
      */
+    @CanIgnoreReturnValue
     CatchUpProcessBuilder<I> setPageSize(int pageSize) {
         checkPositive(pageSize);
         this.pageSize = pageSize;
@@ -102,6 +105,7 @@ public final class CatchUpProcessBuilder<I> {
     /**
      * Sets the way to dispatch the events during the catch-up.
      */
+    @CanIgnoreReturnValue
     public CatchUpProcessBuilder<I> setDispatchOp(DispatchCatchingUp<I> operation) {
         this.dispatchOp = checkNotNull(operation);
         return this;

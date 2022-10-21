@@ -69,6 +69,7 @@ final class AsEntityRecordColumn {
      *         the type of the column values
      * @return a view on the column
      */
+    @SuppressWarnings("Immutable")
     static <V> RecordColumn<EntityRecord, V>
     apply(Column<?, ?> original, Class<V> typeOfValues, Function<EntityRecord, V> getter) {
         checkNotNull(original);

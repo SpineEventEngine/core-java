@@ -68,7 +68,6 @@ import static java.util.Optional.ofNullable;
  *         the type of the dispatchers expected for the bus
  */
 @Internal
-@CanIgnoreReturnValue
 public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
                                  T extends Signal<?, ?, ?>,
                                  E extends SignalEnvelope<?, T, ?>,
@@ -96,6 +95,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      *
      * @param filter the filter to add
      */
+    @CanIgnoreReturnValue
     public final B appendFilter(BusFilter<E> filter) {
         checkNotNull(filter);
         filters.add(filter);
@@ -119,6 +119,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      * <p>If an exception is thrown by a {@linkplain Consumer#accept(Object) listener code}, it
      * will be ignored by the bus.
      */
+    @CanIgnoreReturnValue
     public final B addListener(Listener<E> listener) {
         checkNotNull(listener);
         listeners.add(listener);
@@ -128,6 +129,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
     /**
      * Removes the listener. If the listener was not added before, the method has no effect.
      */
+    @CanIgnoreReturnValue
     public final B removeListener(Listener<E> listener) {
         checkNotNull(listener);
         listeners.remove(listener);
@@ -142,6 +144,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
     }
 
     @Internal
+    @CanIgnoreReturnValue
     public B injectContext(BoundedContext context) {
         this.context = context;
         return self();
@@ -164,6 +167,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      *          auto-complete hint for the {@code set} prefix.
      */
     @Internal
+    @CanIgnoreReturnValue
     public B injectSystem(SystemWriteSide writeSide) {
         this.systemWriteSide = checkNotNull(writeSide);
         return self();
@@ -177,6 +181,7 @@ public abstract class BusBuilder<B extends BusBuilder<B, T, E, C, D>,
      *          auto-complete hint for the {@code set} prefix.
      */
     @Internal
+    @CanIgnoreReturnValue
     public B injectTenantIndex(TenantIndex index) {
         this.tenantIndex = checkNotNull(index);
         return self();

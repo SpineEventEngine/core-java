@@ -26,6 +26,7 @@
 
 package io.spine.client;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
 
@@ -53,6 +54,7 @@ public final class SubscriptionRequest<S extends EntityState<?>>
     /**
      * Configures the request to return results matching all the passed filters.
      */
+    @CanIgnoreReturnValue
     public SubscriptionRequest<S> where(EntityStateFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
@@ -61,6 +63,7 @@ public final class SubscriptionRequest<S extends EntityState<?>>
     /**
      * Configures the request to return results matching all the passed filters.
      */
+    @CanIgnoreReturnValue
     public SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
         builder().where(extractFilters(filter));
         return self();

@@ -27,6 +27,7 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.server.BoundedContext;
@@ -191,6 +192,7 @@ final class CatchUpStarter<I> {
          * Sets the <b>initialized</b> {@code BoundedContext}, in scope of which the catch-up is
          * performed.
          */
+        @CanIgnoreReturnValue
         Builder<I> withContext(BoundedContext context) {
             this.context = checkNotNull(context);
             return this;

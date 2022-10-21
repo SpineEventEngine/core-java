@@ -134,7 +134,7 @@ public final class CommandBus
     }
 
     @VisibleForTesting
-    public final boolean isMultitenant() {
+    public boolean isMultitenant() {
         return multitenant;
     }
 
@@ -207,7 +207,7 @@ public final class CommandBus
                : TenantId.getDefaultInstance();
     }
 
-    final SystemWriteSide systemFor(TenantId tenantId) {
+    SystemWriteSide systemFor(TenantId tenantId) {
         checkNotNull(tenantId);
         var result = delegatingTo(systemWriteSide).get(tenantId);
         return result;
@@ -272,7 +272,6 @@ public final class CommandBus
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
-    @CanIgnoreReturnValue
     public static class Builder extends BusBuilder<Builder,
                                                    Command,
                                                    CommandEnvelope,
@@ -305,12 +304,14 @@ public final class CommandBus
         }
 
         @Internal
+        @CanIgnoreReturnValue
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
 
         @Internal
+        @CanIgnoreReturnValue
         public Builder setWatcher(CommandFlowWatcher watcher) {
             this.watcher = watcher;
             return this;
