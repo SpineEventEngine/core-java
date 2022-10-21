@@ -50,7 +50,7 @@ repositories {
  * Please keep this value in sync. with `io.spine.internal.dependency.Jackson.version`.
  * It's not a requirement, but would be good in terms of consistency.
  */
-val jacksonVersion = "2.13.0"
+val jacksonVersion = "2.13.4"
 
 val googleAuthToolVersion = "2.1.2"
 val licenseReportVersion = "2.1"
@@ -100,7 +100,7 @@ val protobufPluginVersion = "0.8.19"
  * @see <a href="https://github.com/Kotlin/dokka/releases">
  *     Dokka Releases</a>
  */
-val dokkaVersion = "1.7.10"
+val dokkaVersion = "1.7.20"
 
 configurations.all {
     resolutionStrategy {

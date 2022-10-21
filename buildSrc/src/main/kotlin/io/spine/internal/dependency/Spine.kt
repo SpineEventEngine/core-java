@@ -49,7 +49,14 @@ class Spine(p: ExtensionAware) {
          * The default version  of `base` to use.
          * @see [Spine.base]
          */
-        const val base = "2.0.0-SNAPSHOT.112"
+        const val base = "2.0.0-SNAPSHOT.114"
+
+        /**
+         * The default version of `core-java` to use.
+         * @see [Spine.CoreJava.client]
+         * @see [Spine.CoreJava.server]
+         */
+        const val core = "2.0.0-SNAPSHOT.114"
 
         /**
          * The version of `model-compiler` to use.
@@ -66,19 +73,19 @@ class Spine(p: ExtensionAware) {
          * The version of `base-types` to use.
          * @see [Spine.baseTypes]
          */
-        const val baseTypes = "2.0.0-SNAPSHOT.108"
+        const val baseTypes = "2.0.0-SNAPSHOT.110"
 
         /**
          * The version of `time` to use.
          * @see [Spine.time]
          */
-        const val time = "2.0.0-SNAPSHOT.108"
+        const val time = "2.0.0-SNAPSHOT.109"
 
         /**
          * The version of `tool-base` to use.
          * @see [Spine.toolBase]
          */
-        const val toolBase = "2.0.0-SNAPSHOT.109"
+        const val toolBase = "2.0.0-SNAPSHOT.111"
 
         /**
          * The version of `validation` to use.
@@ -99,7 +106,7 @@ class Spine(p: ExtensionAware) {
          *
          * @see [ProtoData]
          */
-        const val protoDataVersion = "0.2.18"
+        const val protoDataVersion = "0.2.20"
     }
 
     val base = "$group:spine-base:${p.baseVersion}"
@@ -121,6 +128,10 @@ class Spine(p: ExtensionAware) {
     val mcJavaPlugin = "io.spine.tools:spine-mc-java-plugins:${p.mcJavaVersion}:all"
 
     val validation = Validation(p)
+
+    val coreJava = CoreJava(p)
+    val client = coreJava.client // Added for brevity.
+    val server = coreJava.server // Added for brevity.
 
     private val ExtensionAware.baseVersion: String
         get() = "baseVersion".asExtra(this, DefaultVersion.base)
@@ -171,6 +182,21 @@ class Spine(p: ExtensionAware) {
 
         const val version = protoDataVersion
         const val pluginLib = "$group:protodata:$version"
+    }
+
+    /**
+     * Dependencies on `core-java` modules.
+     *
+     * See [`SpineEventEngine/core-java`](https://github.com/SpineEventEngine/core-java/).
+     */
+    class CoreJava(p: ExtensionAware) {
+        val core = "$group:spine-core:${p.coreVersion}"
+        val client = "$group:spine-client:${p.coreVersion}"
+        val server = "$group:spine-server:${p.coreVersion}"
+        val testUtilServer = "$toolsGroup:spine-testutil-server:${p.coreVersion}"
+
+        private val ExtensionAware.coreVersion: String
+            get() = "coreVersion".asExtra(this, DefaultVersion.core)
     }
 }
 
