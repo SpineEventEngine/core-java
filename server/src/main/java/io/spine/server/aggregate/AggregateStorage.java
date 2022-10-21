@@ -453,6 +453,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
      *         if the {@code snapshotIndex} is negative
      */
     @Internal
+    @SuppressWarnings("LenientFormatStringValidation")
     public void truncateOlderThan(int snapshotIndex, Timestamp date) {
         checkNotNull(date);
         checkArgument(snapshotIndex >= 0, TRUNCATE_ON_WRONG_SNAPSHOT_MESSAGE, snapshotIndex);
