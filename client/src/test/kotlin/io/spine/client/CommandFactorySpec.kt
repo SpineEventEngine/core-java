@@ -23,110 +23,94 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.client
 
-package io.spine.client;
-
-import io.spine.base.CommandMessage;
-import io.spine.base.Identifier;
-import io.spine.core.TenantId;
-import io.spine.test.commands.CmdCreateProject;
-import io.spine.validate.ValidationException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import static io.spine.client.given.ActorRequestFactoryTestEnv.ACTOR;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
-import static io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND;
-import static io.spine.time.testing.Future.secondsFromNow;
-import static io.spine.time.testing.Past.secondsAgo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.google.common.truth.Truth.assertThat
+import io.spine.base.CommandMessage
+import io.spine.base.Identifier.newUuid
+import io.spine.client.given.ActorRequestFactoryTestEnv
+import io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder
+import io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND
+import io.spine.core.tenantId
+import io.spine.test.commands.cmdCreateProject
+import io.spine.time.testing.Future
+import io.spine.time.testing.Past
+import io.spine.validate.ValidationException
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @DisplayName("Command factory should")
-class CommandFactoryTest {
+internal class CommandFactorySpec {
 
-    private CommandFactory factory;
+    private lateinit var factory: CommandFactory
 
     @BeforeEach
-    void createFactory() {
-        factory = requestFactory().command();
+    fun createFactory() {
+        factory = ActorRequestFactoryTestEnv.requestFactory().command()
     }
 
     @Nested
-    @DisplayName("create command")
-    class CreateCommand {
+    internal inner class `create command` {
 
         /**
          * Tests that a command is created with the current time.
          *
          * @implNote We are creating a range of +/- second between the call to make sure the
-         *         timestamp would fit into this range. This way the test ensures the sub-second
-         *         precision of timestamps, which is enough for the purpose of this test.
+         * timestamp would fit into this range. This way the test ensures the sub-second
+         * precision of timestamps, which is enough for the purpose of this test.
          */
         @Test
-        @DisplayName("with current time")
-        void withTimestamp() {
-            var beforeCall = secondsAgo(1);
-            var commandMessage = CmdCreateProject.newBuilder()
-                    .setId(Identifier.newUuid())
-                    .build();
-            var command = factory.create(commandMessage);
-            var afterCall = secondsFromNow(1);
-
-            assertTrue(command.isBetween(beforeCall, afterCall));
+        fun `with current time`() {
+            val beforeCall = Past.secondsAgo(1)
+            val command = factory.create(command())
+            val afterCall = Future.secondsFromNow(1)
+            assertTrue(command.isBetween(beforeCall, afterCall))
         }
 
         @Test
-        @DisplayName("with given entity version")
-        void withEntityVersion() {
-            var command = factory.create(command(), 2);
-
-            var context = command.context();
-            assertEquals(2, context.getTargetVersion());
+        fun `with given entity version`() {
+            val command = factory.create(command(), 2)
+            val context = command.context()
+            assertThat(context.targetVersion).isEqualTo(2)
         }
 
         @Test
-        @DisplayName("with own tenant ID")
-        void withOwnTenantId() {
-            var tenantId = TenantId.newBuilder()
-                    .setValue(getClass().getSimpleName())
-                    .build();
-            var mtFactory = requestFactoryBuilder()
-                    .setTenantId(tenantId)
-                    .setActor(ACTOR)
-                    .build();
-            var command = mtFactory.command().create(command());
-            assertEquals(tenantId, command.context()
-                                          .getActorContext()
-                                          .getTenantId());
+        fun `with own tenant ID`() {
+            val tenantId = tenantId { value = javaClass.simpleName }
+            val mtFactory = requestFactoryBuilder().also { f ->
+                f.tenantId = tenantId
+                f.actor = ActorRequestFactoryTestEnv.ACTOR
+            }.build()
+
+            val command = mtFactory.command().create(command())
+
+            assertThat(command.context().actorContext.tenantId)
+                .isEqualTo(tenantId)
         }
 
-        private CommandMessage command() {
-            var commandMessage = CmdCreateProject.newBuilder()
-                    .setId(Identifier.newUuid())
-                    .build();
-            return commandMessage;
-        }
+        private fun command(): CommandMessage = cmdCreateProject { id = newUuid() }
     }
 
     @Nested
     @DisplayName("throw `ValidationException` when creating command")
-    class NotAccept {
+    internal inner class NotAccept {
 
         @Test
-        @DisplayName("from invalid `Message`")
-        void invalidMessage() {
-            assertThrows(ValidationException.class, () -> factory.create(INVALID_COMMAND));
+        fun `from invalid 'Message'`() {
+            assertThrows<ValidationException> {
+                factory.create(INVALID_COMMAND)
+            }
         }
 
         @Test
-        @DisplayName("from invalid `Message` with version")
-        void invalidMessageWithVersion() {
-            assertThrows(ValidationException.class, () -> factory.create(INVALID_COMMAND, 42));
+        fun `from invalid 'Message' with version`() {
+            assertThrows<ValidationException> {
+                factory.create(INVALID_COMMAND, 42)
+            }
         }
     }
 }
