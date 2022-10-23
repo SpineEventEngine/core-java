@@ -33,15 +33,17 @@ import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
 import io.spine.base.Identifier
 import io.spine.base.Time.currentTime
-import io.spine.protobuf.Durations2
-import io.spine.string.Stringifiers
+import io.spine.protobuf.Durations2.ZERO
+import io.spine.string.Stringifiers.fromString
+import io.spine.string.Stringifiers.toString
 import io.spine.test.commands.cmdCreateProject
 import io.spine.test.commands.cmdStartProject
 import io.spine.test.commands.cmdStopProject
 import io.spine.testing.UtilityClassTest
 import io.spine.testing.client.TestActorRequestFactory
 import io.spine.testing.core.given.GivenUserId
-import io.spine.time.testing.Past
+import io.spine.time.testing.Past.minutesAgo
+import io.spine.time.testing.Past.secondsAgo
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -56,26 +58,24 @@ internal class CommandsSpec : UtilityClassTest<Commands>(Commands::class.java) {
 
     private val requestFactory = TestActorRequestFactory(CommandsSpec::class.java)
 
+    inline fun <reified T : kotlin.Any> NullPointerTester.setDefault(value : T): NullPointerTester =
+        setDefault(T::class.java, value)
+
     override fun configure(tester: NullPointerTester) {
         super.configure(tester)
-        tester.setDefault(FileDescriptor::class.java, DEFAULT_FILE_DESCRIPTOR)
-            .setDefault(Timestamp::class.java, currentTime())
-            .setDefault(Duration::class.java, Durations2.ZERO)
-            .setDefault(
-                Command::class.java,
-                requestFactory.createCommand(createProject, Past.minutesAgo(1))
-            )
-            .setDefault(CommandContext::class.java, requestFactory.createCommandContext())
-            .setDefault(UserId::class.java, GivenUserId.newUuid())
-
-        tester.setDefault<CommandContext>(CommandContext::class.java, requestFactory.createCommandContext())
+        tester.setDefault<FileDescriptor>(DEFAULT_FILE_DESCRIPTOR)
+            .setDefault<Timestamp>(currentTime())
+            .setDefault<Duration>(ZERO)
+            .setDefault<Command>(requestFactory.createCommand(createProject, minutesAgo(1)))
+            .setDefault<CommandContext>(requestFactory.createCommandContext())
+            .setDefault<UserId>(GivenUserId.newUuid())
     }
 
     @Test
     fun `sort given commands by timestamp`() {
-        val cmd1 = requestFactory.createCommand(createProject, Past.minutesAgo(1))
-        val cmd2 = requestFactory.createCommand(startProject, Past.secondsAgo(30))
-        val cmd3 = requestFactory.createCommand(stopProject, Past.secondsAgo(5))
+        val cmd1 = requestFactory.createCommand(createProject, minutesAgo(1))
+        val cmd2 = requestFactory.createCommand(startProject, secondsAgo(30))
+        val cmd3 = requestFactory.createCommand(stopProject, secondsAgo(5))
         val sortedCommands = listOf(cmd1, cmd2, cmd3)
         val commandsToSort = listOf(cmd3, cmd1, cmd2)
 
@@ -87,8 +87,8 @@ internal class CommandsSpec : UtilityClassTest<Commands>(Commands::class.java) {
     @Test
     fun `provide stringifier for command id`() {
         val id = CommandId.generate()
-        val str = Stringifiers.toString(id)
-        val convertedBack = Stringifiers.fromString(str, CommandId::class.java)
+        val str = toString(id)
+        val convertedBack = fromString(str, CommandId::class.java)
         assertThat(convertedBack)
             .isEqualTo(id)
     }
