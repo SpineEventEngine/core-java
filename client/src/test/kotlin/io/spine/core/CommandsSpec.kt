@@ -40,6 +40,7 @@ import io.spine.test.commands.cmdCreateProject
 import io.spine.test.commands.cmdStartProject
 import io.spine.test.commands.cmdStopProject
 import io.spine.testing.UtilityClassTest
+import io.spine.testing.setDefault
 import io.spine.testing.client.TestActorRequestFactory
 import io.spine.testing.core.given.GivenUserId
 import io.spine.time.testing.Past.minutesAgo
@@ -57,9 +58,6 @@ import org.junit.jupiter.api.Test
 internal class CommandsSpec : UtilityClassTest<Commands>(Commands::class.java) {
 
     private val requestFactory = TestActorRequestFactory(CommandsSpec::class.java)
-
-    inline fun <reified T : kotlin.Any> NullPointerTester.setDefault(value : T): NullPointerTester =
-        setDefault(T::class.java, value)
 
     override fun configure(tester: NullPointerTester) {
         super.configure(tester)
