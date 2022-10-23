@@ -23,104 +23,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.core
 
-package io.spine.core;
-
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
-import io.spine.protobuf.Durations2;
-import io.spine.string.Stringifiers;
-import io.spine.test.commands.CmdCreateProject;
-import io.spine.test.commands.CmdStartProject;
-import io.spine.test.commands.CmdStopProject;
-import io.spine.testing.UtilityClassTest;
-import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.core.given.GivenUserId;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.protobuf.Descriptors.FileDescriptor;
-import static io.spine.base.Time.currentTime;
-import static io.spine.time.testing.Past.minutesAgo;
-import static io.spine.time.testing.Past.secondsAgo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import com.google.common.testing.NullPointerTester
+import com.google.common.truth.Truth.assertThat
+import com.google.protobuf.Any
+import com.google.protobuf.Descriptors.FileDescriptor
+import com.google.protobuf.Duration
+import com.google.protobuf.Timestamp
+import io.spine.base.Identifier
+import io.spine.base.Time.currentTime
+import io.spine.protobuf.Durations2
+import io.spine.string.Stringifiers
+import io.spine.test.commands.cmdCreateProject
+import io.spine.test.commands.cmdStartProject
+import io.spine.test.commands.cmdStopProject
+import io.spine.testing.UtilityClassTest
+import io.spine.testing.client.TestActorRequestFactory
+import io.spine.testing.core.given.GivenUserId
+import io.spine.time.testing.Past
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 /**
- * Tests for {@linkplain Commands Commands utility class}.
+ * Tests for [Commands utility class][Commands].
  *
- * <p>The test suite is located under the "client" module since actor request generation
+ * The test suite is located under the "client" module since actor request generation
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
  */
 @DisplayName("`Commands` utility should")
-class CommandsTest extends UtilityClassTest<Commands> {
+internal class CommandsSpec : UtilityClassTest<Commands>(Commands::class.java) {
 
-    private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
-                                                                     .getFile();
+    private val requestFactory = TestActorRequestFactory(CommandsSpec::class.java)
 
-    private static final CmdCreateProject createProject = CmdCreateProject
-            .newBuilder()
-            .setId(Identifier.newUuid())
-            .build();
+    override fun configure(tester: NullPointerTester) {
+        super.configure(tester)
+        tester.setDefault(FileDescriptor::class.java, DEFAULT_FILE_DESCRIPTOR)
+            .setDefault(Timestamp::class.java, currentTime())
+            .setDefault(Duration::class.java, Durations2.ZERO)
+            .setDefault(
+                Command::class.java,
+                requestFactory.createCommand(createProject, Past.minutesAgo(1))
+            )
+            .setDefault(CommandContext::class.java, requestFactory.createCommandContext())
+            .setDefault(UserId::class.java, GivenUserId.newUuid())
 
-    private static final CmdStartProject startProject = CmdStartProject
-            .newBuilder()
-            .setId(Identifier.newUuid())
-            .build();
-
-    private static final CmdStopProject stopProject = CmdStopProject
-            .newBuilder()
-            .setId(Identifier.newUuid())
-            .build();
-
-    private final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(CommandsTest.class);
-
-    CommandsTest() {
-        super(Commands.class);
-    }
-
-    @Override
-    protected void configure(NullPointerTester tester) {
-        super.configure(tester);
-        tester.setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
-              .setDefault(Timestamp.class, currentTime())
-              .setDefault(Duration.class, Durations2.ZERO)
-              .setDefault(Command.class, requestFactory.createCommand(createProject, minutesAgo(1)))
-              .setDefault(CommandContext.class, requestFactory.createCommandContext())
-              .setDefault(UserId.class, GivenUserId.newUuid());
+        tester.setDefault<CommandContext>(CommandContext::class.java, requestFactory.createCommandContext())
     }
 
     @Test
-    @DisplayName("sort given commands by timestamp")
-    void sortByTimestamp() {
-        var cmd1 = requestFactory.createCommand(createProject, minutesAgo(1));
-        var cmd2 = requestFactory.createCommand(startProject, secondsAgo(30));
-        var cmd3 = requestFactory.createCommand(stopProject, secondsAgo(5));
-        List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
-        List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
-        assertNotEquals(sortedCommands, commandsToSort);
+    fun `sort given commands by timestamp`() {
+        val cmd1 = requestFactory.createCommand(createProject, Past.minutesAgo(1))
+        val cmd2 = requestFactory.createCommand(startProject, Past.secondsAgo(30))
+        val cmd3 = requestFactory.createCommand(stopProject, Past.secondsAgo(5))
+        val sortedCommands = listOf(cmd1, cmd2, cmd3)
+        val commandsToSort = listOf(cmd3, cmd1, cmd2)
 
-        Commands.sort(commandsToSort);
-
-        assertEquals(sortedCommands, commandsToSort);
+        assertThat(commandsToSort).isNotEqualTo(sortedCommands)
+        Commands.sort(commandsToSort)
+        assertThat(commandsToSort).isEqualTo(sortedCommands)
     }
 
     @Test
-    @DisplayName("provide stringifier for command id")
-    void provideStringifierForId() {
-        var id = CommandId.generate();
-
-        var str = Stringifiers.toString(id);
-        var convertedBack = Stringifiers.fromString(str, CommandId.class);
+    fun `provide stringifier for command id`() {
+        val id = CommandId.generate()
+        val str = Stringifiers.toString(id)
+        val convertedBack = Stringifiers.fromString(str, CommandId::class.java)
         assertThat(convertedBack)
-                .isEqualTo(id);
+            .isEqualTo(id)
+    }
+
+    companion object {
+        private val DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor().file
+        private val createProject = cmdCreateProject { id = Identifier.newUuid() }
+        private val startProject = cmdStartProject { id = Identifier.newUuid() }
+        private val stopProject = cmdStopProject { id = Identifier.newUuid() }
     }
 }
