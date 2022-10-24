@@ -23,199 +23,180 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.client;
+package io.spine.client
 
-import com.google.common.reflect.TypeToken;
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import io.spine.base.Time;
-import io.spine.test.client.TestEntity;
-import io.spine.time.Temporals;
-import io.spine.time.ZoneId;
-import io.spine.time.ZoneIds;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.time.ZonedDateTime;
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.truth.Truth.assertThat;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.ACTOR;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.ZONE_ID;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.google.common.collect.Sets.newHashSet
+import com.google.common.reflect.TypeToken
+import com.google.common.testing.NullPointerTester
+import com.google.common.truth.Truth.assertThat
+import com.google.protobuf.Any
+import com.google.protobuf.Message
+import com.google.protobuf.Timestamp
+import io.spine.base.Identifier
+import io.spine.base.Time
+import io.spine.core.UserId
+import io.spine.test.client.TestEntity
+import io.spine.testing.DisplayNames
+import io.spine.testing.core.given.GivenUserId
+import io.spine.testing.setDefault
+import io.spine.time.Temporals
+import io.spine.time.ZoneIds
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 /**
- * Base tests for the {@linkplain ActorRequestFactory} descendants.
+ * Base tests for the [ActorRequestFactory] descendants.
  */
 @DisplayName("`ActorRequestFactory` should")
-class ActorRequestFactoryTest {
+internal class ActorRequestFactorySpec {
 
-    private ActorRequestFactory factory;
+    companion object {
+
+        val ACTOR: UserId = GivenUserId.of(Identifier.newUuid())
+        val ZONE_ID: io.spine.time.ZoneId = ZoneIds.systemDefault()
+
+        fun requestFactoryBuilder(): ActorRequestFactory.Builder {
+            return ActorRequestFactory.newBuilder()
+        }
+
+        fun requestFactory(): ActorRequestFactory {
+            return requestFactoryBuilder().setZoneId(ZONE_ID)
+                .setActor(ACTOR)
+                .build()
+        }
+    }
+
+    private lateinit var factory: ActorRequestFactory
 
     @BeforeEach
-    void createFactory() {
-        factory = requestFactory();
+    fun createFactory() {
+        factory = requestFactory()
     }
 
-    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-                       "SerializableInnerClassWithNonSerializableOuterClass"}) // for TypeToken
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        var tester = new NullPointerTester();
-        tester.setDefault(Message.class, TestEntity.getDefaultInstance())
-                .setDefault(new TypeToken<Class<? extends Message>>() {}.getRawType(),
-                            TestEntity.class)
-                .setDefault(new TypeToken<Set<? extends Message>>() {}.getRawType(),
-                            newHashSet(Any.getDefaultInstance()))
-                .setDefault(ZoneId.class, ZoneIds.systemDefault());
-        setDeprecatedDefaultsToo(tester);
-        tester.testInstanceMethods(factory, NullPointerTester.Visibility.PUBLIC);
-    }
-
-    @SuppressWarnings("deprecation")
-    private static void setDeprecatedDefaultsToo(NullPointerTester tester) {
-        tester.setDefault(
-                io.spine.time.ZoneOffset.class,
-                io.spine.time.ZoneOffset.getDefaultInstance()
-        );
-    }
 
     @Test
-    @DisplayName("require actor in `Builder`")
-    void requireActorInBuilder() {
-        assertThrows(NullPointerException.class,
-                     () -> requestFactoryBuilder()
-                             .setZoneId(ZoneIds.systemDefault())
-                             .build()
-        );
+    @DisplayName(DisplayNames.NOT_ACCEPT_NULLS)
+    fun passNullToleranceCheck() {
+
+        @Suppress("DEPRECATION") /* Use fully-qualified names in the scope of the method
+        instead of imports to localize deprecation warning and its suppression in this method. */
+        fun NullPointerTester.setDeprecatedDefaultsToo() {
+            setDefault<io.spine.time.ZoneOffset>(io.spine.time.ZoneOffset.getDefaultInstance())
+        }
+
+        val tester = NullPointerTester()
+        tester.setDefault<Message>(TestEntity.getDefaultInstance())
+            .setDefault(
+                object : TypeToken<Class<out Message?>?>() {}.rawType,
+                TestEntity::class.java
+            )
+            .setDefault(
+                object : TypeToken<Set<Message?>?>() {}.rawType,
+                newHashSet(Any.getDefaultInstance())
+            )
+            .setDefault<io.spine.time.ZoneId>(ZoneIds.systemDefault())
+            .setDeprecatedDefaultsToo()
+
+        tester.testInstanceMethods(factory, NullPointerTester.Visibility.PUBLIC)
     }
 
     @Test
-    @DisplayName("return values set in `Builder`")
-    void returnValuesSetInBuilder() {
-        var builder = requestFactoryBuilder()
-                .setActor(ACTOR)
-                .setZoneId(ZONE_ID);
-
-        assertEquals(ACTOR, builder.getActor());
-        assertEquals(ZONE_ID, builder.getZoneId());
+    fun `require actor in 'Builder'`() {
+        assertThrows<NullPointerException> {
+            requestFactoryBuilder().apply {
+                zoneId = ZoneIds.systemDefault()
+                build()
+            }
+        }
     }
 
     @Test
-    @DisplayName("be single tenant by default")
-    void beSingleTenant() {
-        assertNull(factory.tenantId());
+    fun `return values set in 'Builder'`() {
+        val builder = requestFactoryBuilder().apply {
+            actor = ACTOR
+            zoneId = ZONE_ID
+        }
+        assertThat(builder.actor).isEqualTo(ACTOR)
+        assertThat(builder.zoneId).isEqualTo(ZONE_ID)
+    }
+
+    @Test
+    fun `be single tenant by default`() {
+        assertNull(factory.tenantId())
+    }
+
+    @Test
+    fun `when created, store user and timezone`() {
+        assertEquals(ACTOR, factory.actor())
+        assertEquals(ZONE_ID, factory.zoneId())
+    }
+
+    @Test
+    fun `assign system time-zone, if not specified`() {
+        val aFactory = requestFactoryBuilder()
+            .setActor(ACTOR)
+            .build()
+        assertThat(aFactory.actor()).isEqualTo(ACTOR)
+        assertThat(aFactory.zoneId()).isEqualTo(ZoneIds.systemDefault())
+    }
+
+    @Test
+    fun `support moving between timezones`() {
+        val id = ZoneId.of("Australia/Darwin")
+        val newZone = ZoneIds.of(id)
+        val movedFactory = factory.switchTimeZone(newZone)
+        assertThat(movedFactory.zoneId())
+            .isNotEqualTo(factory.zoneId())
+        assertThat(movedFactory.zoneId())
+            .isEqualTo(newZone)
     }
 
     @Nested
-    @DisplayName("when created, store")
-    class Store {
+    @DisplayName("obtain time-zone from current `Time.Provider`")
+    internal inner class UsingTimeProvider {
 
-        @Test
-        @DisplayName("given user")
-        void givenUser() {
-            var aFactory = requestFactoryBuilder()
-                    .setActor(ACTOR)
-                    .build();
-
-            assertEquals(ACTOR, aFactory.actor());
-        }
-
-        @Test
-        @DisplayName("given user and timezone")
-        void givenUserAndTimezone() {
-            assertEquals(ACTOR, factory.actor());
-            assertEquals(ZONE_ID, factory.zoneId());
-        }
-    }
-
-    @Nested
-    @DisplayName("Support moving between timezones")
-    class TimeZoneMove {
-
-        @Test
-        @DisplayName("by `ZoneId`")
-        void byOffsetAndId() {
-            var id = java.time.ZoneId.of("Australia/Darwin");
-            var newZone = ZoneIds.of(id);
-
-            var movedFactory = factory.switchTimeZone(newZone);
-
-            assertThat(movedFactory.zoneId())
-                    .isNotEqualTo(factory.zoneId());
-            assertThat(movedFactory.zoneId())
-                    .isEqualTo(newZone);
-        }
-
-        @Test
-        @DisplayName("by `ZoneId`")
-        void byZoneId() {
-            var id = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
-
-            var zoneId = ZoneIds.of(id);
-            var movedFactory = factory.switchTimeZone(zoneId);
-
-            assertNotEquals(factory.zoneId(), movedFactory.zoneId());
-            assertEquals(zoneId, movedFactory.zoneId());
-        }
-    }
-
-    @Nested
-    @DisplayName("obtain time-zone and offset from current `Time.Provider`")
-    class UsingTimeProvider {
-
-        private final Time.Provider provider = new CustomTimeProvider();
+        private val provider: Time.Provider = CustomTimeProvider()
 
         @BeforeEach
-        void setCustomProvider() {
-            Time.setProvider(provider);
+        fun setCustomProvider() {
+            Time.setProvider(provider)
         }
 
         @AfterEach
-        void clearProvider() {
-            Time.resetProvider();
+        fun clearProvider() {
+            Time.resetProvider()
         }
 
         @Test
-        @DisplayName("when no set directly")
-        void zoneIdAndOffset() {
-            var factory = ActorRequestFactory.newBuilder()
-                    .setActor(ACTOR)
-                    .build();
-
-            var expected = ZoneIds.of(CustomTimeProvider.ZONE);
+        fun `when no time-zone set directly`() {
+            val factory = ActorRequestFactory.newBuilder()
+                .setActor(ACTOR)
+                .build()
+            val expected = ZoneIds.of(CustomTimeProvider.ZONE)
             assertThat(factory.zoneId())
-                    .isEqualTo(expected);
+                .isEqualTo(expected)
         }
     }
 
-    private static class CustomTimeProvider implements Time.Provider {
+    private class CustomTimeProvider : Time.Provider {
 
-        private static final java.time.ZoneId ZONE = java.time.ZoneId.of("Pacific/Galapagos");
-
-        @Override
-        public Timestamp currentTime() {
-            var nowThere = ZonedDateTime.now(ZONE).toInstant();
-            return Temporals.from(nowThere)
-                            .toTimestamp();
+        override fun currentTime(): Timestamp {
+            val nowThere = ZonedDateTime.now(ZONE).toInstant()
+            return Temporals.from(nowThere).toTimestamp()
         }
 
-        @Override
-        public java.time.ZoneId currentZone() {
-            return ZONE;
+        override fun currentZone(): ZoneId = ZONE
+
+        companion object {
+            val ZONE: ZoneId = ZoneId.of("Pacific/Galapagos")
         }
     }
 }
