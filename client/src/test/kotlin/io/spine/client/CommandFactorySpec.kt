@@ -28,11 +28,12 @@ package io.spine.client
 import com.google.common.truth.Truth.assertThat
 import io.spine.base.CommandMessage
 import io.spine.base.Identifier.newUuid
-import io.spine.client.given.ActorRequestFactoryTestEnv
-import io.spine.client.given.ActorRequestFactoryTestEnv.requestFactoryBuilder
 import io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND
+import io.spine.core.UserId
 import io.spine.core.tenantId
 import io.spine.test.commands.cmdCreateProject
+import io.spine.testing.core.given.GivenUserId
+import io.spine.time.ZoneIds
 import io.spine.time.testing.Future
 import io.spine.time.testing.Past
 import io.spine.validate.ValidationException
@@ -46,11 +47,27 @@ import org.junit.jupiter.api.assertThrows
 @DisplayName("Command factory should")
 internal class CommandFactorySpec {
 
+    companion object {
+
+        private val ACTOR: UserId = GivenUserId.of(newUuid())
+        private val ZONE_ID: io.spine.time.ZoneId = ZoneIds.systemDefault()
+
+        fun requestFactoryBuilder(): ActorRequestFactory.Builder {
+            return ActorRequestFactory.newBuilder()
+        }
+
+        fun requestFactory(): ActorRequestFactory {
+            return requestFactoryBuilder().setZoneId(ZONE_ID)
+                .setActor(ACTOR)
+                .build()
+        }
+    }
+
     private lateinit var factory: CommandFactory
 
     @BeforeEach
     fun createFactory() {
-        factory = ActorRequestFactoryTestEnv.requestFactory().command()
+        factory = requestFactory().command()
     }
 
     @Nested
@@ -83,7 +100,7 @@ internal class CommandFactorySpec {
             val tenantId = tenantId { value = javaClass.simpleName }
             val mtFactory = requestFactoryBuilder().also { f ->
                 f.tenantId = tenantId
-                f.actor = ActorRequestFactoryTestEnv.ACTOR
+                f.actor = ACTOR
             }.build()
 
             val command = mtFactory.command().create(command())
