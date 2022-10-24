@@ -23,151 +23,130 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.core
 
-package io.spine.core;
-
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import io.spine.base.CommandMessage;
-import io.spine.base.Identifier;
-import io.spine.test.commands.CmdCreateProject;
-import io.spine.test.commands.CmdStartProject;
-import io.spine.test.commands.CmdStopProject;
-import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.client.command.TestCommandMessage;
-import io.spine.testing.core.given.GivenCommandContext;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.Stream;
-
-import static com.google.common.truth.Truth.assertThat;
-import static io.spine.protobuf.Durations2.seconds;
-import static io.spine.time.testing.Future.secondsFromNow;
-import static io.spine.time.testing.Past.minutesAgo;
-import static io.spine.time.testing.Past.secondsAgo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.google.common.truth.Truth.assertThat
+import com.google.protobuf.Duration
+import com.google.protobuf.Timestamp
+import io.spine.base.CommandMessage
+import io.spine.base.Identifier.newUuid
+import io.spine.protobuf.Durations2.seconds
+import io.spine.test.commands.CmdCreateProject
+import io.spine.test.commands.CmdStartProject
+import io.spine.test.commands.CmdStopProject
+import io.spine.test.commands.cmdCreateProject
+import io.spine.test.commands.cmdStartProject
+import io.spine.test.commands.cmdStopProject
+import io.spine.testing.client.TestActorRequestFactory
+import io.spine.testing.client.command.testCommandMessage
+import io.spine.testing.core.given.GivenCommandContext
+import io.spine.time.testing.Future
+import io.spine.time.testing.Past.minutesAgo
+import io.spine.time.testing.Past.secondsAgo
+import java.util.stream.Stream
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 /**
- * Tests for the {@link Command} class, which implements {@link CommandMixin}.
+ * Tests for the [Command] class, which implements [CommandMixin].
  *
- * <p>The test suite is located under the "client" module since actor request generation
+ * The test suite is located under the "client" module since actor request generation
  * is required. So we want to avoid circular dependencies between "core" and "client" modules.
  */
-@SuppressWarnings("MethodOnlyUsedFromInnerClass" /* to simplify the structure, allow for re-use */)
 @DisplayName("`Command` should")
-class CommandTest {
+internal class CommandSpec {
+    private val requestFactory = TestActorRequestFactory(CommandSpec::class.java)
 
-    private final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(CommandTest.class);
-
-    private CmdCreateProject createProject;
-    private CmdStartProject startProject;
-    private CmdStopProject stopProject;
+    private lateinit var createProject: CmdCreateProject
+    private lateinit var startProject: CmdStartProject
+    private lateinit var stopProject: CmdStopProject
 
     @BeforeEach
-    void createCommands() {
-        var projectId = Identifier.newUuid();
-        createProject = CmdCreateProject.newBuilder()
-                .setId(projectId)
-                .build();
-        startProject = CmdStartProject.newBuilder()
-                .setId(projectId)
-                .build();
-        stopProject = CmdStopProject.newBuilder()
-                .setId(projectId)
-                .build();
+    fun createCommands() {
+        val projectId = newUuid()
+        createProject = cmdCreateProject { id = projectId }
+        startProject = cmdStartProject { id = projectId }
+        stopProject = cmdStopProject { id = projectId }
     }
 
     @Test
-    @DisplayName("extract message from given command")
-    void extractMessage() {
-        CommandMessage message = TestCommandMessage.newBuilder()
-                .setId(Identifier.newUuid())
-                .build();
-        var command = command(message);
+    fun `extract message from given command`() {
+        val message = testCommandMessage { id = newUuid() }
+        val command = command(message)
         assertThat(command.enclosedMessage())
-                .isEqualTo(message);
+            .isEqualTo(message)
     }
 
     @Nested
-    @DisplayName("Compare creation time if")
-    class TimeCheck {
+    internal inner class `Compare creation time if` {
 
         @Test
-        @DisplayName("after given time")
-        void after() {
-            var command = command(stopProject);
+        fun `after given time`() {
+            val command = command(stopProject)
             assertThat(command.isAfter(secondsAgo(5)))
-                 .isTrue();
+                .isTrue()
         }
 
         @Test
-        @DisplayName("before given time")
-        void before() {
-            var command = command(startProject);
-            assertThat(command.isBefore(secondsFromNow(10)))
-                    .isTrue();
+        fun `before given time`() {
+            val command = command(startProject)
+            assertThat(command.isBefore(Future.secondsFromNow(10)))
+                .isTrue()
         }
 
         @Test
-        @DisplayName("withing time range")
-        void between() {
-            var fiveMinsAgo = command(createProject, minutesAgo(5));
-            var twoMinsAgo = command(startProject, minutesAgo(2));
-            var thirtySecondsAgo = command(stopProject, secondsAgo(30));
-            var twentySecondsAgo = command(stopProject, secondsAgo(20));
-            var fiveSecondsAgo = command(stopProject, secondsAgo(5));
-
-            var filteredCommands =
-                    Stream.of(fiveMinsAgo,
-                              twoMinsAgo,
-                              thirtySecondsAgo,
-                              twentySecondsAgo,
-                              fiveSecondsAgo)
-                          .filter(c -> c.isBetween(minutesAgo(3), secondsAgo(10)))
-                          .count();
-            assertEquals(3, filteredCommands);
+        fun `withing time range`() {
+            val fiveMinsAgo = command(createProject, minutesAgo(5))
+            val twoMinsAgo = command(startProject, minutesAgo(2))
+            val thirtySecondsAgo = command(stopProject, secondsAgo(30))
+            val twentySecondsAgo = command(stopProject, secondsAgo(20))
+            val fiveSecondsAgo = command(stopProject, secondsAgo(5))
+            val commands = Stream.of(
+                fiveMinsAgo,
+                twoMinsAgo,
+                thirtySecondsAgo,
+                twentySecondsAgo,
+                fiveSecondsAgo
+            )
+            val filteredCommands = commands.filter { c ->
+                c.isBetween(minutesAgo(3), secondsAgo(10))
+            }
+            assertThat(filteredCommands.count()).isEqualTo(3)
         }
     }
-    @Test
-    @DisplayName("consider command scheduled when command delay is set")
-    void recognizeScheduled() {
-        var cmd = commandWithDelay(createProject, seconds(10));
-        assertThat(cmd.isScheduled())
-                .isTrue();
-    }
 
     @Test
-    @DisplayName("consider command not scheduled when no scheduling options are present")
-    void recognizeNotScheduled() {
-        var cmd = command(createProject);
-        assertThat(cmd.isScheduled())
-                .isFalse();
+    fun `consider command scheduled when command delay is set`() {
+        val cmd = commandWithDelay(createProject, seconds(10))
+        assertThat(cmd.isScheduled).isTrue()
     }
 
     @Test
-    @DisplayName("throw exception when command delay set to negative")
-    void throwOnNegativeDelay() {
-        var cmd = commandWithDelay(createProject, seconds(-10));
-        assertThrows(IllegalStateException.class, cmd::isScheduled);
+    fun `consider command not scheduled when no scheduling options are present`() {
+        val cmd = command(createProject)
+        assertThat(cmd.isScheduled).isFalse()
     }
 
-    private Command command(CommandMessage msg, Timestamp timestamp) {
-        return requestFactory.createCommand(msg, timestamp);
+    @Test
+    fun `throw exception when command delay set to negative`() {
+        val cmd = commandWithDelay(createProject, seconds(-10))
+        assertThrows<IllegalStateException> { cmd.isScheduled }
     }
 
-    private Command command(CommandMessage msg) {
-        return requestFactory.command().create(msg);
+    private fun command(msg: CommandMessage, timestamp: Timestamp): Command {
+        return requestFactory.createCommand(msg, timestamp)
     }
 
-    private Command commandWithDelay(CommandMessage msg, Duration delay) {
-        var context = GivenCommandContext.withScheduledDelayOf(delay);
-        var result = requestFactory.command()
-                                   .createBasedOnContext(msg, context);
-        return result;
+    private fun command(msg: CommandMessage): Command {
+        return requestFactory.command().create(msg)
+    }
+
+    private fun commandWithDelay(msg: CommandMessage, delay: Duration): Command {
+        val context = GivenCommandContext.withScheduledDelayOf(delay)
+        return requestFactory.command()
+            .createBasedOnContext(msg, context)
     }
 }
