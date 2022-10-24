@@ -80,7 +80,7 @@ import com.google.protobuf.Any as AnyProto
 @DisplayName("`QueryBuilder` should")
 internal class QueryBuilderSpec {
 
-    companion object TestEnv {
+    companion object {
         
         private val ACTOR = GivenUserId.of(newUuid())
         private val ZONE_ID = ZoneIds.systemDefault()
