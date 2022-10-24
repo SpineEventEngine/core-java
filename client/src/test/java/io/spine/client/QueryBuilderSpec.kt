@@ -23,561 +23,576 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.client
 
-package io.spine.client;
-
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import io.spine.test.client.TestEntityId;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
-import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.protobuf.util.Durations.fromHours;
-import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.currentTime;
-import static io.spine.client.CompositeFilter.CompositeOperator.ALL;
-import static io.spine.client.CompositeFilter.CompositeOperator.EITHER;
-import static io.spine.client.Filter.Operator.EQUAL;
-import static io.spine.client.Filter.Operator.GREATER_OR_EQUAL;
-import static io.spine.client.Filter.Operator.GREATER_THAN;
-import static io.spine.client.Filter.Operator.LESS_OR_EQUAL;
-import static io.spine.client.Filters.all;
-import static io.spine.client.Filters.either;
-import static io.spine.client.Filters.eq;
-import static io.spine.client.Filters.ge;
-import static io.spine.client.Filters.gt;
-import static io.spine.client.Filters.le;
-import static io.spine.client.OrderBy.Direction.ASCENDING;
-import static io.spine.client.OrderBy.Direction.DESCENDING;
-import static io.spine.client.OrderBy.Direction.OD_UNKNOWN;
-import static io.spine.client.OrderBy.Direction.UNRECOGNIZED;
-import static io.spine.client.given.ActorRequestFactoryTestEnv.requestFactory;
-import static io.spine.client.given.QueryBuilderTestEnv.FIRST_FIELD;
-import static io.spine.client.given.QueryBuilderTestEnv.SECOND_FIELD;
-import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE;
-import static io.spine.client.given.QueryBuilderTestEnv.TEST_ENTITY_TYPE_URL;
-import static io.spine.client.given.QueryBuilderTestEnv.orderBy;
-import static io.spine.client.given.TestEntities.randomId;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import com.google.common.testing.NullPointerTester
+import com.google.common.truth.Subject
+import com.google.common.truth.Truth.assertThat
+import com.google.protobuf.Int32Value
+import com.google.protobuf.Message
+import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Durations
+import com.google.protobuf.util.Timestamps.subtract
+import io.spine.base.EntityState
+import io.spine.base.Identifier.newUuid
+import io.spine.base.Time
+import io.spine.client.CompositeFilter.CompositeOperator.ALL
+import io.spine.client.CompositeFilter.CompositeOperator.EITHER
+import io.spine.client.Filters.all
+import io.spine.client.Filters.either
+import io.spine.client.Filters.eq
+import io.spine.client.OrderBy.Direction.ASCENDING
+import io.spine.client.OrderBy.Direction.DESCENDING
+import io.spine.client.OrderBy.Direction.OD_UNKNOWN
+import io.spine.client.OrderBy.Direction.UNRECOGNIZED
+import io.spine.client.given.TestEntities.randomId
+import io.spine.protobuf.AnyPacker
+import io.spine.protobuf.TypeConverter.toObject
+import io.spine.test.client.TestEntity
+import io.spine.test.client.TestEntityId
+import io.spine.testing.DisplayNames
+import io.spine.testing.core.given.GivenUserId
+import io.spine.time.ZoneIds
+import io.spine.type.TypeUrl
+import java.util.*
+import java.util.stream.Collectors.toList
+import kotlin.Any
+import kotlin.IllegalArgumentException
+import kotlin.Int
+import kotlin.RuntimeException
+import kotlin.String
+import kotlin.Unit
+import kotlin.apply
+import kotlin.arrayOf
+import kotlin.with
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import com.google.protobuf.Any as AnyProto
 
 @DisplayName("`QueryBuilder` should")
-class QueryBuilderTest {
+internal class QueryBuilderSpec {
 
-    private QueryFactory factory;
+    companion object TestEnv {
+        
+        private val ACTOR = GivenUserId.of(newUuid())
+        private val ZONE_ID = ZoneIds.systemDefault()
 
+        val TEST_ENTITY_TYPE: Class<out EntityState<*>> = TestEntity::class.java
+        val TEST_ENTITY_TYPE_URL: TypeUrl = TypeUrl.of(TEST_ENTITY_TYPE)
+        
+        const val SECOND_FIELD = "second_field"
+        const val FIRST_FIELD = "first_field"
+
+        fun orderBy(column: String, direction: OrderBy.Direction): OrderBy = orderBy {
+            this.column = column
+            this.direction = direction
+        }
+
+        fun requestFactory(): ActorRequestFactory = ActorRequestFactory.newBuilder().apply {
+            zoneId = ZONE_ID
+            actor = ACTOR
+        }.build()
+    }
+
+    /**
+     * Allows to execute Truth assertions in a block.
+     */
+    operator fun <T: Subject> T.invoke(assertions: T.() -> Unit): Unit = this.assertions()
+
+    private lateinit var factory: QueryFactory
+    
     @BeforeEach
-    void createFactory() {
-        factory = requestFactory().query();
+    fun createFactory() {
+        factory = requestFactory().query()
     }
 
     @Nested
-    @DisplayName("check arguments and")
-    class CheckArguments {
-
+    internal inner class `check arguments and` {
+        
         @Test
-        @DisplayName(NOT_ACCEPT_NULLS)
-        void notAcceptNulls() {
-            var tester = new NullPointerTester();
-            tester.testAllPublicStaticMethods(QueryBuilder.class);
-            tester.testAllPublicInstanceMethods(factory.select(TEST_ENTITY_TYPE));
+        @DisplayName(DisplayNames.NOT_ACCEPT_NULLS)
+        fun notAcceptNulls() {
+            val tester = NullPointerTester()
+            tester.testAllPublicStaticMethods(QueryBuilder::class.java)
+            tester.testAllPublicInstanceMethods(factory.select(TEST_ENTITY_TYPE))
         }
 
         @Test
-        @DisplayName("throw `IAE` if negative limit int value is provided")
-        void notAcceptNegativeIntLimit() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> factory.select(TEST_ENTITY_TYPE)
-                                      .limit(-10));
+        fun `throw 'IAE' if negative limit int value is provided`() {
+            assertThrows<IllegalArgumentException> {
+                factory.select(TEST_ENTITY_TYPE).limit(-10)
+            }
         }
 
         @Test
-        @DisplayName("throw `IAE` if limit int value is 0")
-        void notAcceptZeroIntLimit() {
-            assertThrows(IllegalArgumentException.class,
-                         () -> factory.select(TEST_ENTITY_TYPE)
-                                      .limit(0));
+        fun `throw 'IAE' if limit int value is 0`() {
+            assertThrows<IllegalArgumentException> {
+                factory.select(TEST_ENTITY_TYPE).limit(0)
+            }
         }
 
         @Test
-        @DisplayName("throw `IAE` if order direction is not ASCENDING or DESCENDING")
-        void notAcceptInvalidDirection() {
-            var select = factory.select(TEST_ENTITY_TYPE)
-                                .orderBy(FIRST_FIELD, ASCENDING)
-                                .orderBy(FIRST_FIELD, DESCENDING);
-            assertThrows(IllegalArgumentException.class,
-                         () -> select.orderBy(FIRST_FIELD, OD_UNKNOWN));
-            assertThrows(IllegalArgumentException.class,
-                         () -> select.orderBy(FIRST_FIELD, UNRECOGNIZED));
+        fun `throw 'IAE' if order direction is not ASCENDING or DESCENDING`() {
+            val select = factory.select(TEST_ENTITY_TYPE)
+                .orderBy(FIRST_FIELD, ASCENDING)
+                .orderBy(FIRST_FIELD, DESCENDING)
+            
+            assertThrows<IllegalArgumentException> {
+                select.orderBy(FIRST_FIELD, OD_UNKNOWN) 
+            }
+            assertThrows<IllegalArgumentException> {
+                select.orderBy(FIRST_FIELD, UNRECOGNIZED) 
+            }
         }
     }
 
     @Nested
-    @DisplayName("create query")
-    class CreateQuery {
+    internal inner class `create query` {
 
         @Test
-        @DisplayName("by only entity type")
-        void byType() {
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .build();
-            assertNotNull(query);
-            var format = query.getFormat();
-            assertFalse(format.hasFieldMask());
+        fun `by only entity type`() {
+            val query = factory.select(TEST_ENTITY_TYPE).build()
+            assertNotNull(query)
 
-            var target = query.getTarget();
-            assertTrue(target.getIncludeAll());
-
-            assertThat(format.getOrderByCount()).isEqualTo(0);
-            assertThat(format.getLimit()).isEqualTo(0);
-
-            assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
-        }
-
-        @Test
-        @DisplayName("with order")
-        void ordered() {
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .orderBy(FIRST_FIELD, ASCENDING)
-                               .build();
-            assertNotNull(query);
-            var format = query.getFormat();
-            assertFalse(format.hasFieldMask());
-
-            var expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING);
-            assertEquals(expectedOrderBy, format.getOrderBy(0));
-
-            assertThat(format.getLimit()).isEqualTo(0);
-
-            var target = query.getTarget();
-            assertTrue(target.getIncludeAll());
-
-            assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
-        }
-
-        @Test
-        @DisplayName("with limit")
-        void limited() {
-            var limit = 15;
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .orderBy(SECOND_FIELD, DESCENDING)
-                               .limit(limit)
-                               .build();
-            assertNotNull(query);
-            var format = query.getFormat();
-            assertFalse(format.hasFieldMask());
-
-            var expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrderBy, format.getOrderBy(0));
-
-            assertThat(format.getLimit()).isEqualTo(limit);
-
-            var target = query.getTarget();
-            assertTrue(target.getIncludeAll());
-
-            assertEquals(TEST_ENTITY_TYPE_URL.value(), target.getType());
-        }
-
-        @Test
-        @DisplayName("by ID")
-        void byId() {
-            var id1 = 314;
-            var id2 = 271;
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .byId(id1, id2)
-                               .build();
-            assertNotNull(query);
-            assertFalse(query.getFormat().hasFieldMask());
-
-            var target = query.getTarget();
-            assertFalse(target.getIncludeAll());
-
-            var entityFilters = target.getFilters();
-            var idFilter = entityFilters.getIdFilter();
-            Collection<Any> idValues = idFilter.getIdList();
-            Collection<Integer> intIdValues = idValues
-                    .stream()
-                    .map(id -> toObject(id, int.class))
-                    .collect(toList());
-
-            assertThat(idValues)
-                 .hasSize(2);
-            assertThat(intIdValues).containsExactly(id1, id2);
-        }
-
-        @Test
-        @DisplayName("by field mask")
-        void byFieldMask() {
-            var fieldName = "TestEntity.firstField";
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .withMask(fieldName)
-                               .build();
-            assertNotNull(query);
-            var format = query.getFormat();
-            assertTrue(format.hasFieldMask());
-
-            var mask = format.getFieldMask();
-            Collection<String> fieldNames = mask.getPathsList();
-
-            var assertFieldNames = assertThat(fieldNames);
-
-            assertFieldNames.hasSize(1);
-            assertFieldNames.contains(fieldName);
-        }
-
-        @Test
-        @DisplayName("by column filter")
-        void byFilter() {
-            var columnName = "myImaginaryColumn";
-            Object columnValue = 42;
-
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .where(eq(columnName, columnValue))
-                               .build();
-            assertNotNull(query);
-            var target = query.getTarget();
-            assertFalse(target.getIncludeAll());
-
-            var entityFilters = target.getFilters();
-            var aggregatingFilters = entityFilters.getFilterList();
-            assertThat(aggregatingFilters)
-                 .hasSize(1);
-            var aggregatingFilter = aggregatingFilters.get(0);
-            Collection<Filter> filters = aggregatingFilter.getFilterList();
-            assertThat(filters)
-                 .hasSize(1);
-            var actualValue = findByName(filters, columnName).getValue();
-            assertNotNull(columnValue);
-            var messageValue = unpack(actualValue, Int32Value.class);
-            var actualGenericValue = messageValue.getValue();
-            assertEquals(columnValue, actualGenericValue);
-        }
-
-        @Test
-        @DisplayName("by multiple column filters")
-        void byMultipleFilters() {
-            var columnName1 = "myColumn";
-            Object columnValue1 = 42;
-            var columnName2 = "oneMore";
-            Object columnValue2 = randomId();
-
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .where(eq(columnName1, columnValue1),
-                                        eq(columnName2, columnValue2))
-                               .build();
-            assertNotNull(query);
-            var target = query.getTarget();
-            assertFalse(target.getIncludeAll());
-
-            var entityFilters = target.getFilters();
-            var aggregatingFilters = entityFilters.getFilterList();
-            assertThat(aggregatingFilters)
-                 .hasSize(1);
-            Collection<Filter> filters = aggregatingFilters.get(0)
-                                                           .getFilterList();
-            var actualValue1 = findByName(filters, columnName1).getValue();
-            assertNotNull(actualValue1);
-            int actualGenericValue1 = toObject(actualValue1, int.class);
-            assertEquals(columnValue1, actualGenericValue1);
-
-            var actualValue2 = findByName(filters, columnName2).getValue();
-            assertNotNull(actualValue2);
-            Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
-            assertEquals(columnValue2, actualGenericValue2);
-        }
-
-        @SuppressWarnings("OverlyLongMethod")
-        // A big test for the grouping operators proper building.
-        @Test
-        @DisplayName("by column filter grouping")
-        void byFilterGrouping() {
-            var establishedTimeColumn = "establishedTime";
-            var companySizeColumn = "companySize";
-            var countryColumn = "country";
-            var countryName = "Ukraine";
-
-            var twoDaysAgo = subtract(currentTime(), fromHours(-48));
-
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .where(all(ge(companySizeColumn, 50),
-                                            le(companySizeColumn, 1000)),
-                                        either(gt(establishedTimeColumn, twoDaysAgo),
-                                               eq(countryColumn, countryName)))
-                               .build();
-            var target = query.getTarget();
-            var filters = target.getFilters()
-                                .getFilterList();
-            assertThat(filters)
-                 .hasSize(2);
-
-            var firstFilter = filters.get(0);
-            var secondFilter = filters.get(1);
-
-            List<Filter> allFilters;
-            List<Filter> eitherFilters;
-            if (firstFilter.getOperator() == ALL) {
-                assertEquals(EITHER, secondFilter.getOperator());
-                allFilters = firstFilter.getFilterList();
-                eitherFilters = secondFilter.getFilterList();
-            } else {
-                assertEquals(ALL, secondFilter.getOperator());
-                eitherFilters = firstFilter.getFilterList();
-                allFilters = secondFilter.getFilterList();
+            with(query.format) {
+                assertFalse(hasFieldMask())
+                assertThat(orderByCount).isEqualTo(0)
+                assertThat(limit).isEqualTo(0)
             }
 
-            assertThat(allFilters)
-                 .hasSize(2);
-            assertThat(eitherFilters)
-                 .hasSize(2);
-
-            var companySizeLowerBound = allFilters.get(0);
-            var columnName1 = companySizeLowerBound.getFieldPath()
-                                                   .getFieldName(0);
-            assertEquals(companySizeColumn, columnName1);
-            assertEquals(50L,
-                         (long) toObject(companySizeLowerBound.getValue(), int.class));
-            assertEquals(GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
-
-            var companySizeHigherBound = allFilters.get(1);
-            var columnName2 = companySizeHigherBound.getFieldPath()
-                                                    .getFieldName(0);
-            assertEquals(companySizeColumn, columnName2);
-            assertEquals(1000L,
-                         (long) toObject(companySizeHigherBound.getValue(), int.class));
-            assertEquals(LESS_OR_EQUAL, companySizeHigherBound.getOperator());
-
-            var establishedTimeFilter = eitherFilters.get(0);
-            var columnName3 = establishedTimeFilter.getFieldPath()
-                                                   .getFieldName(0);
-            assertEquals(establishedTimeColumn, columnName3);
-            assertEquals(twoDaysAgo,
-                         toObject(establishedTimeFilter.getValue(), Timestamp.class));
-            assertEquals(GREATER_THAN, establishedTimeFilter.getOperator());
-
-            var countryFilter = eitherFilters.get(1);
-            var columnName4 = countryFilter.getFieldPath()
-                                           .getFieldName(0);
-            assertEquals(countryColumn, columnName4);
-            assertEquals(countryName,
-                         toObject(countryFilter.getValue(), String.class));
-            assertEquals(EQUAL, countryFilter.getOperator());
+            with(query.target) {
+                assertTrue(includeAll)
+                assertThat(type).isEqualTo(TEST_ENTITY_TYPE_URL.value())
+            }
         }
 
-        @SuppressWarnings("OverlyLongMethod")
-        // A big test case covering the query arguments coexistence.
         @Test
-        @DisplayName("by all available arguments")
-        void byAllArguments() {
-            var id1 = 314;
-            var id2 = 271;
-            var limit = 10;
-            var columnName1 = "column1";
-            Object columnValue1 = 42;
-            var columnName2 = "column2";
-            Object columnValue2 = randomId();
-            var fieldName = "TestEntity.secondField";
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .withMask(fieldName)
-                               .byId(id1, id2)
-                               .where(eq(columnName1, columnValue1),
-                                        eq(columnName2, columnValue2))
-                               .orderBy(SECOND_FIELD, DESCENDING)
-                               .limit(limit)
-                               .build();
-            assertNotNull(query);
+        fun `with order`() {
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .orderBy(FIRST_FIELD, ASCENDING)
+                .build()
+            assertNotNull(query)
 
-            var format = query.getFormat();
-            var mask = format.getFieldMask();
-            Collection<String> fieldNames = mask.getPathsList();
-            var assertFieldNames = assertThat(fieldNames);
-            assertFieldNames.hasSize(1);
-            assertFieldNames.containsExactly(fieldName);
+            with(query.format) {
+                val expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING)
 
-            var target = query.getTarget();
-            assertFalse(target.getIncludeAll());
-            var entityFilters = target.getFilters();
+                assertFalse(hasFieldMask())
+                assertThat(getOrderBy(0)).isEqualTo(expectedOrderBy)
+                assertThat(limit).isEqualTo(0)
+            }
 
-            var idFilter = entityFilters.getIdFilter();
-            Collection<Any> idValues = idFilter.getIdList();
-            Collection<Integer> intIdValues = idValues
-                    .stream()
-                    .map(id -> toObject(id, int.class))
-                    .collect(toList());
+            with(query.target) {
+                assertTrue(includeAll)
+                assertThat(type).isEqualTo(TEST_ENTITY_TYPE_URL.value())
+            }
+        }
 
+        @Test
+        fun `with limit`() {
+            val expectedLimit = 15
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .orderBy(SECOND_FIELD, DESCENDING)
+                .limit(expectedLimit)
+                .build()
+            assertNotNull(query)
+
+            with(query.format) {
+                val expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING)
+
+                assertFalse(hasFieldMask())
+                assertThat(getOrderBy(0)).isEqualTo(expectedOrderBy)
+                assertThat(limit).isEqualTo(expectedLimit)
+            }
+
+            with(query.target) {
+                assertTrue(includeAll)
+                assertThat(type).isEqualTo(TEST_ENTITY_TYPE_URL.value())
+            }
+        }
+
+        @Test
+        fun `by ID`() {
+            val id1 = 314
+            val id2 = 271
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .byId(id1, id2)
+                .build()
+            assertNotNull(query)
+            assertFalse(query.format.hasFieldMask())
+
+            val target = query.target
+            assertFalse(target.includeAll)
+
+            val entityFilters = target.filters
+            val idFilter = entityFilters.idFilter
+            val idValues: Collection<AnyProto> = idFilter.idList
+            val intIdValues: Collection<Int> = idValues
+                .stream()
+                .map { id: AnyProto ->
+                    toObject(
+                        id, Int::class.java
+                    )
+                }
+                .collect(toList())
+            assertThat(idValues).hasSize(2)
+            assertThat(intIdValues).containsExactly(id1, id2)
+        }
+
+        @Test
+        fun `by field mask`() {
+            val fieldName = "TestEntity.firstField"
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .withMask(fieldName)
+                .build()
+            assertNotNull(query)
+
+            val format = query.format
+            assertTrue(format.hasFieldMask())
+
+            val mask = format.fieldMask
+            val fieldNames: Collection<String> = mask.pathsList
+            val assertFieldNames = assertThat(fieldNames)
+            assertFieldNames.hasSize(1)
+            assertFieldNames.contains(fieldName)
+        }
+
+        @Test
+        fun `by column filter`() {
+            val columnName = "myImaginaryColumn"
+            val columnValue: Any = 42
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .where(eq(columnName, columnValue))
+                .build()
+            assertNotNull(query)
+
+            val target = query.target
+            assertFalse(target.includeAll)
+
+            val entityFilters = target.filters
+            val aggregatingFilters = entityFilters.filterList
+            assertThat(aggregatingFilters).hasSize(1)
+
+            val aggregatingFilter = aggregatingFilters[0]
+            val filters: Collection<Filter> = aggregatingFilter.filterList
+            assertThat(filters).hasSize(1)
+
+            val actualValue = findByName(filters, columnName).value
+            assertNotNull(columnValue)
+            val messageValue = AnyPacker.unpack(actualValue, Int32Value::class.java)
+            val actualGenericValue = messageValue.value
+            assertEquals(columnValue, actualGenericValue)
+        }
+
+        @Test
+        fun `by multiple column filters`() {
+            val columnName1 = "myColumn"
+            val columnValue1: Any = 42
+            val columnName2 = "oneMore"
+            val columnValue2: Any = randomId()
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .where(
+                    eq(columnName1, columnValue1),
+                    eq(columnName2, columnValue2)
+                )
+                .build()
+            assertNotNull(query)
+            val target = query.target
+            assertFalse(target.includeAll)
+            val entityFilters = target.filters
+            val aggregatingFilters = entityFilters.filterList
+            assertThat(aggregatingFilters)
+                .hasSize(1)
+            val filters: Collection<Filter> = aggregatingFilters[0]
+                .filterList
+            val actualValue1 = findByName(filters, columnName1).value
+            assertNotNull(actualValue1)
+            val actualGenericValue1 = toObject(actualValue1, Int::class.java)
+            assertEquals(columnValue1, actualGenericValue1)
+            val actualValue2 = findByName(filters, columnName2).value
+            assertNotNull(actualValue2)
+            val actualGenericValue2: Message = toObject(actualValue2, TestEntityId::class.java)
+            assertEquals(columnValue2, actualGenericValue2)
+        }
+
+        /**
+         * A big test for the grouping operators proper building.
+         */
+        @Test
+        fun `by column filter grouping`() {
+            val establishedTimeColumn = "establishedTime"
+            val companySizeColumn = "companySize"
+            val countryColumn = "country"
+            val countryName = "Ukraine"
+            val twoDaysAgo = subtract(Time.currentTime(), Durations.fromHours(-48))
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .where(
+                    all(
+                        Filters.ge(companySizeColumn, 50),
+                        Filters.le(companySizeColumn, 1000)
+                    ),
+                    either(
+                        Filters.gt(establishedTimeColumn, twoDaysAgo),
+                        eq(countryColumn, countryName)
+                    )
+                )
+                .build()
+            val target = query.target
+            val filters = target.filters
+                .filterList
+            assertThat(filters).hasSize(2)
+
+            val firstFilter = filters[0]
+            val secondFilter = filters[1]
+            val allFilters: List<Filter>
+            val eitherFilters: List<Filter>
+            if (firstFilter.operator == ALL) {
+                assertEquals(
+                    EITHER,
+                    secondFilter.operator
+                )
+                allFilters = firstFilter.filterList
+                eitherFilters = secondFilter.filterList
+            } else {
+                assertEquals(
+                    ALL,
+                    secondFilter.operator
+                )
+                eitherFilters = firstFilter.filterList
+                allFilters = secondFilter.filterList
+            }
+
+            assertThat(allFilters).hasSize(2)
+            assertThat(eitherFilters).hasSize(2)
+
+            val companySizeLowerBound = allFilters[0]
+            val columnName1 = companySizeLowerBound.fieldPath
+                .getFieldName(0)
+            assertEquals(companySizeColumn, columnName1)
+            assertEquals(
+                50L, toObject(companySizeLowerBound.value, Int::class.java).toLong()
+            )
+            assertEquals(
+                Filter.Operator.GREATER_OR_EQUAL,
+                companySizeLowerBound.operator
+            )
+            val companySizeHigherBound = allFilters[1]
+            val columnName2 = companySizeHigherBound.fieldPath
+                .getFieldName(0)
+            assertEquals(companySizeColumn, columnName2)
+            assertEquals(
+                1000L, toObject(companySizeHigherBound.value, Int::class.java).toLong()
+            )
+            assertEquals(Filter.Operator.LESS_OR_EQUAL, companySizeHigherBound.operator)
+            val establishedTimeFilter = eitherFilters[0]
+            val columnName3 = establishedTimeFilter.fieldPath
+                .getFieldName(0)
+            assertEquals(establishedTimeColumn, columnName3)
+            assertEquals(
+                twoDaysAgo,
+                toObject(establishedTimeFilter.value, Timestamp::class.java)
+            )
+            assertEquals(Filter.Operator.GREATER_THAN, establishedTimeFilter.operator)
+            val countryFilter = eitherFilters[1]
+            val columnName4 = countryFilter.fieldPath
+                .getFieldName(0)
+            assertEquals(countryColumn, columnName4)
+            assertEquals(countryName, toObject(countryFilter.value, String::class.java))
+            assertEquals(Filter.Operator.EQUAL, countryFilter.operator)
+        }
+
+        /**
+         * A big test case covering the query arguments coexistence.
+         */
+        @Test
+        fun `by all available arguments`() {
+            val id1 = 314
+            val id2 = 271
+            val limit = 10
+            val columnName1 = "column1"
+            val columnValue1: Any = 42
+            val columnName2 = "column2"
+            val columnValue2: Any = randomId()
+            val fieldName = "TestEntity.secondField"
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .withMask(fieldName)
+                .byId(id1, id2)
+                .where(
+                    eq(columnName1, columnValue1),
+                    eq(columnName2, columnValue2)
+                )
+                .orderBy(SECOND_FIELD, DESCENDING)
+                .limit(limit)
+                .build()
+            assertNotNull(query)
+            val format = query.format
+            val mask = format.fieldMask
+            val fieldNames: Collection<String> = mask.pathsList
+            val assertFieldNames = assertThat(fieldNames)
+            assertFieldNames.hasSize(1)
+            assertFieldNames.containsExactly(fieldName)
+            val target = query.target
+            assertFalse(target.includeAll)
+            val entityFilters = target.filters
+            val idFilter = entityFilters.idFilter
+            val idValues: Collection<AnyProto> = idFilter.idList
+            val intIdValues: Collection<Int> = idValues
+                .stream()
+                .map { id: AnyProto ->
+                    toObject(id, Int::class.java)
+                }
+                .collect(toList())
             assertThat(idValues)
-                 .hasSize(2);
-            assertThat(intIdValues).containsAtLeast(id1, id2);
+                .hasSize(2)
+            assertThat(intIdValues).containsAtLeast(id1, id2)
 
             // Check query params
-            var aggregatingFilters =
-                    entityFilters.getFilterList();
-
+            val aggregatingFilters = entityFilters.filterList
             assertThat(aggregatingFilters)
-                 .hasSize(1);
-            Collection<Filter> filters = aggregatingFilters.get(0)
-                                                           .getFilterList();
+                .hasSize(1)
+            val filters: Collection<Filter> = aggregatingFilters[0]
+                .filterList
             assertThat(filters)
-                 .hasSize(2);
-
-            var actualValue1 = findByName(filters, columnName1).getValue();
-            assertNotNull(actualValue1);
-            int actualGenericValue1 = toObject(actualValue1, int.class);
-            assertEquals(columnValue1, actualGenericValue1);
-
-            var actualValue2 = findByName(filters, columnName2).getValue();
-            assertNotNull(actualValue2);
-            Message actualGenericValue2 = toObject(actualValue2, TestEntityId.class);
-            assertEquals(columnValue2, actualGenericValue2);
-
-            var expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING);
-            assertEquals(expectedOrderBy, format.getOrderBy(0));
-
-            assertThat(format.getLimit()).isEqualTo(limit);
+                .hasSize(2)
+            val actualValue1 = findByName(filters, columnName1).value
+            assertNotNull(actualValue1)
+            val actualGenericValue1 =
+                toObject(actualValue1, Int::class.java)
+            assertEquals(columnValue1, actualGenericValue1)
+            val actualValue2 = findByName(filters, columnName2).value
+            assertNotNull(actualValue2)
+            val actualGenericValue2: Message =
+                toObject(actualValue2, TestEntityId::class.java)
+            assertEquals(columnValue2, actualGenericValue2)
+            val expectedOrderBy = orderBy(
+                SECOND_FIELD,
+                DESCENDING
+            )
+            assertEquals(expectedOrderBy, format.getOrderBy(0))
+            assertThat(format.limit).isEqualTo(limit)
         }
 
-        private Filter findByName(Iterable<Filter> filters, String name) {
-            for (var filter : filters) {
-                if (filter.getFieldPath()
-                          .getFieldName(0)
-                          .equals(name)) {
-                    return filter;
+        private fun findByName(filters: Iterable<Filter>, name: String): Filter {
+            for (filter in filters) {
+                if (filter.fieldPath.getFieldName(0) == name) {
+                    return filter
                 }
             }
-            fail(format("No Filter found for %s.", name));
-            // avoid returning `null`
-            throw new RuntimeException("never happens unless JUnit is broken");
+            fail<Any>(String.format("No Filter found for %s.", name))
+            throw RuntimeException("never happens unless JUnit is broken")
         }
     }
 
     @Nested
-    @DisplayName("persist only last given")
-    class Persist {
+    internal inner class `persist only last given` {
 
         @Test
-        @DisplayName("IDs clause")
-        void lastIds() {
-            Iterable<?> genericIds = asList(newUuid(), -1, randomId());
-            Long[] longIds = {1L, 2L, 3L};
-            Message[] messageIds = {randomId(), randomId(), randomId()};
-            var stringIds = new String[]{newUuid(), newUuid(), newUuid()};
-            Integer[] intIds = {4, 5, 6};
+        fun `IDs clause`() {
+            val genericIds: Iterable<*> = listOf(newUuid(), -1, randomId())
+            val longIds = arrayOf(1L, 2L, 3L)
+            val messageIds = arrayOf<Message>(randomId(), randomId(), randomId())
+            val stringIds = arrayOf(newUuid(), newUuid(), newUuid())
+            val intIds = arrayOf(4, 5, 6)
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .byId(genericIds)
+                .byId(*longIds)
+                .byId(*stringIds)
+                .byId(*intIds)
+                .byId(*messageIds)
+                .build()
+            assertNotNull(query)
 
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .byId(genericIds)
-                               .byId(longIds)
-                               .byId(stringIds)
-                               .byId(intIds)
-                               .byId(messageIds)
-                               .build();
-            assertNotNull(query);
+            val target = query.target
+            val filters = target.filters
+            val entityIds: Collection<AnyProto> = filters.idFilter
+                .idList
+            assertThat(entityIds).hasSize(messageIds.size)
 
-            var target = query.getTarget();
-            var filters = target.getFilters();
-            Collection<Any> entityIds = filters.getIdFilter()
-                                               .getIdList();
-            assertThat(entityIds)
-                 .hasSize(messageIds.length);
-            Iterable<? extends Message> actualValues = entityIds
-                    .stream()
-                    .map(id -> toObject(id, TestEntityId.class))
-                    .collect(toList());
+            val actualValues: Iterable<Message> = entityIds
+                .stream()
+                .map { id: AnyProto -> toObject(id, TestEntityId::class.java) }
+                .collect(toList())
             assertThat(actualValues)
-                    .containsAtLeastElementsIn(messageIds);
+                .containsAtLeastElementsIn(messageIds)
         }
 
         @Test
-        @DisplayName("field mask")
-        void lastFieldMask() {
-            Iterable<String> iterableFields = singleton("TestEntity.firstField");
-            var arrayFields = new String[]{"TestEntity.secondField"};
+        fun `field mask`() {
+            val iterableFields: Iterable<String> = setOf("TestEntity.firstField")
+            val arrayFields = arrayOf("TestEntity.secondField")
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .withMask(iterableFields)
+                .withMask(*arrayFields)
+                .build()
+            assertNotNull(query)
 
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .withMask(iterableFields)
-                               .withMask(arrayFields)
-                               .build();
-            assertNotNull(query);
-            var mask = query.getFormat().getFieldMask();
-
-            Collection<String> maskFields = mask.getPathsList();
+            val mask = query.format.fieldMask
+            val maskFields: Collection<String> = mask.pathsList
             assertThat(maskFields)
-                 .hasSize(arrayFields.length);
+                .hasSize(arrayFields.size)
             assertThat(maskFields)
-                    .containsAtLeastElementsIn(arrayFields);
+                .containsAtLeastElementsIn(arrayFields)
         }
 
         @Test
-        @DisplayName("limit")
-        void lastLimit() {
-            var expectedLimit = 10;
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .orderBy(FIRST_FIELD, ASCENDING)
-                               .limit(2)
-                               .limit(5)
-                               .limit(expectedLimit)
-                               .build();
-            assertNotNull(query);
-            assertEquals(expectedLimit, query.getFormat().getLimit());
+        fun limit() {
+            val expectedLimit = 10
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .orderBy(FIRST_FIELD, ASCENDING)
+                .limit(2)
+                .limit(5)
+                .limit(expectedLimit)
+                .build()
+            assertNotNull(query)
+            assertThat(query.format.limit).isEqualTo(expectedLimit)
         }
 
         @Test
-        @DisplayName("order")
-        void lastOrder() {
-            var query = factory.select(TEST_ENTITY_TYPE)
-                               .orderBy(FIRST_FIELD, ASCENDING)
-                               .orderBy(SECOND_FIELD, ASCENDING)
-                               .orderBy(SECOND_FIELD, DESCENDING)
-                               .orderBy(FIRST_FIELD, DESCENDING)
-                               .build();
-            assertNotNull(query);
-            assertEquals(orderBy(FIRST_FIELD, DESCENDING), query.getFormat().getOrderBy(0));
+        fun order() {
+            val query = factory.select(TEST_ENTITY_TYPE)
+                .orderBy(FIRST_FIELD, ASCENDING)
+                .orderBy(SECOND_FIELD, ASCENDING)
+                .orderBy(SECOND_FIELD, DESCENDING)
+                .orderBy(FIRST_FIELD, DESCENDING)
+                .build()
+            assertNotNull(query)
+
+            assertThat(query.format.getOrderBy(0))
+                .isEqualTo(orderBy(FIRST_FIELD, DESCENDING))
         }
     }
 
     @Test
-    @DisplayName("provide proper `toString()` method")
-    void supportToString() {
-        var id1 = 314;
-        var id2 = 271;
-        var columnName1 = "column1";
-        Object columnValue1 = 42;
-        var columnName2 = "column2";
-        Message columnValue2 = randomId();
-        var fieldName = "TestEntity.secondField";
-        var builder =
-                factory.select(TEST_ENTITY_TYPE)
-                       .withMask(fieldName)
-                       .byId(id1, id2)
-                       .where(eq(columnName1, columnValue1),
-                              eq(columnName2, columnValue2));
-        var stringRepr = builder.toString();
-
-        var assertOutput = assertThat(stringRepr);
-
-        assertOutput.contains(TEST_ENTITY_TYPE.getSimpleName());
-        assertOutput.contains(String.valueOf(id1));
-        assertOutput.contains(String.valueOf(id2));
-        assertOutput.contains(columnName1);
-        assertOutput.contains(columnName2);
+    fun `provide proper 'toString()' method`() {
+        val id1 = 314
+        val id2 = 271
+        val columnName1 = "column1"
+        val columnValue1: Any = 42
+        val columnName2 = "column2"
+        val columnValue2: Message = randomId()
+        val fieldName = "TestEntity.secondField"
+        val builder = factory.select(TEST_ENTITY_TYPE)
+            .withMask(fieldName)
+            .byId(id1, id2)
+            .where(
+                eq(columnName1, columnValue1),
+                eq(columnName2, columnValue2)
+            )
+        val stringForm = builder.toString()
+        val assertStringForm = assertThat(stringForm)
+        assertStringForm {
+            contains(TEST_ENTITY_TYPE.simpleName)
+            contains(id1.toString())
+            contains(id2.toString())
+            contains(columnName1)
+            contains(columnName2)
+        }
     }
 }
