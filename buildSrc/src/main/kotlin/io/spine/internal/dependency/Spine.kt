@@ -103,7 +103,7 @@ class Spine(p: ExtensionAware) {
          * The version of `change` to use.
          * @see [Spine.change]
          */
-        const val change = "2.0.0-SNAPSHOT.116"
+        const val change = "2.0.0-SNAPSHOT.117"
 
         /**
          * The version of `tool-base` to use.
