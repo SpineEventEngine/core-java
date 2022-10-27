@@ -33,6 +33,8 @@ import io.spine.server.tuple.Tuple
  * A tuple of one event.
  *
  * Used when returning an iterable from a handler method for better readability over `List<E>`.
+ *
+ * @param E the type of the event.
  */
 public class Just<E : EventMessage>(event: E) : Tuple(event) {
 
