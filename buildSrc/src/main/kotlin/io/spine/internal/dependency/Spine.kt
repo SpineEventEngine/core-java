@@ -116,6 +116,12 @@ class Spine(p: ExtensionAware) {
          * @see [Spine.validation]
          */
         const val validation = "2.0.0-SNAPSHOT.32"
+
+        /**
+         * The version of Javadoc Tools to use.
+         * @see [Spine.javadocTools]
+         */
+        const val javadocTools = "2.0.0-SNAPSHOT.75"
     }
 
     companion object {
@@ -145,6 +151,12 @@ class Spine(p: ExtensionAware) {
     val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${p.toolBaseVersion}"
     val modelCompiler = "$toolsGroup:spine-model-compiler:${p.mcVersion}"
     val mcJavaPlugin = "$toolsGroup:spine-mc-java-plugins:${p.mcJavaVersion}:all"
+
+    /**
+     *  Does not allow re-definition via a project property.
+     *  Please change [DefaultVersion.javadocTools].                     ˚
+     */
+    val javadocTools = "$toolsGroup::${DefaultVersion.javadocTools}"
 
     @Deprecated("Please use `validation.runtime`", replaceWith = ReplaceWith("validation.runtime"))
     val validate = "$group:spine-validate:${p.baseVersion}"
