@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.118</version>
+<version>2.0.0-SNAPSHOT.119</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -140,7 +140,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.114</version>
+    <version>2.0.0-SNAPSHOT.118</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -159,6 +159,11 @@ all modules and does not describe the project structure per-subproject.
     <groupId>com.google.errorprone</groupId>
     <artifactId>error_prone_core</artifactId>
     <version>2.16</version>
+  </dependency>
+  <dependency>
+    <groupId>com.google.errorprone</groupId>
+    <artifactId>javac</artifactId>
+    <version>9+181-r4173-1</version>
   </dependency>
   <dependency>
     <groupId>com.google.protobuf</groupId>
@@ -209,7 +214,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
     <artifactId>pmd-java</artifactId>
-    <version>6.44.0</version>
+    <version>6.50.0</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
