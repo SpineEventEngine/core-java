@@ -29,6 +29,10 @@ import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Spine
 
+plugins {
+    `java-test-fixtures`
+}
+
 dependencies {
     api(Kotlin.reflect)
     api(Grpc.protobuf)
