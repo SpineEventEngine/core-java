@@ -49,7 +49,7 @@ class Spine(p: ExtensionAware) {
          * The default version  of `base` to use.
          * @see [Spine.base]
          */
-        const val base = "2.0.0-SNAPSHOT.114"
+        const val base = "2.0.0-SNAPSHOT.118"
 
         /**
          * The default version of `core-java` to use.
@@ -82,7 +82,7 @@ class Spine(p: ExtensionAware) {
         const val time = "2.0.0-SNAPSHOT.109"
 
         /**
-         * Tghe version of `change` to use.
+         * The version of `change` to use.
          * @see [Spine.change]
          */
         const val change = "2.0.0-SNAPSHOT.116"
