@@ -24,13 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** Versions of the Spine libraries that `core-java` depends on. */
-val baseVersion: String by extra("2.0.0-SNAPSHOT.118")
-val baseTypesVersion: String by extra("2.0.0-SNAPSHOT.111")
-val timeVersion: String by extra("2.0.0-SNAPSHOT.110")
-val toolBaseVersion: String by extra("2.0.0-SNAPSHOT.109")
-val validationVersion: String by extra("2.0.0-SNAPSHOT.32")
-val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.103")
-
-/** The version of this library. */
+/**
+ *  The version of this library.
+ *
+ * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ */
 val versionToPublish: String by extra("2.0.0-SNAPSHOT.119")
