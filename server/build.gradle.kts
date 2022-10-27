@@ -27,10 +27,7 @@
 import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Kotlin
-
-val baseVersion: String by extra
-val baseTypesVersion: String by extra
-val validationVersion: String by extra
+import io.spine.internal.dependency.Spine
 
 dependencies {
     api(Kotlin.reflect)
@@ -38,19 +35,23 @@ dependencies {
     api(Grpc.core)
     api(Grpc.stub)
     api(project(":client"))
+
+    val spine = Spine(project)
     /*
      * Expose Validation API at the server side. E.g. for tuning custom validation for
      * anti-corruption layer.
      */
-    api("io.spine.validation:spine-validation-java-runtime:$validationVersion")
+    api(spine.validation.runtime)
 
-    AutoService.apply {
+    with(AutoService) {
         testAnnotationProcessor(processor)
         testCompileOnly(annotations)
     }
     testImplementation(Grpc.nettyShaded)
-    testImplementation("io.spine.tools:spine-testlib:$baseVersion")
-    testImplementation("io.spine:spine-base-types:$baseTypesVersion")
+
+    testImplementation(spine.testlib)
+    testImplementation(spine.baseTypes)
+
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
