@@ -115,7 +115,7 @@ class Spine(p: ExtensionAware) {
          * The version of `validation` to use.
          * @see [Spine.validation]
          */
-        const val validation = "2.0.0-SNAPSHOT.32"
+        const val validation = "2.0.0-SNAPSHOT.33"
 
         /**
          * The version of Javadoc Tools to use.
