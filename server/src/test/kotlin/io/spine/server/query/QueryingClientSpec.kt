@@ -26,86 +26,82 @@
 
 package io.spine.server.query
 
-import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth8.assertThat
-import com.google.protobuf.compiler.PluginProtos.CodeGeneratorRequest
-//import io.spine.protodata.CodeGenerationContext
-//import io.spine.protodata.FilePath
-//import io.spine.protodata.ProtobufCompilerContext
-//import io.spine.protodata.ProtobufSourceFile
-//import io.spine.protodata.events.CompilerEvents
-//import io.spine.protodata.path
-//import io.spine.protodata.test.DoctorProto
-//import io.spine.protodata.test.ProjectProto
+import io.spine.grpc.StreamObservers
 import io.spine.server.BoundedContext
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
+import io.spine.server.given.counting.NumberStats
+import io.spine.server.given.counting.Range
+import io.spine.server.given.counting.RangeStats
+import io.spine.server.given.counting.command.generateNumbers
+import io.spine.server.given.counting.createCountingContext
+import io.spine.server.given.counting.range
+import io.spine.testing.client.TestActorRequestFactory
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("`QueryingClient` should")
 class QueryingClientSpec {
 
-//    private val fileNames: Correspondence<ProtobufSourceFile, String> = Correspondence.from(
-//        { file, path -> file!!.file.path.value == path },
-//        "file name"
-//    )
-//
-//    private val actor = QueryingClientSpec::class.simpleName!!
-//    private lateinit var context: BoundedContext
-//
-//    private val files = listOf(DoctorProto.getDescriptor(), ProjectProto.getDescriptor())
-//
-    @BeforeEach
-    fun initContext() {
-//        context = CodeGenerationContext.builder().build()
-//        val request = CodeGeneratorRequest.newBuilder()
-//            .addAllProtoFile(files.map { it.toProto() })
-//            .addAllFileToGenerate(files.map { it.name })
-//            .build()
-//        val events = CompilerEvents.parse(request)
-//        ProtobufCompilerContext().use {
-//            it.emitted(events)
-//        }
-    }
-//
-    @AfterEach
-    fun shutDown() {
-//        context.close()
+    /**
+     * Prepares the environment for all the tests of this suite.
+     */
+    companion object {
+
+        private val actor = QueryingClientSpec::class.simpleName!!
+        private lateinit var context: BoundedContext
+        private lateinit var range: Range
+
+        @JvmStatic
+        @BeforeAll
+        fun initContext() {
+            context = createCountingContext()
+            range = range {
+                minValue = -100
+                maxValue = 100
+            }
+
+            val factory = TestActorRequestFactory(this::class.java)
+            val cmd = factory.createCommand(generateNumbers {
+                count = 100
+                range = this@Companion.range
+            })
+
+            context.commandBus().post(cmd, StreamObservers.noOpObserver())
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun shutDown() {
+            context.close()
+        }
     }
 
     @Test
     fun `fetch multiple results`() {
-//        val client = QueryingClient(context, ProtobufSourceFile::class.java, actor)
-//        val sources = client.all()
-//        val assertSources = assertThat(sources)
-//        assertSources
-//            .hasSize(2)
-//        assertSources
-//            .comparingElementsUsing(fileNames)
-//            .containsExactlyElementsIn(files.map { it.name })
+        val client = QueryingClient(context, NumberStats::class.java, actor)
+        val stats = client.all()
+        assertThat(stats).isNotEmpty()
     }
 
     @Test
     fun `fetch the only one`() {
-//        val client = QueryingClient(context, ProtobufSourceFile::class.java, actor)
-//        val path = files.first().path()
-//        val source = client.withId(path)
-//        assertThat(source)
-//            .isPresent()
-//        assertThat(source.get().file.path)
-//            .isEqualTo(path)
+        val client = QueryingClient(context, RangeStats::class.java, actor)
+        val rangeStats = client.find(range)
+        assertThat(rangeStats).isPresent()
+        assertThat(rangeStats.get().range).isEqualTo(range)
     }
 
     @Test
     fun `fetch none`() {
-//        val client = QueryingClient(context, ProtobufSourceFile::class.java, actor)
-//        val path = FilePath.newBuilder()
-//            .setValue("non/existent/path.proto")
-//            .build()
-//        val source = client.withId(path)
-//        assertThat(source)
-//            .isEmpty()
+        val client = QueryingClient(context, RangeStats::class.java, actor)
+        val nonExisting = range {
+            minValue = -200
+            maxValue = 200
+        }
+        val rangeStats = client.find(nonExisting)
+        assertThat(rangeStats).isEmpty()
     }
 }
