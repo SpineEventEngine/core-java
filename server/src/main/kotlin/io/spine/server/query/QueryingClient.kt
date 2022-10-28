@@ -44,7 +44,7 @@ import java.util.*
  * @param T the type of entity states to query.
  */
 public class QueryingClient<T : EntityState<*>>
-internal constructor(
+constructor(
     private val context: BoundedContext,
     private val type: Class<T>,
     actorName: String
