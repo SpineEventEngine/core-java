@@ -56,6 +56,8 @@ dependencies {
     testImplementation(spine.testlib)
     testImplementation(spine.baseTypes)
 
+    testFixturesImplementation(spine.testlib)
+
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
