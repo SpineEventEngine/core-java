@@ -67,7 +67,7 @@ internal constructor(
      * @throws IllegalArgumentException
      *          if the given ID is not of one of the supported types
      */
-    public fun withId(id: Any): Optional<T> {
+    public fun find(id: Any): Optional<T> {
         Identifier.checkSupported(id.javaClass)
         val query = buildQuery(id)
         val results = execute(query)
@@ -78,6 +78,9 @@ internal constructor(
             Optional.of(value)
         }
     }
+
+    @Deprecated(message = "Please use `find(id)` instead.", replaceWith = ReplaceWith("find(id)"))
+    public fun withId(id: Any): Optional<T> = find(id)
 
     /**
      * Selects all entities of the given type.
