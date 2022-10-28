@@ -128,7 +128,9 @@ private class Observer<T : EntityState<*>>(
         throw e
     }
 
-    override fun onCompleted() {}
+    override fun onCompleted() {
+        // Do nothing.
+    }
 
     /**
      * Obtains the found result or throws an `IllegalStateException` if
