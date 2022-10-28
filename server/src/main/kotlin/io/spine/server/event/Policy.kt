@@ -60,10 +60,11 @@ public abstract class Policy<E : EventMessage>: AbstractEventReactor(), Logging 
     protected lateinit var context: BoundedContext
 
     /**
-     * Handles an event and produces some number of events in responce.
+     * Handles an event and produces some number of events in response.
      */
     @ContractFor(handler = React::class)
     protected abstract fun whenever(event: E): Iterable<Message>
+    
     final override fun registerWith(context: BoundedContext) {
         super.registerWith(context)
         this.context = context
@@ -77,11 +78,11 @@ public abstract class Policy<E : EventMessage>: AbstractEventReactor(), Logging 
      */
     final override fun messageClasses(): ImmutableSet<EventClass> {
         val classes = super.messageClasses()
-        checkHandlers(classes)
+        checkReceptors(classes)
         return classes
     }
 
-    private fun checkHandlers(events: Iterable<EventClass>) {
+    private fun checkReceptors(events: Iterable<EventClass>) {
         val classes = events.toList()
         if (classes.size > 1) {
             throw IllegalStateException(
