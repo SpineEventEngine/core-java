@@ -82,7 +82,7 @@ constructor(
      *
      * The value of the ID must be one of the [supported types][io.spine.base.Identifier].
      *
-     * Does same as [find]. Provided for fluent calls when called after [Querying.select]
+     * Does the same as [find] and provided for fluent calls when called after [Querying.select]
      *
      * @return the state of the entity or empty `Optional` if the entity with the given ID
      *         was not found
