@@ -26,7 +26,6 @@
 package io.spine.server.bus
 
 import com.google.common.truth.Truth.assertThat
-import io.spine.base.Error
 import io.spine.base.Identifier.newUuid
 import io.spine.core.Ack
 import io.spine.core.Command
@@ -52,10 +51,9 @@ internal class MessageIdExtensionsSpec {
 
     @Test
     fun `reject() with ERROR status`() {
-        val error = with(Error.newBuilder()) {
+        val error = io.spine.base.error {
             type = MessageIdExtensionsSpec::class.java.canonicalName
             message = "A test error."
-            build()
         }
         val ack = ID.causedError(error)
         assertIdEquals(ack)
