@@ -32,7 +32,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("Kotlin extensions of `ServerEnvironment` should")
-class ServerEnvironmentExtensionsTest {
+internal class ServerEnvironmentExtensionsSpec {
 
     @Test
     fun `add 'under' top-level function for 'ServerEnvironment' configuration`() {

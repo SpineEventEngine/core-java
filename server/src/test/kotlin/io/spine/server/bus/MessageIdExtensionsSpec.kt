@@ -41,7 +41,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("`MessageIdExtensions` should")
-internal class MessageIdExtensionsTest {
+internal class MessageIdExtensionsSpec {
 
     @Test
     fun `acknowledge() with OK status`() {
@@ -53,7 +53,7 @@ internal class MessageIdExtensionsTest {
     @Test
     fun `reject() with ERROR status`() {
         val error = with(Error.newBuilder()) {
-            type = MessageIdExtensionsTest::class.java.canonicalName
+            type = MessageIdExtensionsSpec::class.java.canonicalName
             message = "A test error."
             build()
         }
