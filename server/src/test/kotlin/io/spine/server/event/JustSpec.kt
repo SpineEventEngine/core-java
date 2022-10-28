@@ -30,9 +30,11 @@ import com.google.common.truth.Truth.assertThat
 import io.spine.base.Identifier.newUuid
 import io.spine.test.event.projectCreated
 import io.spine.test.event.projectId
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-class `Just should` {
+@DisplayName("`Just` should")
+class JustSpec {
 
     @Test
     fun `store one value`() {
