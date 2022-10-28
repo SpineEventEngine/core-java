@@ -37,6 +37,7 @@ import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.Listener;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.command.AbstractAssignee;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.enrich.Enricher;
@@ -270,6 +271,17 @@ public final class BoundedContextBuilder implements Logging {
             dispatcherConsumer.accept(dispatcher);
         }
         return this;
+    }
+
+    /**
+     * Adds the given assignee to the Bounded Context.
+     *
+     * @param assignee
+     *          the assignee to add
+     */
+    @CanIgnoreReturnValue
+    public BoundedContextBuilder addAssignee(AbstractAssignee assignee) {
+        return addCommandDispatcher(assignee);
     }
 
     /**
