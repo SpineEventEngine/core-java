@@ -77,7 +77,19 @@ constructor(
         }
     }
 
-    @Deprecated(message = "Please use `find(id)` instead.", replaceWith = ReplaceWith("find(id)"))
+    /**
+     * Obtains a state of an entity by its ID.
+     *
+     * The value of the ID must be one of the [supported types][io.spine.base.Identifier].
+     *
+     * Does same as [find]. Provided for fluent calls when called after [Querying.select]
+     *
+     * @return the state of the entity or empty `Optional` if the entity with the given ID
+     *         was not found
+     * @throws IllegalArgumentException
+     *          if the given ID is not of one of the supported types
+     * @see [find]
+     */
     public fun withId(id: Any): Optional<T> = find(id)
 
     /**
