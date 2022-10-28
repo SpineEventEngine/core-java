@@ -31,6 +31,7 @@ import io.spine.server.BoundedContext
 import io.spine.server.BoundedContext.singleTenant
 import io.spine.server.command.Assign
 import io.spine.server.command.SingleCommandAssignee
+import io.spine.server.entity.alter
 import io.spine.server.given.counting.command.GenerateNumbers
 import io.spine.server.given.counting.event.NumberGenerated
 import io.spine.server.given.counting.event.numberGenerated
@@ -66,14 +67,12 @@ private class RandomNumberGenerator: SingleCommandAssignee<GenerateNumbers>() {
 private class RangeStatsView: Projection<Range, RangeStats, RangeStats.Builder>() {
 
     @Subscribe
-    fun whenever(event: NumberGenerated) {
-        builder().apply {
-            range = event.range
-            val number = event.number
-            val currentCount = countMap[number]
-            val newValue = currentCount?.inc() ?: 1
-            putCount(number, newValue)
-        }
+    fun whenever(event: NumberGenerated) = alter {
+        range = event.range
+        val number = event.number
+        val currentCount = countMap[number]
+        val newValue = currentCount?.inc() ?: 1
+        putCount(number, newValue)
     }
 }
 
@@ -98,10 +97,8 @@ private class NumberStatsView: Projection<Int, NumberStats, NumberStats.Builder>
     @Subscribe
     @Suppress("UNUSED_PARAMETER") /* We simply need to know it happened. The number itself should
         be set by the repository during dispatching. */
-    fun whenever(event: NumberGenerated) {
-        builder().apply {
-            count = count.inc()
-        }
+    fun whenever(event: NumberGenerated) = alter {
+        count = count.inc()
     }
 }
 
