@@ -26,5 +26,5 @@
 
 package io.spine.server.given.counting
 
-internal class RangeStats {
+internal class RangeStatsView {
 }
