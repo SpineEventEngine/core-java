@@ -43,7 +43,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("`QueryingClient` should")
-class QueryingClientSpec {
+internal class QueryingClientSpec {
 
     /**
      * Prepares the environment for all the tests of this suite.

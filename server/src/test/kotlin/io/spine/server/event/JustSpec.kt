@@ -34,7 +34,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("`Just` should")
-class JustSpec {
+internal class JustSpec {
 
     @Test
     fun `store one value`() {
