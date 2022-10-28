@@ -29,13 +29,13 @@ package io.spine.server.query
 import io.grpc.stub.StreamObserver
 import io.spine.base.EntityState
 import io.spine.base.Identifier
-import io.spine.util.theOnly
 import io.spine.client.ActorRequestFactory
 import io.spine.client.Query
 import io.spine.client.QueryResponse
-import io.spine.core.UserId
+import io.spine.core.userId
 import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContext
+import io.spine.util.theOnly
 import java.util.*
 
 /**
@@ -50,9 +50,7 @@ internal constructor(
     actorName: String
 ) {
 
-    private val actor = UserId.newBuilder()
-        .setValue(actorName)
-        .build()
+    private val actor = userId { value = actorName }
     private val factory = ActorRequestFactory.newBuilder()
         .setActor(actor)
         .build()
