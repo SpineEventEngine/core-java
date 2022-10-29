@@ -53,7 +53,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventRouting;
-import io.spine.server.route.Route;
+import io.spine.server.route.RouteFn;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -87,7 +87,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the state of aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState<I>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository,
@@ -433,34 +433,44 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         return id;
     }
 
-    @SuppressWarnings("UnnecessaryLambda")
-    private Route<? extends EventMessage, EventContext, I> eventImportRouting() {
-        return (message, context) -> {
-            var ids = eventImportRouting.apply(message, context);
-            var numberOfTargets = ids.size();
-            var messageType = message.getClass()
-                                     .getName();
-            checkState(
-                    numberOfTargets > 0,
-                    "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
-                    context,
-                    messageType
-            );
-            checkState(
-                    numberOfTargets == 1,
-                    "Expected one aggregate ID, but got %s (%s). Event class: `%s`, context: `%s`.",
-                    String.valueOf(numberOfTargets),
-                    ids,
-                    messageType,
-                    context
-            );
-            var id = ids.stream()
-                      .findFirst()
-                      .orElseThrow(() -> newIllegalStateException(
-                              "Unable to route import event `%s`.", messageType)
-                      );
-            return id;
-        };
+    private RouteFn<? extends EventMessage, EventContext, I> eventImportRouting() {
+        return this::idForImported;
+    }
+
+    /**
+     * Obtains an aggregate ID from the given event message and context applying
+     * {@link #eventImportRouting} to them.
+     *
+     * <p>Assumes that routing should give only one ID.
+     *
+     * @throws IllegalStateException
+     *          if {@link #eventImportRouting} returns more than one ID
+     */
+    private I idForImported(EventMessage message, EventContext context) {
+        var ids = eventImportRouting.apply(message, context);
+        var numberOfTargets = ids.size();
+        var messageType = message.getClass()
+                                 .getName();
+        checkState(
+                numberOfTargets > 0,
+                "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
+                context,
+                messageType
+        );
+        checkState(
+                numberOfTargets == 1,
+                "Expected one aggregate ID, but got %s (%s). Event class: `%s`, context: `%s`.",
+                String.valueOf(numberOfTargets),
+                ids,
+                messageType,
+                context
+        );
+        var id = ids.stream()
+                .findFirst()
+                .orElseThrow(() -> newIllegalStateException(
+                        "Unable to route import event `%s`.", messageType)
+                );
+        return id;
     }
 
     /**

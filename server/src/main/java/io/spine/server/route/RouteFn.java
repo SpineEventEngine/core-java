@@ -26,15 +26,37 @@
 
 package io.spine.server.route;
 
-import io.spine.core.AcceptsContracts;
+import com.google.protobuf.Message;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.Serializable;
+import java.util.function.BiFunction;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@AcceptsContracts
-public @interface Route {
+/**
+ * Obtains one or more entity identifiers based on a message and its context.
+ *
+ * @param <M>
+ *         the type of messages to get IDs from
+ * @param <C>
+ *         the type of message context
+ * @param <R>
+ *         the type of the route function result
+ */
+@FunctionalInterface
+public interface RouteFn<M extends Message, C extends Message, R>
+        extends BiFunction<M, C, R>, Serializable {
+
+    /**
+     * Obtains entity ID(s) from the passed message and its context.
+     *
+     * @param message
+     *         the event or a command message
+     * @param context
+     *         the context of the message
+     * @return the set of entity identifiers
+     * @apiNote This method overrides the one from {@code BiFunction} for more clarity in
+     *         Javadoc references. Without overriding it will be {@code #apply(Object, Object)}
+     *         which may be confusing in the context of event routing.
+     */
+    @Override
+    R apply(M message, C context);
 }
