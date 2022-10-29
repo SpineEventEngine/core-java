@@ -27,6 +27,7 @@
 package io.spine.server.given.routing
 
 import com.google.protobuf.Empty
+import io.spine.base.EventMessage
 import io.spine.core.Subscribe
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContext.singleTenant
@@ -53,7 +54,7 @@ import io.spine.testing.TestValues.random
  * ### Implementation note
  *
  * The implementation of this context is deliberately naïve in terms of event generation
- * and propagation. It generates many small events for each generated figure.
+ * and propagation. It generates an event for each generated figure.
  *
  * If a number of events is big, it leads to increase of a load to a data storage because we need to
  * load and store corresponding entity states. It is not noticeable for this test fixture
@@ -87,7 +88,8 @@ private class FigureGenerator: SingleCommandAssignee<GenerateFigures>() {
 }
 
 /**
- * Accumulates number stats per range in response to [FigureGenerated] event.
+ * A singleton accumulating figures in buckets corresponding to their kinds
+ * in response to [FigureGenerated] event.
  */
 private class SorterView: Projection<Empty, Sorter, Sorter.Builder>() {
 
@@ -111,7 +113,7 @@ private class SorterView: Projection<Empty, Sorter, Sorter.Builder>() {
     companion object {
         @Route
         @JvmStatic
-        fun byRange(e: FigureGenerated): Empty = Empty.getDefaultInstance()
+        fun toSingleton(e: EventMessage): Empty = Empty.getDefaultInstance()
     }
 }
 
@@ -129,7 +131,7 @@ private class FigureStatsView: Projection<Figure, FigureStats, FigureStats.Build
     companion object {
         @Route
         @JvmStatic
-        fun byNumber(e: FigureGenerated): Figure = e.figure
+        fun byFigure(e: FigureGenerated): Figure = e.figure
     }
 }
 
