@@ -23,24 +23,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package spine.server.given.counting;
 
-group = "io.spine.tools"
+import "spine/options.proto";
 
-val baseVersion: String by extra
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.given.counting";
+option java_outer_classname = "EntitiesProto";
+option java_multiple_files = true;
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
+import "spine/server/given/counting/range.proto";
 
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// [Counts][count] numbers generated in the [range].
+message RangeStats {
+    option (entity).kind = VIEW;
+    Range range = 1;
+    map<int32, int32> count = 2;
+}
+
+// [Counts][count] a number of times the [number] was generated.
+message NumberStats {
+    option (entity).kind = VIEW;
+    int32 number = 1;
+    int32 count = 2;
 }

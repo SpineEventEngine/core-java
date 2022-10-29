@@ -23,24 +23,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package spine.server.given.counting;
 
-group = "io.spine.tools"
+import "spine/options.proto";
 
-val baseVersion: String by extra
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.given.counting";
+option java_outer_classname = "RangeProto";
+option java_multiple_files = true;
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// A range of integer values.
+//
+// The range is empty if `min_value == max_value`.
+//
+message Range {
+    int32 min_value = 1 [(max).value = "max_value"];
+    int32 max_value = 2;
 }

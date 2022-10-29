@@ -27,7 +27,6 @@
 package io.spine.internal.dependency
 
 // https://pmd.github.io/
-@Suppress("unused") // Will be used when `config/gradle/pmd.gradle` migrates to Kotlin.
 object Pmd {
-    const val version = "6.44.0"
+    const val version = "6.50.0"
 }

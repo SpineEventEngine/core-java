@@ -24,23 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package io.spine.server
 
-group = "io.spine.tools"
+import com.google.common.truth.Truth
+import io.spine.environment.Tests
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
-val baseVersion: String by extra
+@DisplayName("Kotlin extensions of `ServerEnvironment` should")
+internal class ServerEnvironmentExtensionsSpec {
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
-
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
+    @Test
+    fun `add 'under' top-level function for 'ServerEnvironment' configuration`() {
+        under<Tests> {
+            Truth.assertThat(type())
+                .isEqualTo(Tests::class.java)
+        }
     }
 }

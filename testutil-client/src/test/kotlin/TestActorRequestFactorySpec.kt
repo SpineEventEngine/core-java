@@ -1,3 +1,15 @@
+import com.google.common.truth.Truth.assertThat
+import io.spine.base.Identifier.newUuid
+import io.spine.core.UserId
+import io.spine.core.userId
+import io.spine.testing.client.TestActorRequestFactory
+import io.spine.time.ZoneId
+import io.spine.time.ZoneIds
+import io.spine.time.ZoneIds.systemDefault
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+
 /*
  * Copyright 2022, TeamDev. All rights reserved.
  *
@@ -24,21 +36,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server
+@DisplayName("`TestActorRequestFactory` should")
+class TestActorRequestFactorySpec {
 
-import com.google.common.truth.Truth
-import io.spine.environment.Tests
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+    private lateinit var userId: UserId
+    private lateinit var zoneId: ZoneId
 
-@DisplayName("Kotlin extensions of `ServerEnvironment` should")
-class ServerEnvironmentExtensionsTest {
+    @BeforeEach
+    fun generateIds() {
+        userId = userId{ value = newUuid() }
+        zoneId = systemDefault()
+    }
 
     @Test
-    fun `add 'under' top-level function for 'ServerEnvironment' configuration`() {
-        under<Tests> {
-            Truth.assertThat(type())
-                .isEqualTo(Tests::class.java)
-        }
+    fun `accept 'null' for tenant ID in single-tenant context`() {
+        val factory = TestActorRequestFactory(null, userId, zoneId)
+        assertThat(factory.tenantId()).isNull()
+    }
+
+    @Test
+    fun `assume 'systemDefault()' time zone if created using class name`() {
+        val factory = TestActorRequestFactory(javaClass)
+        assertThat(factory.zoneId()).isEqualTo(systemDefault())
     }
 }

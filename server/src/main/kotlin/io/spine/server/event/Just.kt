@@ -24,23 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package io.spine.server.event
 
-group = "io.spine.tools"
+import io.spine.base.EventMessage
+import io.spine.server.tuple.Tuple
 
-val baseVersion: String by extra
+/**
+ * A tuple of one event.
+ *
+ * Used when returning an iterable from a handler method for better readability over `List<E>`.
+ *
+ * @param E the type of the event.
+ */
+public class Just<E : EventMessage>(event: E) : Tuple(event) {
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
+    public companion object {
 
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
+        private const val serialVersionUID: Long = 0L
+
+        /**
+         * A factory method for Java.
+         *
+         * Prefer the primary constructor in Kotlin.
+         *
+         * This method is intended to be imported statically.
+         */
+        @JvmStatic
+        public fun <E : EventMessage> just(event: E): Just<E> = Just(event)
     }
 }

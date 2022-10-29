@@ -24,23 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package io.spine.server.query
 
-group = "io.spine.tools"
+import io.spine.base.EntityState
 
-val baseVersion: String by extra
+/**
+ * A component capable of querying states of views.
+ */
+public interface Querying {
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
+    /**
+     * Creates a [QueryingClient] to find views of the given entity state class.
+     *
+     * This method is targeted for Java API users. If you use Kotlin, see the no-param overload for
+     * prettier code.
+     */
+    public fun <P : EntityState<*>> select(type: Class<P>): QueryingClient<P>
+}
 
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+/**
+ * Creates a [QueryingClient] to find views of the given entity state type.
+ *
+ * This overload is for Kotlin API users. Java users cannot access `inline` methods. As the method
+ * is `inline`, it cannot be declared inside the interface. Thus, we use an extension method for
+ * this overload.
+ */
+public inline fun <reified P : EntityState<*>> Querying.select(): QueryingClient<P> {
+    val cls = P::class.java
+    return select(cls)
 }

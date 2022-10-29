@@ -23,24 +23,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package spine.server.given.counting;
 
-group = "io.spine.tools"
+import "spine/options.proto";
 
-val baseVersion: String by extra
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.given.counting.command";
+option java_outer_classname = "CountingCommandsProto";
+option java_multiple_files = true;
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
+import "spine/server/given/counting/range.proto";
 
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// A request to generate random numbers in the range [min_value]..[max_value].
+//
+// The bounds of the range are included. The generation is repeated [count] times.
+//
+message GenerateNumbers {
+    Range range = 1 [(required) = true];
+    int32 count = 2 [(min).value = "1"];
 }

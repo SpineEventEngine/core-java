@@ -24,23 +24,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package io.spine.server.event
 
-group = "io.spine.tools"
+import com.google.common.truth.Truth.assertThat
+import io.spine.base.Identifier.newUuid
+import io.spine.test.event.projectCreated
+import io.spine.test.event.projectId
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
-val baseVersion: String by extra
+@DisplayName("`Just` should")
+internal class JustSpec {
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
-
-    JUnit.api.forEach {
-        api(it)
+    @Test
+    fun `store one value`() {
+        val just = Just(validEvent)
+        assertThat(just)
+            .containsExactly(validEvent)
     }
-    Truth.libs.forEach {
-       api(it)
+
+    @Test
+    fun `initialize via static method`() {
+        val just = Just.just(validEvent)
+        assertThat(just)
+            .containsExactly(validEvent)
     }
+}
+
+private val validEvent = projectCreated {
+    projectId = projectId { id = newUuid() }
 }

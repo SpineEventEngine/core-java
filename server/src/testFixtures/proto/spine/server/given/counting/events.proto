@@ -23,24 +23,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Truth
+package spine.server.given.counting;
 
-group = "io.spine.tools"
+import "spine/options.proto";
 
-val baseVersion: String by extra
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.given.counting.event";
+option java_outer_classname = "CountingEventsProto";
+option java_multiple_files = true;
 
-dependencies {
-    api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
+import "spine/server/given/counting/range.proto";
 
-    JUnit.api.forEach {
-        api(it)
-    }
-    Truth.libs.forEach {
-       api(it)
-    }
+// A [number] was generated within the requested [range].
+message NumberGenerated {
+    int32 number = 1 [(min).value = "range.min_value", (max).value = "range.max_value"];
+    Range range = 2 [(required) = true];
 }

@@ -29,6 +29,7 @@ import io.spine.internal.gradle.testing.exposeTestConfiguration
 
 dependencies {
     val spine = Spine(project)
+    api(spine.base)
     api(spine.time)
     api(spine.baseTypes)
     api(spine.change)

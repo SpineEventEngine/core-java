@@ -32,7 +32,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @DisplayName("Kotlin extensions of `TransactionalEntity` should")
-internal class ExtensionsTest {
+internal class TransactionalEntityExtensionsSpec {
 
     @Test
     fun `add 'update' block handler for passing properties to 'builder'`() {
