@@ -90,7 +90,8 @@ private class RangeStatsView: Projection<Range, RangeStats, RangeStats.Builder>(
     }
 
     companion object {
-        @Route @JvmStatic
+        @Route
+        @JvmStatic
         fun byRange(e: NumberGenerated): Range = e.range
     }
 }
@@ -107,7 +108,8 @@ private class NumberStatsView: Projection<Int, NumberStats, NumberStats.Builder>
     }
 
     companion object {
-        @Route @JvmStatic
+        @Route
+        @JvmStatic
         fun byNumber(e: NumberGenerated): Int = e.number
     }
 }
