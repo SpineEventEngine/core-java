@@ -47,7 +47,7 @@ import io.spine.testing.TestValues.random
  * The numbers are generated in response to [GenerateNumbers] command, which is
  * handled by [RandomNumberGenerator].
  *
- * This context is a test fixture for [io.spine.server.query.QueryingClientSpec]
+ * This context is a test fixture for [io.spine.server.query.QueryingClientSpec].
  */
 @Suppress("unused") // is declared for documentation purposes.
 private const val ABOUT = ""
