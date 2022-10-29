@@ -120,8 +120,6 @@ private class RangeStatsRepository : ProjectionRepository<Range, RangeStatsView,
 private class NumberStatsView: Projection<Int, NumberStats, NumberStats.Builder>() {
 
     @Subscribe
-    @Suppress("UNUSED_PARAMETER") /* We simply need to know it happened. The number itself should
-        be set by the repository during dispatching. */
     fun whenever(event: NumberGenerated) = alter {
         count = count.inc()
     }
