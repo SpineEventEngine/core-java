@@ -36,10 +36,7 @@ option java_multiple_files = true;
 
 import "spine/server/given/counting/range.proto";
 
-// A request to generate random numbers in the range [min_value]..[max_value].
-//
-// The bounds of the range are included. The generation is repeated [count] times.
-//
+// A [number] was generated within the requested [range].
 message NumberGenerated {
     int32 number = 1 [(min).value = "range.min_value", (max).value = "range.max_value"];
     Range range = 2 [(required) = true];
