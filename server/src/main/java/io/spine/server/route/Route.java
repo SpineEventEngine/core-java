@@ -26,15 +26,26 @@
 
 package io.spine.server.route;
 
-import io.spine.core.AcceptsContracts;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Annotates a <strong>static</strong> method of an {@link io.spine.server.entity.Entity Entity}
+ * class which accepts a {@link io.spine.base.SignalMessage SignalMessage} as a single parameter.
+ *
+ * <p>The method <em>must</em> return one identifier of type {@code <I>} for {@link Unicast}
+ * entities, and <em>can</em> and return an {@code Iterable<I>}, if this kind of entities
+ * supports {@linkplain Multicast multicast}.
+ *
+ * <p>The method <strong>must</strong> be either package-private or {@code protected} for
+ * being accessible from the generated code in the same package.
+ *
+ * <p>The {@code protected} modifier should be used <em>only</em> in the very rare cases of
+ * dealing with {@linkplain io.spine.core.ContractFor entity class hierarchies}.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@AcceptsContracts
 public @interface Route {
 }
