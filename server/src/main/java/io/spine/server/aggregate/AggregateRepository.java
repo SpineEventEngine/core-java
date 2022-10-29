@@ -43,7 +43,6 @@ import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Inbox;
-import io.spine.server.delivery.InboxLabel;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.QueryableRepository;
@@ -73,6 +72,9 @@ import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.Iterators.transform;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
+import static io.spine.server.delivery.InboxLabel.IMPORT_EVENT;
+import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -87,7 +89,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         the type of the state of aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState<I>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository,
@@ -178,28 +180,30 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * Initializes the {@code Inbox}.
      */
     private void initInbox() {
-        var delivery = ServerEnvironment.instance()
-                                        .delivery();
-        inbox = delivery
-                .<I>newInbox(entityStateType())
-                .withBatchListener(new BatchDeliveryListener<>() {
-                    @Override
-                    public void onStart(I id) {
-                        cache.startCaching(id);
-                    }
-
-                    @Override
-                    public void onEnd(I id) {
-                        cache.stopCaching(id);
-                    }
-                })
-                .addEventEndpoint(InboxLabel.REACT_UPON_EVENT,
+        var delivery = ServerEnvironment.instance().delivery();
+        inbox = delivery.<I>newInbox(entityStateType())
+                .withBatchListener(newCachingListener())
+                .addEventEndpoint(REACT_UPON_EVENT,
                                   e -> new AggregateEventReactionEndpoint<>(this, e))
-                .addEventEndpoint(InboxLabel.IMPORT_EVENT,
+                .addEventEndpoint(IMPORT_EVENT,
                                   e -> new EventImportEndpoint<>(this, e))
-                .addCommandEndpoint(InboxLabel.HANDLE_COMMAND,
+                .addCommandEndpoint(HANDLE_COMMAND,
                                     c -> new AggregateCommandEndpoint<>(this, c))
                 .build();
+    }
+
+    private BatchDeliveryListener<I> newCachingListener() {
+        return new BatchDeliveryListener<>() {
+            @Override
+            public void onStart(I id) {
+                cache.startCaching(id);
+            }
+
+            @Override
+            public void onEnd(I id) {
+                cache.stopCaching(id);
+            }
+        };
     }
 
     private Inbox<I> inbox() {
