@@ -121,6 +121,7 @@ private class NumberStatsView: Projection<Int, NumberStats, NumberStats.Builder>
 
     @Subscribe
     fun whenever(event: NumberGenerated) = alter {
+        number = event.number
         count = count.inc()
     }
 }
