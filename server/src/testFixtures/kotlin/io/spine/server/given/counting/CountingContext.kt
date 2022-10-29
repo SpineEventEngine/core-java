@@ -41,6 +41,18 @@ import io.spine.server.route.EventRouting
 import io.spine.testing.TestValues.random
 
 /**
+ * The Counting context generates random numbers in a range and accumulates
+ * statistics in [RangeStatsView] and [NumberStatsView] projects.
+ *
+ * The numbers are generated in response to [GenerateNumbers] command, which is
+ * handled by [RandomNumberGenerator].
+ *
+ * This context is a test fixture for [io.spine.server.query.QueryingClientSpec]
+ */
+@Suppress("unused") // is declared for documentation purposes.
+private const val ABOUT = ""
+
+/**
  * Generates random numbers taking the parameter from the [GenerateNumbers] command.
  */
 private class RandomNumberGenerator: SingleCommandAssignee<GenerateNumbers>() {
