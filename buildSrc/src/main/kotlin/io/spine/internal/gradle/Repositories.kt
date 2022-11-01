@@ -35,6 +35,151 @@ import java.util.*
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.kotlin.dsl.ScriptHandlerScope
+
+/**
+ * Applies [standard][doApplyStandard] repositories to this [ScriptHandlerScope]
+ * optionally adding [gitHub] repositories for Spine-only components, if
+ * names of such repositories are given.
+ *
+ * @param buildscript
+ *         a [ScriptHandlerScope] to work with. Pass `this` under `buildscript { }`.
+ * @param rootProject
+ *         a root project where the `buildscript` is declared.
+ * @param gitHubRepo
+ *         a list of short repository names, or empty list if only
+ *         [standard repositories][doApplyStandard] are required.
+ */
+fun applyWithStandard(
+    buildscript: ScriptHandlerScope,
+    rootProject: Project,
+    vararg gitHubRepo: String
+) {
+    val repositories = buildscript.repositories
+    gitHubRepo.iterator().forEachRemaining { repo ->
+        repositories.applyGitHubPackages(repo, rootProject)
+    }
+    repositories.applyStandard()
+}
+
+/**
+ * Registers the selected GitHub Packages repos as Maven repositories.
+ *
+ * To be used in `buildscript` clauses when a fully-qualified call must be made.
+ *
+ * @param repositories
+ *          the handler to accept registration of the GitHub Packages repository
+ * @param shortRepositoryName
+ *          the short name of the GitHub repository (e.g. "core-java")
+ * @param project
+ *          the project which is going to consume artifacts from the repository
+ * @see applyGitHubPackages
+ */
+@Suppress("unused")
+fun doApplyGitHubPackages(
+    repositories: RepositoryHandler,
+    shortRepositoryName: String,
+    project: Project
+) = repositories.applyGitHubPackages(shortRepositoryName, project)
+
+/**
+ * Registers the standard set of Maven repositories.
+ *
+ * To be used in `buildscript` clauses when a fully-qualified call must be made.
+ */
+@Suppress("unused")
+fun doApplyStandard(repositories: RepositoryHandler) = repositories.applyStandard()
+
+/**
+ * Applies the repository hosted at GitHub Packages, to which Spine artifacts were published.
+ *
+ * This method should be used by those wishing to have Spine artifacts published
+ * to GitHub Packages as dependencies.
+ *
+ * @param shortRepositoryName
+ *          short names of the GitHub repository (e.g. "base", "core-java", "model-tools")
+ * @param project
+ *          the project which is going to consume artifacts from repositories
+ */
+fun RepositoryHandler.applyGitHubPackages(shortRepositoryName: String, project: Project) {
+    val repository = gitHub(shortRepositoryName)
+    val credentials = repository.credentials(project)
+
+    credentials?.let {
+        spineMavenRepo(it, repository.releases)
+        spineMavenRepo(it, repository.snapshots)
+    }
+}
+
+/**
+ * Applies the repositories hosted at GitHub Packages, to which Spine artifacts were published.
+ *
+ * This method should be used by those wishing to have Spine artifacts published
+ * to GitHub Packages as dependencies.
+ *
+ * @param shortRepositoryName
+ *          the short name of the GitHub repository (e.g. "core-java")
+ * @param project
+ *          the project which is going to consume or publish artifacts from
+ *          the registered repository
+ */
+fun RepositoryHandler.applyGitHubPackages(project: Project, vararg shortRepositoryName: String) {
+    for (name in shortRepositoryName) {
+        applyGitHubPackages(name, project)
+    }
+}
+
+/**
+ * Applies [standard][applyStandard] repositories to this [RepositoryHandler]
+ * optionally adding [applyGitHubPackages] repositories for Spine-only components, if
+ * names of such repositories are given.
+ *
+ * @param project
+ *         a project to which we add dependencies
+ * @param gitHubRepo
+ *         a list of short repository names, or empty list if only
+ *         [standard repositories][applyStandard] are required.
+ */
+fun RepositoryHandler.applyStandardWithGitHub(project: Project, vararg gitHubRepo: String) {
+    gitHubRepo.iterator().forEachRemaining { repo ->
+        applyGitHubPackages(repo, project)
+    }
+    applyStandard()
+}
+
+/**
+ * Applies repositories commonly used by Spine Event Engine projects.
+ *
+ * Does not include the repositories hosted at GitHub Packages.
+ *
+ * @see applyGitHubPackages
+ */
+fun RepositoryHandler.applyStandard() {
+
+    val spineRepos = listOf(
+        Repos.spine,
+        Repos.spineSnapshots,
+        Repos.artifactRegistry,
+        Repos.artifactRegistrySnapshots
+    )
+
+    spineRepos
+        .map { URI(it) }
+        .forEach {
+            maven {
+                url = it
+                includeSpineOnly()
+            }
+        }
+
+    maven {
+        url = URI(Repos.sonatypeSnapshots)
+    }
+
+    mavenCentral()
+    gradlePluginPortal()
+    mavenLocal().includeSpineOnly()
+}
 
 /**
  * A Maven repository.
@@ -92,29 +237,13 @@ data class Credentials(
 )
 
 /**
- * Defines names of additional repositories commonly used in the framework projects.
+ * Defines names of additional repositories commonly used in the Spine SDK projects.
  *
  * @see [applyStandard]
  */
-@Suppress("unused")
-object Repos {
-    @Deprecated(
-        message = "Please use another repository.",
-        replaceWith = ReplaceWith("artifactRegistry"),
-        level = DeprecationLevel.ERROR
-    )
-    val oldSpine = PublishingRepos.mavenTeamDev.releases
-
-    @Deprecated(
-        message = "Please use another repository.",
-        replaceWith = ReplaceWith("artifactRegistrySnapshots"),
-        level = DeprecationLevel.ERROR
-    )
-    val oldSpineSnapshots = PublishingRepos.mavenTeamDev.snapshots
-
+private object Repos {
     val spine = CloudRepo.published.releases
     val spineSnapshots = CloudRepo.published.snapshots
-
     val artifactRegistry = PublishingRepos.cloudArtifactRegistry.releases
     val artifactRegistrySnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
 
@@ -125,108 +254,6 @@ object Repos {
     )
     const val sonatypeReleases = "https://oss.sonatype.org/content/repositories/snapshots"
     const val sonatypeSnapshots = "https://oss.sonatype.org/content/repositories/snapshots"
-}
-
-/**
- * Registers the standard set of Maven repositories.
- *
- * To be used in `buildscript` clauses when a fully-qualified call must be made.
- */
-@Suppress("unused")
-fun doApplyStandard(repositories: RepositoryHandler) = repositories.applyStandard()
-
-/**
- * Registers the selected GitHub Packages repos as Maven repositories.
- *
- * To be used in `buildscript` clauses when a fully-qualified call must be made.
- *
- * @param repositories
- *          the handler to accept registration of the GitHub Packages repository
- * @param shortRepositoryName
- *          the short name of the GitHub repository (e.g. "core-java")
- * @param project
- *          the project which is going to consume artifacts from the repository
- * @see applyGitHubPackages
- */
-@Suppress("unused")
-fun doApplyGitHubPackages(
-    repositories: RepositoryHandler,
-    shortRepositoryName: String,
-    project: Project
-) = repositories.applyGitHubPackages(shortRepositoryName, project)
-
-/**
- * Applies the repository hosted at GitHub Packages, to which Spine artifacts were published.
- *
- * This method should be used by those wishing to have Spine artifacts published
- * to GitHub Packages as dependencies.
- *
- * @param shortRepositoryName
- *          short names of the GitHub repository (e.g. "base", "core-java", "model-tools")
- * @param project
- *          the project which is going to consume artifacts from repositories
- */
-fun RepositoryHandler.applyGitHubPackages(shortRepositoryName: String, project: Project) {
-    val repository = gitHub(shortRepositoryName)
-    val credentials = repository.credentials(project)
-
-    credentials?.let {
-        spineMavenRepo(it, repository.releases)
-        spineMavenRepo(it, repository.snapshots)
-    }
-}
-
-/**
- * Applies the repositories hosted at GitHub Packages, to which Spine artifacts were published.
- *
- * This method should be used by those wishing to have Spine artifacts published
- * to GitHub Packages as dependencies.
- *
- * @param shortRepositoryName
- *          the short name of the GitHub repository (e.g. "core-java")
- * @param project
- *          the project which is going to consume or publish artifacts from
- *          the registered repository
- */
-fun RepositoryHandler.applyGitHubPackages(project: Project, vararg shortRepositoryName: String) {
-    for (name in shortRepositoryName) {
-        applyGitHubPackages(name, project)
-    }
-}
-
-/**
- * Applies repositories commonly used by Spine Event Engine projects.
- *
- * Does not include the repositories hosted at GitHub Packages.
- *
- * @see applyGitHubPackages
- */
-@Suppress("unused")
-fun RepositoryHandler.applyStandard() {
-
-    val spineRepos = listOf(
-        Repos.spine,
-        Repos.spineSnapshots,
-        Repos.artifactRegistry,
-        Repos.artifactRegistrySnapshots
-    )
-
-    spineRepos
-        .map { URI(it) }
-        .forEach {
-            maven {
-                url = it
-                includeSpineOnly()
-            }
-        }
-
-    maven {
-        url = URI(Repos.sonatypeSnapshots)
-    }
-
-    mavenCentral()
-    gradlePluginPortal()
-    mavenLocal().includeSpineOnly()
 }
 
 /**
