@@ -204,9 +204,6 @@ fun RepositoryHandler.applyGitHubPackages(project: Project, vararg shortReposito
 @Suppress("unused")
 fun RepositoryHandler.applyStandard() {
 
-    gradlePluginPortal()
-    mavenLocal()
-
     val spineRepos = listOf(
         Repos.spine,
         Repos.spineSnapshots,
@@ -223,10 +220,13 @@ fun RepositoryHandler.applyStandard() {
             }
         }
 
-    mavenCentral()
     maven {
         url = URI(Repos.sonatypeSnapshots)
     }
+
+    mavenCentral()
+    gradlePluginPortal()
+    mavenLocal().includeSpineOnly()
 }
 
 /**

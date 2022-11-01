@@ -61,29 +61,41 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
 
-    io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
+    /**
+     * Applies repositories putting those at GitHub first for faster CI builds.
+     */
+    fun ScriptHandlerScope.applyRepositories() {
+        val gitHub: (String) -> Unit = { repo ->
+            io.spine.internal.gradle.doApplyGitHubPackages(repositories, repo, rootProject)
+        }
+        gitHub("base")
+        gitHub("time")
+        gitHub("tool-base")
+        io.spine.internal.gradle.doApplyStandard(repositories)
+    }
 
-    val spine = io.spine.internal.dependency.Spine(project)
+    applyRepositories()
 
     dependencies {
-        classpath(spine.mcJavaPlugin)
+        classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
 
     io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
+            val spine = io.spine.internal.dependency.Spine(project)
+            val kotlin = io.spine.internal.dependency.Kotlin
             force(
-                io.spine.internal.dependency.Kotlin.stdLib,
-                io.spine.internal.dependency.Kotlin.stdLibCommon,
+                kotlin.stdLib,
+                kotlin.stdLibCommon,
                 spine.base,
                 spine.time,
                 spine.toolBase,
             )
         }
     }
+
 }
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
@@ -91,8 +103,10 @@ plugins {
     `java-library`
     kotlin("jvm")
     idea
-    id(io.spine.internal.dependency.Protobuf.GradlePlugin.id)
-    id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
+    id(protobufPlugin)
+    id(errorPronePlugin)
+    id(gradleDoctor.pluginId) version gradleDoctor.version
+    `detekt-code-analysis`
 }
 
 object BuildSettings {

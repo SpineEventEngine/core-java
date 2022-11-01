@@ -61,7 +61,7 @@ class Spine(p: ExtensionAware) {
          *
          * @see [ProtoData]
          */
-        const val protoData = "0.2.21"
+        const val protoData = "0.3.0"
 
         /**
          * The default version  of `base` to use.
@@ -85,7 +85,7 @@ class Spine(p: ExtensionAware) {
         /**
          * The version of `mc-java` to use.
          */
-        const val mcJava = "2.0.0-SNAPSHOT.104"
+        const val mcJava = "2.0.0-SNAPSHOT.105"
 
         /**
          * The version of `base-types` to use.
@@ -115,7 +115,7 @@ class Spine(p: ExtensionAware) {
          * The version of `validation` to use.
          * @see [Spine.validation]
          */
-        const val validation = "2.0.0-SNAPSHOT.33"
+        const val validation = "2.0.0-SNAPSHOT.50"
 
         /**
          * The version of Javadoc Tools to use.
@@ -150,7 +150,24 @@ class Spine(p: ExtensionAware) {
     val pluginBase = "$toolsGroup:spine-plugin-base:${p.toolBaseVersion}"
     val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${p.toolBaseVersion}"
     val modelCompiler = "$toolsGroup:spine-model-compiler:${p.mcVersion}"
+
+    /**
+     * Coordinates of the McJava plugin bundle which uses version of the bundle
+     * from [ExtensionAware.mcJavaVersion] property.
+     *
+     * This property and [ExtensionAware.mcJavaVersion] are deprecated because
+     * we discourage using versions of Spine components outside of this dependency
+     * object class.
+     */
+    @Deprecated(message = "Please use `McJava.pluginLib` instead")
+    @Suppress("DEPRECATION")
     val mcJavaPlugin = "$toolsGroup:spine-mc-java-plugins:${p.mcJavaVersion}:all"
+
+    object McJava {
+        const val version = DefaultVersion.mcJava
+        const val pluginId = "io.spine.mc-java"
+        const val pluginLib = "$toolsGroup:spine-mc-java-plugins:${version}:all"
+    }
 
     /**
      *  Does not allow re-definition via a project property.
@@ -182,6 +199,7 @@ class Spine(p: ExtensionAware) {
     private val ExtensionAware.mcVersion: String
         get() = "mcVersion".asExtra(this, DefaultVersion.mc)
 
+    @Deprecated(message = "Please use `Spine.McJava` dependency object instead.")
     private val ExtensionAware.mcJavaVersion: String
         get() = "mcJavaVersion".asExtra(this, DefaultVersion.mcJava)
 
@@ -215,6 +233,8 @@ class Spine(p: ExtensionAware) {
         const val group = "io.spine.protodata"
         const val version = protoDataVersion
         const val compiler = "$group:protodata-compiler:$version"
+
+        const val codegenJava = "io.spine.protodata:protodata-codegen-java:$version"
 
         const val pluginId = "io.spine.protodata"
         const val pluginLib = "${Spine.group}:protodata:$version"

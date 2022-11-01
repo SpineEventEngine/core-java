@@ -1,0 +1,22 @@
+name: Run Detekt code analysis
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: zulu
+          cache: gradle
+
+      - name: Run analysis
+        shell: bash
+        run: ./gradlew detekt --stacktrace
