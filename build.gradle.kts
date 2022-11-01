@@ -35,6 +35,7 @@ import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.applyStandardWithGitHub
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
@@ -61,22 +62,11 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-
-    /**
-     * Applies repositories putting those at GitHub first for faster CI builds.
-     */
-    fun ScriptHandlerScope.applyRepositories() {
-        val gitHub: (String) -> Unit = { repo ->
-            io.spine.internal.gradle.doApplyGitHubPackages(repositories, repo, rootProject)
-        }
-        gitHub("base")
-        gitHub("time")
-        gitHub("tool-base")
-        io.spine.internal.gradle.doApplyStandard(repositories)
-    }
-
-    applyRepositories()
-
+    io.spine.internal.gradle.applyWithStandard(this, rootProject,
+        "base",
+        "time",
+        "tool-base"
+    )
     dependencies {
         classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
@@ -171,7 +161,7 @@ allprojects {
 val spine = Spine(project)
 
 subprojects {
-    repositories.applyStandard()
+    applyRepositories()
     applyPlugins()
     setupJava()
     setupKotlin()
@@ -196,6 +186,16 @@ LicenseReporter.mergeAllReports(project)
  * The alias for typed extensions functions related to subprojects.
  */
 typealias Subproject = Project
+
+/**
+ * Defines repositories to be used in subprojects when resolving artifacts.
+ */
+fun Subproject.applyRepositories() {
+    repositories.applyStandardWithGitHub(
+        project,
+        "base", "time", "base-types", "change", "validation", "ProtoData", "mc-java",
+    )
+}
 
 /**
  * Applies plugins common to all modules to this subproject.
