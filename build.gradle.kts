@@ -85,7 +85,6 @@ buildscript {
             )
         }
     }
-
 }
 
 @Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
