@@ -24,16 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given
+package io.spine.internal.dependency
 
-import io.spine.core.Subscribe
-import io.spine.server.event.AbstractEventSubscriber
-import io.spine.test.projection.event.Int32Imported
-
-class KotlinEventSubscriber : AbstractEventSubscriber() {
-
-    @Subscribe
-    internal fun on(@Suppress("UNUSED_PARAMETER") e: Int32Imported) {
-        // Do nothing.
-    }
+/**
+ * Helps optimize Gradle Builds by ensuring recommendations at build time.
+ *
+ * See [plugin site](https://runningcode.github.io/gradle-doctor) for features and usage.
+ */
+object GradleDoctor {
+    const val version = "0.8.1"
+    const val pluginId = "com.osacky.doctor"
 }

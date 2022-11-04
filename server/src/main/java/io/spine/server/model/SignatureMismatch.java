@@ -27,7 +27,6 @@
 package io.spine.server.model;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 
 import java.util.Optional;
@@ -118,12 +117,8 @@ public final class SignatureMismatch {
         WARN
     }
 
-    @SuppressWarnings("DuplicateStringLiteralInspection") // `message` is a common term.
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("unmetCriterion", unmetCriterion)
-                          .add("message", message)
-                          .toString();
+        return message;
     }
 }

@@ -24,16 +24,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO:2021-07-05:dmytro.dashenkov: https://github.com/SpineEventEngine/config/issues/214.
+import io.spine.internal.gradle.ConfigTester
+import io.spine.internal.gradle.SpineRepos
+import io.spine.internal.gradle.cleanFolder
+import java.nio.file.Path
+import java.nio.file.Paths
 
-allprojects {
-    configurations.all {
-        resolutionStrategy {
-            eachDependency {
-                if (requested.group == "org.jacoco") {
-                    useVersion("0.8.7")
-                }
-            }
-        }
+// A reference to `config` to use along with the `ConfigTester`.
+val config: Path = Paths.get("./")
+
+// A temp folder to use to check out the sources of other repositories with the `ConfigTester`.
+val tempFolder = File("./tmp")
+
+// Creates a Gradle task which checks out and builds the selected Spine repositories
+// with the local version of `config` and `config/buildSrc`.
+ConfigTester(config, tasks, tempFolder)
+    .addRepo(SpineRepos.baseTypes)  // Builds `base-types` at `master`.
+    .addRepo(SpineRepos.base)       // Builds `base` at `master`.
+    .addRepo(SpineRepos.coreJava)   // Builds `core-java` at `master`.
+
+    // This is how one builds a specific branch of some repository:
+    // .addRepo(SpineRepos.coreJava, Branch("grpc-concurrency-fixes"))
+
+    // Register the produced task under the selected name to invoke manually upon need.
+    .registerUnder("buildDependants")
+
+// Cleans the temp folder used to check out the sources from Git.
+tasks.register("clean") {
+    doLast {
+        cleanFolder(tempFolder)
     }
 }

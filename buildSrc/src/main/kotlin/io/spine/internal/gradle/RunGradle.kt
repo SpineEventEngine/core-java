@@ -47,6 +47,15 @@ import org.gradle.internal.os.OperatingSystem
 @Suppress("unused")
 open class RunGradle : DefaultTask() {
 
+    companion object {
+
+        /**
+         * Default Gradle build timeout.
+         */
+        private const val BUILD_TIMEOUT_MINUTES: Long = 10
+    }
+
+
     /**
      * Path to the directory which contains a Gradle wrapper script.
      */
@@ -62,7 +71,7 @@ open class RunGradle : DefaultTask() {
      * For how many minutes to wait for the Gradle build to complete.
      */
     @Internal
-    var maxDurationMins: Long = 10
+    var maxDurationMins: Long = BUILD_TIMEOUT_MINUTES
 
     /**
      * Names of Gradle properties to copy into the launched build.

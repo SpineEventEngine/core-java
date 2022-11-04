@@ -102,6 +102,13 @@ val protobufPluginVersion = "0.8.19"
  */
 val dokkaVersion = "1.7.20"
 
+/**
+ * The version of Detekt Gradle Plugin.
+ *
+ * @see <a href="https://github.com/detekt/detekt/releases">Detekt Releases</a>
+ */
+val detektVersion = "1.21.0"
+
 configurations.all {
     resolutionStrategy {
         force(
@@ -142,6 +149,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
 
+    implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
     implementation("com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}")
     implementation("org.jetbrains.dokka:dokka-base:${dokkaVersion}")

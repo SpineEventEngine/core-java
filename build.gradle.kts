@@ -35,6 +35,7 @@ import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.applyStandardWithGitHub
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
@@ -61,23 +62,23 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
-
-    io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
-
-    val spine = io.spine.internal.dependency.Spine(project)
-
+    io.spine.internal.gradle.applyWithStandard(this, rootProject,
+        "base",
+        "time",
+        "tool-base"
+    )
     dependencies {
-        classpath(spine.mcJavaPlugin)
+        classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
 
     io.spine.internal.gradle.doForceVersions(configurations)
     configurations.all {
         resolutionStrategy {
+            val spine = io.spine.internal.dependency.Spine(project)
+            val kotlin = io.spine.internal.dependency.Kotlin
             force(
-                io.spine.internal.dependency.Kotlin.stdLib,
-                io.spine.internal.dependency.Kotlin.stdLibCommon,
+                kotlin.stdLib,
+                kotlin.stdLibCommon,
                 spine.base,
                 spine.time,
                 spine.toolBase,
@@ -91,8 +92,10 @@ plugins {
     `java-library`
     kotlin("jvm")
     idea
-    id(io.spine.internal.dependency.Protobuf.GradlePlugin.id)
-    id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
+    id(protobufPlugin)
+    id(errorPronePlugin)
+    id(gradleDoctor.pluginId) version gradleDoctor.version
+    `detekt-code-analysis`
 }
 
 object BuildSettings {
@@ -106,11 +109,11 @@ object BuildSettings {
      *      protobuf#10593</a>
      */
     const val protocArtifact = "com.google.protobuf:protoc:3.19.6"
+
+    const val JAVA_VERSION = 11
 }
 
 repositories.applyStandard()
-
-apply(from = "$rootDir/version.gradle.kts")
 
 spinePublishing {
     modules = setOf(
@@ -146,21 +149,18 @@ allprojects {
         plugin("project-report")
     }
 
-    apply {
-        from("$rootDir/version.gradle.kts")
-    }
-
+    apply(from = "$rootDir/version.gradle.kts")
     group = "io.spine"
     version = extra["versionToPublish"]!!
 }
 
-val spine = Spine(project)
-
 subprojects {
-    repositories.applyStandard()
+    applyRepositories()
     applyPlugins()
-    setupJava()
-    setupKotlin()
+
+    val javaVersion = JavaLanguageVersion.of(BuildSettings.JAVA_VERSION)
+    setupJava(javaVersion)
+    setupKotlin(javaVersion)
 
     val spine = Spine(this)
     defineDependencies(spine)
@@ -182,6 +182,16 @@ LicenseReporter.mergeAllReports(project)
  * The alias for typed extensions functions related to subprojects.
  */
 typealias Subproject = Project
+
+/**
+ * Defines repositories to be used in subprojects when resolving artifacts.
+ */
+fun Subproject.applyRepositories() {
+    repositories.applyStandardWithGitHub(
+        project,
+        "base", "time", "base-types", "change", "validation", "ProtoData", "mc-java",
+    )
+}
 
 /**
  * Applies plugins common to all modules to this subproject.
@@ -212,16 +222,17 @@ fun Subproject.applyPlugins() {
 /**
  * Configures Java tasks in this project.
  */
-fun Subproject.setupJava() {
+fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
     java {
-        tasks {
-            withType<JavaCompile>().configureEach {
-                configureJavac()
-                configureErrorProne()
-            }
-            withType<Jar>().configureEach {
-                duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            }
+        toolchain.languageVersion.set(javaVersion)
+    }
+    tasks {
+        withType<JavaCompile>().configureEach {
+            configureJavac()
+            configureErrorProne()
+        }
+        withType<Jar>().configureEach {
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
     }
 }
@@ -229,15 +240,13 @@ fun Subproject.setupJava() {
 /**
  * Configures Kotlin tasks in this project.
  */
-fun Subproject.setupKotlin() {
+fun Subproject.setupKotlin(javaVersion: JavaLanguageVersion) {
     kotlin {
-        val javaVersion = JavaVersion.VERSION_11.toString()
-
-        applyJvmToolchain(javaVersion)
+        applyJvmToolchain(javaVersion.asInt())
         explicitApi()
 
         tasks.withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion
+            kotlinOptions.jvmTarget = javaVersion.toString()
             setFreeCompilerArgs()
         }
     }

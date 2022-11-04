@@ -54,9 +54,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("`AbstractHandlerMethod` should")
+@DisplayName("`AbstractReceptor` should")
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-class AbstractReceptorTest {
+class AbstractReceptorSpec {
 
     private final OneParamSignature signature = new OneParamSignature();
 
@@ -92,13 +92,13 @@ class AbstractReceptorTest {
     class CheckAccess {
 
         @Test
-        @DisplayName("public")
+        @DisplayName(AccessModifier.MODIFIER_PUBLIC)
         void isPublic() {
             assertTrue(twoParamMethod.isPublic());
         }
 
         @Test
-        @DisplayName("private")
+        @DisplayName(AccessModifier.MODIFIER_PRIVATE)
         void isPrivate() {
             assertTrue(oneParamMethod.isPrivate());
         }

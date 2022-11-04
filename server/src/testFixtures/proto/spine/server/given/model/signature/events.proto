@@ -23,24 +23,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.model
+package spine.server.given.model.signature;
 
-import com.google.common.truth.Truth8.assertThat
-import io.spine.core.Subscribe
-import io.spine.server.event.model.SubscriberSignature
-import io.spine.server.model.given.KotlinEventSubscriber
-import org.junit.jupiter.api.Test
+import "spine/options.proto";
 
-class `Method signature in Kotlin should` {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.given.model.signature";
+option java_outer_classname = "ModelEventsProto";
+option java_multiple_files = true;
 
-    @Test
-    fun `be accepted with the 'internal' access modifier`() {
-        val method = KotlinEventSubscriber::class.java
-            .declaredMethods
-            .first { it.isAnnotationPresent(Subscribe::class.java) }
-        val mismatch = MatchCriterion.ACCESS_MODIFIER.test(method, SubscriberSignature())
-        assertThat(mismatch)
-            .isEmpty()
-    }
+enum Coin {
+    option allow_alias = true;
+
+    C_UNKNOWN = 0;
+
+    OBVERSE = 1;
+    HEADS = 1;
+
+    REVERSE = 2;
+    TAILS = 2;
+}
+
+message CoinTossed {
+    int32 number = 1;
 }

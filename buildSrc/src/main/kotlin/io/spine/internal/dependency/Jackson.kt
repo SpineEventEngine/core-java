@@ -26,7 +26,6 @@
 
 package io.spine.internal.dependency
 
-
 @Suppress("unused")
 object Jackson {
     const val version = "2.13.4"
