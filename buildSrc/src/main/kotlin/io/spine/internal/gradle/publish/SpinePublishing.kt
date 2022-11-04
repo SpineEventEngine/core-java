@@ -28,8 +28,13 @@ package io.spine.internal.gradle.publish
 
 import io.spine.internal.gradle.Repository
 import org.gradle.api.Project
+import org.gradle.api.publish.PublicationContainer
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.findByType
+import org.gradle.kotlin.dsl.getByType
 
 /**
  * Configures [SpinePublishing] extension.
@@ -105,8 +110,11 @@ import org.gradle.kotlin.dsl.findByType
  * @see [registerArtifacts]
  */
 fun Project.spinePublishing(configuration: SpinePublishing.() -> Unit) {
+    apply<MavenPublishPlugin>()
     val name = SpinePublishing::class.java.simpleName
-    val extension = with(extensions) { findByType<SpinePublishing>() ?: create(name, project) }
+    val extension = with(extensions) {
+        findByType<SpinePublishing>() ?: create(name, project)
+    }
     extension.run {
         configuration()
         configured()
@@ -116,8 +124,9 @@ fun Project.spinePublishing(configuration: SpinePublishing.() -> Unit) {
 /**
  * A Gradle extension for setting up publishing of spine modules using `maven-publish` plugin.
  *
- * @param project a project in which the extension is opened. By default, this project will be
- *  published as long as a [set][modules] of modules to publish is not specified explicitly.
+ * @param project
+ *         a project in which the extension is opened. By default, this project will be
+ *         published as long as a [set][modules] of modules to publish is not specified explicitly.
  *
  * @see spinePublishing
  */
@@ -139,6 +148,13 @@ open class SpinePublishing(private val project: Project) {
      * Empty by default.
      */
     var modules: Set<String> = emptySet()
+
+    /**
+     * Set of modules that have custom publications and do not need standard ones.
+     *
+     * Empty by default.
+     */
+    var modulesWithCustomPublishing: Set<String> = emptySet()
 
     /**
      * Set of repositories, to which the resulting artifacts will be sent.
@@ -274,7 +290,6 @@ open class SpinePublishing(private val project: Project) {
      * `maven-publish` plugin for each published module.
      */
     internal fun configured() {
-
         ensureProtoJarExclusionsArePublished()
         ensureTestJarInclusionsArePublished()
         ensuresModulesNotDuplicated()
@@ -303,14 +318,15 @@ open class SpinePublishing(private val project: Project) {
      *
      * @see modules
      */
-    private fun publishedProjects() = modules.map { name -> project.project(name) }
+    private fun publishedProjects() = modules.union(modulesWithCustomPublishing)
+        .map { name -> project.project(name) }
         .ifEmpty { setOf(project) }
 
     /**
      * Sets up `maven-publish` plugin for the given project.
      *
-     * Firstly, an instance of [PublishingConfig] is assembled for the project. Then, this
-     * config is applied.
+     * Firstly, an instance of [PublishingConfig] is assembled for the project.
+     * Then, this config is applied.
      *
      * This method utilizes `project.afterEvaluate` closure. General rule of thumb is to avoid using
      * of this closure, as it configures a project when its configuration is considered completed.
@@ -335,13 +351,15 @@ open class SpinePublishing(private val project: Project) {
         includeDokkaJar: Boolean
     ) {
         val artifactId = artifactId(project)
-        val publishingConfig = PublishingConfig(
-            artifactId,
-            destinations,
-            includeProtoJar,
-            includeTestJar,
-            includeDokkaJar
-        )
+        val customPublishing = modulesWithCustomPublishing.contains(project.name)
+        val publishingConfig = if (customPublishing) {
+            PublishingConfig(artifactId, destinations)
+        } else {
+            PublishingConfig(
+                artifactId, destinations,
+                includeProtoJar, includeTestJar, includeDokkaJar
+            )
+        }
         project.afterEvaluate {
             publishingConfig.apply(project)
         }
@@ -353,7 +371,7 @@ open class SpinePublishing(private val project: Project) {
      * It consists of a project's name and [prefix][artifactPrefix]:
      * `<artifactPrefix><project.name>`.
      */
-    internal fun artifactId(project: Project): String = "$artifactPrefix${project.name}"
+    fun artifactId(project: Project): String = "$artifactPrefix${project.name}"
 
     /**
      * Ensures that all modules, marked as excluded from [protoJar] publishing,
@@ -380,8 +398,10 @@ open class SpinePublishing(private val project: Project) {
     private fun ensureTestJarInclusionsArePublished() {
         val nonPublishedInclusions = testJar.inclusions.minus(modules)
         if (nonPublishedInclusions.isNotEmpty()) {
-            throw IllegalStateException("One or more modules are marked as `included into test " +
-                    "JAR publication`, but they are not even published: $nonPublishedInclusions")
+            error(
+                "One or more modules are marked as `included into test JAR publication`," +
+                        " but they are not even published: $nonPublishedInclusions."
+            )
         }
     }
 
@@ -401,9 +421,22 @@ open class SpinePublishing(private val project: Project) {
         rootExtension?.let { rootPublishing ->
             val thisProject = setOf(project.name, project.path)
             if (thisProject.minus(rootPublishing.modules).size != 2) {
-                throw IllegalStateException("Publishing of `$thisProject` module is already " +
-                            "configured in a root project!")
+                error(
+                    "Publishing of `$thisProject` module is already configured in a root project!"
+                )
             }
         }
     }
 }
+
+/**
+ * Obtains [PublishingExtension] of this project.
+ */
+internal val Project.publishingExtension: PublishingExtension
+    get() = extensions.getByType()
+
+/**
+ * Obtains [PublicationContainer] of this project.
+ */
+internal val Project.publications: PublicationContainer
+    get() = publishingExtension.publications

@@ -177,12 +177,12 @@ class UpdateGitHubPages : Plugin<Project> {
         val inputs = composeJavadocInputs(allowInternalJavadoc)
 
         register(copyJavadoc, Copy::class.java) {
-            from(*inputs.toTypedArray())
+            inputs.forEach { from(it) }
             into(javadocOutputFolder)
         }
     }
 
-    private fun TaskContainer.composeJavadocInputs(allowInternalJavadoc: Boolean): MutableList<Any> {
+    private fun TaskContainer.composeJavadocInputs(allowInternalJavadoc: Boolean): List<Any> {
         val inputs = mutableListOf<Any>()
         if (allowInternalJavadoc) {
             inputs.add(javadocTask())
@@ -197,12 +197,12 @@ class UpdateGitHubPages : Plugin<Project> {
         val inputs = composeDokkaInputs()
 
         register(copyDokka, Copy::class.java) {
-            from(*inputs.toTypedArray())
+            inputs.forEach { from(it) }
             into(dokkaOutputFolder)
         }
     }
 
-    private fun TaskContainer.composeDokkaInputs(): MutableList<Any> {
+    private fun TaskContainer.composeDokkaInputs(): List<Any> {
         val inputs = mutableListOf<Any>()
 
         inputs.add(dokkaHtmlTask())

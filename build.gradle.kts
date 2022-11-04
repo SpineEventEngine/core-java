@@ -163,8 +163,10 @@ val spine = Spine(project)
 subprojects {
     applyRepositories()
     applyPlugins()
-    setupJava()
-    setupKotlin()
+
+    val javaVersion = JavaLanguageVersion.of(11)
+    setupJava(javaVersion)
+    setupKotlin(javaVersion)
 
     val spine = Spine(this)
     defineDependencies(spine)
@@ -226,16 +228,19 @@ fun Subproject.applyPlugins() {
 /**
  * Configures Java tasks in this project.
  */
-fun Subproject.setupJava() {
+fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
     java {
-        tasks {
-            withType<JavaCompile>().configureEach {
-                configureJavac()
-                configureErrorProne()
-            }
-            withType<Jar>().configureEach {
-                duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            }
+        val jv = JavaVersion.toVersion(javaVersion.asInt())
+        sourceCompatibility = jv
+        targetCompatibility = jv
+    }
+    tasks {
+        withType<JavaCompile>().configureEach {
+            configureJavac()
+            configureErrorProne()
+        }
+        withType<Jar>().configureEach {
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
     }
 }
@@ -243,15 +248,13 @@ fun Subproject.setupJava() {
 /**
  * Configures Kotlin tasks in this project.
  */
-fun Subproject.setupKotlin() {
+fun Subproject.setupKotlin(javaVersion: JavaLanguageVersion) {
     kotlin {
-        val javaVersion = JavaVersion.VERSION_11.toString()
-
-        applyJvmToolchain(javaVersion)
+        applyJvmToolchain(javaVersion.asInt())
         explicitApi()
 
         tasks.withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion
+            kotlinOptions.jvmTarget = javaVersion.toString()
             setFreeCompilerArgs()
         }
     }

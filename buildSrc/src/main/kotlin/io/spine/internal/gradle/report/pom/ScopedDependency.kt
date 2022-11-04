@@ -94,16 +94,16 @@ private constructor(
          */
         fun of(dependency: Dependency, configuration: Configuration): ScopedDependency {
             val configurationName = configuration.name
-
-            if (CONFIG_TO_SCOPE.containsKey(configurationName)) {
-                val scope = CONFIG_TO_SCOPE[configurationName]
-                return ScopedDependency(dependency, scope!!)
+            val knownScope = CONFIG_TO_SCOPE[configurationName]
+            return when {
+                knownScope != null -> ScopedDependency(dependency, knownScope)
+                isTestsRelated(configurationName) -> ScopedDependency(dependency, test)
+                else -> ScopedDependency(dependency, undefined)
             }
-            if (configurationName.toLowerCase().startsWith("test")) {
-                return ScopedDependency(dependency, test)
-            }
-            return ScopedDependency(dependency, undefined)
         }
+
+        private fun isTestsRelated(configurationName: String): Boolean =
+            configurationName.startsWith("test", ignoreCase = true)
 
         /**
          * Performs comparison of {@code DependencyWithScope} instances according to these rules:

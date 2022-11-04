@@ -42,17 +42,10 @@ import java.nio.file.WatchService
  * After the first usage, the instances of this type delegate all calls to the internally
  * created instance of [Path] created with [createTempDirectory].
  */
+@Suppress("TooManyFunctions")
 class LazyTempPath(private val prefix: String) : Path {
 
-    private lateinit var tempPath: Path
-
-    private val delegate: Path
-        get() {
-            if (!::tempPath.isInitialized) {
-                tempPath = createTempDirectory(prefix)
-            }
-            return tempPath
-        }
+    private val delegate: Path by lazy { createTempDirectory(prefix) }
 
     override fun compareTo(other: Path): Int = delegate.compareTo(other)
 

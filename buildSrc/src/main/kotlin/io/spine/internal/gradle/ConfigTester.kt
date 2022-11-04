@@ -60,6 +60,15 @@ class ConfigTester(
     private val tasks: TaskContainer,
     private val tempFolder: File = File("./tmp")
 ) {
+
+    companion object {
+
+        /**
+         * Gradle build timeout.
+         */
+        private const val BUILD_TIMEOUT_MINUTES = 30L
+    }
+
     private val buildSrc: Path = config.resolve("buildSrc")
 
     /**
@@ -132,7 +141,7 @@ class ConfigTester(
                 println("*** `${gitRepo.name}`: Gradle build completed. ***")
             }
             directory = gitRepo.prepareCheckout(tempFolder).absolutePath
-            maxDurationMins = 30
+            maxDurationMins = BUILD_TIMEOUT_MINUTES
         }
     }
 
@@ -302,30 +311,30 @@ class ClonedRepo(
     @Suppress("TooGenericExceptionCaught")
     private fun copyFolder(sourceFolder: Path, ignoredFolder: Path?, destinationFolder: Path) {
         try {
-            Files.walk(sourceFolder).forEach { file: Path ->
-                if (ignoredFolder != null) {
-                    if (file.toAbsolutePath().startsWith(ignoredFolder.toAbsolutePath())) {
-                        return@forEach
-                    }
-                }
-                try {
-                    val destination = destinationFolder.resolve(sourceFolder.relativize(file))
-                    if (Files.isDirectory(file)) {
-                        if (!Files.exists(destination)) Files.createDirectory(destination)
-                        return@forEach
-                    }
-                    Files.copy(file, destination)
-                } catch (e: Exception) {
-                    throw IllegalStateException(
-                        "Error copying folder `$sourceFolder` to `$destinationFolder`.", e
-                    )
-                }
-            }
+            copyRecursively(sourceFolder, ignoredFolder, destinationFolder)
         } catch (e: Exception) {
             throw IllegalStateException(
                 "Error copying folder `$sourceFolder` to `$destinationFolder`.", e
             )
         }
+    }
+
+    private fun copyRecursively(sourceFolder: Path, ignoredFolder: Path?, destinationFolder: Path) {
+        fun Path.isIgnored(): Boolean = ignoredFolder
+            ?.let { toAbsolutePath().startsWith(it.toAbsolutePath()) }
+            ?: false
+
+        val flattenedTree = Files.walk(sourceFolder).filter { it.isIgnored().not() }
+        val filesToDestinations = flattenedTree.map { file ->
+            val destination = destinationFolder.resolve(sourceFolder.relativize(file))
+            file to destination
+        }
+
+        val directories = filesToDestinations.filter { Files.isDirectory(it.first) }
+        directories.forEach { Files.createDirectories(it.second) }
+
+        val files = filesToDestinations.filter { Files.isDirectory(it.first).not() }
+        files.forEach { Files.copy(it.first, it.second) }
     }
 }
 

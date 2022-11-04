@@ -62,10 +62,8 @@ import io.spine.internal.gradle.publish.testJar
 @Suppress("unused")
 fun Project.exposeTestConfiguration() {
 
-    if (pluginManager.hasPlugin("java").not()) {
-        throw IllegalStateException(
-            "Can't expose the test configuration because `java` plugin has not been applied."
-        )
+    check(pluginManager.hasPlugin("java")) {
+        "Can't expose the test configuration because `java` plugin has not been applied."
     }
 
     configurations.create("testArtifacts") {

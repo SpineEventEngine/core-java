@@ -109,13 +109,13 @@ class Spine(p: ExtensionAware) {
          * The version of `tool-base` to use.
          * @see [Spine.toolBase]
          */
-        const val toolBase = "2.0.0-SNAPSHOT.111"
+        const val toolBase = "2.0.0-SNAPSHOT.112"
 
         /**
          * The version of `validation` to use.
          * @see [Spine.validation]
          */
-        const val validation = "2.0.0-SNAPSHOT.51"
+        const val validation = "2.0.0-SNAPSHOT.61"
 
         /**
          * The version of Javadoc Tools to use.

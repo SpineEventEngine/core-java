@@ -73,20 +73,36 @@ class IncrementGuard : Plugin<Project> {
      * to a feature branch.
      *
      * Returns `false` if the associated reference is not a branch (e.g. a tag) or if it has
-     * the name which ends with `master`. So, on branches such as `master` and `2.x-jdk8-master`
-     * this method would return `false`.
+     * the name which ends with `master` or `main`.
+     *
+     * For example, on the following branhces the method would return `false`:
+     *
+     * 1. `master`.
+     * 2. `main`.
+     * 3. `2.x-jdk8-master`.
+     * 4. `2.x-jdk8-main`.
      *
      * @see <a href="https://docs.github.com/en/free-pro-team@latest/actions/reference/environment-variables">
      *     List of default environment variables provided for GitHub Actions builds</a>
      */
     private fun shouldCheckVersion(): Boolean {
-        val eventName = System.getenv("GITHUB_EVENT_NAME")
-        if ("push" != eventName) {
+        val event = System.getenv("GITHUB_EVENT_NAME")
+        val reference = System.getenv("GITHUB_REF")
+        if (event != "push" || reference == null) {
             return false
         }
-        val reference = System.getenv("GITHUB_REF") ?: return false
-        val matches = Regex("refs/heads/(.+)").matchEntire(reference) ?: return false
-        val branch = matches.groupValues[1]
-        return !branch.endsWith("master")
+        val branch = branchName(reference)
+        return when {
+            branch == null -> false
+            branch.endsWith("master") -> false
+            branch.endsWith("main") -> false
+            else -> true
+        }
+    }
+
+    private fun branchName(gitHubRef: String): String? {
+        val matches = Regex("refs/heads/(.+)").matchEntire(gitHubRef)
+        val branch = matches?.let { it.groupValues[1] }
+        return branch
     }
 }

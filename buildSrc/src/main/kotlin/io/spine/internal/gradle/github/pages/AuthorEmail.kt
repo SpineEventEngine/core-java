@@ -45,10 +45,8 @@ class AuthorEmail(val value: String) {
          */
         fun fromVar() : AuthorEmail {
             val envValue = System.getenv(environmentVariable)
-            if (envValue.isNullOrEmpty()) {
-                throw IllegalStateException(
-                    "Unable to obtain an author from `${environmentVariable}`."
-                )
+            check(envValue != null && envValue.isNotBlank()) {
+                "Unable to obtain an author from `${environmentVariable}`."
             }
             return AuthorEmail(envValue)
         }
