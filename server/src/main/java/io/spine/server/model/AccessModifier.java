@@ -28,6 +28,9 @@ package io.spine.server.model;
 
 import io.spine.core.ContractFor;
 import io.spine.reflect.J2Kt;
+import kotlin.jvm.internal.Reflection;
+import kotlin.reflect.KClass;
+import kotlin.reflect.KVisibility;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -45,6 +48,7 @@ import static kotlin.reflect.KVisibility.INTERNAL;
 /**
  * The predicate for {@linkplain Modifier access modifiers} of {@linkplain Method methods}.
  */
+@SuppressWarnings("DuplicateStringLiteralInspection")
 public final class AccessModifier implements Predicate<Method> {
 
     public static final AccessModifier PUBLIC =
@@ -54,22 +58,13 @@ public final class AccessModifier implements Predicate<Method> {
             onJavaMethod(Modifier::isProtected, "protected");
 
     public static final AccessModifier PACKAGE_PRIVATE =
-            onJavaMethod(methodModifier ->
-                                 !(isPublic(methodModifier)
-                                         || isProtected(methodModifier)
-                                         || isPrivate(methodModifier)),
-                         "package-private");
+            onJavaMethod(isPackagePrivate(), "package-private");
 
     public static final AccessModifier PRIVATE =
             onJavaMethod(Modifier::isPrivate, "private");
 
-    public static final AccessModifier KOTLIN_INTERNAL = new AccessModifier(m -> {
-        var kotlinMethod = J2Kt.findKotlinMethod(m);
-        if (kotlinMethod.isEmpty()) {
-            return false;
-        }
-        return kotlinMethod.get().getVisibility() == INTERNAL;
-    }, "Kotlin internal");
+    public static final AccessModifier KOTLIN_INTERNAL =
+            new AccessModifier(isInternal(), "Kotlin `internal`");
 
     /**
      * A protected method which overrides a method from a superclass.
@@ -112,7 +107,7 @@ public final class AccessModifier implements Predicate<Method> {
         while (!cls.equals(Object.class)) {
             var methods = cls.getDeclaredMethods();
             for (var m : methods) {
-                if (inheritedMethod(method, m)) {
+                if (inheritedMethod(m, method)) {
                     validateContract(m, method);
                     return true;
                 }
@@ -139,9 +134,38 @@ public final class AccessModifier implements Predicate<Method> {
         }
     }
 
+    private static IntPredicate isPackagePrivate() {
+        return methodModifier ->
+                !(isPublic(methodModifier)
+                        || isProtected(methodModifier)
+                        || isPrivate(methodModifier));
+    }
+
+    /**
+     * Obtains the predicate which tells if a Kotlin method is declared {@code internal}
+     * or the method is effectively internal because it is declared in an
+     * {@code internal} class.
+     */
+    private static Predicate<Method> isInternal() {
+        return m -> {
+            var methodFound = J2Kt.findKotlinMethod(m);
+            if (methodFound.isEmpty()) {
+                return false;
+            }
+            var kotlinMethod = methodFound.get();
+            if (kotlinMethod.getVisibility() == INTERNAL) {
+                return true;
+            }
+            KClass<?> kotlinClass = Reflection.getOrCreateKotlinClass(m.getDeclaringClass());
+            var publicMethod = (kotlinMethod.getVisibility() == KVisibility.PUBLIC);
+            var internalClass = (kotlinClass.getVisibility() == INTERNAL);
+            return publicMethod && internalClass;
+        };
+    }
+
     @SuppressWarnings("RedundantExplicitVariableType" /* Due to the regression bug in PMD.
                                                     See https://github.com/pmd/pmd/issues/2976, */)
-    private static boolean inheritedMethod(Method child, Method parent) {
+    private static boolean inheritedMethod(Method parent, Method child) {
         if (!parent.getName().equals(child.getName())) {
             return false;
         }
