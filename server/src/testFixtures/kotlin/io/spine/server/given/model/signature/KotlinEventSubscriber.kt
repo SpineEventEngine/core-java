@@ -24,16 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given
+package io.spine.server.given.model.signature
 
 import io.spine.core.Subscribe
 import io.spine.server.event.AbstractEventSubscriber
-import io.spine.test.projection.event.Int32Imported
 
 class KotlinEventSubscriber : AbstractEventSubscriber() {
 
     @Subscribe
-    internal fun on(@Suppress("UNUSED_PARAMETER") e: Int32Imported) {
+    internal fun on(@Suppress("UNUSED_PARAMETER") e: CoinTossed) {
         // Do nothing.
     }
 }

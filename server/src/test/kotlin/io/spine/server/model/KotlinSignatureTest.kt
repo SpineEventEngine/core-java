@@ -28,19 +28,79 @@ package io.spine.server.model
 
 import com.google.common.truth.Truth8.assertThat
 import io.spine.core.Subscribe
+import io.spine.server.event.AbstractEventSubscriber
 import io.spine.server.event.model.SubscriberSignature
-import io.spine.server.model.given.KotlinEventSubscriber
+import io.spine.server.given.model.signature.CoinTossed
+import io.spine.server.given.model.signature.KotlinEventSubscriber
+import io.spine.server.model.MatchCriterion.ACCESS_MODIFIER
+import java.lang.reflect.Method
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-class `Method signature in Kotlin should` {
+@DisplayName("Method signature in Kotlin should")
+class KotlinMethodSignatureSpec {
 
     @Test
     fun `be accepted with the 'internal' access modifier`() {
-        val method = KotlinEventSubscriber::class.java
-            .declaredMethods
-            .first { it.isAnnotationPresent(Subscribe::class.java) }
-        val mismatch = MatchCriterion.ACCESS_MODIFIER.test(method, SubscriberSignature())
-        assertThat(mismatch)
-            .isEmpty()
+        val method = subscriberIn(KotlinEventSubscriber::class.java)
+        assertMatches(method)
+    }
+
+    @Test
+    fun `be accepted if a declaring class is 'internal'`() {
+        val method = subscriberIn(TfInternalSubscriber::class.java)
+        assertMatches(method)
+    }
+
+    @Test
+    fun `warn on private subscribing receptor`() {
+        val method = subscriberIn(TfInternalWithPrivate::class.java)
+        val mismatch = ACCESS_MODIFIER.test(method, SubscriberSignature())
+        assertThat(mismatch).isPresent()
+        assertTrue(mismatch.get().isWarning)
+    }
+
+    private fun subscriberIn(cls: Class<*>): Method {
+        val method = cls.declaredMethods.first { it.annotatedAsSubscriber() }
+        return method
+    }
+
+    /**
+     * Tells if [Subscribe] annotation present in this method.
+     */
+    private fun Method.annotatedAsSubscriber() = isAnnotationPresent(Subscribe::class.java)
+
+    /**
+     * Asserts that the given method matches the [ACCESS_MODIFIER] criterion.
+     */
+    private fun assertMatches(method: Method) {
+        val mismatch = ACCESS_MODIFIER.test(method, SubscriberSignature())
+        assertThat(mismatch).isEmpty()
+    }
+}
+
+/**
+ * An internal class which declares seemingly public function.
+ *
+ * The function is effectively `internal` because the class which declares it
+ * is `internal.
+ */
+internal class TfInternalSubscriber : AbstractEventSubscriber() {
+
+    @Subscribe
+    fun on(@Suppress("UNUSED_PARAMETER") ignored: CoinTossed) {
+        // Do nothing.
+    }
+}
+
+/**
+ * An internal class with private subscription receptor, which is an error.
+ */
+internal class TfInternalWithPrivate : AbstractEventSubscriber() {
+
+    @Subscribe
+    private fun on(@Suppress("UNUSED_PARAMETER") ignored: CoinTossed) {
+        // Do nothing.
     }
 }
