@@ -91,7 +91,7 @@ class Spine(p: ExtensionAware) {
          * The version of `base-types` to use.
          * @see [Spine.baseTypes]
          */
-        const val baseTypes = "2.0.0-SNAPSHOT.112"
+        const val baseTypes = "2.0.0-SNAPSHOT.113"
 
         /**
          * The version of `time` to use.
