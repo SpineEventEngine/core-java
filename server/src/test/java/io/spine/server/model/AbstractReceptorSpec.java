@@ -54,9 +54,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("`AbstractHandlerMethod` should")
+@DisplayName("`AbstractReceptor` should")
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-class AbstractReceptorTest {
+class AbstractReceptorSpec {
 
     private final OneParamSignature signature = new OneParamSignature();
 

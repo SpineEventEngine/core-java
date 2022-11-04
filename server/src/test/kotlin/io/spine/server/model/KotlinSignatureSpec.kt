@@ -31,7 +31,6 @@ import io.spine.core.Subscribe
 import io.spine.server.event.AbstractEventSubscriber
 import io.spine.server.event.model.SubscriberSignature
 import io.spine.server.given.model.signature.CoinTossed
-import io.spine.server.given.model.signature.KotlinEventSubscriber
 import io.spine.server.model.MatchCriterion.ACCESS_MODIFIER
 import java.lang.reflect.Method
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -43,13 +42,19 @@ class KotlinMethodSignatureSpec {
 
     @Test
     fun `be accepted with the 'internal' access modifier`() {
-        val method = subscriberIn(KotlinEventSubscriber::class.java)
+        val method = subscriberIn(TfEventSubscriber::class.java)
         assertMatches(method)
     }
 
     @Test
     fun `be accepted if a declaring class is 'internal'`() {
         val method = subscriberIn(TfInternalSubscriber::class.java)
+        assertMatches(method)
+    }
+
+    @Test
+    fun `be accepted if a declaring class is 'private'`() {
+        val method = subscriberIn(TfPrivateSubscriber::class.java)
         assertMatches(method)
     }
 
@@ -81,10 +86,21 @@ class KotlinMethodSignatureSpec {
 }
 
 /**
+ * A public class with `internal` subscribing receptor.
+ */
+class TfEventSubscriber : AbstractEventSubscriber() {
+
+    @Subscribe
+    internal fun on(@Suppress("UNUSED_PARAMETER") e: CoinTossed) {
+        // Do nothing.
+    }
+}
+
+/**
  * An internal class which declares seemingly public function.
  *
  * The function is effectively `internal` because the class which declares it
- * is `internal.
+ * is `internal`.
  */
 internal class TfInternalSubscriber : AbstractEventSubscriber() {
 
@@ -95,12 +111,26 @@ internal class TfInternalSubscriber : AbstractEventSubscriber() {
 }
 
 /**
- * An internal class with private subscription receptor, which is an error.
+ * An internal class with private subscription receptor,
+ * which is a warning for now.
+ *
+ * Later such a declaration would make the method inaccessible to the generated code.
  */
 internal class TfInternalWithPrivate : AbstractEventSubscriber() {
 
     @Subscribe
     private fun on(@Suppress("UNUSED_PARAMETER") ignored: CoinTossed) {
+        // Do nothing.
+    }
+}
+
+/**
+ * A subscriber class with a public method, which makes the method effectively `private`.
+ */
+private class TfPrivateSubscriber : AbstractEventSubscriber() {
+
+    @Subscribe
+    fun on(@Suppress("UNUSED_PARAMETER") ignored: CoinTossed) {
         // Do nothing.
     }
 }

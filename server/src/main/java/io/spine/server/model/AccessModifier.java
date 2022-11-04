@@ -153,7 +153,12 @@ public final class AccessModifier implements Predicate<Method> {
     /**
      * Obtains the predicate which tells if a Kotlin method is declared {@code internal}
      * or the method is effectively internal because it is declared in an
-     * {@code internal} class.
+     * {@code internal} or a {@code private} class.
+     *
+     * <p>Declaration in a {@code private} class is a special case. We assume that the method
+     * is effectively {@code internal} because the class is being used from either an outer
+     * Java or Kotlin class, or from the same Kotlin file. Otherwise, being private, it cannot
+     * be added to a Bounded Context.
      */
     private static boolean isInternal(Method m) {
         var method = J2Kt.findKotlinMethod(m);
@@ -166,7 +171,8 @@ public final class AccessModifier implements Predicate<Method> {
         }
         KClass<?> kotlinClass = Reflection.getOrCreateKotlinClass(m.getDeclaringClass());
         var publicMethod = (kotlinMethod.getVisibility() == KVisibility.PUBLIC);
-        var internalClass = (kotlinClass.getVisibility() == INTERNAL);
+        var classVisibility = kotlinClass.getVisibility();
+        var internalClass = (classVisibility == INTERNAL || classVisibility == KVisibility.PRIVATE);
         return publicMethod && internalClass;
     }
 
