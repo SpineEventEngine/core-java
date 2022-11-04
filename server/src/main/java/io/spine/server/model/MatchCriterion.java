@@ -34,8 +34,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.spine.server.model.MethodExceptionCheck.check;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
@@ -71,16 +73,14 @@ public enum MatchCriterion {
             return createMismatch(method, signature.annotation());
         }
     },
-
     /**
      * The criterion for the method parameters to conform the
      * {@linkplain ReceptorSignature#params() requirements}.
      *
      * @see AllowedParams#findMatching(Method)
      */
-    PARAMETERS(ERROR,
-               "The method `%s` has invalid parameters. Please refer to the documentation"
-                       + " of `@%s` for allowed parameter types.") {
+    PARAMETERS(ERROR, "The method `%s` has invalid parameters.%n"
+             + "       Please refer to the documentation of `@%s` for allowed parameter types.") {
         @Override
         Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             var matching = signature.params().findMatching(method);
@@ -95,10 +95,9 @@ public enum MatchCriterion {
      * The criterion, which ensures that the method access modifier is among the
      * {@linkplain ReceptorSignature#modifier() expected}.
      */
-    ACCESS_MODIFIER(WARN,
-                    "The access modifier of `%s` method is `%s`. "
-                            + "We recommend it to be one of: `%s`. "
-                            + "Refer to the `%s` annotation docs for details.") {
+    ACCESS_MODIFIER(WARN, "The access modifier of `%s` method is `%s`.%n"
+               + "         We recommend it to be one of: %s.%n"
+               + "         Please refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             var recommended = signature.modifier();
@@ -187,7 +186,10 @@ public enum MatchCriterion {
     private static String methodAsString(Method method) {
         var declaringClassName = method.getDeclaringClass()
                                        .getCanonicalName();
-        var parameterTypes = Diags.join(method.getParameterTypes());
+        var paramTypes = Arrays.stream(method.getParameterTypes())
+                .map(Class::getSimpleName)
+                .collect(Collectors.<String>toUnmodifiableList());
+        var parameterTypes = Diags.join(paramTypes);
         var result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
         return result;
     }
@@ -196,6 +198,8 @@ public enum MatchCriterion {
      * Helper class for {@link #PROHIBITED_EXCEPTION} for composing an error message.
      */
     static final class ProhibitedExceptionMessage {
+
+        private static final String METHOD_THROWS = "The method `%s.%s` throws `%s`.%n";
 
         private final Method method;
         private final ImmutableList<Class<? extends Throwable>> declared;
@@ -213,16 +217,14 @@ public enum MatchCriterion {
         public String toString() {
             if (allowed == null) {
                 return format(
-                        "The method `%s.%s` throws `%s`. But throwing is not allowed"
-                                + " for this kind of methods.",
+                        METHOD_THROWS + "Throwing is not allowed for this kind of methods.",
                         method.getDeclaringClass().getCanonicalName(),
                         method.getName(),
                         enumerateThrown()
                 );
             }
             return format(
-                    "The method `%s.%s` throws `%s`. But only `%s` is allowed for"
-                            + " this kind of methods.",
+                    METHOD_THROWS + "Only `%s` is allowed for this kind of methods.",
                     method.getDeclaringClass().getCanonicalName(),
                     method.getName(),
                     enumerateThrown(),
