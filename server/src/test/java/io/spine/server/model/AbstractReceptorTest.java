@@ -92,13 +92,13 @@ class AbstractReceptorTest {
     class CheckAccess {
 
         @Test
-        @DisplayName("public")
+        @DisplayName(AccessModifier.MODIFIER_PUBLIC)
         void isPublic() {
             assertTrue(twoParamMethod.isPublic());
         }
 
         @Test
-        @DisplayName("private")
+        @DisplayName(AccessModifier.MODIFIER_PRIVATE)
         void isPrivate() {
             assertTrue(oneParamMethod.isPrivate());
         }

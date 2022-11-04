@@ -31,6 +31,7 @@ import io.spine.reflect.J2Kt;
 import kotlin.jvm.internal.Reflection;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KVisibility;
+import org.jetbrains.annotations.Contract;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -48,23 +49,29 @@ import static kotlin.reflect.KVisibility.INTERNAL;
 /**
  * The predicate for {@linkplain Modifier access modifiers} of {@linkplain Method methods}.
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
+@SuppressWarnings("WeakerAccess" /* Is made for documentation purposes and future references*/)
 public final class AccessModifier implements Predicate<Method> {
 
+    public static final String MODIFIER_PUBLIC = "public";
+    public static final String MODIFIER_PRIVATE = "private";
+    public static final String MODIFIER_PROTECTED = "protected";
+    @SuppressWarnings("DuplicateStringLiteralInspection") // in the generated code.
+    public static final String MODIFIER_INTERNAL = "internal";
+
     public static final AccessModifier PUBLIC =
-            onJavaMethod(Modifier::isPublic, "public");
+            onJavaMethod(Modifier::isPublic, MODIFIER_PUBLIC);
 
     public static final AccessModifier PROTECTED =
-            onJavaMethod(Modifier::isProtected, "protected");
+            onJavaMethod(Modifier::isProtected, MODIFIER_PROTECTED);
 
     public static final AccessModifier PACKAGE_PRIVATE =
-            onJavaMethod(isPackagePrivate(), "package-private");
+            onJavaMethod(AccessModifier::isPackagePrivate, "package-private");
 
     public static final AccessModifier PRIVATE =
-            onJavaMethod(Modifier::isPrivate, "private");
+            onJavaMethod(Modifier::isPrivate, MODIFIER_PRIVATE);
 
     public static final AccessModifier KOTLIN_INTERNAL =
-            new AccessModifier(isInternal(), "Kotlin `internal`");
+            new AccessModifier(AccessModifier::isInternal, MODIFIER_INTERNAL);
 
     /**
      * A protected method which overrides a method from a superclass.
@@ -74,10 +81,8 @@ public final class AccessModifier implements Predicate<Method> {
      * <p>The purpose of this modifier is to allow inheritance for
      * {@linkplain ContractFor contract methods} without discouraging users with warning logs.
      */
-    public static final AccessModifier PROTECTED_CONTRACT = new AccessModifier(
-            m -> PROTECTED.test(m) && derivedFromContract(m),
-            "protected with @Override"
-    );
+    public static final AccessModifier PROTECTED_CONTRACT =
+            new AccessModifier(AccessModifier::protectedAndDerived, "protected with @Override");
 
     /**
      * The predicate which determines if the method has a matching modifier or not.
@@ -96,9 +101,14 @@ public final class AccessModifier implements Predicate<Method> {
         this.name = name;
     }
 
+    @Contract(value = "_, _ -> new", pure = true)
     private static AccessModifier onJavaMethod(IntPredicate flagPredicate, String name) {
         Predicate<Method> predicate = m -> flagPredicate.test(m.getModifiers());
         return new AccessModifier(predicate, name);
+    }
+
+    private static boolean protectedAndDerived(Method m) {
+        return PROTECTED.test(m) && derivedFromContract(m);
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
@@ -107,7 +117,7 @@ public final class AccessModifier implements Predicate<Method> {
         while (!cls.equals(Object.class)) {
             var methods = cls.getDeclaredMethods();
             for (var m : methods) {
-                if (inheritedMethod(m, method)) {
+                if (inheritedMethod(method, m)) {
                     validateContract(m, method);
                     return true;
                 }
@@ -134,9 +144,8 @@ public final class AccessModifier implements Predicate<Method> {
         }
     }
 
-    private static IntPredicate isPackagePrivate() {
-        return methodModifier ->
-                !(isPublic(methodModifier)
+    private static boolean isPackagePrivate(int methodModifier) {
+        return !(isPublic(methodModifier)
                         || isProtected(methodModifier)
                         || isPrivate(methodModifier));
     }
@@ -146,31 +155,27 @@ public final class AccessModifier implements Predicate<Method> {
      * or the method is effectively internal because it is declared in an
      * {@code internal} class.
      */
-    private static Predicate<Method> isInternal() {
-        return m -> {
-            var methodFound = J2Kt.findKotlinMethod(m);
-            if (methodFound.isEmpty()) {
-                return false;
-            }
-            var kotlinMethod = methodFound.get();
-            if (kotlinMethod.getVisibility() == INTERNAL) {
-                return true;
-            }
-            KClass<?> kotlinClass = Reflection.getOrCreateKotlinClass(m.getDeclaringClass());
-            var publicMethod = (kotlinMethod.getVisibility() == KVisibility.PUBLIC);
-            var internalClass = (kotlinClass.getVisibility() == INTERNAL);
-            return publicMethod && internalClass;
-        };
-    }
-
-    @SuppressWarnings("RedundantExplicitVariableType" /* Due to the regression bug in PMD.
-                                                    See https://github.com/pmd/pmd/issues/2976, */)
-    private static boolean inheritedMethod(Method parent, Method child) {
-        if (!parent.getName().equals(child.getName())) {
+    private static boolean isInternal(Method m) {
+        var method = J2Kt.findKotlinMethod(m);
+        if (method.isEmpty()) {
             return false;
         }
-        Class<?>[] parentParams = parent.getParameterTypes();
-        Class<?>[] childParams = child.getParameterTypes();
+        var kotlinMethod = method.get();
+        if (kotlinMethod.getVisibility() == INTERNAL) {
+            return true;
+        }
+        KClass<?> kotlinClass = Reflection.getOrCreateKotlinClass(m.getDeclaringClass());
+        var publicMethod = (kotlinMethod.getVisibility() == KVisibility.PUBLIC);
+        var internalClass = (kotlinClass.getVisibility() == INTERNAL);
+        return publicMethod && internalClass;
+    }
+
+    private static boolean inheritedMethod(Method thisMethod, Method parent) {
+        if (!parent.getName().equals(thisMethod.getName())) {
+            return false;
+        }
+        var parentParams = parent.getParameterTypes();
+        var childParams = thisMethod.getParameterTypes();
         if (parentParams.length != childParams.length) {
             return false;
         }
