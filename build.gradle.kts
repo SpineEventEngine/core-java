@@ -114,8 +114,6 @@ object BuildSettings {
 
 repositories.applyStandard()
 
-apply(from = "$rootDir/version.gradle.kts")
-
 spinePublishing {
     modules = setOf(
         "core",
@@ -150,10 +148,7 @@ allprojects {
         plugin("project-report")
     }
 
-    apply {
-        from("$rootDir/version.gradle.kts")
-    }
-
+    apply(from = "$rootDir/version.gradle.kts")
     group = "io.spine"
     version = extra["versionToPublish"]!!
 }
@@ -230,9 +225,7 @@ fun Subproject.applyPlugins() {
  */
 fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
     java {
-        val jv = JavaVersion.toVersion(javaVersion.asInt())
-        sourceCompatibility = jv
-        targetCompatibility = jv
+        toolchain.languageVersion.set(javaVersion)
     }
     tasks {
         withType<JavaCompile>().configureEach {
