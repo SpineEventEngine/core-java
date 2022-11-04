@@ -109,6 +109,8 @@ object BuildSettings {
      *      protobuf#10593</a>
      */
     const val protocArtifact = "com.google.protobuf:protoc:3.19.6"
+
+    const val JAVA_VERSION = 11
 }
 
 repositories.applyStandard()
@@ -152,13 +154,11 @@ allprojects {
     version = extra["versionToPublish"]!!
 }
 
-val spine = Spine(project)
-
 subprojects {
     applyRepositories()
     applyPlugins()
 
-    val javaVersion = JavaLanguageVersion.of(11)
+    val javaVersion = JavaLanguageVersion.of(BuildSettings.JAVA_VERSION)
     setupJava(javaVersion)
     setupKotlin(javaVersion)
 
