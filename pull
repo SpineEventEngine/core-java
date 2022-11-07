@@ -27,8 +27,8 @@
 #
 
 cd ./config || exit
-echo "Switching the pointer of the 'config' submodule to its 'master'."
-git checkout master
+echo "Switching the pointer of the 'config' submodule to its 'v1.x'."
+git checkout v1.x
 git pull
 
 cd ..
