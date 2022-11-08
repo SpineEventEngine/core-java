@@ -412,7 +412,7 @@ fun Subproject.forceConfigurations(spine: Spine) {
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
                        See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
-                       .configureProtocPlugins() method which sets the version from resources. */
+                       .configureProtocPlugins()` method which sets the version from resources. */
                     Grpc.protobufPlugin,
 
                     spine.base,
