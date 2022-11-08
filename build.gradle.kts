@@ -92,10 +92,9 @@ plugins {
     `java-library`
     kotlin("jvm")
     idea
-    id(protobufPlugin)
-    id(errorPronePlugin)
-    id(gradleDoctor.pluginId) version gradleDoctor.version
-    `detekt-code-analysis`
+    protobuf
+    errorprone
+    `gradle-doctor`
 }
 
 object BuildSettings {
