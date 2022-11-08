@@ -44,7 +44,7 @@ internal class AcksTest : UtilityClassTest<Acks>(Acks::class.java) {
     }
 
     @Nested
-    internal inner class `obtain 'CommandId'`() {
+    internal inner class `obtain 'CommandId'` {
 
         @Test
         fun `returning ID value`() {
