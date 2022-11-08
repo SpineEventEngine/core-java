@@ -91,7 +91,7 @@ class Spine(p: ExtensionAware) {
          * The version of `base-types` to use.
          * @see [Spine.baseTypes]
          */
-        const val baseTypes = "2.0.0-SNAPSHOT.113"
+        const val baseTypes = "2.0.0-SNAPSHOT.112"
 
         /**
          * The version of `time` to use.
@@ -106,10 +106,17 @@ class Spine(p: ExtensionAware) {
         const val change = "2.0.0-SNAPSHOT.117"
 
         /**
+         * The version of `text` to use.
+         *
+         * @see Spine.text
+         */
+        const val text = "2.0.0-SNAPSHOT.1"
+
+        /**
          * The version of `tool-base` to use.
          * @see [Spine.toolBase]
          */
-        const val toolBase = "2.0.0-SNAPSHOT.112"
+        const val toolBase = "2.0.0-SNAPSHOT.111"
 
         /**
          * The version of `validation` to use.
@@ -143,9 +150,10 @@ class Spine(p: ExtensionAware) {
     val baseTypes = "$group:spine-base-types:${p.baseTypesVersion}"
     val time = "$group:spine-time:${p.timeVersion}"
     val change = "$group:spine-change:${p.changeVersion}"
+    val text = "$group:spine-text:${p.textVersion}"
 
     val testlib = "$toolsGroup:spine-testlib:${p.baseVersion}"
-    val testUtilTime = "io.spine.tools:spine-testutil-time:${p.timeVersion}"
+    val testUtilTime = "$toolsGroup:spine-testutil-time:${p.timeVersion}"
     val toolBase = "$toolsGroup:spine-tool-base:${p.toolBaseVersion}"
     val pluginBase = "$toolsGroup:spine-plugin-base:${p.toolBaseVersion}"
     val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${p.toolBaseVersion}"
@@ -195,6 +203,9 @@ class Spine(p: ExtensionAware) {
 
     private val ExtensionAware.changeVersion: String
         get() = "changeVersion".asExtra(this, DefaultVersion.change)
+
+    private val ExtensionAware.textVersion: String
+        get() = "textVersion".asExtra(this, DefaultVersion.text)
 
     private val ExtensionAware.mcVersion: String
         get() = "mcVersion".asExtra(this, DefaultVersion.mc)
