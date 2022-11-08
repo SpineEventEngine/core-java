@@ -74,7 +74,6 @@ buildscript {
     }
 }
 
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm")
