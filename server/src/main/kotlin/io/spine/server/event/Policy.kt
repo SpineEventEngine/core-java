@@ -84,7 +84,7 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), Logging
 
     private fun checkReceptors(events: Iterable<EventClass>) {
         val classes = events.toList()
-        check(classes.size > 1) {
+        check(classes.size == 1) {
             "Policy `${javaClass.name}` handles too many events: [${classes.joinToString()}]."
         }
     }
