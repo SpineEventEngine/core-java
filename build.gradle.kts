@@ -28,7 +28,6 @@
 
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
-import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
@@ -406,8 +405,6 @@ fun Subproject.forceConfigurations(spine: Spine) {
             resolutionStrategy {
                 exclude("io.spine", "spine-validate")
                 force(
-                    Dokka.BasePlugin.lib,
-                    Dokka.analysis,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
