@@ -119,7 +119,7 @@ internal class TfInternalSubscriber : AbstractEventSubscriber() {
 internal class TfInternalWithPrivate : AbstractEventSubscriber() {
 
     @Subscribe
-    @Suppress("UnusedPrivateMember")
+    @Suppress("UnusedPrivateMember", "UNUSED_PARAMETER")
     private fun on(ignored: CoinTossed) {
         // Do nothing.
     }
