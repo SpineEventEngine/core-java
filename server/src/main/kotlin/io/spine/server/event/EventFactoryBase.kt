@@ -36,9 +36,9 @@ import io.spine.protobuf.AnyPacker.pack
 import io.spine.validate.checkValid
 
 /**
- * Abstract base for event factories.
+ * Base class for event factories.
  */
-internal abstract class EventFactoryBase(
+internal open class EventFactoryBase protected constructor(
     val origin: EventOrigin,
     val producerId: Any
 ) {
