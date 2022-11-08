@@ -34,8 +34,6 @@ plugins {
     `detekt-code-analysis`
 }
 
-val baseVersion: String by extra
-
 dependencies {
     api(project(":client"))
     val spine = Spine(project)
