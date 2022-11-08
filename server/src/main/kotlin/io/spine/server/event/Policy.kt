@@ -55,7 +55,7 @@ import io.spine.server.type.EventClass
  * ```
  * @param E the type of the event handled by this policy
  */
-public abstract class Policy<E : EventMessage>: AbstractEventReactor(), Logging {
+public abstract class Policy<E : EventMessage> : AbstractEventReactor(), Logging {
 
     protected lateinit var context: BoundedContext
 
@@ -64,7 +64,7 @@ public abstract class Policy<E : EventMessage>: AbstractEventReactor(), Logging 
      */
     @ContractFor(handler = React::class)
     protected abstract fun whenever(event: E): Iterable<Message>
-    
+
     final override fun registerWith(context: BoundedContext) {
         super.registerWith(context)
         this.context = context
@@ -84,10 +84,8 @@ public abstract class Policy<E : EventMessage>: AbstractEventReactor(), Logging 
 
     private fun checkReceptors(events: Iterable<EventClass>) {
         val classes = events.toList()
-        if (classes.size > 1) {
-            throw IllegalStateException(
-                "Policy `${javaClass.name}` handles too many events: [${classes.joinToString()}]."
-            )
+        check(classes.size > 1) {
+            "Policy `${javaClass.name}` handles too many events: [${classes.joinToString()}]."
         }
     }
 }
