@@ -62,28 +62,15 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
+    io.spine.internal.gradle.doForceVersions(configurations)
     io.spine.internal.gradle.applyWithStandard(this, rootProject,
         "base",
         "time",
         "tool-base"
     )
+
     dependencies {
         classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
-    }
-
-    io.spine.internal.gradle.doForceVersions(configurations)
-    configurations.all {
-        resolutionStrategy {
-            val spine = io.spine.internal.dependency.Spine(project)
-            val kotlin = io.spine.internal.dependency.Kotlin
-            force(
-                kotlin.stdLib,
-                kotlin.stdLibCommon,
-                spine.base,
-                spine.time,
-                spine.toolBase,
-            )
-        }
     }
 }
 
