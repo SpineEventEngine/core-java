@@ -29,6 +29,10 @@ import io.spine.internal.gradle.testing.exposeTestConfiguration
 
 group = "io.spine.tools"
 
+plugins {
+    `detekt-code-analysis`
+}
+
 dependencies {
     api(project(":server"))
     api(project(":testutil-client"))

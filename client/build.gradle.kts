@@ -28,6 +28,10 @@ import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.testing.exposeTestConfiguration
 
+plugins {
+    `detekt-code-analysis`
+}
+
 dependencies {
     api(Grpc.core)
     api(Grpc.stub)
