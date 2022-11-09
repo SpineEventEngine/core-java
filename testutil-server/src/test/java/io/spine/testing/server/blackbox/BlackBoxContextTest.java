@@ -32,7 +32,7 @@ import com.google.common.truth.Subject;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.base.EntityState;
-import io.spine.base.Tests;
+import io.spine.environment.Tests;
 import io.spine.client.Client;
 import io.spine.client.ClientRequest;
 import io.spine.client.Query;
