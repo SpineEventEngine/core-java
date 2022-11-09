@@ -28,7 +28,6 @@
 
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
-import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
@@ -62,40 +61,25 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
+    io.spine.internal.gradle.doForceVersions(configurations)
     io.spine.internal.gradle.applyWithStandard(this, rootProject,
         "base",
         "time",
         "tool-base"
     )
+
     dependencies {
         classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
-
-    io.spine.internal.gradle.doForceVersions(configurations)
-    configurations.all {
-        resolutionStrategy {
-            val spine = io.spine.internal.dependency.Spine(project)
-            val kotlin = io.spine.internal.dependency.Kotlin
-            force(
-                kotlin.stdLib,
-                kotlin.stdLibCommon,
-                spine.base,
-                spine.time,
-                spine.toolBase,
-            )
-        }
-    }
 }
 
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm")
     idea
-    id(protobufPlugin)
-    id(errorPronePlugin)
-    id(gradleDoctor.pluginId) version gradleDoctor.version
-    `detekt-code-analysis`
+    protobuf
+    errorprone
+    `gradle-doctor`
 }
 
 object BuildSettings {
@@ -421,13 +405,11 @@ fun Subproject.forceConfigurations(spine: Spine) {
             resolutionStrategy {
                 exclude("io.spine", "spine-validate")
                 force(
-                    Dokka.BasePlugin.lib,
-                    Dokka.analysis,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
                        See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
-                       .configureProtocPlugins() method which sets the version from resources. */
+                       .configureProtocPlugins()` method which sets the version from resources. */
                     Grpc.protobufPlugin,
 
                     spine.base,

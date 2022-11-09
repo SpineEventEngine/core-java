@@ -33,6 +33,7 @@ import io.spine.internal.dependency.AutoValue
 import io.spine.internal.dependency.CheckerFramework
 import io.spine.internal.dependency.CommonsCli
 import io.spine.internal.dependency.CommonsLogging
+import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.FindBugs
 import io.spine.internal.dependency.Flogger
@@ -82,6 +83,7 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         AutoCommon.lib,
         AutoService.annotations,
         CheckerFramework.annotations,
+        Dokka.BasePlugin.lib,
         ErrorProne.annotations,
         ErrorProne.core,
         Guava.lib,

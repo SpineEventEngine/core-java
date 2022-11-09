@@ -54,7 +54,7 @@ val jacksonVersion = "2.13.4"
 
 val googleAuthToolVersion = "2.1.2"
 val licenseReportVersion = "2.1"
-val grGitVersion = "3.1.1"
+val grGitVersion = "4.1.1"
 
 /**
  * The version of the Kotlin Gradle plugin.

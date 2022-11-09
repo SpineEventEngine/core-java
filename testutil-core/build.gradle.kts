@@ -30,7 +30,9 @@ import io.spine.internal.dependency.Truth
 
 group = "io.spine.tools"
 
-val baseVersion: String by extra
+plugins {
+    `detekt-code-analysis`
+}
 
 dependencies {
     api(project(":client"))
