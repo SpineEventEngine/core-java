@@ -26,9 +26,9 @@
 
 package io.spine.system.server;
 
-import io.spine.base.Environment;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.DefaultMode;
+import io.spine.environment.Environment;
+import io.spine.environment.Tests;
 import io.spine.server.given.environment.Local;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -95,9 +95,9 @@ class SystemSettingsTest {
         class AllowParallelPosting {
 
             @Test
-            @DisplayName("in the `Production` environment")
-            void forProductionEnv() {
-                env.setTo(Production.class);
+            @DisplayName("in the `DefaultMode` environment")
+            void forDefaultModeEnv() {
+                env.setTo(DefaultMode.class);
                 SystemSettings settings = SystemSettings.defaults();
                 assertTrue(settings.postEventsInParallel());
             }
@@ -147,7 +147,7 @@ class SystemSettingsTest {
             @Test
             @DisplayName("directly in the current thread")
             void usingCurrentThread() {
-                env.setTo(Production.class);
+                env.setTo(DefaultMode.class);
                 SystemSettings settings = SystemSettings.defaults();
                 assumeTrue(settings.postEventsInParallel());
 
@@ -158,7 +158,7 @@ class SystemSettingsTest {
             @Test
             @DisplayName("using the passed `Executor`")
             void usingPassedExecutor() {
-                env.setTo(Production.class);
+                env.setTo(DefaultMode.class);
                 SystemSettings settings = SystemSettings.defaults();
                 assumeTrue(settings.postEventsInParallel());
                 assertDefaultExecutor(settings);
@@ -172,7 +172,7 @@ class SystemSettingsTest {
             @Test
             @DisplayName("using the default `Executor`")
             void usingDefaultExecutor() {
-                env.setTo(Production.class);
+                env.setTo(DefaultMode.class);
                 SystemSettings settings = SystemSettings.defaults();
                 assumeTrue(settings.postEventsInParallel());
 

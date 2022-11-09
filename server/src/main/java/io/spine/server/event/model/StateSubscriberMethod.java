@@ -28,11 +28,11 @@ package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.EntityState;
-import io.spine.base.Environment;
+import io.spine.environment.Environment;
 import io.spine.base.EventMessage;
 import io.spine.base.Field;
 import io.spine.base.FieldPath;
-import io.spine.base.Tests;
+import io.spine.environment.Tests;
 import io.spine.core.BoundedContext;
 import io.spine.core.BoundedContextName;
 import io.spine.logging.Logging;

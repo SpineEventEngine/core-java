@@ -28,9 +28,9 @@ package io.spine.server.storage.system;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Subject;
-import io.spine.base.Environment;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.DefaultMode;
+import io.spine.environment.Environment;
+import io.spine.environment.Tests;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
@@ -71,21 +71,21 @@ class SystemAwareStorageFactoryTest {
     }
 
     @Test
-    @DisplayName("wrap production storage")
-    void wrapProdStorage() {
+    @DisplayName("wrap default storage")
+    void wrapDefaultStorage() {
         Environment.instance()
-                   .setTo(Production.class);
+                   .setTo(DefaultMode.class);
 
         ServerEnvironment serverEnv = ServerEnvironment.instance();
-        StorageFactory productionStorage = new MemoizingStorageFactory();
-        ServerEnvironment.when(Production.class)
-                         .use(productionStorage);
+        StorageFactory defaultStorage = new MemoizingStorageFactory();
+        ServerEnvironment.when(DefaultMode.class)
+                         .use(defaultStorage);
         StorageFactory storageFactory = serverEnv.storageFactory();
         assertThat(storageFactory)
                 .isInstanceOf(SystemAwareStorageFactory.class);
         SystemAwareStorageFactory systemAware = (SystemAwareStorageFactory) storageFactory;
         assertThat(systemAware.delegate())
-                .isEqualTo(productionStorage);
+                .isEqualTo(defaultStorage);
 
         Environment.instance()
                    .reset();

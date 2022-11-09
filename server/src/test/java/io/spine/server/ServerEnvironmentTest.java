@@ -26,10 +26,10 @@
 
 package io.spine.server;
 
-import io.spine.base.Environment;
-import io.spine.base.EnvironmentType;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.DefaultMode;
+import io.spine.environment.Environment;
+import io.spine.environment.EnvironmentType;
+import io.spine.environment.Tests;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.given.environment.Local;
@@ -167,9 +167,9 @@ class ServerEnvironmentTest {
         }
 
         @Test
-        @DisplayName("close the production transport, tracer and storage factories")
-        void productionCloses() throws Exception {
-            testClosesEnv(Production.class);
+        @DisplayName("close the default transport, tracer and storage factories")
+        void defaultModeCloses() throws Exception {
+            testClosesEnv(DefaultMode.class);
         }
 
         @Test
@@ -184,7 +184,7 @@ class ServerEnvironmentTest {
             testClosesEnv(Local.class);
         }
 
-        private void testClosesEnv(Class<? extends EnvironmentType> envType) throws Exception {
+        private void testClosesEnv(Class<? extends EnvironmentType<?>> envType) throws Exception {
             ServerEnvironment.when(envType)
                              .use(storageFactory)
                              .use(transportFactory)
