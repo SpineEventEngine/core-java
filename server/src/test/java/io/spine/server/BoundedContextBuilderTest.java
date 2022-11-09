@@ -54,6 +54,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -146,6 +147,27 @@ class BoundedContextBuilderTest {
 
         assertThat(builder.tenantIndex())
                 .hasValue(tenantIndex);
+    }
+
+    @Test
+    @DisplayName("allow creating a testing copy")
+    void createTestingCopy() {
+        BoundedContextBuilder reference =
+                BoundedContext.multitenant("Context to copy")
+                              .setTenantIndex(new StubTenantIndex())
+                              .addCommandDispatcher(new NoOpCommandDispatcher())
+                              .addEventDispatcher(new NoOpEventDispatcher())
+                              .add(DefaultRepository.of(ProjectAggregate.class))
+                              .add(DefaultRepository.of(ProjectProjection.class))
+                              .addCommandFilter(command -> Optional.empty())
+                              .addCommandListener(command -> {})
+                              .addEventFilter(event -> Optional.empty())
+                              .addEventListener(event -> {});
+        reference.systemSettings().disableParallelPosting();
+
+        BoundedContextBuilder copy = reference.testingCopy();
+        assertThat(copy)
+             .isEqualTo(reference);
     }
 
     /**

@@ -60,6 +60,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -651,14 +652,11 @@ public final class BoundedContextBuilder implements Logging {
     @Internal
     @VisibleForTesting
     public BoundedContextBuilder testingCopy() {
-        String name = name().getValue();
         EventEnricher enricher =
                 eventEnricher().orElseGet(() -> EventEnricher.newBuilder()
                                                              .build());
         BoundedContextBuilder copy =
-                isMultitenant()
-                ? BoundedContext.multitenant(name)
-                : BoundedContext.singleTenant(name);
+                new BoundedContextBuilder(this.spec, this.systemSettings);
         copy.enrichEventsUsing(enricher);
         repositories().forEach(copy::add);
         commandDispatchers().forEach(copy::addCommandDispatcher);
@@ -666,5 +664,31 @@ public final class BoundedContextBuilder implements Logging {
         eventDispatchers().forEach(copy::addEventDispatcher);
         eventBus.filters().forEach(copy::addEventFilter);
         return copy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        BoundedContextBuilder builder = (BoundedContextBuilder) o;
+        return spec.equals(builder.spec) && commandBus.equals(builder.commandBus) &&
+                commandDispatchers.equals(builder.commandDispatchers) &&
+                eventBus.equals(builder.eventBus) &&
+                eventDispatchers.equals(builder.eventDispatchers) &&
+                systemSettings.equals(builder.systemSettings) &&
+                Objects.equals(stand, builder.stand) &&
+                Objects.equals(rootDirectory, builder.rootDirectory) &&
+                Objects.equals(tenantIndex, builder.tenantIndex) &&
+                repositories.equals(builder.repositories);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(spec, commandBus, commandDispatchers, eventBus, eventDispatchers,
+                            systemSettings, stand, rootDirectory, tenantIndex, repositories);
     }
 }
