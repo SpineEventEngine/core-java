@@ -300,6 +300,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Adds a listener for commands posted to the {@code CommandBus} of the context being built.
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder addCommandListener(Listener<CommandEnvelope> listener) {
         checkNotNull(listener);
         commandBus.addListener(listener);
@@ -339,6 +340,7 @@ public final class BoundedContextBuilder implements Logging {
     /**
      * Adds a listener of the events posted to the {@code EventBus} of the context being built.
      */
+    @CanIgnoreReturnValue
     public BoundedContextBuilder addEventListener(Listener<EventEnvelope> listener) {
         checkNotNull(listener);
         eventBus.addListener(listener);
@@ -652,43 +654,20 @@ public final class BoundedContextBuilder implements Logging {
     @Internal
     @VisibleForTesting
     public BoundedContextBuilder testingCopy() {
+        BoundedContextBuilder copy =
+                new BoundedContextBuilder(this.spec, this.systemSettings);
         EventEnricher enricher =
                 eventEnricher().orElseGet(() -> EventEnricher.newBuilder()
                                                              .build());
-        BoundedContextBuilder copy =
-                new BoundedContextBuilder(this.spec, this.systemSettings);
         copy.enrichEventsUsing(enricher);
+        copy.setTenantIndex(this.tenantIndex);
         repositories().forEach(copy::add);
         commandDispatchers().forEach(copy::addCommandDispatcher);
         commandBus.filters().forEach(copy::addCommandFilter);
+        commandBus.listeners().forEach(copy::addCommandListener);
         eventDispatchers().forEach(copy::addEventDispatcher);
         eventBus.filters().forEach(copy::addEventFilter);
+        eventBus.listeners().forEach(copy::addEventListener);
         return copy;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        BoundedContextBuilder builder = (BoundedContextBuilder) o;
-        return spec.equals(builder.spec) && commandBus.equals(builder.commandBus) &&
-                commandDispatchers.equals(builder.commandDispatchers) &&
-                eventBus.equals(builder.eventBus) &&
-                eventDispatchers.equals(builder.eventDispatchers) &&
-                systemSettings.equals(builder.systemSettings) &&
-                Objects.equals(stand, builder.stand) &&
-                Objects.equals(rootDirectory, builder.rootDirectory) &&
-                Objects.equals(tenantIndex, builder.tenantIndex) &&
-                repositories.equals(builder.repositories);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(spec, commandBus, commandDispatchers, eventBus, eventDispatchers,
-                            systemSettings, stand, rootDirectory, tenantIndex, repositories);
     }
 }
