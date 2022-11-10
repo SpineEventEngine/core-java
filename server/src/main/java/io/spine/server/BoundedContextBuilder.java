@@ -659,7 +659,7 @@ public final class BoundedContextBuilder implements Logging {
                 eventEnricher().orElseGet(() -> EventEnricher.newBuilder()
                                                              .build());
         copy.enrichEventsUsing(enricher);
-        copy.setTenantIndex(this.tenantIndex);
+        tenantIndex().map(copy::setTenantIndex);
         repositories().forEach(copy::add);
         commandDispatchers().forEach(copy::addCommandDispatcher);
         commandBus.filters().forEach(copy::addCommandFilter);
