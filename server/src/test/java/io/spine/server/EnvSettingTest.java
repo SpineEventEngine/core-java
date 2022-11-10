@@ -26,9 +26,9 @@
 
 package io.spine.server;
 
-import io.spine.base.EnvironmentType;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.DefaultMode;
+import io.spine.environment.EnvironmentType;
+import io.spine.environment.Tests;
 import io.spine.server.given.environment.Local;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.Assertions.assertNpe;
+import static io.spine.testing.Tests.nullRef;
 
 @DisplayName("`EnvSetting` should")
 @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -54,9 +55,9 @@ class EnvSettingTest {
     class NoNulls {
 
         @Test
-        @DisplayName("for the `Production` environment")
-        void forProd() {
-            testNoNullsForEnv(Production.class);
+        @DisplayName("for the `DefaultMode` environment")
+        void forDefault() {
+            testNoNullsForEnv(DefaultMode.class);
         }
 
         @Test
@@ -76,14 +77,14 @@ class EnvSettingTest {
         @SuppressWarnings("ThrowableNotThrown")
         void forEnv() {
             EnvSetting<StorageFactory> setting = new EnvSetting<>();
-            assertNpe(() -> setting.use(InMemoryStorageFactory.newInstance(), null));
+            assertNpe(() -> setting.use(InMemoryStorageFactory.newInstance(), nullRef()));
         }
 
         @SuppressWarnings("ThrowableNotThrown")
-        private void testNoNullsForEnv(Class<? extends EnvironmentType> envType) {
+        private void testNoNullsForEnv(Class<? extends EnvironmentType<?>> envType) {
             EnvSetting<?> setting = new EnvSetting<Void>();
-            assertNpe(() -> setting.use(null, envType));
-            assertNpe(() -> setting.lazyUse(null, envType));
+            assertNpe(() -> setting.use(nullRef(), envType));
+            assertNpe(() -> setting.lazyUse(nullRef(), envType));
         }
     }
 
@@ -93,9 +94,9 @@ class EnvSettingTest {
     class ReturnValue {
 
         @Test
-        @DisplayName("for the `Production` environment")
-        void forProduction() {
-            testReturnsForEnv(Production.class);
+        @DisplayName("for the `DefaultMode` environment")
+        void forDefault() {
+            testReturnsForEnv(DefaultMode.class);
         }
 
         @Test
@@ -110,7 +111,7 @@ class EnvSettingTest {
             testReturnsForEnv(Local.class);
         }
 
-        private void testReturnsForEnv(Class<? extends EnvironmentType> type) {
+        private void testReturnsForEnv(Class<? extends EnvironmentType<?>> type) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             storageFactory.use(factory, type);
@@ -125,15 +126,15 @@ class EnvSettingTest {
         class AssignDefault {
 
             @Test
-            @DisplayName("assign for a missing `Production` environment")
-            void assignDefaultForProd() {
-                testAssignsDefaultForEnv(Production.class);
+            @DisplayName("assign for a missing `DefaultMode` environment")
+            void assignDefaultForDefaultMode() {
+                testAssignsDefaultForEnv(DefaultMode.class);
             }
 
             @Test
-            @DisplayName("retain the original `Production` env value")
-            void retainForProd() {
-                testRetainsDefaultForEnv(Production.class);
+            @DisplayName("retain the original `DefaultMode` env value")
+            void retainForDefaultMode() {
+                testRetainsDefaultForEnv(DefaultMode.class);
             }
 
             @Test
@@ -160,20 +161,20 @@ class EnvSettingTest {
                 testRetainsDefaultForEnv(Tests.class);
             }
 
-            void testAssignsDefaultForEnv(Class<? extends EnvironmentType> type) {
-                MemoizingStorageFactory memoizingFactory = new MemoizingStorageFactory();
+            void testAssignsDefaultForEnv(Class<? extends EnvironmentType<?>> type) {
+                StorageFactory memoizingFactory = new MemoizingStorageFactory();
                 EnvSetting<StorageFactory> storageFactory =
                         new EnvSetting<>(type, () -> memoizingFactory);
                 assertThat(storageFactory.value(type))
                         .isSameInstanceAs(memoizingFactory);
             }
 
-            void testRetainsDefaultForEnv(Class<? extends EnvironmentType> type) {
-                MemoizingStorageFactory defaultFactory = new MemoizingStorageFactory();
+            void testRetainsDefaultForEnv(Class<? extends EnvironmentType<?>> type) {
+                StorageFactory defaultFactory = new MemoizingStorageFactory();
                 EnvSetting<StorageFactory> storageFactory =
                         new EnvSetting<>(type, () -> defaultFactory);
 
-                MemoizingStorageFactory actualFactory = new MemoizingStorageFactory();
+                StorageFactory actualFactory = new MemoizingStorageFactory();
                 storageFactory.use(actualFactory, type);
 
                 assertThat(storageFactory.value(type)).isSameInstanceAs(actualFactory);
@@ -186,9 +187,9 @@ class EnvSettingTest {
     class Lazy {
 
         @Test
-        @DisplayName("for the `Production` environment")
-        void forProduction() {
-            testLazyForEnv(Production.class);
+        @DisplayName("for the `DefaultMode` environment")
+        void forDefault() {
+            testLazyForEnv(DefaultMode.class);
         }
 
         @Test
@@ -203,7 +204,7 @@ class EnvSettingTest {
             testLazyForEnv(Local.class);
         }
 
-        private void testLazyForEnv(Class<? extends EnvironmentType> type) {
+        private void testLazyForEnv(Class<? extends EnvironmentType<?>> type) {
             InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
             EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
             AtomicBoolean resolved = new AtomicBoolean(false);
@@ -224,18 +225,18 @@ class EnvSettingTest {
     @Test
     @DisplayName("reset the value for all environments")
     void resetTheValues() {
-        InMemoryStorageFactory prodStorageFactory = InMemoryStorageFactory.newInstance();
-        MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
+        InMemoryStorageFactory defaultStorageFactory = InMemoryStorageFactory.newInstance();
+        StorageFactory testingStorageFactory = new MemoizingStorageFactory();
         InMemoryStorageFactory localStorageFactory = InMemoryStorageFactory.newInstance();
 
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-        storageFactory.use(prodStorageFactory, Production.class);
+        storageFactory.use(defaultStorageFactory, DefaultMode.class);
         storageFactory.use(testingStorageFactory, Tests.class);
         storageFactory.use(localStorageFactory, Local.class);
 
         storageFactory.reset();
 
-        Stream.of(Production.class, Tests.class, Local.class)
+        Stream.of(DefaultMode.class, Tests.class, Local.class)
               .map(storageFactory::optionalValue)
               .forEach(s -> assertThat(s).isEmpty());
     }
@@ -247,8 +248,8 @@ class EnvSettingTest {
 
         EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-        storageSetting.use(storageFactory, Production.class);
-        storageSetting.ifPresentForEnvironment(Production.class, AutoCloseable::close);
+        storageSetting.use(storageFactory, DefaultMode.class);
+        storageSetting.ifPresentForEnvironment(DefaultMode.class, AutoCloseable::close);
 
         assertThat(storageFactory.isClosed()).isTrue();
     }
@@ -256,21 +257,20 @@ class EnvSettingTest {
     @Test
     @DisplayName("run an operation for all present values")
     void runOperationForAll() throws Exception {
-        MemoizingStorageFactory prodStorageFactory = new MemoizingStorageFactory();
+        MemoizingStorageFactory defaultStorageFactory = new MemoizingStorageFactory();
         MemoizingStorageFactory testingStorageFactory = new MemoizingStorageFactory();
         MemoizingStorageFactory localStorageFactory = new MemoizingStorageFactory();
 
         EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-        storageSetting.use(prodStorageFactory, Production.class);
+        storageSetting.use(defaultStorageFactory, DefaultMode.class);
         storageSetting.use(testingStorageFactory, Tests.class);
         storageSetting.use(localStorageFactory, Local.class);
 
         storageSetting.apply(AutoCloseable::close);
 
-        assertThat(prodStorageFactory.isClosed()).isTrue();
+        assertThat(defaultStorageFactory.isClosed()).isTrue();
         assertThat(testingStorageFactory.isClosed()).isTrue();
         assertThat(localStorageFactory.isClosed()).isTrue();
-
     }
 }

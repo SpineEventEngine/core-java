@@ -29,12 +29,11 @@ package io.spine.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
-import io.spine.base.CustomEnvironmentType;
-import io.spine.base.Environment;
-import io.spine.base.EnvironmentType;
+import io.spine.environment.CustomEnvironmentType;
+import io.spine.environment.Environment;
+import io.spine.environment.EnvironmentType;
 import io.spine.base.Identifier;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.Tests;
 import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandbus.ExecutorCommandScheduler;
 import io.spine.server.delivery.Delivery;
@@ -60,11 +59,12 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * 
  * <p>Some parts of the {@code ServerEnvironment} can be customized based on the {@code
  * EnvironmentType}. To do so, one of the overloads of the {@code use} method can be called.
- * Two environment types exist out of the box: {@link Tests} and {@link Production}.
+ * Two environment types exist out of the box: {@link Tests}
+ * and {@link io.spine.environment.DefaultMode DefaultMode}.
  * For example:
  * <pre>
  *
- *     ServerEnvironment.when(Production.class)
+ *     ServerEnvironment.when(DefaultMode.class)
  *                      .use(productionStorageFactory)
  *                      .use(memoizingTracerFactory);
  *     ServerEnvironment.when(Tests.class)
@@ -162,7 +162,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * @apiNote This is a convenience method for server-side configuration code, which
      *         simply delegates to {@link Environment#type()}.
      */
-    public Class<? extends EnvironmentType> type() {
+    public Class<? extends EnvironmentType<?>> type() {
         return Environment.instance().type();
     }
 
@@ -180,7 +180,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * a {@linkplain Delivery#local() local implementation} of {@code Delivery}.
      */
     public synchronized Delivery delivery() {
-        Class<? extends EnvironmentType> currentEnv = environment().type();
+        Class<? extends EnvironmentType<?>> currentEnv = environment().type();
         Optional<Delivery> currentDelivery = this.delivery.optionalValue(currentEnv);
         if (currentDelivery.isPresent()) {
             return currentDelivery.get();
@@ -243,7 +243,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * Obtains the {@link TracerFactory} associated with the current environment, if it was set.
      */
     public Optional<TracerFactory> tracing() {
-        Class<? extends EnvironmentType> currentType = environment().type();
+        Class<? extends EnvironmentType<?>> currentType = environment().type();
         return this.tracerFactory.optionalValue(currentType);
     }
 
@@ -260,7 +260,7 @@ public final class ServerEnvironment implements AutoCloseable {
      *         {@linkplain TypeConfigurator#use(StorageFactory) configured} prior to the call
      */
     public StorageFactory storageFactory() {
-        Class<? extends EnvironmentType> type = environment().type();
+        Class<? extends EnvironmentType<?>> type = environment().type();
         StorageFactory result = storageFactory.optionalValue(type)
                 .orElseThrow(() -> SuggestConfiguring.storageFactory(type));
         return result;
@@ -272,7 +272,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @Internal
     public Optional<StorageFactory> optionalStorageFactory() {
-        Class<? extends EnvironmentType> type = environment().type();
+        Class<? extends EnvironmentType<?>> type = environment().type();
         return storageFactory.optionalValue(type);
     }
 
@@ -288,7 +288,7 @@ public final class ServerEnvironment implements AutoCloseable {
      * {@link InMemoryTransportFactory} and returns it.
      */
     public TransportFactory transportFactory() {
-        Class<? extends EnvironmentType> type = environment().type();
+        Class<? extends EnvironmentType<?>> type = environment().type();
         TransportFactory result = transportFactory.optionalValue(type)
                 .orElseThrow(() -> SuggestConfiguring.transportFactory(type));
 
@@ -303,12 +303,13 @@ public final class ServerEnvironment implements AutoCloseable {
      * This is test-only method required for cleaning of the server environment instance in tests.
      */
     @VisibleForTesting
+    @SuppressWarnings("TestOnlyProblems")   /* `reset()` is not test-only. */
     public void reset() {
         transportFactory.reset();
         tracerFactory.reset();
         storageFactory.reset();
         delivery.reset();
-        Class<? extends EnvironmentType> currentEnv = environment().type();
+        Class<? extends EnvironmentType<?>> currentEnv = environment().type();
         delivery.use(Delivery.local(), currentEnv);
         resetDeploymentType();
     }
@@ -326,7 +327,7 @@ public final class ServerEnvironment implements AutoCloseable {
     /**
      * Starts flowing API chain for configuring {@code ServerEnvironment} for the passed type.
      */
-    public static TypeConfigurator when(Class<? extends EnvironmentType> type) {
+    public static TypeConfigurator when(Class<? extends EnvironmentType<?>> type) {
         checkNotNull(type);
         return new TypeConfigurator(type);
     }
@@ -337,9 +338,9 @@ public final class ServerEnvironment implements AutoCloseable {
     public static class TypeConfigurator {
 
         private final ServerEnvironment se;
-        private final Class<? extends EnvironmentType> type;
+        private final Class<? extends EnvironmentType<?>> type;
 
-        private TypeConfigurator(Class<? extends EnvironmentType> type) {
+        private TypeConfigurator(Class<? extends EnvironmentType<?>> type) {
             this.se = instance();
             if (CustomEnvironmentType.class.isAssignableFrom(type)) {
                 registerCustomType(type);
@@ -347,10 +348,10 @@ public final class ServerEnvironment implements AutoCloseable {
             this.type = checkNotNull(type);
         }
 
-        private static void registerCustomType(Class<? extends EnvironmentType> type) {
+        private static void registerCustomType(Class<? extends EnvironmentType<?>> type) {
             @SuppressWarnings("unchecked") // checked by calling site.
-            Class<? extends CustomEnvironmentType> customType =
-                    (Class<? extends CustomEnvironmentType>) type;
+            Class<? extends CustomEnvironmentType<?>> customType =
+                    (Class<? extends CustomEnvironmentType<?>>) type;
             Environment.instance()
                        .register(customType);
         }
@@ -488,7 +489,7 @@ public final class ServerEnvironment implements AutoCloseable {
      */
     @FunctionalInterface
     @SuppressWarnings("NewClassNamingConvention") // two letters for this name is fine.
-    public interface Fn<R> extends Function<Class<? extends EnvironmentType>, R> {
+    public interface Fn<R> extends Function<Class<? extends EnvironmentType<?>>, R> {
     }
 
     /**
@@ -502,7 +503,7 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         private static IllegalStateException
-        storageFactory(Class<? extends EnvironmentType> type) {
+        storageFactory(Class<? extends EnvironmentType<?>> type) {
             return raise(
                     "The storage factory for the environment `%s` was not configured.",
                     type, "storageFactory"
@@ -510,7 +511,7 @@ public final class ServerEnvironment implements AutoCloseable {
         }
 
         private static IllegalStateException
-        transportFactory(Class<? extends EnvironmentType> type) {
+        transportFactory(Class<? extends EnvironmentType<?>> type) {
             return raise(
                     "Transport factory is not assigned for the current environment `%s`.",
                     type, "transportFactory"
@@ -530,7 +531,7 @@ public final class ServerEnvironment implements AutoCloseable {
          *         the name of the parameter passed to the {@code use()} method
          */
         private static IllegalStateException
-        raise(String prefixFmt, Class<? extends EnvironmentType> type, String featureParamName) {
+        raise(String prefixFmt, Class<? extends EnvironmentType<?>> type, String featureParamName) {
             String typeName = type.getSimpleName();
             String fmt = prefixFmt + " Please call `ServerEnvironment.when(%s.class).use(%s);`.";
             return newIllegalStateException(fmt, typeName, typeName, featureParamName);

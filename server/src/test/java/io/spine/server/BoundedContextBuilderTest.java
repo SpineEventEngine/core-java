@@ -38,13 +38,16 @@ import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.bc.given.ProjectProjection;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.Listener;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
+import io.spine.test.bc.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -54,6 +57,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -176,6 +180,86 @@ class BoundedContextBuilderTest {
         @Override
         public void close() {
             // Do nothing.
+        }
+    }
+
+    @Nested
+    @SuppressWarnings("UnnecessaryLambda")  /* For brevity. */
+    class TestingCopy {
+
+        private final CommandDispatcher cmdDispatcher = new NoOpCommandDispatcher();
+        private final EventDispatcher eventDispatcher = new NoOpEventDispatcher();
+        private final Repository<ProjectId, ProjectProjection> repo =
+                DefaultRepository.of(ProjectProjection.class);
+        private final BusFilter<CommandEnvelope> cmdFilter = command -> Optional.empty();
+        private final Listener<CommandEnvelope> cmdListener = command -> {};
+        private final BusFilter<EventEnvelope> eventFilter = event -> Optional.empty();
+        private final Listener<EventEnvelope> eventListener = event -> {};
+        private TenantIndex tenantIndex = new StubTenantIndex();
+
+        @Test
+        @DisplayName("allow creating a testing copy")
+        void createCopy() {
+            BoundedContextBuilder reference = prepareReference();
+
+            BoundedContextBuilder copy = reference.testingCopy();
+            BoundedContext copiedCtx = copy.build();
+
+            assertIndex(copy);
+            assertDispatchers(copy);
+            assertRepos(copy);
+            assertCmdBus(copiedCtx);
+            assertEventBus(copiedCtx);
+        }
+
+        private void assertEventBus(BoundedContext copiedCtx) {
+            EventBus eventBus = copiedCtx.eventBus();
+            assertThat(eventBus.hasFilter(eventFilter))
+                    .isTrue();
+            assertThat(eventBus.hasListener(eventListener))
+                    .isTrue();
+        }
+
+        private void assertCmdBus(BoundedContext copiedCtx) {
+            CommandBus cmdBus = copiedCtx.commandBus();
+            assertThat(cmdBus.hasListener(cmdListener))
+                    .isTrue();
+            assertThat(cmdBus.hasFilter(cmdFilter))
+                    .isTrue();
+        }
+
+        private void assertRepos(BoundedContextBuilder copy) {
+            assertThat(copy.repositories())
+                    .containsExactly(repo);
+        }
+
+        private void assertDispatchers(BoundedContextBuilder copy) {
+            assertThat(copy.commandDispatchers())
+                    .containsExactly(cmdDispatcher);
+            assertThat(copy.eventDispatchers())
+                    .containsExactly(eventDispatcher);
+        }
+
+        private void assertIndex(BoundedContextBuilder copy) {
+            assertThat(copy.tenantIndex())
+                    .isPresent();
+            assertThat(copy.tenantIndex().get())
+                    .isInstanceOf(StubTenantIndex.class);
+        }
+
+        private BoundedContextBuilder prepareReference() {
+            BoundedContextBuilder reference =
+                    BoundedContext.multitenant("Context to copy")
+                                  .setTenantIndex(tenantIndex)
+                                  .addCommandDispatcher(cmdDispatcher)
+                                  .addEventDispatcher(eventDispatcher)
+                                  .add(repo)
+                                  .addCommandFilter(cmdFilter)
+                                  .addCommandListener(cmdListener)
+                                  .addEventFilter(eventFilter)
+                                  .addEventListener(eventListener);
+            reference.systemSettings().disableParallelPosting();
+            return reference;
         }
     }
 

@@ -28,10 +28,10 @@ package io.spine.server;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.common.truth.Truth8;
-import io.spine.base.Environment;
-import io.spine.base.EnvironmentType;
-import io.spine.base.Production;
-import io.spine.base.Tests;
+import io.spine.environment.DefaultMode;
+import io.spine.environment.Environment;
+import io.spine.environment.EnvironmentType;
+import io.spine.environment.Tests;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.UniformAcrossAllShards;
 import io.spine.server.given.environment.Local;
@@ -93,12 +93,12 @@ class ServerEnvironmentConfigTest {
         }
 
         @Nested
-        @DisplayName("`Production`")
+        @DisplayName("`DefaultMode`")
         class ForProd {
 
             @BeforeEach
-            void turnToProduction() {
-                environment.setTo(Production.class);
+            void turnToDefaultMode() {
+                environment.setTo(DefaultMode.class);
             }
 
             @Test
@@ -107,10 +107,10 @@ class ServerEnvironmentConfigTest {
                 assertThrows(IllegalStateException.class, serverEnvironment::transportFactory);
             }
             @Test
-            @DisplayName("return configured instance in Production")
-            void productionValue() {
+            @DisplayName("return configured instance in `DefaultMode`")
+            void defaultValue() {
                 TransportFactory factory = new StubTransportFactory();
-                when(Production.class).use(factory);
+                when(DefaultMode.class).use(factory);
                 assertValue(factory);
             }
         }
@@ -178,7 +178,7 @@ class ServerEnvironmentConfigTest {
     @DisplayName("`Delivery`")
     class OfDelivery {
 
-        private Class<? extends EnvironmentType> currentType;
+        private Class<? extends EnvironmentType<?>> currentType;
         private Delivery currentDelivery;
 
         private void assertValue(Delivery delivery) {
@@ -241,7 +241,7 @@ class ServerEnvironmentConfigTest {
      */
     static final class ReturnValue<R> implements ServerEnvironment.Fn<R> {
 
-        private @Nullable Class<? extends EnvironmentType> typePassed;
+        private @Nullable Class<? extends EnvironmentType<?>> typePassed;
 
         private final R value;
 
@@ -250,12 +250,12 @@ class ServerEnvironmentConfigTest {
         }
 
         @Override
-        public R apply(Class<? extends EnvironmentType> type) {
+        public R apply(Class<? extends EnvironmentType<?>> type) {
             typePassed = type;
             return value;
         }
 
-        @Nullable Class<? extends EnvironmentType> typePassed() {
+        @Nullable Class<? extends EnvironmentType<?>> typePassed() {
             return typePassed;
         }
     }
@@ -265,12 +265,12 @@ class ServerEnvironmentConfigTest {
     class OfTracerFactory {
 
         @Test
-        @DisplayName("returning an instance for the production environment")
-        void forProduction() {
-            environment.setTo(Production.class);
+        @DisplayName("returning an instance for the `DefaultMode`")
+        void forDefaultMode() {
+            environment.setTo(DefaultMode.class);
 
             TracerFactory factory = new MemoizingTracerFactory();
-            when(Production.class).use(factory);
+            when(DefaultMode.class).use(factory);
 
             assertTracer(factory);
         }
@@ -333,6 +333,7 @@ class ServerEnvironmentConfigTest {
             return (SystemAwareStorageFactory) serverEnvironment.storageFactory();
         }
 
+        @SuppressWarnings("resource")   /* We don't care in tests. */
         private void assertDelegateIs(StorageFactory factory) {
             StorageFactory delegate = systemAwareFactory().delegate();
             assertThat(delegate)
@@ -340,30 +341,32 @@ class ServerEnvironmentConfigTest {
         }
 
         @Nested
-        @DisplayName("`Production`")
-        class ForProduction {
+        @DisplayName("`DefaultMode`")
+        class ForDefaultMode {
 
             @BeforeEach
-            void turnToProduction() {
-                environment.setTo(Production.class);
+            void turnToDefaultMode() {
+                environment.setTo(DefaultMode.class);
             }
 
             @Test
             @DisplayName("throwing an `IllegalStateException` if not configured")
+            @SuppressWarnings("ResultOfMethodCallIgnored")
             void throwsIfNotConfigured() {
                 assertThrows(IllegalStateException.class, serverEnvironment::storageFactory);
             }
 
             @Test
             @DisplayName("return configured `StorageFactory`")
-            void productionFactory() {
+            void defaultFactory() {
                 StorageFactory factory = InMemoryStorageFactory.newInstance();
-                when(Production.class).use(factory);
+                when(DefaultMode.class).use(factory);
                 assertDelegateIs(factory);
             }
 
             @Test
             @DisplayName("return `InMemoryStorageFactory` under Tests")
+            @SuppressWarnings("resource")   /* We don't care in tests. */
             void testsFactory() {
                 environment.setTo(Tests.class);
 

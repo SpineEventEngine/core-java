@@ -163,6 +163,7 @@ public abstract class BlackBoxContext implements Logging, Closeable {
         this.clientSupplier = new ClientSupplier(context);
     }
 
+    @SuppressWarnings("TestOnlyProblems") /* `testingCopy` is not test-only. */
     private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
         BoundedContextBuilder result = builder.testingCopy();
         result.addCommandListener(commands)

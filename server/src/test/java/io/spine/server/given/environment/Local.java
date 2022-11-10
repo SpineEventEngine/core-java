@@ -26,19 +26,24 @@
 
 package io.spine.server.given.environment;
 
-import io.spine.base.EnvironmentType;
+import io.spine.environment.CustomEnvironmentType;
 
 /**
  * A custom environment for testing the {@link io.spine.server.ServerEnvironment} and
  * {@link io.spine.server.EnvSetting}.
  */
-public final class Local extends EnvironmentType {
+public final class Local extends CustomEnvironmentType<Local> {
 
     private static boolean enabled = false;
 
     @Override
     protected boolean enabled() {
         return enabled;
+    }
+
+    @Override
+    protected Local self() {
+        return this;
     }
 
     public static void enable() {

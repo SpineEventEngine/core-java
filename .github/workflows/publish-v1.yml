@@ -1,0 +1,70 @@
+name: Publishing for Spine v1.x
+
+on:
+  push:
+    branches:
+      - v1
+      - 1.x-dev
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: 8
+          distribution: zulu
+          cache: gradle
+
+      - name: Decrypt CloudRepo credentials
+        run: ./config/scripts/decrypt.sh "$CLOUDREPO_CREDENTIALS_KEY" ./.github/keys/cloudrepo.properties.gpg ./cloudrepo.properties
+        env:
+          CLOUDREPO_CREDENTIALS_KEY: ${{ secrets.CLOUDREPO_CREDENTIALS_KEY }}
+
+      - name: Decrypt Git SSH credentials
+        run: ./config/scripts/decrypt.sh "$GIT_CREDENTIALS_KEY" ./.github/keys/deploy_key_rsa.gpg ./deploy_key_rsa
+        env:
+          GIT_CREDENTIALS_KEY: ${{ secrets.GIT_CREDENTIALS_KEY }}
+
+        # Make sure the SSH key is not "too visible". SSH agent will not accept it otherwise.
+      - name: Set file system permissions
+        run: chmod 400 ./deploy_key_rsa && chmod +x ./config/scripts/register-ssh-key.sh
+
+      - name: Decrypt GCS credentials
+        run: ./config/scripts/decrypt.sh "$GCS_CREDENTIALS_KEY" ./.github/keys/gcs-auth-key.json.gpg ./gcs-auth-key.json
+        env:
+          GCS_CREDENTIALS_KEY: ${{ secrets.GCS_CREDENTIALS_KEY }}
+
+      - name: Decrypt GCAR credentials
+        run: ./config/scripts/decrypt.sh "$MAVEN_PUBLISHER_KEY" ./.github/keys/maven-publisher.json.gpg ./maven-publisher.json
+        env:
+          MAVEN_PUBLISHER_KEY: ${{ secrets.MAVEN_PUBLISHER_KEY }}
+
+      - name: Decrypt Git SSH credentials
+        run: ./config/scripts/decrypt.sh "$GRADLE_PORTAL_CREDENTIALS_KEY" ./.github/keys/gradle-plugin-portal.secret.properties.gpg ./gradle-plugin-portal.secret.properties
+        env:
+          GRADLE_PORTAL_CREDENTIALS_KEY: ${{ secrets.GRADLE_PORTAL_CREDENTIALS_KEY }}
+
+      - name: Append Gradle properties
+        run: cat ./gradle-plugin-portal.secret.properties >> ./gradle.properties
+
+      - name: Publish artifacts to Maven
+        # Since we're in the `v1`/`1.x-dev` branch already, this means that tests of a PR passed.
+        # So, no need to run the tests again when publishing.\
+        #
+        # Also, we don't want to update the GitHub Pages content, as it may be already
+        # updated with the contents of 2.x branch. So this operation should be performed
+        # manually, if really needed.
+        # See https://github.com/SpineEventEngine/config/tree/master/scripts/publish-documentation.
+        run: ./gradlew publish -x test -x updateGitHubPages --stacktrace
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORMAL_GIT_HUB_PAGES_AUTHOR: developers@spine.io
+          # https://docs.github.com/en/actions/reference/environment-variables
+          REPO_SLUG: $GITHUB_REPOSITORY    # e.g. SpineEventEngine/core-java
+          GOOGLE_APPLICATION_CREDENTIALS: ./maven-publisher.json
+          NPM_TOKEN: ${{ secrets.NPM_SECRET }}
