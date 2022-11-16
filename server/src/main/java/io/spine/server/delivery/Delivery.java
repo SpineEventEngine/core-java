@@ -459,8 +459,8 @@ public final class Delivery implements Logging {
             Page<InboxMessage> currentPage = maybePage.get();
             ImmutableList<InboxMessage> messages = currentPage.contents();
             if (!messages.isEmpty()) {
-                DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
                 Conveyor conveyor = new Conveyor(messages, deliveredMessages);
+                DeliveryAction action = new GroupByTargetAndDeliver(deliveries, monitor, conveyor);
                 Iterable<CatchUp> catchUpJobs = catchUpStorage.readAll();
                 List<Station> stations = conveyorStationsFor(catchUpJobs, action);
                 DeliveryStage stage = launch(conveyor, stations, index);

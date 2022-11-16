@@ -89,7 +89,20 @@ public class DeliveryMonitor {
         // do nothing.
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})   /* Part of public API. */
     public void onDeliveryStarted(ShardIndex index) {
+        // do nothing.
+    }
+
+    /**
+     * A callback invoked if the signal transmitted via given message
+     * was handled by the respective receptor with failure.
+     *
+     * @param reception
+     *         the details on failed reception
+     */
+    @SuppressWarnings("WeakerAccess")   /* Part of public API. */
+    public void onReceptionFailure(FailedReception reception) {
         // do nothing.
     }
 

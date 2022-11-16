@@ -96,7 +96,7 @@ final class LiveDeliveryStation extends Station {
      *         the dispatching
      */
     @Override
-    public final Result process(Conveyor conveyor) {
+    public Result process(Conveyor conveyor) {
         FilterToDeliver filter = new FilterToDeliver(conveyor);
         Collection<InboxMessage> filtered = filter.messagesToDispatch();
         if (filtered.isEmpty()) {
