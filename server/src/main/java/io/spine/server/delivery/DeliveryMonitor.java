@@ -28,6 +28,7 @@ package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
+import io.spine.server.delivery.FailedReception.Action;
 
 /**
  * A controlling monitor of a {@link Delivery Inbox Delivery} process.
@@ -98,12 +99,21 @@ public class DeliveryMonitor {
      * A callback invoked if the signal transmitted via given message
      * was handled by the respective receptor with failure.
      *
+     * <p>Returns an action to take in relation to the failure.
+     *
+     * <p>By default, this callback returns an action which rethrows
+     * the {@code Throwable} representing
+     * the {@linkplain FailedReception#failure() reception failure}.
+     * End-users may choose to override this behavior by returning another action.
+     *
+     * <p>Other pre-defined actions are defined by the {@link FailedReception} API.
+     *
      * @param reception
      *         the details on failed reception
      */
     @SuppressWarnings("WeakerAccess")   /* Part of public API. */
-    public void onReceptionFailure(FailedReception reception) {
-        // do nothing.
+    public Action onReceptionFailure(FailedReception reception) {
+        return reception.rethrowFailure();
     }
 
     /**

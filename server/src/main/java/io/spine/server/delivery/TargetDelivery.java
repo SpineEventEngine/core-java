@@ -29,6 +29,7 @@ package io.spine.server.delivery;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
+import io.spine.server.delivery.FailedReception.Action;
 import io.spine.server.tenant.IdInTenant;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
@@ -126,10 +127,10 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         private void dispatch(InboxMessage message) {
             try {
                 doDispatch(message);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 FailedReception reception = new FailedReception(message, e, conveyor);
-                monitor.onReceptionFailure(reception);
-                throw new RuntimeException(e);
+                Action action = monitor.onReceptionFailure(reception);
+                action.execute();
             }
         }
 

@@ -26,6 +26,10 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
+
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+
 /**
  * The evidence of an {@link InboxMessage} which has failed to be handled
  * by its receptor, such as an event or a command handler method.
@@ -75,22 +79,54 @@ public final class FailedReception {
     }
 
     /**
-     * Marks the message as {@linkplain InboxMessageStatus#DELIVERED delivered}.
+     * Returns an action which marks the message
+     * as {@linkplain InboxMessageStatus#DELIVERED delivered}.
      *
      * <p>The message will be automatically removed from its inbox
      * at the end of the delivery stage.
      */
-    public void markDelivered() {
-        conveyor.markDelivered(message);
+    public Action markDelivered() {
+        return () -> conveyor.markDelivered(message);
     }
 
     /**
-     * Attempts to dispatch the message one more time.
+     * Returns an action which attempts to dispatch the message one more time.
      *
-     * <p>This is a blocking call, which triggers another dispatch action of the same message
-     * to the same receptor method.
+     * <p>Once returned, the action is executed immediately via a blocking call.
+     * It triggers another dispatch attempt to dispatch the message
+     * to the same receptor.
      */
-    public void reDispatchNow() {
-        // do nothing for now.
+    public Action redispatchNow() {
+        return () -> {
+            // do nothing for now.
+        };
+    }
+
+    /**
+     * Returns an action which just rethrows the {@code Throwable}
+     * representing a reception failure.
+     *
+     * <p>The failure is rethrown via an {@code IllegalStateException}.
+     */
+    @SuppressWarnings("WeakerAccess")   /* Part of the public API. */
+    public Action rethrowFailure() {
+        return () -> {
+            throw illegalStateWithCauseOf(failure());
+        };
+    }
+
+    /**
+     * An action to take in relation to the failed reception.
+     */
+    @FunctionalInterface
+    public interface Action {
+
+        /**
+         * Executes an action.
+         *
+         * <p>Please note this method is internal, and is called by the framework code.
+         */
+        @Internal
+        void execute();
     }
 }
