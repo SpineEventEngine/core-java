@@ -37,8 +37,8 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  * <p>End-users may choose to do one of the following:
  *
  * <ul>
- *     <li>mark the message as delivered;
- *     <li>attempt to re-dispatch the message right now.
+ *     <li>{@linkplain #markDelivered() mark} the message as delivered;
+ *     <li>{@linkplain #rethrowFailure() rethrow} the {@code Throwable} representing the failure.
  * </ul>
  */
 public final class FailedReception {
@@ -85,21 +85,9 @@ public final class FailedReception {
      * <p>The message will be automatically removed from its inbox
      * at the end of the delivery stage.
      */
+    @SuppressWarnings("WeakerAccess")   /* Part of the public API. */
     public Action markDelivered() {
         return () -> conveyor.markDelivered(message);
-    }
-
-    /**
-     * Returns an action which attempts to dispatch the message one more time.
-     *
-     * <p>Once returned, the action is executed immediately via a blocking call.
-     * It triggers another dispatch attempt to dispatch the message
-     * to the same receptor.
-     */
-    public Action redispatchNow() {
-        return () -> {
-            // do nothing for now.
-        };
     }
 
     /**
