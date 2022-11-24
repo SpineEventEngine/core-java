@@ -127,7 +127,7 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         private void dispatch(InboxMessage message) {
             try {
                 doDispatch(message);
-            } catch (Throwable e) {
+            } catch (RuntimeException e) {
                 FailedReception reception = new FailedReception(message, e, conveyor);
                 Action action = monitor.onReceptionFailure(reception);
                 action.execute();

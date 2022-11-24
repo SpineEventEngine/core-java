@@ -44,7 +44,7 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 public final class FailedReception {
 
     private final InboxMessage message;
-    private final Throwable failure;
+    private final RuntimeException failure;
     private final Conveyor conveyor;
 
     /**
@@ -58,7 +58,7 @@ public final class FailedReception {
      *         the conveyor holding the {@code InboxMessage}s currently being delivered;
      *         used to manipulate the message upon end-user's choice
      */
-    FailedReception(InboxMessage message, Throwable failure, Conveyor conveyor) {
+    FailedReception(InboxMessage message, RuntimeException failure, Conveyor conveyor) {
         this.message = message;
         this.failure = failure;
         this.conveyor = conveyor;
@@ -74,7 +74,7 @@ public final class FailedReception {
     /**
      * Returns the failure.
      */
-    public Throwable failure() {
+    public RuntimeException failure() {
         return failure;
     }
 
