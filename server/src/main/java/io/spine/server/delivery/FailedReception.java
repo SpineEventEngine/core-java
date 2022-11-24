@@ -112,7 +112,7 @@ public final class FailedReception {
         /**
          * Executes an action.
          *
-         * <p>Please note this method is internal, and is called by the framework code.
+         * <p>Please note this method is internal, and is called by the framework code only.
          */
         @Internal
         void execute();

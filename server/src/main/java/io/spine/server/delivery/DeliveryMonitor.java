@@ -102,11 +102,11 @@ public class DeliveryMonitor {
      * <p>Returns an action to take in relation to the failure.
      *
      * <p>By default, this callback returns an action which rethrows
-     * the {@code Throwable} representing
+     * the {@code RuntimeException} representing
      * the {@linkplain FailedReception#failure() reception failure}.
      * End-users may choose to override this behavior by returning another action.
      *
-     * <p>Other pre-defined actions are defined by the {@link FailedReception} API.
+     * <p>See {@link FailedReception} for more pre-defined actions.
      *
      * @param reception
      *         the details on failed reception
