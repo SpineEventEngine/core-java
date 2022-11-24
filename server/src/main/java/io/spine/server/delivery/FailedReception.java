@@ -26,7 +26,7 @@
 
 package io.spine.server.delivery;
 
-import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
@@ -106,15 +106,13 @@ public final class FailedReception {
     /**
      * An action to take in relation to the failed reception.
      */
+    @SPI
     @FunctionalInterface
     public interface Action {
 
         /**
          * Executes an action.
-         *
-         * <p>Please note this method is internal, and is called by the framework code only.
          */
-        @Internal
         void execute();
     }
 }
