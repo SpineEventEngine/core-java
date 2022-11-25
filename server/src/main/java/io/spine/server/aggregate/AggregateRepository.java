@@ -34,6 +34,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.json.Json;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
@@ -623,10 +624,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         tx.commitIfActive();
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
-            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n",
+            String outcomeDetails = Json.toJson(outcome);
+            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n%s",
                                            aggregateClass().value()
                                                            .getName(),
-                                           result.idAsString());
+                                           result.idAsString(),
+                                           outcomeDetails);
         }
         return result;
     }
