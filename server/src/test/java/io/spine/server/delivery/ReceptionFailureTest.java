@@ -30,6 +30,7 @@ import io.spine.base.Identifier;
 import io.spine.server.delivery.given.ReceptionFailureTestEnv;
 import io.spine.server.delivery.given.ReceptionistAggregate;
 import io.spine.test.delivery.command.TurnConditionerOn;
+import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.delivery.given.ReceptionistAggregate.FAILURE_MESSAGE;
 
+@SlowTest
 @DisplayName("`Delivery` should allow to handle the failed reception of signals ")
 @SuppressWarnings("resource")   /* We don't care about closing black boxes in this test. */
 final class ReceptionFailureTest extends AbstractDeliveryTest {
