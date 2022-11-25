@@ -40,6 +40,7 @@ import io.spine.server.delivery.ShardObserver;
 import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.Receptionist;
+import io.spine.test.delivery.command.TurnConditionerOn;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -81,6 +82,14 @@ public final class ReceptionFailureTestEnv {
                            .setId(receptionistId)
                            .setHowManyCmdsHandled(cmdsHandled)
                            .vBuild();
+    }
+
+    public static TurnConditionerOn tellToTurnConditioner(String receptionistId) {
+        TurnConditionerOn command = TurnConditionerOn
+                .newBuilder()
+                .setReceptionistId(receptionistId)
+                .vBuild();
+        return command;
     }
 
     /**
