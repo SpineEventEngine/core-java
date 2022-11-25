@@ -27,27 +27,15 @@
 package io.spine.server.delivery;
 
 import io.spine.base.Identifier;
-import io.spine.core.TenantId;
-import io.spine.environment.Tests;
-import io.spine.server.BoundedContextBuilder;
-import io.spine.server.DefaultRepository;
-import io.spine.server.ServerEnvironment;
+import io.spine.server.delivery.given.ReceptionFailureTestEnv;
 import io.spine.server.delivery.given.ReceptionistAggregate;
-import io.spine.server.entity.Repository;
-import io.spine.server.tenant.TenantAwareRunner;
-import io.spine.test.delivery.Receptionist;
 import io.spine.test.delivery.command.TurnConditionerOn;
 import io.spine.testing.server.blackbox.BlackBoxContext;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
-import java.util.Optional;
-
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
-import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.ReceptionistAggregate.FAILURE_MESSAGE;
 
 @DisplayName("`Delivery` should allow to handle the failed reception of signals ")
@@ -57,9 +45,9 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
     @Test
     @DisplayName("via custom delivery monitor with default `rethrow` action")
     void supplyDeliveryMonitor() {
-        ObservingMonitor monitor = new ObservingMonitor();
-        configureDelivery(monitor);
-        BlackBoxContext context = blackBox();
+        ReceptionFailureTestEnv.ObservingMonitor monitor = new ReceptionFailureTestEnv.ObservingMonitor();
+        ReceptionFailureTestEnv.configureDelivery(monitor);
+        BlackBoxContext context = ReceptionFailureTestEnv.blackBox();
 
         String receptionistId = Identifier.newUuid();
         TurnConditionerOn command = TurnConditionerOn
@@ -67,92 +55,18 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
                 .setReceptionistId(receptionistId)
                 .vBuild();
         context.receivesCommand(command);
-        sleep();
+        ReceptionFailureTestEnv.sleep();
         assertThat(monitor.lastFailure()).isEmpty();
-        context.assertState(receptionistId, receptionist(receptionistId, 1));
+        context.assertState(receptionistId, ReceptionFailureTestEnv.receptionist(receptionistId, 1));
 
         ReceptionistAggregate.makeApplierFail();
         context.receivesCommand(command);
-        sleep();
+        ReceptionFailureTestEnv.sleep();
         assertThat(monitor.lastFailure()).isPresent();
         FailedReception reception = monitor.lastFailure()
                                            .get();
         RuntimeException failure = reception.failure();
         assertThat(failure).isInstanceOf(IllegalStateException.class);
         assertThat(failure).hasMessageThat().contains(FAILURE_MESSAGE);
-    }
-
-    private static BlackBoxContext blackBox() {
-        Repository<String, ReceptionistAggregate> repository =
-                DefaultRepository.of(ReceptionistAggregate.class);
-        BlackBoxContext context = BlackBoxContext.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(repository)
-        );
-        return context;
-    }
-
-    private static void configureDelivery(ObservingMonitor monitor) {
-        Delivery delivery = Delivery.newBuilder()
-                                    .setMonitor(monitor)
-                                    .build();
-        delivery.subscribe(new IgnoringObserver());
-        ServerEnvironment.when(Tests.class)
-                         .use(delivery);
-    }
-
-    private static void sleep() {
-        sleepUninterruptibly(Duration.ofMillis(900));
-    }
-
-    private static Receptionist receptionist(String receptionistId, int cmdsHandled) {
-        return Receptionist.newBuilder()
-                           .setId(receptionistId)
-                           .setHowManyCmdsHandled(cmdsHandled)
-                           .vBuild();
-    }
-
-    /**
-     * A shard observer which deliberately ignores any exceptions thrown when dispatching
-     * inbox messages.
-     */
-    private static final class IgnoringObserver implements ShardObserver {
-
-        @Override
-        public void onMessage(InboxMessage message) {
-            new Thread(() -> runDelivery(message)).start();
-
-        }
-
-        private static void runDelivery(InboxMessage message) {
-            TenantId tenant = message.tenant();
-            ShardIndex index = message.shardIndex();
-            Delivery delivery = ServerEnvironment.instance()
-                                                 .delivery();
-            try {
-                TenantAwareRunner.with(tenant)
-                                 .run(() -> delivery.deliverMessagesFrom(index));
-            } catch (Exception ignored) {
-                // Do nothing.
-            }
-        }
-    }
-
-    /**
-     * A delivery monitor which remembers the last observed reception failure.
-     */
-    private static final class ObservingMonitor extends DeliveryMonitor {
-
-        private @Nullable FailedReception lastFailure = null;
-
-        @Override
-        public FailedReception.Action onReceptionFailure(FailedReception reception) {
-            lastFailure = reception;
-            return super.onReceptionFailure(reception);
-        }
-
-        public Optional<FailedReception> lastFailure() {
-            return Optional.ofNullable(lastFailure);
-        }
     }
 }
