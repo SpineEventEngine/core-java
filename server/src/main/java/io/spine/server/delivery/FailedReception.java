@@ -27,8 +27,9 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.SPI;
+import io.spine.base.Error;
 
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The evidence of an {@link InboxMessage} which has failed to be handled
@@ -38,13 +39,13 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  *
  * <ul>
  *     <li>{@linkplain #markDelivered() mark} the message as delivered;
- *     <li>{@linkplain #rethrowFailure() rethrow} the {@code Throwable} representing the failure.
+ *     <li>{@linkplain #throwAsException() rethrow} the {@code Throwable} representing the failure.
  * </ul>
  */
 public final class FailedReception {
 
     private final InboxMessage message;
-    private final RuntimeException failure;
+    private final Error error;
     private final Conveyor conveyor;
 
     /**
@@ -52,15 +53,15 @@ public final class FailedReception {
      *
      * @param message
      *         the message which failed to handle
-     * @param failure
+     * @param error
      *         the details of the failure
      * @param conveyor
      *         the conveyor holding the {@code InboxMessage}s currently being delivered;
      *         used to manipulate the message upon end-user's choice
      */
-    FailedReception(InboxMessage message, RuntimeException failure, Conveyor conveyor) {
+    FailedReception(InboxMessage message, Error error, Conveyor conveyor) {
         this.message = message;
-        this.failure = failure;
+        this.error = error;
         this.conveyor = conveyor;
     }
 
@@ -74,8 +75,8 @@ public final class FailedReception {
     /**
      * Returns the failure.
      */
-    public RuntimeException failure() {
-        return failure;
+    public Error error() {
+        return error;
     }
 
     /**
@@ -91,15 +92,12 @@ public final class FailedReception {
     }
 
     /**
-     * Returns an action which just rethrows the {@code Throwable}
-     * representing a reception failure.
-     *
-     * <p>The failure is rethrown via an {@code IllegalStateException}.
+     * Returns an action which just rethrows the {@link Error} as an {@code IllegalStateException}.
      */
     @SuppressWarnings("WeakerAccess")   /* Part of the public API. */
-    public Action rethrowFailure() {
+    public Action throwAsException() {
         return () -> {
-            throw illegalStateWithCauseOf(failure());
+            throw newIllegalStateException(error.toString());
         };
     }
 

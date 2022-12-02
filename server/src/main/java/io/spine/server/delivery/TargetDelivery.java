@@ -30,6 +30,7 @@ import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.delivery.FailedReception.Action;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.tenant.IdInTenant;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
@@ -98,6 +99,7 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
     }
 
+    @SuppressWarnings("rawtypes")   /* For simplicity. */
     private SignalEnvelope asEnvelope(InboxMessage message) {
         if (message.hasCommand()) {
             return inboxOfCmds.asEnvelope(message);
@@ -125,21 +127,19 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
 
         private void dispatch(InboxMessage message) {
-            try {
-                doDispatch(message);
-            } catch (RuntimeException e) {
-                FailedReception reception = new FailedReception(message, e, conveyor);
+            DispatchOutcome outcome = doDispatch(message);
+            if(outcome.hasError()) {
+                FailedReception reception =
+                        new FailedReception(message, outcome.getError(), conveyor);
                 Action action = monitor.onReceptionFailure(reception);
                 action.execute();
             }
         }
 
-        private void doDispatch(InboxMessage message) {
-            if (message.hasCommand()) {
-                inboxOfCommands.deliver(message);
-            } else {
-                inboxOfEvents.deliver(message);
-            }
+        private DispatchOutcome doDispatch(InboxMessage message) {
+            return message.hasCommand()
+                   ? inboxOfCommands.deliver(message)
+                   : inboxOfEvents.deliver(message);
         }
     }
 
@@ -163,6 +163,7 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
          *
          * <p>The resulting order of messages through all batches is preserved.
          */
+        @SuppressWarnings("rawtypes")   /* For simplicity. */
         private static <I> List<Batch<I>>
         byInboxId(List<InboxMessage> messages,
                   MonitoringDispatcher<I> dispatcher,

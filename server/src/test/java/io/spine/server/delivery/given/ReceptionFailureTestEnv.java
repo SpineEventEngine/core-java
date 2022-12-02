@@ -26,6 +26,8 @@
 
 package io.spine.server.delivery.given;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.spine.core.TenantId;
 import io.spine.environment.Tests;
 import io.spine.server.BoundedContextBuilder;
@@ -34,7 +36,9 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.DeliveryMonitor;
 import io.spine.server.delivery.FailedReception;
+import io.spine.server.delivery.InboxContents;
 import io.spine.server.delivery.InboxMessage;
+import io.spine.server.delivery.Page;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardObserver;
 import io.spine.server.entity.Repository;
@@ -47,6 +51,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.time.Duration;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 
 public final class ReceptionFailureTestEnv {
@@ -64,7 +69,7 @@ public final class ReceptionFailureTestEnv {
         return context;
     }
 
-    public static void configureDelivery(ObservingMonitor monitor) {
+    public static void configureDelivery(DeliveryMonitor monitor) {
         Delivery delivery = Delivery.newBuilder()
                                     .setMonitor(monitor)
                                     .build();
@@ -90,6 +95,22 @@ public final class ReceptionFailureTestEnv {
                 .setReceptionistId(receptionistId)
                 .vBuild();
         return command;
+    }
+
+    /**
+     * Fetches the contents of a single shard.
+     *
+     * <p>In case there are many shards configured, this method
+     * throws an {@code IllegalStateException}.
+     */
+    public static ImmutableList<InboxMessage> inboxMessages() {
+        ImmutableMap<ShardIndex, Page<InboxMessage>> contents = InboxContents.get();
+        checkState(contents.size() == 1);
+        Page<InboxMessage> onlyPage = contents.values()
+                                          .iterator()
+                                          .next();
+        ImmutableList<InboxMessage> messages = onlyPage.contents();
+        return messages;
     }
 
     /**
@@ -134,6 +155,25 @@ public final class ReceptionFailureTestEnv {
 
         public Optional<FailedReception> lastFailure() {
             return Optional.ofNullable(lastFailure);
+        }
+    }
+
+    /**
+     * A delivery monitor which marks the message causing a reception failure
+     * as {@linkplain io.spine.server.delivery.InboxMessageStatus#DELIVERED delivered}.
+     */
+    public static final class MarkFailureDeliveredMonitor extends DeliveryMonitor {
+
+        private boolean failureReceived = false;
+
+        @Override
+        public FailedReception.Action onReceptionFailure(FailedReception reception) {
+            this.failureReceived = true;
+            return reception.markDelivered();
+        }
+
+        public boolean failureReceived() {
+            return failureReceived;
         }
     }
 }

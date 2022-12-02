@@ -74,7 +74,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    public final void dispatchTo(I aggregateId) {
+    public final DispatchOutcome dispatchTo(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
         DispatchOutcome outcome = handleAndApplyEvents(aggregate);
@@ -86,6 +86,7 @@ abstract class AggregateEndpoint<I,
             repository().lifecycleOf(aggregateId)
                         .onDispatchingFailed(envelope(), error);
         }
+        return outcome;
     }
 
     private void storeAndPost(A aggregate, DispatchOutcome outcome) {

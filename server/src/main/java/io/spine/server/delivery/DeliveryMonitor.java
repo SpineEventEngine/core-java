@@ -103,7 +103,7 @@ public class DeliveryMonitor {
      *
      * <p>By default, this callback returns an action which rethrows
      * the {@code RuntimeException} representing
-     * the {@linkplain FailedReception#failure() reception failure}.
+     * the {@linkplain FailedReception#error() reception failure}.
      * End-users may choose to override this behavior by returning another action.
      *
      * <p>See {@link FailedReception} for more pre-defined actions.
@@ -113,7 +113,7 @@ public class DeliveryMonitor {
      */
     @SuppressWarnings("WeakerAccess")   /* Part of public API. */
     public Action onReceptionFailure(FailedReception reception) {
-        return reception.rethrowFailure();
+        return reception.throwAsException();
     }
 
     /**

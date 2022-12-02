@@ -28,6 +28,8 @@ package io.spine.server.projection;
 
 import io.spine.base.EntityState;
 import io.spine.server.delivery.event.CatchUpStarted;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.Success;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
@@ -61,14 +63,23 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
     }
 
     @Override
-    public void dispatchTo(I entityId) {
+    public DispatchOutcome dispatchTo(I entityId) {
         TypeName actualTypeName = envelope().messageTypeName();
         if (CATCH_UP_STARTED.equals(actualTypeName)) {
             ProjectionRepository<I, P, ?> repository = repository();
             repository.recordStorage()
                       .delete(entityId);
+            return successOutcome();
         } else {
-            super.dispatchTo(entityId);
+            return super.dispatchTo(entityId);
         }
+    }
+
+    private DispatchOutcome successOutcome() {
+        return DispatchOutcome
+                .newBuilder()
+                .setPropagatedSignal(envelope().messageId())
+                .setSuccess(Success.getDefaultInstance())
+                .vBuild();
     }
 }

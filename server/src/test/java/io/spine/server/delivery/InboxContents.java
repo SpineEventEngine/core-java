@@ -33,10 +33,10 @@ import io.spine.server.ServerEnvironment;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 
 /**
- * Utility providing an access to the raw contents of the {@link Inbox}es in the current
+ * Utility providing access to the raw contents of the {@link Inbox}es in the current
  * {@linkplain io.spine.server.ServerEnvironment server environment}.
  */
-final class InboxContents {
+public final class InboxContents {
 
     private InboxContents() {
     }
@@ -44,7 +44,8 @@ final class InboxContents {
     /**
      * Fetches the contents of the {@code Inbox}es for each of the {@code ShardIndex}es.
      */
-    static ImmutableMap<ShardIndex, Page<InboxMessage>> get() {
+    @SuppressWarnings("resource")
+    public static ImmutableMap<ShardIndex, Page<InboxMessage>> get() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
         InboxStorage storage = delivery.inboxStorage();

@@ -26,7 +26,10 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.collect.ImmutableList;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.server.delivery.given.ReceptionFailureTestEnv.MarkFailureDeliveredMonitor;
 import io.spine.server.delivery.given.ReceptionFailureTestEnv.ObservingMonitor;
 import io.spine.server.delivery.given.ReceptionistAggregate;
 import io.spine.test.delivery.command.TurnConditionerOn;
@@ -39,6 +42,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.blackBox;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.configureDelivery;
+import static io.spine.server.delivery.given.ReceptionFailureTestEnv.inboxMessages;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.receptionist;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.sleep;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.tellToTurnConditioner;
@@ -51,7 +55,7 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("via custom delivery monitor with default `rethrow` action")
-    void supplyDeliveryMonitor() {
+    void allowFailureRethrow() {
         ObservingMonitor monitor = new ObservingMonitor();
         configureDelivery(monitor);
         BlackBoxContext context = blackBox();
@@ -67,10 +71,36 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
         context.receivesCommand(command);
         sleep();
         assertThat(monitor.lastFailure()).isPresent();
+        @SuppressWarnings("OptionalGetWithoutIsPresent")    /* Checked above. */
         FailedReception reception = monitor.lastFailure()
                                            .get();
-        RuntimeException failure = reception.failure();
-        assertThat(failure).isInstanceOf(IllegalStateException.class);
-        assertThat(failure).hasMessageThat().contains(FAILURE_MESSAGE);
+
+        Error error = reception.error();
+        assertThat(error.getStacktrace()).contains(FAILURE_MESSAGE);
+
+        ImmutableList<InboxMessage> messages = inboxMessages();
+        assertThat(messages.size()).isEqualTo(1);
+        assertThat(messages.get(0)
+                           .getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
+    }
+
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
+    @Test
+    @DisplayName("via custom delivery monitor with default `rethrow` action")
+    void allowMarkingFailedMessageAsDelivered() {
+        MarkFailureDeliveredMonitor monitor = new MarkFailureDeliveredMonitor();
+        configureDelivery(monitor);
+        BlackBoxContext context = blackBox();
+
+        String receptionistId = Identifier.newUuid();
+        TurnConditionerOn command = tellToTurnConditioner(receptionistId);
+        ReceptionistAggregate.makeApplierFail();
+        context.receivesCommand(command);
+        sleep();
+
+        assertThat(monitor.failureReceived()).isTrue();
+        System.out.println("----- Reading the `InboxStorage` contents... -----");
+        ImmutableList<InboxMessage> messages = inboxMessages();
+        assertThat(messages.size()).isEqualTo(0);
     }
 }
