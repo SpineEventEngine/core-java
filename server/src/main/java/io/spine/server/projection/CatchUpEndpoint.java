@@ -29,10 +29,11 @@ package io.spine.server.projection;
 import io.spine.base.EntityState;
 import io.spine.server.delivery.event.CatchUpStarted;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.Success;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeName;
+
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 /**
  * Dispatches an event to projections during the catch-up.
@@ -69,17 +70,9 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
             ProjectionRepository<I, P, ?> repository = repository();
             repository.recordStorage()
                       .delete(entityId);
-            return successOutcome();
+            return successfulOutcome(envelope().messageId());
         } else {
             return super.dispatchTo(entityId);
         }
-    }
-
-    private DispatchOutcome successOutcome() {
-        return DispatchOutcome
-                .newBuilder()
-                .setPropagatedSignal(envelope().messageId())
-                .setSuccess(Success.getDefaultInstance())
-                .vBuild();
     }
 }

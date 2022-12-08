@@ -27,10 +27,13 @@
 package io.spine.server.event.given.bus;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.ProjectCreated;
+
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 /**
  * A simple dispatcher class, which only dispatch and does not have own event
@@ -56,8 +59,9 @@ public class BareDispatcher implements EventDispatcher {
     }
 
     @Override
-    public void dispatch(EventEnvelope event) {
+    public DispatchOutcome dispatch(EventEnvelope event) {
         dispatchCalled = true;
+        return successfulOutcome(event);
     }
 
     public boolean isDispatchCalled() {

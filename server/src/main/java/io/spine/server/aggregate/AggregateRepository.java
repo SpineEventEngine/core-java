@@ -44,6 +44,8 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.dispatch.BatchDispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcome;
+import io.spine.server.dispatch.DispatchOutcomes;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.Repository;
@@ -74,6 +76,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -334,11 +338,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         the command to dispatch
      */
     @Override
-    public final void dispatch(CommandEnvelope cmd) {
+    public final DispatchOutcome dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
         Optional<I> target = route(cmd);
-        target.ifPresent(id -> inbox().send(cmd)
-                                      .toHandler(id));
+        if (target.isPresent()) {
+            I id = target.get();
+            inbox().send(cmd)
+                   .toHandler(id);
+            return sentToInbox(cmd, id);
+        } else {
+            return DispatchOutcomes.noTargetsToRoute(cmd);
+        }
     }
 
     private Optional<I> route(CommandEnvelope cmd) {
@@ -388,11 +398,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         the event to dispatch
      */
     @Override
-    public void dispatchEvent(EventEnvelope event) {
+    public DispatchOutcome dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
         Set<I> targets = route(event);
-        targets.forEach((id) -> inbox().send(event)
-                                       .toReactor(id));
+        if (targets.size() > 0) {
+            targets.forEach((id) -> inbox().send(event)
+                                           .toReactor(id));
+            return sentToInbox(event, targets);
+        } else {
+            return successfulOutcome(event);
+        }
+
     }
 
     private Set<I> route(EventEnvelope event) {
@@ -403,11 +419,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Imports the passed event into one of the aggregates.
      */
-    final void importEvent(EventEnvelope event) {
+    final DispatchOutcome importEvent(EventEnvelope event) {
         checkNotNull(event);
         Optional<I> target = routeImport(event);
-        target.ifPresent(id -> inbox().send(event)
-                                      .toImporter(id));
+        if(target.isPresent()) {
+            I id = target.get();
+            inbox().send(event)
+                   .toImporter(id);
+            return sentToInbox(event, id);
+        } else {
+            return DispatchOutcomes.noTargetsToRoute(event);
+        }
     }
 
     private Optional<I> routeImport(EventEnvelope event) {

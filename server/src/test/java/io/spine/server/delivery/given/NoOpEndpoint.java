@@ -26,17 +26,25 @@
 
 package io.spine.server.delivery.given;
 
+import io.spine.base.Identifier;
+import io.spine.core.MessageId;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.CommandEnvelope;
 
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 import static io.spine.testing.Tests.nullRef;
 
 public class NoOpEndpoint implements MessageEndpoint<String, CommandEnvelope> {
 
     @Override
-    public void dispatchTo(String targetId) {
-        // do nothing.
+    public DispatchOutcome dispatchTo(String targetId) {
+        MessageId id = MessageId
+                .newBuilder()
+                .setId(Identifier.pack(targetId))
+                .vBuild();
+        return successfulOutcome(id);
     }
 
     @Override

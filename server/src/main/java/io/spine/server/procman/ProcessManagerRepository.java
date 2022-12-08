@@ -43,6 +43,7 @@ import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityRecord;
@@ -70,6 +71,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
+import static io.spine.server.dispatch.DispatchOutcomes.noTargetsToRoute;
+import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -303,11 +306,17 @@ public abstract class ProcessManagerRepository<I,
      *         a request to dispatch
      */
     @Override
-    public final void dispatchCommand(CommandEnvelope command) {
+    public final DispatchOutcome dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         Optional<I> target = route(command);
-        target.ifPresent(id -> inbox().send(command)
-                                      .toHandler(id));
+        if(target.isPresent()) {
+            I id = target.get();
+            inbox().send(command)
+                   .toHandler(id);
+            return sentToInbox(command, id);
+        } else {
+            return noTargetsToRoute(command);
+        }
     }
 
     private Optional<I> route(CommandEnvelope cmd) {

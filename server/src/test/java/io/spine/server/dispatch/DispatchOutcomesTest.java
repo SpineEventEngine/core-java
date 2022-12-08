@@ -24,45 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.server.dispatch;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.server.command.AbstractCommandDispatcher;
-import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.type.CommandClass;
+import com.google.common.testing.NullPointerTester;
+import io.spine.core.MessageId;
 import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.testing.UtilityClassTest;
+import org.junit.jupiter.api.DisplayName;
 
-import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
+import static io.spine.server.dispatch.given.Given.commandEnvelope;
+import static io.spine.server.dispatch.given.Given.eventEnvelope;
 
-/**
- * Increments a counter on receiving a command of the specified type.
- *
- * @see io.spine.testing.server.blackbox.BlackBoxBoundedContextTest#registerCommandDispatchers
- */
-public final class BbCommandDispatcher extends AbstractCommandDispatcher {
+@DisplayName("`DispatchOutcomes` shoult")
+class DispatchOutcomesTest extends UtilityClassTest<DispatchOutcomes> {
 
-    private int commandsReceived = 0;
-    private final CommandClass commandToDispatch;
-
-    public BbCommandDispatcher(CommandClass commandToDispatch) {
-        super();
-        this.commandToDispatch = commandToDispatch;
+    DispatchOutcomesTest() {
+        super(DispatchOutcomes.class);
     }
 
     @Override
-    public ImmutableSet<CommandClass> messageClasses() {
-        return ImmutableSet.of(commandToDispatch);
-    }
-
-    @CanIgnoreReturnValue
-    @Override
-    public DispatchOutcome dispatch(CommandEnvelope envelope) {
-        commandsReceived++;
-        return successfulOutcome(envelope);
-    }
-
-    public int commandsDispatched() {
-        return commandsReceived;
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(MessageId.class, MessageId.getDefaultInstance())
+              .setDefault(EventEnvelope.class, eventEnvelope())
+              .setDefault(CommandEnvelope.class, commandEnvelope());
     }
 }

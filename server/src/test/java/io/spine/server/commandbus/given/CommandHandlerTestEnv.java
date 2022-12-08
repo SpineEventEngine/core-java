@@ -35,6 +35,7 @@ import io.spine.logging.Logging;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.tuple.Pair;
 import io.spine.server.type.CommandEnvelope;
@@ -56,6 +57,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 public class CommandHandlerTestEnv {
 
@@ -87,8 +89,9 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public void dispatch(EventEnvelope event) {
+        public DispatchOutcome dispatch(EventEnvelope event) {
             dispatched.add(event);
+            return successfulOutcome(event);
         }
 
         public List<EventEnvelope> dispatched() {

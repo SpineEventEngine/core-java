@@ -30,16 +30,18 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.Error;
 import io.spine.core.CommandValidationError;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND_VALUE;
 import static io.spine.server.commandbus.CommandException.ATTR_COMMAND_TYPE_NAME;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -113,8 +115,11 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
      * {@linkplain #canDispatch(EventEnvelope) is detected}.
      */
     @Override
-    protected void handle(EventEnvelope event) {
+    protected DispatchOutcome handle(EventEnvelope event) {
         failTest();
+        // This return statement is unreachable,
+        // since the previous statement throws an {@code Error}.
+        return successfulOutcome(event);
     }
 
     /**
@@ -124,7 +129,7 @@ final class UnsupportedCommandGuard extends AbstractEventSubscriber {
      * {@link #commandType}.
      */
     private void failTest() {
-        checkNotNull(commandType);
+        requireNonNull(commandType);
         String msg = format(
                 "The command type `%s` does not have a handler in the context `%s`.",
                 commandType, context

@@ -32,6 +32,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.route.EventRouting;
 import io.spine.server.type.EventEnvelope;
@@ -39,6 +40,7 @@ import io.spine.server.type.EventEnvelope;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
@@ -105,9 +107,10 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     @CanIgnoreReturnValue
-    public final void dispatch(EventEnvelope event) {
+    public final DispatchOutcome dispatch(EventEnvelope event) {
         checkNotNull(event);
         doDispatch(event);
+        return successfulOutcome(event);
     }
 
     private void doDispatch(EventEnvelope event) {

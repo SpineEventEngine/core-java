@@ -1,0 +1,205 @@
+/*
+ * Copyright 2022, TeamDev. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Redistribution and use in source and/or binary forms, with or without
+ * modification, must retain the above copyright notice and the following
+ * disclaimer.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package io.spine.server.dispatch;
+
+import com.google.protobuf.Any;
+import io.spine.base.Identifier;
+import io.spine.core.MessageId;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.server.type.SignalEnvelope;
+
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
+/**
+ * A utility for working with {@link DispatchOutcome} instances.
+ */
+public final class DispatchOutcomes {
+
+    /**
+     * Prevents this utility from instantiation.
+     */
+    private DispatchOutcomes() {
+    }
+
+    /**
+     * Returns an outcome, which tells about a successful dispatching of the message
+     * with the passed ID.
+     *
+     * @param messageId
+     *         identifier of the message
+     */
+    public static DispatchOutcome successfulOutcome(MessageId messageId) {
+        checkNotNull(messageId);
+        return withMessageId(messageId)
+                .setSuccess(Success.getDefaultInstance())
+                .vBuild();
+    }
+
+    private static DispatchOutcome.Builder withMessageId(MessageId messageId) {
+        return DispatchOutcome
+                .newBuilder()
+                .setPropagatedSignal(messageId);
+    }
+
+    /**
+     * Returns an outcome, which tells about a successful dispatching
+     * of the passed event envelope.
+     *
+     * @param event
+     *         envelope of the event which was successfully dispatched
+     */
+    public static DispatchOutcome successfulOutcome(EventEnvelope event) {
+        checkNotNull(event);
+        return successfulOutcome(event.messageId());
+    }
+
+    /**
+     * Returns an outcome, which tells about a successful dispatching
+     * of the passed command envelope.
+     *
+     * @param command
+     *         envelope of the command which was successfully dispatched
+     */
+    public static DispatchOutcome successfulOutcome(CommandEnvelope command) {
+        checkNotNull(command);
+        return successfulOutcome(command.messageId());
+    }
+
+    /**
+     * Returns an outcome, which tells that the passed command
+     * was sent to the inbox of the entity with the passed ID.
+     *
+     * @param cmd
+     *         the command which has been sent to the inbox
+     * @param entityId
+     *         identifier of the entity, to which inbox the command
+     *         has been sent
+     */
+    public static <I> DispatchOutcome sentToInbox(CommandEnvelope cmd, I entityId) {
+        checkNotNull(cmd);
+        checkNotNull(entityId);
+        InboxAddresses addresses = inboxAddressOf(entityId);
+        DispatchOutcome outcome = withMessageId(cmd.messageId())
+                .setSentToInbox(addresses)
+                .vBuild();
+        return outcome;
+    }
+
+    /**
+     * Returns an outcome, which tells that the passed event
+     * was sent to several inboxes of entities with the passed identifiers.
+     *
+     * @param event
+     *         the event which has been sent to inboxes
+     * @param entityIds
+     *         identifiers of entities, to which inboxes the event
+     *         has been sent
+     */
+    public static <I> DispatchOutcome sentToInbox(EventEnvelope event, Set<I> entityIds) {
+        checkNotNull(event);
+        checkNotNull(entityIds);
+        checkState(!entityIds.isEmpty());
+
+        InboxAddresses addresses = inboxAddressesOf(entityIds);
+        DispatchOutcome outcome = withMessageId(event.messageId())
+                .setSentToInbox(addresses)
+                .vBuild();
+        return outcome;
+    }
+
+    /**
+     * Returns an outcome, which tells that the passed event
+     * was sent to the inbox of entity with the passed ID.
+     *
+     * @param event
+     *         the event which has been sent to the inbox
+     * @param entityId
+     *         the identifier of entity, to which inbox the event
+     *         has been sent
+     */
+    public static <I> DispatchOutcome sentToInbox(EventEnvelope event, I entityId) {
+        checkNotNull(event);
+        checkNotNull(entityId);
+
+        InboxAddresses addresses = inboxAddressOf(entityId);
+        DispatchOutcome outcome = withMessageId(event.messageId())
+                .setSentToInbox(addresses)
+                .vBuild();
+        return outcome;
+    }
+
+    private static <I> InboxAddresses inboxAddressOf(I entityId) {
+        InboxAddresses address = InboxAddresses
+                .newBuilder()
+                .addId(Identifier.pack(entityId))
+                .vBuild();
+        return address;
+    }
+
+    private static <I> InboxAddresses inboxAddressesOf(Set<I> entityIds) {
+        InboxAddresses.Builder builder = InboxAddresses.newBuilder();
+        for (I id : entityIds) {
+            Any packed = Identifier.pack(id);
+            builder.addId(packed);
+        }
+        return builder.vBuild();
+    }
+
+    /**
+     * Returns an outcome signifying that the given event has been published
+     * to a remote channel, most likely, to another Bounded Context.
+     *
+     * @param event
+     *         the event which has been published
+     */
+    public static DispatchOutcome publishedToRemote(EventEnvelope event) {
+        checkNotNull(event);
+        DispatchOutcome outcome = withMessageId(event.messageId())
+                .setPublishedToRemote(true)
+                .vBuild();
+        return outcome;
+    }
+
+    /**
+     * Returns an outcome telling that during the dispatching there were no target entities
+     * to route the signal to.
+     *
+     * @param signal
+     *         the dispatched signal
+     */
+    public static DispatchOutcome noTargetsToRoute(SignalEnvelope<?, ?, ?> signal) {
+        checkNotNull(signal);
+        DispatchOutcome outcome = withMessageId(signal.messageId())
+                .setNoTargetsToRoute(true)
+                .vBuild();
+        return outcome;
+    }
+}

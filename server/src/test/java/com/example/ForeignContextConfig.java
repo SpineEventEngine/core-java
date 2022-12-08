@@ -33,11 +33,14 @@ import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.bc.given.ProjectAggregate;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
+
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 /**
  * Test environment class for testing {@code BoundedContext} configuration from
@@ -80,8 +83,8 @@ public final class ForeignContextConfig {
 
             @CanIgnoreReturnValue
             @Override
-            public void dispatch(CommandEnvelope envelope) {
-                // Do nothing.
+            public DispatchOutcome dispatch(CommandEnvelope envelope) {
+                return successfulOutcome(envelope);
             }
         };
     }
@@ -109,8 +112,8 @@ public final class ForeignContextConfig {
 
         @CanIgnoreReturnValue
         @Override
-        public void dispatch(EventEnvelope envelope) {
-            // Do nothing.
+        public DispatchOutcome dispatch(EventEnvelope envelope) {
+            return successfulOutcome(envelope);
         }
     }
 }

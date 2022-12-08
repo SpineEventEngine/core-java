@@ -28,11 +28,13 @@ package io.spine.server.delivery;
 
 import io.spine.core.Subscribe;
 import io.spine.server.delivery.event.ShardProcessingRequested;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 
+import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -70,10 +72,11 @@ final class ShardMaintenanceProcess extends AbstractEventSubscriber {
     }
 
     @Override
-    public void handle(EventEnvelope event) {
+    public DispatchOutcome handle(EventEnvelope event) {
         ShardEvent message = (ShardEvent) event.message();
         inbox.send(event)
              .toSubscriber(message.getId());
+        return sentToInbox(event, message.getId());
     }
 
     /**
@@ -88,8 +91,8 @@ final class ShardMaintenanceProcess extends AbstractEventSubscriber {
         }
 
         @Override
-        public void dispatchTo(ShardIndex targetId) {
-            ShardMaintenanceProcess.super.dispatch(envelope);
+        public DispatchOutcome dispatchTo(ShardIndex targetId) {
+            return ShardMaintenanceProcess.super.dispatch(envelope);
         }
 
         @Override
