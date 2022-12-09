@@ -113,7 +113,7 @@ public class DeliveryMonitor {
      */
     @SuppressWarnings("WeakerAccess")   /* Part of public API. */
     public Action onReceptionFailure(FailedReception reception) {
-        return reception.throwAsException();
+        return reception.markDelivered();
     }
 
     /**
