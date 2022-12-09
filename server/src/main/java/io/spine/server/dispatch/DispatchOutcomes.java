@@ -33,10 +33,10 @@ import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A utility for working with {@link DispatchOutcome} instances.
@@ -94,28 +94,57 @@ public final class DispatchOutcomes {
     }
 
     /**
-     * Returns an outcome, which tells that the passed command
+     * Returns an outcome, which tells that the passed signal
      * was sent to the inbox of the entity with the passed ID.
      *
-     * @param cmd
-     *         the command which has been sent to the inbox
+     * @param signal
+     *         the signal which has been sent to the inbox
      * @param entityId
-     *         identifier of the entity, to which inbox the command
+     *         identifier of the entity, to which inbox the signal
      *         has been sent
      */
-    public static <I> DispatchOutcome sentToInbox(CommandEnvelope cmd, I entityId) {
-        checkNotNull(cmd);
+    public static <I> DispatchOutcome sentToInbox(SignalEnvelope<?, ?, ?> signal, I entityId) {
+        checkNotNull(signal);
         checkNotNull(entityId);
+
         InboxAddresses addresses = inboxAddressOf(entityId);
-        DispatchOutcome outcome = withMessageId(cmd.messageId())
+        DispatchOutcome outcome = withMessageId(signal.messageId())
                 .setSentToInbox(addresses)
                 .vBuild();
         return outcome;
     }
 
     /**
+     * Returns an outcome, which tells that the passed signal
+     * was intended to be sent to the inbox of the entity with the passed ID.
+     *
+     * <p>If the passed {@code Optional} of entity ID is not present,
+     * returns an outcome telling there were
+     * {@linkplain #noTargetsToRoute(SignalEnvelope) no targets} to route the signal to.
+     *
+     * @param signal
+     *         the signal which has been sent to the inbox
+     * @param entityId
+     *         an optional identifier of the entity, to which inbox the signal
+     *         should have been sent
+     */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") /* Handling `Optional` uniformly. */
+    public static <I>
+    DispatchOutcome maybeSentToInbox(SignalEnvelope<?, ?, ?> signal, Optional<I> entityId) {
+        checkNotNull(signal);
+        checkNotNull(entityId);
+
+        return entityId.map(id -> sentToInbox(signal, id))
+                       .orElseGet(() -> noTargetsToRoute(signal));
+    }
+
+    /**
      * Returns an outcome, which tells that the passed event
      * was sent to several inboxes of entities with the passed identifiers.
+     *
+     * <p>In case an empty set of entity IDs was passed, returns an outcome
+     * telling there were {@linkplain #noTargetsToRoute(SignalEnvelope) no targets}
+     * to route the signal to.
      *
      * @param event
      *         the event which has been sent to inboxes
@@ -126,30 +155,12 @@ public final class DispatchOutcomes {
     public static <I> DispatchOutcome sentToInbox(EventEnvelope event, Set<I> entityIds) {
         checkNotNull(event);
         checkNotNull(entityIds);
-        checkState(!entityIds.isEmpty());
+
+        if (entityIds.isEmpty()) {
+            return noTargetsToRoute(event);
+        }
 
         InboxAddresses addresses = inboxAddressesOf(entityIds);
-        DispatchOutcome outcome = withMessageId(event.messageId())
-                .setSentToInbox(addresses)
-                .vBuild();
-        return outcome;
-    }
-
-    /**
-     * Returns an outcome, which tells that the passed event
-     * was sent to the inbox of entity with the passed ID.
-     *
-     * @param event
-     *         the event which has been sent to the inbox
-     * @param entityId
-     *         the identifier of entity, to which inbox the event
-     *         has been sent
-     */
-    public static <I> DispatchOutcome sentToInbox(EventEnvelope event, I entityId) {
-        checkNotNull(event);
-        checkNotNull(entityId);
-
-        InboxAddresses addresses = inboxAddressOf(entityId);
         DispatchOutcome outcome = withMessageId(event.messageId())
                 .setSentToInbox(addresses)
                 .vBuild();

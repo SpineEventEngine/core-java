@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.EntityState;
-import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
@@ -40,7 +39,6 @@ import io.spine.server.type.EventEnvelope;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
@@ -109,25 +107,20 @@ public abstract class EventDispatchingRepository<I,
     @CanIgnoreReturnValue
     public final DispatchOutcome dispatch(EventEnvelope event) {
         checkNotNull(event);
-        doDispatch(event);
-        return successfulOutcome(event);
-    }
-
-    private void doDispatch(EventEnvelope event) {
         Set<I> targets = route(event);
-        Event outerObject = event.outerObject();
-        targets.forEach(id -> dispatchTo(id, outerObject));
+        return dispatchTo(targets, event);
     }
 
     /**
-     * Dispatches the given event to an entity with the given ID.
+     * Dispatches the given event to entities with the given identifiers,
+     * and returns the dispatch outcome.
      *
-     * @param id
-     *         the target entity ID
+     * @param ids
+     *         the identifiers of the target entities
      * @param event
      *         the event to dispatch
      */
-    protected abstract void dispatchTo(I id, Event event);
+    protected abstract DispatchOutcome dispatchTo(Set<I> ids, EventEnvelope event);
 
     /**
      * Determines the targets of the given event.
