@@ -45,7 +45,6 @@ import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.dispatch.DispatchOutcomes;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.Repository;
@@ -76,6 +75,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.dispatch.DispatchOutcomes.noTargetsToRoute;
 import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 import static io.spine.server.tenant.TenantAwareRunner.with;
@@ -347,7 +347,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .toHandler(id);
             return sentToInbox(cmd, id);
         } else {
-            return DispatchOutcomes.noTargetsToRoute(cmd);
+            return noTargetsToRoute(cmd);
         }
     }
 
@@ -428,7 +428,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                    .toImporter(id);
             return sentToInbox(event, id);
         } else {
-            return DispatchOutcomes.noTargetsToRoute(event);
+            return noTargetsToRoute(event);
         }
     }
 
