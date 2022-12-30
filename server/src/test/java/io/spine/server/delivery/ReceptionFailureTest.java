@@ -28,7 +28,6 @@ package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.base.Error;
-import io.spine.base.Identifier;
 import io.spine.server.delivery.given.ReceptionFailureTestEnv.MarkFailureDeliveredMonitor;
 import io.spine.server.delivery.given.ReceptionFailureTestEnv.ObservingMonitor;
 import io.spine.server.delivery.given.ReceptionistAggregate;
@@ -38,8 +37,11 @@ import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.blackBox;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.configureDelivery;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.inboxMessages;
@@ -49,31 +51,33 @@ import static io.spine.server.delivery.given.ReceptionFailureTestEnv.tellToTurnC
 import static io.spine.server.delivery.given.ReceptionistAggregate.FAILURE_MESSAGE;
 
 @SlowTest
-@DisplayName("`Delivery` should allow to handle the failed reception of signals ")
+@DisplayName("`Delivery` should allow to monitor the failed reception of signals ")
 @SuppressWarnings("resource")   /* We don't care about closing black boxes in this test. */
 final class ReceptionFailureTest extends AbstractDeliveryTest {
 
     @Test
-    @DisplayName("via custom delivery monitor with default `rethrow` action")
+    @DisplayName("and rethrow errors, and observe the `InboxMessage` as one still to deliver")
     void allowFailureRethrow() {
         ObservingMonitor monitor = new ObservingMonitor();
         configureDelivery(monitor);
-        BlackBoxContext context = blackBox();
+        BlackBoxContext context = blackBox().tolerateFailures();
 
-        String receptionistId = Identifier.newUuid();
+        String receptionistId = newUuid();
         TurnConditionerOn command = tellToTurnConditioner(receptionistId);
+        ReceptionistAggregate.makeApplierPass();
         context.receivesCommand(command);
         sleep();
         assertThat(monitor.lastFailure()).isEmpty();
         context.assertState(receptionistId, receptionist(receptionistId, 1));
+        System.out.println("Events were successfully applied.");
 
         ReceptionistAggregate.makeApplierFail();
         context.receivesCommand(command);
         sleep();
-        assertThat(monitor.lastFailure()).isPresent();
+        Optional<FailedReception> lastFailure = monitor.lastFailure();
+        assertThat(lastFailure).isPresent();
         @SuppressWarnings("OptionalGetWithoutIsPresent")    /* Checked above. */
-        FailedReception reception = monitor.lastFailure()
-                                           .get();
+                FailedReception reception = lastFailure.get();
 
         Error error = reception.error();
         assertThat(error.getStacktrace()).contains(FAILURE_MESSAGE);
@@ -86,13 +90,13 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
 
     @SuppressWarnings("UseOfSystemOutOrSystemErr")
     @Test
-    @DisplayName("via custom delivery monitor with default `rethrow` action")
+    @DisplayName("and mark the corresponding `InboxMessage` as delivered")
     void allowMarkingFailedMessageAsDelivered() {
         MarkFailureDeliveredMonitor monitor = new MarkFailureDeliveredMonitor();
         configureDelivery(monitor);
-        BlackBoxContext context = blackBox();
+        BlackBoxContext context = blackBox().tolerateFailures();
 
-        String receptionistId = Identifier.newUuid();
+        String receptionistId = newUuid();
         TurnConditionerOn command = tellToTurnConditioner(receptionistId);
         ReceptionistAggregate.makeApplierFail();
         context.receivesCommand(command);

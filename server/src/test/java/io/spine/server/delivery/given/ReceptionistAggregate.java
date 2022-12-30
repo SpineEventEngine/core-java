@@ -87,4 +87,8 @@ public final class ReceptionistAggregate
     public static void makeApplierFail() {
         failInAppliers = true;
     }
+
+    public static void makeApplierPass() {
+        failInAppliers = false;
+    }
 }
