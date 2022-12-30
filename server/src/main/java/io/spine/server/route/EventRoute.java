@@ -56,7 +56,7 @@ public interface EventRoute<I, M extends EventMessage> extends Multicast<I, M, E
 
     /**
      * Creates an event route that obtains event producer ID from an {@code EventContext} and
-     * returns it as a sole element of the the immutable set.
+     * returns it as a sole element of the immutable set.
      *
      * @param <I>
      *         the type of the IDs of entities to which the event would be routed
