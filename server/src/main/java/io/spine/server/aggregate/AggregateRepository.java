@@ -79,6 +79,7 @@ import static io.spine.server.dispatch.DispatchOutcomes.maybeSentToInbox;
 import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -204,7 +205,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private Inbox<I> inbox() {
-        return checkNotNull(inbox);
+        return requireNonNull(inbox);
     }
 
     /**
@@ -482,7 +483,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p><b>NOTE</b>: repository read operations are optimized around the current snapshot
      * trigger. Setting the snapshot trigger to a new value may cause read operations to perform
-     * sub-optimally, until a new snapshot is created. This doesn't apply to newly created
+     * suboptimally, until a new snapshot is created. This doesn't apply to newly created
      * repositories.
      *
      * @param snapshotTrigger
@@ -597,7 +598,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * <p>The current {@link #snapshotTrigger} is used as a read operation
      * {@linkplain AggregateReadRequest#batchSize()} batch size}, so the method can perform
-     * sub-optimally for some time after a {@link #snapshotTrigger} change.
+     * suboptimally for some time after a {@link #snapshotTrigger} change.
      *
      * @param id
      *         the ID of the {@code Aggregate} to fetch
