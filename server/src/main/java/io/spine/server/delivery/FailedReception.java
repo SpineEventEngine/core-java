@@ -26,10 +26,9 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Error;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The evidence of an {@link InboxMessage} which has failed to be handled
@@ -39,7 +38,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <ul>
  *     <li>{@linkplain #markDelivered() mark} the message as delivered;
- *     <li>{@linkplain #throwAsException() rethrow} the {@code Throwable} representing the failure.
+ *     <li>{@linkplain #repeatDispatching() repeat dispatching} of the message immediately.
  * </ul>
  */
 public final class FailedReception {
@@ -47,6 +46,7 @@ public final class FailedReception {
     private final InboxMessage message;
     private final Error error;
     private final Conveyor conveyor;
+    private final RepeatDispatching repeat;
 
     /**
      * Creates an instance of the failed reception.
@@ -58,11 +58,18 @@ public final class FailedReception {
      * @param conveyor
      *         the conveyor holding the {@code InboxMessage}s currently being delivered;
      *         used to manipulate the message upon end-user's choice
+     * @param repeat
+     *         a callback invoked to repeat the dispatching
+     *         of the {@code InboxMessage} immediately
      */
-    FailedReception(InboxMessage message, Error error, Conveyor conveyor) {
+    FailedReception(InboxMessage message,
+                    Error error,
+                    Conveyor conveyor,
+                    RepeatDispatching repeat) {
         this.message = message;
         this.error = error;
         this.conveyor = conveyor;
+        this.repeat = repeat;
     }
 
     /**
@@ -92,13 +99,11 @@ public final class FailedReception {
     }
 
     /**
-     * Returns an action which just rethrows the {@link Error} as an {@code IllegalStateException}.
+     * Returns an action immediately repeats the dispatching of the message.
      */
     @SuppressWarnings("WeakerAccess")   /* Part of the public API. */
-    public Action throwAsException() {
-        return () -> {
-            throw newIllegalStateException(error.toString());
-        };
+    public Action repeatDispatching() {
+        return repeat::dispatchAgain;
     }
 
     /**
@@ -112,5 +117,19 @@ public final class FailedReception {
          * Executes an action.
          */
         void execute();
+    }
+
+    /**
+     * An internal interface used to specify the action,
+     * which immediately repeats the {@code InboxMessage} dispatching.
+     */
+    @Internal
+    @FunctionalInterface
+    public interface RepeatDispatching {
+
+        /**
+         * Dispatches the message one more time.
+         */
+        void dispatchAgain();
     }
 }

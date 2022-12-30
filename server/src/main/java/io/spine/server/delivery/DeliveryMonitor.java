@@ -101,10 +101,8 @@ public class DeliveryMonitor {
      *
      * <p>Returns an action to take in relation to the failure.
      *
-     * <p>By default, this callback returns an action which rethrows
-     * the {@code RuntimeException} representing
-     * the {@linkplain FailedReception#error() reception failure}.
-     * End-users may choose to override this behavior by returning another action.
+     * <p>By default, this callback returns an action which
+     * marks the message as {@linkplain InboxMessageStatus#DELIVERED delivered}.
      *
      * <p>See {@link FailedReception} for more pre-defined actions.
      *

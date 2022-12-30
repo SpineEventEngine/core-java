@@ -51,9 +51,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.time.Duration;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 
+/**
+ * Test environment for {@link io.spine.server.delivery.ReceptionFailureTest}.
+ */
 public final class ReceptionFailureTestEnv {
 
     private ReceptionFailureTestEnv() {
@@ -107,8 +111,8 @@ public final class ReceptionFailureTestEnv {
         ImmutableMap<ShardIndex, Page<InboxMessage>> contents = InboxContents.get();
         checkState(contents.size() == 1);
         Page<InboxMessage> onlyPage = contents.values()
-                                          .iterator()
-                                          .next();
+                                              .iterator()
+                                              .next();
         ImmutableList<InboxMessage> messages = onlyPage.contents();
         return messages;
     }
@@ -122,7 +126,6 @@ public final class ReceptionFailureTestEnv {
         @Override
         public void onMessage(InboxMessage message) {
             new Thread(() -> runDelivery(message)).start();
-
         }
 
         @SuppressWarnings("resource")
@@ -142,20 +145,45 @@ public final class ReceptionFailureTestEnv {
 
     /**
      * A delivery monitor which remembers the last observed reception failure.
+     *
+     * <p>Allows to specify a {@link FailureResolver} and act upon the observed failure.
      */
     public static final class ObservingMonitor extends DeliveryMonitor {
 
         private @Nullable FailedReception lastFailure = null;
+        private @Nullable FailureResolver resolver = null;
 
         @Override
         public FailedReception.Action onReceptionFailure(FailedReception reception) {
             lastFailure = reception;
+            if (resolver != null) {
+                return resolver.onFailure(reception);
+            }
             return super.onReceptionFailure(reception);
         }
 
         public Optional<FailedReception> lastFailure() {
             return Optional.ofNullable(lastFailure);
         }
+
+        /**
+         * Specifies the resolver for this monitor.
+         */
+        public void setResolver(FailureResolver resolver) {
+            this.resolver = checkNotNull(resolver);
+        }
+    }
+
+    /**
+     * Allows to act upon an observed {@link FailedReception}.
+     */
+    @FunctionalInterface
+    public interface FailureResolver {
+
+        /**
+         * Returns an action in response to a failed reception.
+         */
+        FailedReception.Action onFailure(FailedReception reception);
     }
 
     /**

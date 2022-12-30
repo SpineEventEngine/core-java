@@ -30,14 +30,13 @@ import com.google.common.collect.ImmutableList;
 import io.spine.base.Error;
 import io.spine.server.delivery.given.ReceptionFailureTestEnv.MarkFailureDeliveredMonitor;
 import io.spine.server.delivery.given.ReceptionFailureTestEnv.ObservingMonitor;
-import io.spine.server.delivery.given.ReceptionistAggregate;
 import io.spine.test.delivery.command.TurnConditionerOn;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -49,6 +48,8 @@ import static io.spine.server.delivery.given.ReceptionFailureTestEnv.receptionis
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.sleep;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.tellToTurnConditioner;
 import static io.spine.server.delivery.given.ReceptionistAggregate.FAILURE_MESSAGE;
+import static io.spine.server.delivery.given.ReceptionistAggregate.makeApplierFail;
+import static io.spine.server.delivery.given.ReceptionistAggregate.makeApplierPass;
 
 @SlowTest
 @DisplayName("`Delivery` should allow to monitor the failed reception of signals ")
@@ -56,7 +57,7 @@ import static io.spine.server.delivery.given.ReceptionistAggregate.FAILURE_MESSA
 final class ReceptionFailureTest extends AbstractDeliveryTest {
 
     @Test
-    @DisplayName("and rethrow errors, and observe the `InboxMessage` as one still to deliver")
+    @DisplayName("and repeat dispatching of the corresponding `InboxMessage`")
     void allowFailureRethrow() {
         ObservingMonitor monitor = new ObservingMonitor();
         configureDelivery(monitor);
@@ -64,31 +65,31 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
 
         String receptionistId = newUuid();
         TurnConditionerOn command = tellToTurnConditioner(receptionistId);
-        ReceptionistAggregate.makeApplierPass();
+        makeApplierPass();
         context.receivesCommand(command);
         sleep();
         assertThat(monitor.lastFailure()).isEmpty();
         context.assertState(receptionistId, receptionist(receptionistId, 1));
-        System.out.println("Events were successfully applied.");
 
-        ReceptionistAggregate.makeApplierFail();
+        AtomicBoolean failureObserved = new AtomicBoolean(false);
+        monitor.setResolver((failure) -> {
+            failureObserved.set(true);
+            Error error = failure.error();
+            assertThat(error.getStacktrace()).contains(FAILURE_MESSAGE);
+
+            makeApplierPass();
+            return failure.repeatDispatching();
+        });
+
+        makeApplierFail();
         context.receivesCommand(command);
         sleep();
-        Optional<FailedReception> lastFailure = monitor.lastFailure();
-        assertThat(lastFailure).isPresent();
-        @SuppressWarnings("OptionalGetWithoutIsPresent")    /* Checked above. */
-                FailedReception reception = lastFailure.get();
 
-        Error error = reception.error();
-        assertThat(error.getStacktrace()).contains(FAILURE_MESSAGE);
-
-        ImmutableList<InboxMessage> messages = inboxMessages();
-        assertThat(messages.size()).isEqualTo(1);
-        assertThat(messages.get(0)
-                           .getStatus()).isEqualTo(InboxMessageStatus.TO_DELIVER);
+        assertThat(failureObserved.get())
+                .isTrue();
+        assertInboxEmpty();
     }
 
-    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     @Test
     @DisplayName("and mark the corresponding `InboxMessage` as delivered")
     void allowMarkingFailedMessageAsDelivered() {
@@ -98,12 +99,15 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
 
         String receptionistId = newUuid();
         TurnConditionerOn command = tellToTurnConditioner(receptionistId);
-        ReceptionistAggregate.makeApplierFail();
+        makeApplierFail();
         context.receivesCommand(command);
         sleep();
 
         assertThat(monitor.failureReceived()).isTrue();
-        System.out.println("----- Reading the `InboxStorage` contents... -----");
+        assertInboxEmpty();
+    }
+
+    private static void assertInboxEmpty() {
         ImmutableList<InboxMessage> messages = inboxMessages();
         assertThat(messages.size()).isEqualTo(0);
     }

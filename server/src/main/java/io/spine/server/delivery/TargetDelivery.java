@@ -27,6 +27,7 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.delivery.FailedReception.Action;
@@ -129,8 +130,9 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         private void dispatch(InboxMessage message) {
             DispatchOutcome outcome = doDispatch(message);
             if(outcome.hasError()) {
+                Error error = outcome.getError();
                 FailedReception reception =
-                        new FailedReception(message, outcome.getError(), conveyor);
+                        new FailedReception(message, error, conveyor, () -> dispatch(message));
                 Action action = monitor.onReceptionFailure(reception);
                 action.execute();
             }
