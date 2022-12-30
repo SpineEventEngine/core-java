@@ -64,7 +64,7 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
     }
 
     @Override
-    public DispatchOutcome dispatchTo(I entityId) {
+    protected DispatchOutcome performDispatch(I entityId) {
         TypeName actualTypeName = envelope().messageTypeName();
         if (CATCH_UP_STARTED.equals(actualTypeName)) {
             ProjectionRepository<I, P, ?> repository = repository();
@@ -72,7 +72,7 @@ final class CatchUpEndpoint<I, P extends Projection<I, S, ?>, S extends EntitySt
                       .delete(entityId);
             return successfulOutcome(envelope().messageId());
         } else {
-            return super.dispatchTo(entityId);
+            return super.performDispatch(entityId);
         }
     }
 }

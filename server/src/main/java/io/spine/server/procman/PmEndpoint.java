@@ -74,7 +74,7 @@ abstract class PmEndpoint<I,
      */
     @SuppressWarnings("UnnecessaryInheritDoc") // IDEA bug.
     @Override
-    public DispatchOutcome dispatchTo(I id) {
+    protected final DispatchOutcome performDispatch(I id) {
         P manager = repository().findOrCreate(id);
         DispatchOutcome outcome = runTransactionFor(manager);
         DispatchOutcomeHandler

@@ -74,7 +74,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    public final DispatchOutcome dispatchTo(I aggregateId) {
+    protected final DispatchOutcome performDispatch(I aggregateId) {
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.lifecycleFlags();
         DispatchOutcome outcome = handleAndApplyEvents(aggregate);

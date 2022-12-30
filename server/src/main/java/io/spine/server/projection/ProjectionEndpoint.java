@@ -63,7 +63,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Enti
     }
 
     @Override
-    public DispatchOutcome dispatchTo(I entityId) {
+    protected DispatchOutcome performDispatch(I entityId) {
         ProjectionRepository<I, P, ?> repository = repository();
         P projection = repository.findOrCreate(entityId);
         DispatchOutcome outcome = runTransactionFor(projection);
