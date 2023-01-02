@@ -194,6 +194,10 @@ public final class ReceptionFailureTestEnv {
 
         private boolean failureReceived = false;
 
+        /**
+         * In case the reception of the {@code InboxMessage} failed,
+         * mark it as delivered anyway.
+         */
         @Override
         public FailedReception.Action onReceptionFailure(FailedReception reception) {
             this.failureReceived = true;
