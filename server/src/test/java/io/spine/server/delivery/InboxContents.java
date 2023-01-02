@@ -44,7 +44,6 @@ public final class InboxContents {
     /**
      * Fetches the contents of the {@code Inbox}es for each of the {@code ShardIndex}es.
      */
-    @SuppressWarnings("resource")
     public static ImmutableMap<ShardIndex, Page<InboxMessage>> get() {
         Delivery delivery = ServerEnvironment.instance()
                                              .delivery();
