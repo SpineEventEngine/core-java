@@ -109,6 +109,13 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
     }
 
+    /**
+     * Dispatches the signal to the respective target, monitors
+     * the erroneous {@code DispatchOutcome}s and notifies the {@code DeliveryMonitor} of such.
+     *
+     * @param <I>
+     *         type of identifiers of the delivery targets
+     */
     private static class MonitoringDispatcher<I> {
 
         private final DeliveryMonitor monitor;
