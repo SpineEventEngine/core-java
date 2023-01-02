@@ -50,7 +50,7 @@ interface ShardedMessageDelivery<M extends ShardedRecord> {
      * @param monitor
      *         the delivery monitor to be notified of the reception failures
      * @param conveyor
-     * the conveyor holding the current state of the inbox messages being delivered
+     *         the conveyor holding the current state of the inbox messages being delivered
      */
     void deliver(List<M> incoming, DeliveryMonitor monitor, Conveyor conveyor);
 
