@@ -206,7 +206,7 @@ public final class DispatchOutcomes {
      * @param signal
      *         the dispatched signal
      */
-    public static DispatchOutcome noTargetsToRoute(SignalEnvelope<?, ?, ?> signal) {
+    private static DispatchOutcome noTargetsToRoute(SignalEnvelope<?, ?, ?> signal) {
         checkNotNull(signal);
         DispatchOutcome outcome = withMessageId(signal.messageId())
                 .setNoTargetsToRoute(true)
