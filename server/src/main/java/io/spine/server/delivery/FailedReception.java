@@ -40,6 +40,11 @@ import io.spine.base.Error;
  *     <li>{@linkplain #markDelivered() mark} the message as delivered;
  *     <li>{@linkplain #repeatDispatching() repeat dispatching} of the message immediately.
  * </ul>
+ *
+ * <p>Alternatively, end-users may choose to define their own way of reacting
+ * to reception failures by implementing a custom {@code FailedReception.Action},
+ * and returning it via the corresponding
+ * {@linkplain DeliveryMonitor#onReceptionFailure(FailedReception) API} of {@code DeliveryMonitor}.
  */
 public final class FailedReception {
 
