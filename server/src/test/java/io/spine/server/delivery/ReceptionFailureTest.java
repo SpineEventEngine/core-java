@@ -32,6 +32,7 @@ import io.spine.server.delivery.given.ReceptionFailureTestEnv.MarkFailureDeliver
 import io.spine.server.delivery.given.ReceptionFailureTestEnv.ObservingMonitor;
 import io.spine.test.delivery.command.TurnConditionerOn;
 import io.spine.testing.SlowTest;
+import io.spine.testing.logging.MuteLogging;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,7 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("and repeat dispatching of the corresponding `InboxMessage`")
+    @MuteLogging
     void allowFailureRethrow() {
         ObservingMonitor monitor = new ObservingMonitor();
         configureDelivery(monitor);
@@ -92,6 +94,7 @@ final class ReceptionFailureTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("and mark the corresponding `InboxMessage` as delivered")
+    @MuteLogging
     void allowMarkingFailedMessageAsDelivered() {
         MarkFailureDeliveredMonitor monitor = new MarkFailureDeliveredMonitor();
         configureDelivery(monitor);
