@@ -87,8 +87,7 @@ public abstract class AbstractMessageEndpoint<I, M extends SignalEnvelope<?, ?, 
 
     private DispatchOutcome onFailedDispatch(Exception failure, I targetId) {
         Error error = failureToError(failure, targetId);
-        DispatchOutcome outcome = DispatchOutcome
-                .newBuilder()
+        DispatchOutcome outcome = DispatchOutcome.newBuilder()
                 .setPropagatedSignal(envelope.messageId())
                 .setError(error)
                 .vBuild();
