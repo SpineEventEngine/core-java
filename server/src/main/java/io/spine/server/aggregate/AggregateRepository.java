@@ -632,9 +632,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
             String outcomeDetails = Json.toJson(outcome);
-            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n%s",
-                                           aggregateClass().value()
-                                                           .getName(),
+            String aggClass = aggregateClass().value()
+                                              .getName();
+            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n" +
+                                                   "Erroneous dispatch outcome: `%s`",
+                                           aggClass,
                                            result.idAsString(),
                                            outcomeDetails);
         }
