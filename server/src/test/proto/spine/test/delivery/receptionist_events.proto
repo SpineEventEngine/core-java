@@ -34,7 +34,6 @@ option java_package = "io.spine.test.delivery.event";
 option java_outer_classname = "ReceptionistEventsProto";
 option java_multiple_files = true;
 
-
 message ConditionerTurnedOn {
     string receptionist = 1;
 }
