@@ -40,8 +40,7 @@ public class NoOpEndpoint implements MessageEndpoint<String, CommandEnvelope> {
 
     @Override
     public DispatchOutcome dispatchTo(String targetId) {
-        MessageId id = MessageId
-                .newBuilder()
+        MessageId id = MessageId.newBuilder()
                 .setId(Identifier.pack(targetId))
                 .vBuild();
         return successfulOutcome(id);
