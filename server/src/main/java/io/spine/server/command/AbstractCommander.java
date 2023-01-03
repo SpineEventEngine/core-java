@@ -39,6 +39,7 @@ import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.CommandClass;
@@ -81,13 +82,15 @@ public abstract class AbstractCommander
 
     @CanIgnoreReturnValue
     @Override
-    public void dispatch(CommandEnvelope command) {
+    public DispatchOutcome dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.handlerOf(command.messageClass());
+        DispatchOutcome outcome = method.invoke(this, command);
         DispatchOutcomeHandler
-                .from(method.invoke(this, command))
+                .from(outcome)
                 .onCommands(this::postCommands)
                 .onRejection(this::postRejection)
                 .handle();
+        return outcome;
     }
 
     @Override
@@ -106,12 +109,14 @@ public abstract class AbstractCommander
     }
 
     @Override
-    public void dispatchEvent(EventEnvelope event) {
+    public DispatchOutcome dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.commanderOn(event.messageClass());
+        DispatchOutcome outcome = method.invoke(this, event);
         DispatchOutcomeHandler
-                .from(method.invoke(this, event))
+                .from(outcome)
                 .onCommands(this::postCommands)
                 .handle();
+        return outcome;
     }
 
     /**

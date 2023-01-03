@@ -27,12 +27,14 @@
 package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.test.event.EvTeamCreated;
 
 import static com.google.common.collect.Sets.union;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 public class DelegatingEventDispatcherTestEnv {
 
@@ -60,8 +62,8 @@ public class DelegatingEventDispatcherTestEnv {
         }
 
         @Override
-        public void dispatchEvent(EventEnvelope event) {
-            // Do nothing.
+        public DispatchOutcome dispatchEvent(EventEnvelope event) {
+            return successfulOutcome(event);
         }
     }
 
@@ -84,8 +86,8 @@ public class DelegatingEventDispatcherTestEnv {
         }
 
         @Override
-        public void dispatchEvent(EventEnvelope event) {
-            // Do nothing.
+        public DispatchOutcome dispatchEvent(EventEnvelope event) {
+            return successfulOutcome(event);
         }
     }
 }

@@ -41,9 +41,15 @@ import static java.util.stream.Collectors.groupingBy;
 final class GroupByTargetAndDeliver implements DeliveryAction {
 
     private final InboxDeliveries inboxDeliveries;
+    private final DeliveryMonitor monitor;
+    private final Conveyor conveyor;
 
-    GroupByTargetAndDeliver(InboxDeliveries deliveries) {
+    GroupByTargetAndDeliver(InboxDeliveries deliveries,
+                            DeliveryMonitor monitor,
+                            Conveyor conveyor) {
         inboxDeliveries = deliveries;
+        this.monitor = monitor;
+        this.conveyor = conveyor;
     }
 
     /**
@@ -71,7 +77,7 @@ final class GroupByTargetAndDeliver implements DeliveryAction {
             ShardedMessageDelivery<InboxMessage> delivery = inboxDeliveries.get(typeUrl);
             List<InboxMessage> deliveryPackage = messagesByType.get(typeUrl);
             try {
-                delivery.deliver(deliveryPackage);
+                delivery.deliver(deliveryPackage, monitor, conveyor);
             } catch (RuntimeException exception) {
                 errors.addException(exception);
             } catch (@SuppressWarnings("ErrorNotRethrown") /* False positive */ ModelError error) {

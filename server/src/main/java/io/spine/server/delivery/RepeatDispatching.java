@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,36 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.server.delivery;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.server.command.AbstractCommandDispatcher;
-import io.spine.server.type.CommandClass;
-import io.spine.server.type.CommandEnvelope;
+import io.spine.annotation.Internal;
+import io.spine.base.Error;
 
 /**
- * A command dispatcher that dispatches the same type of commands as
- * {@link io.spine.testing.server.blackbox.given.BbCommandDispatcher}.
+ * Specifies the way to repeat the dispatching of {@code InboxMessage}s.
  *
- * <p>Attempting to register them with the same bounded context should result in an exception.
+ * @see FailedReception#FailedReception(InboxMessage, Error, Conveyor, RepeatDispatching)
  */
-public final class BbDuplicateCommandDispatcher extends AbstractCommandDispatcher {
+@Internal
+@FunctionalInterface
+public interface RepeatDispatching {
 
-    private final CommandClass commandToIntercept;
-
-    public BbDuplicateCommandDispatcher(CommandClass commandToIntercept) {
-        super();
-        this.commandToIntercept = commandToIntercept;
-    }
-
-    @Override
-    public ImmutableSet<CommandClass> messageClasses() {
-        return ImmutableSet.of(commandToIntercept);
-    }
-
-    @CanIgnoreReturnValue
-    @Override
-    public void dispatch(CommandEnvelope envelope) {
-    }
+    /**
+     * Dispatches the message one more time.
+     */
+    void dispatchAgain();
 }

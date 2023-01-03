@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.synchronizedMap;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -55,7 +56,18 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
 
     private static final long serialVersionUID = 0L;
 
-    private final Map<Class<? extends M>, Route<M, C, R>> routes = new LinkedHashMap<>();
+    /**
+     * Map of currently known routes.
+     *
+     * @implNote This collection is made {@code synchronized}, since in some cases it is
+     *         being simultaneously read and modified in different threads.
+     *         In particular, the modification at run-time is performed when storing
+     *         the routes discovered on per-interface basis. Therefore, if this collection
+     *         is not {@code synchronized}, a {@code ConcurrentModificationException}
+     *         is sometimes thrown.
+     */
+    private final Map<Class<? extends M>, Route<M, C, R>> routes =
+            synchronizedMap(new LinkedHashMap<>());
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */
     private Route<M, C, R> defaultRoute;

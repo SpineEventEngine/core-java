@@ -12,15 +12,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
 
       - uses: actions/setup-java@v3
         with:
           java-version: 8
           distribution: zulu
-          cache: gradle
-
-      - name: Pull config
-        run: git submodule update --init --recursive
 
       - name: Build project and run tests
         shell: bash

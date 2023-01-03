@@ -33,7 +33,6 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
-import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandBus;
@@ -43,6 +42,7 @@ import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityRecord;
@@ -64,12 +64,15 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
+import static io.spine.server.dispatch.DispatchOutcomes.maybeSentToInbox;
+import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -303,11 +306,12 @@ public abstract class ProcessManagerRepository<I,
      *         a request to dispatch
      */
     @Override
-    public final void dispatchCommand(CommandEnvelope command) {
+    public final DispatchOutcome dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         Optional<I> target = route(command);
         target.ifPresent(id -> inbox().send(command)
                                       .toHandler(id));
+        return maybeSentToInbox(command, target);
     }
 
     private Optional<I> route(CommandEnvelope cmd) {
@@ -333,19 +337,20 @@ public abstract class ProcessManagerRepository<I,
     /**
      * {@inheritDoc}
      *
-     * <p>Sends the given event to the {@code Inbox} of this repository.
+     * <p>Sends the given event to the {@code Inbox}es of respective entities.
      */
     @Override
-    protected final void dispatchTo(I id, Event event) {
-        inbox().send(EventEnvelope.of(event))
-               .toReactor(id);
+    protected final DispatchOutcome dispatchTo(Set<I> ids, EventEnvelope event) {
+        ids.forEach(id -> inbox().send(event)
+                                 .toReactor(id));
+        return sentToInbox(event, ids);
     }
 
-    @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     @VisibleForTesting
     protected PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
         PmTransaction<I, S, ?> tx = new PmTransaction<>((ProcessManager<I, S, ?>) manager);
-        TransactionListener listener = EntityLifecycleMonitor.newInstance(this, manager.id());
+        TransactionListener<I> listener =
+                EntityLifecycleMonitor.newInstance(this, manager.id());
         tx.setListener(listener);
         return tx;
     }

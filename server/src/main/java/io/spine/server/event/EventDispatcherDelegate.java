@@ -28,6 +28,7 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
@@ -61,9 +62,9 @@ public interface EventDispatcherDelegate {
     ImmutableSet<EventClass> externalEvents();
 
     /**
-     * Dispatches the event.
+     * Dispatches the event and returns the outcome of dispatching.
      */
-    void dispatchEvent(EventEnvelope event);
+    DispatchOutcome dispatchEvent(EventEnvelope event);
 
     /**
      * Returns immutable set with one element with the identity of the multicast dispatcher

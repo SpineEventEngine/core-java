@@ -27,8 +27,11 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Any;
+import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
+import io.spine.server.delivery.FailedReception.Action;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.tenant.IdInTenant;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
@@ -63,14 +66,15 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
     }
 
     @Override
-    public void deliver(List<InboxMessage> incoming) {
-
+    public void deliver(List<InboxMessage> incoming, DeliveryMonitor monitor, Conveyor conveyor) {
+        MonitoringDispatcher<I> dispatcher =
+                new MonitoringDispatcher<>(monitor, conveyor, inboxOfCmds, inboxOfEvents);
         if (batchListener == null) {
             for (InboxMessage incomingMessage : incoming) {
-                doDeliver(inboxOfCmds, inboxOfEvents, incomingMessage);
+                dispatcher.dispatch(incomingMessage);
             }
         } else {
-            deliverInBatch(incoming, batchListener);
+            deliverInBatch(incoming, dispatcher, batchListener);
         }
     }
 
@@ -83,33 +87,68 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
     }
 
-    private static <I> void doDeliver(InboxOfCommands<I>  cmdDispatcher,
-                                      InboxOfEvents<I> eventDispatcher,
-                                      InboxMessage incomingMessage) {
-        if (incomingMessage.hasCommand()) {
-            cmdDispatcher.deliver(incomingMessage);
-        } else {
-            eventDispatcher.deliver(incomingMessage);
-        }
-    }
-
     private void deliverInBatch(List<InboxMessage> incoming,
+                                MonitoringDispatcher<I> dispatcher,
                                 BatchDeliveryListener<I> batchDispatcher) {
-        List<Batch<I>> batches = Batch.byInboxId(incoming, this::asEnvelope);
+        List<Batch<I>> batches = Batch.byInboxId(incoming, dispatcher, this::asEnvelope);
 
         for (Batch<I> batch : batches) {
             TenantId tenant = batch.inboxId.tenant();
             TenantAwareRunner.with(tenant).run(
-                () -> batch.deliverVia(batchDispatcher, inboxOfCmds, inboxOfEvents)
+                () -> batch.deliverWith(batchDispatcher)
             );
         }
     }
 
+    @SuppressWarnings("rawtypes")   /* For simplicity. */
     private SignalEnvelope asEnvelope(InboxMessage message) {
         if (message.hasCommand()) {
             return inboxOfCmds.asEnvelope(message);
         } else {
             return inboxOfEvents.asEnvelope(message);
+        }
+    }
+
+    /**
+     * Dispatches the signal to the respective target, monitors
+     * the erroneous {@code DispatchOutcome}s and notifies the {@code DeliveryMonitor} of such.
+     *
+     * @param <I>
+     *         type of identifiers of the delivery targets
+     */
+    private static class MonitoringDispatcher<I> {
+
+        private final DeliveryMonitor monitor;
+        private final Conveyor conveyor;
+        private final InboxOfCommands<I> inboxOfCommands;
+        private final InboxOfEvents<I> inboxOfEvents;
+
+
+        private MonitoringDispatcher(DeliveryMonitor monitor,
+                                     Conveyor conveyor,
+                                     InboxOfCommands<I> inboxOfCommands,
+                                     InboxOfEvents<I> inboxOfEvents) {
+            this.monitor = monitor;
+            this.conveyor = conveyor;
+            this.inboxOfCommands = inboxOfCommands;
+            this.inboxOfEvents = inboxOfEvents;
+        }
+
+        private void dispatch(InboxMessage message) {
+            DispatchOutcome outcome = doDispatch(message);
+            if(outcome.hasError()) {
+                Error error = outcome.getError();
+                FailedReception reception =
+                        new FailedReception(message, error, conveyor, () -> dispatch(message));
+                Action action = monitor.onReceptionFailure(reception);
+                action.execute();
+            }
+        }
+
+        private DispatchOutcome doDispatch(InboxMessage message) {
+            return message.hasCommand()
+                   ? inboxOfCommands.deliver(message)
+                   : inboxOfEvents.deliver(message);
         }
     }
 
@@ -120,9 +159,12 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
 
         private final IdInTenant<InboxId> inboxId;
         private final List<InboxMessage> messages = new ArrayList<>();
+        private final MonitoringDispatcher<I> dispatcher;
 
-        private Batch(InboxId inboxId, TenantId tenantId) {
+
+        private Batch(InboxId inboxId, TenantId tenantId, MonitoringDispatcher<I> dispatcher) {
             this.inboxId = IdInTenant.of(inboxId, tenantId);
+            this.dispatcher = dispatcher;
         }
 
         /**
@@ -130,21 +172,24 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
          *
          * <p>The resulting order of messages through all batches is preserved.
          */
-        private static <I> List<Batch<I>> byInboxId(List<InboxMessage> messages,
-                                                    Function<InboxMessage, SignalEnvelope> fn) {
+        @SuppressWarnings("rawtypes")   /* For simplicity. */
+        private static <I> List<Batch<I>>
+        byInboxId(List<InboxMessage> messages,
+                  MonitoringDispatcher<I> dispatcher,
+                  Function<InboxMessage, SignalEnvelope> toEnvelope) {
             List<Batch<I>> batches = new ArrayList<>();
             Batch<I> currentBatch = null;
             for (InboxMessage message : messages) {
 
                 InboxId msgInboxId = message.getInboxId();
-                SignalEnvelope envelope = fn.apply(message);
+                SignalEnvelope envelope = toEnvelope.apply(message);
                 TenantId tenantId = envelope.tenantId();
                 if (currentBatch == null) {
-                    currentBatch = new Batch<>(msgInboxId, tenantId);
+                    currentBatch = new Batch<>(msgInboxId, tenantId, dispatcher);
                 } else {
                     if (!matchesBatch(currentBatch, msgInboxId, tenantId)) {
                         batches.add(currentBatch);
-                        currentBatch = new Batch<>(msgInboxId, tenantId);
+                        currentBatch = new Batch<>(msgInboxId, tenantId, dispatcher);
                     }
                 }
                 currentBatch.addMessage(message);
@@ -168,25 +213,23 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
             messages.add(message);
         }
 
-        private void deliverVia(BatchDeliveryListener<I> dispatcher,
-                                InboxOfCommands<I> cmdDispatcher,
-                                InboxOfEvents<I> eventDispatcher) {
+        private void deliverWith(BatchDeliveryListener<I> listener) {
             if (messages.size() > 1) {
                 Any packedId = inboxId.value()
                                       .getEntityId()
                                       .getId();
                 @SuppressWarnings("unchecked")      // Only IDs of type `I` are stored.
-                        I id = (I) Identifier.unpack(packedId);
-                dispatcher.onStart(id);
+                I id = (I) Identifier.unpack(packedId);
+                listener.onStart(id);
                 try {
                     for (InboxMessage message : messages) {
-                        doDeliver(cmdDispatcher, eventDispatcher, message);
+                        dispatcher.dispatch(message);
                     }
                 } finally {
-                    dispatcher.onEnd(id);
+                    listener.onEnd(id);
                 }
             } else {
-                doDeliver(cmdDispatcher, eventDispatcher, messages.get(0));
+                dispatcher.dispatch(messages.get(0));
             }
         }
     }

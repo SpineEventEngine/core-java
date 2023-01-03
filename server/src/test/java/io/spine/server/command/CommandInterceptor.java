@@ -29,9 +29,11 @@ package io.spine.server.command;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.CommandMessage;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 import static io.spine.server.type.CommandClass.setOf;
 
 /**
@@ -49,8 +51,9 @@ public final class CommandInterceptor extends AbstractCommandHandler {
     }
 
     @Override
-    public void dispatch(CommandEnvelope envelope) {
+    public DispatchOutcome dispatch(CommandEnvelope envelope) {
         history.add(envelope);
+        return successfulOutcome(envelope);
     }
 
     @Override

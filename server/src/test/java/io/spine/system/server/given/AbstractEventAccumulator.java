@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -37,6 +38,7 @@ import io.spine.server.type.EventEnvelope;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,9 +63,10 @@ public abstract class AbstractEventAccumulator implements EventDispatcher {
      */
     @CanIgnoreReturnValue
     @Override
-    public final void dispatch(EventEnvelope event) {
+    public final DispatchOutcome dispatch(EventEnvelope event) {
         EventMessage msg = event.message();
         remember(msg);
+        return successfulOutcome(event);
     }
 
     @Override

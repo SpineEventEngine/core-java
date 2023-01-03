@@ -49,7 +49,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * </ul>
  *
  * <p>Like other message-handling methods, commanding methods are designed to be called by
- * the framework only. Therefore, it is recommended to declare a them as package-private.
+ * the framework only. Therefore, it is recommended to declare them as package-private.
  * It discourages a developer from calling these methods directly from anywhere.
  *
  * <p>Package-private access level still declares that a command handler method is a part
@@ -91,7 +91,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <h2>Returning Values</h2>
  *
  * <p>A command-transforming method always returns an outcome. Depending on the design intention,
- * a type of an outcome may vary.
+ * a type of outcome may vary.
  *
  * <p>The command-transforming method must return either
  *
@@ -147,7 +147,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>Throwing {@linkplain Throwable other types} of {@code Throwable}s is not allowed in
  * the command-transforming methods.
  *
- *
  * <h1>Command Reaction</h1>
  *
  * <p>A commanding method may serve to emit commands in response to an incoming event. In this case
@@ -200,7 +199,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  *
  * <h2>Returning Values</h2>
  *
- * <p>A command-reacting method may emit one more more messages deriving from
+ * <p>A command-reacting method may emit one or more messages deriving from
  * {@link io.spine.base.CommandMessage CommandMessage}. The possibilities for the return values
  * are flexible. They serve to describe the returning values as sharp as possible and thus
  * reduce the probability of a human mistake.
@@ -264,7 +263,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Command {
 
     /**
-     * When {@code true}, the annotated method receives an event generated from outside of the
+     * When {@code true}, the annotated method receives an event generated from outside the
      * Bounded Context to which the annotated method's class belongs.
      *
      * <p>Should only be applied to commanding methods that accept an event or rejection as a

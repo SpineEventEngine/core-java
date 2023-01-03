@@ -27,6 +27,7 @@
 package io.spine.server.bus;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -48,11 +49,12 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
     ImmutableSet<C> messageClasses();
 
     /**
-     * Dispatches the message contained in the passed envelope.
+     * Dispatches the message contained in the passed envelope
+     * and returns the outcome.
      *
      * @param envelope the envelope with the message
      */
-    void dispatch(E envelope);
+    DispatchOutcome dispatch(E envelope);
 
     /**
      * Checks if this dispatcher can dispatch the given message.

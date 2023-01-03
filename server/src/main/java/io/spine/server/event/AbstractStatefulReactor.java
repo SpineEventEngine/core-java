@@ -35,6 +35,7 @@ import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
 import io.spine.server.delivery.MessageEndpoint;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.Repository;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
@@ -42,6 +43,7 @@ import io.spine.type.TypeUrl;
 import java.util.Optional;
 import java.util.Set;
 
+import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -82,12 +84,14 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
 
     @CanIgnoreReturnValue
     @Override
-    public void dispatch(EventEnvelope event) {
+    public DispatchOutcome dispatch(EventEnvelope event) {
         Set<I> targets = route(event);
         for (I target : targets) {
             inbox.send(event)
                  .toReactor(target);
         }
+        DispatchOutcome outcome = sentToInbox(event, targets);
+        return outcome;
     }
 
     /**
@@ -145,11 +149,12 @@ public abstract class AbstractStatefulReactor<I, S extends Message, B extends Va
          *         concurrent modifications when running locally in a multi-threading mode
          */
         @Override
-        public final void dispatchTo(I targetId) {
+        public DispatchOutcome dispatchTo(I targetId) {
             synchronized (endpointLock) {
                 loadIntoBuilder(targetId);
-                AbstractStatefulReactor.super.dispatch(envelope);
+                DispatchOutcome outcome = AbstractStatefulReactor.super.dispatch(envelope);
                 flushState();
+                return outcome;
             }
         }
 

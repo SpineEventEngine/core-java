@@ -24,39 +24,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.pm;
+package io.spine.server.dispatch;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.type.CommandClass;
+import com.google.common.testing.NullPointerTester;
+import io.spine.core.MessageId;
 import io.spine.server.type.CommandEnvelope;
-import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmPlanIteration;
-import io.spine.test.procman.command.PmReviewBacklog;
-import io.spine.test.procman.command.PmScheduleRetrospective;
-import io.spine.test.procman.command.PmStartIteration;
+import io.spine.server.type.EventEnvelope;
+import io.spine.testing.UtilityClassTest;
+import org.junit.jupiter.api.DisplayName;
 
-/**
- * A simple NO-OP dispatcher for {@link TestProcessManager}.
- *
- * <p>Enables dispatch for all commands posted by the {@code TestProcessManager} commanding
- * methods.
- */
-public class TestProcessManagerDispatcher implements CommandDispatcher {
+import static io.spine.server.dispatch.given.Given.commandEnvelope;
+import static io.spine.server.dispatch.given.Given.eventEnvelope;
 
-    @Override
-    public ImmutableSet<CommandClass> messageClasses() {
-        return CommandClass.setOf(PmCreateProject.class,
-                                  PmAddTask.class,
-                                  PmReviewBacklog.class,
-                                  PmScheduleRetrospective.class,
-                                  PmPlanIteration.class,
-                                  PmStartIteration.class);
+@DisplayName("`DispatchOutcomes` shoult")
+class DispatchOutcomesTest extends UtilityClassTest<DispatchOutcomes> {
+
+    DispatchOutcomesTest() {
+        super(DispatchOutcomes.class);
     }
 
     @Override
-    public void dispatch(CommandEnvelope envelope) {
-        // Do nothing.
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(MessageId.class, MessageId.getDefaultInstance())
+              .setDefault(EventEnvelope.class, eventEnvelope())
+              .setDefault(CommandEnvelope.class, commandEnvelope());
     }
 }

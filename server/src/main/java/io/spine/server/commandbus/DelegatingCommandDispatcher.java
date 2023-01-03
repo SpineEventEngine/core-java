@@ -28,6 +28,7 @@ package io.spine.server.commandbus;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
@@ -65,8 +66,8 @@ public class DelegatingCommandDispatcher implements CommandDispatcher {
     }
 
     @Override
-    public final void dispatch(CommandEnvelope envelope) {
-        delegate.dispatchCommand(envelope);
+    public final DispatchOutcome dispatch(CommandEnvelope envelope) {
+        return delegate.dispatchCommand(envelope);
     }
 
     /**

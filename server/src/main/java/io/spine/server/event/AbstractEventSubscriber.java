@@ -95,8 +95,8 @@ public abstract class AbstractEventSubscriber
      *         the envelope with the event
      */
     @Override
-    public final void dispatch(EventEnvelope event) {
-        with(event.tenantId()).run(() -> handle(event));
+    public final DispatchOutcome dispatch(EventEnvelope event) {
+        return with(event.tenantId()).evaluate(() -> handle(event));
     }
 
     /**
@@ -105,7 +105,7 @@ public abstract class AbstractEventSubscriber
      * <p>By default, passes the event to the corresponding {@linkplain io.spine.core.Subscribe
      * subscriber} method of the entity.
      */
-    protected void handle(EventEnvelope event) {
+    protected DispatchOutcome handle(EventEnvelope event) {
         DispatchOutcome outcome =
                 thisClass.subscriberOf(event)
                          .map(method -> method.invoke(this, event))
@@ -119,6 +119,7 @@ public abstract class AbstractEventSubscriber
                     .vBuild();
             system.postEvent(systemEvent, event.asMessageOrigin());
         }
+        return outcome;
     }
 
     private MessageId eventAnchor() {

@@ -23,40 +23,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.bus.given;
+package spine.test.delivery;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.server.bus.MulticastDispatcher;
-import io.spine.server.type.MessageEnvelope;
-import io.spine.type.MessageClass;
+import "spine/options.proto";
 
-import static io.spine.base.Identifier.newUuid;
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.delivery.event";
+option java_outer_classname = "ReceptionistEventsProto";
+option java_multiple_files = true;
 
-public class MulticastDispatcherIdentityTestEnv {
+message ConditionerTurnedOn {
+    string receptionist = 1;
+}
 
-    /** Prevents instantiation of this utility class. */
-    private MulticastDispatcherIdentityTestEnv() {
-    }
-
-    public static class NoOpDispatcher
-            implements MulticastDispatcher<MessageClass, MessageEnvelope> {
-
-        public static final String ID = newUuid();
-
-        @Override
-        public ImmutableSet<MessageClass> messageClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public void dispatch(MessageEnvelope envelope) {
-            // Do nothing.
-        }
-
-        @Override
-        public String toString() {
-            return ID;
-        }
-    }
+message ConditionerTurnedOff {
+    string receptionist = 1;
 }

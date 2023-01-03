@@ -63,11 +63,12 @@ public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Enti
     }
 
     @Override
-    public void dispatchTo(I entityId) {
+    protected DispatchOutcome performDispatch(I entityId) {
         ProjectionRepository<I, P, ?> repository = repository();
         P projection = repository.findOrCreate(entityId);
-        runTransactionFor(projection);
+        DispatchOutcome outcome = runTransactionFor(projection);
         store(projection);
+        return outcome;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Enti
                     .onDispatchEventToSubscriber(envelope().outerObject());
     }
 
-    protected void runTransactionFor(P projection) {
+    protected DispatchOutcome runTransactionFor(P projection) {
         ProjectionTransaction<I, S, ?> tx = start((Projection<I, S, ?>) projection);
         TransactionListener<I> listener =
                 EntityLifecycleMonitor.newInstance(repository(), projection.id());
@@ -90,6 +91,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Enti
             repository().lifecycleOf(projection.id())
                         .onDispatchingFailed(envelope(), error);
         }
+        return outcome;
     }
 
     @CanIgnoreReturnValue

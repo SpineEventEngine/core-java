@@ -29,6 +29,7 @@ package io.spine.server.bc.given;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -41,6 +42,7 @@ import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
 import static com.google.common.collect.Sets.union;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 public class Given {
 
@@ -82,8 +84,8 @@ public class Given {
 
         @CanIgnoreReturnValue
         @Override
-        public void dispatch(CommandEnvelope envelope) {
-            // Do nothing.
+        public DispatchOutcome dispatch(CommandEnvelope envelope) {
+            return successfulOutcome(envelope);
         }
     }
 
@@ -108,8 +110,8 @@ public class Given {
 
         @CanIgnoreReturnValue
         @Override
-        public void dispatch(EventEnvelope envelope) {
-            // Do nothing.
+        public DispatchOutcome dispatch(EventEnvelope envelope) {
+            return successfulOutcome(envelope);
         }
     }
 }

@@ -47,12 +47,17 @@ interface ShardedMessageDelivery<M extends ShardedRecord> {
      *
      * @param incoming
      *         the incoming messages to deliver
+     * @param monitor
+     *         the delivery monitor to be notified of the reception failures
+     * @param conveyor
+     *         the conveyor holding the current state of the inbox messages being delivered
      */
-    void deliver(List<M> incoming);
+    void deliver(List<M> incoming, DeliveryMonitor monitor, Conveyor conveyor);
 
     /**
-     * Serves to notify that the given message was originally sent to be {@linkplain #deliver(List)
-     * delivered}, but turned out to be a duplicate.
+     * Serves to notify that the given message was originally sent to be
+     * {@linkplain #deliver(List, DeliveryMonitor, Conveyor) delivered},
+     * but turned out to be a duplicate.
      */
     void onDuplicate(M message);
 }

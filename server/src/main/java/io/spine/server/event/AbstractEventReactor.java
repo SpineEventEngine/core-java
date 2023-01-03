@@ -38,6 +38,7 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.Identity;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.event.model.EventReactorMethod;
@@ -113,18 +114,20 @@ public abstract class AbstractEventReactor
     }
 
     @Override
-    public void dispatch(EventEnvelope event) {
-        TenantAwareRunner.with(event.tenantId())
-                         .run(() -> reactAndPost(event));
+    public DispatchOutcome dispatch(EventEnvelope event) {
+        return TenantAwareRunner.with(event.tenantId())
+                         .evaluate(() -> reactAndPost(event));
     }
 
-    private void reactAndPost(EventEnvelope event) {
+    private DispatchOutcome reactAndPost(EventEnvelope event) {
         EventReactorMethod method = thisClass.reactorOf(event.messageClass(), event.originClass());
+        DispatchOutcome outcome = method.invoke(this, event);
         DispatchOutcomeHandler
-                .from(method.invoke(this, event))
+                .from(outcome)
                 .onEvents(eventBus::post)
                 .onError(error -> postFailure(error, event))
                 .handle();
+        return outcome;
     }
 
     private MessageId eventAnchor() {

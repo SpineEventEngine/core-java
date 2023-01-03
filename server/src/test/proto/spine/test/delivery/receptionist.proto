@@ -23,45 +23,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.server.delivery;
+package spine.test.delivery;
 
-import io.spine.annotation.Internal;
-import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.entity.Repository;
-import io.spine.server.type.SignalEnvelope;
+import "spine/options.proto";
 
-/**
- * An endpoint for messages delivered to an abstract target.
- *
- * @param <I>
- *         the type of target identifier
- * @param <M>
- *         the type of message envelope being delivered
- */
-@Internal
-public interface MessageEndpoint<I, M extends SignalEnvelope<?, ?, ?>> {
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.delivery";
+option java_outer_classname = "ReceptionistProto";
+option java_multiple_files = true;
 
-    /**
-     * Dispatches the message to the target with the passed ID.
-     *
-     * @param targetId
-     *         the identifier of a target
-     */
-    DispatchOutcome dispatchTo(I targetId);
+message Receptionist {
 
-    /**
-     * The callback invoked if the handled signal is a duplicate.
-     *
-     * @param target
-     *         the target entity
-     * @param envelope
-     *         the handled signal
-     */
-    void onDuplicate(I target, M envelope);
+    option (entity).kind = AGGREGATE;
 
-    /**
-     * Obtains the repository which manages the target entities.
-     */
-    Repository<I, ?> repository();
+    string id = 1;
+
+    int32 how_many_cmds_handled = 2[(min).value = "0"];
 }
