@@ -46,8 +46,7 @@ public final class ReceptionistAggregate
 
     @Assign
     ConditionerTurnedOn handler(TurnConditionerOn cmd) {
-        return ConditionerTurnedOn
-                .newBuilder()
+        return ConditionerTurnedOn.newBuilder()
                 .setReceptionist(id())
                 .vBuild();
     }
