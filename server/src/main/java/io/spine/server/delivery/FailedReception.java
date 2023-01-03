@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Error;
 
@@ -122,19 +121,5 @@ public final class FailedReception {
          * Executes an action.
          */
         void execute();
-    }
-
-    /**
-     * An internal interface used to specify the action,
-     * which immediately repeats the {@code InboxMessage} dispatching.
-     */
-    @Internal
-    @FunctionalInterface
-    public interface RepeatDispatching {
-
-        /**
-         * Dispatches the message one more time.
-         */
-        void dispatchAgain();
     }
 }
