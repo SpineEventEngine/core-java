@@ -635,7 +635,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             String aggClass = aggregateClass().value()
                                               .getName();
             throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n" +
-                                                   "Erroneous dispatch outcome: `%s`",
+                                                   "Erroneous dispatch outcome: `%s`.",
                                            aggClass,
                                            result.idAsString(),
                                            outcomeDetails);
