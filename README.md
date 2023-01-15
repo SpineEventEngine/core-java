@@ -3,7 +3,6 @@
 [![Ubuntu build][ubuntu-build-badge]][gh-actions]
 [![codecov.io](https://codecov.io/github/SpineEventEngine/core-java/coverage.svg?branch=master)](https://codecov.io/github/SpineEventEngine/core-java?branch=master) &nbsp;
 [![license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Gitter chat](https://badges.gitter.im/SpineEventEngine.png)](https://gitter.im/SpineEventEngine)
 
 [gh-actions]: https://github.com/SpineEventEngine/core-java/actions
 [ubuntu-build-badge]: https://github.com/SpineEventEngine/core-java/actions/workflows/build-on-ubuntu.yml/badge.svg
