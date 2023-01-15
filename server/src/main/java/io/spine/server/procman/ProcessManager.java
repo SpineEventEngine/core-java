@@ -63,7 +63,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <li>
  *   <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html">
  *       Process Manager Pattern</a>
- * <li><a href="http://kellabyte.com/2012/05/30/clarifying-the-saga-pattern/">
+ * <li><a href="http://web.archive.org/web/20161205130022/http://kellabyte.com/2012/05/30/clarifying-the-saga-pattern/">
  *     Clarifying the Saga pattern</a> — the difference between Process Manager and Saga
  * <li><a href="https://dzone.com/articles/are-sagas-and-workflows-same-t">
  *     Are Sagas and Workflows the same...</a>
