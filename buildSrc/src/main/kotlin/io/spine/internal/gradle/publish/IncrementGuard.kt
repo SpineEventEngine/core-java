@@ -75,7 +75,7 @@ class IncrementGuard : Plugin<Project> {
      * Returns `false` if the associated reference is not a branch (e.g. a tag) or if it has
      * the name which ends with `master` or `main`.
      *
-     * For example, on the following branhces the method would return `false`:
+     * For example, on the following branches the method would return `false`:
      *
      * 1. `master`.
      * 2. `main`.

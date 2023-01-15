@@ -26,15 +26,11 @@
 
 @file:Suppress("RemoveRedundantQualifierName")
 
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.VersionWriter
-import io.spine.internal.gradle.applyStandard
-import io.spine.internal.gradle.applyStandardWithGitHub
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
@@ -51,6 +47,7 @@ import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.coverage.JacocoConfig
 import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
+import io.spine.internal.gradle.standardToSpineSdk
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
 import io.spine.protodata.gradle.CodegenSettings
@@ -61,13 +58,8 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
+    standardSpineSdkRepositories()
     io.spine.internal.gradle.doForceVersions(configurations)
-    io.spine.internal.gradle.applyWithStandard(this, rootProject,
-        "base",
-        "time",
-        "tool-base"
-    )
-
     dependencies {
         classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
@@ -97,7 +89,7 @@ object BuildSettings {
     const val JAVA_VERSION = 11
 }
 
-repositories.applyStandard()
+repositories.standardToSpineSdk()
 
 spinePublishing {
     modules = setOf(
@@ -139,7 +131,7 @@ allprojects {
 }
 
 subprojects {
-    applyRepositories()
+    repositories.standardToSpineSdk()
     applyPlugins()
 
     val javaVersion = JavaLanguageVersion.of(BuildSettings.JAVA_VERSION)
@@ -166,16 +158,6 @@ LicenseReporter.mergeAllReports(project)
  * The alias for typed extensions functions related to subprojects.
  */
 typealias Subproject = Project
-
-/**
- * Defines repositories to be used in subprojects when resolving artifacts.
- */
-fun Subproject.applyRepositories() {
-    repositories.applyStandardWithGitHub(
-        project,
-        "base", "time", "base-types", "change", "validation", "ProtoData", "mc-java",
-    )
-}
 
 /**
  * Applies plugins common to all modules to this subproject.
@@ -410,7 +392,8 @@ fun Subproject.forceConfigurations(spine: Spine) {
                        for the gRPC plugin.
                        See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
                        .configureProtocPlugins()` method which sets the version from resources. */
-                    Grpc.protobufPlugin,
+                    Grpc.ProtocPlugin.artifact,
+                    JUnit.runner,
 
                     spine.base,
                     spine.validation.runtime,

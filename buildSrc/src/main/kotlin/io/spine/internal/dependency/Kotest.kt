@@ -26,8 +26,13 @@
 
 package io.spine.internal.dependency
 
-// https://github.com/google/auto
-object AutoValue {
-    private const val version = "1.9"
-    const val annotations = "com.google.auto.value:auto-value-annotations:${version}"
+/**
+ * Testing framework for Kotlin.
+ *
+ * @see <a href="https://kotest.io/">Kotest site</a>
+ */
+object Kotest {
+    const val version = "5.5.4"
+    const val group = "io.kotest"
+    const val assertions = "$group:kotest-assertions-core:$version"
 }

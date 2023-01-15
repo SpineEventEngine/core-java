@@ -30,7 +30,7 @@ package io.spine.internal.dependency
 @Suppress("unused")
 object Grpc {
     @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.46.0"
+    const val version        = "1.52.0"
     const val api            = "io.grpc:grpc-api:${version}"
     const val auth           = "io.grpc:grpc-auth:${version}"
     const val core           = "io.grpc:grpc-core:${version}"
@@ -39,7 +39,11 @@ object Grpc {
     const val okHttp         = "io.grpc:grpc-okhttp:${version}"
     const val protobuf       = "io.grpc:grpc-protobuf:${version}"
     const val protobufLite   = "io.grpc:grpc-protobuf-lite:${version}"
-    const val protobufPlugin = "io.grpc:protoc-gen-grpc-java:${version}"
     const val netty          = "io.grpc:grpc-netty:${version}"
     const val nettyShaded    = "io.grpc:grpc-netty-shaded:${version}"
+
+    object ProtocPlugin {
+        const val id = "grpc"
+        const val artifact = "io.grpc:protoc-gen-grpc-java:${version}"
+    }
 }

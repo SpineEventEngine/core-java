@@ -29,14 +29,14 @@ package io.spine.internal.dependency
 // https://junit.org/junit5/
 @Suppress("unused")
 object JUnit {
-    const val version                    = "5.9.1"
-    private const val platformVersion    = "1.9.1"
+    const val version                    = "5.9.2"
+    private const val platformVersion    = "1.9.2"
     private const val legacyVersion      = "4.13.1"
 
     // https://github.com/apiguardian-team/apiguardian
     private const val apiGuardianVersion = "1.1.2"
     // https://github.com/junit-pioneer/junit-pioneer
-    private const val pioneerVersion     = "1.7.1"
+    private const val pioneerVersion     = "1.9.1"
 
     const val legacy = "junit:junit:${legacyVersion}"
     val api = listOf(
