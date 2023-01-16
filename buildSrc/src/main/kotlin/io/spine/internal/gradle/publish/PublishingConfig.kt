@@ -35,38 +35,84 @@ import org.gradle.kotlin.dsl.apply
 /**
  * Information, required to set up publishing of a project using `maven-publish` plugin.
  *
- * @param artifactId a name that a project is known by.
- * @param destinations set of repositories, to which the resulting artifacts will be sent.
- * @param includeProtoJar tells whether [protoJar] artifact should be published.
- * @param includeTestJar tells whether [testJar] artifact should be published.
- * @param includeDokkaJar tells whether [dokkaJar] artifact should be published.
+ * @param artifactId
+ *         a name that a project is known by.
+ * @param destinations
+ *         set of repositories, to which the resulting artifacts will be sent.
+ * @param includeProtoJar
+ *         tells whether [protoJar] artifact should be published.
+ * @param includeTestJar
+ *         tells whether [testJar] artifact should be published.
+ * @param includeDokkaJar
+ *         tells whether [dokkaJar] artifact should be published.
+ * @param customPublishing
+ *         tells whether subproject declares own publishing and standard one
+ *         should not be applied.
  */
-internal class PublishingConfig(
+internal class PublishingConfig private constructor(
     val artifactId: String,
     val destinations: Set<Repository>,
-    val includeProtoJar: Boolean = true,
-    val includeTestJar: Boolean = false,
-    val includeDokkaJar: Boolean = false
-)
+    val customPublishing: Boolean,
+    val includeTestJar: Boolean,
+    val includeDokkaJar: Boolean,
+    val includeProtoJar: Boolean
+) {
+    /**
+     * Creates an instance for standard publishing of a project module,
+     * specified under [SpinePublishing.modules].
+     */
+    constructor(
+        artifactId: String,
+        destinations: Set<Repository>,
+        includeProtoJar: Boolean = true,
+        includeTestJar: Boolean = false,
+        includeDokkaJar: Boolean = false
+    ) : this(artifactId, destinations, false, includeTestJar, includeDokkaJar, includeProtoJar)
 
+    /**
+     * Creates an instance for publishing a module specified
+     * under [SpinePublishing.modulesWithCustomPublishing].
+     */
+    constructor(artifactId: String, destinations: Set<Repository>) :
+            this(artifactId, destinations, customPublishing = true,
+                includeTestJar = false, includeDokkaJar = false, includeProtoJar = false)
+}
 /**
  * Applies this configuration to the given project.
  *
  * This method does the following:
  *
  *  1. Applies `maven-publish` plugin to the project.
- *  2. Registers [MavenJavaPublication] in Gradle's [PublicationContainer][org.gradle.api.publish.PublicationContainer].
+ *  2. Registers [MavenJavaPublication] in Gradle's
+ *     [PublicationContainer][org.gradle.api.publish.PublicationContainer].
  *  4. Configures "publish" task.
  *
  *  The actual list of resulted artifacts is determined by [registerArtifacts].
  */
 internal fun PublishingConfig.apply(project: Project) = with(project) {
     apply(plugin = "maven-publish")
-    createPublication(project)
+    handlePublication(project)
     configurePublishTask(destinations)
 }
 
-private fun PublishingConfig.createPublication(project: Project) {
+private fun PublishingConfig.handlePublication(project: Project) {
+    if (customPublishing) {
+        handleCustomPublications(project)
+    } else {
+        createStandardPublication(project)
+    }
+}
+
+private fun PublishingConfig.handleCustomPublications(project: Project) {
+    project.logger.info("The project `${project.name}` is set to provide custom publishing.")
+    val publications = CustomPublications(
+        artifactId = artifactId,
+        destinations = destinations
+    )
+    publications.registerIn(project)
+}
+
+private fun PublishingConfig.createStandardPublication(project: Project) {
     val artifacts = project.registerArtifacts(includeProtoJar, includeTestJar, includeDokkaJar)
     val publication = MavenJavaPublication(
         artifactId = artifactId,

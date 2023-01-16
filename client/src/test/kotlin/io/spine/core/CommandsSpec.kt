@@ -26,23 +26,24 @@
 package io.spine.core
 
 import com.google.common.testing.NullPointerTester
-import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.Any
 import com.google.protobuf.Descriptors.FileDescriptor
 import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
+import com.google.protobuf.util.Durations.ZERO
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.spine.base.Identifier
 import io.spine.base.Time.currentTime
-import io.spine.protobuf.Durations2.ZERO
 import io.spine.string.Stringifiers.fromString
 import io.spine.string.Stringifiers.toString
 import io.spine.test.commands.cmdCreateProject
 import io.spine.test.commands.cmdStartProject
 import io.spine.test.commands.cmdStopProject
 import io.spine.testing.UtilityClassTest
-import io.spine.testing.setDefault
 import io.spine.testing.client.TestActorRequestFactory
 import io.spine.testing.core.given.GivenUserId
+import io.spine.testing.setDefault
 import io.spine.time.testing.Past.minutesAgo
 import io.spine.time.testing.Past.secondsAgo
 import org.junit.jupiter.api.DisplayName
@@ -77,9 +78,9 @@ internal class CommandsSpec : UtilityClassTest<Commands>(Commands::class.java) {
         val sortedCommands = listOf(cmd1, cmd2, cmd3)
         val commandsToSort = listOf(cmd3, cmd1, cmd2)
 
-        assertThat(commandsToSort).isNotEqualTo(sortedCommands)
+        commandsToSort shouldNotBe sortedCommands
         Commands.sort(commandsToSort)
-        assertThat(commandsToSort).isEqualTo(sortedCommands)
+        commandsToSort shouldBe sortedCommands
     }
 
     @Test
@@ -87,8 +88,8 @@ internal class CommandsSpec : UtilityClassTest<Commands>(Commands::class.java) {
         val id = CommandId.generate()
         val str = toString(id)
         val convertedBack = fromString(str, CommandId::class.java)
-        assertThat(convertedBack)
-            .isEqualTo(id)
+
+        convertedBack shouldBe id
     }
 
     companion object {

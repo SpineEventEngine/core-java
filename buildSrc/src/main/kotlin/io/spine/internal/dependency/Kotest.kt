@@ -24,23 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model
+package io.spine.internal.dependency
 
-import com.google.common.truth.Truth8.assertThat
-import io.spine.core.Subscribe
-import io.spine.server.event.model.SubscriberSignature
-import io.spine.server.model.given.KotlinEventSubscriber
-import org.junit.jupiter.api.Test
-
-class `Method signature in Kotlin should` {
-
-    @Test
-    fun `be accepted with the 'internal' access modifier`() {
-        val method = KotlinEventSubscriber::class.java
-            .declaredMethods
-            .first { it.isAnnotationPresent(Subscribe::class.java) }
-        val mismatch = MatchCriterion.ACCESS_MODIFIER.test(method, SubscriberSignature())
-        assertThat(mismatch)
-            .isEmpty()
-    }
+/**
+ * Testing framework for Kotlin.
+ *
+ * @see <a href="https://kotest.io/">Kotest site</a>
+ */
+object Kotest {
+    const val version = "5.5.4"
+    const val group = "io.kotest"
+    const val assertions = "$group:kotest-assertions-core:$version"
 }

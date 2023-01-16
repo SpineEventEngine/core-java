@@ -28,6 +28,7 @@ package io.spine.internal.gradle.report.pom
 
 import java.io.StringWriter
 import java.lang.System.lineSeparator
+import java.util.*
 
 /**
  * Helps to format the `pom.xml` file according to its expected XML structure.
@@ -74,6 +75,7 @@ internal object PomFormatting {
                     "structure per-subproject." +
                     NL
         return String.format(
+            Locale.US,
             "<!-- %s %s %s -->",
             NL, description, NL
         )

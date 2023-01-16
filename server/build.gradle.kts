@@ -31,6 +31,7 @@ import io.spine.internal.dependency.Spine
 
 plugins {
     `java-test-fixtures`
+    `detekt-code-analysis`
 }
 
 dependencies {

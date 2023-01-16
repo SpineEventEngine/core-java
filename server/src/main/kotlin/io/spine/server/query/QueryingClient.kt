@@ -149,6 +149,6 @@ private class Observer<T : EntityState<*>>(
      * the result has not been received.
      */
     fun foundResult(): List<T> {
-        return result ?: throw IllegalStateException("Query has not yielded any result yet.")
+        return result ?: error("Query has not yielded any result yet.")
     }
 }

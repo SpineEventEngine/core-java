@@ -23,11 +23,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package io.spine.internal.dependency
+package spine.server.given.model.signature;
 
-// https://github.com/google/auto
-object AutoValue {
-    private const val version = "1.9"
-    const val annotations = "com.google.auto.value:auto-value-annotations:${version}"
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.given.model.signature";
+option java_outer_classname = "ModelEventsProto";
+option java_multiple_files = true;
+
+enum Coin {
+    option allow_alias = true;
+
+    C_UNKNOWN = 0;
+
+    OBVERSE = 1;
+    HEADS = 1;
+
+    REVERSE = 2;
+    TAILS = 2;
+}
+
+message CoinTossed {
+    int32 number = 1;
 }

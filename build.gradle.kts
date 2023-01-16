@@ -26,15 +26,11 @@
 
 @file:Suppress("RemoveRedundantQualifierName")
 
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
-import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.VersionWriter
-import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
@@ -51,6 +47,7 @@ import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.coverage.JacocoConfig
 import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.report.pom.PomGenerator
+import io.spine.internal.gradle.standardToSpineSdk
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
 import io.spine.protodata.gradle.CodegenSettings
@@ -61,38 +58,20 @@ import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    apply(from = "$rootDir/version.gradle.kts")
-
-    io.spine.internal.gradle.doApplyStandard(repositories)
-    io.spine.internal.gradle.doApplyGitHubPackages(repositories, "base", rootProject)
-
-    val spine = io.spine.internal.dependency.Spine(project)
-
-    dependencies {
-        classpath(spine.mcJavaPlugin)
-    }
-
+    standardSpineSdkRepositories()
     io.spine.internal.gradle.doForceVersions(configurations)
-    configurations.all {
-        resolutionStrategy {
-            force(
-                io.spine.internal.dependency.Kotlin.stdLib,
-                io.spine.internal.dependency.Kotlin.stdLibCommon,
-                spine.base,
-                spine.time,
-                spine.toolBase,
-            )
-        }
+    dependencies {
+        classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
 }
 
-@Suppress("RemoveRedundantQualifierName") // Cannot use imports here.
 plugins {
     `java-library`
     kotlin("jvm")
     idea
-    id(io.spine.internal.dependency.Protobuf.GradlePlugin.id)
-    id(io.spine.internal.dependency.ErrorProne.GradlePlugin.id)
+    protobuf
+    errorprone
+    `gradle-doctor`
 }
 
 object BuildSettings {
@@ -106,11 +85,11 @@ object BuildSettings {
      *      protobuf#10593</a>
      */
     const val protocArtifact = "com.google.protobuf:protoc:3.19.6"
+
+    const val JAVA_VERSION = 11
 }
 
-repositories.applyStandard()
-
-apply(from = "$rootDir/version.gradle.kts")
+repositories.standardToSpineSdk()
 
 spinePublishing {
     modules = setOf(
@@ -146,21 +125,18 @@ allprojects {
         plugin("project-report")
     }
 
-    apply {
-        from("$rootDir/version.gradle.kts")
-    }
-
+    apply(from = "$rootDir/version.gradle.kts")
     group = "io.spine"
     version = extra["versionToPublish"]!!
 }
 
-val spine = Spine(project)
-
 subprojects {
-    repositories.applyStandard()
+    repositories.standardToSpineSdk()
     applyPlugins()
-    setupJava()
-    setupKotlin()
+
+    val javaVersion = JavaLanguageVersion.of(BuildSettings.JAVA_VERSION)
+    setupJava(javaVersion)
+    setupKotlin(javaVersion)
 
     val spine = Spine(this)
     defineDependencies(spine)
@@ -212,16 +188,17 @@ fun Subproject.applyPlugins() {
 /**
  * Configures Java tasks in this project.
  */
-fun Subproject.setupJava() {
+fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
     java {
-        tasks {
-            withType<JavaCompile>().configureEach {
-                configureJavac()
-                configureErrorProne()
-            }
-            withType<Jar>().configureEach {
-                duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            }
+        toolchain.languageVersion.set(javaVersion)
+    }
+    tasks {
+        withType<JavaCompile>().configureEach {
+            configureJavac()
+            configureErrorProne()
+        }
+        withType<Jar>().configureEach {
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
     }
 }
@@ -229,15 +206,13 @@ fun Subproject.setupJava() {
 /**
  * Configures Kotlin tasks in this project.
  */
-fun Subproject.setupKotlin() {
+fun Subproject.setupKotlin(javaVersion: JavaLanguageVersion) {
     kotlin {
-        val javaVersion = JavaVersion.VERSION_11.toString()
-
-        applyJvmToolchain(javaVersion)
+        applyJvmToolchain(javaVersion.asInt())
         explicitApi()
 
         tasks.withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion
+            kotlinOptions.jvmTarget = javaVersion.toString()
             setFreeCompilerArgs()
         }
     }
@@ -412,14 +387,13 @@ fun Subproject.forceConfigurations(spine: Spine) {
             resolutionStrategy {
                 exclude("io.spine", "spine-validate")
                 force(
-                    Dokka.BasePlugin.lib,
-                    Dokka.analysis,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.
                        See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
-                       .configureProtocPlugins() method which sets the version from resources. */
-                    Grpc.protobufPlugin,
+                       .configureProtocPlugins()` method which sets the version from resources. */
+                    Grpc.ProtocPlugin.artifact,
+                    JUnit.runner,
 
                     spine.base,
                     spine.validation.runtime,

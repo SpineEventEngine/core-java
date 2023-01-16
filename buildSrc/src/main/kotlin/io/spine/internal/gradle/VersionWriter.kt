@@ -97,7 +97,7 @@ abstract class WriteVersions : DefaultTask() {
      * `versions-spine-tools.properties`.
      */
     @TaskAction
-    private fun writeFile() {
+    fun writeFile() {
         versions.finalizeValue()
         versionsFileLocation.finalizeValue()
 

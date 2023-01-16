@@ -24,16 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO:2021-07-05:dmytro.dashenkov: https://github.com/SpineEventEngine/config/issues/214.
+package io.spine.internal.dependency
 
-allprojects {
-    configurations.all {
-        resolutionStrategy {
-            eachDependency {
-                if (requested.group == "org.jacoco") {
-                    useVersion("0.8.7")
-                }
-            }
-        }
-    }
+// https://github.com/google/auto
+object AutoCommon {
+    private const val version = "1.2.1"
+    const val lib = "com.google.auto:auto-common:${version}"
+}
+
+// https://github.com/google/auto
+object AutoService {
+    private const val version = "1.0.1"
+    const val annotations = "com.google.auto.service:auto-service-annotations:${version}"
+    @Suppress("unused")
+    const val processor   = "com.google.auto.service:auto-service:${version}"
+}
+
+// https://github.com/google/auto
+object AutoValue {
+    private const val version = "1.10.1"
+    const val annotations = "com.google.auto.value:auto-value-annotations:${version}"
 }

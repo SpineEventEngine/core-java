@@ -59,7 +59,6 @@ import java.util.stream.Collectors.toList
 import kotlin.Any
 import kotlin.IllegalArgumentException
 import kotlin.Int
-import kotlin.RuntimeException
 import kotlin.String
 import kotlin.Unit
 import kotlin.apply
@@ -485,8 +484,8 @@ internal class QueryBuilderSpec {
                     return filter
                 }
             }
-            fail<Any>(String.format("No Filter found for %s.", name))
-            throw RuntimeException("never happens unless JUnit is broken")
+            fail<Any>(String.format(Locale.US, "No Filter found for %s.", name))
+            error("Unreachable code is reached!") // Never happens unless JUnit is broken.
         }
     }
 

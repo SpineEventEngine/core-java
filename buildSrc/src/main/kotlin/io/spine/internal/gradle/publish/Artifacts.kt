@@ -58,6 +58,11 @@ private fun FileTreeElement.isGoogleProtoSource(): Boolean {
 }
 
 /**
+ * The reference to the `generateProto` task of a `main` source set.
+ */
+internal fun Project.generateProto() = tasks.getByName("generateProto")
+
+/**
  * Locates or creates `sourcesJar` task in this [Project].
  *
  * The output of this task is a `jar` archive. The archive contains sources from `main` source set.
@@ -72,6 +77,7 @@ private fun FileTreeElement.isGoogleProtoSource(): Boolean {
  * For Proto sources to be included – [special treatment][protoSources] is needed.
  */
 internal fun Project.sourcesJar() = tasks.getOrCreate("sourcesJar") {
+    dependsOn(generateProto())
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource) // Puts Java and Kotlin sources.
     from(protoSources()) // Puts Proto sources.
@@ -84,6 +90,7 @@ internal fun Project.sourcesJar() = tasks.getOrCreate("sourcesJar") {
  * [Proto sources][protoSources] from `main` source set.
  */
 internal fun Project.protoJar() = tasks.getOrCreate("protoJar") {
+    dependsOn(generateProto())
     archiveClassifier.set("proto")
     from(protoSources())
 }

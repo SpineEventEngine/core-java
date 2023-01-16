@@ -24,6 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("TooManyFunctions") // Deprecated functions will be kept for a while.
+
 package io.spine.internal.gradle
 
 import io.spine.internal.gradle.publish.CloudRepo
@@ -35,105 +37,37 @@ import java.util.*
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.kotlin.dsl.ScriptHandlerScope
 
 /**
- * A Maven repository.
+ * Applies [standard][doApplyStandard] repositories to this [ScriptHandlerScope]
+ * optionally adding [gitHub] repositories for Spine-only components, if
+ * names of such repositories are given.
+ *
+ * @param buildscript
+ *         a [ScriptHandlerScope] to work with. Pass `this` under `buildscript { }`.
+ * @param rootProject
+ *         a root project where the `buildscript` is declared.
+ * @param gitHubRepo
+ *         a list of short repository names, or empty list if only
+ *         [standard repositories][doApplyStandard] are required.
  */
-data class Repository(
-    val releases: String,
-    val snapshots: String,
-    private val credentialsFile: String? = null,
-    private val credentialValues: ((Project) -> Credentials?)? = null,
-    val name: String = "Maven repository `$releases`"
-) {
-
-    /**
-     * Obtains the publishing password credentials to this repository.
-     *
-     * If the credentials are represented by a `.properties` file, reads the file and parses
-     * the credentials. The file must have properties `user.name` and `user.password`, which store
-     * the username and the password for the Maven repository auth.
-     */
-    fun credentials(project: Project): Credentials? {
-        if (credentialValues != null) {
-            return credentialValues.invoke(project)
-        }
-        credentialsFile!!
-        val log = project.logger
-        log.info("Using credentials from `$credentialsFile`.")
-        val file = project.rootProject.file(credentialsFile)
-        if (!file.exists()) {
-            return null
-        }
-        val creds = file.readCredentials()
-        log.info("Publishing build as `${creds.username}`.")
-        return creds
-    }
-
-    private fun File.readCredentials(): Credentials {
-        val properties = Properties()
-        properties.load(inputStream())
-        val username = properties.getProperty("user.name")
-        val password = properties.getProperty("user.password")
-        return Credentials(username, password)
-    }
-
-    override fun toString(): String {
-        return name
-    }
-}
-
-/**
- * Password credentials for a Maven repository.
- */
-data class Credentials(
-    val username: String?,
-    val password: String?
+@Suppress("unused")
+@Deprecated(
+    message = "Please use `standardSpineSdkRepositories()`.",
+    replaceWith = ReplaceWith("standardSpineSdkRepositories()")
 )
-
-/**
- * Defines names of additional repositories commonly used in the framework projects.
- *
- * @see [applyStandard]
- */
-@Suppress("unused")
-object Repos {
-    @Deprecated(
-        message = "Please use another repository.",
-        replaceWith = ReplaceWith("artifactRegistry"),
-        level = DeprecationLevel.ERROR
-    )
-    val oldSpine = PublishingRepos.mavenTeamDev.releases
-
-    @Deprecated(
-        message = "Please use another repository.",
-        replaceWith = ReplaceWith("artifactRegistrySnapshots"),
-        level = DeprecationLevel.ERROR
-    )
-    val oldSpineSnapshots = PublishingRepos.mavenTeamDev.snapshots
-
-    val spine = CloudRepo.published.releases
-    val spineSnapshots = CloudRepo.published.snapshots
-
-    val artifactRegistry = PublishingRepos.cloudArtifactRegistry.releases
-    val artifactRegistrySnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
-
-    @Deprecated(
-        message = "Sonatype release repository redirects to the Maven Central",
-        replaceWith = ReplaceWith("sonatypeSnapshots"),
-        level = DeprecationLevel.ERROR
-    )
-    const val sonatypeReleases = "https://oss.sonatype.org/content/repositories/snapshots"
-    const val sonatypeSnapshots = "https://oss.sonatype.org/content/repositories/snapshots"
+fun applyWithStandard(
+    buildscript: ScriptHandlerScope,
+    rootProject: Project,
+    vararg gitHubRepo: String
+) {
+    val repositories = buildscript.repositories
+    gitHubRepo.iterator().forEachRemaining { repo ->
+        repositories.applyGitHubPackages(repo, rootProject)
+    }
+    repositories.standardToSpineSdk()
 }
-
-/**
- * Registers the standard set of Maven repositories.
- *
- * To be used in `buildscript` clauses when a fully-qualified call must be made.
- */
-@Suppress("unused")
-fun doApplyStandard(repositories: RepositoryHandler) = repositories.applyStandard()
 
 /**
  * Registers the selected GitHub Packages repos as Maven repositories.
@@ -149,11 +83,27 @@ fun doApplyStandard(repositories: RepositoryHandler) = repositories.applyStandar
  * @see applyGitHubPackages
  */
 @Suppress("unused")
+@Deprecated(
+    message = "Please use `standardSpineSdkRepositories()`.",
+    replaceWith = ReplaceWith("standardSpineSdkRepositories()")
+)
 fun doApplyGitHubPackages(
     repositories: RepositoryHandler,
     shortRepositoryName: String,
     project: Project
 ) = repositories.applyGitHubPackages(shortRepositoryName, project)
+
+/**
+ * Registers the standard set of Maven repositories.
+ *
+ * To be used in `buildscript` clauses when a fully-qualified call must be made.
+ */
+@Suppress("unused")
+@Deprecated(
+    message = "Please use `standardSpineSdkRepositories()`.",
+    replaceWith = ReplaceWith("standardSpineSdkRepositories()")
+)
+fun doApplyStandard(repositories: RepositoryHandler) = repositories.standardToSpineSdk()
 
 /**
  * Applies the repository hosted at GitHub Packages, to which Spine artifacts were published.
@@ -195,17 +145,80 @@ fun RepositoryHandler.applyGitHubPackages(project: Project, vararg shortReposito
 }
 
 /**
- * Applies repositories commonly used by Spine Event Engine projects.
+ * Applies [standard][applyStandard] repositories to this [RepositoryHandler]
+ * optionally adding [applyGitHubPackages] repositories for Spine-only components, if
+ * names of such repositories are given.
  *
- * Does not include the repositories hosted at GitHub Packages.
- *
- * @see applyGitHubPackages
+ * @param project
+ *         a project to which we add dependencies
+ * @param gitHubRepo
+ *         a list of short repository names, or empty list if only
+ *         [standard repositories][applyStandard] are required.
  */
 @Suppress("unused")
-fun RepositoryHandler.applyStandard() {
+@Deprecated(
+    message = "Please use `standardToSpineSdk()`.",
+    replaceWith = ReplaceWith("standardToSpineSdk()")
+)
+fun RepositoryHandler.applyStandardWithGitHub(project: Project, vararg gitHubRepo: String) {
+    gitHubRepo.iterator().forEachRemaining { repo ->
+        applyGitHubPackages(repo, project)
+    }
+    standardToSpineSdk()
+}
 
-    gradlePluginPortal()
-    mavenLocal()
+/**
+ * A scrambled version of PAT generated with the only "read:packages" scope.
+ *
+ * The scrambling around PAT is necessary because GitHub analyzes commits for the presence
+ * of tokens and invalidates them.
+ *
+ * @see <a href="https://github.com/orgs/community/discussions/25629">
+ *     How to make GitHub packages to the public</a>
+ */
+object Pat {
+    private const val shade = "_phg->8YlN->MFRA->gxIk->HVkm->eO6g->FqHJ->z8MS->H4zC->ZEPq"
+    private const val separator = "->"
+    private val chunks: Int = shade.split(separator).size - 1
+
+    fun credentials(): Credentials {
+        val pass = shade.replace(separator, "").splitAndReverse(chunks, "")
+        return Credentials("public", pass)
+    }
+
+    /**
+     * Splits this string to the chunks, reverses each chunk, and joins them
+     * back to a string using the [separator].
+     */
+    private fun String.splitAndReverse(numChunks: Int, separator: String): String {
+        check(length / numChunks >= 2) {
+            "The number of chunks is too big. Must be <= ${length / 2}."
+        }
+        val chunks = chunked(length / numChunks)
+        val reversedChunks = chunks.map { chunk -> chunk.reversed() }
+        return reversedChunks.joinToString(separator)
+    }
+}
+
+/**
+ * Adds a read-only view to all artifacts of the SpineEventEngine
+ * GitHub organization.
+ */
+fun RepositoryHandler.spineArtifacts(): MavenArtifactRepository = maven {
+    url = URI("https://maven.pkg.github.com/SpineEventEngine/*")
+    includeSpineOnly()
+    val pat = Pat.credentials()
+    credentials {
+        username = pat.username
+        password = pat.password
+    }
+}
+
+/**
+ * Applies repositories commonly used by Spine Event Engine projects.
+ */
+fun RepositoryHandler.standardToSpineSdk() {
+    spineArtifacts()
 
     val spineRepos = listOf(
         Repos.spine,
@@ -223,10 +236,99 @@ fun RepositoryHandler.applyStandard() {
             }
         }
 
-    mavenCentral()
     maven {
         url = URI(Repos.sonatypeSnapshots)
     }
+
+    mavenCentral()
+    gradlePluginPortal()
+    mavenLocal().includeSpineOnly()
+}
+
+@Deprecated(
+    message = "Please use `standardToSpineSdk() instead.",
+    replaceWith = ReplaceWith("standardToSpineSdk()")
+)
+fun RepositoryHandler.applyStandard() = this.standardToSpineSdk()
+
+/**
+ * A Maven repository.
+ */
+data class Repository(
+    val releases: String,
+    val snapshots: String,
+    private val credentialsFile: String? = null,
+    private val credentialValues: ((Project) -> Credentials?)? = null,
+    val name: String = "Maven repository `$releases`"
+) {
+
+    /**
+     * Obtains the publishing password credentials to this repository.
+     *
+     * If the credentials are represented by a `.properties` file, reads the file and parses
+     * the credentials. The file must have properties `user.name` and `user.password`, which store
+     * the username and the password for the Maven repository auth.
+     */
+    fun credentials(project: Project): Credentials? = when {
+        credentialValues != null -> credentialValues.invoke(project)
+        credentialsFile != null -> credsFromFile(credentialsFile, project)
+        else -> throw IllegalArgumentException(
+            "Credentials file or a supplier function should be passed."
+        )
+    }
+
+    private fun credsFromFile(fileName: String, project: Project): Credentials? {
+        val file = project.rootProject.file(fileName)
+        if (file.exists().not()) {
+            return null
+        }
+
+        val log = project.logger
+        log.info("Using credentials from `$fileName`.")
+        val creds = file.parseCredentials()
+        log.info("Publishing build as `${creds.username}`.")
+        return creds
+    }
+
+    private fun File.parseCredentials(): Credentials {
+        val properties = Properties().apply { load(inputStream()) }
+        val username = properties.getProperty("user.name")
+        val password = properties.getProperty("user.password")
+        return Credentials(username, password)
+    }
+
+    override fun toString(): String {
+        return name
+    }
+}
+
+/**
+ * Password credentials for a Maven repository.
+ */
+data class Credentials(
+    val username: String?,
+    val password: String?
+)
+
+/**
+ * Defines names of additional repositories commonly used in the Spine SDK projects.
+ *
+ * @see [applyStandard]
+ */
+private object Repos {
+    val spine = CloudRepo.published.releases
+    val spineSnapshots = CloudRepo.published.snapshots
+    val artifactRegistry = PublishingRepos.cloudArtifactRegistry.releases
+    val artifactRegistrySnapshots = PublishingRepos.cloudArtifactRegistry.snapshots
+
+    @Suppress("unused")
+    @Deprecated(
+        message = "Sonatype release repository redirects to the Maven Central",
+        replaceWith = ReplaceWith("sonatypeSnapshots"),
+        level = DeprecationLevel.ERROR
+    )
+    const val sonatypeReleases = "https://oss.sonatype.org/content/repositories/snapshots"
+    const val sonatypeSnapshots = "https://oss.sonatype.org/content/repositories/snapshots"
 }
 
 /**
