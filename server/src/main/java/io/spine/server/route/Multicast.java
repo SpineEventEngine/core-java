@@ -41,5 +41,5 @@ import java.util.Set;
  *         the type of message context
  */
 @FunctionalInterface
-public interface Multicast<I, M extends Message, C extends Message> extends Route<M, C, Set<I>>  {
+public interface Multicast<I, M extends Message, C extends Message> extends RouteFn<M, C, Set<I>> {
 }

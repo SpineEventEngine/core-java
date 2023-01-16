@@ -39,5 +39,5 @@ import com.google.protobuf.Message;
  *         the type of message context
  */
 @FunctionalInterface
-public interface Unicast<I, M extends Message, C extends Message> extends Route<M, C, I> {
+public interface Unicast<I, M extends Message, C extends Message> extends RouteFn<M, C, I> {
 }

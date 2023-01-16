@@ -107,7 +107,7 @@ public final class StateUpdateRouting<I>
     StateUpdateRouting<I> route(Class<S> stateClass, StateUpdateRoute<I, S> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // Logically valid.
-        var route = (Route<EntityState<?>, EventContext, Set<I>>) via;
+        var route = (RouteFn<EntityState<?>, EventContext, Set<I>>) via;
         addRoute(stateClass, route);
         return this;
     }

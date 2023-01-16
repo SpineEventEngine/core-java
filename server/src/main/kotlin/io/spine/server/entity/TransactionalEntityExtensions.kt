@@ -28,7 +28,6 @@
 
 package io.spine.server.entity
 
-import io.spine.annotation.Experimental
 import io.spine.base.EntityState
 import io.spine.validate.ValidatingBuilder
 
@@ -36,7 +35,8 @@ import io.spine.validate.ValidatingBuilder
  * Extends [TransactionalEntity] with the `update` block for accessing
  * properties of the entity state [builder][TransactionalEntity.builder].
  *
- * For example, a method that applies an event may look like this:
+ * For example, a method of an [Aggregate][io.spine.server.aggregate.Aggregate] that
+ * applies an event may look like this:
  *
  * ```kotlin
  * @Apply
@@ -49,16 +49,16 @@ import io.spine.validate.ValidatingBuilder
  * }
  * ```
  *
- * @param I the type of the entity identifiers
- * @param E the type of the transactional entity
- * @param S the type of the entity state
- * @param B the type of the entity state builder
+ * **API Note:** This function is not `inline` because [TransactionalEntity.builder] is
+ * `protected` while inline functions can use only `public` API.
  *
- * @see alter for a version of this method that does not return a value
- * @apiNote This function is not `inline` because [TransactionalEntity.builder] is `protected`
- * while inline functions can use only `public` API.
+ * @param I the type of the entity identifiers.
+ * @param E the type of the transactional entity.
+ * @param S the type of the entity state.
+ * @param B the type of the entity state builder.
+ *
+ * @see alter for a version of this method that does not return a value.
  */
-@Experimental
 public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
         E.update(block: B.() -> Unit): B {
     val builder = builder()
@@ -70,7 +70,8 @@ public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : Validat
  * Extends [TransactionalEntity] with the `alter` block for changing
  * properties of the entity state [builder][TransactionalEntity.builder].
  *
- * For example, a method that applies an event may look like this:
+ * For example, a method of an [Aggregate][io.spine.server.aggregate.Aggregate] that
+ * applies an event may look like this:
  *
  * ```kotlin
  * @Apply
@@ -79,17 +80,16 @@ public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : Validat
  *     description = e.description
  * }
  * ```
- *
- * @param I the type of the entity identifiers
- * @param E the type of the transactional entity
- * @param S the type of the entity state
- * @param B the type of the entity state builder
- *
- * @see update for a version of this method that returns the value of the builder
- * @apiNote This function is not `inline` because [TransactionalEntity.builder] is `protected`
+ * **API Note:** This function is not `inline` because [TransactionalEntity.builder] is `protected`
  * while inline functions can use only `public` API.
+ *
+ * @param I the type of the entity identifiers.
+ * @param E the type of the transactional entity.
+ * @param S the type of the entity state.
+ * @param B the type of the entity state builder.
+ *
+ * @see update for a version of this method that returns the value of the builder.
  */
-@Experimental
 public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
         E.alter(block: B.() -> Unit) {
     val builder = builder()

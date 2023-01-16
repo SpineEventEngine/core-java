@@ -96,7 +96,7 @@ public final class EventRouting<I>
      * <p>Overrides for return type covariance.
      */
     @Override
-    public final EventRoute<I, EventMessage> defaultRoute() {
+    public EventRoute<I, EventMessage> defaultRoute() {
         return (EventRoute<I, EventMessage>) super.defaultRoute();
     }
 
@@ -153,7 +153,7 @@ public final class EventRouting<I>
     EventRouting<I> route(Class<E> eventType, EventRoute<I, ? super E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        var casted = (Route<EventMessage, EventContext, Set<I>>) via;
+        var casted = (RouteFn<EventMessage, EventContext, Set<I>>) via;
         addRoute(eventType, casted);
         return this;
     }

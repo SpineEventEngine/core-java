@@ -23,10 +23,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
- */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.140")
+package spine.server.given.sorting;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.given.sorting";
+option java_outer_classname = "FigureProto";
+option java_multiple_files = true;
+
+// A geometry figure.
+message Figure {
+    oneof kind {
+        bool circle = 1;
+        bool triangle = 2;
+        bool square = 3;
+    }
+}

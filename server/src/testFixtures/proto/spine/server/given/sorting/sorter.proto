@@ -23,10 +23,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-/**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
- */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.140")
+package spine.server.given.sorting;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.server.given.sorting";
+option java_outer_classname = "SorterProto";
+option java_multiple_files = true;
+
+import "google/protobuf/empty.proto";
+
+import "spine/server/given/sorting/figure.proto";
+
+// Accumulates figures by buckets.
+message Sorter {
+    option (entity).kind = VIEW;
+
+    // The sorter is a singleton.
+    google.protobuf.Empty id = 1;
+
+    // Use `repeated` wince we cannot have have a map key of type [Figure].
+    repeated Bucket bucket = 2;
+
+    // A container for [Figure]s.
+    message Bucket {
+        repeated Figure figure = 3;
+    }
+}
+
+// Counts how many figures were generated.
+message FigureStats {
+    option (entity).kind = VIEW;
+    Figure figure = 1;
+    int32 count = 2 [(min).value = "0"];
+}

@@ -35,9 +35,11 @@ import io.spine.base.RejectionThrowable
 import io.spine.core.Command
 import io.spine.core.Event
 import io.spine.core.EventContext
-import io.spine.core.RejectionEventContext
+import io.spine.core.rejectionEventContext
 
-/** A placeholder to be used when a producer of a rejection is not available. */
+/**
+ * A placeholder to be used when a producer of a rejection is not available.
+ */
 private val unknownProducer: Any = Identifier.pack("Unknown")
 
 /**
@@ -60,7 +62,9 @@ public fun reject(command: Command, throwable: Throwable): Event {
     return factory.createRejection()
 }
 
-/** Extracts a `RejectionThrowable` from the passed instance. */
+/**
+ * Extracts a `RejectionThrowable` from the passed instance.
+ */
 private fun unwrap(throwable: Throwable): RejectionThrowable {
     if (throwable is RejectionThrowable) {
         return throwable
@@ -82,21 +86,23 @@ private class RFactory(val command: Command, val throwable: RejectionThrowable) 
         throwable.producerId().orElse(unknownProducer)
     ) {
 
-    /** Creates a rejection event which does not have version information. */
+    /**
+     * Creates a rejection event which does not have version information.
+     */
     fun createRejection(): Event {
         val msg = throwable.messageThrown()
         val ctx = createContext()
         return assemble(msg, ctx)
     }
 
-    /** Creates an event context holding a rejection context. */
-    private fun createContext(): EventContext {
-        val rejectionContext = RejectionEventContext.newBuilder()
-            .setCommand(command)
-            .setStacktrace(throwable.stackTraceToString())
-            .build()
-        return newContext(null)
-            .setRejection(rejectionContext)
-            .build()
-    }
+    /**
+     * Creates an event context holding a rejection context.
+     */
+    private fun createContext(): EventContext =
+        newContext(null).apply {
+            rejection = rejectionEventContext {
+                command = this@RFactory.command
+                stacktrace = throwable.stackTraceToString()
+            }
+        }.build()
 }

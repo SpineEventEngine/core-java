@@ -48,6 +48,19 @@ import io.spine.testing.TestValues.random
  * handled by [RandomNumberGenerator].
  *
  * This context is a test fixture for [io.spine.server.query.QueryingClientSpec].
+ *
+ * ### Implementation note
+ *
+ * The implementation of this context is deliberately naïve in terms of event generation
+ * and propagation. It generates many small events for each generated figure.
+ *
+ * If a number of events is big, it leads to increase of a load to a data storage because we need to
+ * load and store corresponding entity states. It is not noticeable for this test fixture
+ * arrangement because in-memory storage is used.
+ *
+ * A production implementation of similar cases should prefer bigger event containing
+ * all information (provided [size limit](https://stackoverflow.com/a/34186672) is met),
+ * or series of events containing chunks of information.
  */
 @Suppress("unused") // is declared for documentation purposes.
 private const val ABOUT = ""

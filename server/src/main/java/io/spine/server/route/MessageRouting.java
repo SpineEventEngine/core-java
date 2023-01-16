@@ -48,26 +48,26 @@ import static java.util.Objects.requireNonNull;
  * @param <C>
  *         the type of message context objects
  * @param <R>
- *         the type returned by the {@linkplain Route#apply(Message, Message) routing function}
+ *         the type returned by the {@linkplain RouteFn#apply(Message, Message) routing function}
  */
 abstract class MessageRouting<M extends Message, C extends MessageContext, R>
-        implements Route<M, C, R> {
+        implements RouteFn<M, C, R> {
 
     private static final long serialVersionUID = 0L;
 
-    private final Map<Class<? extends M>, Route<M, C, R>> routes = new LinkedHashMap<>();
+    private final Map<Class<? extends M>, RouteFn<M, C, R>> routes = new LinkedHashMap<>();
 
     /** The default route to be used if there is no matching entry set in {@link #routes}. */
-    private Route<M, C, R> defaultRoute;
+    private RouteFn<M, C, R> defaultRoute;
 
-    MessageRouting(Route<M, C, R> defaultRoute) {
+    MessageRouting(RouteFn<M, C, R> defaultRoute) {
         this.defaultRoute = defaultRoute;
     }
 
     /**
      * Obtains the default route used by the schema.
      */
-    protected Route<M, C, R> defaultRoute() {
+    protected RouteFn<M, C, R> defaultRoute() {
         return defaultRoute;
     }
 
@@ -77,7 +77,7 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
      * @param newDefault the new route to be used as default
      */
     @CanIgnoreReturnValue
-    MessageRouting<M, C, R> replaceDefault(Route<M, C, R> newDefault) {
+    MessageRouting<M, C, R> replaceDefault(RouteFn<M, C, R> newDefault) {
         checkNotNull(newDefault);
         defaultRoute = newDefault;
         return this;
@@ -112,7 +112,7 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
      *         if the route for this message class is already set either directly or
      *         via a super-interface
      */
-    void addRoute(Class<? extends M> messageType, Route<M, C, R> via)
+    void addRoute(Class<? extends M> messageType, RouteFn<M, C, R> via)
             throws IllegalStateException {
         checkNotNull(messageType);
         checkNotNull(via);
@@ -227,7 +227,7 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
     final class Match {
 
         private final Class<? extends M> requestedClass;
-        private final @Nullable Route<M, C, R> route;
+        private final @Nullable RouteFn<M, C, R> route;
         private final @Nullable Class<? extends M> entryClass;
 
         /**
@@ -246,7 +246,7 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
          */
         private Match(Class<? extends M> requestedClass,
                       @Nullable Class<? extends M> entryType,
-                      @Nullable Route<M, C, R> route) {
+                      @Nullable RouteFn<M, C, R> route) {
             this.requestedClass = requestedClass;
             this.route = route;
             this.entryClass = entryType;
@@ -268,7 +268,7 @@ abstract class MessageRouting<M extends Message, C extends MessageContext, R>
             return requireNonNull(entryClass);
         }
 
-        Route<M, C, R> route() {
+        RouteFn<M, C, R> route() {
             return requireNonNull(route);
         }
     }

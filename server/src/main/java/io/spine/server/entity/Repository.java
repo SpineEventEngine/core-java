@@ -41,7 +41,7 @@ import io.spine.server.Closeable;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.route.Route;
+import io.spine.server.route.RouteFn;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.SignalEnvelope;
@@ -268,6 +268,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @throws IllegalStateException
      *         if the repository has no context assigned
      */
+    @SuppressWarnings("DataFlowIssue") // non-null result ensured by `hasContext()` call.
     protected final BoundedContext context() {
         checkState(hasContext(),
                    "The repository (class: `%s`) is not registered with a `BoundedContext`.",
@@ -376,7 +377,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     @Internal
     protected final <M extends Message, C extends MessageContext, R> Optional<R>
-    route(Route<M, C, R> routing, SignalEnvelope<?, ?, C> envelope) {
+    route(RouteFn<M, C, R> routing, SignalEnvelope<?, ?, C> envelope) {
         try {
             @SuppressWarnings("unchecked")
             var message = (M) envelope.message();
