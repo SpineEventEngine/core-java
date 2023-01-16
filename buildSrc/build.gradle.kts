@@ -62,7 +62,7 @@ val grGitVersion = "4.1.1"
  * Please check that this value matches one defined in
  *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.7.20"
+val kotlinVersion = "1.7.21"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -80,7 +80,7 @@ val guavaVersion = "31.1-jre"
  * @see <a href="https://github.com/tbroyer/gradle-errorprone-plugin/releases">
  *     Error Prone Gradle Plugin Releases</a>
  */
-val errorProneVersion = "3.0.1"
+val errorPronePluginVersion = "3.0.1"
 
 /**
  * The version of Protobuf Gradle Plugin.
@@ -90,7 +90,7 @@ val errorProneVersion = "3.0.1"
  * @see <a href="https://github.com/google/protobuf-gradle-plugin/releases">
  *     Protobuf Gradle Plugins Releases</a>
  */
-val protobufPluginVersion = "0.8.19"
+val protobufPluginVersion = "0.9.1"
 
 /**
  * The version of Dokka Gradle Plugins.
@@ -112,6 +112,8 @@ val detektVersion = "1.21.0"
 configurations.all {
     resolutionStrategy {
         force(
+            "com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion",
+
             // Force Kotlin lib versions avoiding using those bundled with Gradle.
             "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
@@ -143,7 +145,7 @@ dependencies {
     implementation("com.google.guava:guava:$guavaVersion")
     api("com.github.jk1:gradle-license-report:$licenseReportVersion")
     implementation("org.ajoberstar.grgit:grgit-core:${grGitVersion}")
-    implementation("net.ltgt.gradle:gradle-errorprone-plugin:${errorProneVersion}")
+    implementation("net.ltgt.gradle:gradle-errorprone-plugin:${errorPronePluginVersion}")
 
     // Add explicit dependency to avoid warning on different Kotlin runtime versions.
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
