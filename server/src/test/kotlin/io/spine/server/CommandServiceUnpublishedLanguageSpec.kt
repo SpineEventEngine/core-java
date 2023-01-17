@@ -26,7 +26,7 @@
 
 package io.spine.server
 
-import com.google.common.truth.Truth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.core.Ack
 import io.spine.core.Command
 import io.spine.core.Status
@@ -38,10 +38,12 @@ import io.spine.testing.client.TestActorRequestFactory
 import io.spine.testing.logging.mute.MuteLogging
 import io.spine.type.UnpublishedLanguageException
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @MuteLogging
-internal class `'CommandService' should prohibit using 'internal_type' commands` {
+@DisplayName("`CommandService` should prohibit using `internal_type` commands")
+internal class CommandServiceUnpublishedLanguageSpec {
 
     private lateinit var service: CommandService
     private lateinit var observer: MemoizingObserver<Ack>
@@ -58,18 +60,19 @@ internal class `'CommandService' should prohibit using 'internal_type' commands`
 
         service.post(command, observer)
 
-        assertThat(observer.error).isNull()
-        assertThat(observer.isCompleted).isTrue()
+        observer.error shouldBe null
+        observer.isCompleted shouldBe true
 
         val response = observer.firstResponse()
-        assertThat(isNotDefault(response)).isTrue()
+
+        isNotDefault(response) shouldBe true
 
         val status = response.status
-        assertThat(status.statusCase).isEqualTo(Status.StatusCase.ERROR)
+
+        status.statusCase shouldBe Status.StatusCase.ERROR
 
         val error = status.error
-        assertThat(error.type)
-            .isEqualTo(UnpublishedLanguageException::class.java.canonicalName)
+        error.type shouldBe UnpublishedLanguageException::class.java.canonicalName
     }
 
     private fun createCommand(): Command {
