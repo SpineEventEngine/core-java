@@ -34,21 +34,25 @@ import io.spine.server.testing.blackbox.assertEntity
 import io.spine.testing.core.given.GivenUserId
 import io.spine.testing.server.blackbox.BlackBox
 import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.RepeatedTest
 
 @DisplayName("Event routing for a reaction event should")
 internal class EventReactionRoutingSpec {
-    
+
     /**
      * Verifies that the routing of the event generated as a reaction on another event
      * occurs after the origin event is routed.
      *
-     *
      * If the routing of `RUserConsentRequested` event is done before its origin
      * (`RUserSignedIn`) is dispatched, the repository won't be able to route the event
      * properly, making the corresponding field `false`.
+     *
+     * The test is made `@RepeatedTest` to increase the changes of failure because
+     * historically it failed sometimes. See the GitHub issue link next to commented
+     * out `@Disabled` annotation for details.
      */
-    @Test //@Disabled       // See https://github.com/SpineEventEngine/core-java/issues/925.
+    @RepeatedTest(50) //@Test
+    //@Disabled // See https://github.com/SpineEventEngine/core-java/issues/925.
     @DisplayName("only occur after the origin event has been already dispatched")
     fun occurAfterOriginDispatched() {
         val userId = GivenUserId.generated()
