@@ -112,4 +112,3 @@ private class UserRepository : AggregateRepository<UserId, UserAggregate, RUser>
             .unicast(RUserConsentRequested::class.java) { e -> e.user }
     }
 }
-
