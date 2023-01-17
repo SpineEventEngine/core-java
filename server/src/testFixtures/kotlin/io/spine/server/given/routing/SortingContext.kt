@@ -136,7 +136,7 @@ private class FigureStatsView: Projection<Figure, FigureStats, FigureStats.Build
 }
 
 /**
- * Creates Counting bounded context.
+ * Creates Sorting bounded context.
  */
 @Suppress("unused")
 fun createSortingContext(): BoundedContext = singleTenant("Sorting").apply {
