@@ -25,23 +25,34 @@
  */
 syntax = "proto3";
 
-package spine.test.route.user;
+package spine.server.given.users;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.route.given.user.event";
-option java_outer_classname = "EventsProto";
+option java_package="io.spine.server.given.users";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
-import "spine/test/route/user/user.proto";
 
-message RUserSignedIn {
-    spine.core.UserId user_id = 1;
-    RSessionId session_id = 2 [(required) = true];
+message RUser {
+    option (entity).kind = AGGREGATE;
+
+    core.UserId id = 1;
+
+    bool user_consent_requested = 2;
 }
 
-message RUserConsentRequested {
-    spine.core.UserId user_id = 1;
+message RSessionId {
+    string uuid = 1;
+}
+
+message RSession {
+    option (entity).kind = PROJECTION;
+
+    RSessionId id = 1;
+
+    core.UserId user_id = 2 [(required) = true, (column) = true];
+
+    bool user_consent_requested = 3;
 }
