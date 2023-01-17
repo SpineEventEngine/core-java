@@ -90,7 +90,7 @@ internal class UserAggregate : Aggregate<UserId, RUser, RUser.Builder>() {
     }
 
     @Apply
-    private fun on(@Suppress("UNUSED_PARAMTER") event: RUserConsentRequested) = alter {
+    private fun on(@Suppress("UNUSED_PARAMETER") event: RUserConsentRequested) = alter {
         userConsentRequested = true
     }
 }
