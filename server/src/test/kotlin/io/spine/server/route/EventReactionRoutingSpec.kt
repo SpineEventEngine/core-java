@@ -65,16 +65,18 @@ internal class EventReactionRoutingSpec {
                 session = sessionId
             })
 
-            val session = rSession {
+            val expected = rSession {
                 id = sessionId
                 this@rSession.userId = userId
+                // Check that the event `RUserConsentRequested` was dispatched to
+                // the corresponding `SessionProjection`.
                 userConsentRequested = true
             }
 
             context.assertEntity<SessionProjection, _>(sessionId)
                 .hasStateThat()
                 .comparingExpectedFieldsOnly()
-                .isEqualTo(session)
+                .isEqualTo(expected)
         }
     }
 }
