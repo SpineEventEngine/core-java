@@ -335,15 +335,6 @@ fun Subproject.setupCodeGeneration(generatedDir: String) {
         )
     }
 
-    /**
-     * Temporarily use this version, since 3.21.x is known to provide
-     * a broken `protoc-gen-js` artifact.
-     *
-     * See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
-     * Once it is addressed, this artifact should be `Protobuf.compiler`.
-     *
-     * Also, this fixes the explicit API more for the generated Kotlin code.
-     */
     protobuf {
         // Do not remove this setting until ProtoData can copy all the directories from
         // `build/generated-proto`. Otherwise, the GRPC code won't be picked up.
