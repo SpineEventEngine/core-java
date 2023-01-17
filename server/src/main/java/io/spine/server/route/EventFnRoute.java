@@ -58,7 +58,7 @@ final class EventFnRoute<I, E extends EventMessage> implements EventRoute<I, E> 
 
     /**
      * Creates an event route which obtains target entity ID from an event message and
-     * a its context.
+     * its context.
      */
     EventFnRoute(BiFunction<E, EventContext, I> fn) {
         this.fn = checkNotNull(fn);
