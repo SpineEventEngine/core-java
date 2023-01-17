@@ -50,6 +50,14 @@ import io.spine.server.route.EventRouting
 @Suppress("unused")
 private const val ABOUT = ""
 
+fun createUsersContext(): BoundedContextBuilder = singleTenant("Users").apply {
+    add(UserRepository())
+    add(SessionRepository())
+}
+
+/**
+ * Remembers the user's consent in response to [RUserConsentRequested]
+ */
 class SessionProjection : Projection<RSessionId, RSession, RSession.Builder>() {
 
     @Subscribe
@@ -63,7 +71,7 @@ class SessionProjection : Projection<RSessionId, RSession, RSession.Builder>() {
     }
 }
 
-class SessionRepository : ProjectionRepository<RSessionId, SessionProjection, RSession>() {
+private class SessionRepository : ProjectionRepository<RSessionId, SessionProjection, RSession>() {
 
     @OverridingMethodsMustInvokeSuper
     override fun setupEventRouting(routing: EventRouting<RSessionId>) {
@@ -82,7 +90,7 @@ class SessionRepository : ProjectionRepository<RSessionId, SessionProjection, RS
     }
 }
 
-internal class UserAggregate : Aggregate<UserId, RUser, RUser.Builder>() {
+private class UserAggregate : Aggregate<UserId, RUser, RUser.Builder>() {
 
     @React
     fun on(event: RUserSignedIn): RUserConsentRequested = rUserConsentRequested {
@@ -95,16 +103,13 @@ internal class UserAggregate : Aggregate<UserId, RUser, RUser.Builder>() {
     }
 }
 
-internal class UserRepository : AggregateRepository<UserId, UserAggregate, RUser>() {
+private class UserRepository : AggregateRepository<UserId, UserAggregate, RUser>() {
 
     override fun setupEventRouting(routing: EventRouting<UserId>) {
         super.setupEventRouting(routing)
-        routing.unicast(RUserSignedIn::class.java) { e -> e.user }
-        routing.unicast(RUserConsentRequested::class.java) { e -> e.user }
+        routing
+            .unicast(RUserSignedIn::class.java) { e -> e.user }
+            .unicast(RUserConsentRequested::class.java) { e -> e.user }
     }
 }
 
-fun createUsersContext(): BoundedContextBuilder = singleTenant("Users").apply {
-    add(UserRepository())
-    add(SessionRepository())
-}
