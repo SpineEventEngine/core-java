@@ -61,12 +61,12 @@ fun createUsersContext(): BoundedContextBuilder = singleTenant("Users").apply {
 class SessionProjection : Projection<RSessionId, RSession, RSession.Builder>() {
 
     @Subscribe
-    fun on(event: RUserSignedIn) {
+    internal fun on(event: RUserSignedIn) {
         builder().setId(event.session).userId = event.user
     }
 
     @Subscribe
-    fun on(@Suppress("UNUSED_PARAMETER") e: RUserConsentRequested) = alter {
+    internal fun on(@Suppress("UNUSED_PARAMETER") e: RUserConsentRequested) = alter {
         userConsentRequested = true
     }
 }
