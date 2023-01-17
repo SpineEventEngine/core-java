@@ -26,8 +26,9 @@
 
 package io.spine.server.query
 
-import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth8.assertThat
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.spine.grpc.StreamObservers
 import io.spine.server.BoundedContext
 import io.spine.server.given.counting.NumberStats
@@ -37,6 +38,7 @@ import io.spine.server.given.counting.command.generateNumbers
 import io.spine.server.given.counting.createCountingContext
 import io.spine.server.given.counting.range
 import io.spine.testing.client.TestActorRequestFactory
+import java.util.Optional.empty
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
@@ -83,15 +85,18 @@ internal class QueryingClientSpec {
     fun `fetch multiple results`() {
         val client = QueryingClient(context, NumberStats::class.java, actor)
         val stats = client.all()
-        assertThat(stats).isNotEmpty()
+
+        stats shouldNotBe emptySet<NumberStats>()
     }
 
     @Test
     fun `fetch the only one`() {
         val client = QueryingClient(context, RangeStats::class.java, actor)
         val rangeStats = client.find(range)
-        assertThat(rangeStats).isPresent()
-        assertThat(rangeStats.get().range).isEqualTo(range)
+
+        rangeStats shouldBePresent {
+            range shouldBe Companion.range
+        }
     }
 
     @Test
@@ -102,6 +107,7 @@ internal class QueryingClientSpec {
             maxValue = 200
         }
         val rangeStats = client.find(nonExisting)
-        assertThat(rangeStats).isEmpty()
+
+        rangeStats shouldBe empty()
     }
 }
