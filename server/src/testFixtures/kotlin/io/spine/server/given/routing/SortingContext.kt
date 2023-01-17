@@ -113,7 +113,8 @@ private class SorterView: Projection<Empty, Sorter, Sorter.Builder>() {
     companion object {
         @Route
         @JvmStatic
-        fun toSingleton(e: EventMessage): Empty = Empty.getDefaultInstance()
+        fun toSingleton(@Suppress("UNUSED_PARAMETER") e: EventMessage): Empty =
+            Empty.getDefaultInstance()
     }
 }
 
