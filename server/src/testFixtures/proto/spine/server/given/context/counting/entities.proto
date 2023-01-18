@@ -25,20 +25,27 @@
  */
 syntax = "proto3";
 
-package spine.server.given.counting;
+package spine.server.given.context.counting;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.given.counting";
-option java_outer_classname = "RangeProto";
+option java_package="io.spine.server.given.context.counting";
+option java_outer_classname = "EntitiesProto";
 option java_multiple_files = true;
 
-// A range of integer values.
-//
-// The range is empty if `min_value == max_value`.
-//
-message Range {
-    int32 min_value = 1 [(max).value = "max_value"];
-    int32 max_value = 2;
+import "spine/server/given/context/counting/range.proto";
+
+// [Counts][count] numbers generated in the [range].
+message RangeStats {
+    option (entity).kind = VIEW;
+    Range range = 1;
+    map<int32, int32> count = 2;
+}
+
+// [Counts][count] a number of times the [number] was generated.
+message NumberStats {
+    option (entity).kind = VIEW;
+    int32 number = 1;
+    int32 count = 2;
 }

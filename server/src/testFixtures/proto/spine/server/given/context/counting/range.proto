@@ -25,19 +25,20 @@
  */
 syntax = "proto3";
 
-package spine.server.given.counting;
+package spine.server.given.context.counting;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.given.counting.event";
-option java_outer_classname = "CountingEventsProto";
+option java_package="io.spine.server.given.context.counting";
+option java_outer_classname = "RangeProto";
 option java_multiple_files = true;
 
-import "spine/server/given/counting/range.proto";
-
-// A [number] was generated within the requested [range].
-message NumberGenerated {
-    int32 number = 1 [(min).value = "range.min_value", (max).value = "range.max_value"];
-    Range range = 2 [(required) = true];
+// A range of integer values.
+//
+// The range is empty if `min_value == max_value`.
+//
+message Range {
+    int32 min_value = 1 [(max).value = "max_value"];
+    int32 max_value = 2;
 }

@@ -25,16 +25,16 @@
  */
 syntax = "proto3";
 
-package spine.server.given.counting;
+package spine.server.given.context.counting;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.given.counting.command";
+option java_package="io.spine.server.given.context.counting.command";
 option java_outer_classname = "CountingCommandsProto";
 option java_multiple_files = true;
 
-import "spine/server/given/counting/range.proto";
+import "spine/server/given/context/counting/range.proto";
 
 // A request to generate random numbers in the range [min_value]..[max_value].
 //
