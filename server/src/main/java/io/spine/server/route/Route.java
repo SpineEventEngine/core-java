@@ -33,11 +33,15 @@ import java.lang.annotation.Target;
 
 /**
  * Annotates a <strong>static</strong> method of an {@link io.spine.server.entity.Entity Entity}
- * class which accepts a {@link io.spine.base.SignalMessage SignalMessage} as a single parameter.
+ * class for arranging message routing for this class of entities.
+ *
+ * <p>The method must accept a {@link io.spine.base.SignalMessage SignalMessage} as the first
+ * parameter, and <em>may</em> contain corresponding
+ * {@linkplain io.spine.base.MessageContext MessageContext} as the second parameter.
  *
  * <p>The method <em>must</em> return one identifier of type {@code <I>} for {@link Unicast}
- * entities, and <em>can</em> and return an {@code Iterable<I>}, if this kind of entities
- * supports {@linkplain Multicast multicast}.
+ * dispatching, and <em>may</em> return an {@code Iterable<I>}, if this message can be dispatched
+ * via {@linkplain Multicast multicast}.
  *
  * <p>The method <strong>must</strong> be either package-private or {@code protected} for
  * being accessible from the generated code in the same package.
