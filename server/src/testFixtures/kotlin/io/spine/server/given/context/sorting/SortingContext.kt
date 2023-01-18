@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.given.routing
+package io.spine.server.given.context.sorting
 
 import com.google.protobuf.Empty
 import io.spine.base.EventMessage
@@ -34,13 +34,10 @@ import io.spine.server.BoundedContext.singleTenant
 import io.spine.server.command.Assign
 import io.spine.server.command.SingleCommandAssignee
 import io.spine.server.entity.alter
-import io.spine.server.given.sorting.Figure
-import io.spine.server.given.sorting.FigureStats
-import io.spine.server.given.sorting.Sorter
-import io.spine.server.given.sorting.SorterKt.bucket
-import io.spine.server.given.sorting.command.GenerateFigures
-import io.spine.server.given.sorting.event.FigureGenerated
-import io.spine.server.given.sorting.event.figureGenerated
+import io.spine.server.given.context.sorting.SorterKt.bucket
+import io.spine.server.given.context.sorting.command.GenerateFigures
+import io.spine.server.given.context.sorting.event.FigureGenerated
+import io.spine.server.given.context.sorting.event.figureGenerated
 import io.spine.server.projection.Projection
 import io.spine.server.route.Route
 import io.spine.testing.TestValues.random

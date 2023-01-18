@@ -25,18 +25,22 @@
  */
 syntax = "proto3";
 
-package spine.server.given.sorting;
+package spine.server.given.context.sorting;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.given.sorting.event";
-option java_outer_classname = "SortingEventsProto";
+option java_package="io.spine.server.given.context.sorting.command";
+option java_outer_classname = "SortingCommandsProto";
 option java_multiple_files = true;
 
-import "spine/server/given/sorting/figure.proto";
+import "spine/server/given/context/sorting/figure.proto";
 
-// A [figure] was generated.
-message FigureGenerated {
-    Figure figure = 1 [(required) = true];
+// A request to generate geometric figures specified in the [figure] field of the command.
+//
+// The generation is repeated [count] times.
+//
+message GenerateFigures {
+    repeated Figure figure = 1 [(required) = true, (distinct) = true];
+    int32 count = 2 [(min).value = "1"];
 }
