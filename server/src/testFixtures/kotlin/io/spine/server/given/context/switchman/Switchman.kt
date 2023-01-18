@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,38 +23,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.given.context.switchman
 
-package io.spine.server.route.given.switchman;
-
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.command.Assign;
-import io.spine.server.route.given.switchman.command.SetSwitch;
-import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
+import io.spine.server.aggregate.Aggregate
+import io.spine.server.aggregate.Apply
+import io.spine.server.command.Assign
+import io.spine.server.entity.alter
+import io.spine.server.given.context.switchman.command.SetSwitch
+import io.spine.server.given.context.switchman.event.SwitchPositionConfirmed
+import io.spine.server.given.context.switchman.event.switchPositionConfirmed
 
 /**
  * The aggregate that handles commands send to a switchman.
  */
-public final class Switchman extends Aggregate<String, SwitchmanLog, SwitchmanLog.Builder> {
-
-    Switchman(String id) {
-        super(id);
-    }
+class Switchman internal constructor(id: String) :
+    Aggregate<String, SwitchmanLog, SwitchmanLog.Builder>(id) {
 
     @Assign
-    SwitchPositionConfirmed on(SetSwitch cmd) {
-        return SwitchPositionConfirmed
-                .newBuilder()
-                .setSwitchmanName(id())
-                .setSwitchId(cmd.getSwitchId())
-                .setPosition(cmd.getPosition())
-                .build();
-    }
+    fun on(cmd: SetSwitch): SwitchPositionConfirmed =
+        switchPositionConfirmed {
+            switchmanName = id()
+            switchId = cmd.switchId
+            position = cmd.position
+        }
 
     @Apply
-    private void event(SwitchPositionConfirmed event) {
-        builder()
-                .setName(event.getSwitchmanName())
-                .setSwitchCount(state().getSwitchCount() + 1);
+    private fun event(event: SwitchPositionConfirmed) = alter {
+        name = event.switchmanName
+        switchCount += 1
     }
 }

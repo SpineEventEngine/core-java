@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,42 +23,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.given.context.switchman
 
-package io.spine.server.route.given.switchman;
-
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.route.CommandRouting;
-import io.spine.server.route.given.switchman.command.SetSwitch;
-import io.spine.server.route.given.switchman.rejection.SwitchmanUnavailable;
+import io.spine.server.aggregate.AggregateRepository
+import io.spine.server.given.context.switchman.command.SetSwitch
+import io.spine.server.given.context.switchman.rejection.SwitchmanUnavailable
+import io.spine.server.route.CommandRouting
 
 /**
- * A repository which fires a rejection in response to a command with a particular value of the
- * target aggregate ID.
+ * A repository which fires a rejection in response to a command with a particular
+ * value of the target aggregate ID.
  */
-public final class SwitchmanBureau extends AggregateRepository<String, Switchman, SwitchmanLog> {
+class SwitchmanBureau : AggregateRepository<String, Switchman, SwitchmanLog>() {
 
-    /** The ID of the aggregate for which a {@link SetSwitch command} would be rejected. */
-    public static final String MISSING_SWITCHMAN_NAME = "Petrovich";
-
-    @Override
-    protected void setupCommandRouting(CommandRouting<String> routing) {
-        super.setupCommandRouting(routing);
-        routing.route(SetSwitch.class, (cmd, ctx) -> routeToSwitchman(cmd));
+    override fun setupCommandRouting(routing: CommandRouting<String>) {
+        super.setupCommandRouting(routing)
+        routing.route(SetSwitch::class.java) { cmd, _ -> routeToSwitchman(cmd) }
     }
 
-    /**
-     * Returns the route to a switchman, checking whether he is available.
-     *
-     * <p>In case the switchman isn't available, throws a {@code RuntimeException}.
-     */
-    private static String routeToSwitchman(SetSwitch cmd) {
-        var switchmanName = cmd.getSwitchmanName();
-        if (switchmanName.equals(MISSING_SWITCHMAN_NAME)) {
-            throw new RuntimeException(
+    companion object {
+
+        /**
+         * The ID of the aggregate for which a [command][SetSwitch] would be rejected.
+         */
+        const val MISSING_SWITCHMAN_NAME = "Petrovich"
+
+        /**
+         * Returns the route to a switchman, checking whether he is available.
+         *
+         * In case the switchman isn't available, throws a `RuntimeException`.
+         */
+        private fun routeToSwitchman(cmd: SetSwitch): String {
+            val switchmanName = cmd.switchmanName
+            if (switchmanName == MISSING_SWITCHMAN_NAME) {
+                throw RuntimeException(
                     SwitchmanUnavailable.newBuilder()
-                            .setSwitchmanName(switchmanName)
-                            .build());
+                        .setSwitchmanName(switchmanName)
+                        .build()
+                )
+            }
+            return switchmanName
         }
-        return switchmanName;
     }
 }

@@ -25,13 +25,19 @@
  */
 syntax = "proto3";
 
-package spine.test.server.route;
+package spine.server.given.context.switchman;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.route.given.switchman.rejection";
+option java_package="io.spine.server.given.context.switchman.command";
+option java_outer_classname = "SwitchmanCommandsProto";
+option java_multiple_files = true;
 
-message SwitchmanUnavailable {
-    string switchman_name = 1;
+import "spine/server/given/context/switchman/switchman.proto";
+
+message SetSwitch {
+    string switchman_name = 1 [(required) = true];
+    SwitchId switch_id = 2 [(required) = true];
+    SwitchPosition position = 3 [(required) = true];
 }

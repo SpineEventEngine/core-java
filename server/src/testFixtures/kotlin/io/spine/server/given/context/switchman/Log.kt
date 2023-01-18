@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,78 +23,77 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.given.context.switchman
 
-package io.spine.server.route.given.switchman;
-
-import com.google.common.collect.ImmutableSet;
-import io.spine.base.Time;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.Apply;
-import io.spine.server.event.React;
-import io.spine.server.route.EventRouting;
-import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
-import io.spine.server.route.given.switchman.event.SwitchWorkRecorded;
-import io.spine.server.route.given.switchman.event.SwitchmanAbsenceRecorded;
-import io.spine.server.route.given.switchman.rejection.Rejections;
+import com.google.common.collect.ImmutableSet
+import io.spine.base.Time
+import io.spine.server.aggregate.Aggregate
+import io.spine.server.aggregate.AggregateRepository
+import io.spine.server.aggregate.Apply
+import io.spine.server.entity.alter
+import io.spine.server.event.React
+import io.spine.server.given.context.switchman.event.SwitchPositionConfirmed
+import io.spine.server.given.context.switchman.event.SwitchWorkRecorded
+import io.spine.server.given.context.switchman.event.SwitchmanAbsenceRecorded
+import io.spine.server.given.context.switchman.event.switchWorkRecorded
+import io.spine.server.given.context.switchman.event.switchmanAbsenceRecorded
+import io.spine.server.given.context.switchman.rejection.Rejections.SwitchmanUnavailable
+import io.spine.server.route.EventRouting
 
 /**
  * The aggregate that accumulates information about switchman work and absence.
  *
- * <p>There's only one log per system.
+ * There's only one log per system.
  */
-public final class Log extends Aggregate<Long, LogState, LogState.Builder> {
-
-    /** The ID of the singleton log. */
-    public static final long ID = 42L;
+class Log : Aggregate<Long, LogState, LogState.Builder>() {
 
     @React
-    SwitchmanAbsenceRecorded on(Rejections.SwitchmanUnavailable rejection) {
-        return SwitchmanAbsenceRecorded
-                .newBuilder()
-                .setSwitchmanName(rejection.getSwitchmanName())
-                .setTimestamp(Time.currentTime())
-                .build();
-    }
+    fun on(rejection: SwitchmanUnavailable): SwitchmanAbsenceRecorded =
+        switchmanAbsenceRecorded {
+            switchmanName = rejection.switchmanName
+            timestamp = Time.currentTime()
+        }
 
     @Apply
-    private void event(SwitchmanAbsenceRecorded event) {
-        builder().addMissingSwitchman(event.getSwitchmanName());
+    private fun event(event: SwitchmanAbsenceRecorded) = alter {
+        addMissingSwitchman(event.switchmanName)
     }
 
     @React
-    SwitchWorkRecorded on(SwitchPositionConfirmed event) {
-        return SwitchWorkRecorded
-                .newBuilder()
-                .setSwitchId(event.getSwitchId())
-                .setSwitchmanName(event.getSwitchmanName())
-                .build();
-    }
+    fun on(event: SwitchPositionConfirmed): SwitchWorkRecorded =
+        switchWorkRecorded {
+            switchId = event.switchId
+            switchmanName = event.switchmanName
+        }
 
     @Apply
-    private void event(SwitchWorkRecorded event) {
-        var switchmanName = event.getSwitchmanName();
-        var currentCount = state().getCountersMap()
-                                  .get(switchmanName);
-        builder().putCounters(switchmanName,
-                              currentCount == null ? 1 : currentCount + 1);
+    private fun event(event: SwitchWorkRecorded) = alter {
+        val switchmanName = event.switchmanName
+        val currentCount = countersMap[switchmanName]
+        putCounters(
+            switchmanName,
+            if (currentCount == null) 1 else currentCount + 1
+        )
     }
 
     /**
      * The repository with default routing functions that route to the singleton aggregate.
      */
-    public static final class Repository extends AggregateRepository<Long, Log, LogState> {
+    class Repository : AggregateRepository<Long, Log, LogState>() {
 
-        private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
-
-        public Repository() {
-            super();
+        override fun setupEventRouting(routing: EventRouting<Long>) {
+            super.setupEventRouting(routing)
+            routing.replaceDefault { _, _ -> SINGLETON_ID_SET }
         }
 
-        @Override
-        protected void setupEventRouting(EventRouting<Long> routing) {
-            super.setupEventRouting(routing);
-            routing.replaceDefault((event, ctx) -> SINGLETON_ID_SET);
+        companion object {
+            private val SINGLETON_ID_SET = ImmutableSet.of(ID)
         }
+    }
+
+    companion object {
+
+        /** The ID of the singleton log.  */
+        const val ID = 42L
     }
 }
