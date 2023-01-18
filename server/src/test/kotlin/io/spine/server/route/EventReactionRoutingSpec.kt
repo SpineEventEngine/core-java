@@ -33,6 +33,7 @@ import io.spine.server.given.context.users.rSession
 import io.spine.server.testing.blackbox.assertEntity
 import io.spine.testing.core.given.GivenUserId
 import io.spine.testing.server.blackbox.BlackBox
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.RepeatedTest
 
@@ -52,7 +53,7 @@ internal class EventReactionRoutingSpec {
      * out `@Disabled` annotation for details.
      */
     @RepeatedTest(50) //@Test
-    //@Disabled // See https://github.com/SpineEventEngine/core-java/issues/925.
+    @Disabled // See https://github.com/SpineEventEngine/core-java/issues/925.
     @DisplayName("only occur after the origin event has been already dispatched")
     fun occurAfterOriginDispatched() {
         val userId = GivenUserId.generated()
