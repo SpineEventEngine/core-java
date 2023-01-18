@@ -25,17 +25,17 @@
  */
 syntax = "proto3";
 
-package spine.server.given.users;
+package spine.server.given.context.users;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.given.users.event";
+option java_package = "io.spine.server.given.context.users.event";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
-import "spine/server/given/users/entities.proto";
+import "spine/server/given/context/users/entities.proto";
 
 message RUserSignedIn {
     spine.core.UserId user = 1;

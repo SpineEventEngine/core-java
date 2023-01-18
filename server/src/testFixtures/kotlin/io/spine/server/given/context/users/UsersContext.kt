@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.given.users
+package io.spine.server.given.context.users
 
 import com.google.common.collect.ImmutableSet
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper
@@ -37,9 +37,9 @@ import io.spine.server.aggregate.AggregateRepository
 import io.spine.server.aggregate.Apply
 import io.spine.server.entity.alter
 import io.spine.server.event.React
-import io.spine.server.given.users.event.RUserConsentRequested
-import io.spine.server.given.users.event.RUserSignedIn
-import io.spine.server.given.users.event.rUserConsentRequested
+import io.spine.server.given.context.users.event.RUserConsentRequested
+import io.spine.server.given.context.users.event.RUserSignedIn
+import io.spine.server.given.context.users.event.rUserConsentRequested
 import io.spine.server.projection.Projection
 import io.spine.server.projection.ProjectionRepository
 import io.spine.server.route.EventRouting

@@ -25,12 +25,12 @@
  */
 syntax = "proto3";
 
-package spine.server.given.users;
+package spine.server.given.context.users;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.given.users";
+option java_package="io.spine.server.given.context.users";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
