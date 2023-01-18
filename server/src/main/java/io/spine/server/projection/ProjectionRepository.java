@@ -84,11 +84,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>To start the catch-up, one should call a corresponding method (see below).
  *
  * <pre>
- *     TaskViewRepository repository = new TaskViewRepository();
+ *     var repository = new TaskViewRepository();
  *
- *     BoundedContextBuilder builder = BoundedContext.singleTenant("Tasks")
- *                                                   .add(repository)
- *                                                   .build();
+ *     var builder = BoundedContext.singleTenant("Tasks")
+ *             .add(repository)
+ *             .build();
  *     // ...
  *
  *     //Start the catch-up when needed:
