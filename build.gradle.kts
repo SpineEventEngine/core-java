@@ -411,14 +411,16 @@ fun Subproject.setupPublishing() {
  */
 fun Subproject.addTaskDependencies() {
     tasks {
-        val generateRejections by existing
-        compileKotlin {
-            dependsOn(generateRejections)
-        }
+        afterEvaluate {
+            val generateRejections by existing
+            compileKotlin {
+                dependsOn(generateRejections)
+            }
 
-        val generateTestRejections by existing
-        compileTestKotlin {
-            dependsOn(generateTestRejections)
+            val generateTestRejections by existing
+            compileTestKotlin {
+                dependsOn(generateTestRejections)
+            }
         }
     }
     configureTaskDependencies()
