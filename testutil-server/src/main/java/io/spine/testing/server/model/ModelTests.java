@@ -57,7 +57,7 @@ public final class ModelTests {
     }
 
     /**
-     * Obtains a method declared in the passed class with the given name.
+     * Obtains a method declared in the given class with the given name.
      *
      * @throws IllegalStateException
      *         if the class does not have such a method.
