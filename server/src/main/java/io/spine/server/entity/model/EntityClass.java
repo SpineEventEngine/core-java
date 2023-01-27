@@ -29,6 +29,7 @@ package io.spine.server.entity.model;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
+import io.spine.protobuf.Messages;
 import io.spine.server.entity.DefaultEntityFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityFactory;
@@ -44,7 +45,6 @@ import java.lang.reflect.Constructor;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.Messages.defaultInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -152,7 +152,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
                 result = defaultState;
                 if (result == null) {
                     var stateClass = stateClass();
-                    defaultState = defaultInstance(stateClass);
+                    defaultState = Messages.getDefaultInstance(stateClass);
                     result = defaultState;
                 }
             }

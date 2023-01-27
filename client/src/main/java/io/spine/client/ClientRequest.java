@@ -34,7 +34,7 @@ import io.spine.core.UserId;
 import io.spine.query.EntityQuery;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.type.MessageExtensions.requirePublished;
+import static io.spine.type.PubPreconditions.requirePublished;
 
 /**
  * Entry point for creating client requests.
@@ -52,7 +52,6 @@ import static io.spine.type.MessageExtensions.requirePublished;
  *
  * @see Client
  */
-@SuppressWarnings("ClassReferencesSubclass")
 // we want to have DSL for calls encapsulated in this class.
 public class ClientRequest extends ClientRequestBase {
 

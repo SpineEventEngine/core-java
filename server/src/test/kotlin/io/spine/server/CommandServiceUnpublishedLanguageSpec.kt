@@ -32,7 +32,7 @@ import io.spine.core.Command
 import io.spine.core.Status
 import io.spine.grpc.MemoizingObserver
 import io.spine.grpc.StreamObservers.memoizingObserver
-import io.spine.protobuf.Messages.isNotDefault
+import io.spine.protobuf.isNotDefault
 import io.spine.test.unpublished.command.Halt
 import io.spine.testing.client.TestActorRequestFactory
 import io.spine.testing.logging.mute.MuteLogging
@@ -65,7 +65,7 @@ internal class CommandServiceUnpublishedLanguageSpec {
 
         val response = observer.firstResponse()
 
-        isNotDefault(response) shouldBe true
+        response.isNotDefault() shouldBe true
 
         val status = response.status
 

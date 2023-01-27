@@ -37,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.type.MessageExtensions.isInternal;
+import static io.spine.type.MessageExtsKt.isInternal;
 
 /**
  * An abstract base for classes implementing server-side services.
