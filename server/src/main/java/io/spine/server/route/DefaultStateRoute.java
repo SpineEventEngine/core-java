@@ -79,7 +79,7 @@ final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState<?>> 
     }
 
     boolean supports(Class<? extends EntityState<?>> stateType) {
-        var type = Messages.defaultInstance(stateType)
+        var type = Messages.getDefaultInstance(stateType)
                            .getDescriptorForType();
         var idField = findField(idClass, type);
         return idField.isPresent();

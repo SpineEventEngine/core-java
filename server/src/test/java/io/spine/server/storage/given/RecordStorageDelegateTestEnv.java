@@ -41,6 +41,7 @@ import java.util.stream.IntStream;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.Messages.isDefault;
+import static io.spine.protobuf.ProtocolMessageEnums.isDefault;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.test.storage.StgProject.Column.dueDate;
 import static io.spine.test.storage.StgProject.Status.DONE;
@@ -129,7 +130,7 @@ public final class RecordStorageDelegateTestEnv {
     /**
      * Creates twelve records with random IDs and names.
      *
-     * <p>Each record has the due date set to the be a day ahead of the current time and
+     * <p>Each record has the due date set to be a day ahead of the current time and
      * the {@code CREATED} project status.
      */
     public static ImmutableMap<StgProjectId, StgProject> dozenOfRecords() {

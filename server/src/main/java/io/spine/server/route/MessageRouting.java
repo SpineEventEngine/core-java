@@ -50,7 +50,7 @@ import static java.util.Objects.requireNonNull;
  * @param <R>
  *         the type returned by the {@linkplain RouteFn#apply(Message, Message) routing function}
  */
-abstract class MessageRouting<M extends Message, C extends MessageContext, R>
+public abstract class MessageRouting<M extends Message, C extends MessageContext, R>
         implements RouteFn<M, C, R> {
 
     private static final long serialVersionUID = 0L;

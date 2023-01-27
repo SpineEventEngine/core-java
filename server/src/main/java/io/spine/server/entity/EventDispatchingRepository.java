@@ -138,7 +138,7 @@ public abstract class EventDispatchingRepository<I,
      * @return a set of IDs of projections to dispatch the given event to
      */
     protected Set<I> route(EventEnvelope event) {
-        return route(eventRouting(), event)
-                .orElse(ImmutableSet.of());
+        var targets = route(eventRouting(), event);
+        return targets.orElse(ImmutableSet.of());
     }
 }

@@ -31,7 +31,7 @@ import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
 import io.spine.client.EntityStateFilter.eq
 import io.spine.client.EventFilter.eq
 import io.spine.server.BoundedContextBuilder
-import io.spine.test.client.ActiveUsersProjection.*
+import io.spine.test.client.ActiveUsersProjection.THE_ID
 import io.spine.test.client.ClientTestContext
 import io.spine.test.client.users.ActiveUsers
 import io.spine.test.client.users.LoginStatus

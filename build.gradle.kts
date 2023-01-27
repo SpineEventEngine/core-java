@@ -75,17 +75,6 @@ plugins {
 }
 
 object BuildSettings {
-    /**
-     * Temporarily use this version, since 3.21.x is known to provide
-     * a broken `protoc-gen-js` artifact and Kotlin code without access modifiers.
-     *
-     * @see <a href="https://github.com/protocolbuffers/protobuf-javascript/issues/127">
-     *      protobuf-javascript#127</a>
-     * @see <a href="https://github.com/protocolbuffers/protobuf/issues/10593">
-     *      protobuf#10593</a>
-     */
-    const val protocArtifact = "com.google.protobuf:protoc:3.19.6"
-
     const val JAVA_VERSION = 11
 }
 
@@ -346,21 +335,11 @@ fun Subproject.setupCodeGeneration(generatedDir: String) {
         )
     }
 
-    /**
-     * Temporarily use this version, since 3.21.x is known to provide
-     * a broken `protoc-gen-js` artifact.
-     *
-     * See https://github.com/protocolbuffers/protobuf-javascript/issues/127.
-     * Once it is addressed, this artifact should be `Protobuf.compiler`.
-     *
-     * Also, this fixes the explicit API more for the generated Kotlin code.
-     */
     protobuf {
         // Do not remove this setting until ProtoData can copy all the directories from
         // `build/generated-proto`. Otherwise, the GRPC code won't be picked up.
         // See: https://github.com/SpineEventEngine/ProtoData/issues/94
         generatedFilesBaseDir = generatedDir
-        protoc { artifact = BuildSettings.protocArtifact }
     }
 
     /**
@@ -432,14 +411,16 @@ fun Subproject.setupPublishing() {
  */
 fun Subproject.addTaskDependencies() {
     tasks {
-        val generateRejections by existing
-        compileKotlin {
-            dependsOn(generateRejections)
-        }
+        afterEvaluate {
+            val generateRejections by existing
+            compileKotlin {
+                dependsOn(generateRejections)
+            }
 
-        val generateTestRejections by existing
-        compileTestKotlin {
-            dependsOn(generateTestRejections)
+            val generateTestRejections by existing
+            compileTestKotlin {
+                dependsOn(generateTestRejections)
+            }
         }
     }
     configureTaskDependencies()

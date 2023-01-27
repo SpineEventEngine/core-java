@@ -38,7 +38,7 @@ import io.spine.type.MessageClass;
  * @param <E>
  *         the type of the message envelopes
  */
-public interface MessageDispatcher<C extends MessageClass, E extends MessageEnvelope> {
+public interface MessageDispatcher<C extends MessageClass<?>, E extends MessageEnvelope<?, ?, ?>> {
 
     /**
      * Obtains a set of message classes that can be processed by this dispatcher.
@@ -48,7 +48,7 @@ public interface MessageDispatcher<C extends MessageClass, E extends MessageEnve
     ImmutableSet<C> messageClasses();
 
     /**
-     * Dispatches the message contained in the passed envelope.
+     * Dispatches the message contained in the given envelope.
      *
      * @param envelope the envelope with the message
      */

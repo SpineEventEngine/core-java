@@ -62,7 +62,7 @@ val grGitVersion = "4.1.1"
  * Please check that this value matches one defined in
  *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.7.21"
+val kotlinVersion = "1.8.0"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -107,7 +107,7 @@ val dokkaVersion = "1.7.20"
  *
  * @see <a href="https://github.com/detekt/detekt/releases">Detekt Releases</a>
  */
-val detektVersion = "1.21.0"
+val detektVersion = "1.22.0"
 
 configurations.all {
     resolutionStrategy {

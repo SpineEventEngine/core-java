@@ -32,7 +32,7 @@ import io.spine.core.EventContext;
 import io.spine.core.MessageId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
-import io.spine.server.route.given.switchman.LogState;
+import io.spine.server.given.context.switchman.LogState;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.core.given.GivenVersion;

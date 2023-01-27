@@ -418,8 +418,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     }
 
     private Set<I> route(EventEnvelope event) {
-        return route(eventRouting(), event)
-                .orElse(ImmutableSet.of());
+        var route = route(eventRouting(), event);
+        return route.orElse(ImmutableSet.of());
     }
 
     /**
