@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
  *
  * <p>The method must accept a {@link io.spine.base.SignalMessage SignalMessage} as the first
  * parameter, and <em>may</em> contain corresponding
- * {@linkplain io.spine.base.MessageContext MessageContext} as the second parameter.
+ * {@link io.spine.base.MessageContext MessageContext} as the second parameter.
  *
  * <p>The method <em>must</em> return one identifier of type {@code <I>} for {@link Unicast}
  * dispatching, and <em>may</em> return an {@code Iterable<I>}, if this message can be dispatched
