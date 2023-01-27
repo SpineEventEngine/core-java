@@ -35,7 +35,7 @@ object Kotlin {
      * When changing the version, also change the version used in the `buildSrc/build.gradle.kts`.
      */
     @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version = "1.7.21"
+    const val version = "1.8.0"
 
     private const val group = "org.jetbrains.kotlin"
 
