@@ -56,7 +56,7 @@ class SwitchmanBureau : AggregateRepository<String, Switchman, SwitchmanLog>() {
         private fun routeToSwitchman(cmd: SetSwitch): String {
             val switchmanName = cmd.switchmanName
             if (switchmanName == MISSING_SWITCHMAN_NAME) {
-                throw RuntimeException(
+                throw IllegalStateException(
                     SwitchmanUnavailable.newBuilder()
                         .setSwitchmanName(switchmanName)
                         .build()
