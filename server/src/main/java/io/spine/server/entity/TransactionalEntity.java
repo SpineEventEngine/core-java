@@ -35,13 +35,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A base for entities, perform transactions {@linkplain Event events}.
  *
  * <p>Defines a transaction-based mechanism for state, version, and lifecycle flags update.
  *
- * <p>Exposes {@linkplain #builder()} validating builder} for the state as the only way
+ * <p>Exposes {@linkplain #builder() validating builder} for the state as the only way
  * to modify the state from the descendants.
  */
 public abstract class TransactionalEntity<I,
@@ -137,7 +138,7 @@ public abstract class TransactionalEntity<I,
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(missingTxMessage());
         }
-        return checkNotNull(transaction);
+        return requireNonNull(transaction);
     }
 
     /**
