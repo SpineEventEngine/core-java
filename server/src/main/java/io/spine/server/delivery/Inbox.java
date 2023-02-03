@@ -122,7 +122,7 @@ public final class Inbox<I> {
     /**
      * Unregisters this {@code Inbox} instance in the JVM-wide {@code Delivery}.
      *
-     * After this call the messages residing in the sharded storage will not be delivered to the
+     * <p>After this call the messages residing in the sharded storage will not be delivered to the
      * entities served by this {@code Inbox}.
      */
     public void unregister() {
