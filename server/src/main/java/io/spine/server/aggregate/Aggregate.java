@@ -115,10 +115,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * <p>End-users must not call {@code state()} method within an event applier.
  * It is so, because event appliers are invoked in scope of an active transaction,
- * which accumulates the model updates via aggregate's {@code builder()},
- * and not {@code state()}. Therefore, {@code state()} invocation from the applier's code
- * may return some inconsistent results, and in general is prone to errors. All such
- * attempts will result in a {@code RuntimeException}.
+ * which accumulates the model updates in aggregate's {@code builder()},
+ * and not in {@code state()}. Therefore, {@code state()} invocation from
+ * the applier's code may return some inconsistent result,
+ * and in general is prone to errors.
+ * All such attempts will result in a {@code RuntimeException}.
  *
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
@@ -251,10 +252,13 @@ public abstract class Aggregate<I,
      * Until this transaction is completed, the {@code state()} of the corresponding aggregate
      * is not up-to-date. Therefore, relying upon it in code is prone to errors,
      * and is prohibited for good sake.
+     *
+     * @throws IllegalStateException
+     *         if this method is called from within an event applier
      */
     @Override
     protected void ensureAccessToState() {
-        if(applierWatcher.inProgress()) {
+        if (applierWatcher.inProgress()) {
             throw newIllegalStateException(
                     "Aggregate `state()` method must not be used from `@Apply`-marked method." +
                             " Use `builder()` instead. The issue detected in `%s` aggregate class.",
