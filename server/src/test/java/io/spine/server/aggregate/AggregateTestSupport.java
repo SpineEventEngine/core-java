@@ -26,6 +26,8 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.json.Json;
+import io.spine.logging.Logging;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -41,6 +43,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class AggregateTestSupport {
 
+    private static final Logger logger = new Logger();
+
     /** Prevents instantiation of this utility class. */
     private AggregateTestSupport() {
     }
@@ -55,10 +59,12 @@ public final class AggregateTestSupport {
     public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchCommand(AggregateRepository<I, A> repository, A aggregate, CommandEnvelope command) {
         checkArguments(repository, aggregate, command);
-        return dispatchAndCollect(
+        DispatchOutcome outcome = dispatchAndCollect(
                 new AggregateCommandEndpoint<>(repository, command),
                 aggregate
         );
+        logger.warnIfErroneous(outcome);
+        return outcome;
     }
 
     /**
@@ -71,10 +77,12 @@ public final class AggregateTestSupport {
     public static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
     dispatchEvent(AggregateRepository<I, A> repository, A aggregate, EventEnvelope event) {
         checkArguments(repository, aggregate, event);
-        return dispatchAndCollect(
+        DispatchOutcome outcome = dispatchAndCollect(
                 new AggregateEventReactionEndpoint<>(repository, event),
                 aggregate
         );
+        logger.warnIfErroneous(outcome);
+        return outcome;
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> DispatchOutcome
@@ -83,9 +91,28 @@ public final class AggregateTestSupport {
     }
 
     private static <I, A extends Aggregate<I, ?, ?>> void
-    checkArguments(AggregateRepository<I, A> repository, A aggregate, MessageEnvelope envelope) {
+    checkArguments(AggregateRepository<I, A> repository,
+                   A aggregate,
+                   MessageEnvelope<?, ?, ?> envelope) {
         checkNotNull(repository);
         checkNotNull(aggregate);
         checkNotNull(envelope);
+    }
+
+    /**
+     * A window into Spine's logging from the {@code static} execution context
+     * of this {@code AggregateTestSupport} utility.
+     */
+    private static final class Logger implements Logging {
+
+        /**
+         * Prints the {@code Error} details as a warning-level log message,
+         * if the provided outcome has one.
+         */
+        private void warnIfErroneous(DispatchOutcome outcome) {
+            if(outcome.hasError()) {
+                _warn().log(Json.toJson(outcome.getError()));
+            }
+        }
     }
 }

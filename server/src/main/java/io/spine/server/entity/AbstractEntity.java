@@ -190,6 +190,7 @@ public abstract class AbstractEntity<I, S extends EntityState>
      */
     @Override
     public final S state() {
+        ensureAccessToState();
         S result = state;
         if (result == null) {
             synchronized (this) {
@@ -201,6 +202,24 @@ public abstract class AbstractEntity<I, S extends EntityState>
             }
         }
         return result;
+    }
+
+    /**
+     * Ensures that the callee is allowed to access Entity's {@link #state() state()} method.
+     *
+     * <p>In case the access is prohibited, throws a {@code RuntimeException}.
+     *
+     * <p>In some scenarios, the state of Entity may be not up-to-date,
+     * so descendants of {@code AbstractEntity} are able to put the corresponding restrictions
+     * on this method invocation.
+     *
+     * <p>By default, this method performs no checks,
+     * thus allowing to access Entity's {@code state()} at any point of time.
+     */
+    @Internal
+    @SuppressWarnings("NoopMethodInAbstractClass" /* By design. */)
+    protected void ensureAccessToState() {
+        // Do nothing by default.
     }
 
     /**

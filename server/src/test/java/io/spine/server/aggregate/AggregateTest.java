@@ -607,6 +607,29 @@ public class AggregateTest {
     }
 
     @Nested
+    @DisplayName("prohibit")
+    class Prohibit {
+        @Test
+        @DisplayName("to call `state()` from within applier")
+        void callStateFromApplier() {
+            ModelTests.dropAllModels();
+            FaultyAggregate faultyAggregate =
+                    new FaultyAggregate(ID, false, false);
+
+            Command command = Given.ACommand.addTask(ID);
+            DispatchOutcome outcome = dispatchCommand(faultyAggregate, env(command));
+
+            assertThat(outcome.hasError()).isTrue();
+            Error error = outcome.getError();
+            assertThat(error)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(Error.newBuilder()
+                                    .setType(IllegalStateException.class.getCanonicalName())
+                                    .buildPartial());
+        }
+    }
+
+    @Nested
     @DisplayName("catch RuntimeExceptions in")
     class CatchHandlerFailures {
 
