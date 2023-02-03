@@ -132,6 +132,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Aggregate should")
 @SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
+        "ClassWithTooManyMethods", "OverlyCoupledClass" /* Testing a centerpiece. */
 })
 @MuteLogging    /* Explicitly triggering failures in tests. */
 public class AggregateTest {
