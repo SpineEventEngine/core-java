@@ -92,7 +92,7 @@ public abstract class AbstractEntity<I, S extends EntityState>
     /**
      * The ID of the entity.
      *
-     * <p>Assigned either through the {@linkplain #AbstractEntity(Object)} constructor which
+     * <p>Assigned either through the {@linkplain #AbstractEntity(Object) constructor which
      * accepts the ID}, or via {@link #setId(Object)}. Is never {@code null}.
      */
     private @MonotonicNonNull I id;
@@ -386,7 +386,7 @@ public abstract class AbstractEntity<I, S extends EntityState>
      * Ensures that the entity is not marked as {@code archived}.
      *
      * @throws CannotModifyArchivedEntity
-     *         if the entity in in the archived status
+     *         if the entity in the archived status
      * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getArchived()
      */
