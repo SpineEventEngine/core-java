@@ -26,6 +26,8 @@
 
 package io.spine.server.delivery;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
@@ -82,5 +84,15 @@ final class InboxDeliveries {
     void unregister(Inbox<?> inbox) {
         TypeUrl entityType = inbox.entityStateType();
         contents.remove(entityType.value());
+    }
+
+    /**
+     * Returns the {@code String} values of type URLs
+     * under which the message delivered are registered
+     * in this instance of {@code InboxDeliveries}.
+     */
+    @VisibleForTesting
+    ImmutableSet<String> knownTypeUrls() {
+        return ImmutableSet.copyOf(contents.keySet());
     }
 }

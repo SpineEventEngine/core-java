@@ -626,6 +626,14 @@ public final class Delivery implements Logging {
     }
 
     /**
+     * Returns the registry of known message deliveries.
+     */
+    @VisibleForTesting
+    InboxDeliveries registeredDeliveries() {
+        return deliveries;
+    }
+
+    /**
      * Determines the shard index for the message, judging on the identifier of the entity,
      * to which this message is dispatched.
      *
