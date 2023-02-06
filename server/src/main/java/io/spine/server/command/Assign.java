@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p>Like other message-handling methods, command handlers are designed to be called by
- * the framework only. Therefore, it is recommended to declare a them as package-private.
+ * the framework only. Therefore, it is recommended to declare them as package-private.
  * It discourages a developer from calling these methods directly from anywhere.
  *
  * <p>Package-private access level still declares that a command handler method is a part
