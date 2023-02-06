@@ -129,10 +129,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("Aggregate should")
 @SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
+        "ClassWithTooManyMethods", "OverlyCoupledClass" /* Testing a centerpiece. */
 })
-@DisplayName("Aggregate should")
+@MuteLogging    /* Explicitly triggering failures in tests. */
 public class AggregateTest {
 
     private static final ProjectId ID = ProjectId.newBuilder()

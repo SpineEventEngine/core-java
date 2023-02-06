@@ -61,6 +61,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.time.TimestampTemporal;
+import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -195,7 +196,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     private void initInbox(Delivery delivery) {
         inbox = delivery
-                .<I>newInbox(entityStateType())
+                .<I>newInbox(inboxStateType())
                 .withBatchListener(new BatchDeliveryListener<I>() {
                     @Override
                     public void onStart(I id) {
@@ -212,6 +213,20 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 .addEventEndpoint(InboxLabel.CATCH_UP,
                                   e -> CatchUpEndpoint.of(this, e))
                 .build();
+    }
+
+    /**
+     * Returns a {@code TypeUrl} under which the entities of this repository will register
+     * their {@code Inbox}es.
+     *
+     * <p>Descendants may choose to customize this value in special cases.
+     * One of these cases is avoiding the duplication of {@code Inbox}es
+     * in an application-wide {@code Delivery} for the same system projection
+     * registered in several Bounded Contexts.
+     */
+    @Internal
+    protected TypeUrl inboxStateType() {
+        return entityStateType();
     }
 
     private Inbox<I> inbox() {

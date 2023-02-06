@@ -41,6 +41,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.system.server.event.EntityLifecycleEvent;
+import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import java.util.Iterator;
@@ -53,6 +54,7 @@ import static io.spine.system.server.Mirror.ID_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.STATE_FIELD_NUMBER;
 import static io.spine.system.server.Mirror.VERSION_FIELD_NUMBER;
 import static io.spine.system.server.MirrorProjection.buildFilters;
+import static java.lang.String.format;
 
 /**
  * The repository for {@link Mirror} projections.
@@ -78,6 +80,41 @@ public final class MirrorRepository
         super.setupEventRouting(routing);
         routing.route(EntityLifecycleEvent.class,
                       (message, context) -> targetsFrom(message));
+    }
+
+    /**
+     * Returns the custom type URL for {@code Mirror} type to use during the {@code Inbox}
+     * registration in {@code Delivery}.
+     *
+     * <p>The prefix part in the resulting type URL includes the name of the Bounded Context
+     * in which this repository is registered.
+     *
+     * <p>It is a workaround preventing some known issues of delivering signals
+     * to {@code Mirror} instances in an application consisting of several Bounded Contexts.
+     * As long as each of the Bounded Contexts may have their own {@code Mirror}
+     * as a system entity, application-wide {@code Delivery} must have a way
+     * to distinguish the inboxes for each of such {@code Mirror} entity types.
+     * Inserting the name of the Bounded Context into the type URL helps to achieve this goal.
+     *
+     * <p>This type URL must be used solely for {@code Inbox}-specific set up,
+     * and must not be associated with any entity state types, since its "prefix" part
+     * is customized.
+     *
+     * <p>Please note, this feature along with {@code Mirror} itself is removed in Spine 2.x.
+     */
+    @Internal
+    @Override
+    @SuppressWarnings("resource")   /* Not using any resources from `context()`. */
+    protected TypeUrl inboxStateType() {
+        String contextName = context().name()
+                                      .value();
+        TypeUrl originalValue = super.inboxStateType();
+        String originalPrefix = originalValue.prefix();
+        TypeName typeName = originalValue.toTypeName();
+
+        String rawTypeUrl = format("%s@%s/%s", originalPrefix, contextName, typeName.value());
+        TypeUrl result = TypeUrl.parse(rawTypeUrl);
+        return result;
     }
 
     @Internal
