@@ -33,10 +33,13 @@ import io.spine.server.command.Assign;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
+import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.test.aggregate.event.AggTaskAdded;
 
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
+import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 
 /**
  * The test environment class for checking raising and catching exceptions.
@@ -70,5 +73,17 @@ public final class FaultyAggregate
             throw new IllegalStateException(BROKEN_APPLIER);
         }
         builder().setStatus(Status.CREATED);
+    }
+
+    @Assign
+    AggTaskAdded handle(AggAddTask cmd) {
+        return taskAdded(cmd.getProjectId());
+    }
+
+    @Apply
+    private void event(AggTaskAdded event) {
+        /* This call to `state()` is prohibited from `Apply`-marked method. */
+        ProjectId id = state().getId();
+        builder().setId(id);
     }
 }

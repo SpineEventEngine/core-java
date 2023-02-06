@@ -40,7 +40,7 @@ import io.spine.server.type.EventEnvelope;
  *
  * @param <I> the type of aggregate IDs
  * @param <S> the type of aggregate state
- * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
+ * @param <B> the type of {@code ValidatingBuilder} for the aggregate state
  */
 @Internal
 public class AggregateTransaction<I,

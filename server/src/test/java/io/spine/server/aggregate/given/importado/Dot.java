@@ -50,14 +50,14 @@ final class Dot extends Aggregate<ObjectId, Point, Point.Builder> {
 
     @Apply(allowImport = true)
     private void event(Moved event) {
-        Point newPosition = move(state(), event.getDirection());
+        Point newPosition = move(builder(), event.getDirection());
 
         builder().setId(event.getObject())
                  .setX(newPosition.getX())
                  .setY(newPosition.getY());
     }
 
-    private static Point move(Point p, Direction direction) {
+    private static Point move(PointOrBuilder p, Direction direction) {
         Point.Builder result = Point
                 .newBuilder()
                 .setX(p.getX())
