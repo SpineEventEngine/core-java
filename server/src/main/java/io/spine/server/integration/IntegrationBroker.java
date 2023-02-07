@@ -37,6 +37,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.transport.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
@@ -245,7 +246,8 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
      * Dispatches the given event via the local {@code EventBus} and observes the acknowledgement.
      */
     void dispatchLocally(Event event, StreamObserver<Ack> ackObserver) {
-        bus.dispatch(event, ackObserver);
+        TenantAwareRunner.with(event.tenant())
+                         .run(() -> bus.dispatch(event, ackObserver));
     }
 
     /**

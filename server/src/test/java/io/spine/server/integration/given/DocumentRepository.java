@@ -32,9 +32,12 @@ import io.spine.server.integration.OpenOfficeDocumentUploaded;
 import io.spine.server.integration.PaperDocumentScanned;
 import io.spine.server.route.EventRouting;
 
+import java.util.Optional;
+import java.util.Set;
+
 import static io.spine.server.route.EventRoute.withId;
 
-public class DocumentRepository extends AggregateRepository<DocumentId, DocumentAggregate> {
+public final class DocumentRepository extends AggregateRepository<DocumentId, DocumentAggregate> {
 
     @Override
     protected void setupImportRouting(EventRouting<DocumentId> routing) {
@@ -45,7 +48,31 @@ public class DocumentRepository extends AggregateRepository<DocumentId, Document
     @Override
     protected void setupEventRouting(EventRouting<DocumentId> routing) {
         super.setupEventRouting(routing);
-        routing.route(OpenOfficeDocumentUploaded.class,
-                      (message, context) -> withId(message.getId()));
+        routing.route(OpenOfficeDocumentUploaded.class, (message, context) -> route(message));
+    }
+
+    /**
+     * Routes an external event to the instances of {@link DocumentAggregate}.
+     *
+     * <p>This method includes an explicit call to repository's {@code find(..)} method.
+     * This is done to ensure that even in multi-tenant environment such a call
+     * is available, meaning that the {@code TenantId} is present in scope
+     * of runtime execution context.
+     *
+     * <p>Corresponding tests are available
+     * in {@link io.spine.server.integration.IntegrationBrokerTest IntegrationBrokerTest}.
+     *
+     * @param event
+     *         event to route
+     * @return set of identifiers
+     */
+    private Set<DocumentId> route(OpenOfficeDocumentUploaded event) {
+        DocumentId id = event.getId();
+        Optional<DocumentAggregate> aggregate = find(id);
+        if (!aggregate.isPresent()) {
+            _debug().log("`Document` aggregate is not found by ID `%s`. " +
+                                 "Creating a new instance.", id);
+        }
+        return withId(id);
     }
 }

@@ -82,9 +82,7 @@ class ThirdPartyContextTest {
     @AfterEach
     void closeContext() throws Exception {
         context.close();
-        ServerEnvironment
-                .instance()
-                .reset();
+        resetServerEnvironment();
     }
 
     @Test
@@ -213,11 +211,16 @@ class ThirdPartyContextTest {
     @Test
     @DisplayName("in a multitenant environment")
     void multitenant() {
+        /* Getting rid of the class-level repositories and bounded contexts. */
+        resetServerEnvironment();
+
         DocumentRepository documentRepository = new DocumentRepository();
-        BoundedContextBuilder
+        BoundedContext boundedContext = BoundedContextBuilder
                 .assumingTests(true)
                 .add(documentRepository)
                 .build();
+        assertThat(boundedContext.isMultitenant())
+                .isTrue();
         UserId johnDoe = userId();
         TenantId acmeCorp = TenantId
                 .newBuilder()
@@ -246,6 +249,12 @@ class ThirdPartyContextTest {
                 .with(cyberdyne)
                 .evaluate(() -> documentRepository.find(documentId));
         assertThat(cyberdyneDailyReport).isEmpty();
+    }
+
+    private static void resetServerEnvironment() {
+        ServerEnvironment
+                .instance()
+                .reset();
     }
 
     private static void postForSingleTenant(UserId actor, EventMessage event) {
