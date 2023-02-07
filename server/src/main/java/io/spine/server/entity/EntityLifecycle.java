@@ -490,11 +490,14 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             Version version = change.getNewValue()
                                     .getVersion();
+            Any lastKnownState = change.getPreviousValue()
+                                       .getState();
             EntityArchived event = EntityArchived
                     .newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setLastState(lastKnownState)
                     .vBuild();
             postEvent(event);
         }
@@ -511,12 +514,15 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             Version version = change.getNewValue()
                                     .getVersion();
+            Any lastKnownState = change.getPreviousValue()
+                                       .getState();
             EntityDeleted event = EntityDeleted
                     .newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
                     .setMarkedAsDeleted(true)
+                    .setLastState(lastKnownState)
                     .vBuild();
             postEvent(event);
         }

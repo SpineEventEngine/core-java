@@ -190,6 +190,9 @@ message EntityArchived {
 
     // The version received by the entity upon archiving.
     core.Version version = 4;
+
+    // The last known state of the entity.
+    google.protobuf.Any last_state = 5;
 }
 
 // An entity was either marked as deleted or had its record physically removed from the storage.
@@ -216,6 +219,9 @@ message EntityDeleted {
         // The entity record was physically removed from the storage.
         bool removed_from_storage = 6;
     }
+
+    // The last known state of the entity.
+    google.protobuf.Any last_state = 7;
 }
 
 // An entity was marked as NOT archived.

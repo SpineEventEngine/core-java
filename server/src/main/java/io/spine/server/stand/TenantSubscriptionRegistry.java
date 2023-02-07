@@ -76,10 +76,12 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
     @Override
     public void add(Subscription subscription) {
         SubscriptionRecord record = SubscriptionRecord.of(subscription);
-        TypeUrl type = record.targetType();
         lockAndRun(() -> {
-            typeToRecord.put(type, record);
-            subscriptionToAttrs.put(subscription, record);
+            ImmutableSet<TypeUrl> types = record.targetTypes();
+            for (TypeUrl type : types) {
+                typeToRecord.put(type, record);
+                subscriptionToAttrs.put(subscription, record);
+            }
         });
     }
 
@@ -90,7 +92,10 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
                 return;
             }
             SubscriptionRecord record = subscriptionToAttrs.get(subscription);
-            typeToRecord.remove(record.targetType(), record);
+            ImmutableSet<TypeUrl> types = record.targetTypes();
+            for (TypeUrl type : types) {
+                typeToRecord.remove(type, record);
+            }
             subscriptionToAttrs.remove(subscription);
         });
     }
