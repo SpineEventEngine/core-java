@@ -27,9 +27,12 @@ package io.spine.server.stand;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
@@ -41,14 +44,17 @@ import java.util.Optional;
 final class SubscriptionRecord {
 
     private static final TypeUrl ENTITY_STATE_CHANGED = TypeUrl.of(EntityStateChanged.class);
+    private static final TypeUrl ENTITY_DELETED = TypeUrl.of(EntityDeleted.class);
     private final Subscription subscription;
-    private final TypeUrl type;
-    private final UpdateHandler handler;
+    private final ImmutableMap<TypeUrl, UpdateHandler> handlers;
+
+    private SubscriptionRecord(Subscription s, ImmutableMap<TypeUrl, UpdateHandler> handlers) {
+        this.subscription = s;
+        this.handlers = handlers;
+    }
 
     private SubscriptionRecord(Subscription s, TypeUrl targetType, UpdateHandler handler) {
-        this.subscription = s;
-        this.type = targetType;
-        this.handler = handler;
+        this(s, ImmutableMap.of(targetType, handler));
     }
 
     /**
@@ -75,14 +81,17 @@ final class SubscriptionRecord {
     }
 
     /**
-     * Creates a record managing an entity subscription.
+     * Creates a record managing a subscription on entity changes.
      *
-     * <p>In fact, this is a subscription to an {@link EntityStateChanged} event with a custom
-     * callback and matcher (to validate the entity state packed inside the event).
+     * <p>In fact, this is a subscription to both {@link EntityStateChanged}
+     * and {@link EntityDeleted} events with a custom callback
+     * and matcher (to validate the entity state packed inside the event).
      */
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
-        EntityUpdateHandler handler = new EntityUpdateHandler(subscription);
-        return new SubscriptionRecord(subscription, ENTITY_STATE_CHANGED, handler);
+        ImmutableMap<TypeUrl, UpdateHandler> handlers =
+                ImmutableMap.of(ENTITY_STATE_CHANGED, new EntityChangeHandler(subscription),
+                                ENTITY_DELETED, new EntityRemovalHandler(subscription));
+        return new SubscriptionRecord(subscription, handlers);
     }
 
     /**
@@ -94,7 +103,9 @@ final class SubscriptionRecord {
      *         the action to attach to the record
      */
     void activate(SubscriptionCallback callback) {
-        handler.setCallback(callback);
+        for (UpdateHandler handler : handlers()) {
+            handler.setCallback(callback);
+        }
     }
 
     /**
@@ -108,14 +119,24 @@ final class SubscriptionRecord {
      * @see #activate(SubscriptionCallback)
      */
     void update(EventEnvelope event) {
-        handler.handle(event);
+        Iterable<UpdateHandler> updateHandlers = handlers();
+        for (UpdateHandler handler : updateHandlers) {
+            handler.handle(event);
+        }
+    }
+
+    private Iterable<UpdateHandler> handlers() {
+        Iterable<UpdateHandler> updateHandlers = handlers.values();
+        return updateHandlers;
     }
 
     /**
      * Checks whether this record has an active callback attached.
      */
     boolean isActive() {
-        return handler.isActive();
+        return handlers.values()
+                       .stream()
+                       .anyMatch(UpdateHandler::isActive);
     }
 
     /**
@@ -124,11 +145,17 @@ final class SubscriptionRecord {
      */
     @VisibleForTesting
     Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
-        return handler.detectUpdate(event);
+        for (UpdateHandler handler : handlers()) {
+            Optional<SubscriptionUpdate> detected = handler.detectUpdate(event);
+            if(detected.isPresent()) {
+                return detected;
+            }
+        }
+        return Optional.empty();
     }
 
-    TypeUrl targetType() {
-        return type;
+    ImmutableSet<TypeUrl> targetTypes() {
+        return handlers.keySet();
     }
 
     @Override
