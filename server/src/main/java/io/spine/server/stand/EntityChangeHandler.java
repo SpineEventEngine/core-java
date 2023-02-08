@@ -34,19 +34,22 @@ import io.spine.client.SubscriptionUpdate;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
 /**
  * The update handler of {@code Subscription}s for changes in {@code Entity} state.
  *
- * <p>This handler only processes the changes in non-deleted and non-archived
+ * <p>This handler only processes the changes unrelated to archiving or deleting the
  * {@code Entity} instances.
  */
 final class EntityChangeHandler extends AbstractEntityUpdateHandler {
 
+    private static final TypeUrl ENTITY_STATE_CHANGED = TypeUrl.of(EntityStateChanged.class);
+
     EntityChangeHandler(Subscription subscription) {
-        super(subscription);
+        super(subscription, ENTITY_STATE_CHANGED);
     }
 
     /**
@@ -56,7 +59,7 @@ final class EntityChangeHandler extends AbstractEntityUpdateHandler {
      * initially passed the subscription criteria, stop passing those as their state updates.
      *
      * <p>In this case a special {@code SubscriptionUpdate} is emitted. Its
-     * {@linkplain SubscriptionUpdate#getEntityUpdates() EntityUpdates} will have
+     * {@link SubscriptionUpdate#getEntityUpdates() EntityUpdates} will have
      * {@link EntityStateUpdate#getNoLongerMatching() EntityStateUpdate.getNoLongerMatching()}
      * set to {@code true}.
      *

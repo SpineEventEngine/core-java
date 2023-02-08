@@ -537,13 +537,14 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getArchived();
         if (!newValue && oldValue) {
-            Version version = change.getNewValue()
-                                    .getVersion();
+            EntityRecord newRecord = change.getNewValue();
+            Version version = newRecord.getVersion();
             EntityUnarchived event = EntityUnarchived
                     .newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setState(newRecord.getState())
                     .vBuild();
             postEvent(event);
         }
@@ -558,13 +559,14 @@ public class EntityLifecycle {
                                  .getLifecycleFlags()
                                  .getDeleted();
         if (!newValue && oldValue) {
-            Version version = change.getNewValue()
-                                    .getVersion();
+            EntityRecord newRecord = change.getNewValue();
+            Version version = newRecord.getVersion();
             EntityRestored event = EntityRestored
                     .newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setState(newRecord.getState())
                     .vBuild();
             postEvent(event);
         }

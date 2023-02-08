@@ -239,6 +239,9 @@ message EntityUnarchived {
 
     // The version received by the entity upon extraction.
     core.Version version = 4;
+
+    // The state of the entity after marking it as not-archived.
+    google.protobuf.Any state = 5;
 }
 
 // An entity was marked as NOT deleted.
@@ -256,6 +259,9 @@ message EntityRestored {
 
     // The version received by the entity upon restoration.
     core.Version version = 4;
+
+    // The state of the entity after restoration.
+    google.protobuf.Any state = 5;
 }
 
 // A migration operation was applied to an entity.
