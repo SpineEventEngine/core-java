@@ -38,6 +38,9 @@ import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
 /**
  * A {@link SubscriptionRegistry} entry that manages a single subscription.
  */
@@ -119,10 +122,17 @@ final class SubscriptionRecord {
      * @see #activate(SubscriptionCallback)
      */
     void update(EventEnvelope event) {
-        Iterable<UpdateHandler> updateHandlers = handlers();
-        for (UpdateHandler handler : updateHandlers) {
-            handler.handle(event);
-        }
+        UpdateHandler handler = handlerForEvent(event);
+        handler.handle(event);
+    }
+
+    private UpdateHandler handlerForEvent(EventEnvelope event) {
+        TypeUrl eventType = event.typeUrl();
+        UpdateHandler handler = handlers.get(eventType);
+        requireNonNull(handler,
+                       () -> format("Cannot find `UpdateHandler` for the event of type `%s`.",
+                                    eventType));
+        return handler;
     }
 
     private Iterable<UpdateHandler> handlers() {
@@ -145,13 +155,8 @@ final class SubscriptionRecord {
      */
     @VisibleForTesting
     Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
-        for (UpdateHandler handler : handlers()) {
-            Optional<SubscriptionUpdate> detected = handler.detectUpdate(event);
-            if(detected.isPresent()) {
-                return detected;
-            }
-        }
-        return Optional.empty();
+        UpdateHandler handler = handlerForEvent(event);
+        return handler.detectUpdate(event);
     }
 
     ImmutableSet<TypeUrl> targetTypes() {
