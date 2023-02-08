@@ -31,23 +31,23 @@ import io.spine.base.EntityState;
 import io.spine.client.Subscription;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityArchived;
 import io.spine.type.TypeUrl;
 
 /**
- * Handles the {@link EntityDeleted} events in respect to the {@code Subscription}.
+ * Handles the {@link EntityArchived} events in respect to the {@code Subscription}.
  */
-final class EntityRemovalHandler extends NoLongerMatchingHandler {
+final class EntityArchivalHandler extends NoLongerMatchingHandler {
 
-    private static final TypeUrl ENTITY_DELETED = TypeUrl.of(EntityDeleted.class);
+    private static final TypeUrl ENTITY_ARCHIVED = TypeUrl.of(EntityArchived.class);
 
-    EntityRemovalHandler(Subscription subscription) {
-        super(subscription, ENTITY_DELETED);
+    EntityArchivalHandler(Subscription subscription) {
+        super(subscription, ENTITY_ARCHIVED);
     }
 
     @Override
     protected EntityState lastKnownStateFrom(EventEnvelope event) {
-        EntityDeleted message = (EntityDeleted) event.message();
+        EntityArchived message = (EntityArchived) event.message();
         Any newState = message.getLastState();
         EntityState result = (EntityState) AnyPacker.unpack(newState);
         return result;

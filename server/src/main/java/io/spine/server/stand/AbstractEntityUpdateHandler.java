@@ -38,14 +38,15 @@ import io.spine.client.TargetFilters;
 import io.spine.core.Responses;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityLifecycleEvent;
+import io.spine.type.TypeUrl;
 
 /**
  * Abstract base for handlers of {@code Subscriptions} for {@code Entity}-related updates.
  */
-abstract class AbstractEntityUpdateHandler extends UpdateHandler{
+abstract class AbstractEntityUpdateHandler extends UpdateHandler {
 
-    AbstractEntityUpdateHandler(Subscription subscription) {
-        super(subscription);
+    AbstractEntityUpdateHandler(Subscription subscription, TypeUrl eventType) {
+        super(subscription, eventType);
     }
 
     @Override

@@ -31,25 +31,31 @@ import io.spine.base.EntityState;
 import io.spine.client.Subscription;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EntityDeleted;
+import io.spine.system.server.event.EntityRestored;
 import io.spine.type.TypeUrl;
 
 /**
- * Handles the {@link EntityDeleted} events in respect to the {@code Subscription}.
+ * Handles the {@link EntityRestored} events in respect to the {@code Subscription}.
  */
-final class EntityRemovalHandler extends NoLongerMatchingHandler {
+final class EntityRestorationHandler extends ResurrectionHandler {
 
-    private static final TypeUrl ENTITY_DELETED = TypeUrl.of(EntityDeleted.class);
+    private static final TypeUrl ENTITY_RESTORED = TypeUrl.of(EntityRestored.class);
 
-    EntityRemovalHandler(Subscription subscription) {
-        super(subscription, ENTITY_DELETED);
+    EntityRestorationHandler(Subscription subscription) {
+        super(subscription, ENTITY_RESTORED);
     }
 
     @Override
-    protected EntityState lastKnownStateFrom(EventEnvelope event) {
-        EntityDeleted message = (EntityDeleted) event.message();
-        Any newState = message.getLastState();
-        EntityState result = (EntityState) AnyPacker.unpack(newState);
+    EntityState stateFrom(EventEnvelope event) {
+        Any packed = packedStateFrom(event);
+        EntityState result = (EntityState) AnyPacker.unpack(packed);
+        return result;
+    }
+
+    @Override
+    Any packedStateFrom(EventEnvelope event) {
+        EntityRestored message = (EntityRestored) event.message();
+        Any result = message.getState();
         return result;
     }
 }

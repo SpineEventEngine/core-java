@@ -26,30 +26,41 @@
 
 package io.spine.server.stand;
 
-import com.google.protobuf.Any;
 import io.spine.base.EntityState;
+import io.spine.client.EntityStateUpdate;
 import io.spine.client.Subscription;
-import io.spine.protobuf.AnyPacker;
+import io.spine.client.SubscriptionUpdate;
 import io.spine.server.type.EventEnvelope;
-import io.spine.system.server.event.EntityDeleted;
 import io.spine.type.TypeUrl;
 
+import java.util.Optional;
+
 /**
- * Handles the {@link EntityDeleted} events in respect to the {@code Subscription}.
+ * Abstract base for handlers which detect changes in {@code Entity} state,
+ * leading to concluding it as {@linkplain EntityStateUpdate#getNoLongerMatching()
+ * no longer matching} the subscription criteria.
  */
-final class EntityRemovalHandler extends NoLongerMatchingHandler {
+abstract class NoLongerMatchingHandler extends AbstractEntityUpdateHandler {
 
-    private static final TypeUrl ENTITY_DELETED = TypeUrl.of(EntityDeleted.class);
-
-    EntityRemovalHandler(Subscription subscription) {
-        super(subscription, ENTITY_DELETED);
+    NoLongerMatchingHandler(Subscription subscription, TypeUrl eventType) {
+        super(subscription, eventType);
     }
 
     @Override
-    protected EntityState lastKnownStateFrom(EventEnvelope event) {
-        EntityDeleted message = (EntityDeleted) event.message();
-        Any newState = message.getLastState();
-        EntityState result = (EntityState) AnyPacker.unpack(newState);
-        return result;
+    @SuppressWarnings("PMD.CollapsibleIfStatements" /* For better readability. */)
+    final Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
+        SubscriptionUpdate result = null;
+        if (typeMatches(event)) {
+            if (includeAll() ||
+                    (idMatches(event) && stateMatches(lastKnownStateFrom(event)))) {
+                result = noLongerMatching(event);
+            }
+        }
+        return Optional.ofNullable(result);
     }
+
+    /**
+     * Extracts the last known state of the {@code Entity} from the passed event.
+     */
+    protected abstract EntityState lastKnownStateFrom(EventEnvelope event);
 }

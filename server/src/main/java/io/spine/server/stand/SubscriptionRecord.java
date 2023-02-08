@@ -32,12 +32,14 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.EntityArchived;
 import io.spine.system.server.event.EntityDeleted;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -46,18 +48,17 @@ import static java.util.Objects.requireNonNull;
  */
 final class SubscriptionRecord {
 
-    private static final TypeUrl ENTITY_STATE_CHANGED = TypeUrl.of(EntityStateChanged.class);
-    private static final TypeUrl ENTITY_DELETED = TypeUrl.of(EntityDeleted.class);
     private final Subscription subscription;
     private final ImmutableMap<TypeUrl, UpdateHandler> handlers;
 
-    private SubscriptionRecord(Subscription s, ImmutableMap<TypeUrl, UpdateHandler> handlers) {
+    private SubscriptionRecord(Subscription s, ImmutableSet<UpdateHandler> handlers) {
         this.subscription = s;
-        this.handlers = handlers;
+        this.handlers = handlers.stream()
+                                .collect(toImmutableMap(UpdateHandler::eventType, h -> h));
     }
 
-    private SubscriptionRecord(Subscription s, TypeUrl targetType, UpdateHandler handler) {
-        this(s, ImmutableMap.of(targetType, handler));
+    private SubscriptionRecord(Subscription s, UpdateHandler handler) {
+        this(s, ImmutableSet.of(handler));
     }
 
     /**
@@ -80,20 +81,23 @@ final class SubscriptionRecord {
      */
     private static SubscriptionRecord createEventRecord(Subscription subscription) {
         EventUpdateHandler handler = new EventUpdateHandler(subscription);
-        return new SubscriptionRecord(subscription, subscription.targetType(), handler);
+        return new SubscriptionRecord(subscription, handler);
     }
 
     /**
      * Creates a record managing a subscription on entity changes.
      *
-     * <p>In fact, this is a subscription to both {@link EntityStateChanged}
-     * and {@link EntityDeleted} events with a custom callback
+     * <p>In fact, this is a subscription to {@link EntityStateChanged},
+     * {@link EntityDeleted}, and {@link EntityArchived} events with a custom callback
      * and matcher (to validate the entity state packed inside the event).
      */
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
-        ImmutableMap<TypeUrl, UpdateHandler> handlers =
-                ImmutableMap.of(ENTITY_STATE_CHANGED, new EntityChangeHandler(subscription),
-                                ENTITY_DELETED, new EntityRemovalHandler(subscription));
+        ImmutableSet<UpdateHandler> handlers =
+                ImmutableSet.of(new EntityChangeHandler(subscription),
+                                new EntityRemovalHandler(subscription),
+                                new EntityRestorationHandler(subscription),
+                                new EntityArchivalHandler(subscription),
+                                new EntityUnarchivalHandler(subscription));
         return new SubscriptionRecord(subscription, handlers);
     }
 

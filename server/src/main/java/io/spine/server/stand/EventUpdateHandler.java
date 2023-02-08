@@ -47,7 +47,7 @@ import static io.spine.core.Responses.ok;
 final class EventUpdateHandler extends UpdateHandler {
 
     EventUpdateHandler(Subscription subscription) {
-        super(subscription);
+        super(subscription, subscription.targetType());
     }
 
     @Override
