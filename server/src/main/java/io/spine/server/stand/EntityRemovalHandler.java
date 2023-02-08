@@ -46,18 +46,13 @@ final class EntityRemovalHandler extends AbstractEntityUpdateHandler {
     }
 
     @Override
+    @SuppressWarnings("PMD.CollapsibleIfStatements" /* For better readability. */)
     Optional<SubscriptionUpdate> detectUpdate(EventEnvelope event) {
         SubscriptionUpdate result = null;
-
         if (typeMatches(event)) {
-            if (includeAll()) {
+            if (includeAll() ||
+                    (idMatches(event) && stateMatches(lastKnownStateFrom(event)))) {
                 result = noLongerMatching(event);
-            } else {
-                if (idMatches(event)) {
-                    if (stateMatches(lastKnownStateFrom(event))) {
-                        result = noLongerMatching(event);
-                    }
-                }
             }
         }
         return Optional.ofNullable(result);
