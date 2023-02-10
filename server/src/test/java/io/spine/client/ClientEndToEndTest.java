@@ -30,11 +30,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import io.spine.server.Server;
 import io.spine.test.client.billing.PaymentReceived;
-import io.spine.test.client.tasks.CreateTask;
-import io.spine.test.client.tasks.TaskCreated;
-import io.spine.test.client.tasks.TaskId;
+import io.spine.test.client.tasks.command.CreateCTask;
+import io.spine.test.client.tasks.event.CTaskCreated;
 import io.spine.testing.SlowTest;
-import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.MuteLogging;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -50,6 +48,7 @@ import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterrup
 import static io.grpc.ManagedChannelBuilder.forAddress;
 import static io.grpc.Status.CANCELLED;
 import static io.spine.client.Client.usingChannel;
+import static io.spine.client.given.ClientTasksTestEnv.createCTask;
 import static io.spine.server.Server.atPort;
 import static io.spine.test.client.ClientTestContext.tasks;
 import static io.spine.test.client.ClientTestContext.users;
@@ -60,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SlowTest
 @MuteLogging
 @DisplayName("Real gRPC-based `Client` should")
-class ClientEndToEnd {
+class ClientEndToEndTest {
 
     @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String ADDRESS = "localhost";
@@ -114,15 +113,10 @@ class ClientEndToEnd {
     @DisplayName("post Command and subscribe to Event which is not declared explicitly")
     void subscribeToEvent() {
         AtomicBoolean fired = new AtomicBoolean(false);
-        CreateTask task = CreateTask
-                .newBuilder()
-                .setId(TaskId.generate())
-                .setName("My task")
-                .setAuthor(GivenUserId.generated())
-                .vBuild();
+        CreateCTask task = createCTask("`Task` emitting events");
         client.asGuest()
               .command(task)
-              .observe(TaskCreated.class, event -> fired.set(true))
+              .observe(CTaskCreated.class, event -> fired.set(true))
               .post();
         sleepUninterruptibly(ofSeconds(1));
         assertThat(fired.get())
