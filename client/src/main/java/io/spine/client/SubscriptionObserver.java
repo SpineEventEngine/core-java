@@ -43,8 +43,8 @@ import static io.spine.util.Exceptions.unsupported;
  * and sent to the delegate observer one by one.
  *
  * @param <M>
- *         the type of the delegate observer messages, which could be unpacked entity state
- *         or {@code Event}
+ *         the type of the delegate-observer's messages, which can either be
+ *         an unpacked entity state or an {@code Event}
  */
 final class SubscriptionObserver<M extends Message>
         implements StreamObserver<SubscriptionUpdate> {
