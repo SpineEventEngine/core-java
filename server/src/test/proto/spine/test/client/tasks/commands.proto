@@ -30,15 +30,31 @@ package spine.test.client.tasks;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.client.tasks";
+option java_package = "io.spine.test.client.tasks.command";
 option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
 import "spine/test/client/tasks/task.proto";
 
-message CreateTask {
-    TaskId id = 1;
+message CreateCTask {
+    CTaskId id = 1;
     string name = 2;
     core.UserId author = 3;
+}
+
+message ArchiveCTask {
+    CTaskId id = 1;
+}
+
+message UnarchiveCTask {
+    CTaskId id = 1;
+}
+
+message DeleteCTask {
+    CTaskId id = 1;
+}
+
+message RestoreCTask {
+    CTaskId id = 1;
 }

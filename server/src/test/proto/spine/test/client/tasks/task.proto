@@ -36,14 +36,15 @@ option java_multiple_files = true;
 
 import "spine/core/user_id.proto";
 
-message TaskId {
+message CTaskId {
     string uuid = 1;
 }
 
-message Task {
+message CTask {
     option (entity).kind = AGGREGATE;
+    option (entity).visibility = SUBSCRIBE;
 
-    TaskId id = 1;
+    CTaskId id = 1;
     string name = 2;
     core.UserId author = 3;
 }
