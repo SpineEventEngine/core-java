@@ -250,7 +250,6 @@ public class Stand implements AutoCloseable {
         checkNotNull(callback);
 
         subscriptionValidator.validate(subscription);
-
         SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
@@ -258,7 +257,6 @@ public class Stand implements AutoCloseable {
                 ack(responseObserver);
             }
         };
-
         op.execute();
     }
 

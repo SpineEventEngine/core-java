@@ -32,6 +32,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.MessageContext;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -47,7 +48,7 @@ import java.util.function.Consumer;
  *         (e.g. {@link io.spine.core.Event}); if subscribed message type does not have a context,
  *         this parameter is likely to be the same as {@code M}
  * @param <B>
- *         the type of this requests for return type covariance
+ *         the type of this request for return type covariance
  */
 public abstract class
 SubscribingRequest<M extends Message,
@@ -117,17 +118,33 @@ SubscribingRequest<M extends Message,
     public Subscription post() {
         Topic topic = builder().build();
         StreamObserver<W> observer = createObserver();
-        return subscribe(topic, observer);
+        Optional<StreamObserver<SubscriptionUpdate>> chain = chain();
+        Subscription subscription = chain.map(c -> subscribe(topic, observer, c))
+                                         .orElseGet(() -> subscribe(topic, observer));
+        return subscription;
     }
 
     private StreamObserver<W> createObserver() {
         return consumers().build().toObserver();
     }
 
+    protected Optional<StreamObserver<SubscriptionUpdate>> chain() {
+        return Optional.empty();
+    }
+
     private Subscription subscribe(Topic topic, StreamObserver<W> observer) {
         Subscription subscription =
                 client().subscriptions()
                         .subscribeTo(topic, observer);
+        return subscription;
+    }
+
+    private Subscription subscribe(Topic topic,
+                                   StreamObserver<W> observer,
+                                   StreamObserver<SubscriptionUpdate> chain) {
+        Subscription subscription =
+                client().subscriptions()
+                        .subscribeTo(topic, observer, chain);
         return subscription;
     }
 }
