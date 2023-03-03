@@ -30,6 +30,8 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.SubscriptionUpdate.UpdateCase;
 
+import java.util.Optional;
+
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.unsupported;
 
@@ -51,8 +53,21 @@ final class SubscriptionObserver<M extends Message>
 
     private final StreamObserver<M> delegate;
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType"
+            /* Could have been `@Nullable`,
+            but it is always used as `Optional`;
+            so having `Optional` field is an optimization.*/)
+    private final Optional<StreamObserver<SubscriptionUpdate>> chain;
+
     SubscriptionObserver(StreamObserver<M> targetObserver) {
         this.delegate = targetObserver;
+        this.chain = Optional.empty();
+    }
+
+    SubscriptionObserver(StreamObserver<M> targetObserver,
+                         StreamObserver<SubscriptionUpdate> chain) {
+        this.delegate = targetObserver;
+        this.chain = Optional.of(chain);
     }
 
     @SuppressWarnings("unchecked") // Logically correct.
@@ -80,6 +95,7 @@ final class SubscriptionObserver<M extends Message>
             default:
                 throw unsupported("Unsupported update case `%s`.", updateCase);
         }
+        chain.ifPresent(observer -> observer.onNext(value));
     }
 
     @Override

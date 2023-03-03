@@ -101,7 +101,7 @@ final class ClientSubscriptionsTest extends AbstractClientTest {
         @Test
         @DisplayName("of an Aggregate")
         void aggregate() {
-            List<CTask> receivedUpdates = new ArrayList<>();
+            List<CTask> updates = new ArrayList<>();
 
             Client client = client();
             CreateCTask createTask = createCTask("Soon to be deleted and restored");
@@ -110,12 +110,12 @@ final class ClientSubscriptionsTest extends AbstractClientTest {
             RestoreCTask restoreTask = restoreCTask(id);
             client.asGuest()
                   .subscribeTo(CTask.class)
-                  .observe(receivedUpdates::add)
+                  .observe(updates::add)
                   .post();
 
-            assertNumOfUpdates(receivedUpdates, 1, client, createTask);
-            assertNumOfUpdates(receivedUpdates, 1, client, deleteTask);
-            assertNumOfUpdates(receivedUpdates, 2, client, restoreTask);
+            assertNumOfUpdates(updates, 1, client, createTask);
+            assertNumOfUpdates(updates, 1, client, deleteTask);
+            assertNumOfUpdates(updates, 2, client, restoreTask);
         }
     }
 
@@ -126,7 +126,8 @@ final class ClientSubscriptionsTest extends AbstractClientTest {
         @Test
         @DisplayName("of an Aggregate")
         void aggregate() {
-            List<CTask> receivedUpdates = new ArrayList<>();
+            List<CTask> updates = new ArrayList<>();
+            List<CTaskId> noLongerMatchingIds = new ArrayList<>();
 
             Client client = client();
             CreateCTask createTask = createCTask("Soon to be archived and un-archived");
@@ -135,12 +136,17 @@ final class ClientSubscriptionsTest extends AbstractClientTest {
             UnarchiveCTask unarchiveCTask = unarchiveCTask(id);
             client.asGuest()
                   .subscribeTo(CTask.class)
-                  .observe(receivedUpdates::add)
+                  .observe(updates::add)
+                  .whenNoLongerMatching(CTaskId.class, noLongerMatchingIds::add)
                   .post();
 
-            assertNumOfUpdates(receivedUpdates, 1, client, createTask);
-            assertNumOfUpdates(receivedUpdates, 1, client, archiveTask);
-            assertNumOfUpdates(receivedUpdates, 2, client, unarchiveCTask);
+            assertThat(noLongerMatchingIds).isEmpty();
+            assertNumOfUpdates(updates, 1, client, createTask);
+
+            assertNumOfUpdates(updates, 1, client, archiveTask);
+            assertThat(noLongerMatchingIds).containsExactly(id);
+
+            assertNumOfUpdates(updates, 2, client, unarchiveCTask);
         }
     }
 
