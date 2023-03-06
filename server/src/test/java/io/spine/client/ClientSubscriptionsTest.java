@@ -102,6 +102,7 @@ final class ClientSubscriptionsTest extends AbstractClientTest {
         @DisplayName("of an Aggregate")
         void aggregate() {
             List<CTask> updates = new ArrayList<>();
+            List<CTaskId> noLongerMatchingIds = new ArrayList<>();
 
             Client client = client();
             CreateCTask createTask = createCTask("Soon to be deleted and restored");
@@ -111,11 +112,18 @@ final class ClientSubscriptionsTest extends AbstractClientTest {
             client.asGuest()
                   .subscribeTo(CTask.class)
                   .observe(updates::add)
+                  .whenNoLongerMatching(CTaskId.class, noLongerMatchingIds::add)
                   .post();
 
+            assertThat(noLongerMatchingIds).isEmpty();
             assertNumOfUpdates(updates, 1, client, createTask);
+
             assertNumOfUpdates(updates, 1, client, deleteTask);
+            // `CTask` became deleted. It should stop matching the subscription criteria.
+            assertThat(noLongerMatchingIds).containsExactly(id);
+
             assertNumOfUpdates(updates, 2, client, restoreTask);
+            assertThat(noLongerMatchingIds).containsExactly(id);
         }
     }
 
@@ -144,9 +152,11 @@ final class ClientSubscriptionsTest extends AbstractClientTest {
             assertNumOfUpdates(updates, 1, client, createTask);
 
             assertNumOfUpdates(updates, 1, client, archiveTask);
+            // `CTask` became archived. It should stop matching the subscription criteria.
             assertThat(noLongerMatchingIds).containsExactly(id);
 
             assertNumOfUpdates(updates, 2, client, unarchiveCTask);
+            assertThat(noLongerMatchingIds).containsExactly(id);
         }
     }
 
