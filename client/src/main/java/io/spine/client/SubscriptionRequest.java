@@ -115,7 +115,7 @@ public final class SubscriptionRequest<S extends EntityState>
 
     @Override
     protected Optional<StreamObserver<SubscriptionUpdate>> chain() {
-        if(null == nlmConsumer) {
+        if (null == nlmConsumer) {
             return Optional.empty();
         }
         return Optional.of(new NoLongerMatchingFilter(nlmConsumer));
