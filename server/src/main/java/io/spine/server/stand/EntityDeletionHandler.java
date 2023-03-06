@@ -37,14 +37,14 @@ import io.spine.type.TypeUrl;
 /**
  * Handles the {@link EntityDeleted} events in respect to the {@code Subscription}.
  */
-final class EntityRemovalHandler extends NoLongerMatchingHandler {
+final class EntityDeletionHandler extends NoLongerMatchingHandler {
 
     private static final TypeUrl ENTITY_DELETED = TypeUrl.of(EntityDeleted.class);
 
     /**
      * Creates a new instance for the passed {@code Subscription}.
      */
-    EntityRemovalHandler(Subscription subscription) {
+    EntityDeletionHandler(Subscription subscription) {
         super(subscription, ENTITY_DELETED);
     }
 

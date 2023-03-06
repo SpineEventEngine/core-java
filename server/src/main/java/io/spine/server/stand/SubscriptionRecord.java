@@ -94,7 +94,7 @@ final class SubscriptionRecord {
     private static SubscriptionRecord createEntityRecord(Subscription subscription) {
         ImmutableSet<UpdateHandler> handlers =
                 ImmutableSet.of(new EntityChangeHandler(subscription),
-                                new EntityRemovalHandler(subscription),
+                                new EntityDeletionHandler(subscription),
                                 new EntityRestorationHandler(subscription),
                                 new EntityArchivalHandler(subscription),
                                 new EntityUnarchivalHandler(subscription));
