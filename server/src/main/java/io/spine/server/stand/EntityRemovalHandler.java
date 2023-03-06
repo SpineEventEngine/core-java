@@ -41,6 +41,9 @@ final class EntityRemovalHandler extends NoLongerMatchingHandler {
 
     private static final TypeUrl ENTITY_DELETED = TypeUrl.of(EntityDeleted.class);
 
+    /**
+     * Creates a new instance for the passed {@code Subscription}.
+     */
     EntityRemovalHandler(Subscription subscription) {
         super(subscription, ENTITY_DELETED);
     }

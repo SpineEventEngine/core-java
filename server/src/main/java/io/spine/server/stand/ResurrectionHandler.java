@@ -43,6 +43,10 @@ import java.util.Optional;
  */
 abstract class ResurrectionHandler extends AbstractEntityUpdateHandler {
 
+    /**
+     * Creates a new instance for the given {@code Subscription}
+     * and the corresponding {@code TypeUrl} of system event.
+     */
     ResurrectionHandler(Subscription subscription, TypeUrl eventType) {
         super(subscription, eventType);
     }

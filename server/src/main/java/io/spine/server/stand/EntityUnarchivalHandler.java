@@ -41,6 +41,9 @@ final class EntityUnarchivalHandler extends ResurrectionHandler {
 
     private static final TypeUrl ENTITY_UNARCHIVED = TypeUrl.of(EntityUnarchived.class);
 
+    /**
+     * Creates a new instance for the passed {@code Subscription}.
+     */
     EntityUnarchivalHandler(Subscription subscription) {
         super(subscription, ENTITY_UNARCHIVED);
     }
