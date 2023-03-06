@@ -42,6 +42,10 @@ import java.util.Optional;
  */
 abstract class NoLongerMatchingHandler extends AbstractEntityUpdateHandler {
 
+    /**
+     * Creates a new instance for the given {@code Subscription}
+     * and the corresponding {@code TypeUrl} of system event.
+     */
     NoLongerMatchingHandler(Subscription subscription, TypeUrl eventType) {
         super(subscription, eventType);
     }

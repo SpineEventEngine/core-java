@@ -41,6 +41,9 @@ final class EntityRestorationHandler extends ResurrectionHandler {
 
     private static final TypeUrl ENTITY_RESTORED = TypeUrl.of(EntityRestored.class);
 
+    /**
+     * Creates a new instance for the passed {@code Subscription}.
+     */
     EntityRestorationHandler(Subscription subscription) {
         super(subscription, ENTITY_RESTORED);
     }

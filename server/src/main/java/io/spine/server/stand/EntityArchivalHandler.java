@@ -41,6 +41,9 @@ final class EntityArchivalHandler extends NoLongerMatchingHandler {
 
     private static final TypeUrl ENTITY_ARCHIVED = TypeUrl.of(EntityArchived.class);
 
+    /**
+     * Creates a new instance for the passed {@code Subscription}.
+     */
     EntityArchivalHandler(Subscription subscription) {
         super(subscription, ENTITY_ARCHIVED);
     }
