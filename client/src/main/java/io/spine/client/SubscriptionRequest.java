@@ -26,12 +26,9 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EntityState;
-import io.spine.base.Identifier;
 import io.spine.core.EmptyContext;
-import io.spine.protobuf.AnyPacker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -50,8 +47,14 @@ import static io.spine.client.Filters.extractFilters;
 public final class SubscriptionRequest<S extends EntityState>
         extends SubscribingRequest<S, EmptyContext, S, SubscriptionRequest<S>> {
 
+    /**
+     * The builder of consumers of entity state.
+     */
     private final StateConsumers.Builder<S> consumers;
 
+    /**
+     * Optional consumer of entity IDs, which no longer match the subscription criteria.
+     */
     private @Nullable NoLongerMatchingConsumer<?> nlmConsumer;
 
     SubscriptionRequest(ClientRequest parent, Class<S> type) {
@@ -88,6 +91,8 @@ public final class SubscriptionRequest<S extends EntityState>
      *     <li>entity is archived.</li>
      * </ul>
      *
+     * <p>It is a responsibility of callee to provide a correct type of entity identifiers.
+     *
      * @param consumer
      *         the consumer to notify
      * @param idType
@@ -113,7 +118,7 @@ public final class SubscriptionRequest<S extends EntityState>
         if(null == nlmConsumer) {
             return Optional.empty();
         }
-        return Optional.of(new NlmObserver(nlmConsumer));
+        return Optional.of(new NoLongerMatchingFilter(nlmConsumer));
     }
 
     @Override
@@ -131,54 +136,4 @@ public final class SubscriptionRequest<S extends EntityState>
         return (factory) -> factory.topic().select(messageType());
     }
 
-    private static final class NoLongerMatchingConsumer<I> implements Consumer<Any> {
-
-        private final Class<I> idClass;
-        private final Consumer<I> delegate;
-
-        private NoLongerMatchingConsumer(Class<I> idClass, Consumer<I> delegate) {
-            this.idClass = idClass;
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void accept(Any packedId) {
-            EntityId entityId = AnyPacker.unpack(packedId, EntityId.class);
-            Any any = entityId.getId();
-            I unpacked = Identifier.unpack(any, idClass);
-            delegate.accept(unpacked);
-        }
-    }
-
-    private static final class NlmObserver implements StreamObserver<SubscriptionUpdate> {
-
-        private final NoLongerMatchingConsumer<?> consumer;
-
-        private NlmObserver(NoLongerMatchingConsumer<?> consumer) {
-            this.consumer = consumer;
-        }
-
-        @Override
-        public void onNext(SubscriptionUpdate value) {
-            if (value.hasEntityUpdates()) {
-                value.getEntityUpdates()
-                     .getUpdateList()
-                     .stream()
-                     .filter(update -> update.getKindCase() ==
-                             EntityStateUpdate.KindCase.NO_LONGER_MATCHING)
-                     .map(EntityStateUpdate::getId)
-                     .forEach(consumer);
-            }
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            // do nothing.
-        }
-
-        @Override
-        public void onCompleted() {
-            // do nothing.
-        }
-    }
 }
