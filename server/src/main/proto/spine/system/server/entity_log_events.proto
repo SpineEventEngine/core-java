@@ -240,7 +240,7 @@ message EntityUnarchived {
     // The version received by the entity upon extraction.
     core.Version version = 4;
 
-    // The state of the entity after marking it as not-archived.
+    // The state of the entity after marking it as non-archived.
     google.protobuf.Any state = 5;
 }
 
