@@ -128,6 +128,16 @@ SubscribingRequest<M extends Message,
         return consumers().build().toObserver();
     }
 
+    /**
+     * Returns an observer of raw {@code SubscriptionUpdate}s, which will be called
+     * in addition to notifying the {@linkplain #consumers() consumers}.
+     *
+     * <p>Descendants may choose to override this method in order to specify their
+     * observer chaining policy.
+     *
+     * @return {@code StreamObserver} to call in chain (wrapped into {@code Optional}),
+     *         or {@code Optional.empty()} if no such chaining is configured
+     */
     protected Optional<StreamObserver<SubscriptionUpdate>> chain() {
         return Optional.empty();
     }
