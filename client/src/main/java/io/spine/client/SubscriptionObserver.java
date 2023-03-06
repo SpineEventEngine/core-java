@@ -56,7 +56,7 @@ final class SubscriptionObserver<M extends Message>
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType"
             /* Could have been `@Nullable`,
             but it is always used as `Optional`;
-            so having `Optional` field is an optimization.*/)
+            so having `Optional` field is an optimization. */)
     private final Optional<StreamObserver<SubscriptionUpdate>> chain;
 
     SubscriptionObserver(StreamObserver<M> targetObserver) {
