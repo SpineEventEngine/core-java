@@ -411,11 +411,12 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        Optional<ShardProcessingSession> picked = workRegistry.pickUp(index, currentNode);
-        if (!picked.isPresent()) {
+        PickUpOutcome acknowledgement = workRegistry.pickUp(index, currentNode);
+        acknowledgement.ifExceptionOccurred(e -> monitor.onShardPickUpFailure(index, e));
+        if (!acknowledgement.isPicked()) {
             return Optional.empty();
         }
-        ShardProcessingSession session = picked.get();
+        ShardProcessingSession session = acknowledgement.getSession();
         monitor.onDeliveryStarted(index);
 
         RunResult runResult;
@@ -575,7 +576,8 @@ public final class Delivery implements Logging {
      */
     public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repo) {
         CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repo);
-        CatchUpRepositories.cache().put(repo);
+        CatchUpRepositories.cache()
+                           .put(repo);
         return builder.setStorage(catchUpStorage)
                       .setPageSize(catchUpPageSize);
     }
@@ -586,7 +588,8 @@ public final class Delivery implements Logging {
      *
      * <p>The registration of the dispatchers allows to handle the {@code Delivery}-specific events.
      *
-     * @param context Bounded Context in which the message dispatchers should be registered
+     * @param context
+     *         Bounded Context in which the message dispatchers should be registered
      */
     @Internal
     public void registerDispatchersIn(BoundedContext context) {
