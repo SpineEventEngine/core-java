@@ -96,6 +96,24 @@ public class DeliveryMonitor {
     }
 
     /**
+     * Called if an {@code Exception} occurred when the {@code Delivery} attempted
+     * to pick up a shard.
+     *
+     * <p>Pay attention, this method is not called if the shard could not be picked up because
+     * it's already picked by another worker. This situation doesn't lead to an exception in
+     * {@code ShardedWorkRegistry} so it is not considered as a failure.
+     *
+     * @param index
+     *         an index of the shard that could not be picked up due to an exception
+     * @param e
+     *         occurred exception
+     */
+    @SuppressWarnings({"WeakerAccess", "unused"})  // This SPI method is designed for descendants.
+    public void onShardPickUpFailure(ShardIndex index, Exception e) {
+        // do nothing.
+    }
+
+    /**
      * A callback invoked if the signal transmitted via given message
      * was handled by the respective receptor with failure.
      *
