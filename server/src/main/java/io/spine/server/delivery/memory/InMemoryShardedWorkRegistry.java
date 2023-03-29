@@ -29,6 +29,7 @@ package io.spine.server.delivery.memory;
 import com.google.protobuf.Duration;
 import io.spine.server.NodeId;
 import io.spine.server.delivery.AbstractWorkRegistry;
+import io.spine.server.delivery.PickUpOutcome;
 import io.spine.server.delivery.ShardIndex;
 import io.spine.server.delivery.ShardProcessingSession;
 import io.spine.server.delivery.ShardSessionRecord;
@@ -53,7 +54,7 @@ public final class InMemoryShardedWorkRegistry extends AbstractWorkRegistry {
     private final Map<ShardIndex, ShardSessionRecord> workByNode = newConcurrentMap();
 
     @Override
-    public synchronized Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId nodeId) {
+    public synchronized PickUpOutcome pickUp(ShardIndex index, NodeId nodeId) {
         return super.pickUp(index, nodeId);
     }
 
