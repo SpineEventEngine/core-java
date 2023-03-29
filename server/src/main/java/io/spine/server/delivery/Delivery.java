@@ -411,12 +411,12 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        PickUpOutcome acknowledgement = workRegistry.pickUp(index, currentNode);
-        acknowledgement.ifExceptionOccurred(e -> monitor.onShardPickUpFailure(index, e));
-        if (!acknowledgement.isPicked()) {
+        PickUpOutcome pickUpResult = workRegistry.pickUp(index, currentNode);
+        pickUpResult.ifExceptionOccurred(e -> monitor.onShardPickUpFailure(index, e));
+        if (!pickUpResult.isPicked()) {
             return Optional.empty();
         }
-        ShardProcessingSession session = acknowledgement.getSession();
+        ShardProcessingSession session = pickUpResult.getSession();
         monitor.onDeliveryStarted(index);
 
         RunResult runResult;
