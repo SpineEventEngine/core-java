@@ -43,13 +43,13 @@ public interface ShardedWorkRegistry {
      * <p>This action is intended to be exclusive, i.e. a single shard may be served
      * by a single application node at a given moment of time.
      *
-     * <p>In case of a successful operation, an instance of {@link PickUpAckMixin} containing
-     * {@code ShardProcessingSession} is returned. The node obtained the session should perform
+     * <p>In case of a successful operation, an instance of {@link PickUpAck} containing
+     * {@code ShardSessionRecord} is returned. The node obtained the session should perform
      * the desired actions with the sharded messages
-     * and then {@link ShardProcessingSession#complete() complete} the session.
+     * and then {@link #release(ShardSessionRecord) release()} the session.
      *
      * <p>In case the shard at a given index is already picked up by some node,
-     * an {@link PickUpAckMixin} containing {@link WorkerId} that owns the session is returned.
+     * an {@link PickUpAck} containing {@link WorkerId} that owns the session is returned.
      *
      * @param index
      *         the index of the shard to pick up for processing
