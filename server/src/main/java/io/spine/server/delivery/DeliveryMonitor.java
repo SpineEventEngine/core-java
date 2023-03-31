@@ -105,12 +105,22 @@ public class DeliveryMonitor {
      *
      * @param index
      *         an index of the shard that could not be picked up due to an exception
-     * @param e
-     *         occurred exception
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  // This SPI method is designed for descendants.
-    public void onShardPickUpFailure(ShardIndex index, Exception e) {
+    public void onShardPickUpFailure(ShardIndex index) {
         // do nothing.
+    }
+
+    /**
+     * Called if {@code Delivery} could not pick up a shard because it was already picked
+     * by another worker.
+     *
+     * @param index
+     *         a shard index that could not be picked
+     */
+    @SuppressWarnings({"WeakerAccess", "unused"})  // This SPI method is designed for descendants.
+    public void onShardAlreadyPicked(ShardIndex index) {
+        // do nothing
     }
 
     /**

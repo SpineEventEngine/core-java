@@ -411,12 +411,18 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        PickUpOutcome pickUpResult = workRegistry.pickUp(index, currentNode);
-        pickUpResult.ifExceptionOccurred(e -> monitor.onShardPickUpFailure(index, e));
-        if (!pickUpResult.isPicked()) {
+        PickUpAck ack;
+        try {
+            ack = workRegistry.pickUp(index, currentNode);
+        } catch (RuntimeException e) {
+            monitor.onShardPickUpFailure(index);
+            throw e;
+        }
+        ack.ifAlreadyPicked(owner -> monitor.onShardAlreadyPicked(index));
+        if (!ack.hasSession()) {
             return Optional.empty();
         }
-        ShardProcessingSession session = pickUpResult.getSession();
+        ShardSessionRecord session = ack.getSession();
         monitor.onDeliveryStarted(index);
 
         RunResult runResult;
@@ -427,7 +433,7 @@ public final class Delivery implements Logging {
                 totalDelivered += runResult.deliveredCount();
             } while (runResult.shouldRunAgain());
         } finally {
-            session.complete();
+            workRegistry.release(session);
         }
         DeliveryStats stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
@@ -448,8 +454,8 @@ public final class Delivery implements Logging {
      *
      * @return the results of the run
      */
-    private RunResult runDelivery(ShardProcessingSession session) {
-        ShardIndex index = session.shardIndex();
+    private RunResult runDelivery(ShardSessionRecord session) {
+        ShardIndex index = session.getIndex();
 
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
