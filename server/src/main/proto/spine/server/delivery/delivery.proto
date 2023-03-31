@@ -39,6 +39,7 @@ option java_multiple_files = true;
 import "google/protobuf/timestamp.proto";
 
 import "spine/server/server_environment.proto";
+import "spine/base/error.proto";
 
 // An index of a shard.
 //
@@ -106,4 +107,25 @@ message WorkerId {
     //
     // An example of such an identifier could be ID of the thread which processes a shard.
     string value = 2 [(required) = true];
+}
+
+// An outcome of the `pickUp()` method of method of `ShardedWorkRegistry` indicating
+// the result of the pickup attempt.
+//
+// The outcome contains one of 2 following results:
+// 1. Shard picked up successfully. In this case the outcome will contain
+// a new `ShardSessionRecord`.
+// 2. Shard could not be picked up as it's already picked by another worker. In this case
+// the outcome will contain the `WorkerId` of the worker owning the session.
+message PickUpAck {
+
+    option (is).java_type = "io.spine.server.delivery.PickUpAckMixin";
+
+    oneof ack {
+      option (is_required) = true;
+
+      ShardSessionRecord session = 1;
+
+      WorkerId alreadyPickedBy = 2;
+    }
 }
