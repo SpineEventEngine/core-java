@@ -65,17 +65,15 @@ public abstract class ShardedWorkRegistryTest {
         ShardIndex index = newIndex(1, 42);
         NodeId node = generateNodeId();
 
-        Optional<ShardProcessingSession> session = registry.pickUp(index, node);
-        ShardProcessingSession actualSession = assertSession(session, index);
+        PickUpAck ack = registry.pickUp(index, node);
+        ShardSessionRecord session = assertSession(ack, index);
 
-        assertThat(registry.pickUp(index, node))
-                .isEmpty();
-        assertThat(registry.pickUp(index, generateNodeId()))
-                .isEmpty();
+        assertAlreadyPicked(registry.pickUp(index, node), session.getWorker());
+        assertAlreadyPicked(registry.pickUp(index, generateNodeId()), session.getWorker());
 
-        actualSession.complete();
-        Optional<ShardProcessingSession> newSession = registry.pickUp(index, generateNodeId());
-        assertSession(newSession, index);
+        registry.release(session);
+        PickUpAck newAck = registry.pickUp(index, generateNodeId());
+        assertSession(newAck, index);
     }
 
     @Test
@@ -97,8 +95,8 @@ public abstract class ShardedWorkRegistryTest {
 
         for (ShardIndex shardIndex : indexes) {
             NodeId anotherNode = generateNodeId();
-            Optional<ShardProcessingSession> newSession = registry.pickUp(shardIndex, anotherNode);
-            assertSession(newSession, shardIndex);
+            PickUpAck ack = registry.pickUp(shardIndex, anotherNode);
+            assertSession(ack, shardIndex);
         }
     }
 
@@ -129,22 +127,33 @@ public abstract class ShardedWorkRegistryTest {
                     NodeId newNode = generateNodeId();
                     ShardIndex newIndex = newIndex(i, outOfTotal);
 
-                    Optional<ShardProcessingSession> session = registry.pickUp(newIndex, newNode);
-                    assertSession(session, newIndex);
+                    PickUpAck ack = registry.pickUp(newIndex, newNode);
+                    assertSession(ack, newIndex);
                     return newIndex;
                 })
                 .collect(toImmutableSet());
         return indexes;
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")     // asserting the `Optional`.
+    /**
+     * Asserts that the given {@code ack} indicates a successfully picked shard with
+     * the given {@code index}.
+     */
     @CanIgnoreReturnValue
-    private static ShardProcessingSession
-    assertSession(Optional<ShardProcessingSession> session, ShardIndex index) {
-        assertThat(session)
-                .isPresent();
-        ShardProcessingSession actualSession = session.get();
-        assertThat(actualSession.shardIndex()).isEqualTo(index);
+    private static ShardSessionRecord assertSession(PickUpAck ack, ShardIndex index) {
+        assertThat(ack.session()).isPresent();
+        ShardSessionRecord actualSession = ack.getSession();
+        assertThat(actualSession.getIndex()).isEqualTo(index);
         return actualSession;
+    }
+
+    /**
+     * Asserts that the given {@code ack} indicates that shard is already picked by the given
+     * {@code expected} worker, and returns the {@code WorkerId} from the {@code ack}.
+     */
+    @CanIgnoreReturnValue
+    private static WorkerId assertAlreadyPicked(PickUpAck ack, WorkerId expected) {
+        assertThat(ack.alreadyPickedBy()).hasValue(expected);
+        return ack.getAlreadyPickedBy();
     }
 }

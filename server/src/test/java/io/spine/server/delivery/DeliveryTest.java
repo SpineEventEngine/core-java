@@ -215,9 +215,9 @@ public class DeliveryTest extends AbstractDeliveryTest {
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsMatch(delivery, index));
 
-        Optional<ShardProcessingSession> session =
-                registry.pickUp(index, ServerEnvironment.instance().nodeId());
-        assertThat(session).isPresent();
+        PickUpAck ack = registry.pickUp(index, ServerEnvironment.instance()
+                                                                .nodeId());
+        assertThat(ack.hasSession()).isTrue();
 
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsEmpty(delivery, index));
@@ -370,7 +370,6 @@ public class DeliveryTest extends AbstractDeliveryTest {
      * of {@code Delivery} must have been made {@code public}, which wouldn't be
      * a good API design move.
      ******************************************************************************/
-
 
     private static void assertStatsMatch(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
