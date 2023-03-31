@@ -51,29 +51,29 @@ import static io.spine.base.Time.currentTime;
 public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
     @Override
-    public PickUpOutcome pickUp(ShardIndex index, NodeId node) {
+    public PickUpAck pickUp(ShardIndex index, NodeId node) {
         checkNotNull(index);
         checkNotNull(node);
 
         WorkerId worker = currentWorkerFor(node);
-        PickUpOutcome result = pickUp(index, worker);
+        PickUpAck result = pickUp(index, worker);
         return result;
     }
 
-    private PickUpOutcome pickUp(ShardIndex index, WorkerId worker) {
+    private PickUpAck pickUp(ShardIndex index, WorkerId worker) {
         Optional<ShardSessionRecord> optionalRecord = find(index);
         if (!optionalRecord.isPresent()) {
             ShardSessionRecord newRecord = createRecord(index, worker);
-            return PickUpOutcome.pickedUp(asSession(newRecord));
+            return PickUpAckMixin.pickedUp(newRecord);
         }
 
         ShardSessionRecord record = optionalRecord.get();
         if (hasWorker(record)) {
-            return PickUpOutcome.alreadyPickedBy(record.getWorker());
+            return PickUpAckMixin.alreadyPickedBy(record.getWorker());
         }
 
         ShardSessionRecord updatedRecord = updateNode(record, worker);
-        return PickUpOutcome.pickedUp(asSession(updatedRecord));
+        return PickUpAckMixin.pickedUp(updatedRecord);
     }
 
     /**
@@ -87,7 +87,8 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
     protected abstract WorkerId currentWorkerFor(NodeId node);
 
     private static boolean hasWorker(ShardSessionRecord record) {
-        return !WorkerId.getDefaultInstance().equals(record.getWorker());
+        return !WorkerId.getDefaultInstance()
+                        .equals(record.getWorker());
     }
 
     private ShardSessionRecord createRecord(ShardIndex index, WorkerId worker) {
@@ -162,9 +163,4 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
      *         the registry
      */
     protected abstract Optional<ShardSessionRecord> find(ShardIndex index);
-
-    /**
-     * Restores a {@link ShardProcessingSession} from the given session record.
-     */
-    protected abstract ShardProcessingSession asSession(ShardSessionRecord record);
 }
