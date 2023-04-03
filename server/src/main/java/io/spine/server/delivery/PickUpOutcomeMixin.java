@@ -35,19 +35,19 @@ import java.util.function.Consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A mixin of the {@link PickUpAck} that provides convenient methods for accessing the result.
+ * A mixin of the {@link PickUpOutcome} that provides convenient methods for accessing the result.
  */
 @GeneratedMixin
-public interface PickUpAckMixin extends PickUpAckOrBuilder {
+public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
 
     /**
      * Creates a new {@code PickUpOutcome} of successfully picked shard
      * with the given {@code ShardSessionRecord}.
      */
     @SuppressWarnings("ClassReferencesSubclass") // This is a mixin of the type.
-    static PickUpAck pickedUp(ShardSessionRecord session) {
+    static PickUpOutcome pickedUp(ShardSessionRecord session) {
         checkNotNull(session);
-        return PickUpAck
+        return PickUpOutcome
                 .newBuilder()
                 .setSession(session)
                 .vBuild();
@@ -58,9 +58,9 @@ public interface PickUpAckMixin extends PickUpAckOrBuilder {
      * {@code worker}.
      */
     @SuppressWarnings("ClassReferencesSubclass") // This is a mixin of the type.
-    static PickUpAck alreadyPickedBy(WorkerId worker) {
+    static PickUpOutcome alreadyPickedBy(WorkerId worker) {
         checkNotNull(worker);
-        return PickUpAck
+        return PickUpOutcome
                 .newBuilder()
                 .setAlreadyPickedBy(worker)
                 .vBuild();
@@ -71,7 +71,7 @@ public interface PickUpAckMixin extends PickUpAckOrBuilder {
      * successfully picked, or does nothing otherwise.
      */
     @CanIgnoreReturnValue
-    default PickUpAckMixin ifPicked(Consumer<ShardSessionRecord> consumer) {
+    default PickUpOutcomeMixin ifPicked(Consumer<ShardSessionRecord> consumer) {
         if (getSession() != null) {
             consumer.accept(getSession());
         }
@@ -87,7 +87,7 @@ public interface PickUpAckMixin extends PickUpAckOrBuilder {
      * <p>The worker who owns the session will be passed to the {@code consumer}.
      */
     @CanIgnoreReturnValue
-    default PickUpAckMixin ifAlreadyPicked(Consumer<WorkerId> consumer) {
+    default PickUpOutcomeMixin ifAlreadyPicked(Consumer<WorkerId> consumer) {
         if (getAlreadyPickedBy() != null) {
             consumer.accept(getAlreadyPickedBy());
         }

@@ -220,9 +220,9 @@ public class DeliveryTest extends AbstractDeliveryTest {
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsMatch(delivery, index));
 
-        PickUpAck ack = registry.pickUp(index, ServerEnvironment.instance()
+        PickUpOutcome outcome = registry.pickUp(index, ServerEnvironment.instance()
                                                                 .nodeId());
-        assertThat(ack.hasSession()).isTrue();
+        assertThat(outcome.hasSession()).isTrue();
         assertThat(monitor.failedToPickUp()).isEmpty();
         assertThat(monitor.alreadyPickedShards()).containsExactly(index);
 

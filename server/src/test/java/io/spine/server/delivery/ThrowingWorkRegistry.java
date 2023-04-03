@@ -40,7 +40,7 @@ public class ThrowingWorkRegistry implements ShardedWorkRegistry {
             "Thrown from `ThrowingWorkRegistry` that always throws exception.";
 
     @Override
-    public PickUpAck pickUp(ShardIndex index, NodeId node) {
+    public PickUpOutcome pickUp(ShardIndex index, NodeId node) {
         throw new IllegalStateException(MESSAGE);
     }
 

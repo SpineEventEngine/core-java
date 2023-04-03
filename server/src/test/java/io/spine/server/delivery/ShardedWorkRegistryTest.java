@@ -65,15 +65,15 @@ public abstract class ShardedWorkRegistryTest {
         ShardIndex index = newIndex(1, 42);
         NodeId node = generateNodeId();
 
-        PickUpAck ack = registry.pickUp(index, node);
-        ShardSessionRecord session = assertSession(ack, index);
+        PickUpOutcome outcome = registry.pickUp(index, node);
+        ShardSessionRecord session = assertSession(outcome, index);
 
         assertAlreadyPicked(registry.pickUp(index, node), session.getWorker());
         assertAlreadyPicked(registry.pickUp(index, generateNodeId()), session.getWorker());
 
         registry.release(session);
-        PickUpAck newAck = registry.pickUp(index, generateNodeId());
-        assertSession(newAck, index);
+        PickUpOutcome newOutcome = registry.pickUp(index, generateNodeId());
+        assertSession(newOutcome, index);
     }
 
     @Test
@@ -95,8 +95,8 @@ public abstract class ShardedWorkRegistryTest {
 
         for (ShardIndex shardIndex : indexes) {
             NodeId anotherNode = generateNodeId();
-            PickUpAck ack = registry.pickUp(shardIndex, anotherNode);
-            assertSession(ack, shardIndex);
+            PickUpOutcome outcome = registry.pickUp(shardIndex, anotherNode);
+            assertSession(outcome, shardIndex);
         }
     }
 
@@ -127,8 +127,8 @@ public abstract class ShardedWorkRegistryTest {
                     NodeId newNode = generateNodeId();
                     ShardIndex newIndex = newIndex(i, outOfTotal);
 
-                    PickUpAck ack = registry.pickUp(newIndex, newNode);
-                    assertSession(ack, newIndex);
+                    PickUpOutcome outcome = registry.pickUp(newIndex, newNode);
+                    assertSession(outcome, newIndex);
                     return newIndex;
                 })
                 .collect(toImmutableSet());
@@ -136,24 +136,24 @@ public abstract class ShardedWorkRegistryTest {
     }
 
     /**
-     * Asserts that the given {@code ack} indicates a successfully picked shard with
+     * Asserts that the given {@code outcome} indicates a successfully picked shard with
      * the given {@code index}.
      */
     @CanIgnoreReturnValue
-    private static ShardSessionRecord assertSession(PickUpAck ack, ShardIndex index) {
-        assertThat(ack.session()).isPresent();
-        ShardSessionRecord actualSession = ack.getSession();
+    private static ShardSessionRecord assertSession(PickUpOutcome outcome, ShardIndex index) {
+        assertThat(outcome.session()).isPresent();
+        ShardSessionRecord actualSession = outcome.getSession();
         assertThat(actualSession.getIndex()).isEqualTo(index);
         return actualSession;
     }
 
     /**
-     * Asserts that the given {@code ack} indicates that shard is already picked by the given
-     * {@code expected} worker, and returns the {@code WorkerId} from the {@code ack}.
+     * Asserts that the given {@code outcome} indicates that shard is already picked by the given
+     * {@code expected} worker, and returns the {@code WorkerId} from the {@code outcome}.
      */
     @CanIgnoreReturnValue
-    private static WorkerId assertAlreadyPicked(PickUpAck ack, WorkerId expected) {
-        assertThat(ack.alreadyPickedBy()).hasValue(expected);
-        return ack.getAlreadyPickedBy();
+    private static WorkerId assertAlreadyPicked(PickUpOutcome outcome, WorkerId expected) {
+        assertThat(outcome.alreadyPickedBy()).hasValue(expected);
+        return outcome.getAlreadyPickedBy();
     }
 }

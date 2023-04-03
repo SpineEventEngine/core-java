@@ -411,7 +411,7 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        PickUpAck ack;
+        PickUpOutcome ack;
         try {
             ack = workRegistry.pickUp(index, currentNode);
         } catch (RuntimeException e) {

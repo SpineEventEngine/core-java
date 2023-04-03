@@ -51,29 +51,29 @@ import static io.spine.base.Time.currentTime;
 public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
     @Override
-    public PickUpAck pickUp(ShardIndex index, NodeId node) {
+    public PickUpOutcome pickUp(ShardIndex index, NodeId node) {
         checkNotNull(index);
         checkNotNull(node);
 
         WorkerId worker = currentWorkerFor(node);
-        PickUpAck result = pickUp(index, worker);
+        PickUpOutcome result = pickUp(index, worker);
         return result;
     }
 
-    private PickUpAck pickUp(ShardIndex index, WorkerId worker) {
+    private PickUpOutcome pickUp(ShardIndex index, WorkerId worker) {
         Optional<ShardSessionRecord> optionalRecord = find(index);
         if (!optionalRecord.isPresent()) {
             ShardSessionRecord newRecord = createRecord(index, worker);
-            return PickUpAckMixin.pickedUp(newRecord);
+            return PickUpOutcomeMixin.pickedUp(newRecord);
         }
 
         ShardSessionRecord record = optionalRecord.get();
         if (hasWorker(record)) {
-            return PickUpAckMixin.alreadyPickedBy(record.getWorker());
+            return PickUpOutcomeMixin.alreadyPickedBy(record.getWorker());
         }
 
         ShardSessionRecord updatedRecord = updateNode(record, worker);
-        return PickUpAckMixin.pickedUp(updatedRecord);
+        return PickUpOutcomeMixin.pickedUp(updatedRecord);
     }
 
     /**
