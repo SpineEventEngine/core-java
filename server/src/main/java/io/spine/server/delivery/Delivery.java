@@ -418,7 +418,7 @@ public final class Delivery implements Logging {
             monitor.onShardPickUpFailure(index);
             throw e;
         }
-        ack.ifAlreadyPicked(owner -> monitor.onShardAlreadyPicked(index));
+        ack.ifAlreadyPicked(owner -> monitor.onShardAlreadyPicked(index, owner));
         if (!ack.hasSession()) {
             return Optional.empty();
         }

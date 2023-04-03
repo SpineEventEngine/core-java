@@ -52,6 +52,7 @@ import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
+import javafx.util.Pair;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -63,6 +64,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
@@ -222,7 +224,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                                                 .nodeId());
         assertThat(ack.hasSession()).isTrue();
         assertThat(monitor.failedToPickUp()).isEmpty();
-        assertThat(monitor.alreadyPicked()).containsExactly(index);
+        assertThat(monitor.alreadyPickedShards()).containsExactly(index);
 
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsEmpty(delivery, index));
@@ -448,7 +450,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
         private final List<DeliveryStats> allStats = new ArrayList<>();
 
-        private final List<ShardIndex> alreadyPicked = new ArrayList<>();
+        private final List<Pair<ShardIndex, WorkerId>> alreadyPicked = new ArrayList<>();
 
         private final List<ShardIndex> failedToPickUp = new ArrayList<>();
 
@@ -463,12 +465,18 @@ public class DeliveryTest extends AbstractDeliveryTest {
         }
 
         @Override
-        public void onShardAlreadyPicked(ShardIndex shard) {
-            alreadyPicked.add(shard);
+        public void onShardAlreadyPicked(ShardIndex shard, WorkerId owner) {
+            alreadyPicked.add(new Pair<>(shard, owner));
         }
 
-        public ImmutableList<ShardIndex> alreadyPicked() {
+        public ImmutableList<Pair<ShardIndex, WorkerId>> alreadyPicked() {
             return ImmutableList.copyOf(alreadyPicked);
+        }
+
+        public ImmutableList<ShardIndex> alreadyPickedShards() {
+            return alreadyPicked.stream()
+                                .map(Pair::getKey)
+                                .collect(toImmutableList());
         }
 
         public ImmutableList<ShardIndex> failedToPickUp() {

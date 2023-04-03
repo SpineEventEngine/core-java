@@ -117,9 +117,11 @@ public class DeliveryMonitor {
      *
      * @param index
      *         a shard index that could not be picked
+     * @param worker
+     *         a worker that currently owns the session
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
-    public void onShardAlreadyPicked(ShardIndex index) {
+    public void onShardAlreadyPicked(ShardIndex index, WorkerId worker) {
         // Do nothing
     }
 
