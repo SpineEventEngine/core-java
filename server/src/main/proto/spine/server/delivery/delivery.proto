@@ -127,6 +127,6 @@ message PickUpAck {
 
       ShardSessionRecord session = 1;
 
-      WorkerId alreadyPickedBy = 2;
+      WorkerId already_picked_by = 2;
     }
 }
