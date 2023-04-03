@@ -68,7 +68,7 @@ public interface PickUpAckMixin {
 
     /**
      * Calls the given {@code consumer} with the {@code ShardProcessingSession} if the shard is
-     * successfully picked.
+     * successfully picked, or does nothing otherwise.
      */
     @CanIgnoreReturnValue
     default PickUpAckMixin ifPicked(Consumer<ShardSessionRecord> consumer) {
@@ -81,6 +81,8 @@ public interface PickUpAckMixin {
     /**
      * Calls the given {@code consumer} if the shard could not be picked because it's already
      * picked by another worker.
+     *
+     * <p>Does nothing if the shard is sucessfully picked.
      *
      * <p>The worker who owns the session will be passed to the {@code consumer}.
      */
