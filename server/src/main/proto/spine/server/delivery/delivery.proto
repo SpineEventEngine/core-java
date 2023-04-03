@@ -109,8 +109,7 @@ message WorkerId {
     string value = 2 [(required) = true];
 }
 
-// An outcome of the `pickUp()` method of method of `ShardedWorkRegistry` indicating
-// the result of the pickup attempt.
+// An outcome of the shard pick-up attempt indicating the result.
 //
 // The outcome contains one of 2 following results:
 // 1. Shard picked up successfully. In this case the outcome will contain
@@ -122,11 +121,14 @@ message PickUpAck {
 
     option (is).java_type = "io.spine.server.delivery.PickUpAckMixin";
 
-    oneof ack {
+    oneof value {
       option (is_required) = true;
 
+      // Shard delivery session indicating that the shard is successfully picked.
       ShardSessionRecord session = 1;
 
+      // Identifier of the worker who owns the delivery session at the moment, indicates
+      // that the shard cannot be picked because it's picked by this worker.
       WorkerId already_picked_by = 2;
     }
 }
