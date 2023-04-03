@@ -99,14 +99,14 @@ public class DeliveryMonitor {
      * Called if an {@code Exception} occurred when the {@code Delivery} attempted
      * to pick up a shard.
      *
-     * <p>Pay attention, this method is not called if the shard could not be picked up because
-     * it's already picked by another worker. This situation doesn't lead to an exception in
-     * {@code ShardedWorkRegistry} so it is not considered as a failure.
+     * <p>Please note, this callback is <em>not</em> invoked in case the shard cannot be picked
+     * if it's already picked by another worker. It is so, because such a use case is a part
+     * of normal flow, and thus does not provoke a {@code RuntimeException}.
      *
      * @param index
      *         an index of the shard that could not be picked up due to an exception
      */
-    @SuppressWarnings({"WeakerAccess", "unused"})  // This SPI method is designed for descendants.
+    @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
     public void onShardPickUpFailure(ShardIndex index) {
         // Do nothing.
     }
@@ -118,7 +118,7 @@ public class DeliveryMonitor {
      * @param index
      *         a shard index that could not be picked
      */
-    @SuppressWarnings({"WeakerAccess", "unused"})  // This SPI method is designed for descendants.
+    @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
     public void onShardAlreadyPicked(ShardIndex index) {
         // Do nothing
     }
