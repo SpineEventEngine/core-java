@@ -34,20 +34,23 @@ import io.spine.server.NodeId;
  *
  * <p>Such an implementation is usefully in tests for testing error handling.
  */
-public class ThrowingWorkRegistry implements ShardedWorkRegistry{
+public class ThrowingWorkRegistry implements ShardedWorkRegistry {
+
+    private static final String MESSAGE =
+            "Thrown from `ThrowingWorkRegistry` that always throws exception.";
 
     @Override
     public PickUpAck pickUp(ShardIndex index, NodeId node) {
-        throw new IllegalStateException("Thrown from `ThrowingWorkRegistry` that always throws exception.");
+        throw new IllegalStateException(MESSAGE);
     }
 
     @Override
     public void release(ShardSessionRecord session) {
-        throw new IllegalStateException("Thrown from `ThrowingWorkRegistry` that always throws exception.");
+        throw new IllegalStateException(MESSAGE);
     }
 
     @Override
     public Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
-        throw new IllegalStateException("Thrown from `ThrowingWorkRegistry` that always throws exception.");
+        throw new IllegalStateException(MESSAGE);
     }
 }
