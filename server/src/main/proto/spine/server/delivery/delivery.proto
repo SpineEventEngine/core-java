@@ -115,6 +115,7 @@ message WorkerId {
 // The outcome contains one of 2 following results:
 // 1. Shard picked up successfully. In this case the outcome will contain
 // a new `ShardSessionRecord`.
+//
 // 2. Shard could not be picked up as it's already picked by another worker. In this case
 // the outcome will contain the `WorkerId` of the worker owning the session.
 message PickUpAck {
