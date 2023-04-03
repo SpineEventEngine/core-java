@@ -411,18 +411,18 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        PickUpOutcome ack;
+        PickUpOutcome outcome;
         try {
-            ack = workRegistry.pickUp(index, currentNode);
+            outcome = workRegistry.pickUp(index, currentNode);
         } catch (RuntimeException e) {
             monitor.onShardPickUpFailure(index);
             throw e;
         }
-        ack.ifAlreadyPicked(owner -> monitor.onShardAlreadyPicked(index, owner));
-        if (!ack.hasSession()) {
+        outcome.ifAlreadyPicked(owner -> monitor.onShardAlreadyPicked(index, owner));
+        if (!outcome.hasSession()) {
             return Optional.empty();
         }
-        ShardSessionRecord session = ack.getSession();
+        ShardSessionRecord session = outcome.getSession();
         monitor.onDeliveryStarted(index);
 
         RunResult runResult;
