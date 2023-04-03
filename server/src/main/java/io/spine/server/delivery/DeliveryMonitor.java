@@ -87,12 +87,12 @@ public class DeliveryMonitor {
      */
     @SuppressWarnings("unused")  // This SPI method is designed for descendants.
     public void onDeliveryCompleted(DeliveryStats stats) {
-        // do nothing.
+        // Do nothing.
     }
 
     @SuppressWarnings({"WeakerAccess", "unused"})   /* Part of public API. */
     public void onDeliveryStarted(ShardIndex index) {
-        // do nothing.
+        // Do nothing.
     }
 
     /**
@@ -108,7 +108,7 @@ public class DeliveryMonitor {
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  // This SPI method is designed for descendants.
     public void onShardPickUpFailure(ShardIndex index) {
-        // do nothing.
+        // Do nothing.
     }
 
     /**
@@ -120,7 +120,7 @@ public class DeliveryMonitor {
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  // This SPI method is designed for descendants.
     public void onShardAlreadyPicked(ShardIndex index) {
-        // do nothing
+        // Do nothing
     }
 
     /**
