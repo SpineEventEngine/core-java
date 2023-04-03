@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A mixin of the {@link PickUpAck} that provides convenient methods for accessing the result.
  */
 @GeneratedMixin
-public interface PickUpAckMixin {
+public interface PickUpAckMixin extends PickUpAckOrBuilder {
 
     /**
      * Creates a new {@code PickUpOutcome} of successfully picked shard
@@ -109,8 +109,4 @@ public interface PickUpAckMixin {
     default Optional<WorkerId> alreadyPickedBy() {
         return Optional.ofNullable(getAlreadyPickedBy());
     }
-
-    ShardSessionRecord getSession();
-
-    WorkerId getAlreadyPickedBy();
 }
