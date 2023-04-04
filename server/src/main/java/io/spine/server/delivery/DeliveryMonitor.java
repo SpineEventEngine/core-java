@@ -103,26 +103,36 @@ public class DeliveryMonitor {
      * if it's already picked by another worker. It is so, because such a use case is a part
      * of normal flow, and thus does not provoke a {@code RuntimeException}.
      *
-     * @param index
-     *         an index of the shard that could not be picked up due to an exception
+     * <p>Returns an action to take in relation to the failure.
+     *
+     * <p>By default this callback returns an Action that does nothing. This means the occurred
+     * exception will be throw out of the {@code deliverMessagesFrom()} method.
+     *
+     * @param failure
+     *         contains an information about the occurred failure and gives access to
+     *         predefined {@code Action}s to handle the error.
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
-    public void onShardPickUpFailure(ShardIndex index) {
-        // Do nothing.
+    public FailedPickUp.Action onShardPickUpFailure(TechFailure failure) {
+        return failure.doNothing();
     }
 
     /**
      * Called if {@code Delivery} could not pick up a shard because it was already picked
      * by another worker.
      *
-     * @param index
-     *         a shard index that could not be picked
-     * @param worker
-     *         a worker that currently owns the session
+     * <p>Returns an action to take in relation to the failure.
+     *
+     * <p>By default this callback returns an Action that does nothing. This means that
+     * an empty {@code Optional} will be returned from the {@code deliverMessagesFrom()} method.
+     *
+     * @param failure
+     *         contains an information about the worker who owns the session and gives access
+     *         to predefined {@code Action}s to handle the error.
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
-    public void onShardAlreadyPicked(ShardIndex index, WorkerId worker) {
-        // Do nothing
+    public FailedPickUp.Action onShardAlreadyPicked(AlreadyPickedUp failure) {
+        return failure.doNothing();
     }
 
     /**
