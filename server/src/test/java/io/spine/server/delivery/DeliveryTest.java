@@ -52,7 +52,6 @@ import io.spine.testing.SlowTest;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.server.blackbox.BlackBoxContext;
 import io.spine.testing.server.entity.EntitySubject;
-import javafx.util.Pair;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +63,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
