@@ -224,11 +224,12 @@ public class DeliveryTest extends AbstractDeliveryTest {
                                                                 .nodeId());
         assertThat(outcome.hasSession()).isTrue();
         assertThat(monitor.failedToPickUp()).isEmpty();
-        assertThat(monitor.alreadyPickedShards()).containsExactly(index);
+        assertThat(monitor.alreadyPickedShards()).isEmpty();
 
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsEmpty(delivery, index));
         assertThat(monitor.failedToPickUp()).isEmpty();
+        assertThat(monitor.alreadyPickedShards()).containsExactly(index);
     }
 
     @Test
@@ -274,7 +275,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
         ImmutableSet<String> aTarget = singleTarget();
         assertThat(monitor.stats()).isEmpty();
-        assertThat(monitor.alreadyPicked()).isEmpty();
+        assertThat(monitor.alreadyPickedShards()).isEmpty();
         assertThat(monitor.failedToPickUp()).isEmpty();
         new NastyClient(1).runWith(aTarget);
 
@@ -450,7 +451,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
         private final List<DeliveryStats> allStats = new ArrayList<>();
 
-        private final List<Pair<ShardIndex, WorkerId>> alreadyPicked = new ArrayList<>();
+        private final List<ShardIndex> alreadyPicked = new ArrayList<>();
 
         private final List<ShardIndex> failedToPickUp = new ArrayList<>();
 
@@ -460,23 +461,19 @@ public class DeliveryTest extends AbstractDeliveryTest {
         }
 
         @Override
-        public void onShardPickUpFailure(ShardIndex shard) {
-            failedToPickUp.add(shard);
+        public FailedPickUp.Action onShardPickUpFailure(TechFailure failure) {
+            failedToPickUp.add(failure.shard());
+            return super.onShardPickUpFailure(failure);
         }
 
         @Override
-        public void onShardAlreadyPicked(ShardIndex shard, WorkerId owner) {
-            alreadyPicked.add(new Pair<>(shard, owner));
-        }
-
-        public ImmutableList<Pair<ShardIndex, WorkerId>> alreadyPicked() {
-            return ImmutableList.copyOf(alreadyPicked);
+        public FailedPickUp.Action onShardAlreadyPicked(AlreadyPickedUp failure) {
+            alreadyPicked.add(failure.shard());
+            return super.onShardAlreadyPicked(failure);
         }
 
         public ImmutableList<ShardIndex> alreadyPickedShards() {
-            return alreadyPicked.stream()
-                                .map(Pair::getKey)
-                                .collect(toImmutableList());
+            return ImmutableList.copyOf(alreadyPicked);
         }
 
         public ImmutableList<ShardIndex> failedToPickUp() {
