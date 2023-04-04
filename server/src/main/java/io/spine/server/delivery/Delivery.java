@@ -415,12 +415,10 @@ public final class Delivery implements Logging {
         try {
             outcome = workRegistry.pickUp(index, currentNode);
         } catch (RuntimeException e) {
-            monitor.onShardPickUpFailure(index);
-            throw e;
+            return handleTechPickUpFailure(index, e);
         }
-        outcome.ifAlreadyPicked(owner -> monitor.onShardAlreadyPicked(index, owner));
-        if (!outcome.hasSession()) {
-            return Optional.empty();
+        if (outcome.hasAlreadyPickedBy()) {
+            return handleAlreadyPickedUp(index, outcome.getAlreadyPickedBy());
         }
         ShardSessionRecord session = outcome.getSession();
         monitor.onDeliveryStarted(index);
@@ -441,6 +439,27 @@ public final class Delivery implements Logging {
         lateMessage.ifPresent(this::onNewMessage);
 
         return Optional.of(stats);
+    }
+
+    /**
+     * Notifies the {@code DeliveryMonitor} about the technical failure and executes
+     * the failure handler {@code Action}.
+     */
+    private Optional<DeliveryStats> handleTechPickUpFailure(ShardIndex shard, RuntimeException e) {
+        TechFailure failure = new TechFailure(shard, e, () -> deliverMessagesFrom(shard));
+        return monitor.onShardPickUpFailure(failure)
+                      .execute();
+    }
+
+    /**
+     * Notifies the {@code DeliveryMonitor} that shard is already pocked up and executes
+     * the failure handler {@code Action}.
+     */
+    private Optional<DeliveryStats> handleAlreadyPickedUp(ShardIndex shard, WorkerId owner) {
+        AlreadyPickedUp failure =
+                new AlreadyPickedUp(shard, owner, () -> deliverMessagesFrom(shard));
+        return monitor.onShardAlreadyPicked(failure)
+                      .execute();
     }
 
     /**
