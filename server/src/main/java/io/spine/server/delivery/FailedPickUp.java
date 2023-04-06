@@ -55,21 +55,21 @@ public abstract class FailedPickUp {
     public abstract Action doNothing();
 
     /**
-     * Returns an {@code Actioon} that will retry the delivery from the shard.
+     * Returns an {@code Action} that will retry the delivery from the shard.
      */
-    public Action retry() {
+    public final Action retry() {
         return retry::retry;
     }
 
     /**
      * Returns a {@code ShardIndex} of the not picked shard.
      */
-    public ShardIndex shard() {
+    public final ShardIndex shard() {
         return shard;
     }
 
     /**
-     * Action to take in relation n to failed pick-up.
+     * Action to take in relation to failed pick-up.
      */
     public interface Action {
 
