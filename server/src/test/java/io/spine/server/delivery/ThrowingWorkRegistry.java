@@ -32,9 +32,9 @@ import io.spine.server.NodeId;
 /**
  * Throws the {@code IllegalStateException} on each operation.
  *
- * <p>Such an implementation is usefully in tests for testing error handling.
+ * <p>Such an implementation is useful in tests for testing error handling.
  */
-public class ThrowingWorkRegistry implements ShardedWorkRegistry {
+public final class ThrowingWorkRegistry implements ShardedWorkRegistry {
 
     private static final String MESSAGE =
             "Thrown from `ThrowingWorkRegistry` that always throws exception.";
