@@ -111,7 +111,7 @@ public class DeliveryMonitor {
      *
      * @param failure
      *         contains an information about the occurred failure and gives access to
-     *         predefined {@code Action}s to handle the error.
+     *         predefined {@code Action}s to handle the error
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
     public FailedPickUp.Action onShardPickUpFailure(RuntimeFailure failure) {
@@ -129,7 +129,7 @@ public class DeliveryMonitor {
      *
      * @param failure
      *         contains an information about the worker who owns the session and gives access
-     *         to predefined {@code Action}s to handle the error.
+     *         to predefined {@code Action}s to handle the error
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
     public FailedPickUp.Action onShardAlreadyPicked(AlreadyPickedUp failure) {
