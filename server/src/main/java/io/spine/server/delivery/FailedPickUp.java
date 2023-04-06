@@ -27,6 +27,7 @@
 package io.spine.server.delivery;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,15 +38,16 @@ public abstract class FailedPickUp {
 
     private final ShardIndex shard;
 
-    private final RetryDelivery retry;
+    private final Supplier<Optional<DeliveryStats>> retryDelivery;
 
     /**
-     * Creates a new {@code FailedPickUp} with the given {@code shard} and {@code retry} action.
+     * Creates a new {@code FailedPickUp} with the given {@code shard} and {@code retryDelivery}
+     * action.
      */
-    FailedPickUp(ShardIndex shard, RetryDelivery retry) {
+    FailedPickUp(ShardIndex shard, Supplier<Optional<DeliveryStats>> retryDelivery) {
         checkNotNull(shard);
-        checkNotNull(retry);
-        this.retry = retry;
+        checkNotNull(retryDelivery);
+        this.retryDelivery = retryDelivery;
         this.shard = shard;
     }
 
@@ -53,7 +55,7 @@ public abstract class FailedPickUp {
      * Returns an {@code Action} that will retry the delivery from the shard.
      */
     public final Action retry() {
-        return retry::retry;
+        return retryDelivery::get;
     }
 
     /**
@@ -72,16 +74,5 @@ public abstract class FailedPickUp {
          * Executes the {@code Action}.
          */
         Optional<DeliveryStats> execute();
-    }
-
-    /**
-     * Specifies a way to retry the delivery.
-     */
-    interface RetryDelivery {
-
-        /**
-         * Retries the delivery.
-         */
-        Optional<DeliveryStats> retry();
     }
 }

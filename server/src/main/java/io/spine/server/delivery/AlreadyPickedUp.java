@@ -27,6 +27,7 @@
 package io.spine.server.delivery;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -51,7 +52,7 @@ public final class AlreadyPickedUp extends FailedPickUp {
      *         to instantiate it. Users are only able to call methods returning an {@code Action}
      *         to modify the error handling behaviour.
      */
-    AlreadyPickedUp(ShardIndex shard, WorkerId owner, RetryDelivery retry) {
+    AlreadyPickedUp(ShardIndex shard, WorkerId owner, Supplier<Optional<DeliveryStats>> retry) {
         super(shard, retry);
         checkNotNull(owner);
         sessionOwner = owner;
