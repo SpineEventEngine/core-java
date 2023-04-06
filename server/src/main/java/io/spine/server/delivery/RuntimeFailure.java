@@ -31,12 +31,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Represents a scenario when shard could not be picked because of some occurred exception.
  */
-public final class TechFailure extends FailedPickUp {
+public final class RuntimeFailure extends FailedPickUp {
 
     private final RuntimeException exception;
 
     /**
-     * Creates a new {@code TechFailure}.
+     * Creates a new {@code RuntimeFailure}.
      *
      * @param shard
      *         a shard that could not be picked
@@ -49,7 +49,7 @@ public final class TechFailure extends FailedPickUp {
      *         to instantiate it. Users are only able to call methods returning an {@code Action}
      *         to modify the error handling behaviour.
      */
-    TechFailure(ShardIndex shard, RuntimeException exception, RetryDelivery retry) {
+    RuntimeFailure(ShardIndex shard, RuntimeException exception, RetryDelivery retry) {
         super(shard, retry);
         checkNotNull(exception);
         this.exception = exception;

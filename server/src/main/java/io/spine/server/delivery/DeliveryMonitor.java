@@ -114,7 +114,7 @@ public class DeliveryMonitor {
      *         predefined {@code Action}s to handle the error.
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
-    public FailedPickUp.Action onShardPickUpFailure(TechFailure failure) {
+    public FailedPickUp.Action onShardPickUpFailure(RuntimeFailure failure) {
         return failure.propagate();
     }
 

@@ -446,7 +446,7 @@ public final class Delivery implements Logging {
      * the failure handler {@code Action}.
      */
     private Optional<DeliveryStats> onRuntimeFailure(ShardIndex shard, RuntimeException e) {
-        TechFailure failure = new TechFailure(shard, e, () -> deliverMessagesFrom(shard));
+        RuntimeFailure failure = new RuntimeFailure(shard, e, () -> deliverMessagesFrom(shard));
         Optional<DeliveryStats> result = monitor.onShardPickUpFailure(failure)
                                                 .execute();
         return result;

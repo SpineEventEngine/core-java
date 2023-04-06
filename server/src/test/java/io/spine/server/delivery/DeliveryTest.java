@@ -459,7 +459,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
         }
 
         @Override
-        public FailedPickUp.Action onShardPickUpFailure(TechFailure failure) {
+        public FailedPickUp.Action onShardPickUpFailure(RuntimeFailure failure) {
             failedToPickUp.add(failure.shard());
             return super.onShardPickUpFailure(failure);
         }
