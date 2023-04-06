@@ -38,7 +38,7 @@ public final class AlreadyPickedUp extends FailedPickUp {
     private final WorkerId sessionOwner;
 
     /**
-     * Creates  anew {@code AlreadyPickedUp} failure.
+     * Creates a new {@code AlreadyPickedUp} failure.
      *
      * @param shard
      *         a shard that could not be picked
@@ -46,6 +46,10 @@ public final class AlreadyPickedUp extends FailedPickUp {
      *         a worker who owns the delivery session
      * @param retry
      *         a way to retry delivery
+     * @apiNote The constructor has the package-private access because this class is
+     *         instantiated by Spine and passed to the {@code DeliveryMonitor}, users don't need
+     *         to instantiate it. Users are only able to call methods returning an {@code Action}
+     *         to modify the error handling behaviour.
      */
     AlreadyPickedUp(ShardIndex shard, WorkerId owner, RetryDelivery retry) {
         super(shard, retry);
@@ -56,7 +60,8 @@ public final class AlreadyPickedUp extends FailedPickUp {
     /**
      * {@inheritDoc}
      *
-     * <p>In case when shard is already picked up “do nothing” means stop the delivery.
+     * <p>In case when shard is already picked up, returning this action
+     * will make the delivery process to finish without any processing done.
      */
     @Override
     public Action doNothing() {
