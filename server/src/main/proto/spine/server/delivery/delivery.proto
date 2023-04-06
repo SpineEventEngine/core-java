@@ -112,11 +112,13 @@ message WorkerId {
 // An outcome of the shard pick-up attempt indicating the result.
 //
 // The outcome contains one of 2 following results:
+//
 // 1. Shard picked up successfully. In this case the outcome will contain
 // a new `ShardSessionRecord`.
 //
 // 2. Shard could not be picked up as it's already picked by another worker. In this case
 // the outcome will contain the `WorkerId` of the worker owning the session.
+//
 message PickUpOutcome {
 
     option (is).java_type = "io.spine.server.delivery.PickUpOutcomeMixin";
