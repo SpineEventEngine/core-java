@@ -26,6 +26,8 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -34,6 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An abstract base for shard pick-up-related failures.
  */
+@Internal
 public abstract class FailedPickUp {
 
     private final ShardIndex shard;
@@ -41,8 +44,8 @@ public abstract class FailedPickUp {
     private final Supplier<Optional<DeliveryStats>> retryDelivery;
 
     /**
-     * Creates a new {@code FailedPickUp} with the given {@code shard} and {@code retryDelivery}
-     * action.
+     * Creates a new {@code FailedPickUp} with the given {@code shard}
+     * and {@code retryDelivery} action.
      */
     FailedPickUp(ShardIndex shard, Supplier<Optional<DeliveryStats>> retryDelivery) {
         checkNotNull(shard);
