@@ -415,10 +415,10 @@ public final class Delivery implements Logging {
         try {
             outcome = workRegistry.pickUp(index, currentNode);
         } catch (RuntimeException e) {
-            return handleTechPickUpFailure(index, e);
+            return onRuntimeFailure(index, e);
         }
         if (outcome.hasAlreadyPickedBy()) {
-            return handleAlreadyPickedUp(index, outcome.getAlreadyPickedBy());
+            return onAlreadyPickedUp(index, outcome.getAlreadyPickedBy());
         }
         ShardSessionRecord session = outcome.getSession();
         monitor.onDeliveryStarted(index);
@@ -445,21 +445,23 @@ public final class Delivery implements Logging {
      * Notifies the {@code DeliveryMonitor} about the technical failure and executes
      * the failure handler {@code Action}.
      */
-    private Optional<DeliveryStats> handleTechPickUpFailure(ShardIndex shard, RuntimeException e) {
+    private Optional<DeliveryStats> onRuntimeFailure(ShardIndex shard, RuntimeException e) {
         TechFailure failure = new TechFailure(shard, e, () -> deliverMessagesFrom(shard));
-        return monitor.onShardPickUpFailure(failure)
-                      .execute();
+        Optional<DeliveryStats> result = monitor.onShardPickUpFailure(failure)
+                                                .execute();
+        return result;
     }
 
     /**
      * Notifies the {@code DeliveryMonitor} that shard is already pocked up and executes
      * the failure handler {@code Action}.
      */
-    private Optional<DeliveryStats> handleAlreadyPickedUp(ShardIndex shard, WorkerId owner) {
+    private Optional<DeliveryStats> onAlreadyPickedUp(ShardIndex shard, WorkerId owner) {
         AlreadyPickedUp failure =
                 new AlreadyPickedUp(shard, owner, () -> deliverMessagesFrom(shard));
-        return monitor.onShardAlreadyPicked(failure)
-                      .execute();
+        Optional<DeliveryStats> result = monitor.onShardAlreadyPicked(failure)
+                                                .execute();
+        return result;
     }
 
     /**
