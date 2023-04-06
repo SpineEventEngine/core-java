@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Represents a scenario when shard could not be picked because of some occurred exception.
  */
-public class TechFailure extends FailedPickUp {
+public final class TechFailure extends FailedPickUp {
 
     private final RuntimeException exception;
 
@@ -44,6 +44,10 @@ public class TechFailure extends FailedPickUp {
      *         an occurred exception
      * @param retry
      *         a way to retry delivery
+     * @apiNote The constructor has the package-private access because this class is
+     *         instantiated by Spine and passed to the {@code DeliveryMonitor}, users don't need
+     *         to instantiate it. Users are only able to call methods returning an {@code Action}
+     *         to modify the error handling behaviour.
      */
     TechFailure(ShardIndex shard, RuntimeException exception, RetryDelivery retry) {
         super(shard, retry);
