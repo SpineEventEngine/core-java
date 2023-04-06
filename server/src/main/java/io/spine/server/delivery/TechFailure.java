@@ -56,12 +56,9 @@ public final class TechFailure extends FailedPickUp {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>In cause of an exception “do nothing” means propagate the thrown exception.
+     * Returns an {@code Action} that propagates the occurred exception.
      */
-    @Override
-    public Action doNothing() {
+    public Action propagate() {
         return () -> {
             throw exception;
         };

@@ -58,12 +58,8 @@ public final class AlreadyPickedUp extends FailedPickUp {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>In case when shard is already picked up, returning this action
-     * will make the delivery process to finish without any processing done.
+     * Returns an action that will make the delivery process to finish without any processing done.
      */
-    @Override
     public Action doNothing() {
         return Optional::empty;
     }

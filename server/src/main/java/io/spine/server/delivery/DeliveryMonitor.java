@@ -105,8 +105,8 @@ public class DeliveryMonitor {
      *
      * <p>Returns an action to take in relation to the failure.
      *
-     * <p>By default this callback returns an Action that does nothing. This means the occurred
-     * exception will be throw out of
+     * <p>By default this callback returns an Action that propagates the occurred exception.
+     * This means the occurred exception will be throw out of
      * the {@link Delivery#deliverMessagesFrom(ShardIndex) deliverMessagesFrom()} method.
      *
      * @param failure
@@ -115,7 +115,7 @@ public class DeliveryMonitor {
      */
     @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
     public FailedPickUp.Action onShardPickUpFailure(TechFailure failure) {
-        return failure.doNothing();
+        return failure.propagate();
     }
 
     /**

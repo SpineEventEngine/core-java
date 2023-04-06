@@ -50,11 +50,6 @@ public abstract class FailedPickUp {
     }
 
     /**
-     * Returns an {@code Action} that will not perform any attempts to recovery after the failure.
-     */
-    public abstract Action doNothing();
-
-    /**
      * Returns an {@code Action} that will retry the delivery from the shard.
      */
     public final Action retry() {
