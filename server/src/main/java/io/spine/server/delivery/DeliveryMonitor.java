@@ -106,7 +106,8 @@ public class DeliveryMonitor {
      * <p>Returns an action to take in relation to the failure.
      *
      * <p>By default this callback returns an Action that does nothing. This means the occurred
-     * exception will be throw out of the {@code deliverMessagesFrom()} method.
+     * exception will be throw out of
+     * the {@link Delivery#deliverMessagesFrom(ShardIndex) deliverMessagesFrom()} method.
      *
      * @param failure
      *         contains an information about the occurred failure and gives access to
