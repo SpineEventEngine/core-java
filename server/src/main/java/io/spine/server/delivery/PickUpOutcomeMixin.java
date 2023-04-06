@@ -26,13 +26,12 @@
 
 package io.spine.server.delivery;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.GeneratedMixin;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.Messages.isNotDefault;
 
 /**
  * A mixin of the {@link PickUpOutcome} that provides convenient methods for accessing the result.
@@ -67,39 +66,15 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
     }
 
     /**
-     * Calls the given {@code consumer} with the {@code ShardProcessingSession} if the shard is
-     * successfully picked, or does nothing otherwise.
-     */
-    @CanIgnoreReturnValue
-    default PickUpOutcomeMixin ifPicked(Consumer<ShardSessionRecord> consumer) {
-        if (getSession() != null) {
-            consumer.accept(getSession());
-        }
-        return this;
-    }
-
-    /**
-     * Calls the given {@code consumer} if the shard could not be picked because it's already
-     * picked by another worker.
-     *
-     * <p>Does nothing if the shard is sucessfully picked.
-     *
-     * <p>The worker who owns the session will be passed to the {@code consumer}.
-     */
-    @CanIgnoreReturnValue
-    default PickUpOutcomeMixin ifAlreadyPicked(Consumer<WorkerId> consumer) {
-        if (getAlreadyPickedBy() != null) {
-            consumer.accept(getAlreadyPickedBy());
-        }
-        return this;
-    }
-
-    /**
      * Returns {@code ShardProcessingSession} if this outcome indicates that shard is successfully
      * picked, or empty {@code Optional} otherwise.
      */
     default Optional<ShardSessionRecord> session() {
-        return Optional.ofNullable(getSession());
+        ShardSessionRecord session = getSession();
+        if (isNotDefault(session)) {
+            return Optional.of(session);
+        }
+        return Optional.empty();
     }
 
     /**
@@ -107,6 +82,10 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
      * as it's already picked by another worker, or empty {@code Optional} otherwise.
      */
     default Optional<WorkerId> alreadyPickedBy() {
-        return Optional.ofNullable(getAlreadyPickedBy());
+        WorkerId pickedBy = getAlreadyPickedBy();
+        if (isNotDefault(pickedBy)) {
+            return Optional.of(pickedBy);
+        }
+        return Optional.empty();
     }
 }
