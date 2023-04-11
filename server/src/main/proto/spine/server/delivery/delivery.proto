@@ -109,6 +109,17 @@ message WorkerId {
     string value = 2 [(required) = true];
 }
 
+// One of the possible outcomes of shard pick-up request stating that the shard is already picked
+// by another worker.
+message ShardAlreadyPickedUp {
+
+    // A worker that owns the session.
+    WorkerId by = 1 [(required) = true];
+
+    // Time when the `worker` has picked the shard.
+    google.protobuf.Timestamp when = 2 [(required) = true];
+}
+
 // An outcome of the shard pick-up attempt indicating the result.
 //
 // The outcome contains one of 2 following results:
@@ -117,7 +128,7 @@ message WorkerId {
 // a new `ShardSessionRecord`.
 //
 // 2. Shard could not be picked up as it's already picked by another worker. In this case
-// the outcome will contain the `WorkerId` of the worker owning the session.
+// the outcome will contain the `ShardAlreadyPickedUp` messages.
 //
 message PickUpOutcome {
 
@@ -129,8 +140,8 @@ message PickUpOutcome {
       // Shard delivery session indicating that the shard is successfully picked.
       ShardSessionRecord session = 1;
 
-      // Identifier of the worker who owns the delivery session at the moment, indicates
-      // that the shard cannot be picked because it's picked by this worker.
-      WorkerId already_picked_by = 2;
+      // Information about the worker who owns the session, indicates
+      // that the shard cannot be picked because it's picked by another worker.
+      ShardAlreadyPickedUp already_picked_by = 2;
     }
 }
