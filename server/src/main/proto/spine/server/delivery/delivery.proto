@@ -117,6 +117,11 @@ message ShardAlreadyPickedUp {
     WorkerId by = 1 [(required) = true];
 
     // Time when the `worker` has picked the shard.
+    //
+    // Pay attention this time is not synchronized between servers, the time on each instance is
+    // slightly different. So be careful comparing this time (potentially created on a different
+    // instance) with the time on the instance when the code is running now.
+    //
     google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
