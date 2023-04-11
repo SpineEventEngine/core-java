@@ -152,8 +152,11 @@ public abstract class ShardedWorkRegistryTest {
      * {@code expected} worker, and returns the {@code WorkerId} from the {@code outcome}.
      */
     @CanIgnoreReturnValue
-    private static WorkerId assertAlreadyPicked(PickUpOutcome outcome, WorkerId expected) {
-        assertThat(outcome.alreadyPickedBy()).hasValue(expected);
+    private static ShardAlreadyPickedUp
+    assertAlreadyPicked(PickUpOutcome outcome, WorkerId expected) {
+        assertThat(outcome.alreadyPickedBy()).isPresent();
+        assertThat(outcome.getAlreadyPickedBy()
+                          .getBy()).isEqualTo(expected);
         return outcome.getAlreadyPickedBy();
     }
 }
