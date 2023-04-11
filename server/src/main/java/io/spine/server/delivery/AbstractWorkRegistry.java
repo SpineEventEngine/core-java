@@ -69,7 +69,8 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
         ShardSessionRecord record = optionalRecord.get();
         if (hasWorker(record)) {
-            return PickUpOutcomeMixin.alreadyPickedBy(record.getWorker());
+            return PickUpOutcomeMixin
+                    .alreadyPickedBy(record.getWorker(), record.getWhenLastPicked());
         }
 
         ShardSessionRecord updatedRecord = updateNode(record, worker);

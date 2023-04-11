@@ -456,9 +456,9 @@ public final class Delivery implements Logging {
      * Notifies the {@code DeliveryMonitor} that shard is already pocked up and executes
      * the failure handler {@code Action}.
      */
-    private Optional<DeliveryStats> onAlreadyPickedUp(ShardIndex shard, WorkerId owner) {
+    private Optional<DeliveryStats> onAlreadyPickedUp(ShardIndex shard, ShardAlreadyPickedUp pickedUp) {
         AlreadyPickedUp failure =
-                new AlreadyPickedUp(shard, owner, () -> deliverMessagesFrom(shard));
+                new AlreadyPickedUp(shard, pickedUp, () -> deliverMessagesFrom(shard));
         Optional<DeliveryStats> result = monitor.onShardAlreadyPicked(failure)
                                                 .execute();
         return result;

@@ -36,15 +36,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class AlreadyPickedUp extends FailedPickUp {
 
-    private final WorkerId sessionOwner;
+    private final ShardAlreadyPickedUp alreadyPickedUp;
 
     /**
      * Creates a new {@code AlreadyPickedUp} failure.
      *
      * @param shard
      *         a shard that could not be picked
-     * @param owner
-     *         a worker who owns the delivery session
+     * @param pickedUp
+     *         a message containing info about owner and the time when the shard was picked
      * @param retry
      *         a way to retry delivery
      * @apiNote The constructor has the package-private access because this class is
@@ -52,10 +52,13 @@ public final class AlreadyPickedUp extends FailedPickUp {
      *         to instantiate it. Users are only able to call methods returning an {@code Action}
      *         to modify the error handling behaviour.
      */
-    AlreadyPickedUp(ShardIndex shard, WorkerId owner, Supplier<Optional<DeliveryStats>> retry) {
+    AlreadyPickedUp(ShardIndex shard,
+                    ShardAlreadyPickedUp pickedUp,
+                    Supplier<Optional<DeliveryStats>> retry
+    ) {
         super(shard, retry);
-        checkNotNull(owner);
-        sessionOwner = owner;
+        checkNotNull(pickedUp);
+        alreadyPickedUp = pickedUp;
     }
 
     /**
@@ -68,7 +71,7 @@ public final class AlreadyPickedUp extends FailedPickUp {
     /**
      * Returns the {@code WorkerId} that owns the delivery session.
      */
-    public WorkerId sessionOwner() {
-        return sessionOwner;
+    public ShardAlreadyPickedUp sessionOwner() {
+        return alreadyPickedUp;
     }
 }

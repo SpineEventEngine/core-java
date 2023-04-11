@@ -26,6 +26,7 @@
 
 package io.spine.server.delivery;
 
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 
 import java.util.Optional;
@@ -54,14 +55,20 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
 
     /**
      * Creates a new {@code PickUpOutcome} indicating that the shard is already picked by the given
-     * {@code worker}.
+     * worker in {@code pickedUp} message.
      */
     @SuppressWarnings("ClassReferencesSubclass") // This is a mixin of the type.
-    static PickUpOutcome alreadyPickedBy(WorkerId worker) {
+    static PickUpOutcome alreadyPickedBy(WorkerId worker, Timestamp whenPicked) {
         checkNotNull(worker);
+        checkNotNull(whenPicked);
+        ShardAlreadyPickedUp pickedUp = ShardAlreadyPickedUp
+                .newBuilder()
+                .setBy(worker)
+                .setWhen(whenPicked)
+                .vBuild();
         return PickUpOutcome
                 .newBuilder()
-                .setAlreadyPickedBy(worker)
+                .setAlreadyPickedBy(pickedUp)
                 .vBuild();
     }
 
@@ -78,13 +85,13 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
     }
 
     /**
-     * Returns {@code WorkerId} if this outcome indicates that shard could not be picked
+     * Returns {@code ShardAlreadyPickedUp} if this outcome indicates that shard could not be picked
      * as it's already picked by another worker, or empty {@code Optional} otherwise.
      */
-    default Optional<WorkerId> alreadyPickedBy() {
-        WorkerId pickedBy = getAlreadyPickedBy();
-        if (isNotDefault(pickedBy)) {
-            return Optional.of(pickedBy);
+    default Optional<ShardAlreadyPickedUp> alreadyPickedBy() {
+        ShardAlreadyPickedUp pickedUp = getAlreadyPickedBy();
+        if (isNotDefault(pickedUp)) {
+            return Optional.of(pickedUp);
         }
         return Optional.empty();
     }
