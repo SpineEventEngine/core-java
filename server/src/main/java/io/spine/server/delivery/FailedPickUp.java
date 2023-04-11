@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 
 import java.util.Optional;
@@ -40,8 +39,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>This class is internal and is not designed to be extended by the framework users. The actual
  * inheritor of this class will be created by framework and passed to the corresponding failure
  * handler.
+ *
+ * <p>The internal {@linkplain Action} may be implemented by the framework users to provide
+ * a custom behaviour for pickup failures in the {@linkplain DeliveryMonitor} in addition to
+ * predefined behaviours provided by the inheritors of this class.
  */
-@Internal
 public abstract class FailedPickUp {
 
     private final ShardIndex shard;
