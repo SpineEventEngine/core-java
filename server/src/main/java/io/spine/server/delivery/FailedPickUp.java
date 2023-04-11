@@ -77,6 +77,7 @@ public abstract class FailedPickUp {
      * Action to take in relation to failed pick-up.
      */
     @SPI
+    @FunctionalInterface
     public interface Action {
 
         /**
