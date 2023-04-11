@@ -27,6 +27,7 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
+import io.spine.annotation.SPI;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -35,6 +36,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An abstract base for shard pick-up-related failures.
+ *
+ * <p>This class is internal and is not designed to be extended by the framework users. The actual
+ * inheritor of this class will be created by framework and passed to the corresponding failure
+ * handler.
  */
 @Internal
 public abstract class FailedPickUp {
@@ -71,6 +76,7 @@ public abstract class FailedPickUp {
     /**
      * Action to take in relation to failed pick-up.
      */
+    @SPI
     public interface Action {
 
         /**
