@@ -58,17 +58,17 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
      * worker in {@code pickedUp} message.
      */
     @SuppressWarnings("ClassReferencesSubclass") // This is a mixin of the type.
-    static PickUpOutcome alreadyPickedBy(WorkerId worker, Timestamp whenPicked) {
+    static PickUpOutcome alreadyPicked(WorkerId worker, Timestamp whenPicked) {
         checkNotNull(worker);
         checkNotNull(whenPicked);
         ShardAlreadyPickedUp pickedUp = ShardAlreadyPickedUp
                 .newBuilder()
-                .setBy(worker)
-                .setWhen(whenPicked)
+                .setWorker(worker)
+                .setWhenPicked(whenPicked)
                 .vBuild();
         return PickUpOutcome
                 .newBuilder()
-                .setAlreadyPickedBy(pickedUp)
+                .setAlreadyPicked(pickedUp)
                 .vBuild();
     }
 
@@ -88,8 +88,8 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
      * Returns {@code ShardAlreadyPickedUp} if this outcome indicates that shard could not be picked
      * as it's already picked by another worker, or empty {@code Optional} otherwise.
      */
-    default Optional<ShardAlreadyPickedUp> alreadyPickedBy() {
-        ShardAlreadyPickedUp pickedUp = getAlreadyPickedBy();
+    default Optional<ShardAlreadyPickedUp> alreadyPicked() {
+        ShardAlreadyPickedUp pickedUp = getAlreadyPicked();
         if (isNotDefault(pickedUp)) {
             return Optional.of(pickedUp);
         }

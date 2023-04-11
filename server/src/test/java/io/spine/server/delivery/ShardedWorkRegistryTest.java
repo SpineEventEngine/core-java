@@ -34,8 +34,6 @@ import io.spine.server.NodeId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -154,9 +152,9 @@ public abstract class ShardedWorkRegistryTest {
     @CanIgnoreReturnValue
     private static ShardAlreadyPickedUp
     assertAlreadyPicked(PickUpOutcome outcome, WorkerId expected) {
-        assertThat(outcome.alreadyPickedBy()).isPresent();
-        assertThat(outcome.getAlreadyPickedBy()
-                          .getBy()).isEqualTo(expected);
-        return outcome.getAlreadyPickedBy();
+        assertThat(outcome.alreadyPicked()).isPresent();
+        assertThat(outcome.getAlreadyPicked()
+                          .getWorker()).isEqualTo(expected);
+        return outcome.getAlreadyPicked();
     }
 }

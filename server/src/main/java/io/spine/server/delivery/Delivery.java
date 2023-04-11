@@ -417,8 +417,8 @@ public final class Delivery implements Logging {
         } catch (RuntimeException e) {
             return onRuntimeFailure(index, e);
         }
-        if (outcome.hasAlreadyPickedBy()) {
-            return onAlreadyPickedUp(index, outcome.getAlreadyPickedBy());
+        if (outcome.hasAlreadyPicked()) {
+            return onAlreadyPickedUp(index, outcome.getAlreadyPicked());
         }
         ShardSessionRecord session = outcome.getSession();
         monitor.onDeliveryStarted(index);
