@@ -99,8 +99,8 @@ public class DeliveryMonitor {
      * Called if an {@code Exception} occurred when the {@code Delivery} attempted
      * to pick up a shard.
      *
-     * <p>Please note, this callback is <em>not</em> invoked in case the shard cannot be picked
-     * if it's already picked by another worker. It is so, because such a use case is a part
+     * <p>Please note, this callback is <em>not</em> invoked in case the shard cannot be picked up
+     * if it's already picked up by another worker. It is so, because such a use case is a part
      * of normal flow, and thus does not provoke a {@code RuntimeException}.
      *
      * <p>Returns an action to take in relation to the failure.
@@ -119,7 +119,7 @@ public class DeliveryMonitor {
     }
 
     /**
-     * Called if {@code Delivery} could not pick up a shard because it was already picked
+     * Called if {@code Delivery} could not pick up a shard because it was already picked up
      * by another worker.
      *
      * <p>Returns an action to take in relation to the failure.

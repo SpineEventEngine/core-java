@@ -51,7 +51,7 @@ public interface ShardedWorkRegistry {
      * <p>In case the shard at a given index is already picked up by some node,
      * an {@link PickUpOutcome} containing {@link ShardAlreadyPickedUp} is returned. This outcome
      * contains information about the {@code WorkerId} of the worker who owns the session and the
-     * {@code Timestamp} when the shard was picked.
+     * {@code Timestamp} when the shard was picked up.
      *
      * @param index
      *         the index of the shard to pick up for processing
@@ -62,7 +62,7 @@ public interface ShardedWorkRegistry {
     PickUpOutcome pickUp(ShardIndex index, NodeId node);
 
     /**
-     * Completes the given {@code session} and releases the picked shard, making it available
+     * Completes the given {@code session} and releases the picked up shard, making it available
      * for picking up.
      *
      * @param session

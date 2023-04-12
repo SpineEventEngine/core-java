@@ -41,7 +41,7 @@ import static io.spine.protobuf.Messages.isNotDefault;
 public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
 
     /**
-     * Creates a new {@code PickUpOutcome} of successfully picked shard
+     * Creates a new {@code PickUpOutcome} of successfully picked up shard
      * with the given {@code ShardSessionRecord}.
      */
     @SuppressWarnings("ClassReferencesSubclass") // This is a mixin of the type.
@@ -54,8 +54,8 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
     }
 
     /**
-     * Creates a new {@code PickUpOutcome} indicating that the shard is already picked by the given
-     * worker in {@code pickedUp} message.
+     * Creates a new {@code PickUpOutcome} indicating that the shard is already picked up
+     * by the given worker in {@code pickedUp} message.
      */
     @SuppressWarnings("ClassReferencesSubclass") // This is a mixin of the type.
     static PickUpOutcome alreadyPicked(WorkerId worker, Timestamp whenPicked) {
@@ -74,7 +74,7 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
 
     /**
      * Returns {@code ShardProcessingSession} if this outcome indicates that shard is successfully
-     * picked, or empty {@code Optional} otherwise.
+     * picked up, or empty {@code Optional} otherwise.
      */
     default Optional<ShardSessionRecord> session() {
         ShardSessionRecord session = getSession();
@@ -85,8 +85,8 @@ public interface PickUpOutcomeMixin extends PickUpOutcomeOrBuilder {
     }
 
     /**
-     * Returns {@code ShardAlreadyPickedUp} if this outcome indicates that shard could not be picked
-     * as it's already picked by another worker, or empty {@code Optional} otherwise.
+     * Returns {@code ShardAlreadyPickedUp} if this outcome indicates that shard could not be
+     * picked up as it's already picked up by another worker, or empty {@code Optional} otherwise.
      */
     default Optional<ShardAlreadyPickedUp> alreadyPicked() {
         ShardAlreadyPickedUp pickedUp = getAlreadyPicked();

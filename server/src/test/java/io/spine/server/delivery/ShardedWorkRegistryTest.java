@@ -134,7 +134,7 @@ public abstract class ShardedWorkRegistryTest {
     }
 
     /**
-     * Asserts that the given {@code outcome} indicates a successfully picked shard with
+     * Asserts that the given {@code outcome} indicates a successfully picked up shard with
      * the given {@code index}.
      */
     @CanIgnoreReturnValue
@@ -146,7 +146,7 @@ public abstract class ShardedWorkRegistryTest {
     }
 
     /**
-     * Asserts that the given {@code outcome} indicates that shard is already picked by the given
+     * Asserts that the given {@code outcome} indicates that shard is already picked up by the given
      * {@code expected} worker, and returns the {@code WorkerId} from the {@code outcome}.
      */
     @CanIgnoreReturnValue

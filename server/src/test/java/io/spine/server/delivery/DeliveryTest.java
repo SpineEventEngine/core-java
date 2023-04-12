@@ -199,7 +199,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("single shard and return stats when picked up the shard " +
-            "and `Optional.empty()` if shard was already picked")
+            "and `Optional.empty()` if shard was already picked up")
     public void returnOptionalEmptyIfPicked() {
         int shardCount = 11;
         ShardedWorkRegistry registry = new InMemoryShardedWorkRegistry();

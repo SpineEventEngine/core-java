@@ -60,9 +60,9 @@ message ShardSessionRecord {
     // The index of a shard processed in this session.
     ShardIndex index = 1 [(required) = true];
 
-    // When the shard processed within the session was last picked by the node.
+    // When the shard processed within the session was last picked up by the node.
     //
-    // This field is unset if no nodes ever picked the session.
+    // This field is unset if no nodes ever picked up the session.
     google.protobuf.Timestamp when_last_picked = 3;
 
     // An identifier of an application worker, which picked up the shard and processes it.
@@ -109,14 +109,14 @@ message WorkerId {
     string value = 2 [(required) = true];
 }
 
-// One of the possible outcomes of shard pick-up request stating that the shard is already picked
+// One of the possible outcomes of shard pick-up request stating that the shard is already picked up
 // by another worker.
 message ShardAlreadyPickedUp {
 
     // A worker that owns the session.
     WorkerId worker = 1 [(required) = true];
 
-    // Time when the `worker` has picked the shard.
+    // Time when the `worker` has picked up the shard.
     //
     // Pay attention this time is not synchronized between servers, the time on each instance is
     // slightly different. So be careful comparing this time (potentially created on a different
@@ -132,7 +132,7 @@ message ShardAlreadyPickedUp {
 // 1. Shard picked up successfully. In this case the outcome will contain
 // a new `ShardSessionRecord`.
 //
-// 2. Shard could not be picked up as it's already picked by another worker. In this case
+// 2. Shard could not be picked up as it's already picked up by another worker. In this case
 // the outcome will contain the `ShardAlreadyPickedUp` messages.
 //
 message PickUpOutcome {
@@ -142,11 +142,11 @@ message PickUpOutcome {
     oneof value {
       option (is_required) = true;
 
-      // Shard delivery session indicating that the shard is successfully picked.
+      // Shard delivery session indicating that the shard is successfully picked up.
       ShardSessionRecord session = 1;
 
       // Information about the worker who owns the session, indicates
-      // that the shard cannot be picked because it's picked by another worker.
+      // that the shard cannot be picked up because it's picked up by another worker.
       ShardAlreadyPickedUp already_picked = 2;
     }
 }
