@@ -453,7 +453,7 @@ public final class Delivery implements Logging {
     }
 
     /**
-     * Notifies the {@code DeliveryMonitor} that shard is already pocked up and executes
+     * Notifies the {@code DeliveryMonitor} that shard is already picked up and executes
      * the failure handler {@code Action}.
      */
     private Optional<DeliveryStats> onAlreadyPickedUp(ShardIndex shard, ShardAlreadyPickedUp pickedUp) {
