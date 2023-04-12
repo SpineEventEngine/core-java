@@ -37,8 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * An abstract base for shard pick-up-related failures.
  *
  * <p>This class is internal and is not designed to be extended by the framework users. The actual
- * inheritor of this class will be created by framework and passed to the corresponding failure
- * handler.
+ * inheritor of this class will be created by framework and passed to the corresponding
+ * failure handler.
  *
  * <p>The internal {@linkplain Action} may be implemented by the framework users to provide
  * a custom behaviour for pickup failures in the {@linkplain DeliveryMonitor} in addition to
