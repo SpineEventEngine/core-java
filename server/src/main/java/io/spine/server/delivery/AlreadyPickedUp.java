@@ -54,8 +54,7 @@ public final class AlreadyPickedUp extends FailedPickUp {
      */
     AlreadyPickedUp(ShardIndex shard,
                     ShardAlreadyPickedUp pickedUp,
-                    Supplier<Optional<DeliveryStats>> retry
-    ) {
+                    Supplier<Optional<DeliveryStats>> retry) {
         super(shard, retry);
         checkNotNull(pickedUp);
         alreadyPickedUp = pickedUp;
