@@ -68,9 +68,9 @@ public final class AlreadyPickedUp extends FailedPickUp {
     }
 
     /**
-     * Returns the {@code WorkerId} that owns the delivery session.
+     * Returns the {@code ShardAlreadyPickedUp} outcome.
      */
-    public ShardAlreadyPickedUp sessionOwner() {
+    public ShardAlreadyPickedUp outcome() {
         return alreadyPickedUp;
     }
 }
