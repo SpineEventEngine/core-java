@@ -34,8 +34,6 @@ import io.spine.server.NodeId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -65,17 +63,15 @@ public abstract class ShardedWorkRegistryTest {
         ShardIndex index = newIndex(1, 42);
         NodeId node = generateNodeId();
 
-        Optional<ShardProcessingSession> session = registry.pickUp(index, node);
-        ShardProcessingSession actualSession = assertSession(session, index);
+        PickUpOutcome outcome = registry.pickUp(index, node);
+        ShardSessionRecord session = assertSession(outcome, index);
 
-        assertThat(registry.pickUp(index, node))
-                .isEmpty();
-        assertThat(registry.pickUp(index, generateNodeId()))
-                .isEmpty();
+        assertAlreadyPicked(registry.pickUp(index, node), session.getWorker());
+        assertAlreadyPicked(registry.pickUp(index, generateNodeId()), session.getWorker());
 
-        actualSession.complete();
-        Optional<ShardProcessingSession> newSession = registry.pickUp(index, generateNodeId());
-        assertSession(newSession, index);
+        registry.release(session);
+        PickUpOutcome newOutcome = registry.pickUp(index, generateNodeId());
+        assertSession(newOutcome, index);
     }
 
     @Test
@@ -97,8 +93,8 @@ public abstract class ShardedWorkRegistryTest {
 
         for (ShardIndex shardIndex : indexes) {
             NodeId anotherNode = generateNodeId();
-            Optional<ShardProcessingSession> newSession = registry.pickUp(shardIndex, anotherNode);
-            assertSession(newSession, shardIndex);
+            PickUpOutcome outcome = registry.pickUp(shardIndex, anotherNode);
+            assertSession(outcome, shardIndex);
         }
     }
 
@@ -129,22 +125,36 @@ public abstract class ShardedWorkRegistryTest {
                     NodeId newNode = generateNodeId();
                     ShardIndex newIndex = newIndex(i, outOfTotal);
 
-                    Optional<ShardProcessingSession> session = registry.pickUp(newIndex, newNode);
-                    assertSession(session, newIndex);
+                    PickUpOutcome outcome = registry.pickUp(newIndex, newNode);
+                    assertSession(outcome, newIndex);
                     return newIndex;
                 })
                 .collect(toImmutableSet());
         return indexes;
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")     // asserting the `Optional`.
+    /**
+     * Asserts that the given {@code outcome} indicates a successfully picked up shard with
+     * the given {@code index}.
+     */
     @CanIgnoreReturnValue
-    private static ShardProcessingSession
-    assertSession(Optional<ShardProcessingSession> session, ShardIndex index) {
-        assertThat(session)
-                .isPresent();
-        ShardProcessingSession actualSession = session.get();
-        assertThat(actualSession.shardIndex()).isEqualTo(index);
+    private static ShardSessionRecord assertSession(PickUpOutcome outcome, ShardIndex index) {
+        assertThat(outcome.session()).isPresent();
+        ShardSessionRecord actualSession = outcome.getSession();
+        assertThat(actualSession.getIndex()).isEqualTo(index);
         return actualSession;
+    }
+
+    /**
+     * Asserts that the given {@code outcome} indicates that shard is already picked up by the given
+     * {@code expected} worker, and returns the {@code WorkerId} from the {@code outcome}.
+     */
+    @CanIgnoreReturnValue
+    private static ShardAlreadyPickedUp
+    assertAlreadyPicked(PickUpOutcome outcome, WorkerId expected) {
+        assertThat(outcome.alreadyPicked()).isPresent();
+        assertThat(outcome.getAlreadyPicked()
+                          .getWorker()).isEqualTo(expected);
+        return outcome.getAlreadyPicked();
     }
 }

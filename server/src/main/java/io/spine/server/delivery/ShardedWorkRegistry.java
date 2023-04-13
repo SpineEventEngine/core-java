@@ -30,8 +30,6 @@ import com.google.protobuf.Duration;
 import io.spine.annotation.SPI;
 import io.spine.server.NodeId;
 
-import java.util.Optional;
-
 /**
  * The registry of the shard indexes along with the identifiers of the nodes, which
  * process the messages corresponding to each index.
@@ -45,21 +43,32 @@ public interface ShardedWorkRegistry {
      * <p>This action is intended to be exclusive, i.e. a single shard may be served
      * by a single application node at a given moment of time.
      *
-     * <p>In case of a successful operation, an instance of {@link ShardProcessingSession}
-     * is returned. The node obtained the session should perform the desired actions with the
-     * sharded messages and then {@link ShardProcessingSession#complete() complete} the session.
+     * <p>In case of a successful operation, an instance of {@link PickUpOutcome} containing
+     * {@code ShardSessionRecord} is returned. The node obtained the session should perform
+     * the desired actions with the sharded messages
+     * and then {@link #release(ShardSessionRecord) release()} the session.
      *
      * <p>In case the shard at a given index is already picked up by some node,
-     * an {@link Optional#empty() Optional.empty()} is returned.
+     * an {@link PickUpOutcome} containing {@link ShardAlreadyPickedUp} is returned. This outcome
+     * contains information about the {@code WorkerId} of the worker who owns the session and the
+     * {@code Timestamp} when the shard was picked up.
      *
      * @param index
      *         the index of the shard to pick up for processing
      * @param node
      *         the identifier of the node for which to pick the shard
-     * @return the session of shard processing,
-     *         or {@code Optional.empty()} if the shard is not available
+     * @return acknowledgement showing the result of the operation
      */
-    Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node);
+    PickUpOutcome pickUp(ShardIndex index, NodeId node);
+
+    /**
+     * Completes the given {@code session} and releases the picked up shard, making it available
+     * for picking up.
+     *
+     * @param session
+     *         a session to be completed
+     */
+    void release(ShardSessionRecord session);
 
     /**
      * Clears up the recorded {@code NodeId}s from the session records if there was no activity

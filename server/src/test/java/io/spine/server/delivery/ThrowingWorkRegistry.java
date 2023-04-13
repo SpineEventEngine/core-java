@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,33 +26,31 @@
 
 package io.spine.server.delivery;
 
-import io.spine.annotation.SPI;
+import com.google.protobuf.Duration;
 import io.spine.server.NodeId;
 
 /**
- * The session of processing the messages, which reside in a shard.
+ * Throws the {@code IllegalStateException} on each operation.
  *
- * <p>Starts by {@linkplain ShardedWorkRegistry#pickUp(ShardIndex, NodeId) picking up}
- * the shard to process.
+ * <p>Such an implementation is useful in tests for testing error handling.
  */
-@SPI
-public abstract class ShardProcessingSession {
+public final class ThrowingWorkRegistry implements ShardedWorkRegistry {
 
-    private final ShardIndex index;
+    private static final String MESSAGE =
+            "Thrown from `ThrowingWorkRegistry` that always throws exception.";
 
-    protected ShardProcessingSession(ShardSessionRecord record) {
-        this.index = record.getIndex();
+    @Override
+    public PickUpOutcome pickUp(ShardIndex index, NodeId node) {
+        throw new IllegalStateException(MESSAGE);
     }
 
-    /**
-     * Returns the index of the shard, to which this session relates to.
-     */
-    public ShardIndex shardIndex() {
-        return index;
+    @Override
+    public void release(ShardSessionRecord session) {
+        throw new IllegalStateException(MESSAGE);
     }
 
-    /**
-     * Completes this session and releases the picked shard, making it available for picking up.
-     */
-    protected abstract void complete();
+    @Override
+    public Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
+        throw new IllegalStateException(MESSAGE);
+    }
 }

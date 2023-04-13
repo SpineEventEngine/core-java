@@ -411,11 +411,16 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         NodeId currentNode = ServerEnvironment.instance()
                                               .nodeId();
-        Optional<ShardProcessingSession> picked = workRegistry.pickUp(index, currentNode);
-        if (!picked.isPresent()) {
-            return Optional.empty();
+        PickUpOutcome outcome;
+        try {
+            outcome = workRegistry.pickUp(index, currentNode);
+        } catch (RuntimeException e) {
+            return onRuntimeFailure(index, e);
         }
-        ShardProcessingSession session = picked.get();
+        if (outcome.hasAlreadyPicked()) {
+            return onAlreadyPickedUp(index, outcome.getAlreadyPicked());
+        }
+        ShardSessionRecord session = outcome.getSession();
         monitor.onDeliveryStarted(index);
 
         RunResult runResult;
@@ -426,7 +431,7 @@ public final class Delivery implements Logging {
                 totalDelivered += runResult.deliveredCount();
             } while (runResult.shouldRunAgain());
         } finally {
-            session.complete();
+            workRegistry.release(session);
         }
         DeliveryStats stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
@@ -434,6 +439,29 @@ public final class Delivery implements Logging {
         lateMessage.ifPresent(this::onNewMessage);
 
         return Optional.of(stats);
+    }
+
+    /**
+     * Notifies the {@code DeliveryMonitor} about the technical failure and executes
+     * the failure handler {@code Action}.
+     */
+    private Optional<DeliveryStats> onRuntimeFailure(ShardIndex shard, RuntimeException e) {
+        RuntimeFailure failure = new RuntimeFailure(shard, e, () -> deliverMessagesFrom(shard));
+        Optional<DeliveryStats> result = monitor.onShardPickUpFailure(failure)
+                                                .execute();
+        return result;
+    }
+
+    /**
+     * Notifies the {@code DeliveryMonitor} that shard is already picked up and executes
+     * the failure handler {@code Action}.
+     */
+    private Optional<DeliveryStats> onAlreadyPickedUp(ShardIndex shard, ShardAlreadyPickedUp pickedUp) {
+        AlreadyPickedUp failure =
+                new AlreadyPickedUp(shard, pickedUp, () -> deliverMessagesFrom(shard));
+        Optional<DeliveryStats> result = monitor.onShardAlreadyPicked(failure)
+                                                .execute();
+        return result;
     }
 
     /**
@@ -447,8 +475,8 @@ public final class Delivery implements Logging {
      *
      * @return the results of the run
      */
-    private RunResult runDelivery(ShardProcessingSession session) {
-        ShardIndex index = session.shardIndex();
+    private RunResult runDelivery(ShardSessionRecord session) {
+        ShardIndex index = session.getIndex();
 
         Page<InboxMessage> startingPage = inboxStorage.readAll(index, pageSize);
         Optional<Page<InboxMessage>> maybePage = Optional.of(startingPage);
@@ -575,7 +603,8 @@ public final class Delivery implements Logging {
      */
     public <I> CatchUpProcessBuilder<I> newCatchUpProcess(ProjectionRepository<I, ?, ?> repo) {
         CatchUpProcessBuilder<I> builder = CatchUpProcess.newBuilder(repo);
-        CatchUpRepositories.cache().put(repo);
+        CatchUpRepositories.cache()
+                           .put(repo);
         return builder.setStorage(catchUpStorage)
                       .setPageSize(catchUpPageSize);
     }
@@ -586,7 +615,8 @@ public final class Delivery implements Logging {
      *
      * <p>The registration of the dispatchers allows to handle the {@code Delivery}-specific events.
      *
-     * @param context Bounded Context in which the message dispatchers should be registered
+     * @param context
+     *         Bounded Context in which the message dispatchers should be registered
      */
     @Internal
     public void registerDispatchersIn(BoundedContext context) {

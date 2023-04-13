@@ -31,9 +31,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
-import io.spine.environment.Tests;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
+import io.spine.environment.Tests;
 import io.spine.protobuf.Messages;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -71,6 +71,7 @@ import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;
 import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Integration tests on message delivery that use different settings of sharding configuration and
@@ -198,14 +199,16 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
     @Test
     @DisplayName("single shard and return stats when picked up the shard " +
-            "and `Optional.empty()` if shard was already picked")
+            "and `Optional.empty()` if shard was already picked up")
     public void returnOptionalEmptyIfPicked() {
         int shardCount = 11;
         ShardedWorkRegistry registry = new InMemoryShardedWorkRegistry();
         FixedShardStrategy strategy = new FixedShardStrategy(shardCount);
+        MonitorUnderTest monitor = new MonitorUnderTest();
         Delivery delivery = Delivery.newBuilder()
                                     .setStrategy(strategy)
                                     .setWorkRegistry(registry)
+                                    .setMonitor(monitor)
                                     .build();
         ServerEnvironment.when(Tests.class)
                          .use(delivery);
@@ -215,12 +218,40 @@ public class DeliveryTest extends AbstractDeliveryTest {
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsMatch(delivery, index));
 
-        Optional<ShardProcessingSession> session =
-                registry.pickUp(index, ServerEnvironment.instance().nodeId());
-        assertThat(session).isPresent();
+        PickUpOutcome outcome = registry.pickUp(index, ServerEnvironment.instance()
+                                                                .nodeId());
+        assertThat(outcome.hasSession()).isTrue();
+        assertThat(monitor.failedToPickUp()).isEmpty();
+        assertThat(monitor.alreadyPickedShards()).isEmpty();
 
         TenantAwareRunner.with(tenantId)
                          .run(() -> assertStatsEmpty(delivery, index));
+        assertThat(monitor.failedToPickUp()).isEmpty();
+        assertThat(monitor.alreadyPickedShards()).containsExactly(index);
+    }
+
+    @Test
+    @DisplayName("a single shard and notify monitor if shard pick-up failed for a technical reason")
+    public void notifyOnPickUpFailure() {
+        int shardCount = 1;
+        ShardedWorkRegistry registry = new ThrowingWorkRegistry();
+        FixedShardStrategy strategy = new FixedShardStrategy(shardCount);
+        MonitorUnderTest monitor = new MonitorUnderTest();
+        Delivery delivery = Delivery.newBuilder()
+                                    .setStrategy(strategy)
+                                    .setWorkRegistry(registry)
+                                    .setMonitor(monitor)
+                                    .build();
+        ServerEnvironment.when(Tests.class)
+                         .use(delivery);
+
+        ShardIndex index = strategy.nonEmptyShard();
+        TenantId tenantId = GivenTenantId.generate();
+        assertThrows(IllegalStateException.class,
+                     () -> TenantAwareRunner.with(tenantId)
+                                            .run(() -> assertStatsMatch(delivery, index))
+        );
+        assertThat(monitor.failedToPickUp()).containsExactly(index);
     }
 
     @Test
@@ -242,6 +273,8 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
         ImmutableSet<String> aTarget = singleTarget();
         assertThat(monitor.stats()).isEmpty();
+        assertThat(monitor.alreadyPickedShards()).isEmpty();
+        assertThat(monitor.failedToPickUp()).isEmpty();
         new NastyClient(1).runWith(aTarget);
 
         for (DeliveryStats singleRunStats : monitor.stats()) {
@@ -371,7 +404,6 @@ public class DeliveryTest extends AbstractDeliveryTest {
      * a good API design move.
      ******************************************************************************/
 
-
     private static void assertStatsMatch(Delivery delivery, ShardIndex index) {
         Optional<DeliveryStats> stats = delivery.deliverMessagesFrom(index);
         assertThat(stats).isPresent();
@@ -417,9 +449,33 @@ public class DeliveryTest extends AbstractDeliveryTest {
 
         private final List<DeliveryStats> allStats = new ArrayList<>();
 
+        private final List<ShardIndex> alreadyPicked = new ArrayList<>();
+
+        private final List<ShardIndex> failedToPickUp = new ArrayList<>();
+
         @Override
         public void onDeliveryCompleted(DeliveryStats stats) {
             allStats.add(stats);
+        }
+
+        @Override
+        public FailedPickUp.Action onShardPickUpFailure(RuntimeFailure failure) {
+            failedToPickUp.add(failure.shard());
+            return super.onShardPickUpFailure(failure);
+        }
+
+        @Override
+        public FailedPickUp.Action onShardAlreadyPicked(AlreadyPickedUp failure) {
+            alreadyPicked.add(failure.shard());
+            return super.onShardAlreadyPicked(failure);
+        }
+
+        public ImmutableList<ShardIndex> alreadyPickedShards() {
+            return ImmutableList.copyOf(alreadyPicked);
+        }
+
+        public ImmutableList<ShardIndex> failedToPickUp() {
+            return ImmutableList.copyOf(failedToPickUp);
         }
 
         private ImmutableList<DeliveryStats> stats() {

@@ -51,29 +51,30 @@ import static io.spine.base.Time.currentTime;
 public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
 
     @Override
-    public Optional<ShardProcessingSession> pickUp(ShardIndex index, NodeId node) {
+    public PickUpOutcome pickUp(ShardIndex index, NodeId node) {
         checkNotNull(index);
         checkNotNull(node);
 
         WorkerId worker = currentWorkerFor(node);
-        Optional<ShardProcessingSession> result = pickUp(index, worker);
+        PickUpOutcome result = pickUp(index, worker);
         return result;
     }
 
-    private Optional<ShardProcessingSession> pickUp(ShardIndex index, WorkerId worker) {
+    private PickUpOutcome pickUp(ShardIndex index, WorkerId worker) {
         Optional<ShardSessionRecord> optionalRecord = find(index);
         if (!optionalRecord.isPresent()) {
             ShardSessionRecord newRecord = createRecord(index, worker);
-            return Optional.of(asSession(newRecord));
+            return PickUpOutcomeMixin.pickedUp(newRecord);
         }
 
         ShardSessionRecord record = optionalRecord.get();
         if (hasWorker(record)) {
-            return Optional.empty();
+            return PickUpOutcomeMixin
+                    .alreadyPicked(record.getWorker(), record.getWhenLastPicked());
         }
 
         ShardSessionRecord updatedRecord = updateNode(record, worker);
-        return Optional.of(asSession(updatedRecord));
+        return PickUpOutcomeMixin.pickedUp(updatedRecord);
     }
 
     /**
@@ -87,7 +88,8 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
     protected abstract WorkerId currentWorkerFor(NodeId node);
 
     private static boolean hasWorker(ShardSessionRecord record) {
-        return !WorkerId.getDefaultInstance().equals(record.getWorker());
+        return !WorkerId.getDefaultInstance()
+                        .equals(record.getWorker());
     }
 
     private ShardSessionRecord createRecord(ShardIndex index, WorkerId worker) {
@@ -162,9 +164,4 @@ public abstract class AbstractWorkRegistry implements ShardedWorkRegistry {
      *         the registry
      */
     protected abstract Optional<ShardSessionRecord> find(ShardIndex index);
-
-    /**
-     * Restores a {@link ShardProcessingSession} from the given session record.
-     */
-    protected abstract ShardProcessingSession asSession(ShardSessionRecord record);
 }

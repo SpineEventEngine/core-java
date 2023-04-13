@@ -87,12 +87,53 @@ public class DeliveryMonitor {
      */
     @SuppressWarnings("unused")  // This SPI method is designed for descendants.
     public void onDeliveryCompleted(DeliveryStats stats) {
-        // do nothing.
+        // Do nothing.
     }
 
     @SuppressWarnings({"WeakerAccess", "unused"})   /* Part of public API. */
     public void onDeliveryStarted(ShardIndex index) {
-        // do nothing.
+        // Do nothing.
+    }
+
+    /**
+     * Called if an {@code Exception} occurred when the {@code Delivery} attempted
+     * to pick up a shard.
+     *
+     * <p>Please note, this callback is <em>not</em> invoked in case the shard cannot be picked up
+     * if it's already picked up by another worker. It is so, because such a use case is a part
+     * of normal flow, and thus does not provoke a {@code RuntimeException}.
+     *
+     * <p>Returns an action to take in relation to the failure.
+     *
+     * <p>By default this callback returns an Action that propagates the occurred exception.
+     * This means the occurred exception will be throw out of
+     * the {@link Delivery#deliverMessagesFrom(ShardIndex) deliverMessagesFrom()} method.
+     *
+     * @param failure
+     *         contains an information about the occurred failure and gives access to
+     *         predefined {@code Action}s to handle the error
+     */
+    @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
+    public FailedPickUp.Action onShardPickUpFailure(RuntimeFailure failure) {
+        return failure.propagate();
+    }
+
+    /**
+     * Called if {@code Delivery} could not pick up a shard because it was already picked up
+     * by another worker.
+     *
+     * <p>Returns an action to take in relation to the failure.
+     *
+     * <p>By default this callback returns an Action that does nothing. This means that
+     * an empty {@code Optional} will be returned from the {@code deliverMessagesFrom()} method.
+     *
+     * @param failure
+     *         contains an information about the worker who owns the session and gives access
+     *         to predefined {@code Action}s to handle the error
+     */
+    @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
+    public FailedPickUp.Action onShardAlreadyPicked(AlreadyPickedUp failure) {
+        return failure.doNothing();
     }
 
     /**
