@@ -43,6 +43,7 @@ import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -163,9 +164,8 @@ public class Sample {
             case BOOLEAN:
                 return random.nextBoolean();
             case STRING:
-                byte[] bytes = new byte[8];
-                random.nextBytes(bytes);
-                return new String(bytes, Charsets.UTF_8);
+                return UUID.randomUUID()
+                           .toString();
             case BYTE_STRING:
                 byte[] bytesPrimitive = new byte[8];
                 random.nextBytes(bytesPrimitive);
