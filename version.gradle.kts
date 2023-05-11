@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,13 +34,13 @@
 /**
  * Version of this library.
  */
-val coreJava = "1.9.0-SNAPSHOT.12"
+val coreJava = "1.9.0-SNAPSHOT.13"
 
 /**
  * Versions of the Spine libraries that `core-java` depends on.
  */
-val base = "1.9.0-SNAPSHOT.5"
-val time = "1.9.0-SNAPSHOT.5"
+val base = "1.9.0-SNAPSHOT.6"
+val time = "1.9.0-SNAPSHOT.6"
 
 project.extra.apply {
     this["versionToPublish"] = coreJava
