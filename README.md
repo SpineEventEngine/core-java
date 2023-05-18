@@ -1,8 +1,6 @@
 # Welcome to Spine Event Engine
-[![Build Status](https://travis-ci.com/SpineEventEngine/core-java.svg?branch=master)](https://travis-ci.com/SpineEventEngine/core-java) &nbsp;
 [![codecov.io](https://codecov.io/github/SpineEventEngine/core-java/coverage.svg?branch=master)](https://codecov.io/github/SpineEventEngine/core-java?branch=master) &nbsp;
 [![license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Gitter chat](https://badges.gitter.im/SpineEventEngine.png)](https://gitter.im/SpineEventEngine)
 
 [Spine Event Engine][spine-site] is a Java framework for building Event Sourcing and CQRS
 applications that are accessed by clients built with JavaScript, Java Nano (Android), Dart, and Java.
@@ -18,7 +16,7 @@ This repository contains the code of:
 The project is under active ongoing development. 
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.8.2][latest-release].  
+The latest stable version is [1.9.0][latest-release].  
 
 ## Quick start and examples
 
@@ -59,7 +57,7 @@ latest version of the configuration files.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:developers@spine.io
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.8.2
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.9.0
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
