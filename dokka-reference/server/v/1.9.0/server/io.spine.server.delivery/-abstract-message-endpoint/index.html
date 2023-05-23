@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>AbstractMessageEndpoint</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/custom-styles.css" rel="Stylesheet">
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>server</span>
+            </a>
+    </div>
+    <div>
+1.9.0    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":server:dokkaHtml/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="server::io.spine.server.delivery/AbstractMessageEndpoint///PointingToDeclaration//-403166102">
+  <div class="breadcrumbs"><a href="../../../index.html">server</a><span class="delimiter">/</span><a href="../index.html">io.spine.server.delivery</a><span class="delimiter">/</span><span class="current">AbstractMessageEndpoint</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Abstract</span><wbr></wbr><span>Message</span><wbr></wbr><span><span>Endpoint</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">AbstractMessageEndpoint</a><span class="token operator">&lt;</span>I<span class="token punctuation">, </span>M<span class="token keyword"> extends </span><a href="../../io.spine.server.type/-signal-envelope/index.html">SignalEnvelope</a><span class="token operator">&lt;</span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token keyword"> implements </span><a href="../-message-endpoint/index.html">MessageEndpoint</a><span class="token operator">&lt;</span><a href="../-message-endpoint/index.html">I</a><span class="token punctuation">, </span><a href="../-message-endpoint/index.html">M</a><span class="token operator">&gt;</span></div><p class="paragraph">An abstract base for messages endpoints. </p><p class="paragraph">Upon a run-time dispatching, catches all <code class="lang-kotlin">Exception</code>s throw, and transforms them into a DispatchOutcome.</p><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>&lt;I&gt;</span></span></u></div></span></div><div><div class="title"><p class="paragraph">the type of target identifier</p></div></div></div></div><div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>&lt;M&gt;</span></span></u></div></span></div><div><div class="title"><p class="paragraph">the type of message envelope being delivered</p></div></div></div></div></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.spine.server.entity/-entity-message-endpoint/index.html">EntityMessageEndpoint</a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,FUNCTION,PROPERTY">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="1243960698%2FConstructors%2F-403166102" anchor-label="AbstractMessageEndpoint" id="1243960698%2FConstructors%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-abstract-message-endpoint.html"><span>Abstract</span><wbr></wbr><span>Message</span><wbr></wbr><span><span>Endpoint</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1243960698%2FConstructors%2F-403166102"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword"></span>void <a href="-abstract-message-endpoint.html"><span class="token function">AbstractMessageEndpoint</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="index.html">M</a> envelope</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-631719447%2FFunctions%2F-403166102" anchor-label="dispatchTo" id="-631719447%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dispatch-to.html"><span>dispatch</span><wbr></wbr><span><span>To</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-631719447%2FFunctions%2F-403166102"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">final </span><span class="token keyword"></span>DispatchOutcome <a href="dispatch-to.html"><span class="token function">dispatchTo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="index.html">I</a> targetId</span></span><span class="token punctuation">)</span></div><div class="brief ">Dispatches the message to the target with the passed ID.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1364159787%2FFunctions%2F-403166102" anchor-label="envelope" id="-1364159787%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="envelope.html"><span><span>envelope</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1364159787%2FFunctions%2F-403166102"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword">final </span><span class="token keyword"></span><a href="index.html">M</a> <a href="envelope.html"><span class="token function">envelope</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Obtains the envelope of the message processed by this endpoint.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1137363041%2FFunctions%2F-403166102" anchor-label="performDispatch" id="-1137363041%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="perform-dispatch.html"><span>perform</span><wbr></wbr><span><span>Dispatch</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1137363041%2FFunctions%2F-403166102"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">protected </span><span class="token keyword">abstract </span><span class="token keyword"></span>DispatchOutcome <a href="perform-dispatch.html"><span class="token function">performDispatch</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="index.html">I</a> targetId</span></span><span class="token punctuation">)</span></div><div class="brief ">Performs actual dispatching of the signal to the respective target by the passed ID.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Inherited functions</h2>
+        <div class="table"><a data-name="119827272%2FFunctions%2F-403166102" anchor-label="onDuplicate" id="119827272%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-message-endpoint/on-duplicate.html"><span>on</span><wbr></wbr><span><span>Duplicate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="119827272%2FFunctions%2F-403166102"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword"></span>void <a href="../-message-endpoint/on-duplicate.html"><span class="token function">onDuplicate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword"></span><a href="../-message-endpoint/index.html">I</a> target<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword"></span><a href="../-message-endpoint/index.html">M</a> envelope</span></span><span class="token punctuation">)</span></div><div class="brief ">The callback invoked if the handled signal is a duplicate.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="360701725%2FFunctions%2F-403166102" anchor-label="repository" id="360701725%2FFunctions%2F-403166102" data-filterable-set=":server:dokkaHtml/main"></a>
+          <div class="table-row" data-filterable-current=":server:dokkaHtml/main" data-filterable-set=":server:dokkaHtml/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-message-endpoint/repository.html"><span><span>repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="360701725%2FFunctions%2F-403166102"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":server:dokkaHtml/main"><div class="symbol monospace block"><span class="token keyword">public </span><span class="token keyword">abstract </span><span class="token keyword"></span><a href="../../io.spine.server.entity/-repository/index.html">Repository</a><span class="token operator">&lt;</span><a href="../-message-endpoint/index.html">I</a><span class="token punctuation">, </span><span class="token keyword">? extends </span><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Object.html">Object</a><span class="token operator">&gt;</span> <a href="../-message-endpoint/repository.html"><span class="token function">repository</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief ">Obtains the repository which manages the target entities.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>Copyright 2023, TeamDev</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
