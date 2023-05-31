@@ -25,7 +25,6 @@
  */
 package io.spine.server;
 
-import io.grpc.BindableService;
 import io.grpc.ServerServiceDefinition;
 import io.spine.server.given.transport.TestGrpcServer;
 import io.spine.testing.logging.mute.MuteLogging;
@@ -102,6 +101,40 @@ class GrpcContainerTest {
 
         assertThat(grpcContainer.grpcServer())
                 .isNotNull();
+    }
+
+    @Test
+    @DisplayName("configure underlying gRPC server")
+    void configureUnderlyingGrpcServer() {
+        var port = 1654;
+        var service = CommandService
+                .newBuilder()
+                .build();
+        var container = GrpcContainer
+                .atPort(port)
+                .withServer((server) -> server.addService(service))
+                .build();
+        try {
+            container.start();
+            var server = container.grpcServer();
+            assertThat(server)
+                    .isNotNull();
+
+            var deployedServices = server.getServices();
+            assertThat(deployedServices)
+                    .hasSize(1);
+
+            var actualName = deployedServices
+                    .get(0)
+                    .getServiceDescriptor()
+                    .getName();
+            assertThat(actualName).contains(service.getClass()
+                                                   .getSimpleName());
+        } catch (IOException e) {
+            fail(e);
+        } finally {
+            container.shutdown();
+        }
     }
 
     @Test
