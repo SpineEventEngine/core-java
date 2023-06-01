@@ -38,6 +38,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.bus.Listener;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -47,6 +48,8 @@ import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.BlackBoxId;
@@ -472,14 +475,15 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         private final CommandClass commandClass =
                 CommandClass.from(BbRegisterCommandDispatcher.class);
-        private CommandDispatcher commandDispatcher;
-        private EventDispatcher eventDispatcher;
-
+        private final Listener<CommandEnvelope> commandListener = envelope -> {};
+        private final Listener<EventEnvelope> eventListener = envelope -> {};
         private final Set<TypeName> types = toTypes(repositories);
+        private final TenantIndex tenantIndex = new StubTenantIndex();
 
         private BlackBox blackBox;
         private EventEnricher enricher;
-        private final TenantIndex tenantIndex = new StubTenantIndex();
+        private CommandDispatcher commandDispatcher;
+        private EventDispatcher eventDispatcher;
 
         @BeforeEach
         void setUp() {
@@ -509,7 +513,9 @@ abstract class BlackBoxTest<T extends BlackBox> {
                                     Class<? extends BlackBox> clazz) {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
+            builder.addCommandListener(commandListener);
             builder.addEventDispatcher(eventDispatcher);
+            builder.addEventListener(eventListener);
             builder.systemSettings().disableParallelPosting();
             blackBox = BlackBox.from(builder);
 
@@ -517,6 +523,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
             assertRepositories();
             assertEntityTypes();
             assertDispatchers();
+            assertListeners();
             assertEnricher();
             assertTenantIndex();
             assertDisabledPosting();
@@ -540,6 +547,13 @@ abstract class BlackBoxTest<T extends BlackBox> {
             assertThat(commandBus().registeredCommandClasses()).contains(commandClass);
             assertThat(eventBus().registeredEventClasses())
                     .containsAtLeastElementsIn(eventDispatcher.eventClasses());
+        }
+
+        private void assertListeners() {
+            assertThat(commandBus().hasListener(commandListener))
+                    .isTrue();
+            assertThat(eventBus().hasListener(eventListener))
+                    .isTrue();
         }
 
         private BoundedContext context() {
