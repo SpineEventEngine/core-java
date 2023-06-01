@@ -29,7 +29,7 @@ package io.spine.system.server;
 /**
  * A configuration of a {@link SystemContext}.
  */
-interface SystemFeatures {
+public interface SystemFeatures {
 
     /**
      * Obtains the {@link io.spine.system.server.CommandLog CommandLog} setting.

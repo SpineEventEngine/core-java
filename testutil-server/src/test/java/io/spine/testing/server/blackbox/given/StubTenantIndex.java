@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,35 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.testing.server.blackbox.given;
 
-import io.spine.base.EventMessage;
-import io.spine.core.Event;
-import io.spine.core.Origin;
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.TenantId;
+import io.spine.server.tenant.TenantIndex;
 
-import static io.spine.util.Exceptions.newIllegalStateException;
+import java.util.Set;
 
 /**
- * An implementation of {@link SystemWriteSide} which never performs an operation.
- *
- * <p>All the methods inherited from {@link SystemWriteSide} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
+ * A no-op implementation of {@code TenantIndex} for tests.
  */
-public enum NoOpSystemWriteSide implements SystemWriteSide {
+public final class StubTenantIndex implements TenantIndex {
 
-    INSTANCE;
-
+    /**
+     * Does nothing.
+     */
     @Override
-    public Event postEvent(EventMessage systemEvent, Origin origin) {
-        return Event.getDefaultInstance();
+    public void keep(TenantId id) {
     }
 
+    /**
+     * Returns an empty set.
+     */
     @Override
-    public SystemFeatures features() {
-        throw newIllegalStateException(
-                "No-op of `SystemWriteSide` does not provide `features()`."
-        );
+    public Set<TenantId> all() {
+        return ImmutableSet.of();
+    }
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void close() {
     }
 }

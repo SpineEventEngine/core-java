@@ -29,7 +29,6 @@ package io.spine.testing.server.blackbox;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Subject;
-import com.google.common.truth.Truth8;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.client.TopicFactory;
 import io.spine.core.ActorContext;
@@ -46,6 +45,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandClass;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.logging.mute.MuteLogging;
@@ -68,6 +68,7 @@ import io.spine.testing.server.blackbox.given.BbProjectViewProjection;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.Given;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
+import io.spine.testing.server.blackbox.given.StubTenantIndex;
 import io.spine.testing.server.blackbox.rejection.Rejections;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.time.ZoneIds;
@@ -82,6 +83,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
@@ -477,6 +479,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         private BlackBox blackBox;
         private EventEnricher enricher;
+        private final TenantIndex tenantIndex = new StubTenantIndex();
 
         @BeforeEach
         void setUp() {
@@ -497,6 +500,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         void multiTenant() {
             var builder = BoundedContextBuilder
                     .assumingTests(true)
+                    .setTenantIndex(tenantIndex)
                     .enrichEventsUsing(enricher);
             assertBlackBox(builder, MtBlackBox.class);
         }
@@ -506,6 +510,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
             repositories.forEach(builder::add);
             builder.addCommandDispatcher(commandDispatcher);
             builder.addEventDispatcher(eventDispatcher);
+            builder.systemSettings().disableParallelPosting();
             blackBox = BlackBox.from(builder);
 
             assertThat(blackBox).isInstanceOf(clazz);
@@ -513,6 +518,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
             assertEntityTypes();
             assertDispatchers();
             assertEnricher();
+            assertTenantIndex();
+            assertDisabledPosting();
         }
 
         private void assertRepositories() {
@@ -547,9 +554,32 @@ abstract class BlackBoxTest<T extends BlackBox> {
             return context().commandBus();
         }
 
+        private TenantIndex tenantIndex() {
+            return context().internalAccess().tenantIndex();
+        }
+
         private void assertEnricher() {
-            Truth8.assertThat(eventBus().enricher())
+            assertThat(eventBus().enricher())
                   .hasValue(enricher);
+        }
+
+        private void assertTenantIndex() {
+            if(context().isMultitenant()) {
+                assertThat(tenantIndex())
+                        .isSameInstanceAs(tenantIndex);
+            }
+        }
+
+        private boolean postsEventsInParallel() {
+            return context().systemClient()
+                            .writeSide()
+                            .features()
+                            .postEventsInParallel();
+        }
+
+        private void assertDisabledPosting() {
+            assertThat(postsEventsInParallel())
+                    .isFalse();
         }
 
         /**
