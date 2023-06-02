@@ -667,19 +667,18 @@ public final class BoundedContextBuilder implements Logging {
     @Internal
     @VisibleForTesting
     public BoundedContextBuilder testingCopy() {
-        var name = name().getValue();
-        var enricher = eventEnricher().orElseGet(() ->
-                                                         EventEnricher.newBuilder().build());
-        var copy =
-                isMultitenant()
-                ? BoundedContext.multitenant(name)
-                : BoundedContext.singleTenant(name);
+        var copy = new BoundedContextBuilder(this.spec, this.systemSettings);
+        var enricher = eventEnricher()
+                .orElseGet(() -> EventEnricher.newBuilder().build());
         copy.enrichEventsUsing(enricher);
+        tenantIndex().ifPresent(copy::setTenantIndex);
         repositories().forEach(copy::add);
         commandDispatchers().forEach(copy::addCommandDispatcher);
         commandBus.filters().forEach(copy::addCommandFilter);
+        commandBus.listeners().forEach(copy::addCommandListener);
         eventDispatchers().forEach(copy::addEventDispatcher);
         eventBus.filters().forEach(copy::addEventFilter);
+        eventBus.listeners().forEach(copy::addEventListener);
         return copy;
     }
 }

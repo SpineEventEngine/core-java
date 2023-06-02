@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.server.blackbox.given;
+
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.TenantId;
+import io.spine.server.tenant.TenantIndex;
+
+import java.util.Set;
+
 /**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * A no-op implementation of {@code TenantIndex} for tests.
  */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.143")
+public final class StubTenantIndex implements TenantIndex {
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void keep(TenantId id) {
+    }
+
+    /**
+     * Returns an empty set.
+     */
+    @Override
+    public Set<TenantId> all() {
+        return ImmutableSet.of();
+    }
+
+    /**
+     * Does nothing.
+     */
+    @Override
+    public void close() {
+    }
+}

@@ -31,9 +31,11 @@ import io.spine.core.Event;
 import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
+import io.spine.util.Exceptions;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -104,5 +106,12 @@ public final class MemoizingWriteSide implements SystemWriteSide {
     public MemoizedSystemMessage lastSeenEvent() {
         assertNotNull(lastSeenEvent);
         return lastSeenEvent;
+    }
+
+    @Override
+    public SystemFeatures features() {
+        throw newIllegalStateException(
+                "This implementation of `SystemWriteSide` does not provide `features()`."
+        );
     }
 }

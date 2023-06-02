@@ -84,4 +84,9 @@ final class DefaultSystemWriteSide implements SystemWriteSide {
         system.eventBus()
               .post(event, noOpObserver());
     }
+
+    @Override
+    public SystemFeatures features() {
+        return system.config();
+    }
 }
