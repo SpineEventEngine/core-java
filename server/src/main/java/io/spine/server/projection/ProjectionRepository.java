@@ -46,6 +46,7 @@ import io.spine.server.delivery.CatchUpSignal;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.delivery.Inbox;
 import io.spine.server.delivery.InboxLabel;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.RepositoryCache;
 import io.spine.server.entity.model.StateClass;
@@ -68,6 +69,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Sets.intersection;
 import static com.google.common.collect.Sets.union;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
+import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.server.tenant.TenantAwareRunner.withCurrentTenant;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -362,10 +364,16 @@ public abstract class ProjectionRepository<I,
         return subscriber.isPresent();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sends the given event to the {@code Inbox}es of respective entities.
+     */
     @Override
-    protected final void dispatchTo(I id, Event event) {
-        inbox().send(EventEnvelope.of(event))
-               .toSubscriber(id);
+    protected final DispatchOutcome dispatchTo(Set<I> ids, EventEnvelope event) {
+        ids.forEach(id -> inbox().send(event)
+                                 .toSubscriber(id));
+        return sentToInbox(event, ids);
     }
 
     /**
@@ -456,7 +464,7 @@ public abstract class ProjectionRepository<I,
      * the {@link CatchUpEndpoint} exposed by this repository.
      *
      * <p>Please note that the {@code CatchUpSignal}s are dispatched to the selected targets
-     * only and cannot be dispatched to all of the repository instances. The reason is that
+     * only and cannot be dispatched to all the repository instances. The reason is that
      * handling of {@code CatchUpSignal}s may affect the lifecycle state of the projection
      * instances. E.g. the callee must know to what targets he is sending the "delete state" signal.
      *

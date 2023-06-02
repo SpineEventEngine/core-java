@@ -102,6 +102,26 @@ public class DeliveryMonitor {
     }
 
     /**
+     * A callback invoked if the signal transmitted via given message
+     * was handled by the respective receptor with failure.
+     *
+     * <p>Returns an action to take in relation to the failure.
+     *
+     * <p>By default, this callback returns an action which
+     * marks the message as {@linkplain InboxMessageStatus#DELIVERED delivered}.
+     *
+     * <p>See {@link FailedReception} for more pre-defined actions.
+     *
+     * @param reception
+     *         the details on failed reception
+     */
+    @SuppressWarnings("WeakerAccess")   /* Part of public API. */
+    public FailedReception.Action onReceptionFailure(FailedReception reception) {
+        return reception.markDelivered();
+    }
+
+
+    /**
      * Returns an instance of {@code DeliveryMonitor} which always says to continue.
      */
     static DeliveryMonitor alwaysContinue() {

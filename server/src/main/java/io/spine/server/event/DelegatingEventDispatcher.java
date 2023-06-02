@@ -29,6 +29,7 @@ package io.spine.server.event;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
@@ -80,8 +81,8 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
     }
 
     @Override
-    public void dispatch(EventEnvelope event) {
-        delegate.dispatchEvent(event);
+    public DispatchOutcome dispatch(EventEnvelope event) {
+        return delegate.dispatchEvent(event);
     }
 
     @Override
@@ -92,7 +93,7 @@ public final class DelegatingEventDispatcher implements EventDispatcher {
     /**
      * Returns the string representation of this dispatcher.
      *
-     * <p>Includes an FQN of the {@code delegate} in order to allow distinguish
+     * <p>Includes an FQN of the {@code delegate} in order to allow distinguishing
      * {@code DelegatingEventDispatcher} instances with different delegates.
      */
     @Override

@@ -29,8 +29,11 @@ package io.spine.testing.server.blackbox.given;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.command.AbstractCommandDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
+
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 /**
  * Increments a counter on receiving a command of the specified type.
@@ -38,8 +41,6 @@ import io.spine.server.type.CommandEnvelope;
  * @see io.spine.testing.server.blackbox.BlackBoxTest
  */
 public final class BbCommandDispatcher extends AbstractCommandDispatcher {
-
-    private int commandsReceived = 0;
     private final CommandClass commandToDispatch;
 
     public BbCommandDispatcher(CommandClass commandToDispatch) {
@@ -54,7 +55,7 @@ public final class BbCommandDispatcher extends AbstractCommandDispatcher {
 
     @CanIgnoreReturnValue
     @Override
-    public void dispatch(CommandEnvelope envelope) {
-        commandsReceived++;
+    public DispatchOutcome dispatch(CommandEnvelope envelope) {
+        return successfulOutcome(envelope);
     }
 }

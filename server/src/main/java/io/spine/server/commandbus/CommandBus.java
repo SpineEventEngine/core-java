@@ -214,6 +214,8 @@ public final class CommandBus
     }
 
     @Override
+    @SuppressWarnings("ResultOfMethodCallIgnored"
+            /* Dispatching outcome is reported via system events, if needed. */)
     protected void dispatch(CommandEnvelope command) {
         var dispatcher = dispatcherOf(command);
         watcher.onDispatchCommand(command);

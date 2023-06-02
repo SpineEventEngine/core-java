@@ -410,7 +410,7 @@ public final class Delivery implements Logging {
      * linear-style jobs, which aim for the maximum performance under
      * the strictly controlled circumstances.
      *
-     * <p>Any concurrent dispatching of signals (command posting, receiving external events, etc)
+     * <p>Any concurrent dispatching of signals (command posting, receiving external events, etc.)
      * will likely break the consistency of their target entities.
      *
      * <p>This API is experimental. Use with caution.
@@ -425,7 +425,7 @@ public final class Delivery implements Logging {
                 .build();
         delivery.subscribe(update -> {
             var action = delivery.deliveries.get(update);
-            action.deliver(ImmutableList.of(update));
+            action.deliverDirectly(update);
         });
         return delivery;
     }
@@ -534,8 +534,8 @@ public final class Delivery implements Logging {
     private DeliveryStage deliverMessages(ImmutableList<InboxMessage> messages,
                                           ShardIndex index,
                                           Iterable<CatchUp> catchUpJobs) {
-        DeliveryAction action = new GroupByTargetAndDeliver(deliveries);
         var conveyor = new Conveyor(messages, deliveredMessages);
+        DeliveryAction action = new GroupByTargetAndDeliver(deliveries, monitor, conveyor);
         List<Station> stations = conveyorStationsFor(catchUpJobs, action);
         var stage = launch(conveyor, stations, index);
         return stage;

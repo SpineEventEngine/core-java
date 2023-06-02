@@ -28,8 +28,11 @@ package io.spine.testing.server.blackbox.given;
 
 import io.spine.core.MessageId;
 import io.spine.core.UserId;
+import io.spine.server.bus.Listener;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.TestValues;
 import io.spine.testing.core.given.GivenVersion;
 import io.spine.testing.server.blackbox.BbProject;
@@ -198,5 +201,13 @@ public class Given {
                                    .value())
                 .setId(pack(newUuidValue()))
                 .build();
+    }
+
+    public static Listener<CommandEnvelope> commandListener() {
+        return envelope -> {};
+    }
+
+    public static Listener<EventEnvelope> eventListener() {
+        return envelope -> {};
     }
 }

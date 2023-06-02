@@ -151,7 +151,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * <p>Throwing {@linkplain Throwable other types} of {@code Throwable}s is not allowed in
  * the command-transforming methods.
  *
- *
  * <h1>Command Reaction</h1>
  *
  * <p>A commanding method may serve to emit commands in response to an incoming event. In this case

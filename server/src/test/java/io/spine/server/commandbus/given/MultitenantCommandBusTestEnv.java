@@ -28,10 +28,13 @@ package io.spine.server.commandbus.given;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.test.commandbus.command.CmdBusAddTask;
+
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 public class MultitenantCommandBusTestEnv {
 
@@ -54,8 +57,9 @@ public class MultitenantCommandBusTestEnv {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
+        public DispatchOutcome dispatch(CommandEnvelope envelope) {
             dispatcherInvoked = true;
+            return successfulOutcome(envelope);
         }
 
         public boolean wasDispatcherInvoked() {

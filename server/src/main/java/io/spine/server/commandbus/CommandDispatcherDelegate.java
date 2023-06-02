@@ -27,6 +27,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 
@@ -68,9 +69,9 @@ public interface CommandDispatcherDelegate {
     ImmutableSet<CommandClass> commandClasses();
 
     /**
-     * Dispatches the command.
+     * Dispatches the command  and returns the outcome of the dispatching.
      */
-    void dispatchCommand(CommandEnvelope envelope);
+    DispatchOutcome dispatchCommand(CommandEnvelope envelope);
 
     /**
      * Tells if this instance dispatches at least one command.
