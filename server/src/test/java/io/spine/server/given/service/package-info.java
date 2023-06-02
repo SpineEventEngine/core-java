@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,12 @@
  */
 
 /**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * Provides test-grade types and interfaces of gRPC services.
  */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.142")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.given.service;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.given.service;
+
+import io.spine.server.CommandService;
+
 /**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * Factory of {@code CommandService} instances to use in tests.
  */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.142")
+public final class GivenCommandService {
+
+    /**
+     * Prevents direct instantiation.
+     */
+    private GivenCommandService() {
+    }
+
+    /**
+     * Returns a new instance of {@code CommandService} which does not serve
+     * any command type.
+     */
+    public static CommandService noOpCommandService() {
+        return CommandService.newBuilder()
+                .build();
+    }
+}

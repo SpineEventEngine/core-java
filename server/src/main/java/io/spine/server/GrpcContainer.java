@@ -36,15 +36,18 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.inprocess.InProcessServerBuilder;
+import io.spine.annotation.Experimental;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.GrpcContainer.ConfigureServer.doNothing;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -75,6 +78,8 @@ public final class GrpcContainer {
     @VisibleForTesting
     private @Nullable Server injectedServer;
 
+    private final ConfigureServer configureServer;
+
     /**
      * Initiates creating a container exposed at the given port.
      */
@@ -95,6 +100,9 @@ public final class GrpcContainer {
         this.port = builder.port().orElse(null);
         this.serverName = builder.serverName().orElse(null);
         this.services = builder.services();
+        this.configureServer = builder.configureServer == null
+                               ? doNothing()
+                               : builder.configureServer;
     }
 
     /**
@@ -277,6 +285,7 @@ public final class GrpcContainer {
         for (var service : services) {
             builder.addService(service);
         }
+        builder = configureServer.apply(builder);
         return builder.build();
     }
 
@@ -318,7 +327,9 @@ public final class GrpcContainer {
      * Injects a server to this container.
      *
      * <p>All calls to {@link #createGrpcServer(Executor)} will resolve to the given server
-     * instance.
+     * instance. The server instance is used as-is, no other
+     * {@linkplain Builder#withServer(ConfigureServer) configuration methods}
+     * have any effect on it.
      *
      * <p>A test-only method.
      */
@@ -374,17 +385,32 @@ public final class GrpcContainer {
     public static final class Builder extends ConnectionBuilder {
 
         private final Set<ServerServiceDefinition> services = Sets.newHashSet();
+        private @Nullable ConfigureServer configureServer;
 
         private Builder(@Nullable Integer port, @Nullable String serverName) {
             super(port, serverName);
         }
 
+        /**
+         * Adds a gRPC service to deploy within the container being built.
+         *
+         * @return this instance of {@code Builder}, for call chaining
+         */
         @CanIgnoreReturnValue
         public Builder addService(BindableService service) {
             services.add(service.bindService());
             return this;
         }
 
+        /**
+         * Removes the {@linkplain #addService(BindableService) previously added}
+         * gRPC service.
+         *
+         * <p>If the service under the given definition was not added previously,
+         * this method does nothing.
+         *
+         * @return this instance of {@code Builder}, for call chaining
+         */
         @CanIgnoreReturnValue
         public Builder removeService(ServerServiceDefinition service) {
             services.remove(service);
@@ -398,8 +424,63 @@ public final class GrpcContainer {
             return ImmutableSet.copyOf(services);
         }
 
+        /**
+         * Sets an additional configuration action for the gRPC {@link Server} instance,
+         * created for this {@code GrpcContainer} to run on top of. This configuration is applied
+         * right before the {@linkplain #start() server is started}.
+         *
+         * <p>Allows the direct access to gRPC {@link ServerBuilder}'s API.
+         *
+         * <p>Please note this API is experimental.
+         *
+         * @return this instance of {@code Builder}, for call chaining
+         * @see ConfigureServer
+         */
+        @Experimental
+        @CanIgnoreReturnValue
+        public Builder withServer(ConfigureServer action) {
+            this.configureServer = checkNotNull(action);
+            return this;
+        }
+
         public GrpcContainer build() {
             return new GrpcContainer(this);
+        }
+    }
+
+    /**
+     * Allows to configure the gRPC's {@link Server} instance,
+     * on top of which this {@code GrpcContainer} will operate.
+     *
+     * <p>It is expected that the obtained builder of gRPC server is used to perform
+     * some fine-grained tuning of its features. The same instance of {@link ServerBuilder}
+     * should be returned.
+     *
+     * <p>Example.
+     *
+     * <pre>
+     *
+     * val container =
+     *     GrpcContainer.atPort(1654)
+     * {@literal                 .withServer((server) -> server.maxInboundMessageSize(16_000_000)) }
+     *                  // ...
+     *                  .build();
+     *
+     * </pre>
+     *
+     * <p>Please note this interface is a part of experimental API.
+     *
+     * @see Builder#withServer(ConfigureServer)
+     */
+    @Experimental
+    @FunctionalInterface
+    public interface ConfigureServer extends Function<ServerBuilder<?>, ServerBuilder<?>> {
+
+        /**
+         * Returns an instance which does nothing and returns the same {@code ServerBuilder}.
+         */
+        static ConfigureServer doNothing() {
+            return builder -> builder;
         }
     }
 }

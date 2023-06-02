@@ -33,6 +33,7 @@ import io.spine.core.Status
 import io.spine.grpc.MemoizingObserver
 import io.spine.grpc.StreamObservers.memoizingObserver
 import io.spine.protobuf.isNotDefault
+import io.spine.server.given.service.GivenCommandService.noOpCommandService
 import io.spine.test.unpublished.command.Halt
 import io.spine.testing.client.TestActorRequestFactory
 import io.spine.testing.logging.mute.MuteLogging
@@ -50,7 +51,7 @@ internal class CommandServiceUnpublishedLanguageSpec {
 
     @BeforeEach
     fun initServiceAndObserver() {
-        service = CommandService.newBuilder().build()
+        service = noOpCommandService()
         observer = memoizingObserver()
     }
 
