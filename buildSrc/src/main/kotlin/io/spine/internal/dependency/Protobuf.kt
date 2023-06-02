@@ -30,7 +30,7 @@ package io.spine.internal.dependency
 @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
 object Protobuf {
     private const val group = "com.google.protobuf"
-    const val version       = "3.21.12"
+    const val version       = "3.22.2"
     val libs = listOf(
         "${group}:protobuf-java:${version}",
         "${group}:protobuf-java-util:${version}",
@@ -46,7 +46,7 @@ object Protobuf {
          *
          * When changing the version, also change the version used in the `build.gradle.kts`.
          */
-        const val version = "0.9.1"
+        const val version = "0.9.2"
         const val id = "com.google.protobuf"
         const val lib = "${group}:protobuf-gradle-plugin:${version}"
     }

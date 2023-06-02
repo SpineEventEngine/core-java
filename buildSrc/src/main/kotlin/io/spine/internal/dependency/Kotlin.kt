@@ -35,12 +35,17 @@ object Kotlin {
      * When changing the version, also change the version used in the `buildSrc/build.gradle.kts`.
      */
     @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version = "1.8.0"
+    const val version = "1.8.10"
 
     private const val group = "org.jetbrains.kotlin"
 
     const val stdLib       = "${group}:kotlin-stdlib:${version}"
     const val stdLibCommon = "${group}:kotlin-stdlib-common:${version}"
+
+    @Deprecated("Please use `stdLib` instead.")
+    const val stdLibJdk7   = "${group}:kotlin-stdlib-jdk7:${version}"
+
+    @Deprecated("Please use `stdLib` instead.")
     const val stdLibJdk8   = "${group}:kotlin-stdlib-jdk8:${version}"
 
     const val reflect    = "${group}:kotlin-reflect:${version}"

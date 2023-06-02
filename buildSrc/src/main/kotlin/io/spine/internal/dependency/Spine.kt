@@ -26,259 +26,123 @@
 
 package io.spine.internal.dependency
 
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.extra
-
 /**
  * Dependencies on Spine modules.
- *
- * @constructor
- * Creates a new instance of `Spine` taking the property values
- * of versions from the given project's extra properties.
  */
 @Suppress("unused")
-class Spine(p: ExtensionAware) {
+object Spine {
+
+    const val group = "io.spine"
+    const val toolsGroup = "io.spine.tools"
 
     /**
-     * Default versions for the modules of Spine, unless they are
-     * configured in `versions.gradle.kts`.
+     * Versions for published Spine SDK artifacts.
      */
-    object DefaultVersion {
+    object ArtifactVersion {
+
+        /** The version of [ProtoData]. */
+        @Deprecated("Please use `ProtoData.version` instead.")
+        const val protoData = ProtoData.version
+
+        /** The version of [Spine.base]. */
+        const val base = "2.0.0-SNAPSHOT.180"
+
+        /** The version of [Spine.reflect]. */
+        const val reflect = "2.0.0-SNAPSHOT.182"
+
+        /** The version of [Spine.logging]. */
+        const val logging = "2.0.0-SNAPSHOT.186"
+
+        /** The version of [Spine.testlib]. */
+        const val testlib = "2.0.0-SNAPSHOT.183"
 
         /**
-         * The version of ProtoData to be used in the project.
-         *
-         * We do it here instead of `versions.gradle.kts` because we later use
-         * it in a `plugins` section in a build script.
-         *
-         * This version cannot be re-defined via `version.gradle.kts` like versions
-         * of other subprojects like [base] or [core]. So, if you want to use another version,
-         * please update this value in your `buildSrc.
-         *
-         * Development of ProtoData uses custom convention for using custom version
-         * of ProtoData in its integration tests. Please see `ProtoData/version.gradle.kts`
-         * for details.
-         *
-         * @see [ProtoData]
-         */
-        const val protoData = "0.6.1"
-
-        /**
-         * The default version of `base` to use.
-         * @see [Spine.base]
-         */
-        const val base = "2.0.0-SNAPSHOT.150"
-
-        /**
-         * The default version of `core-java` to use.
+         * The version of `core-java`.
          * @see [Spine.CoreJava.client]
          * @see [Spine.CoreJava.server]
          */
-        const val core = "2.0.0-SNAPSHOT.122"
+        const val core = "2.0.0-SNAPSHOT.141"
 
-        /**
-         * The version of `model-compiler` to use.
-         * @see [Spine.modelCompiler]
-         */
+        /** The version of [Spine.modelCompiler]. */
         const val mc = "2.0.0-SNAPSHOT.130"
 
-        /**
-         * The version of `mc-java` to use.
-         */
-        const val mcJava = "2.0.0-SNAPSHOT.132"
+        /** The version of [McJava]. */
+        const val mcJava = "2.0.0-SNAPSHOT.147"
 
-        /**
-         * The version of `base-types` to use.
-         * @see [Spine.baseTypes]
-         */
-        const val baseTypes = "2.0.0-SNAPSHOT.113"
+        /** The version of [Spine.baseTypes]. */
+        const val baseTypes = "2.0.0-SNAPSHOT.121"
 
-        /**
-         * The version of `time` to use.
-         * @see [Spine.time]
-         */
+        /** The version of [Spine.time]. */
         const val time = "2.0.0-SNAPSHOT.121"
 
-        /**
-         * The version of `change` to use.
-         * @see [Spine.change]
-         */
+        /** The version of [Spine.change]. */
         const val change = "2.0.0-SNAPSHOT.118"
 
-        /**
-         * The version of `text` to use.
-         *
-         * @see Spine.text
-         */
-        const val text = "2.0.0-SNAPSHOT.2"
+        /** The version of [Spine.text]. */
+        const val text = "2.0.0-SNAPSHOT.3"
 
-        /**
-         * The version of `tool-base` to use.
-         * @see [Spine.toolBase]
-         */
+        /** The version of [Spine.toolBase]. */
         const val toolBase = "2.0.0-SNAPSHOT.156"
 
-        /**
-         * The version of `validation` to use.
-         * @see [Spine.validation]
-         */
-        const val validation = "2.0.0-SNAPSHOT.80"
+        /** The version of [Spine.validation]. */
+        @Deprecated("Please use `Validation.version` instead.")
+        const val validation = Validation.version
 
-        /**
-         * The version of Javadoc Tools to use.
-         * @see [Spine.javadocTools]
-         */
+        /** The version of [Spine.javadocTools]. */
         const val javadocTools = "2.0.0-SNAPSHOT.75"
     }
 
-    companion object {
-        const val group = "io.spine"
-        const val toolsGroup = "io.spine.tools"
+    /** The version of ProtoData to be used in the project. */
+    @Deprecated("Please use `ProtoData.version` instead.")
+    const val protoDataVersion = ProtoData.version
 
-        /**
-         * The version of ProtoData to be used in the project.
-         *
-         * We do it here instead of `versions.gradle.kts` because we later use
-         * it in a `plugins` section in a build script.
-         *
-         * @see [ProtoData]
-         */
-        const val protoDataVersion = DefaultVersion.protoData
-    }
+    const val base = "$group:spine-base:${ArtifactVersion.base}"
+    const val logging = "$group:spine-logging:${ArtifactVersion.logging}"
+    const val loggingContext = "$group:spine-logging-context:${ArtifactVersion.logging}"
+    const val loggingBackend = "$group:spine-logging-backend:${ArtifactVersion.logging}"
+    const val reflect = "$group:spine-reflect:${ArtifactVersion.reflect}"
+    const val baseTypes = "$group:spine-base-types:${ArtifactVersion.baseTypes}"
+    const val time = "$group:spine-time:${ArtifactVersion.time}"
+    const val change = "$group:spine-change:${ArtifactVersion.change}"
+    const val text = "$group:spine-text:${ArtifactVersion.text}"
 
-    val base = "$group:spine-base:${p.baseVersion}"
-    val baseTypes = "$group:spine-base-types:${p.baseTypesVersion}"
-    val time = "$group:spine-time:${p.timeVersion}"
-    val change = "$group:spine-change:${p.changeVersion}"
-    val text = "$group:spine-text:${p.textVersion}"
-
-    val testlib = "$toolsGroup:spine-testlib:${p.baseVersion}"
-    val testUtilTime = "$toolsGroup:spine-testutil-time:${p.timeVersion}"
-    val toolBase = "$toolsGroup:spine-tool-base:${p.toolBaseVersion}"
-    val pluginBase = "$toolsGroup:spine-plugin-base:${p.toolBaseVersion}"
-    val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${p.toolBaseVersion}"
-    val modelCompiler = "$toolsGroup:spine-model-compiler:${p.mcVersion}"
-
-    /**
-     * Coordinates of the McJava plugin bundle which uses version of the bundle
-     * from [ExtensionAware.mcJavaVersion] property.
-     *
-     * This property and [ExtensionAware.mcJavaVersion] are deprecated because
-     * we discourage using versions of Spine components outside of this dependency
-     * object class.
-     */
-    @Deprecated(message = "Please use `McJava.pluginLib` instead")
-    @Suppress("DEPRECATION")
-    val mcJavaPlugin = "$toolsGroup:spine-mc-java-plugins:${p.mcJavaVersion}:all"
+    const val testlib = "$toolsGroup:spine-testlib:${ArtifactVersion.testlib}"
+    const val testUtilTime = "$toolsGroup:spine-testutil-time:${ArtifactVersion.time}"
+    const val toolBase = "$toolsGroup:spine-tool-base:${ArtifactVersion.toolBase}"
+    const val pluginBase = "$toolsGroup:spine-plugin-base:${ArtifactVersion.toolBase}"
+    const val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${ArtifactVersion.toolBase}"
+    const val modelCompiler = "$toolsGroup:spine-model-compiler:${ArtifactVersion.mc}"
 
     object McJava {
-        const val version = DefaultVersion.mcJava
+        const val version = ArtifactVersion.mcJava
         const val pluginId = "io.spine.mc-java"
         const val pluginLib = "$toolsGroup:spine-mc-java-plugins:${version}:all"
     }
 
-    /**
-     *  Does not allow re-definition via a project property.
-     *  Please change [DefaultVersion.javadocTools].
-     */
-    val javadocTools = "$toolsGroup::${DefaultVersion.javadocTools}"
+    const val javadocTools = "$toolsGroup::${ArtifactVersion.javadocTools}"
 
     @Deprecated("Please use `validation.runtime`", replaceWith = ReplaceWith("validation.runtime"))
-    val validate = "$group:spine-validate:${p.baseVersion}"
+    const val validate = "$group:spine-validate:${ArtifactVersion.base}"
 
-    val validation = Validation(p)
+    @Deprecated("Please use `Validation` instead.")
+    val validation = Validation
 
-    val coreJava = CoreJava(p)
-    val client = coreJava.client // Added for brevity.
-    val server = coreJava.server // Added for brevity.
+    @Suppress("MemberVisibilityCanBePrivate")
+    @Deprecated("Please use `CoreJava` instead.")
+    val coreJava = CoreJava
 
-    private val ExtensionAware.baseVersion: String
-        get() = "baseVersion".asExtra(this, DefaultVersion.base)
-
-    private val ExtensionAware.baseTypesVersion: String
-        get() = "baseTypesVersion".asExtra(this, DefaultVersion.baseTypes)
-
-    private val ExtensionAware.timeVersion: String
-        get() = "timeVersion".asExtra(this, DefaultVersion.time)
-
-    private val ExtensionAware.changeVersion: String
-        get() = "changeVersion".asExtra(this, DefaultVersion.change)
-
-    private val ExtensionAware.textVersion: String
-        get() = "textVersion".asExtra(this, DefaultVersion.text)
-
-    private val ExtensionAware.mcVersion: String
-        get() = "mcVersion".asExtra(this, DefaultVersion.mc)
-
-    @Deprecated(message = "Please use `Spine.McJava` dependency object instead.")
-    private val ExtensionAware.mcJavaVersion: String
-        get() = "mcJavaVersion".asExtra(this, DefaultVersion.mcJava)
-
-    private val ExtensionAware.toolBaseVersion: String
-        get() = "toolBaseVersion".asExtra(this, DefaultVersion.toolBase)
-
-    /**
-     * Dependencies on Spine validation modules.
-     *
-     * See [`SpineEventEngine/validation`](https://github.com/SpineEventEngine/validation/).
-     */
-    class Validation(p: ExtensionAware) {
-        companion object {
-            const val group = "io.spine.validation"
-        }
-        val runtime = "$group:spine-validation-java-runtime:${p.validationVersion}"
-        val java = "$group:spine-validation-java:${p.validationVersion}"
-        val model = "$group:spine-validation-model:${p.validationVersion}"
-        val config = "$group:spine-validation-configuration:${p.validationVersion}"
-
-        private val ExtensionAware.validationVersion: String
-            get() = "validationVersion".asExtra(this, DefaultVersion.validation)
-    }
-
-    /**
-     * Dependencies on ProtoData modules.
-     *
-     * See [`SpineEventEngine/ProtoData`](https://github.com/SpineEventEngine/ProtoData/).
-     */
-    object ProtoData {
-        const val group = "io.spine.protodata"
-        const val version = protoDataVersion
-        const val compiler = "$group:protodata-compiler:$version"
-
-        const val codegenJava = "io.spine.protodata:protodata-codegen-java:$version"
-
-        const val pluginId = "io.spine.protodata"
-        const val pluginLib = "${Spine.group}:protodata:$version"
-    }
+    const val client = CoreJava.client // Added for brevity.
+    const val server = CoreJava.server // Added for brevity.
 
     /**
      * Dependencies on `core-java` modules.
      *
      * See [`SpineEventEngine/core-java`](https://github.com/SpineEventEngine/core-java/).
      */
-    class CoreJava(p: ExtensionAware) {
-        val core = "$group:spine-core:${p.coreVersion}"
-        val client = "$group:spine-client:${p.coreVersion}"
-        val server = "$group:spine-server:${p.coreVersion}"
-        val testUtilServer = "$toolsGroup:spine-testutil-server:${p.coreVersion}"
-
-        private val ExtensionAware.coreVersion: String
-            get() = "coreVersion".asExtra(this, DefaultVersion.core)
-    }
-}
-
-/**
- * Obtains the value of the extension property named as this string from the given project.
- *
- * @param p the project declaring extension properties
- * @param defaultValue
- *         the default value to return, if the project does not have such a property.
- *         If `null` then rely on the property declaration, even if this would cause an error.
- */
-private fun String.asExtra(p: ExtensionAware, defaultValue: String? = null): String {
-    return if (p.extra.has(this) || defaultValue == null) {
-        p.extra[this] as String
-    } else {
-        defaultValue
+    object CoreJava {
+        const val core = "$group:spine-core:${ArtifactVersion.core}"
+        const val client = "$group:spine-client:${ArtifactVersion.core}"
+        const val server = "$group:spine-server:${ArtifactVersion.core}"
+        const val testUtilServer = "$toolsGroup:spine-testutil-server:${ArtifactVersion.core}"
     }
 }

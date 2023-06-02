@@ -33,14 +33,6 @@ import io.spine.internal.gradle.Repository
  */
 object PublishingRepos {
 
-    @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
-    val mavenTeamDev = Repository(
-        name = "maven.teamdev.com",
-        releases = "http://maven.teamdev.com/repository/spine",
-        snapshots = "http://maven.teamdev.com/repository/spine-snapshots",
-        credentialsFile = "credentials.properties"
-    )
-
     val cloudRepo = CloudRepo.destination
 
     val cloudArtifactRegistry = CloudArtifactRegistry.repository

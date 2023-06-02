@@ -33,7 +33,8 @@ object Flogger {
     @Suppress("unused")
     object Runtime {
         const val systemBackend = "com.google.flogger:flogger-system-backend:${version}"
-        const val log4J         = "com.google.flogger:flogger-log4j:${version}"
-        const val slf4J         = "com.google.flogger:slf4j-backend-factory:${version}"
+        const val log4j2Backend = "com.google.flogger:flogger-log4j2-backend:${version}"
+        const val slf4JBackend  = "com.google.flogger:flogger-slf4j-backend:${version}"
+        const val grpcContext   = "com.google.flogger:flogger-grpc-context:${version}"
     }
 }

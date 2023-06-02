@@ -36,8 +36,7 @@ plugins {
 
 dependencies {
     api(project(":client"))
-    val spine = Spine(project)
-    api(spine.testlib)
+    api(Spine.testlib)
 
     JUnit.api.forEach {
         api(it)

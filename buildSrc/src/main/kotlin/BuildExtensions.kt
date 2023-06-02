@@ -28,9 +28,11 @@
 
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.GradleDoctor
+import io.spine.internal.dependency.Kotest
+import io.spine.internal.dependency.Kover
+import io.spine.internal.dependency.ProtoData
 import io.spine.internal.dependency.Protobuf
 import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Spine.ProtoData
 import io.spine.internal.gradle.standardToSpineSdk
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -77,7 +79,7 @@ val PluginDependenciesSpec.mcJava: Spine.McJava
     get() = Spine.McJava
 
 /**
- * Shortcut to [Spine.ProtoData] dependency object.
+ * Shortcut to [ProtoData] dependency object.
  *
  * This plugin is in Gradle Portal. But when used in pair with [mcJava], it cannot be applied
  * directly to a project. It is so, because [mcJava] uses [protoData] as its dependency.
@@ -117,6 +119,14 @@ val PluginDependenciesSpec.protobuf: PluginDependencySpec
 
 val PluginDependenciesSpec.`gradle-doctor`: PluginDependencySpec
     get() = id(GradleDoctor.pluginId).version(GradleDoctor.version)
+
+val PluginDependenciesSpec.kotest: PluginDependencySpec
+    get() = Kotest.MultiplatformGradlePlugin.let {
+        return id(it.id).version(it.version)
+    }
+
+val PluginDependenciesSpec.kover: PluginDependencySpec
+    get() = id(Kover.id).version(Kover.version)
 
 /**
  * Configures the dependencies between third-party Gradle tasks

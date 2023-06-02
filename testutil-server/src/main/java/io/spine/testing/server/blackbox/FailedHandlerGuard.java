@@ -33,7 +33,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 
-import static io.spine.json.Json.toJson;
+import static io.spine.type.Json.toJson;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static org.junit.jupiter.api.Assertions.fail;

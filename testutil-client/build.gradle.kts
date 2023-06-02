@@ -37,8 +37,7 @@ plugins {
 dependencies {
     api(project(":client"))
     api(project(":testutil-core"))
-    val spine = Spine(project)
-    api(spine.time)
+    api(Spine.time)
 
     implementation(Grpc.protobuf)
 }

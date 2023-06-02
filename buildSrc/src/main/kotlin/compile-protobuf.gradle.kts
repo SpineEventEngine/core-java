@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,28 +24,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish
+import io.spine.internal.dependency.Protobuf
+import io.spine.internal.gradle.protobuf.setup
 
-/**
- * A DSL element of [SpinePublishing] extension which allows disabling publishing
- * of [protoJar] artifact.
- *
- * This artifact contains all the `.proto` definitions from `sourceSets.main.proto`. By default,
- * it is published.
- *
- * Take a look on [SpinePublishing.protoJar] for a usage example.
- *
- * @see [registerArtifacts]
- */
-class ProtoJar {
+plugins {
+    id("java-library")
+    id("com.google.protobuf")
+}
 
-    /**
-     * Set of modules, for which a proto JAR will not be published.
-     */
-    var exclusions: Set<String> = emptySet()
 
-    /**
-     * Disables proto JAR publishing for all published modules.
-     */
-    var disabled = false
+// For generating test fixtures. See `src/test/proto`.
+protobuf {
+    configurations.excludeProtobufLite()
+    protoc {
+        artifact = Protobuf.compiler
+    }
+    generateProtoTasks.all().configureEach {
+        setup()
+    }
 }

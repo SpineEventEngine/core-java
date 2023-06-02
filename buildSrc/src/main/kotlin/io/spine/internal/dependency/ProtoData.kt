@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.github.pages
+package io.spine.internal.dependency
 
 /**
- * Names of branches involved when updating documentation.
+ * Dependencies on ProtoData modules.
+ *
+ * See [`SpineEventEngine/ProtoData`](https://github.com/SpineEventEngine/ProtoData/).
  */
-object Branch {
+@Suppress("unused")
+object ProtoData {
+    const val version = "0.8.0"
+    const val group = "io.spine.protodata"
+    const val compiler = "$group:protodata-compiler:$version"
 
-    /** The branch to use when pushing the updates to the documentation. */
-    const val ghPages = "gh-pages"
+    const val codegenJava = "io.spine.protodata:protodata-codegen-java:$version"
+
+    const val pluginId = "io.spine.protodata"
+    const val pluginLib = "${Spine.group}:protodata:$version"
 }

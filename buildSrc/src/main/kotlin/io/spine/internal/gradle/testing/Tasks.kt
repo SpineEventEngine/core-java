@@ -47,6 +47,9 @@ import org.gradle.kotlin.dsl.register
 fun TaskContainer.registerTestTasks() {
     withType(Test::class.java).configureEach {
         filter {
+            // There could be cases with no matching tests. E.g. tests could be based on Kotest,
+            // which has custom task types and names.
+            isFailOnNoMatchingTests = false
             includeTestsMatching("*Test")
             includeTestsMatching("*Spec")
         }
@@ -90,7 +93,8 @@ private open class SlowTest : Test() {
     init {
         description = "Executes JUnit tests tagged as `slow`."
         group = "Verification"
-
+        // No slow tests -- no problem.
+        filter.isFailOnNoMatchingTests = false
         this.useJUnitPlatform {
             includeTags(SLOW_TAG)
         }

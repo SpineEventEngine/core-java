@@ -38,8 +38,7 @@ dependencies {
     api(Grpc.protobuf)
     api(project(":core"))
 
-    val spine = Spine(project)
-    testImplementation(spine.testlib)
+    testImplementation(Spine.testlib)
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
 }

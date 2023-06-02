@@ -110,7 +110,7 @@ private fun DartTasks.stagePubPublication(): TaskProvider<Copy> =
         into(publicationDir)
 
         doLast {
-            logger.debug("Pub publication is prepared in directory `$publicationDir`.")
+            logger.debug("Pub publication is prepared in directory `{}`.", publicationDir)
         }
     }
 

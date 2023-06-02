@@ -24,27 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish
+import org.jetbrains.dokka.gradle.DokkaTask
 
-/**
- * A DSL element of [SpinePublishing] extension which allows enabling publishing
- * of [testJar] artifact.
- *
- * This artifact contains compilation output of `test` source set. By default, it is not published.
- *
- * Take a look on [SpinePublishing.testJar] for a usage example.
+plugins {
+    id("org.jetbrains.dokka") // Cannot use `Dokka` dependency object here yet.
+}
 
- * @see [registerArtifacts]
- */
-class TestJar {
+dependencies {
+    useDokkaWithSpineExtensions()
+}
 
-    /**
-     * Set of modules, for which a test JAR will be published.
-     */
-    var inclusions: Set<String> = emptySet()
-
-    /**
-     * Enables test JAR publishing for all published modules.
-     */
-    var enabled = false
+tasks.withType<DokkaTask>().configureEach {
+    configureForKotlin()
 }

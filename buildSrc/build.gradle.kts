@@ -62,7 +62,7 @@ val grGitVersion = "4.1.1"
  * Please check that this value matches one defined in
  *  [io.spine.internal.dependency.Kotlin.version].
  */
-val kotlinVersion = "1.8.0"
+val kotlinVersion = "1.8.10"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -90,7 +90,7 @@ val errorPronePluginVersion = "3.0.1"
  * @see <a href="https://github.com/google/protobuf-gradle-plugin/releases">
  *     Protobuf Gradle Plugins Releases</a>
  */
-val protobufPluginVersion = "0.9.1"
+val protobufPluginVersion = "0.9.2"
 
 /**
  * The version of Dokka Gradle Plugins.
@@ -100,7 +100,7 @@ val protobufPluginVersion = "0.9.1"
  * @see <a href="https://github.com/Kotlin/dokka/releases">
  *     Dokka Releases</a>
  */
-val dokkaVersion = "1.7.20"
+val dokkaVersion = "1.8.10"
 
 /**
  * The version of Detekt Gradle Plugin.
@@ -108,6 +108,16 @@ val dokkaVersion = "1.7.20"
  * @see <a href="https://github.com/detekt/detekt/releases">Detekt Releases</a>
  */
 val detektVersion = "1.22.0"
+
+/**
+ * @see [io.spine.internal.dependency.Kotest]
+ */
+val kotestJvmPluginVersion = "0.4.10"
+
+/**
+ * @see [io.spine.internal.dependency.Kover]
+ */
+val koverVersion = "0.7.0-Beta"
 
 configurations.all {
     resolutionStrategy {
@@ -117,8 +127,6 @@ configurations.all {
             // Force Kotlin lib versions avoiding using those bundled with Gradle.
             "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-            "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion",
-            "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
         )
     }
@@ -158,4 +166,7 @@ dependencies {
 
     // https://github.com/srikanth-lingala/zip4j
     implementation("net.lingala.zip4j:zip4j:2.10.0")
+
+    implementation("io.kotest:kotest-gradle-plugin:$kotestJvmPluginVersion")
+    implementation("org.jetbrains.kotlinx:kover-gradle-plugin:$koverVersion")
 }

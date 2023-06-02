@@ -35,7 +35,7 @@ object Dokka {
      * When changing the version, also change the version used in the
      * `buildSrc/build.gradle.kts`.
      */
-    const val version = "1.7.20"
+    const val version = "1.8.10"
 
     object GradlePlugin {
         const val id = "org.jetbrains.dokka"

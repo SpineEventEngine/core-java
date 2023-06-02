@@ -89,12 +89,9 @@ class JacocoConfig(
          */
         fun applyTo(project: Project) {
             project.applyPlugin(BasePlugin::class.java)
-            project.afterEvaluate {
-                val javaProjects: Iterable<Project> = eligibleProjects(project)
-                val reportsDir = project.rootProject.buildDir.resolve(reportsDirSuffix)
-                JacocoConfig(project.rootProject, reportsDir, javaProjects)
-                    .configure()
-            }
+            val javaProjects: Iterable<Project> = eligibleProjects(project)
+            val reportsDir = project.rootProject.buildDir.resolve(reportsDirSuffix)
+            JacocoConfig(project.rootProject, reportsDir, javaProjects).configure()
         }
 
         /**

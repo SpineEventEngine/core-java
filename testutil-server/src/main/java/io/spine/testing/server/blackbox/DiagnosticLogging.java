@@ -32,7 +32,7 @@ import com.google.errorprone.annotations.FormatString;
 import io.spine.logging.Logging;
 import io.spine.system.server.DiagnosticEvent;
 
-import static io.spine.json.Json.toJson;
+import static io.spine.type.Json.toJson;
 import static java.lang.String.format;
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.dokka
-
-import org.gradle.api.tasks.TaskContainer
-import org.jetbrains.dokka.gradle.DokkaTask
+package io.spine.internal.dependency
 
 /**
- * Finds the `dokkaHtml` Gradle task.
+ * Dependencies on Spine Validation SDK.
+ *
+ * See [`SpineEventEngine/validation`](https://github.com/SpineEventEngine/validation/).
  */
-fun TaskContainer.dokkaHtmlTask() = this.getByName("dokkaHtml") as DokkaTask
+object Validation {
+    const val version = "2.0.0-SNAPSHOT.81"
+    const val group = "io.spine.validation"
+    const val runtime = "$group:spine-validation-java-runtime:$version"
+    const val java = "$group:spine-validation-java:$version"
+    const val model = "$group:spine-validation-model:$version"
+    const val config = "$group:spine-validation-configuration:$version"
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,24 +24,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.dokka
+import io.spine.internal.dependency.Kotest
+import io.spine.internal.dependency.Spine
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.gradle.kotlin.applyJvmToolchain
+import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-import java.io.File
-import org.gradle.api.file.FileCollection
-import org.jetbrains.dokka.gradle.GradleDokkaSourceSetBuilder
-
-/**
- * Returns only Java source roots out of all present in the source set.
- *
- * It is a helper method for generating documentation by Dokka only for Java code.
- * It is helpful when both Java and Kotlin source files are present in a source set.
- * Dokka can properly generate documentation for either Kotlin or Java depending on
- * the configuration, but not both.
- */
-internal fun GradleDokkaSourceSetBuilder.onlyJavaSources(): FileCollection {
-    return sourceRoots.filter(File::isJavaSourceDirectory)
+plugins {
+    id("java-module")
+    kotlin("jvm")
+    id("io.kotest")
+    id("org.jetbrains.kotlinx.kover")
+    id("detekt-code-analysis")
+    id("dokka-for-kotlin")
 }
 
-private fun File.isJavaSourceDirectory(): Boolean {
-    return isDirectory && name == "java"
+kotlin {
+    applyJvmToolchain(BuildSettings.javaVersion.asInt())
+    explicitApi()
+}
+
+dependencies {
+    testImplementation(Spine.testlib)
+    testImplementation(Kotest.frameworkEngine)
+    testImplementation(Kotest.datatest)
+    testImplementation(Kotest.runnerJUnit5Jvm)
+    testImplementation(JUnit.runner)
+}
+
+tasks {
+    withType<KotlinCompile>().configureEach {
+        kotlinOptions.jvmTarget = BuildSettings.javaVersion.toString()
+        setFreeCompilerArgs()
+    }
+}
+
+kover {
+    useJacocoTool()
+}
+
+koverReport {
+    defaults {
+        xml {
+            onCheck = true
+        }
+    }
 }
