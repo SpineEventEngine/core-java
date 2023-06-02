@@ -669,8 +669,7 @@ public final class BoundedContextBuilder implements Logging {
     public BoundedContextBuilder testingCopy() {
         var copy = new BoundedContextBuilder(this.spec, this.systemSettings);
         var enricher = eventEnricher()
-                .orElseGet(() -> EventEnricher.newBuilder()
-                        .build());
+                .orElseGet(() -> EventEnricher.newBuilder().build());
         copy.enrichEventsUsing(enricher);
         tenantIndex().ifPresent(copy::setTenantIndex);
         repositories().forEach(copy::add);
