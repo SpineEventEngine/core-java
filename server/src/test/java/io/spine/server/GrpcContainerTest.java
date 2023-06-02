@@ -38,6 +38,7 @@ import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static io.spine.server.given.service.GivenCommandService.noOpCommandService;
 import static io.spine.testing.TestValues.randomString;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,7 +70,7 @@ class GrpcContainerTest {
 
         var count = 3;
         for (var i = 0; i < count; i++) {
-            var service = CommandService.newBuilder().build();
+            var service = noOpCommandService();
             builder.addService(service);
         }
 
@@ -107,9 +108,7 @@ class GrpcContainerTest {
     @DisplayName("configure underlying gRPC server")
     void configureUnderlyingGrpcServer() {
         var port = 1654;
-        var service = CommandService
-                .newBuilder()
-                .build();
+        var service = noOpCommandService();
         var container = GrpcContainer
                 .atPort(port)
                 .withServer((server) -> server.addService(service))
