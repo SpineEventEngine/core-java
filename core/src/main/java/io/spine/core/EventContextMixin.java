@@ -127,14 +127,13 @@ interface EventContextMixin extends EventContextOrBuilder,
             case ORIGIN_NOT_SET:
             default:
                 if (hasRootCommandId()) {
-                    @SuppressWarnings("DuplicateStringLiteralInspection") // Coincidence.
                     var id = MessageId.newBuilder()
                             .setId(Identifier.pack(getRootCommandId()))
                             .setTypeUrl("Unknown")
                             .build();
                     return Optional.of(id);
                 } else {
-                    _warn().log("Cannot determine root message ID.");
+                    _warn().log("Cannot determine root message ID. Event context: `%s`.", this);
                     return Optional.empty();
                 }
         }
