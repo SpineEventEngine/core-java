@@ -55,7 +55,7 @@ public final class ReceptionistAggregate
     @SuppressWarnings("ResultOfMethodCallIgnored" /* Using Proto builder. */)
     private void apply(ConditionerTurnedOn event) {
         maybeFail();
-        int newValue = builder().getHowManyCmdsHandled() + 1;
+        var newValue = builder().getHowManyCmdsHandled() + 1;
         builder().setId(event.getReceptionist())
                  .setHowManyCmdsHandled(newValue);
     }
