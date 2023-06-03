@@ -62,8 +62,7 @@ public final class ReceptionistAggregate
 
     @Assign
     ConditionerTurnedOff handler(TurnConditionerOff cmd) {
-        return ConditionerTurnedOff
-                .newBuilder()
+        return ConditionerTurnedOff.newBuilder()
                 .setReceptionist(id())
                 .build();
     }
