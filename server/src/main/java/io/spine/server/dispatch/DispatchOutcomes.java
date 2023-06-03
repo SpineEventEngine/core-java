@@ -26,7 +26,6 @@
 
 package io.spine.server.dispatch;
 
-import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.MessageId;
 import io.spine.server.type.CommandEnvelope;
@@ -108,8 +107,8 @@ public final class DispatchOutcomes {
         checkNotNull(signal);
         checkNotNull(entityId);
 
-        InboxAddresses addresses = inboxAddressOf(entityId);
-        DispatchOutcome outcome = withMessageId(signal.messageId())
+        var addresses = inboxAddressOf(entityId);
+        var outcome = withMessageId(signal.messageId())
                 .setSentToInbox(addresses)
                 .build();
         return outcome;
@@ -129,7 +128,7 @@ public final class DispatchOutcomes {
      *         an optional identifier of the entity, to which inbox the signal
      *         should have been sent
      */
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") /* Handling `Optional` uniformly. */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType" /* Handling `Optional` uniformly. */)
     public static <I>
     DispatchOutcome maybeSentToInbox(SignalEnvelope<?, ?, ?> signal, Optional<I> entityId) {
         checkNotNull(signal);
@@ -161,15 +160,15 @@ public final class DispatchOutcomes {
             return noTargetsToRoute(event);
         }
 
-        InboxAddresses addresses = inboxAddressesOf(entityIds);
-        DispatchOutcome outcome = withMessageId(event.messageId())
+        var addresses = inboxAddressesOf(entityIds);
+        var outcome = withMessageId(event.messageId())
                 .setSentToInbox(addresses)
                 .build();
         return outcome;
     }
 
     private static <I> InboxAddresses inboxAddressOf(I entityId) {
-        InboxAddresses address = InboxAddresses
+        var address = InboxAddresses
                 .newBuilder()
                 .addId(Identifier.pack(entityId))
                 .build();
@@ -177,9 +176,9 @@ public final class DispatchOutcomes {
     }
 
     private static <I> InboxAddresses inboxAddressesOf(Set<I> entityIds) {
-        InboxAddresses.Builder builder = InboxAddresses.newBuilder();
-        for (I id : entityIds) {
-            Any packed = Identifier.pack(id);
+        var builder = InboxAddresses.newBuilder();
+        for (var id : entityIds) {
+            var packed = Identifier.pack(id);
             builder.addId(packed);
         }
         return builder.build();
@@ -194,7 +193,7 @@ public final class DispatchOutcomes {
      */
     public static DispatchOutcome publishedToRemote(EventEnvelope event) {
         checkNotNull(event);
-        DispatchOutcome outcome = withMessageId(event.messageId())
+        var outcome = withMessageId(event.messageId())
                 .setPublishedToRemote(true)
                 .build();
         return outcome;
@@ -209,7 +208,7 @@ public final class DispatchOutcomes {
      */
     private static DispatchOutcome noTargetsToRoute(SignalEnvelope<?, ?, ?> signal) {
         checkNotNull(signal);
-        DispatchOutcome outcome = withMessageId(signal.messageId())
+        var outcome = withMessageId(signal.messageId())
                 .setNoTargetsToRoute(true)
                 .build();
         return outcome;
