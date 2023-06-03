@@ -121,6 +121,7 @@ public abstract class AbstractEventReactor
                                 .evaluate(() -> reactAndPost(event));
     }
 
+    @SuppressWarnings("FloggerLogString" /* Re-using the logged message. */)
     private DispatchOutcome reactAndPost(EventEnvelope event) {
         var method = thisClass.reactorOf(event);
         if (method.isPresent()) {
