@@ -52,7 +52,7 @@ public final class ReceptionistAggregate
     }
 
     @Apply
-    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Using Proto builder. */
+    @SuppressWarnings("ResultOfMethodCallIgnored" /* Using Proto builder. */)
     private void apply(ConditionerTurnedOn event) {
         maybeFail();
         int newValue = builder().getHowManyCmdsHandled() + 1;
@@ -69,7 +69,7 @@ public final class ReceptionistAggregate
     }
 
     @Apply
-    @SuppressWarnings("ResultOfMethodCallIgnored")  /* Using Proto builder. */
+    @SuppressWarnings("ResultOfMethodCallIgnored" /* Using Proto builder. */)
     private void apply(ConditionerTurnedOff event) {
         maybeFail();
         var newValue = builder().getHowManyCmdsHandled() + 1;
