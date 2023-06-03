@@ -26,6 +26,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Experimental;
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -78,12 +79,24 @@ final class TargetDelivery<I> implements ShardedMessageDelivery<InboxMessage> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The dispatch outcomes are ignored in this mode of delivery,
+     * as there is no externally submitted {@code DeliveryMonitor}
+     * to notify of them.
+     *
+     * @param message
+     *         the incoming message to deliver
+     */
     @Override
+    @Experimental
+    @SuppressWarnings("ResultOfMethodCallIgnored" /* See the documentation. */)
     public void deliverDirectly(InboxMessage message) {
-        if(message.hasCommand()) {
-            inboxOfCmds.notifyOfDuplicated(message);
+        if (message.hasCommand()) {
+            inboxOfCmds.deliver(message);
         } else {
-            inboxOfEvents.notifyOfDuplicated(message);
+            inboxOfEvents.deliver(message);
         }
     }
 
