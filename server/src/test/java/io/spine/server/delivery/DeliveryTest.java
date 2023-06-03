@@ -27,7 +27,6 @@
 package io.spine.server.delivery;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
 import io.spine.environment.Tests;
@@ -42,7 +41,6 @@ import io.spine.server.delivery.given.TaskAggregate;
 import io.spine.server.delivery.given.TaskAssignment;
 import io.spine.server.delivery.given.TaskView;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.DCreateTask;
 import io.spine.testing.SlowTest;
@@ -56,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
@@ -394,7 +391,7 @@ public class DeliveryTest extends AbstractDeliveryTest {
      * Test environment.
      *
      * <p>Accesses the {@linkplain Delivery Delivery API} which has been made
-     * package-private and marked as visible for testing. Therefore the test environment routines
+     * package-private and marked as visible for testing. Therefore, the test environment routines
      * aren't moved to a separate {@code ...TestEnv} class. Otherwise the test-only API
      * of {@code Delivery} must have been made {@code public}, which wouldn't be
      * a good API design move.

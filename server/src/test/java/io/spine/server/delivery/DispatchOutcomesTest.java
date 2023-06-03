@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,42 +26,29 @@
 
 package io.spine.server.delivery;
 
-import io.spine.annotation.Internal;
-import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.entity.Repository;
-import io.spine.server.type.SignalEnvelope;
+import com.google.common.testing.NullPointerTester;
+import io.spine.core.MessageId;
+import io.spine.server.dispatch.DispatchOutcomes;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import io.spine.testing.UtilityClassTest;
+import org.junit.jupiter.api.DisplayName;
 
-/**
- * An endpoint for messages delivered to an abstract target.
- *
- * @param <I>
- *         the type of target identifier
- * @param <M>
- *         the type of message envelope being delivered
- */
-@Internal
-public interface MessageEndpoint<I, M extends SignalEnvelope<?, ?, ?>> {
+import static io.spine.server.dispatch.given.Given.commandEnvelope;
+import static io.spine.server.dispatch.given.Given.eventEnvelope;
 
-    /**
-     * Dispatches the message to the target with the passed ID.
-     *
-     * @param targetId
-     *         the identifier of a target
-     */
-    DispatchOutcome dispatchTo(I targetId);
+@DisplayName("`DispatchOutcomes` should")
+class DispatchOutcomesTest extends UtilityClassTest<DispatchOutcomes> {
 
-    /**
-     * The callback invoked if the handled signal is a duplicate.
-     *
-     * @param target
-     *         the target entity
-     * @param envelope
-     *         the handled signal
-     */
-    void onDuplicate(I target, M envelope);
+    DispatchOutcomesTest() {
+        super(DispatchOutcomes.class);
+    }
 
-    /**
-     * Obtains the repository which manages the target entities.
-     */
-    Repository<I, ?> repository();
+    @Override
+    protected void configure(NullPointerTester tester) {
+        super.configure(tester);
+        tester.setDefault(MessageId.class, MessageId.getDefaultInstance())
+              .setDefault(EventEnvelope.class, eventEnvelope())
+              .setDefault(CommandEnvelope.class, commandEnvelope());
+    }
 }

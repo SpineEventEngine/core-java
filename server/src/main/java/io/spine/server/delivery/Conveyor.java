@@ -89,7 +89,13 @@ final class Conveyor implements Iterable<InboxMessage> {
         return new ArrayList<>(messages.values()).iterator();
     }
 
-    private void markDelivered(InboxMessage message) {
+    /**
+     * Marks the passed message as {@link InboxMessageStatus#DELIVERED DELIVERED}.
+     *
+     * <p>The change made will be reflected in the storage upon the next
+     * {@link #flushTo(InboxStorage) flushTo(InboxStorage)} invocation.
+     */
+    void markDelivered(InboxMessage message) {
         changeStatus(message, DELIVERED);
         deliveredMessages.recordDelivered(message);
     }
@@ -97,7 +103,7 @@ final class Conveyor implements Iterable<InboxMessage> {
     /**
      * Marks all the passed messages as {@link InboxMessageStatus#DELIVERED DELIVERED}.
      *
-     * <p>Produced the bulk change to the storage, pending until the next
+     * <p>Produces the bulk change to the storage, pending until the next
      * {@link #flushTo(InboxStorage) flushTo(InboxStorage)} invocation.
      */
     void markDelivered(Collection<InboxMessage> messages) {

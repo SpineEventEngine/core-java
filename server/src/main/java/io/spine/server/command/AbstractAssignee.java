@@ -31,6 +31,7 @@ import io.spine.core.Version;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.model.AssigneeClass;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.type.CommandClass;
@@ -79,14 +80,16 @@ public abstract class AbstractAssignee
      *         if an exception occurred during command dispatching with this exception as the cause
      */
     @Override
-    public void dispatch(CommandEnvelope envelope) {
+    public DispatchOutcome dispatch(CommandEnvelope envelope) {
         var method = thisClass.receptorOf(envelope);
+        var outcome = method.invoke(this, envelope);
         DispatchOutcomeHandler
-                .from(method.invoke(this, envelope))
+                .from(outcome)
                 .onEvents(this::postEvents)
                 .onError(error -> onError(envelope, error))
                 .onRejection(rejection -> onRejection(envelope, rejection))
                 .handle();
+        return outcome;
     }
 
     @Override

@@ -39,6 +39,7 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.Identity;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.model.EventReactorClass;
 import io.spine.server.stand.Stand;
@@ -53,6 +54,8 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.server.dispatch.DispatchOutcomes.ignored;
+import static java.lang.String.format;
 
 /**
  * An abstract base for all classes that may produce events in response to other events.
@@ -113,22 +116,28 @@ public abstract class AbstractEventReactor
     }
 
     @Override
-    public void dispatch(EventEnvelope event) {
-        TenantAwareRunner.with(event.tenantId())
-                         .run(() -> reactAndPost(event));
+    public DispatchOutcome dispatch(EventEnvelope event) {
+        return TenantAwareRunner.with(event.tenantId())
+                                .evaluate(() -> reactAndPost(event));
     }
 
-    private void reactAndPost(EventEnvelope event) {
+    @SuppressWarnings("FloggerLogString" /* Re-using the logged message. */)
+    private DispatchOutcome reactAndPost(EventEnvelope event) {
         var method = thisClass.reactorOf(event);
         if (method.isPresent()) {
+            var outcome = method.get().invoke(this, event);
             DispatchOutcomeHandler
-                    .from(method.get().invoke(this, event))
+                    .from(outcome)
                     .onEvents(eventBus::post)
                     .onError(error -> postFailure(error, event))
                     .handle();
+            return outcome;
         } else {
-            _debug().log("Reactor `%s` filtered out and ignored event %s[ID: %s].",
-                         thisClass, event.messageClass(), event.id().value());
+            var eventId = event.id();
+            var msg = format("Reactor `%s` filtered out and ignored event %s[ID: %s].",
+                             thisClass, event.messageClass(), eventId.value());
+            _debug().log(msg);
+            return ignored(event, msg);
         }
     }
 

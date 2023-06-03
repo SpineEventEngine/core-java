@@ -35,6 +35,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.type.CommandClass;
@@ -48,6 +49,8 @@ import io.spine.test.commandbus.command.CmdBusStartProject;
 import io.spine.test.commandbus.event.CmdBusProjectCreated;
 import io.spine.test.commandbus.event.CmdBusProjectStarted;
 import io.spine.test.commandbus.event.CmdBusTaskAdded;
+
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 
 public class CommandDispatcherRegistryTestEnv {
 
@@ -126,8 +129,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
-            // Do nothing.
+        public DispatchOutcome dispatch(CommandEnvelope envelope) {
+            return successfulOutcome(envelope);
         }
     }
 
@@ -146,8 +149,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
-            // Do nothing.
+        public DispatchOutcome dispatch(CommandEnvelope envelope) {
+            return successfulOutcome(envelope);
         }
     }
 
@@ -159,8 +162,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
-            // Do nothing.
+        public DispatchOutcome dispatch(CommandEnvelope envelope) {
+            return successfulOutcome(envelope);
         }
     }
 
@@ -172,8 +175,8 @@ public class CommandDispatcherRegistryTestEnv {
         }
 
         @Override
-        public void dispatch(CommandEnvelope envelope) {
-            // Do nothing.
+        public DispatchOutcome dispatch(CommandEnvelope envelope) {
+            return successfulOutcome(envelope);
         }
     }
 

@@ -29,6 +29,7 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.logging.Logging;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -82,7 +83,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher, Logging 
     }
 
     @Override
-    public void dispatch(EventEnvelope event) {
-        repository.importEvent(event);
+    public DispatchOutcome dispatch(EventEnvelope event) {
+        return repository.importEvent(event);
     }
 }

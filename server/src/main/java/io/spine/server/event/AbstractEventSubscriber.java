@@ -36,6 +36,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.Identity;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcomeHandler;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.type.EventClass;
@@ -94,17 +95,17 @@ public abstract class AbstractEventSubscriber
      *         the envelope with the event
      */
     @Override
-    public final void dispatch(EventEnvelope event) {
-        with(event.tenantId()).run(() -> handle(event));
+    public final DispatchOutcome dispatch(EventEnvelope event) {
+        return with(event.tenantId()).evaluate(() -> handle(event));
     }
 
     /**
      * Handles an event dispatched to this subscriber instance.
      *
-     * <p>By default, passes the event to the corresponding {@linkplain io.spine.core.Subscribe
-     * subscriber} method of the entity.
+     * <p>By default, passes the event to the corresponding
+     * {@linkplain io.spine.core.Subscribe subscriber} method of the entity.
      */
-    protected void handle(EventEnvelope event) {
+    protected DispatchOutcome handle(EventEnvelope event) {
         var outcome =
                 thisClass.subscriberOf(event)
                          .map(method -> method.invoke(this, event))
@@ -113,6 +114,7 @@ public abstract class AbstractEventSubscriber
                 .onError(e -> postFailure(e, event))
                 .onIgnored(i -> logOnIgnored(event))
                 .handle();
+        return outcome;
     }
 
     private void postFailure(Error error, EventEnvelope event) {

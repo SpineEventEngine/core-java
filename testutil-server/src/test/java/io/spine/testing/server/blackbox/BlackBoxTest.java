@@ -93,9 +93,11 @@ import static io.spine.testing.core.given.GivenUserId.newUuid;
 import static io.spine.testing.server.blackbox.given.Given.addProjectAssignee;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.assignSelf;
+import static io.spine.testing.server.blackbox.given.Given.commandListener;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;
+import static io.spine.testing.server.blackbox.given.Given.eventListener;
 import static io.spine.testing.server.blackbox.given.Given.failProject;
 import static io.spine.testing.server.blackbox.given.Given.finalizeProject;
 import static io.spine.testing.server.blackbox.given.Given.initProject;
@@ -475,8 +477,8 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         private final CommandClass commandClass =
                 CommandClass.from(BbRegisterCommandDispatcher.class);
-        private final Listener<CommandEnvelope> commandListener = envelope -> {};
-        private final Listener<EventEnvelope> eventListener = envelope -> {};
+        private final Listener<CommandEnvelope> commandListener = commandListener();
+        private final Listener<EventEnvelope> eventListener = eventListener();
         private final Set<TypeName> types = toTypes(repositories);
         private final TenantIndex tenantIndex = new StubTenantIndex();
 

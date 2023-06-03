@@ -28,19 +28,21 @@ package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 
 import static io.spine.json.Json.toJson;
+import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Performs logging of failed signals handlers or fails the test depending the current
- * context exception tolerance.
+ * Performs logging of failed signals handlers or fails the test
+ * depending upon the current context exception tolerance.
  */
 final class FailedHandlerGuard extends AbstractEventSubscriber implements DiagnosticLogging {
 
@@ -60,9 +62,10 @@ final class FailedHandlerGuard extends AbstractEventSubscriber implements Diagno
     }
 
     @Override
-    protected void handle(EventEnvelope eventEnvelope) {
+    protected DispatchOutcome handle(EventEnvelope eventEnvelope) {
         var event = (HandlerFailedUnexpectedly) eventEnvelope.message();
         on(event);
+        return successfulOutcome(eventEnvelope);
     }
 
     /**

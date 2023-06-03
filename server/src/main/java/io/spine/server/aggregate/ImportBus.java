@@ -115,6 +115,8 @@ public final class ImportBus
     }
 
     @Override
+    @SuppressWarnings("ResultOfMethodCallIgnored"
+            /* Dispatching outcome is reported via system events, if needed. */)
     protected void dispatch(EventEnvelope event) {
         EventDispatcher dispatcher = dispatcherOf(event);
         dispatcher.dispatch(event);

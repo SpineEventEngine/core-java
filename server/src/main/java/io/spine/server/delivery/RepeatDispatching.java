@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,41 +27,19 @@
 package io.spine.server.delivery;
 
 import io.spine.annotation.Internal;
-import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.entity.Repository;
-import io.spine.server.type.SignalEnvelope;
+import io.spine.base.Error;
 
 /**
- * An endpoint for messages delivered to an abstract target.
+ * Specifies the way to repeat the dispatching of {@code InboxMessage}s.
  *
- * @param <I>
- *         the type of target identifier
- * @param <M>
- *         the type of message envelope being delivered
+ * @see FailedReception#FailedReception(InboxMessage, Error, Conveyor, RepeatDispatching)
  */
 @Internal
-public interface MessageEndpoint<I, M extends SignalEnvelope<?, ?, ?>> {
+@FunctionalInterface
+public interface RepeatDispatching {
 
     /**
-     * Dispatches the message to the target with the passed ID.
-     *
-     * @param targetId
-     *         the identifier of a target
+     * Dispatches the message one more time.
      */
-    DispatchOutcome dispatchTo(I targetId);
-
-    /**
-     * The callback invoked if the handled signal is a duplicate.
-     *
-     * @param target
-     *         the target entity
-     * @param envelope
-     *         the handled signal
-     */
-    void onDuplicate(I target, M envelope);
-
-    /**
-     * Obtains the repository which manages the target entities.
-     */
-    Repository<I, ?> repository();
+    void dispatchAgain();
 }

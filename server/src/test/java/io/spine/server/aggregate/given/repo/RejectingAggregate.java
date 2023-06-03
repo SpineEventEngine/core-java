@@ -26,7 +26,6 @@
 
 package io.spine.server.aggregate.given.repo;
 
-import com.google.errorprone.annotations.DoNotCall;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -39,8 +38,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
 
 /**
- * The aggregate with the state of {@linkplain io.spine.test.aggregate.event.AggProjectCreated
- * creation event} wrapped into {@code Any}. The event keeps the list of child project IDs,
+ * The aggregate keeping the list of child project IDs,
  * which we use in rejecting subsequent commands.
  */
 final class RejectingAggregate

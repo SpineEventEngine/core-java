@@ -68,7 +68,7 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    public final void dispatchTo(I aggregateId) {
+    protected final DispatchOutcome performDispatch(I aggregateId) {
         var aggregate = loadOrCreate(aggregateId);
         var flagsBefore = aggregate.lifecycleFlags();
         var outcome = handleAndApplyEvents(aggregate);
@@ -79,6 +79,7 @@ abstract class AggregateEndpoint<I,
             repository().lifecycleOf(aggregateId)
                         .onDispatchingFailed(envelope(), error);
         }
+        return outcome;
     }
 
     private void storeAndPost(A aggregate, DispatchOutcome outcome, LifecycleFlags flagsBefore) {

@@ -37,6 +37,8 @@ import io.spine.server.dispatch.DispatchOutcomeHandlerTest;
 import io.spine.server.dispatch.given.command.CreateDispatch;
 import io.spine.server.dispatch.given.event.DispatchCreated;
 import io.spine.server.dispatch.given.rejection.DispatchRejections;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
@@ -72,8 +74,16 @@ public final class Given {
         return eventFactory.createEvent(dispatchCreated());
     }
 
+    public static EventEnvelope eventEnvelope() {
+        return EventEnvelope.of(event());
+    }
+
     public static Command command() {
         return commandFactory.create(createDispatch());
+    }
+
+    public static CommandEnvelope commandEnvelope() {
+        return CommandEnvelope.of(command());
     }
 
     private static CommandMessage createDispatch() {

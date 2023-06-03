@@ -43,6 +43,7 @@ import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.BatchDeliveryListener;
 import io.spine.server.delivery.Inbox;
+import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventProducingRepository;
 import io.spine.server.entity.QueryableRepository;
@@ -70,13 +71,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.Iterators.transform;
+import static io.spine.json.Json.toJson;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
 import static io.spine.server.delivery.InboxLabel.IMPORT_EVENT;
 import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
+import static io.spine.server.dispatch.DispatchOutcomes.maybeSentToInbox;
+import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.tenant.TenantAwareRunner.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The repository which manages instances of {@code Aggregate}s.
@@ -207,7 +212,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     }
 
     private Inbox<I> inbox() {
-        return checkNotNull(inbox);
+        return requireNonNull(inbox);
     }
 
     /**
@@ -341,11 +346,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      *         the command to dispatch
      */
     @Override
-    public final void dispatch(CommandEnvelope cmd) {
+    public final DispatchOutcome dispatch(CommandEnvelope cmd) {
         checkNotNull(cmd);
         var target = route(cmd);
         target.ifPresent(id -> inbox().send(cmd)
                                       .toHandler(id));
+        return maybeSentToInbox(cmd, target);
     }
 
     /**
@@ -410,11 +416,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      *         the event to dispatch
      */
     @Override
-    public void dispatchEvent(EventEnvelope event) {
+    public DispatchOutcome dispatchEvent(EventEnvelope event) {
         checkNotNull(event);
         var targets = route(event);
         targets.forEach((id) -> inbox().send(event)
                                        .toReactor(id));
+        return sentToInbox(event, targets);
     }
 
     private Set<I> route(EventEnvelope event) {
@@ -425,11 +432,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     /**
      * Imports the passed event into one of the aggregates.
      */
-    final void importEvent(EventEnvelope event) {
+    final DispatchOutcome importEvent(EventEnvelope event) {
         checkNotNull(event);
         var target = routeImport(event);
         target.ifPresent(id -> inbox().send(event)
                                       .toImporter(id));
+        return maybeSentToInbox(event, target);
     }
 
     private Optional<I> routeImport(EventEnvelope event) {
@@ -638,10 +646,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         tx.commitIfActive();
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
-            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n",
-                                           aggregateClass().value()
-                                                           .getName(),
-                                           result.idAsString());
+            var outcomeDetails = toJson(outcome);
+            var aggClass = aggregateClass().value()
+                                           .getName();
+            throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n" +
+                                                   "Erroneous dispatch outcome: `%s`.",
+                                           aggClass,
+                                           result.idAsString(),
+                                           outcomeDetails);
         }
         return result;
     }

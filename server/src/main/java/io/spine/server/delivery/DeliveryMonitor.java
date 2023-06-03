@@ -84,9 +84,9 @@ public class DeliveryMonitor {
      * @param stats
      *         the statistics of the performed delivery
      */
-    @SuppressWarnings("unused")  /* This SPI method is designed for descendants. */
+    @SuppressWarnings("unused" /* This SPI method is designed for descendants. */)
     public void onDeliveryCompleted(DeliveryStats stats) {
-        // do nothing.
+        // Do nothing.
     }
 
     /**
@@ -96,10 +96,30 @@ public class DeliveryMonitor {
      * @param index
      *         the index of the shard, the delivery from which has been started
      */
-    @SuppressWarnings({"unused", "WeakerAccess"}) /* This SPI method is designed for descendants. */
+    @SuppressWarnings({"unused", "WeakerAccess" /* This SPI method is designed for descendants. */})
     public void onDeliveryStarted(ShardIndex index) {
-        // do nothing.
+        // Do nothing.
     }
+
+    /**
+     * A callback invoked if the signal transmitted via given message
+     * is handled by the respective receptor with failure.
+     *
+     * <p>Returns an action to take in relation to the failure.
+     *
+     * <p>By default, this callback returns an action which
+     * marks the message as {@linkplain InboxMessageStatus#DELIVERED delivered}.
+     *
+     * <p>See {@link FailedReception} for more pre-defined actions.
+     *
+     * @param reception
+     *         the details on failed reception
+     */
+    @SuppressWarnings("WeakerAccess" /* Part of public API. */)
+    public FailedReception.Action onReceptionFailure(FailedReception reception) {
+        return reception.markDelivered();
+    }
+
 
     /**
      * Returns an instance of {@code DeliveryMonitor} which always says to continue.

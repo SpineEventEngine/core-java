@@ -95,7 +95,7 @@ final class LiveDeliveryStation extends Station {
      *         the dispatching
      */
     @Override
-    public final Result process(Conveyor conveyor) {
+    public Result process(Conveyor conveyor) {
         var filter = new FilterToDeliver(conveyor);
         var filtered = filter.messagesToDispatch();
         if (filtered.isEmpty()) {
@@ -135,7 +135,7 @@ final class LiveDeliveryStation extends Station {
          * Processes the passed message matching it to the filter requirements.
          *
          * <p>The messages in {@link InboxMessageStatus#TO_DELIVER TO_DELIVER} are accepted for
-         * futher dispatching.
+         * further dispatching.
          *
          * <p>If this message has already been passed to this filter, it is removed as a duplicate.
          *
