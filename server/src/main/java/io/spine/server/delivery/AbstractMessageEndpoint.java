@@ -37,9 +37,9 @@ import io.spine.string.Stringifiers;
 import static java.lang.String.format;
 
 /**
- * An abstract base for messages endpoints.
+ * An abstract base for message endpoints.
  *
- * <p>Upon a run-time dispatching, catches all {@code Exception}s throw,
+ * <p>Upon a run-time dispatching, catches all {@code Exception}s thrown,
  * and transforms them into a {@link DispatchOutcome}.
  *
  * @param <I>
@@ -96,13 +96,14 @@ public abstract class AbstractMessageEndpoint<I, M extends SignalEnvelope<?, ?, 
 
     private Error failureToError(Exception failure, I targetId) {
         var error = Errors.fromThrowable(failure);
-        var message = format("Runtime error when dispatching signal `%s` " +
-                                     "to the entity with ID `%s` of repository `%s`. %s",
-                             Stringifiers.toString(envelope.message()),
-                             Identifier.toString(targetId),
-                             repository().getClass()
-                                         .getSimpleName(),
-                             error.getMessage());
+        var repoName = repository().getClass().getSimpleName();
+        var message =
+                format("Runtime error when dispatching signal `%s` " +
+                               "to the entity with ID `%s` of repository `%s`. %s",
+                       Stringifiers.toString(envelope.message()),
+                       Identifier.toString(targetId),
+                       repoName,
+                       error.getMessage());
         var result = error.toBuilder()
                 .setMessage(message)
                 .build();
