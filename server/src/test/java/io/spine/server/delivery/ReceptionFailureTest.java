@@ -50,7 +50,7 @@ import static io.spine.server.delivery.given.ReceptionistAggregate.makeApplierPa
 
 @SlowTest
 @DisplayName("`Delivery` should allow to monitor the failed reception of signals ")
-@SuppressWarnings("resource")   /* We don't care about closing black boxes in this test. */
+@SuppressWarnings("resource" /* We don't care about closing black boxes in this test. */)
 final class ReceptionFailureTest extends AbstractDeliveryTest {
 
     @Test
