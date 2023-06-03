@@ -56,7 +56,7 @@ public final class FailedReception {
      * Creates an instance of the failed reception.
      *
      * @param message
-     *         the message which failed to handle
+     *         the message which caused the failure
      * @param error
      *         the details of the failure
      * @param conveyor
@@ -97,7 +97,7 @@ public final class FailedReception {
      * <p>The message will be automatically removed from its inbox
      * at the end of the delivery stage.
      */
-    @SuppressWarnings("WeakerAccess")   /* Part of the public API. */
+    @SuppressWarnings("WeakerAccess" /* Part of the public API. */)
     public Action markDelivered() {
         return () -> conveyor.markDelivered(message);
     }
@@ -105,7 +105,7 @@ public final class FailedReception {
     /**
      * Returns an action immediately repeats the dispatching of the message.
      */
-    @SuppressWarnings("WeakerAccess")   /* Part of the public API. */
+    @SuppressWarnings("WeakerAccess" /* Part of the public API. */)
     public Action repeatDispatching() {
         return repeat::dispatchAgain;
     }
