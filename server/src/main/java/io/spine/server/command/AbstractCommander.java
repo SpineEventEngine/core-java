@@ -108,6 +108,7 @@ public abstract class AbstractCommander
     }
 
     @Override
+    @SuppressWarnings("FloggerLogString" /* Re-using the logged message. */)
     public DispatchOutcome dispatchEvent(EventEnvelope event) {
         var method = thisClass.commanderOn(event);
         if (method.isPresent()) {
