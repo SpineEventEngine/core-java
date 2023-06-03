@@ -57,6 +57,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Messages.isNotDefault;
 import static io.spine.server.Ignored.ignored;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for aggregates.
@@ -104,7 +105,18 @@ import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
  * Please see {@link Apply} for more details.
  *
  * <p>The modification of the state is done using a builder instance obtained
- * from {@link #builder()}.
+ * from {@link #builder()}. All changes to state become reflected in {@code state()},
+ * after <em>all</em> events (obtained from aggregate's history when loading
+ * an aggregate, or emitted by command handlers during the command dispatching)
+ * are played.
+ *
+ * <p>End-users must not call {@code state()} method within an event applier.
+ * It is so, because event appliers are invoked in scope of an active transaction,
+ * which accumulates the model updates in aggregate's {@code builder()},
+ * and not in {@code state()}. Therefore, {@code state()} invocation from
+ * the applier's code may return some inconsistent result,
+ * and in general is prone to errors.
+ * All such attempts will result in a {@code RuntimeException}.
  *
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
@@ -135,6 +147,12 @@ public abstract class Aggregate<I,
      * A guard for ensuring idempotency of messages dispatched by this aggregate.
      */
     private IdempotencyGuard idempotencyGuard;
+
+    /**
+     * Tells whether any applier method is being invoked
+     * right now for this instance of aggregate.
+     */
+    private final ApplierWatcher applierWatcher = new ApplierWatcher();
 
     /**
      * Creates a new instance.
@@ -215,6 +233,27 @@ public abstract class Aggregate<I,
     }
 
     /**
+     * Prohibits invoking {@link #state() state()} method from within an applier method.
+     *
+     * <p>All applier methods are always invoked in scope of an active transaction.
+     * Until this transaction is completed, the {@code state()} of the corresponding aggregate
+     * is not up-to-date. Therefore, relying upon it in code is prone to errors,
+     * and is prohibited for good sake.
+     *
+     * @throws IllegalStateException
+     *         if this method is called from within an event applier
+     */
+    @Override
+    protected void ensureAccessToState() {
+        if (applierWatcher.inProgress()) {
+            throw newIllegalStateException(
+                    "Aggregate `state()` method must not be used from `@Apply`-marked method." +
+                            " Use `builder()` instead. The issue detected in `%s` aggregate class.",
+                    getClass().getName());
+        }
+    }
+
+    /**
      * Obtains a method for the passed command and invokes it.
      *
      * <p>Dispatching the commands results in emitting event messages. All the
@@ -276,7 +315,8 @@ public abstract class Aggregate<I,
      */
     final DispatchOutcome invokeApplier(EventEnvelope event) {
         var method = thisClass().applierOf(event);
-        return method.invoke(this, event);
+        var outcome = applierWatcher.perform(() -> method.invoke(this, event));
+        return outcome;
     }
 
     @Override

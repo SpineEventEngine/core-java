@@ -35,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A base for entities, perform transactions {@linkplain Event events}.
@@ -155,7 +156,7 @@ class TransactionalEntity<I, S extends EntityState<I>, B extends ValidatingBuild
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(missingTxMessage());
         }
-        return checkNotNull(transaction);
+        return requireNonNull(transaction);
     }
 
     /**

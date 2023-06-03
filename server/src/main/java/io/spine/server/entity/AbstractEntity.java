@@ -91,7 +91,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     /**
      * The ID of the entity.
      *
-     * <p>Assigned either through the {@linkplain #AbstractEntity(Object)} constructor which
+     * <p>Assigned either through the {@linkplain #AbstractEntity(Object) constructor which
      * accepts the ID}, or via {@link #setId(Object)}. Is never {@code null}.
      */
     private @MonotonicNonNull I id;
@@ -189,6 +189,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     @Override
     public final S state() {
+        ensureAccessToState();
         var result = state;
         if (result == null) {
             synchronized (this) {
@@ -200,6 +201,24 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
             }
         }
         return result;
+    }
+
+    /**
+     * Ensures that the callee is allowed to access Entity's {@link #state() state()} method.
+     *
+     * <p>In case the access is prohibited, throws a {@code RuntimeException}.
+     *
+     * <p>In some scenarios, the state of Entity may be not up-to-date,
+     * so descendants of {@code AbstractEntity} are able to put the corresponding restrictions
+     * on this method invocation.
+     *
+     * <p>By default, this method performs no checks,
+     * thus allowing to access Entity's {@code state()} at any point of time.
+     */
+    @Internal
+    @SuppressWarnings("NoopMethodInAbstractClass" /* By design. */)
+    protected void ensureAccessToState() {
+        // Do nothing by default.
     }
 
     /**
@@ -386,7 +405,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      * Ensures that the entity is not marked as {@code archived}.
      *
      * @throws CannotModifyArchivedEntity
-     *         if the entity in in the archived status
+     *         if the entity in the archived status
      * @see #lifecycleFlags()
      * @see io.spine.server.entity.LifecycleFlags#getArchived()
      */

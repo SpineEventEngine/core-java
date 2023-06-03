@@ -85,11 +85,11 @@ public class RoverBot extends Aggregate<Integer, Position, Position.Builder> {
     }
 
     private int currentX() {
-        return state().getX();
+        return builder().getX();
     }
 
     private int currentY() {
-        return state().getY();
+        return builder().getY();
     }
 
     @Apply
