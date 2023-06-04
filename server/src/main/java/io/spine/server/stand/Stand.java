@@ -269,8 +269,10 @@ public class Stand implements AutoCloseable {
         var op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
-                subscriptionRegistry.remove(subscription);
-                ack(responseObserver);
+                if(subscriptionRegistry.containsId(subscription.getId())) {
+                    subscriptionRegistry.remove(subscription);
+                    ack(responseObserver);
+                }
             }
         };
         op.execute();
