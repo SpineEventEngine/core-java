@@ -27,12 +27,16 @@
 package io.spine.client;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filters.extractFilters;
 
 /**
@@ -44,7 +48,15 @@ import static io.spine.client.Filters.extractFilters;
 public final class SubscriptionRequest<S extends EntityState<?>>
         extends SubscribingRequest<S, EmptyContext, S, SubscriptionRequest<S>> {
 
+    /**
+     * The builder of consumers of entity state.
+     */
     private final StateConsumers.Builder<S> consumers;
+
+    /**
+     * Optional consumer of entity IDs, which no longer match the subscription criteria.
+     */
+    private @Nullable NoLongerMatchingConsumer<?> nlmConsumer;
 
     SubscriptionRequest(ClientRequest parent, Class<S> type) {
         super(parent, type);
@@ -67,6 +79,44 @@ public final class SubscriptionRequest<S extends EntityState<?>>
     public SubscriptionRequest<S> where(CompositeEntityStateFilter... filter) {
         builder().where(extractFilters(filter));
         return self();
+    }
+
+    /**
+     * Adds a consumer observing the entities which previously matched the subscription criteria,
+     * but stopped to do so.
+     *
+     * <p>The consumer is fed with the ID of the entity in the use-cases which follow:
+     *
+     * <ul>
+     *     <li>the value of entity fields is changed, so that the entity state does not pass
+     *     the subscription filters;
+     *     <li>entity is deleted;
+     *     <li>entity is archived.</li>
+     * </ul>
+     *
+     * <p>It is a responsibility of callee to provide a correct type of entity identifiers.
+     *
+     * @param consumer
+     *         the consumer to notify
+     * @param idType
+     *         the type of entity identifiers
+     * @param <I>
+     *         type of entity identifiers, for covariance
+     * @return this instance of {@code SubscriptionRequest}, for call chaining
+     */
+    public <I> SubscriptionRequest<S> whenNoLongerMatching(Class<I> idType, Consumer<I> consumer) {
+        checkNotNull(idType);
+        checkNotNull(consumer);
+        nlmConsumer = new NoLongerMatchingConsumer<>(idType, consumer);
+        return self();
+    }
+
+    @Override
+    protected Optional<StreamObserver<SubscriptionUpdate>> chain() {
+        if (null == nlmConsumer) {
+            return Optional.empty();
+        }
+        return Optional.of(new NoLongerMatchingFilter(nlmConsumer));
     }
 
     @Override

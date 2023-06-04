@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,28 +23,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.client.tasks;
+package io.spine.server.stand;
 
-import "spine/options.proto";
+import com.google.protobuf.Any;
+import io.spine.base.EntityState;
+import io.spine.client.Subscription;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.type.EventEnvelope;
+import io.spine.system.server.event.EntityArchived;
+import io.spine.type.TypeUrl;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.client.tasks";
-option java_outer_classname = "TaskProto";
-option java_multiple_files = true;
+/**
+ * Handles the {@link EntityArchived} events in respect to the {@code Subscription}.
+ */
+final class EntityArchivalHandler extends NoLongerMatchingHandler {
 
-import "spine/core/user_id.proto";
+    private static final TypeUrl ENTITY_ARCHIVED = TypeUrl.of(EntityArchived.class);
 
-message CTaskId {
-    string uuid = 1;
-}
+    /**
+     * Creates a new instance for the passed {@code Subscription}.
+     */
+    EntityArchivalHandler(Subscription subscription) {
+        super(subscription, ENTITY_ARCHIVED);
+    }
 
-message CTask {
-    option (entity).kind = AGGREGATE;
-    option (entity).visibility = SUBSCRIBE;
-
-    CTaskId id = 1;
-    string name = 2;
-    core.UserId author = 3;
+    @Override
+    protected EntityState<?> lastKnownStateFrom(EventEnvelope event) {
+        var message = (EntityArchived) event.message();
+        var newState = message.getLastState();
+        var result = (EntityState<?>) AnyPacker.unpack(newState);
+        return result;
+    }
 }

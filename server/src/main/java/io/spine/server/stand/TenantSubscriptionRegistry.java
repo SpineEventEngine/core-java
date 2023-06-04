@@ -76,10 +76,12 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
     @Override
     public void add(Subscription subscription) {
         var record = SubscriptionRecord.of(subscription);
-        var type = record.targetType();
         lockAndRun(() -> {
-            typeToRecord.put(type, record);
-            subscriptionToAttrs.put(subscription, record);
+            var types = record.targetTypes();
+            for (var type : types) {
+                typeToRecord.put(type, record);
+                subscriptionToAttrs.put(subscription, record);
+            }
         });
     }
 
@@ -90,7 +92,10 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
                 return;
             }
             var record = subscriptionToAttrs.get(subscription);
-            typeToRecord.remove(record.targetType(), record);
+            var types = record.targetTypes();
+            for (var type : types) {
+                typeToRecord.remove(type, record);
+            }
             subscriptionToAttrs.remove(subscription);
         });
     }

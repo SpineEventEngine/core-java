@@ -477,10 +477,13 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             var version = change.getNewValue()
                                 .getVersion();
+            var lastKnownState = change.getPreviousValue()
+                                       .getState();
             var event = EntityArchived.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setLastState(lastKnownState)
                     .build();
             postEvent(event);
         }
@@ -497,11 +500,14 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             var version = change.getNewValue()
                                 .getVersion();
+            var lastKnownState = change.getPreviousValue()
+                                       .getState();
             var event = EntityDeleted.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
                     .setMarkedAsDeleted(true)
+                    .setLastState(lastKnownState)
                     .build();
             postEvent(event);
         }
@@ -516,12 +522,13 @@ public class EntityLifecycle {
                              .getLifecycleFlags()
                              .getArchived();
         if (!newValue && oldValue) {
-            var version = change.getNewValue()
-                                .getVersion();
+            var newRecord = change.getNewValue();
+            var version = newRecord.getVersion();
             var event = EntityUnarchived.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setState(newRecord.getState())
                     .build();
             postEvent(event);
         }
@@ -536,12 +543,13 @@ public class EntityLifecycle {
                              .getLifecycleFlags()
                              .getDeleted();
         if (!newValue && oldValue) {
-            var version = change.getNewValue()
-                                .getVersion();
+            var newRecord = change.getNewValue();
+            var version = newRecord.getVersion();
             var event = EntityRestored.newBuilder()
                     .setEntity(entityId)
                     .addAllSignalId(ImmutableList.copyOf(messageIds))
                     .setVersion(version)
+                    .setState(newRecord.getState())
                     .build();
             postEvent(event);
         }

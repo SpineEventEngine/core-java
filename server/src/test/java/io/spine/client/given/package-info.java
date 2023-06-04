@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,28 +23,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.test.client.tasks;
+/**
+ * Provides convenience API to create a desired test environment for Spine Client tests.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.client.given;
 
-import "spine/options.proto";
+import com.google.errorprone.annotations.CheckReturnValue;
 
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.client.tasks";
-option java_outer_classname = "TaskProto";
-option java_multiple_files = true;
-
-import "spine/core/user_id.proto";
-
-message CTaskId {
-    string uuid = 1;
-}
-
-message CTask {
-    option (entity).kind = AGGREGATE;
-    option (entity).visibility = SUBSCRIBE;
-
-    CTaskId id = 1;
-    string name = 2;
-    core.UserId author = 3;
-}
+import javax.annotation.ParametersAreNonnullByDefault;

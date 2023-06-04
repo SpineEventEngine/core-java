@@ -26,28 +26,29 @@
 
 package io.spine.server.stand;
 
-import com.google.protobuf.Any;
 import io.spine.base.EntityState;
-import io.spine.base.Identifier;
-import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
-import io.spine.client.EntityUpdates;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
-import io.spine.core.Responses;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.EntityStateChanged;
+import io.spine.type.TypeUrl;
 
 import java.util.Optional;
 
 /**
- * The update handler of {@code Subscription}s for {@code Entity} state updates.
+ * The update handler of {@code Subscription}s for changes in {@code Entity} state.
+ *
+ * <p>This handler only processes the changes unrelated to archiving or deleting the
+ * {@code Entity} instances.
  */
-final class EntityUpdateHandler extends UpdateHandler {
+final class EntityChangeHandler extends AbstractEntityUpdateHandler {
 
-    EntityUpdateHandler(Subscription subscription) {
-        super(subscription);
+    private static final TypeUrl ENTITY_STATE_CHANGED = TypeUrl.of(EntityStateChanged.class);
+
+    EntityChangeHandler(Subscription subscription) {
+        super(subscription, ENTITY_STATE_CHANGED);
     }
 
     /**
@@ -57,7 +58,7 @@ final class EntityUpdateHandler extends UpdateHandler {
      * initially passed the subscription criteria, stop passing those as their state updates.
      *
      * <p>In this case a special {@code SubscriptionUpdate} is emitted. Its
-     * {@linkplain SubscriptionUpdate#getEntityUpdates() EntityUpdates} will have
+     * {@link SubscriptionUpdate#getEntityUpdates() EntityUpdates} will have
      * {@link EntityStateUpdate#getNoLongerMatching() EntityStateUpdate.getNoLongerMatching()}
      * set to {@code true}.
      *
@@ -84,59 +85,26 @@ final class EntityUpdateHandler extends UpdateHandler {
         return Optional.ofNullable(result);
     }
 
-    @Override
-    protected boolean typeMatches(EventEnvelope event) {
-        var expectedTypeUrl = target().getType();
-        var actualTypeUrl = asEntityEvent(event).getEntity()
-                                                .getTypeUrl();
-        return expectedTypeUrl.equals(actualTypeUrl);
-    }
-
-    @Override
-    protected Any extractId(EventEnvelope event) {
-        var entityId = asEntityEvent(event).getEntity()
-                                           .getId();
-        return entityId;
-    }
-
-    private static EntityStateChanged asEntityEvent(EventEnvelope event) {
+    private static EntityStateChanged asEntityStateChanged(EventEnvelope event) {
         return (EntityStateChanged) event.message();
     }
 
-    /**
-     * Checks if the entity state matches the subscription filters.
-     */
-    private boolean stateMatches(EntityState<?> state) {
-        var filters = target().getFilters();
-        var result = filters.getFilterList()
-                .stream()
-                .allMatch(f -> f.test(state));
-        return result;
-    }
-
     private static EntityState<?> newStateFrom(EventEnvelope event) {
-        var eventMessage = asEntityEvent(event);
+        var eventMessage = asEntityStateChanged(event);
         var newState = eventMessage.getNewState();
         var result = (EntityState<?>) AnyPacker.unpack(newState);
         return result;
     }
 
     private static EntityState<?> oldStateFrom(EventEnvelope event) {
-        var eventMessage = asEntityEvent(event);
+        var eventMessage = asEntityStateChanged(event);
         var newState = eventMessage.getOldState();
         var result = (EntityState<?>) AnyPacker.unpack(newState);
         return result;
     }
 
-    private static Any packId(EntityStateChanged event) {
-        var entityId = EntityId.newBuilder()
-                .setId(event.getEntity().getId())
-                .build();
-        return Identifier.pack(entityId);
-    }
-
     private SubscriptionUpdate newStateUpdate(EventEnvelope event) {
-        var theEvent = asEntityEvent(event);
+        var theEvent = asEntityStateChanged(event);
         var packedId = packId(theEvent);
         var packedState = theEvent.getNewState();
         var stateUpdate = EntityStateUpdate.newBuilder()
@@ -144,27 +112,5 @@ final class EntityUpdateHandler extends UpdateHandler {
                 .setState(packedState)
                 .build();
         return toSubscriptionUpdate(stateUpdate);
-    }
-
-    private SubscriptionUpdate noLongerMatching(EventEnvelope event) {
-        var theEvent = asEntityEvent(event);
-        var packedId = packId(theEvent);
-        var stateUpdate = EntityStateUpdate.newBuilder()
-                .setId(packedId)
-                .setNoLongerMatching(true)
-                .build();
-        return toSubscriptionUpdate(stateUpdate);
-    }
-
-    private SubscriptionUpdate toSubscriptionUpdate(EntityStateUpdate stateUpdate) {
-        var updates = EntityUpdates.newBuilder()
-                .addUpdate(stateUpdate)
-                .build();
-        var result = SubscriptionUpdate.newBuilder()
-                .setSubscription(subscription())
-                .setResponse(Responses.ok())
-                .setEntityUpdates(updates)
-                .build();
-        return result;
     }
 }
