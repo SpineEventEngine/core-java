@@ -605,14 +605,14 @@ public class AggregateTest {
 
             assertThat(outcome.hasError()).isTrue();
             var error = outcome.getError();
+            var expectedError = Error.newBuilder()
+                    .setType(IllegalStateException.class.getCanonicalName())
+                    .buildPartial();
             assertThat(error)
                     .comparingExpectedFieldsOnly()
-                    .isEqualTo(Error.newBuilder()
-                                       .setType(IllegalStateException.class.getCanonicalName())
-                                       .buildPartial());
+                    .isEqualTo(expectedError);
         }
     }
-
 
     @Nested
     @DisplayName("catch `RuntimeException`s in")
