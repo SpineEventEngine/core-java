@@ -77,10 +77,10 @@ public final class AggregateTestSupport {
      * @return the list of produced event messages
      */
     public static <I, A extends Aggregate<I, S, ?>, S extends EntityState<I>> DispatchOutcome
-    dispatchEvent(AggregateRepository<I, A, S> repository, A instance, EventEnvelope event) {
-        checkArguments(repository, instance, event);
+    dispatchEvent(AggregateRepository<I, A, S> repository, A aggregate, EventEnvelope event) {
+        checkArguments(repository, aggregate, event);
         var outcome = dispatchAndCollect(
-                new AggregateEventReactionEndpoint<>(repository, event), instance
+                new AggregateEventReactionEndpoint<>(repository, event), aggregate
         );
         logger.warnIfErroneous(outcome);
         return outcome;
