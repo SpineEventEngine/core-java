@@ -100,6 +100,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.aggregate.given.Given.ACommand.addTask;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
@@ -450,7 +451,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are uncommitted")
-        void uncommitedAfterDispatch() {
+        void uncommittedAfterDispatch() {
             aggregate.dispatchCommands(command(createProject),
                                        command(addTask),
                                        command(startProject));
@@ -465,7 +466,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are being committed")
-        void beingCommitedAfterDispatch() {
+        void beingCommittedAfterDispatch() {
             aggregate.dispatchCommands(command(createProject),
                                        command(addTask),
                                        command(startProject));
@@ -493,7 +494,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are uncommitted")
-        void uncommitedByDefault() {
+        void uncommittedByDefault() {
             var events = aggregate().getUncommittedEvents();
 
             assertFalse(events.nonEmpty());
@@ -585,6 +586,31 @@ public class AggregateTest {
             assertEquals(currentTime, aggregate.whenModified());
         } finally {
             Time.resetProvider();
+        }
+    }
+
+    @Nested
+    @DisplayName("prohibit")
+    class Prohibit {
+
+        @Test
+        @DisplayName("to call `state()` from within applier")
+        void callStateFromApplier() {
+            ModelTests.dropAllModels();
+            var faultyAggregate =
+                    new FaultyAggregate(ID, false, false);
+            var command = addTask(ID);
+            var outcome = dispatchCommand(faultyAggregate, env(command));
+
+            assertThat(outcome.hasError())
+                    .isTrue();
+            var error = outcome.getError();
+            var expectedError = Error.newBuilder()
+                    .setType(IllegalStateException.class.getCanonicalName())
+                    .buildPartial();
+            assertThat(error)
+                    .comparingExpectedFieldsOnly()
+                    .isEqualTo(expectedError);
         }
     }
 

@@ -35,7 +35,6 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.event.React;
 import io.spine.server.test.shared.LongIdAggregate;
-import io.spine.server.type.MessageEnvelope;
 import io.spine.test.aggregate.number.DoNothing;
 import io.spine.test.aggregate.number.FloatEncountered;
 import io.spine.test.aggregate.number.NumberPassed;
@@ -51,10 +50,8 @@ import static java.util.Collections.emptyList;
 /**
  * The aggregate which throws {@link IllegalArgumentException} in response to negative numbers.
  *
- * <p>Normally aggregates should reject commands via command rejections. This class is test
- * environment for testing of now
- * {@linkplain io.spine.server.aggregate.AggregateRepository#logError(String, MessageEnvelope, RuntimeException)
- * logs errors}.
+ * <p>Normally aggregates should reject commands via rejections. This class does not do so,
+ * because it is a test environment for checking how {@code AggregateRepository} handles errors.
  *
  * @see FailingAggregateRepository
  */
@@ -113,7 +110,7 @@ class FailingAggregate extends Aggregate<Long, LongIdAggregate, LongIdAggregate.
                 .from(event.getWhen())
                 .toInstant()
                 .get(ChronoField.MILLI_OF_SECOND);
-        builder().setValue(state().getValue() + whichSecond);
+        builder().setValue(builder().getValue() + whichSecond);
     }
 
     private static NumberPassed now() {

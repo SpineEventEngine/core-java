@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.aggregate;
+
+import io.spine.server.aggregate.model.Applier;
+import io.spine.server.dispatch.DispatchOutcome;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
 /**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * Watches for the event {@link Applier} methods being invoked on an aggregate instance.
  */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.145")
+final class ApplierWatcher {
+
+    private final AtomicBoolean inProgress = new AtomicBoolean(false);
+
+    /**
+     * Tells whether any applier method on a watched aggregate is being called right now.
+     */
+    boolean inProgress() {
+        return inProgress.get();
+    }
+
+    /**
+     * Performs the call, recording the invocation start and completion.
+     *
+     * @param call
+     *         the call of an {@code Applier} method
+     * @return the outcome of calling the {@code Applier}
+     */
+    synchronized DispatchOutcome perform(Supplier<DispatchOutcome> call) {
+        try {
+            inProgress.set(true);
+            return call.get();
+        } finally {
+            inProgress.set(false);
+        }
+    }
+}
