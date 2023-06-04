@@ -599,11 +599,11 @@ public class AggregateTest {
             ModelTests.dropAllModels();
             var faultyAggregate =
                     new FaultyAggregate(ID, false, false);
-
             var command = addTask(ID);
             var outcome = dispatchCommand(faultyAggregate, env(command));
 
-            assertThat(outcome.hasError()).isTrue();
+            assertThat(outcome.hasError())
+                    .isTrue();
             var error = outcome.getError();
             var expectedError = Error.newBuilder()
                     .setType(IllegalStateException.class.getCanonicalName())
