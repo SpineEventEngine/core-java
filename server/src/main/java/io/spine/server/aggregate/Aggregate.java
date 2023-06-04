@@ -105,18 +105,17 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * Please see {@link Apply} for more details.
  *
  * <p>The modification of the state is done using a builder instance obtained
- * from {@link #builder()}. All changes to state become reflected in {@code state()},
- * after <em>all</em> events (obtained from aggregate's history when loading
- * an aggregate, or emitted by command handlers during the command dispatching)
- * are played.
+ * from {@link #builder() builder()}. All changes to state become reflected
+ * in {@link #state() state()}, after <em>all</em> events (obtained from
+ * aggregate's history when loading an aggregate, or emitted by command handlers
+ * during the command dispatching) are played.
  *
  * <p>End-users must not call {@code state()} method within an event applier.
  * It is so, because event appliers are invoked in scope of an active transaction,
  * which accumulates the model updates in aggregate's {@code builder()},
  * and not in {@code state()}. Therefore, {@code state()} invocation from
- * the applier's code may return some inconsistent result,
- * and in general is prone to errors.
- * All such attempts will result in a {@code RuntimeException}.
+ * the applier's code may return some inconsistent result, and thus
+ * is prone to errors. All such attempts will result in a {@code RuntimeException}.
  *
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
@@ -282,7 +281,7 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>Reacting on a event may result in emitting event messages.
+     * <p>Reacting on an event may result in emitting event messages.
      * All the {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param event
@@ -436,7 +435,7 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Tells if there any uncommitted events.
+     * Tells if there are any uncommitted events.
      */
     boolean hasUncommittedEvents() {
         return uncommittedHistory.hasEvents();
@@ -525,7 +524,8 @@ public abstract class Aggregate<I,
     /**
      * Creates an iterator of the aggregate event history with reverse traversal.
      *
-     * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
+     * <p>The records are returned sorted by timestamp in descending order
+     * (from newer to older).
      *
      * <p>The iterator is empty if there's no history for the aggregate.
      *
