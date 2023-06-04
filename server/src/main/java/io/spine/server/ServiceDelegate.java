@@ -26,7 +26,7 @@
 
 package io.spine.server;
 
-import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
 import io.grpc.BindableService;
 import io.grpc.stub.StreamObserver;
 import io.spine.logging.Logging;
@@ -166,7 +166,7 @@ abstract class ServiceDelegate<T, R> implements Logging {
     /**
      * Obtains all the bounded contexts known to the service.
      */
-    final ImmutableCollection<BoundedContext> contexts() {
-        return types.contexts();
+    final ImmutableSet<BoundedContext> contexts() {
+        return ImmutableSet.copyOf(types.contexts());
     }
 }
