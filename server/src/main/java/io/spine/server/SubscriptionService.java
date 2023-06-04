@@ -247,7 +247,7 @@ public final class SubscriptionService
 
     private static final class CancellationImpl extends SubscriptionDelegate {
 
-        CancellationImpl(BindableService service, TypeDictionary types) {
+        private CancellationImpl(BindableService service, TypeDictionary types) {
             super(service, types);
         }
 
@@ -264,8 +264,16 @@ public final class SubscriptionService
         protected void serveNoContext(Subscription subscription,
                                       StreamObserver<Response> observer,
                                       @Nullable Object params) {
-            _warn().log("Trying to cancel a subscription `%s` which could not be found.",
-                        lazy(subscription::toShortString));
+            var contexts = contexts();
+            _warn().log("Trying to cancel a subscription `%s` which could not be found. " +
+                                "Cancelling it in all known contexts: %s.",
+                        lazy(subscription::toShortString),
+                        Joiner.on(", ")
+                              .join(contexts));
+            for (var context : contexts) {
+                serve(context, subscription, observer, params);
+            }
+
             observer.onCompleted();
         }
     }
