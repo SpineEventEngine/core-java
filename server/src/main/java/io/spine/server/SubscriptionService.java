@@ -39,6 +39,8 @@ import io.spine.client.ThreadSafeObserver;
 import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
+import io.spine.grpc.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
 import io.spine.logging.Logging;
 import io.spine.server.stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
@@ -52,9 +54,7 @@ import java.util.function.Consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
 import static com.google.common.flogger.LazyArgs.lazy;
-import static io.spine.grpc.StreamObservers.ack;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
 
 /**
@@ -204,8 +204,7 @@ public final class SubscriptionService
             _warn().log("Unable to find a Bounded Context for type `%s`." +
                                 " Creating a subscription in contexts: %s.",
                         topic.getTarget().type(),
-                        Joiner.on(", ")
-                              .join(contexts));
+                        contextsAsString(contexts));
             var subscription = Subscriptions.from(topic);
             for (var context : contexts) {
                 var stand = context.stand();
@@ -292,15 +291,38 @@ public final class SubscriptionService
                                       @Nullable Object params) {
             var contexts = contexts();
             _warn().log("Trying to cancel a subscription `%s` which could not be found. " +
-                                "Cancelling it in all known contexts: %s.",
+                                "Cancelling it in all known contexts, where is may reside: %s.",
                         lazy(subscription::toShortString),
-                        Joiner.on(", ")
-                              .join(contexts));
+                        contextsAsString(contexts));
+            var gatheringObserver = StreamObservers.<Response>memoizingObserver();
             for (var context : contexts) {
-                serve(context, subscription, noOpObserver(), params);
+                if(context.stand().hasSubscription(subscription.getId())) {
+                    serve(context, subscription, gatheringObserver, params);
+                }
             }
-            ack(observer);
+            summarizeResponses(gatheringObserver, observer);
+            observer.onCompleted();
         }
+
+        private static void
+        summarizeResponses(MemoizingObserver<Response> summarizer,
+                           StreamObserver<Response> destination) {
+            var observedError = summarizer.getError();
+            if(observedError != null) {
+                destination.onError(observedError);
+                return;
+            }
+            var responses = summarizer.responses();
+            if(!responses.isEmpty()) {
+                var response = responses.get(0);
+                destination.onNext(response);
+            }
+        }
+    }
+
+    private static String contextsAsString(Iterable<BoundedContext> contexts) {
+        return Joiner.on(", ")
+                     .join(contexts);
     }
 
     /**

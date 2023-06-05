@@ -35,6 +35,7 @@ import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
+import io.spine.client.SubscriptionId;
 import io.spine.client.Topic;
 import io.spine.core.Origin;
 import io.spine.core.Response;
@@ -399,6 +400,14 @@ public class Stand implements AutoCloseable {
             return new EntityQueryProcessor(recordRepo);
         }
         return NO_OP_PROCESSOR;
+    }
+
+    /**
+     * Tells whether this context has a subscription with the given ID.
+     */
+    @Internal
+    public boolean hasSubscription(SubscriptionId id) {
+        return subscriptionRegistry.containsId(id);
     }
 
     public static class Builder {
