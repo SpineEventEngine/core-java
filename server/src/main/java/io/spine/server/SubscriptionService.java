@@ -52,7 +52,9 @@ import java.util.function.Consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
 import static com.google.common.flogger.LazyArgs.lazy;
+import static io.spine.grpc.StreamObservers.ack;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
 
 /**
@@ -70,6 +72,7 @@ public final class SubscriptionService
     private final ActivationImpl activation;
     private final CancellationImpl cancellation;
 
+    @SuppressWarnings("ThisEscapedInObjectConstruction" /* To simplify the implementation. */)
     private SubscriptionService(TypeDictionary types) {
         super();
         this.types = types;
@@ -90,7 +93,9 @@ public final class SubscriptionService
      */
     public static SubscriptionService withSingle(BoundedContext context) {
         checkNotNull(context);
-        var result = newBuilder().add(context).build();
+        var result = newBuilder()
+                .add(context)
+                .build();
         return result;
     }
 
@@ -159,7 +164,7 @@ public final class SubscriptionService
      * @return the context which exposes the target type,
      *         or {@code Optional.empty} if no known context does so
      */
-    @VisibleForTesting  // test-only
+    @VisibleForTesting  /* Test-only method. */
     Optional<BoundedContext> findContextOf(Target target) {
         var type = target.type();
         var result = types.find(type);
@@ -187,6 +192,9 @@ public final class SubscriptionService
             stand.subscribe(topic, observer);
         }
 
+        /**
+         * Creates a subscription in each Bounded Context known to {@code SubscriptionService}.
+         */
         @Override
         protected void serveNoContext(Topic topic,
                                       StreamObserver<Subscription> observer,
@@ -260,6 +268,24 @@ public final class SubscriptionService
             stand.cancel(subscription, observer);
         }
 
+        /**
+         * Performs the cancellation of the subscription.
+         *
+         * <p>Such a use case means that it was not possible to detect a Bounded Context
+         * serving the message targeted in the subscription. Thus, upon subscribing,
+         * the subscription
+         * {@linkplain SubscriptionImpl#serveNoContext(Topic, StreamObserver, Object) was created}
+         * in each known Bounded Context.
+         *
+         * <p>Therefore, the cancellation is also performed in each Bounded Context known
+         * to this service.
+         *
+         * @implNote The original {@code observer} is only fed with an acknowledgement once
+         *         after the subscription in cancelled in each Bounded Context.
+         *         This is because it is not possible to call {@code onCompleted()}
+         *         for several times, which would happen should we run
+         *         the original {@code observer} through a default cancellation procedure.
+         */
         @Override
         protected void serveNoContext(Subscription subscription,
                                       StreamObserver<Response> observer,
@@ -271,10 +297,9 @@ public final class SubscriptionService
                         Joiner.on(", ")
                               .join(contexts));
             for (var context : contexts) {
-                serve(context, subscription, observer, params);
+                serve(context, subscription, noOpObserver(), params);
             }
-
-            observer.onCompleted();
+            ack(observer);
         }
     }
 
@@ -286,7 +311,8 @@ public final class SubscriptionService
         /**
          * Builds the {@link SubscriptionService}.
          *
-         * @throws IllegalStateException if no Bounded Contexts were added.
+         * @throws IllegalStateException
+         *         if no Bounded Contexts were added.
          */
         @Override
         public SubscriptionService build() throws IllegalStateException {
