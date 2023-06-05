@@ -173,7 +173,7 @@ public final class SubscriptionService
 
     private static final class SubscriptionImpl extends ServiceDelegate<Topic, Subscription> {
 
-        SubscriptionImpl(BindableService service, TypeDictionary types) {
+        private SubscriptionImpl(BindableService service, TypeDictionary types) {
             super(service, types);
         }
 
@@ -231,7 +231,7 @@ public final class SubscriptionService
 
     private static final class ActivationImpl extends SubscriptionDelegate {
 
-        ActivationImpl(BindableService service, TypeDictionary types) {
+        private ActivationImpl(BindableService service, TypeDictionary types) {
             super(service, types);
         }
 
