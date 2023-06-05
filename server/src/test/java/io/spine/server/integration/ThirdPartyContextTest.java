@@ -29,7 +29,6 @@ package io.spine.server.integration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.EventMessage;
-import io.spine.base.Time;
 import io.spine.core.ActorContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
@@ -42,6 +41,7 @@ import io.spine.server.integration.given.EditHistoryRepository;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.given.GivenEvent;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -78,13 +78,11 @@ class ThirdPartyContextTest {
     @AfterEach
     void closeContext() throws Exception {
         context.close();
-        ServerEnvironment
-                .instance()
-                .reset();
+        resetServerEnvironment();
     }
 
     @Test
-    @DisplayName("not accept nulls in factory methods")
+    @DisplayName("not accept `null`s in factory methods")
     void nullsOnConstruction() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(ThirdPartyContext.class);
@@ -103,8 +101,8 @@ class ThirdPartyContextTest {
     @DisplayName("if multitenant, require a tenant ID for each event")
     void requireTenant() {
         var noTenantContext = ActorContext.newBuilder()
-                .setActor(UserId.newBuilder().setValue("42"))
-                .setTimestamp(Time.currentTime())
+                .setActor(GivenUserId.of("42"))
+                .setTimestamp(currentTime())
                 .build();
         var calendar = ThirdPartyContext.multitenant("Calendar");
         assertThrows(IllegalArgumentException.class,
@@ -115,9 +113,9 @@ class ThirdPartyContextTest {
     @DisplayName("if single-tenant, fail if a tenant ID is supplied")
     void noTenant() {
         var actorWithTenant = ActorContext.newBuilder()
-                .setActor(UserId.newBuilder().setValue("42"))
-                .setTimestamp(Time.currentTime())
-                .setTenantId(TenantId.newBuilder().setValue("AcmeCorp"))
+                .setActor(GivenUserId.of("42"))
+                .setTimestamp(currentTime())
+                .setTenantId(GivenTenantId.of("AcmeCorp"))
                 .build();
         var calendar = ThirdPartyContext.singleTenant("Notes");
         assertThrows(IllegalArgumentException.class,
@@ -200,19 +198,23 @@ class ThirdPartyContextTest {
     @Test
     @DisplayName("in a multitenant environment")
     void multitenant() {
+        /* Getting rid of the class-level repositories and bounded contexts. */
+        resetServerEnvironment();
+
         var documentRepository = new DocumentRepository();
-        BoundedContextBuilder
+        var boundedContext = BoundedContextBuilder
                 .assumingTests(true)
                 .add(documentRepository)
                 .build();
+        assertThat(boundedContext.isMultitenant())
+                .isTrue();
+
         var johnDoe = GivenUserId.newUuid();
         var acmeCorp = TenantId.newBuilder()
-                .setDomain(InternetDomain.newBuilder()
-                                         .setValue("acme.com"))
+                .setDomain(internetDomain("acme.com"))
                 .build();
         var cyberdyne = TenantId.newBuilder()
-                .setDomain(InternetDomain.newBuilder()
-                                   .setValue("cyberdyne.com"))
+                .setDomain(internetDomain("cyberdyne.com"))
                 .build();
         var documentId = DocumentId.generate();
         var importEvent = OpenOfficeDocumentUploaded.newBuilder()
@@ -251,5 +253,16 @@ class ThirdPartyContextTest {
         } catch (Exception e) {
             fail(e);
         }
+    }
+
+    private static InternetDomain.Builder internetDomain(String value) {
+        return InternetDomain.newBuilder()
+                .setValue(value);
+    }
+
+    private static void resetServerEnvironment() {
+        ServerEnvironment
+                .instance()
+                .reset();
     }
 }
