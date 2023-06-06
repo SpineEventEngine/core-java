@@ -32,7 +32,8 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Represents a scenario when shard could not be picked as it's already picked by another worker.
+ * Represents a scenario when shard could not be picked,
+ * as it's already picked by another worker.
  */
 public final class AlreadyPickedUp extends FailedPickUp {
 
@@ -44,7 +45,7 @@ public final class AlreadyPickedUp extends FailedPickUp {
      * @param shard
      *         a shard that could not be picked
      * @param pickedUp
-     *         a message containing info about owner and the time when the shard was picked
+     *         a message containing info about owner, and the time when the shard was picked
      * @param retry
      *         a way to retry delivery
      */
@@ -57,14 +58,15 @@ public final class AlreadyPickedUp extends FailedPickUp {
     }
 
     /**
-     * Returns an action that will make the delivery process to finish without any processing done.
+     * Returns an action that makes the delivery process
+     * to finish without any processing done.
      */
     public Action doNothing() {
         return Optional::empty;
     }
 
     /**
-     * Returns the {@code ShardAlreadyPickedUp} outcome.
+     * Returns the outcome telling the shard was already picked up.
      */
     public ShardAlreadyPickedUp outcome() {
         return alreadyPickedUp;
