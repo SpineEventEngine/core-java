@@ -84,7 +84,7 @@ public class DeliveryMonitor {
      * @param stats
      *         the statistics of the performed delivery
      */
-    @SuppressWarnings("unused" /* This SPI method is designed for descendants. */)
+    @SuppressWarnings({"WeakerAccess" /* Part of public API. */, "unused"})
     public void onDeliveryCompleted(DeliveryStats stats) {
         // Do nothing.
     }
@@ -96,7 +96,7 @@ public class DeliveryMonitor {
      * @param index
      *         the index of the shard, the delivery from which has been started
      */
-    @SuppressWarnings({"unused", "WeakerAccess" /* This SPI method is designed for descendants. */})
+    @SuppressWarnings({"WeakerAccess" /* Part of public API. */, "unused"})
     public void onDeliveryStarted(ShardIndex index) {
         // Do nothing.
     }
@@ -137,7 +137,7 @@ public class DeliveryMonitor {
      *         contains an information about the occurred failure, and gives access to
      *         predefined {@code Action}s to handle the error
      */
-    @SuppressWarnings({"WeakerAccess", "unused" /* Part of public API. */})
+    @SuppressWarnings("WeakerAccess" /* Part of public API. */)
     public FailedPickUp.Action onShardPickUpFailure(RuntimeFailure failure) {
         return failure.propagate();
     }
@@ -155,7 +155,7 @@ public class DeliveryMonitor {
      *         contains an information about the worker who owns the session and gives access
      *         to predefined {@code Action}s to handle the error
      */
-    @SuppressWarnings({"WeakerAccess", "unused"})  /* Part of public API. */
+    @SuppressWarnings("WeakerAccess" /* Part of public API. */)
     public FailedPickUp.Action onShardAlreadyPicked(AlreadyPickedUp failure) {
         return failure.doNothing();
     }
