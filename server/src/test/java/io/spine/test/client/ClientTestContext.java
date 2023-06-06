@@ -26,7 +26,7 @@
 
 package io.spine.test.client;
 
-import io.spine.client.TaskAggregate;
+import io.spine.client.given.TaskAggregate;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 

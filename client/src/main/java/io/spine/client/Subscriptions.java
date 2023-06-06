@@ -151,6 +151,15 @@ public final class Subscriptions implements Logging {
         return subscription;
     }
 
+    <M extends Message> Subscription subscribeTo(Topic topic,
+                                                 StreamObserver<M> observer,
+                                                 StreamObserver<SubscriptionUpdate> chain) {
+        var subscription = blockingServiceStub.subscribe(topic);
+        service.activate(subscription, new SubscriptionObserver<>(observer, chain));
+        add(subscription);
+        return subscription;
+    }
+
     /** Adds all the passed subscriptions. */
     void addAll(Iterable<Subscription> newSubscriptions) {
         newSubscriptions.forEach(this::add);
