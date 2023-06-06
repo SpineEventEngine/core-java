@@ -491,8 +491,13 @@ public final class Delivery implements Logging {
     }
 
     /**
-     * Notifies the {@code DeliveryMonitor} about the technical failure and executes
-     * the failure handler {@code Action}.
+     * Notifies the {@code DeliveryMonitor} telling about the runtime error
+     * occurred while performing the delivery from certain shard.
+     *
+     * <p>Executes the failure handler {@code Action} returned by the monitor.
+     *
+     * <p>If the monitor tells to repeat the delivery, returns the stats of the repeated
+     * delivery process, if any.
      */
     private Optional<DeliveryStats> onRuntimeFailure(ShardIndex shard, RuntimeException e) {
         var failure = new RuntimeFailure(shard, e, () -> deliverMessagesFrom(shard));
@@ -502,8 +507,13 @@ public final class Delivery implements Logging {
     }
 
     /**
-     * Notifies the {@code DeliveryMonitor} that shard is already picked up and executes
-     * the failure handler {@code Action}.
+     * Notifies the {@code DeliveryMonitor} telling the shard from which the delivery
+     * was asked to run, is already picked up.
+     *
+     * <p>Executes the failure handler {@code Action} returned by the monitor.
+     *
+     * <p>If the monitor tells to repeat the delivery, returns the stats of the repeated
+     * delivery process, if any.
      */
     private Optional<DeliveryStats> onAlreadyPickedUp(ShardIndex shard, ShardAlreadyPickedUp pickedUp) {
         var failure = new AlreadyPickedUp(shard, pickedUp, () -> deliverMessagesFrom(shard));
