@@ -26,9 +26,6 @@
 
 package io.spine.server.delivery;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -50,14 +47,14 @@ public final class RuntimeFailure extends FailedPickUp {
      */
     RuntimeFailure(ShardIndex shard,
                    RuntimeException exception,
-                   Supplier<Optional<DeliveryStats>> retry) {
+                   RetryDelivery retry) {
         super(shard, retry);
         checkNotNull(exception);
         this.exception = exception;
     }
 
     /**
-     * Returns an {@code Action} that propagates the occurred exception.
+     * Returns an {@code Action} that re-throws the occurred exception.
      */
     public Action propagate() {
         return () -> {

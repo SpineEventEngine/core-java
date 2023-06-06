@@ -26,14 +26,11 @@
 
 package io.spine.server.delivery;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Represents a scenario when shard could not be picked,
- * as it's already picked by another worker.
+ * Represents a scenario when shard could not be picked up,
+ * as it's already picked up by another worker.
  */
 public final class AlreadyPickedUp extends FailedPickUp {
 
@@ -51,18 +48,10 @@ public final class AlreadyPickedUp extends FailedPickUp {
      */
     AlreadyPickedUp(ShardIndex shard,
                     ShardAlreadyPickedUp pickedUp,
-                    Supplier<Optional<DeliveryStats>> retry) {
+                    RetryDelivery retry) {
         super(shard, retry);
         checkNotNull(pickedUp);
         alreadyPickedUp = pickedUp;
-    }
-
-    /**
-     * Returns an action that makes the delivery process
-     * to finish without any processing done.
-     */
-    public Action doNothing() {
-        return Optional::empty;
     }
 
     /**

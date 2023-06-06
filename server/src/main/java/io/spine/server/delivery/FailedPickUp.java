@@ -26,6 +26,7 @@
 
 package io.spine.server.delivery;
 
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 
 import java.util.Optional;
@@ -38,7 +39,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>Although not marked {@code Internal} explicitly, this type <em>is</em> internal to framework
  * in terms of extensibility. End-users should not extend it directly.
- * Its descendants are provided by the framework itself.
+ * Its descendants are provided by the framework itself, and represent different
+ * pick-up failure scenarios which may happen in {@code Delivery} at run-time.
  *
  * <p>On the other hand, nested {@link Action} is designed to be implemented by the framework
  * users to provide a custom behaviour for pickup failures in the {@linkplain DeliveryMonitor}
@@ -55,7 +57,7 @@ public abstract class FailedPickUp {
      * Creates a new {@code FailedPickUp} with the given {@code shard}
      * and {@code retryDelivery} action.
      */
-    FailedPickUp(ShardIndex shard, Supplier<Optional<DeliveryStats>> retryDelivery) {
+    FailedPickUp(ShardIndex shard, RetryDelivery retryDelivery) {
         checkNotNull(shard);
         checkNotNull(retryDelivery);
         this.retryDelivery = retryDelivery;
@@ -70,7 +72,15 @@ public abstract class FailedPickUp {
     }
 
     /**
-     * Returns a {@code ShardIndex} of the not picked shard.
+     * Returns an action that makes the delivery process
+     * to finish without any processing done.
+     */
+    public Action doNothing() {
+        return Optional::empty;
+    }
+
+    /**
+     * Returns an index of the shard which failed to pick up.
      */
     public final ShardIndex shard() {
         return shard;
@@ -78,6 +88,17 @@ public abstract class FailedPickUp {
 
     /**
      * Action to take in relation to failed shard pick-up.
+     *
+     * <p>May be used to {@linkplain Delivery#deliverMessagesFrom(ShardIndex)
+     * retry the delivery run}, and return its results. To initiate such a retry attempt,
+     * one should return {@linkplain FailedPickUp#retry() FailedPickUp.retry()} action.
+     *
+     * <p>Another option provided is to just {@linkplain FailedPickUp#doNothing()
+     * ignore the failure}, returning which leads to the completion
+     * of the delivery process with no job done.
+     *
+     * <p>See the descendants of {@code FailedPickUp} for other actions
+     * provided out-of-the-box by the framework.
      */
     @SPI
     @FunctionalInterface
@@ -85,7 +106,26 @@ public abstract class FailedPickUp {
 
         /**
          * Executes the {@code Action}.
+         *
+         * @return the results of a
+         *         {@linkplain Delivery#deliverMessagesFrom(ShardIndex) delivery run}, should
+         *         end-users choose to repeat it,
+         *         or {@code Optional.empty()} if no re-run is performed
          */
         Optional<DeliveryStats> execute();
+    }
+
+    /**
+     * A callback window into {@code Delivery} process, providing a way to retry
+     * the delivery process with the same inputs, as was the failed attempt
+     * described by {@link FailedPickUp}.
+     *
+     * <p>This interface is designed to be used internally by {@code Delivery}
+     * in order to power up the actions returned by end-users via {@code DeliveryMonitor}.
+     */
+    @Internal
+    @FunctionalInterface
+    interface RetryDelivery extends Supplier<Optional<DeliveryStats>> {
+
     }
 }
