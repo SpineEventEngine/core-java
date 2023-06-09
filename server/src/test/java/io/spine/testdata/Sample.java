@@ -49,9 +49,9 @@ import static java.lang.String.format;
 
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
- * {@link Command}), storage objects and else.
+ * {@link Command}), storage objects and more.
  */
-public class Sample {
+public final class Sample {
 
     /**
      * The upper bound used for generating random {@code int} and {@code long} values.
