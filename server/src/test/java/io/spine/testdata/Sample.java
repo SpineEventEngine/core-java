@@ -112,8 +112,10 @@ public final class Sample {
      * <p>If the required type is {@link Any}, an instance of an empty {@link Any} wrapped into
      * another {@link Any} is returned. See {@link AnyPacker}.
      *
-     * @param clazz Java class of the required stub message
-     * @param <M>   type of the required message
+     * @param clazz
+     *         Java class of the required stub message
+     * @param <M>
+     *         type of the required message
      * @return new instance of the given {@link Message} type with random fields
      * @see #builderForType(Class)
      */
@@ -152,7 +154,8 @@ public final class Sample {
      * such as {@code Version}, as only non-negative values may be accepted according
      * to their validation rules.
      *
-     * @param field {@link FieldDescriptor} to take the type info from
+     * @param field
+     *         {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field
      */
     @SuppressWarnings({"OverlyComplexMethod", "BadImport" /* Use `Type` for brevity. */})
