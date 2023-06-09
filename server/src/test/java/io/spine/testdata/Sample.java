@@ -26,7 +26,6 @@
 
 package io.spine.testdata;
 
-import com.google.common.base.Charsets;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
@@ -46,12 +45,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.Messages.builderFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.UUID.randomUUID;
 
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
- * {@link Command}), storage objects and else.
+ * {@link Command}), storage objects and more.
  */
-public class Sample {
+public final class Sample {
 
     /**
      * The upper bound used for generating random {@code int} and {@code long} values.
@@ -110,8 +111,10 @@ public class Sample {
      * <p>If the required type is {@link Any}, an instance of an empty {@link Any} wrapped into
      * another {@link Any} is returned. See {@link AnyPacker}.
      *
-     * @param clazz Java class of the required stub message
-     * @param <M>   type of the required message
+     * @param clazz
+     *         Java class of the required stub message
+     * @param <M>
+     *         type of the required message
      * @return new instance of the given {@link Message} type with random fields
      * @see #builderForType(Class)
      */
@@ -150,10 +153,11 @@ public class Sample {
      * such as {@code Version}, as only non-negative values may be accepted according
      * to their validation rules.
      *
-     * @param field {@link FieldDescriptor} to take the type info from
+     * @param field
+     *         {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field
      */
-    @SuppressWarnings({"OverlyComplexMethod", "BadImport" /* Use `Type` for brevity. */})
+    @SuppressWarnings("BadImport" /* Use `Type` for brevity. */)
     private static Object valueFor(FieldDescriptor field) {
         var type = field.getType();
         var javaType = type.getJavaType();
@@ -169,13 +173,10 @@ public class Sample {
             case BOOLEAN:
                 return random.nextBoolean();
             case STRING:
-                var bytes = new byte[8];
-                random.nextBytes(bytes);
-                return new String(bytes, Charsets.UTF_8);
+                return randomString();
             case BYTE_STRING:
-                var bytesPrimitive = new byte[8];
-                random.nextBytes(bytesPrimitive);
-                return ByteString.copyFrom(bytesPrimitive);
+                var randomString = randomString();
+                return ByteString.copyFrom(randomString, UTF_8);
             case ENUM:
                 return enumValueFor(field, random);
             case MESSAGE:
@@ -183,6 +184,10 @@ public class Sample {
             default:
                 throw new IllegalArgumentException(format("Field type %s is not supported.", type));
         }
+    }
+
+    private static String randomString() {
+        return randomUUID().toString();
     }
 
     private static int positiveInt(Random random) {
