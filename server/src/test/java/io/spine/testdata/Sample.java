@@ -26,7 +26,6 @@
 
 package io.spine.testdata;
 
-import com.google.common.base.Charsets;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
@@ -40,12 +39,14 @@ import io.spine.type.TypeUrl;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Random;
+import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.Messages.builderFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
@@ -169,13 +170,10 @@ public final class Sample {
             case BOOLEAN:
                 return random.nextBoolean();
             case STRING:
-                var bytes = new byte[8];
-                random.nextBytes(bytes);
-                return new String(bytes, Charsets.UTF_8);
+                return randomString();
             case BYTE_STRING:
-                var bytesPrimitive = new byte[8];
-                random.nextBytes(bytesPrimitive);
-                return ByteString.copyFrom(bytesPrimitive);
+                var randomString = randomString();
+                return ByteString.copyFrom(randomString, UTF_8);
             case ENUM:
                 return enumValueFor(field, random);
             case MESSAGE:
@@ -183,6 +181,11 @@ public final class Sample {
             default:
                 throw new IllegalArgumentException(format("Field type %s is not supported.", type));
         }
+    }
+
+    private static String randomString() {
+        return UUID.randomUUID()
+                   .toString();
     }
 
     private static int positiveInt(Random random) {
