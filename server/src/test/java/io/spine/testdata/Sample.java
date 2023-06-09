@@ -47,6 +47,7 @@ import static io.spine.protobuf.Messages.builderFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.UUID.randomUUID;
 
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
@@ -184,8 +185,7 @@ public final class Sample {
     }
 
     private static String randomString() {
-        return UUID.randomUUID()
-                   .toString();
+        return randomUUID().toString();
     }
 
     private static int positiveInt(Random random) {
