@@ -460,11 +460,16 @@ public final class Delivery implements Logging {
     public Optional<DeliveryStats> deliverMessagesFrom(ShardIndex index) {
         var currentNode = ServerEnvironment.instance()
                                            .nodeId();
-        var picked = workRegistry.pickUp(index, currentNode);
-        if (picked.isEmpty()) {
-            return Optional.empty();
+        PickUpOutcome outcome;
+        try {
+            outcome = workRegistry.pickUp(index, currentNode);
+        } catch (RuntimeException e) {
+            return onRuntimeFailure(index, e);
         }
-        var session = picked.get();
+        if (outcome.hasAlreadyPicked()) {
+            return onAlreadyPickedUp(index, outcome.getAlreadyPicked());
+        }
+        var session = outcome.getSession();
         monitor.onDeliveryStarted(index);
 
         RunResult runResult;
@@ -475,7 +480,7 @@ public final class Delivery implements Logging {
                 totalDelivered += runResult.deliveredCount();
             } while (runResult.shouldRunAgain());
         } finally {
-            session.complete();
+            workRegistry.release(session);
         }
         var stats = new DeliveryStats(index, totalDelivered);
         monitor.onDeliveryCompleted(stats);
@@ -483,6 +488,38 @@ public final class Delivery implements Logging {
         lateMessage.ifPresent(this::onNewMessage);
 
         return Optional.of(stats);
+    }
+
+    /**
+     * Notifies the {@code DeliveryMonitor} telling about the runtime error
+     * occurred while performing the delivery from certain shard.
+     *
+     * <p>Executes the failure handler {@code Action} returned by the monitor.
+     *
+     * <p>If the monitor tells to repeat the delivery, returns the stats of the repeated
+     * delivery process, if any.
+     */
+    private Optional<DeliveryStats> onRuntimeFailure(ShardIndex shard, RuntimeException e) {
+        var failure = new RuntimeFailure(shard, e, () -> deliverMessagesFrom(shard));
+        var result = monitor.onShardPickUpFailure(failure)
+                            .execute();
+        return result;
+    }
+
+    /**
+     * Notifies the {@code DeliveryMonitor} telling the shard from which the delivery
+     * was asked to run, is already picked up.
+     *
+     * <p>Executes the failure handler {@code Action} returned by the monitor.
+     *
+     * <p>If the monitor tells to repeat the delivery, returns the stats of the repeated
+     * delivery process, if any.
+     */
+    private Optional<DeliveryStats> onAlreadyPickedUp(ShardIndex shard, ShardAlreadyPickedUp pickedUp) {
+        var failure = new AlreadyPickedUp(shard, pickedUp, () -> deliverMessagesFrom(shard));
+        var result = monitor.onShardAlreadyPicked(failure)
+                            .execute();
+        return result;
     }
 
     /**
@@ -496,8 +533,8 @@ public final class Delivery implements Logging {
      *
      * @return the results of the run
      */
-    private RunResult runDelivery(ShardProcessingSession session) {
-        var index = session.shardIndex();
+    private RunResult runDelivery(ShardSessionRecord session) {
+        var index = session.getIndex();
 
         var startingPage = inboxStorage.readAll(index, pageSize);
         var maybePage = Optional.of(startingPage);
@@ -656,7 +693,8 @@ public final class Delivery implements Logging {
      *
      * <p>The registration of the dispatchers allows to handle the {@code Delivery}-specific events.
      *
-     * @param context Bounded Context in which the message dispatchers should be registered
+     * @param context
+     *         Bounded Context in which the message dispatchers should be registered
      */
     @Internal
     public void registerDispatchersIn(BoundedContext context) {

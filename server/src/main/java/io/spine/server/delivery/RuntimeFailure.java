@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * Represents a scenario when shard could not be picked because of some {@code RuntimeException}.
  */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.148")
+public final class RuntimeFailure extends FailedPickUp {
+
+    private final RuntimeException exception;
+
+    /**
+     * Creates a new {@code RuntimeFailure}.
+     *
+     * @param shard
+     *         a shard that could not be picked
+     * @param exception
+     *         an occurred exception
+     * @param retry
+     *         a way to retry delivery
+     */
+    RuntimeFailure(ShardIndex shard,
+                   RuntimeException exception,
+                   RetryDelivery retry) {
+        super(shard, retry);
+        checkNotNull(exception);
+        this.exception = exception;
+    }
+
+    /**
+     * Returns an {@code Action} that re-throws the occurred exception.
+     */
+    public Action propagate() {
+        return () -> {
+            throw exception;
+        };
+    }
+
+    /**
+     * Returns the occurred exception.
+     */
+    public RuntimeException exception() {
+        return exception;
+    }
+}

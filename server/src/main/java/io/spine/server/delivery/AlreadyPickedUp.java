@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- *  The version of this library.
- *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * Represents a scenario when shard could not be picked up,
+ * as it's already picked up by another worker.
  */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.148")
+public final class AlreadyPickedUp extends FailedPickUp {
+
+    private final ShardAlreadyPickedUp alreadyPickedUp;
+
+    /**
+     * Creates a new {@code AlreadyPickedUp} instance.
+     *
+     * @param shard
+     *         a shard that could not be picked
+     * @param pickedUp
+     *         a message containing info about owner, and the time when the shard was picked
+     * @param retry
+     *         a way to retry delivery
+     */
+    AlreadyPickedUp(ShardIndex shard,
+                    ShardAlreadyPickedUp pickedUp,
+                    RetryDelivery retry) {
+        super(shard, retry);
+        checkNotNull(pickedUp);
+        alreadyPickedUp = pickedUp;
+    }
+
+    /**
+     * Returns the outcome telling the shard was already picked up.
+     */
+    public ShardAlreadyPickedUp outcome() {
+        return alreadyPickedUp;
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.delivery.given;
+
+import com.google.protobuf.Duration;
+import io.spine.server.NodeId;
+import io.spine.server.delivery.PickUpOutcome;
+import io.spine.server.delivery.ShardIndex;
+import io.spine.server.delivery.ShardSessionRecord;
+import io.spine.server.delivery.ShardedWorkRegistry;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
+
 /**
- *  The version of this library.
+ * Throws the {@code IllegalStateException} on each operation.
  *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * <p>Used in tests of error handling in {@code Delivery}.
  */
-val versionToPublish: String by extra("2.0.0-SNAPSHOT.148")
+public final class ThrowingWorkRegistry implements ShardedWorkRegistry {
+
+    private static final String MESSAGE =
+            "Thrown from `ThrowingWorkRegistry` that always throws an exception.";
+
+    @Override
+    public PickUpOutcome pickUp(ShardIndex index, NodeId node) {
+        throw newIllegalStateException(MESSAGE);
+    }
+
+    @Override
+    public void release(ShardSessionRecord session) {
+        throw newIllegalStateException(MESSAGE);
+    }
+
+    @Override
+    public Iterable<ShardIndex> releaseExpiredSessions(Duration inactivityPeriod) {
+        throw newIllegalStateException(MESSAGE);
+    }
+}
