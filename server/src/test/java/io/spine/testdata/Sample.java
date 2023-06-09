@@ -157,7 +157,7 @@ public final class Sample {
      *         {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field
      */
-    @SuppressWarnings({"OverlyComplexMethod", "BadImport" /* Use `Type` for brevity. */})
+    @SuppressWarnings("BadImport" /* Use `Type` for brevity. */)
     private static Object valueFor(FieldDescriptor field) {
         var type = field.getType();
         var javaType = type.getJavaType();
