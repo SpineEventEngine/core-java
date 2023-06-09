@@ -46,7 +46,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * users to provide a custom behaviour for pickup failures in the {@linkplain DeliveryMonitor}
  * in addition to predefined behaviours provided by the inheritors of this class.
  */
-@SuppressWarnings("AbstractClassWithoutAbstractMethods" /* To emphasize the design intention.*/)
+@SuppressWarnings("AbstractClassWithoutAbstractMethods" /* To emphasize the design intention. */)
 public abstract class FailedPickUp {
 
     private final ShardIndex shard;
