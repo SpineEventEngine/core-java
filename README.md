@@ -15,7 +15,7 @@ applications that are accessed by clients built with JavaScript, Java Nano (Andr
 The project is under active ongoing development. 
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.8.2][latest-release].
+The latest stable version is [1.9.0][latest-release].
 
 ## Contents
 
@@ -64,7 +64,7 @@ latest version of the configuration files.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:developers@spine.io
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.8.2
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.9.0
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
