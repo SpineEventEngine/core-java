@@ -34,6 +34,7 @@ import io.spine.server.tenant.TenantAwareFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Validates the {@linkplain Subscription} instances submitted to {@linkplain Stand}.
@@ -94,7 +95,7 @@ final class SubscriptionValidator extends RequestValidator<Subscription> {
 
             @Override
             public Boolean apply(@Nullable Subscription input) {
-                checkNotNull(input);
+                requireNonNull(input);
                 boolean result = registry.containsId(input.getId());
                 return result;
             }

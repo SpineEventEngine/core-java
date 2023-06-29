@@ -36,7 +36,7 @@ import org.junit.jupiter.api.DisplayName;
 import static io.spine.server.dispatch.given.Given.commandEnvelope;
 import static io.spine.server.dispatch.given.Given.eventEnvelope;
 
-@DisplayName("`DispatchOutcomes` shoult")
+@DisplayName("`DispatchOutcomes` should")
 class DispatchOutcomesTest extends UtilityClassTest<DispatchOutcomes> {
 
     DispatchOutcomesTest() {

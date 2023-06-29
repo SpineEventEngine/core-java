@@ -34,6 +34,7 @@ import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
 import io.spine.client.Topic;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +43,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
+import static java.lang.String.*;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A slice with subscriptions belonging to one tenant in a multi-tenant application.
@@ -59,9 +61,12 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
     @Override
     public void activate(Subscription subscription, SubscriptionCallback callback) {
         lockAndRun(() -> {
-            checkState(subscriptionToAttrs.containsKey(subscription),
-                       "Cannot find the subscription in the registry.");
-            SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
+            @Nullable Subscription knownSubscription = asKnownSubscription(subscription);
+            requireNonNull(knownSubscription,
+                           () -> format(
+                                   "Cannot find the subscription with ID `%s` in the registry.",
+                                   subscription.getId()));
+            SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(knownSubscription);
             subscriptionRecord.activate(callback);
         });
     }
@@ -88,16 +93,47 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
     @Override
     public void remove(Subscription subscription) {
         lockAndRun(() -> {
-            if (!subscriptionToAttrs.containsKey(subscription)) {
+            @Nullable Subscription toRemove = asKnownSubscription(subscription);
+            if (toRemove == null) {
                 return;
             }
-            SubscriptionRecord record = subscriptionToAttrs.get(subscription);
+
+            SubscriptionRecord record = subscriptionToAttrs.get(toRemove);
             ImmutableSet<TypeUrl> types = record.targetTypes();
             for (TypeUrl type : types) {
                 typeToRecord.remove(type, record);
             }
-            subscriptionToAttrs.remove(subscription);
+            subscriptionToAttrs.remove(toRemove);
         });
+    }
+
+    /**
+     * Ensures that the given subscription is known to this subscription registry.
+     *
+     * <p>If the passed subscription is stored as-is, this method returns it.
+     *
+     * <p>Otherwise, performs a search by the subscription ID, and returns the result.
+     * Such a trick makes sense, as the framework has no control over
+     * the {@code Subscription} objects. They may arrive from client-side or other calling sites
+     * with some attributes modified (such as timestamps). Therefore, it makes sense
+     * to attempt another round of search using the ID of the given subscription.
+     */
+    private @Nullable Subscription asKnownSubscription(Subscription subscription) {
+        if(subscriptionToAttrs.containsKey(subscription)) {
+            return subscription;
+        }
+        @Nullable Subscription foundById = findById(subscription.getId());
+        return foundById;
+    }
+
+    private @Nullable Subscription findById(SubscriptionId id) {
+        Set<Subscription> subscriptions = subscriptionToAttrs.keySet();
+        for (Subscription s : subscriptions) {
+            if(s.getId().equals(id)) {
+                return s;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -113,12 +149,8 @@ final class TenantSubscriptionRegistry implements SubscriptionRegistry {
 
     @Override
     public boolean containsId(SubscriptionId subscriptionId) {
-        for (Subscription existingItem : subscriptionToAttrs.keySet()) {
-            if (existingItem.getId().equals(subscriptionId)) {
-                return true;
-            }
-        }
-        return false;
+        @Nullable Subscription found = findById(subscriptionId);
+        return found != null;
     }
 
     private void lockAndRun(Runnable operation) {
