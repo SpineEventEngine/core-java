@@ -50,7 +50,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-protobuf</artifactId>
-    <version>1.52.1</version>
+    <version>1.53.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
