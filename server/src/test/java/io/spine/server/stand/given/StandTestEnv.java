@@ -33,8 +33,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Duration;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -324,6 +327,31 @@ public final class StandTestEnv {
         return customers.stream()
                         .map(Customer::getId)
                         .collect(toSet());
+    }
+
+    public static Subscription resetTimestamp(Subscription subscription) {
+        var subscriptionBuilder = subscription.toBuilder();
+        var topicBuilder = subscriptionBuilder.getTopic().toBuilder();
+        var context = topicBuilder.getContext();
+        var originalTimestamp = context.getTimestamp();
+
+        var someDuration = Duration.newBuilder()
+                .setSeconds(42L)
+                .build();
+        var newValue = Timestamps.add(Timestamp.getDefaultInstance(), someDuration);
+
+        assertThat(originalTimestamp)
+                .isNotEqualTo(newValue);
+
+        var modifiedContext = context.toBuilder()
+                .setTimestamp(newValue)
+                .build();
+        var modifiedTopic = topicBuilder
+                .setContext(modifiedContext)
+                .build();
+        var modifiedSubscription = subscriptionBuilder.setTopic(modifiedTopic)
+                                                      .build();
+        return modifiedSubscription;
     }
 
     /**

@@ -48,6 +48,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.AloneWaiter;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
+import io.spine.server.stand.given.StandTestEnv;
 import io.spine.server.stand.given.StandTestEnv.AssertProjectQueryResults;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.stand.given.StandTestEnv.MemoizeSubscriptionCallback;
@@ -485,7 +486,31 @@ class StandTest extends TenantAwareTest {
 
         stand.cancel(subscription, noOpObserver());
 
-        var customer = generateCustomers(1).iterator().next();
+        assertNoUpdates(stand, repository, callback);
+    }
+
+    @Test
+    @DisplayName("allow cancelling a subscription " +
+            "even if its internal properties were modified, but ID is the same")
+    void cancelModifiedSubscriptions() {
+        var repository = new CustomerAggregateRepository();
+        var stand = createStand(repository);
+        var allCustomers = requestFactory.topic().allOf(Customer.class);
+        var callback = new MemoizeSubscriptionCallback();
+        var subscription = subscribeAndActivate(stand, allCustomers, callback);
+
+        var modifiedSubscription = StandTestEnv.resetTimestamp(subscription);
+        stand.cancel(modifiedSubscription, noOpObserver());
+
+        assertNoUpdates(stand, repository, callback);
+    }
+
+    private static void
+    assertNoUpdates(Stand stand,
+                    CustomerAggregateRepository repository,
+                    MemoizeSubscriptionCallback callback) {
+        var customer = generateCustomers(1).iterator()
+                                           .next();
         var customerId = customer.getId();
         var version = 1;
         var entity = aggregateOfClass(CustomerAggregate.class)
