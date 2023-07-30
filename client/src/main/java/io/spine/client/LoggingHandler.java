@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import com.google.common.flogger.FluentLogger;
  *
  * <p>The handler always uses {@linkplain FluentLogger#atSevere() severe} level.
  */
+@SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
 abstract class LoggingHandler {
 
     private final FluentLogger logger;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>The log is set up with a {@link Receptor} from which it should be accessed. By default,
  * the log will include the given method as the logging {@linkplain LogSite site}.
  */
+@SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
 public final class ReceptorLog {
 
     private final FluentLogger logger;

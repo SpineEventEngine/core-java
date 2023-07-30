@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish
+package io.spine.internal.dependency
 
 /**
- * A DSL element of [SpinePublishing] extension which configures publishing of [dokkaJar] artifact.
+ * Dependencies on ProtoData modules.
  *
- * This artifact contains Dokka-generated documentation. By default, it is not published.
- *
- * Take a look at the [SpinePublishing.dokkaJar] for a usage example.
- *
- * @see [registerArtifacts]
+ * See [`SpineEventEngine/ProtoData`](https://github.com/SpineEventEngine/ProtoData/).
  */
-class DokkaJar {
-    /**
-     * Enables publishing `JAR`s with Dokka-generated documentation for all published modules.
-     */
-    var enabled = false
+@Suppress("unused", "ConstPropertyName")
+object ProtoData {
+    const val version = "0.9.9"
+    const val group = "io.spine.protodata"
+    const val compiler = "$group:protodata-compiler:$version"
+
+    const val codegenJava = "io.spine.protodata:protodata-codegen-java:$version"
+
+    const val pluginId = "io.spine.protodata"
+    const val pluginLib = "${Spine.group}:protodata:$version"
 }

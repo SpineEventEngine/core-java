@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("MaxLineLength")
+
 package io.spine.internal.dependency
 
 /**
  * Gradle TestKit extension for Google Truth.
  *
- * Source code:
- * https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/tree/main/testkit-truth
- *
- * Usage description:
- * https://dev.to/autonomousapps/gradle-all-the-way-down-testing-your-gradle-plugin-with-gradle-testkit-2hmc
+ * @see <a href="https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin/tree/main/testkit-truth">TestKit source code</a>
+ * @see <a href="https://dev.to/autonomousapps/gradle-all-the-way-down-testing-your-gradle-plugin-with-gradle-testkit-2hmc">Usage description</a>
  */
-@Suppress("unused")
+@Suppress("unused", "ConstPropertyName")
 object TestKitTruth {
-    private const val version = "1.1"
+    private const val version = "1.20.0"
     const val lib = "com.autonomousapps:testkit-truth:$version"
 }

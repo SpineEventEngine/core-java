@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@
 package io.spine.internal.dependency
 
 /**
- * A JSON parser in Kotlin
+ * A JSON parser in Kotlin.
  *
  * [Klaxon](https://github.com/cbeust/klaxon)
  */
+@Suppress("unused", "ConstPropertyName")
 object Klaxon {
     private const val version = "5.6"
     const val lib = "com.beust:klaxon:${version}"

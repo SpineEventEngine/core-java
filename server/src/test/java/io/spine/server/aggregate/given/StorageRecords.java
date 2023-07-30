@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
  */
 public class StorageRecords {
 
-    private static final TestEventFactory eventFactory = newInstance(Given.class);
+    private static final TestEventFactory eventFactory = TestEventFactory.newInstance(Given.class);
 
     /** Prevents instantiation of this utility class. */
     private StorageRecords() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("MaxLineLength")
+
 package io.spine.internal.dependency
 
 /**
  * Plexus Utils is a transitive dependency which we don't use directly.
- * We `force` it in [DependencyResolution.forceConfiguration].
+ * We `force` it in [forceVersions] (see `DependencyResolution.kt`).
  *
- * [Plexus Utils](https://codehaus-plexus.github.io/plexus-utils/)
+ * [Plexus Utils](https://github.com/codehaus-plexus/plexus-utils)
  */
+@Suppress("unused", "ConstPropertyName")
 object Plexus {
-    private const val version = "3.4.0"
+
+    /**
+     * This is the last version in the 3.x series.
+     *
+     * There's a major update to 4.x.
+     *
+     * @see <a href="https://github.com/codehaus-plexus/plexus-utils/releases/tag/plexus-utils-4.0.0">plexus-utils-4.0.0</a>
+     */
+    private const val version = "3.5.1"
     const val utils = "org.codehaus.plexus:plexus-utils:${version}"
 }

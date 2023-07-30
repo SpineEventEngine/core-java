@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ package io.spine.internal.dependency
 /**
  * Google implementations of [HTTP client](https://github.com/googleapis/google-http-java-client).
  */
-@Suppress("unused")
+@Suppress("unused", "ConstPropertyName")
 object HttpClient {
     // https://github.com/googleapis/google-http-java-client
     const val version  = "1.41.5"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,67 +33,76 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.get
+
+/**
+ * The name of the Maven Publishing Gradle plugin.
+ */
+private const val MAVEN_PUBLISH = "maven-publish"
 
 /**
  * Abstract base for handlers of publications in a project
  * with [spinePublishing] settings declared.
  */
 internal sealed class PublicationHandler(
-    private val artifactId: String,
+    protected val project: Project,
     private val destinations: Set<Repository>
 ) {
 
-    /**
-     * Registers this publication in the given project.
-     */
-    fun registerIn(project: Project) {
-        handlePublications(project)
-        registerDestinations(project)
+    fun apply() = with(project) {
+        if (!hasCustomPublishing) {
+            apply(plugin = MAVEN_PUBLISH)
+        }
+
+        pluginManager.withPlugin(MAVEN_PUBLISH) {
+            handlePublications()
+            registerDestinations()
+            configurePublishTask(destinations)
+        }
     }
 
     /**
      * Either handles publications already declared in the given project,
      * or creates new ones.
      */
-    abstract fun handlePublications(project: Project)
-
-    /**
-     * Takes a group name and a version from the given [project] and assigns
-     * them to this publication.
-     */
-    protected fun MavenPublication.assignMavenCoordinates(project: Project) {
-        groupId = project.group.toString()
-        artifactId = this@PublicationHandler.artifactId
-        version = project.version.toString()
-    }
+    abstract fun handlePublications()
 
     /**
      * Goes through the [destinations] and registers each as a repository for publishing
      * in the given Gradle project.
      */
-    private fun registerDestinations(project: Project) {
-        val gradleRepositories = project.publishingExtension.repositories
+    private fun registerDestinations() {
+        val repositories = project.publishingExtension.repositories
         destinations.forEach { destination ->
-            gradleRepositories.register(project, destination)
+            repositories.register(project, destination)
         }
     }
 
     /**
-     * Adds a Maven repository to the project specifying credentials, if they are
-     * [available][Repository.credentials] from the root project.
+     * Takes a group name and a version from the given [project] and assigns
+     * them to this publication.
      */
-    private fun RepositoryHandler.register(project: Project, repository: Repository) {
-        val isSnapshot = project.version.toString().isSnapshot()
-        val target = if (isSnapshot) repository.snapshots else repository.releases
-        val credentials = repository.credentials(project.rootProject)
-        maven {
-            url = project.uri(target)
-            credentials {
-                username = credentials?.username
-                password = credentials?.password
-            }
+    protected fun MavenPublication.assignMavenCoordinates() {
+        groupId = project.group.toString()
+        artifactId = project.spinePublishing.artifactPrefix + artifactId
+        version = project.version.toString()
+    }
+}
+
+/**
+ * Adds a Maven repository to the project specifying credentials, if they are
+ * [available][Repository.credentials] from the root project.
+ */
+private fun RepositoryHandler.register(project: Project, repository: Repository) {
+    val isSnapshot = project.version.toString().isSnapshot()
+    val target = if (isSnapshot) repository.snapshots else repository.releases
+    val credentials = repository.credentials(project.rootProject)
+    maven {
+        url = project.uri(target)
+        credentials {
+            username = credentials?.username
+            password = credentials?.password
         }
     }
 }
@@ -111,65 +120,68 @@ internal sealed class PublicationHandler(
  *
  * By default, only a jar with the compilation output of `main` source set and its
  * metadata files are published. Other artifacts are specified through the
- * [constructor parameter][jars]. Please, take a look on [specifyArtifacts] for additional info.
+ * [constructor parameter][jarFlags]. Please, take a look on [specifyArtifacts] for additional info.
  *
- * @param artifactId
- *         a name that a project is known by.
- * @param jars
- *         list of artifacts to be published along with the compilation output.
+ * @param jarFlags
+ *         flags for additional JARs published along with the compilation output.
  * @param destinations
  *         Maven repositories to which the produced artifacts will be sent.
  * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:publications">
  *       Maven Publish Plugin | Publications</a>
  */
-internal class MavenJavaPublication(
-    artifactId: String,
-    private val jars: Set<TaskProvider<Jar>>,
+internal class StandardJavaPublicationHandler(
+    project: Project,
+    private val jarFlags: JarFlags,
     destinations: Set<Repository>,
-) : PublicationHandler(artifactId, destinations) {
+) : PublicationHandler(project, destinations) {
 
     /**
      * Creates a new "mavenJava" [MavenPublication] in the given project.
      */
-    override fun handlePublications(project: Project) {
-        project.publications.create<MavenPublication>("mavenJava") {
-            assignMavenCoordinates(project)
-            specifyArtifacts(project, jars)
+    override fun handlePublications() {
+        val jars = project.artifacts(jarFlags)
+        val publications = project.publications
+        publications.create<MavenPublication>("mavenJava") {
+            assignMavenCoordinates()
+            specifyArtifacts(jars)
         }
     }
-}
 
-/**
- * Specifies which artifacts this [MavenPublication] will contain.
- *
- * A typical Maven publication contains:
- *
- *  1. Jar archives. For example: compilation output, sources, javadoc, etc.
- *  2. Maven metadata file that has ".pom" extension.
- *  3. Gradle metadata file that has ".module" extension.
- *
- *  Metadata files contain information about a publication itself, its artifacts and their
- *  dependencies. Presence of ".pom" file is mandatory for publication to be consumed by
- *  `mvn` build tool itself or other build tools that understand Maven notation (Gradle, Ivy).
- *  Presence of ".module" is optional, but useful when a publication is consumed by Gradle.
- *
- * @see <a href="https://maven.apache.org/pom.html">Maven – POM Reference</a>
- * @see <a href="https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html">
- *      Understanding Gradle Module Metadata</a>
- */
-private fun MavenPublication.specifyArtifacts(project: Project, jars: Set<TaskProvider<Jar>>) {
-
-    /* "java" component provides a jar with compilation output of "main" source set.
-       It is NOT defined as another `Jar` task intentionally. Doing that will leave the
-       publication without correct ".pom" and ".module" metadata files generated.
-    */
-    from(project.components["java"])
-
-    /* Other artifacts are represented by `Jar` tasks. Those artifacts don't bring any other
-       metadata in comparison with `Component` (such as dependencies notation).
+    /**
+     * Specifies which artifacts this [MavenPublication] will contain.
+     *
+     * A typical Maven publication contains:
+     *
+     *  1. Jar archives. For example: compilation output, sources, javadoc, etc.
+     *  2. Maven metadata file that has ".pom" extension.
+     *  3. Gradle's metadata file that has ".module" extension.
+     *
+     *  Metadata files contain information about a publication itself, its artifacts and their
+     *  dependencies. Presence of ".pom" file is mandatory for publication to be consumed by
+     *  `mvn` build tool itself or other build tools that understand Maven notation (Gradle, Ivy).
+     *  Presence of ".module" is optional, but useful when a publication is consumed by Gradle.
+     *
+     * @see <a href="https://maven.apache.org/pom.html">Maven – POM Reference</a>
+     * @see <a href="https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html">
+     *      Understanding Gradle Module Metadata</a>
      */
-    jars.forEach {
-        artifact(it)
+    private fun MavenPublication.specifyArtifacts(jars: Set<TaskProvider<Jar>>) {
+
+        /* "java" component provides a jar with compilation output of "main" source set.
+           It is NOT defined as another `Jar` task intentionally. Doing that will leave the
+           publication without correct ".pom" and ".module" metadata files generated.
+        */
+        val javaComponent = project.components.findByName("java")
+        javaComponent?.let {
+            from(it)
+        }
+
+        /* Other artifacts are represented by `Jar` tasks. Those artifacts don't bring any other
+           metadata in comparison with `Component` (such as dependencies notation).
+         */
+        jars.forEach {
+            artifact(it)
+        }
     }
 }
 
@@ -177,7 +189,7 @@ private fun MavenPublication.specifyArtifacts(project: Project, jars: Set<TaskPr
  * A handler for custom publications, which are declared under the [publications]
  * section of a module.
  *
- * Such publications should be treated differently than [MavenJavaPublication],
+ * Such publications should be treated differently than [StandardJavaPublicationHandler],
  * which is <em>created</em> for a module. Instead, since the publications are already declared,
  * this class only [assigns maven coordinates][assignMavenCoordinates].
  *
@@ -189,13 +201,12 @@ private fun MavenPublication.specifyArtifacts(project: Project, jars: Set<TaskPr
  * publication, and custom ones. In order to have both standard and custom publications,
  * please specify custom artifact IDs or classifiers for each custom publication.
  */
-internal class CustomPublications(artifactId: String, destinations: Set<Repository>) :
-    PublicationHandler(artifactId, destinations) {
+internal class CustomPublicationHandler(project: Project, destinations: Set<Repository>) :
+    PublicationHandler(project, destinations) {
 
-    override fun handlePublications(project: Project) {
+    override fun handlePublications() {
         project.publications.forEach {
-            val publication = it as MavenPublication
-            publication.assignMavenCoordinates(project)
+            (it as MavenPublication).assignMavenCoordinates()
         }
     }
 }

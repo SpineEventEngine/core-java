@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@
 package io.spine.internal.dependency
 
 // https://github.com/grpc/grpc-java
-@Suppress("unused")
+@Suppress("unused", "ConstPropertyName")
 object Grpc {
     @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.52.1"
+    const val version        = "1.56.1"
     const val api            = "io.grpc:grpc-api:${version}"
     const val auth           = "io.grpc:grpc-auth:${version}"
     const val core           = "io.grpc:grpc-core:${version}"

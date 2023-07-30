@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ internal fun MarkdownDocument.printSection(
 }
 
 /**
- * Prints the metadata of the module to the specified [Markdown document][out].
+ * Prints the module metadata to this [MarkdownDocument].
  */
 private fun MarkdownDocument.printModule(module: ModuleData) {
     ol()
@@ -105,7 +105,7 @@ private fun MarkdownDocument.printProjectUrl(projectUrl: String?, indent: Int) {
 }
 
 /**
- * Prints the links to the the source code licenses.
+ * Prints the links to the source code licenses.
  */
 @Suppress("SameParameterValue" /* Indentation is consistent across the list. */)
 private fun MarkdownDocument.printLicenses(licenses: Set<License>, indent: Int) {

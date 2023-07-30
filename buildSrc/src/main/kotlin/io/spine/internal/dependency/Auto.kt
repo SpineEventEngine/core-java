@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("unused", "ConstPropertyName")
+
 package io.spine.internal.dependency
 
 // https://github.com/google/auto
 object AutoCommon {
-    private const val version = "1.2.1"
+    private const val version = "1.2.2"
     const val lib = "com.google.auto:auto-common:${version}"
 }
 
 // https://github.com/google/auto
 object AutoService {
-    private const val version = "1.0.1"
+    private const val version = "1.1.1"
     const val annotations = "com.google.auto.service:auto-service-annotations:${version}"
     @Suppress("unused")
     const val processor   = "com.google.auto.service:auto-service:${version}"
@@ -42,6 +44,6 @@ object AutoService {
 
 // https://github.com/google/auto
 object AutoValue {
-    private const val version = "1.10.1"
+    private const val version = "1.10.2"
     const val annotations = "com.google.auto.value:auto-value-annotations:${version}"
 }

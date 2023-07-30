@@ -4,6 +4,7 @@ on: pull_request
 
 jobs:
   build:
+    name: Build under Windows
     runs-on: windows-latest
 
     steps:
@@ -17,6 +18,9 @@ jobs:
           distribution: zulu
           cache: gradle
 
+      - name: Configure Pagefile
+        uses: al-cheb/configure-pagefile-action@v1.2
+
       - name: Build project and run tests
         shell: cmd
         # For the reason on `--no-daemon` see https://github.com/actions/cache/issues/454
@@ -24,8 +28,8 @@ jobs:
 
       # See: https://github.com/marketplace/actions/junit-report-action
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v3.5.2
+        uses: mikepenz/action-junit-report@v3.7.6
         if: always() # always run even if the previous step fails
         with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
+          report_paths: '**/build/test-results/**/TEST-*.xml'
           require_tests: true # will fail workflow if test reports not found

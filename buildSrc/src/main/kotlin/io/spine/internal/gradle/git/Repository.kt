@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,43 +44,31 @@ import io.spine.internal.gradle.fs.LazyTempPath
  * release of resources please use the provided functionality inside a `use` block or
  * call the `close` method manually.
  */
-class Repository : AutoCloseable {
+class Repository private constructor(
+
     /**
      * The GitHub SSH URL to the underlying repository.
      */
-    val sshUrl: String
+    private val sshUrl: String,
+
+    /**
+     * Current user configuration.
+     *
+     * This configuration determines what ends up in author and committer fields of a commit.
+     */
+    private var user: UserInfo,
+
+    /**
+     * Currently checked out branch.
+     */
+    private var currentBranch: String
+
+) : AutoCloseable {
 
     /**
      * Path to the temporal folder for a clone of the underlying repository.
      */
     val location = LazyTempPath("repoTemp")
-
-    /**
-     * Current user configuration.
-     *
-     * This configuration determines what ends up in author and commiter fields of a commit.
-     */
-    var user: UserInfo
-        get() = field
-        private set(value) {
-            field = value
-        }
-
-    /**
-     * Currently checked out branch.
-     */
-    var currentBranch: String
-        get() = field
-        private set(value) {
-            field = value
-        }
-
-
-    private constructor(sshUrl: String, user: UserInfo, branch: String) {
-        this.sshUrl = sshUrl
-        this.user = user
-        this.currentBranch = branch
-    }
 
     /**
      * Clones the repository with [the SSH url][sshUrl] into the [temporal folder][location].
@@ -101,7 +89,7 @@ class Repository : AutoCloseable {
     fun checkout(branch: String) {
         repoExecute("git", "checkout", branch)
 
-        this.currentBranch = branch
+        currentBranch = branch
     }
 
     /**
@@ -109,7 +97,7 @@ class Repository : AutoCloseable {
      *
      * Overwrites `user.name` and `user.email` settings locally in [location] with
      * values from [user]. These settings determine what ends up in author and
-     * commiter fields of a commit.
+     * committer fields of a commit.
      */
     fun configureUser(user: UserInfo) {
         repoExecute("git", "config", "user.name", user.name)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@
 
 package io.spine.internal.gradle.github.pages
 
+import io.spine.internal.gradle.git.Repository
 import java.io.File
 import java.nio.file.Path
 import org.gradle.api.Project
@@ -33,7 +34,6 @@ import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logger
-import io.spine.internal.gradle.git.Repository
 
 /**
  * Performs the update of GitHub pages.
@@ -90,25 +90,33 @@ private abstract class UpdateDocumentation(
         File("${repository.location}/${docsDestinationFolder}/${project.name}")
     }
 
+    private fun logDebug(message: () -> String) {
+        if (logger.isDebugEnabled) {
+            logger.debug(message())
+        }
+    }
+
     fun run() {
         val module = project.name
-        logger.debug("Update of the $toolName documentation for module `$module` started.")
+        logDebug {"Update of the $toolName documentation for module `$module` started." }
 
         val documentation = replaceMostRecentDocs()
         copyIntoVersionDir(documentation)
 
         val version = project.version
-        val updateMessage = "Update $toolName documentation for module `$module` as for " +
-                "version $version"
+        val updateMessage =
+            "Update `$toolName` documentation for module `$module` as for version $version"
         repository.commitAllChanges(updateMessage)
 
-        logger.debug("Update of the $toolName documentation for `$module` successfully finished.")
+        logDebug { "Update of the `$toolName` documentation for `$module` successfully finished." }
     }
 
     private fun replaceMostRecentDocs(): ConfigurableFileCollection {
         val generatedDocs = project.files(docsSourceFolder)
 
-        logger.debug("Replacing the most recent $toolName documentation in ${mostRecentFolder}.")
+        logDebug {
+            "Replacing the most recent `$toolName` documentation in `${mostRecentFolder}`."
+        }
         copyDocs(generatedDocs, mostRecentFolder)
 
         return generatedDocs
@@ -125,7 +133,9 @@ private abstract class UpdateDocumentation(
     private fun copyIntoVersionDir(generatedDocs: ConfigurableFileCollection) {
         val versionedDocDir = File("$mostRecentFolder/v/${project.version}")
 
-        logger.debug("Storing the new version of $toolName documentation in `${versionedDocDir}.")
+        logDebug {
+            "Storing the new version of `$toolName` documentation in `${versionedDocDir}`."
+        }
         copyDocs(generatedDocs, versionedDocDir)
     }
 }

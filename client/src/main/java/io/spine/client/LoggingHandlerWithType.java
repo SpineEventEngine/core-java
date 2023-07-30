@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Abstract base for logging handlers that contain information about a type.
  */
+@SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
 abstract class LoggingHandlerWithType extends LoggingHandler {
 
     private final Class<? extends Message> type;

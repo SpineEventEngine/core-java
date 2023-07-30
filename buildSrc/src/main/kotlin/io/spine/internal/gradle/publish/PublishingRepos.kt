@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,6 @@ import io.spine.internal.gradle.Repository
  * Repositories to which we may publish.
  */
 object PublishingRepos {
-
-    @Suppress("HttpUrlsUsage") // HTTPS is not supported by this repository.
-    val mavenTeamDev = Repository(
-        name = "maven.teamdev.com",
-        releases = "http://maven.teamdev.com/repository/spine",
-        snapshots = "http://maven.teamdev.com/repository/spine-snapshots",
-        credentialsFile = "credentials.properties"
-    )
 
     val cloudRepo = CloudRepo.destination
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import io.spine.internal.dependency.AutoService
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Spine
+import io.spine.internal.dependency.Validation
 
 plugins {
     `java-test-fixtures`
@@ -41,12 +42,11 @@ dependencies {
     api(Grpc.stub)
     api(project(":client"))
 
-    val spine = Spine(project)
     /*
      * Expose Validation API at the server side. E.g. for tuning custom validation for
      * anti-corruption layer.
      */
-    api(spine.validation.runtime)
+    api(Validation.runtime)
 
     with(AutoService) {
         testAnnotationProcessor(processor)
@@ -54,10 +54,10 @@ dependencies {
     }
     testImplementation(Grpc.nettyShaded)
 
-    testImplementation(spine.testlib)
-    testImplementation(spine.baseTypes)
+    testImplementation(Spine.testlib)
+    testImplementation(Spine.baseTypes)
 
-    testFixturesImplementation(spine.testlib)
+    testFixturesImplementation(Spine.testlib)
 
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
@@ -75,12 +75,12 @@ tasks.javadoc {
     }
 }
 
-tasks {
-    project.afterEvaluate {
-        val generateTestFixturesRejections by existing
-        @Suppress("UNUSED_VARIABLE")
-        val compileTestFixturesKotlin by existing {
-            dependsOn(generateTestFixturesRejections)
-        }
-    }
-}
+//tasks {
+//    project.afterEvaluate {
+//        val generateTestFixturesRejections by existing
+//        @Suppress("UNUSED_VARIABLE")
+//        val compileTestFixturesKotlin by existing {
+//            dependsOn(generateTestFixturesRejections)
+//        }
+//    }
+//}

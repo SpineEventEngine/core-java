@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ package io.spine.internal.dependency
  *
  * See [plugin site](https://runningcode.github.io/gradle-doctor) for features and usage.
  */
+@Suppress("unused", "ConstPropertyName")
 object GradleDoctor {
     const val version = "0.8.1"
     const val pluginId = "com.osacky.doctor"

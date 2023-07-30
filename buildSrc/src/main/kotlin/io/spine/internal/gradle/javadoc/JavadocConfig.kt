@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ object JavadocConfig {
     /**
      * Link to the documentation for Java 11 Standard Library API.
      *
-     * OpenJDK SE 11 is used for the reference.
+     * Oracle JDK SE 11 is used for the reference.
      */
-    private const val standardLibraryAPI = "https://cr.openjdk.java.net/~iris/se/11/latestSpec/api/"
+    private const val standardLibraryAPI = "https://docs.oracle.com/en/java/javase/11/docs/api/"
 
     @Suppress("MemberVisibilityCanBePrivate") // opened to be visible from docs.
     val tags = listOf(

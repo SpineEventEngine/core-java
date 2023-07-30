@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ package io.spine.server.event.given.bus;
 import io.spine.core.EventContext;
 import io.spine.core.External;
 import io.spine.core.Subscribe;
-import io.spine.json.Json;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 
+import static io.spine.type.Json.toJson;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -63,6 +63,6 @@ public class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
      */
     @Subscribe
     void on(ProjectCreated event) {
-        fail("Unexpected event " + Json.toJson(event));
+        fail("Unexpected event " + toJson(event));
     }
 }

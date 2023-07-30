@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Check version increment
     runs-on: ubuntu-latest
 
     steps:
