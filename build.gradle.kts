@@ -49,8 +49,6 @@ import io.spine.internal.gradle.report.pom.PomGenerator
 import io.spine.internal.gradle.standardToSpineSdk
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
-import io.spine.tools.mc.gradle.ModelCompilerOptions
-import io.spine.tools.mc.java.gradle.McJavaOptions
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -67,7 +65,6 @@ buildscript {
                     spine.server,
                     io.spine.internal.dependency.Spine.Logging.lib,
                     io.spine.internal.dependency.Validation.runtime,
-                    io.spine.internal.dependency.ProtoData.pluginLib,
                 )
             }
         }
@@ -147,9 +144,8 @@ subprojects {
     val generated = "$projectDir/generated"
     applyGeneratedDirectories(generated)
     setupTestTasks()
-    setupCodeGeneration(generated)
     setupPublishing()
-    addTaskDependencies()
+    configureTaskDependencies()
 }
 
 JacocoConfig.applyTo(project)
@@ -176,7 +172,6 @@ fun Subproject.applyPlugins() {
         plugin("pmd-settings")
         plugin("dokka-for-java")
         plugin("io.spine.mc-java")
-        //plugin("io.spine.protodata")
     }
 
     apply<IncrementGuard>()
@@ -314,62 +309,6 @@ fun Subproject.applyGeneratedDirectories(generatedDir: String) {
 }
 
 /**
- * Configures code generation in this project.
- */
-fun Subproject.setupCodeGeneration(generatedDir: String) {
-    /**
-     * The below arrangement is "unusual" `because:
-     *  1. `modelCompiler` could not be found after applying plugin via `apply { }` block.
-     *  2. java { }` cannot be used because it conflicts with `java` of type `JavaPluginExtension`
-     *     already added to the `Project`.
-     */
-    val modelCompiler = extensions.getByType(ModelCompilerOptions::class.java)
-    modelCompiler.apply {
-        // Get nested `this` instead of `Project` instance.
-        val mcOptions = (this@apply as ExtensionAware)
-        val java = mcOptions.extensions.getByName("java") as McJavaOptions
-        java.codegen {
-            validation {
-            //    skipValidation()
-            }
-        }
-    }
-
-//    val protoData = extensions.getByName("protoData") as CodegenSettings
-//    protoData.apply {
-//        renderers(
-//            "io.spine.validation.java.PrintValidationInsertionPoints",
-//            "io.spine.validation.java.JavaValidationRenderer",
-//
-//            // Suppress warnings in the generated code.
-//            "io.spine.protodata.codegen.java.file.PrintBeforePrimaryDeclaration",
-//            "io.spine.protodata.codegen.java.suppress.SuppressRenderer"
-//        )
-//        plugins(
-//            "io.spine.validation.ValidationPlugin",
-//        )
-//    }
-
-//    protobuf {
-//        // Do not remove this setting until ProtoData can copy all the directories from
-//        // `build/generated-proto`. Otherwise, the GRPC code won't be picked up.
-//        // See: https://github.com/SpineEventEngine/ProtoData/issues/94
-//        //generatedFilesBaseDir = generatedDir
-//    }
-
-    /**
-     * Manually suppress deprecations in the generated Kotlin code until ProtoData does it.
-     */
-//    tasks.withType<LaunchProtoData>().forEach { task ->
-//        task.doLast {
-//            sourceSets.forEach { sourceSet ->
-//                suppressDeprecationsInKotlin(generatedDir, sourceSet.name)
-//            }
-//        }
-//    }
-}
-
-/**
  * Forces dependencies of this project.
  */
 fun Subproject.forceConfigurations() {
@@ -420,24 +359,4 @@ fun Subproject.setupPublishing() {
     tasks.named("publish") {
         dependsOn("${project.path}:updateGitHubPages")
     }
-}
-
-/**
- * Adds explicit dependencies for the tasks of this subproject.
- */
-fun Subproject.addTaskDependencies() {
-//    tasks {
-//        afterEvaluate {
-//            val generateRejections by existing
-//            compileKotlin {
-//                dependsOn(generateRejections)
-//            }
-//
-//            val generateTestRejections by existing
-//            compileTestKotlin {
-//                dependsOn(generateTestRejections)
-//            }
-//        }
-//    }
-    configureTaskDependencies()
 }
