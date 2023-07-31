@@ -75,7 +75,7 @@ object Spine {
          * @see [Spine.CoreJava.server]
          * @see <a href="https://github.com/SpineEventEngine/core-java">core-java</a>
          */
-        const val core = "2.0.0-SNAPSHOT.150"
+        const val core = "2.0.0-SNAPSHOT.153"
 
         /**
          * The version of [Spine.modelCompiler].

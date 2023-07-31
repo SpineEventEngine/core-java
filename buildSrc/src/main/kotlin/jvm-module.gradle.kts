@@ -25,7 +25,6 @@
  */
 
 import BuildSettings.javaVersion
-import Jvm_module_gradle.Module
 import io.spine.internal.dependency.CheckerFramework
 import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
@@ -45,6 +44,19 @@ import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
 import io.spine.internal.gradle.report.license.LicenseReporter
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
+import org.gradle.api.Project
+import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getValue
+import org.gradle.kotlin.dsl.idea
+import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.`java-library`
+import org.gradle.kotlin.dsl.kotlin
+import org.gradle.kotlin.dsl.provideDelegate
+import org.gradle.kotlin.dsl.registering
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
