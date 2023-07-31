@@ -26,6 +26,7 @@
 
 package io.spine.internal.gradle.javadoc
 
+import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.javadoc.ExcludeInternalDoclet.Companion.taskName
 import io.spine.internal.gradle.sourceSets
 import org.gradle.api.Project
@@ -36,9 +37,13 @@ import org.gradle.external.javadoc.StandardJavadocDocletOptions
 /**
  * The doclet which removes Javadoc for `@Internal` things in the Java code.
  */
-class ExcludeInternalDoclet(val version: String) {
+@Suppress("ConstPropertyName")
+class ExcludeInternalDoclet(
+    @Deprecated("`Spine.ArtifactVersion.javadocTools` is used instead.")
+    val version: String = Spine.ArtifactVersion.javadocTools
+) {
 
-    private val dependency = "io.spine.tools:spine-javadoc-filter:${version}"
+    private val dependency = Spine.javadocFilter
 
     companion object {
 
