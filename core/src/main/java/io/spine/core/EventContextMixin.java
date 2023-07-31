@@ -27,7 +27,6 @@
 package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
