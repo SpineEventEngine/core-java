@@ -96,7 +96,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/base-types">spine-base-types</a>
          */
-        const val baseTypes = "2.0.0-SNAPSHOT.121"
+        const val baseTypes = "2.0.0-SNAPSHOT.124"
 
         /**
          * The version of [Spine.time].
