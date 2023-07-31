@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.152</version>
+<version>2.0.0-SNAPSHOT.153</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -44,19 +44,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-core</artifactId>
-    <version>1.56.1</version>
+    <version>1.57.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-protobuf</artifactId>
-    <version>1.56.1</version>
+    <version>1.57.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-stub</artifactId>
-    <version>1.56.1</version>
+    <version>1.57.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -68,7 +68,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base-types</artifactId>
-    <version>2.0.0-SNAPSHOT.121</version>
+    <version>2.0.0-SNAPSHOT.124</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -86,7 +86,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>2.0.0-SNAPSHOT.131</version>
+    <version>2.0.0-SNAPSHOT.133</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -140,13 +140,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty</artifactId>
-    <version>1.56.1</version>
+    <version>1.57.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty-shaded</artifactId>
-    <version>1.56.1</version>
+    <version>1.57.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -158,7 +158,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testutil-time</artifactId>
-    <version>2.0.0-SNAPSHOT.131</version>
+    <version>2.0.0-SNAPSHOT.133</version>
     <scope>test</scope>
   </dependency>
   <dependency>

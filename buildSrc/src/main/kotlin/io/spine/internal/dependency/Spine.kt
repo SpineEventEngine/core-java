@@ -96,14 +96,14 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/base-types">spine-base-types</a>
          */
-        const val baseTypes = "2.0.0-SNAPSHOT.121"
+        const val baseTypes = "2.0.0-SNAPSHOT.124"
 
         /**
          * The version of [Spine.time].
          *
          * @see <a href="https://github.com/SpineEventEngine/time">spine-time</a>
          */
-        const val time = "2.0.0-SNAPSHOT.131"
+        const val time = "2.0.0-SNAPSHOT.133"
 
         /**
          * The version of [Spine.change].
@@ -177,7 +177,9 @@ object Spine {
         const val pluginLib = "$toolsGroup:spine-mc-java-plugins:${version}:all"
     }
 
+    @Deprecated("Please use `javadocFilter` instead.", ReplaceWith("javadocFilter"))
     const val javadocTools = "$toolsGroup::${ArtifactVersion.javadocTools}"
+    const val javadocFilter = "$toolsGroup:spine-javadoc-filter:${ArtifactVersion.javadocTools}"
 
     const val client = CoreJava.client // Added for brevity.
     const val server = CoreJava.server // Added for brevity.

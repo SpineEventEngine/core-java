@@ -74,13 +74,3 @@ tasks.javadoc {
         }
     }
 }
-
-//tasks {
-//    project.afterEvaluate {
-//        val generateTestFixturesRejections by existing
-//        @Suppress("UNUSED_VARIABLE")
-//        val compileTestFixturesKotlin by existing {
-//            dependsOn(generateTestFixturesRejections)
-//        }
-//    }
-//}
