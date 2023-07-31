@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,14 +216,14 @@ public abstract class ProcessManager<I,
             var outcome = commanderMethod.get().invoke(this, event);
             return outcome;
         }
-        _debug().log("Process manager %s filtered out and ignored event %s[ID: %s].",
+        _debug().log("Process manager `%s` filtered out and ignored the event `%s` with id `%s`.",
                      thisClass, event.messageClass(), event.id().value());
         return ignored(thisClass, event);
     }
 
     @Override
     protected String missingTxMessage() {
-        return "ProcessManager modification is not available this way. " +
+        return "`ProcessManager` modification is not available this way. " +
                 "Please modify the state from a command handling or event reacting method.";
     }
 }

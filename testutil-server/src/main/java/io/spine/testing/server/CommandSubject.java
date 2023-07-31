@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.truth.Truth.assertAbout;
 
@@ -40,7 +40,7 @@ import static com.google.common.truth.Truth.assertAbout;
 public final class CommandSubject
         extends EmittedMessageSubject<CommandSubject, Command, CommandMessage> {
 
-    private CommandSubject(FailureMetadata metadata, @NullableDecl Iterable<Command> actual) {
+    private CommandSubject(FailureMetadata metadata, @Nullable Iterable<Command> actual) {
         super(metadata, actual);
     }
 
@@ -55,7 +55,7 @@ public final class CommandSubject
     }
 
     /** Creates the subject for asserting passed commands. */
-    public static CommandSubject assertThat(@NullableDecl Iterable<Command> actual) {
+    public static CommandSubject assertThat(@Nullable Iterable<Command> actual) {
         return assertAbout(commands()).that(actual);
     }
 }

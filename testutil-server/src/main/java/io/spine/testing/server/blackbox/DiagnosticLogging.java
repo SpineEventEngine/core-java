@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import com.google.errorprone.annotations.FormatString;
 import io.spine.logging.Logging;
 import io.spine.system.server.DiagnosticEvent;
 
-import static io.spine.json.Json.toJson;
+import static io.spine.type.Json.toJson;
 import static java.lang.String.format;
 
 /**

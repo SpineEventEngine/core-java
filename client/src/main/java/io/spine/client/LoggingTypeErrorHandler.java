@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ final class LoggingTypeErrorHandler extends LoggingHandlerWithType implements Er
      * @param type
      *         the type of the message which caused the error
      */
+    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
     LoggingTypeErrorHandler(FluentLogger logger,
                             String messageFormat,
                             Class<? extends Message> type) {

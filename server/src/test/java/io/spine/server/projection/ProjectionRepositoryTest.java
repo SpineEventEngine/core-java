@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,6 @@ import static io.spine.server.projection.given.SetTestProjectionName.NEW_NAME;
 import static io.spine.server.projection.given.dispatch.ProjectionEventDispatcher.dispatch;
 import static io.spine.testing.TestValues.randomString;
 import static io.spine.testing.server.Assertions.assertEventClasses;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -114,7 +113,7 @@ class ProjectionRepositoryTest
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
         var requestFactory =
                 new TestActorRequestFactory(ProjectionRepositoryTest.class, tenantId);
-        return newInstance(producerId, requestFactory);
+        return TestEventFactory.newInstance(producerId, requestFactory);
     }
 
     private static Event createEvent(TenantId tenantId, EventMessage eventMessage, Timestamp when) {
@@ -341,7 +340,7 @@ class ProjectionRepositoryTest
             var projectCreated = GivenEventMessage.projectCreated();
             var taskAdded = GivenEventMessage.taskAdded();
             var id = projectCreated.getProjectId();
-            var eventFactory = newInstance(id, ProjectionRepositoryTest.class);
+            var eventFactory = TestEventFactory.newInstance(id, ProjectionRepositoryTest.class);
             var project = new TestProjection(id);
             dispatch(project, eventFactory.createEvent(projectCreated));
             var oldState = pack(project.state());

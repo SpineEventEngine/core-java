@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import io.spine.base.EventMessage;
 import io.spine.core.Event;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.truth.Truth.assertAbout;
 
@@ -39,7 +39,7 @@ import static com.google.common.truth.Truth.assertAbout;
  */
 public final class EventSubject extends EmittedMessageSubject<EventSubject, Event, EventMessage> {
 
-    private EventSubject(FailureMetadata metadata, @NullableDecl Iterable<Event> actual) {
+    private EventSubject(FailureMetadata metadata, @Nullable Iterable<Event> actual) {
         super(metadata, actual);
     }
 
@@ -54,7 +54,7 @@ public final class EventSubject extends EmittedMessageSubject<EventSubject, Even
     }
 
     /** Creates the subject for asserting passed events. */
-    public static EventSubject assertThat(@NullableDecl Iterable<Event> actual) {
+    public static EventSubject assertThat(@Nullable Iterable<Event> actual) {
         return assertAbout(events()).that(actual);
     }
 }

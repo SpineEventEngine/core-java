@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.fibonacci.FibonacciAggregate.lastNumberOne;
 import static io.spine.server.aggregate.given.fibonacci.FibonacciAggregate.lastNumberTwo;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 import static java.lang.Integer.MAX_VALUE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -159,7 +158,8 @@ public abstract class AggregateHistoryTruncationTest {
     class Truncate {
 
         private final ProjectId id = Sample.messageOfType(ProjectId.class);
-        private final TestEventFactory eventFactory = newInstance(AggregateStorageTest.class);
+        private final TestEventFactory eventFactory =
+                TestEventFactory.newInstance(AggregateStorageTest.class);
 
         private Version currentVersion;
         private AggregateStorage<ProjectId, AggProject> storage;

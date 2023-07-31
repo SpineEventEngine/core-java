@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,11 @@ package io.spine.client;
 import com.google.common.flogger.FluentLogger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-final class LoggingErrorHandler extends LoggingHandler implements ErrorHandler{
+final class LoggingErrorHandler extends LoggingHandler implements ErrorHandler {
 
     private final @Nullable Object param;
 
+    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
     LoggingErrorHandler(FluentLogger logger, String messageFormat, @Nullable Object param) {
         super(logger, messageFormat);
         this.param = param;

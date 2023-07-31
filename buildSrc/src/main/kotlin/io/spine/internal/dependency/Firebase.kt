@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 package io.spine.internal.dependency
 
 // https://firebase.google.com/docs/admin/setup#java
-@Suppress("unused")
+@Suppress("unused", "ConstPropertyName")
 object Firebase {
     private const val adminVersion = "8.1.0"
     const val admin = "com.google.firebase:firebase-admin:${adminVersion}"

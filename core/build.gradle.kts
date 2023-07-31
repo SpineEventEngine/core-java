@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
  */
 
 import io.spine.internal.dependency.Spine
+import io.spine.internal.dependency.Validation
 import io.spine.internal.gradle.testing.exposeTestConfiguration
 
 plugins {
@@ -32,15 +33,15 @@ plugins {
 }
 
 dependencies {
-    val spine = Spine(project)
-    api(spine.base)
-    api(spine.time)
-    api(spine.baseTypes)
-    api(spine.change)
-    api(spine.validation.runtime)
+    api(Spine.base)
+    api(Spine.time)
+    api(Spine.baseTypes)
+    api(Spine.change)
+    api(Validation.runtime)
+    api(Spine.Logging.lib)
 
     testImplementation(project(":testutil-core"))
-    testImplementation(spine.testUtilTime)
+    testImplementation(Spine.testUtilTime)
 }
 
 modelCompiler {

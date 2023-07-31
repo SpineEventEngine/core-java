@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: Ensure license reports updated
     runs-on: ubuntu-latest
 
     steps:

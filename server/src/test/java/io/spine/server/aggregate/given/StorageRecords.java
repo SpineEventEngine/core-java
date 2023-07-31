@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,13 @@ import static io.spine.base.Time.currentTime;
 import static io.spine.protobuf.Durations2.seconds;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 
 /**
  * Utilities for creating test instances and sequences of {@link AggregateEventRecord}.
  */
 public class StorageRecords {
 
-    private static final TestEventFactory eventFactory = newInstance(Given.class);
+    private static final TestEventFactory eventFactory = TestEventFactory.newInstance(Given.class);
 
     /** Prevents instantiation of this utility class. */
     private StorageRecords() {
@@ -110,7 +109,7 @@ public class StorageRecords {
         var timestamp2 = add(start, delta);
         var timestamp3 = add(timestamp2, delta);
 
-        var factory = newInstance(Given.class);
+        var factory = TestEventFactory.newInstance(Given.class);
 
         var e1 = factory.createEvent(projectCreated(id, Given.projectName(id)), null, start);
         var record1 = create(id, start, e1);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,6 @@ import static io.spine.server.aggregate.given.StorageRecords.sequenceFor;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.testing.TestValues.nullRef;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
-import static io.spine.testing.server.TestEventFactory.newInstance;
 import static java.lang.Integer.MAX_VALUE;
 import static java.util.Collections.reverse;
 import static java.util.stream.Collectors.toList;
@@ -100,7 +99,8 @@ public class AggregateStorageTest
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
 
-    private final TestEventFactory eventFactory = newInstance(AggregateStorageTest.class);
+    private final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(AggregateStorageTest.class);
     private AggregateStorage<ProjectId, AggProject> storage;
 
     private static Snapshot newSnapshot(Timestamp time) {

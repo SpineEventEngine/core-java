@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,7 @@ dependencies {
     api(Grpc.protobuf)
     api(project(":core"))
 
-    val spine = Spine(project)
-    testImplementation(spine.testlib)
+    testImplementation(Spine.testlib)
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
 }

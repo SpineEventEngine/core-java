@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ plugins {
 dependencies {
     api(project(":client"))
     api(project(":testutil-core"))
-    val spine = Spine(project)
-    api(spine.time)
+    api(Spine.time)
 
     implementation(Grpc.protobuf)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.MessageEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.json.Json.toJson;
+import static io.spine.type.Json.toJson;
 
 /**
  * Internal utility class for assisting in aggregate tests.

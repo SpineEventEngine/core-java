@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ package io.spine.internal.dependency
  * but no alternatives are known for some of them so far.  Please see
  * [this issue](https://github.com/SpineEventEngine/base/issues/108) for more details.
  */
+@Suppress("unused", "ConstPropertyName")
 object FindBugs {
     private const val version = "3.0.2"
     const val annotations = "com.google.code.findbugs:jsr305:${version}"

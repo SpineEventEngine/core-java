@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public interface ConsumerErrorHandler<M extends Message>
      *         the type of the messages delivered to the consumer
      * @return the logging error handler
      */
+    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
     static <M extends Message>
     ConsumerErrorHandler<M> logError(FluentLogger logger,
                                      String messageFormat,

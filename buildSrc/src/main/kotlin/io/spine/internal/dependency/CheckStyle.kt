@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ package io.spine.internal.dependency
 
 // https://checkstyle.sourceforge.io/
 // See `io.spine.internal.gradle.checkstyle.CheckStyleConfig`.
-@Suppress("unused")
+@Suppress("unused", "ConstPropertyName")
 object CheckStyle {
     const val version = "10.3.4"
 }

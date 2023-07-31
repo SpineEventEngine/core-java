@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,20 @@
 
 @file:Suppress("RemoveRedundantQualifierName")
 
+import Build_gradle.Subproject
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.Spine
+import io.spine.internal.dependency.Validation
 import io.spine.internal.gradle.VersionWriter
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
-import io.spine.internal.gradle.excludeProtobufLite
-import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.javac.configureErrorProne
 import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.kotlin.applyJvmToolchain
 import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
-import io.spine.internal.gradle.protobuf.suppressDeprecationsInKotlin
 import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
@@ -50,16 +49,27 @@ import io.spine.internal.gradle.report.pom.PomGenerator
 import io.spine.internal.gradle.standardToSpineSdk
 import io.spine.internal.gradle.testing.configureLogging
 import io.spine.internal.gradle.testing.registerTestTasks
-import io.spine.protodata.gradle.CodegenSettings
-import io.spine.protodata.gradle.plugin.LaunchProtoData
-import io.spine.tools.mc.gradle.ModelCompilerOptions
-import io.spine.tools.mc.java.gradle.McJavaOptions
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     standardSpineSdkRepositories()
-    io.spine.internal.gradle.doForceVersions(configurations)
+    doForceVersions(configurations)
+    configurations {
+        all {
+            resolutionStrategy {
+                val spine = io.spine.internal.dependency.Spine
+                force(
+                    spine.base,
+                    spine.toolBase,
+                    spine.server,
+                    io.spine.internal.dependency.Spine.Logging.lib,
+                    io.spine.internal.dependency.Validation.runtime,
+                )
+            }
+        }
+    }
+
     dependencies {
         classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
@@ -103,7 +113,8 @@ spinePublishing {
     }
 
     dokkaJar {
-        enabled = true
+        kotlin = true
+        java = true
     }
 }
 
@@ -127,16 +138,14 @@ subprojects {
     setupJava(javaVersion)
     setupKotlin(javaVersion)
 
-    val spine = Spine(this)
-    defineDependencies(spine)
-    forceConfigurations(spine)
+    defineDependencies()
+    forceConfigurations()
 
     val generated = "$projectDir/generated"
     applyGeneratedDirectories(generated)
     setupTestTasks()
-    setupCodeGeneration(generated)
     setupPublishing()
-    addTaskDependencies()
+    configureTaskDependencies()
 }
 
 JacocoConfig.applyTo(project)
@@ -163,7 +172,6 @@ fun Subproject.applyPlugins() {
         plugin("pmd-settings")
         plugin("dokka-for-java")
         plugin("io.spine.mc-java")
-        plugin("io.spine.protodata")
     }
 
     apply<IncrementGuard>()
@@ -223,17 +231,17 @@ fun Subproject.setupTestTasks() {
 /**
  * Defines dependencies of this subproject.
  */
-fun Subproject.defineDependencies(spine: Spine) {
+fun Subproject.defineDependencies() {
     dependencies {
         ErrorProne.apply {
             errorprone(core)
         }
         // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
-        add("protoData", spine.validation.java)
-        implementation(spine.validation.runtime)
+        add("protoData", Validation.java)
+        implementation(Validation.runtime)
 
         testImplementation(JUnit.runner)
-        testImplementation(spine.testlib)
+        testImplementation(Spine.testlib)
     }
 }
 
@@ -301,63 +309,9 @@ fun Subproject.applyGeneratedDirectories(generatedDir: String) {
 }
 
 /**
- * Configures code generation in this project.
- */
-fun Subproject.setupCodeGeneration(generatedDir: String) {
-    /**
-     * The below arrangement is "unusual" `because:
-     *  1. `modelCompiler` could not be found after applying plugin via `apply { }` block.
-     *  2. java { }` cannot be used because it conflicts with `java` of type `JavaPluginExtension`
-     *     already added to the `Project`.
-     */
-    val modelCompiler = extensions.getByType(ModelCompilerOptions::class.java)
-    modelCompiler.apply {
-        // Get nested `this` instead of `Project` instance.
-        val mcOptions = (this@apply as ExtensionAware)
-        val java = mcOptions.extensions.getByName("java") as McJavaOptions
-        java.codegen {
-            validation { skipValidation() }
-        }
-    }
-
-    val protoData = extensions.getByName("protoData") as CodegenSettings
-    protoData.apply {
-        renderers(
-            "io.spine.validation.java.PrintValidationInsertionPoints",
-            "io.spine.validation.java.JavaValidationRenderer",
-
-            // Suppress warnings in the generated code.
-            "io.spine.protodata.codegen.java.file.PrintBeforePrimaryDeclaration",
-            "io.spine.protodata.codegen.java.suppress.SuppressRenderer"
-        )
-        plugins(
-            "io.spine.validation.ValidationPlugin",
-        )
-    }
-
-    protobuf {
-        // Do not remove this setting until ProtoData can copy all the directories from
-        // `build/generated-proto`. Otherwise, the GRPC code won't be picked up.
-        // See: https://github.com/SpineEventEngine/ProtoData/issues/94
-        generatedFilesBaseDir = generatedDir
-    }
-
-    /**
-     * Manually suppress deprecations in the generated Kotlin code until ProtoData does it.
-     */
-    tasks.withType<LaunchProtoData>().forEach { task ->
-        task.doLast {
-            sourceSets.forEach { sourceSet ->
-                suppressDeprecationsInKotlin(generatedDir, sourceSet.name)
-            }
-        }
-    }
-}
-
-/**
  * Forces dependencies of this project.
  */
-fun Subproject.forceConfigurations(spine: Spine) {
+fun Subproject.forceConfigurations() {
     configurations {
         forceVersions()
         excludeProtobufLite()
@@ -374,14 +328,15 @@ fun Subproject.forceConfigurations(spine: Spine) {
                     Grpc.ProtocPlugin.artifact,
                     JUnit.runner,
 
-                    spine.base,
-                    spine.validation.runtime,
-                    spine.time,
-                    spine.baseTypes,
-                    spine.change,
-                    spine.testlib,
-                    spine.toolBase,
-                    spine.pluginBase,
+                    Spine.base,
+                    Validation.runtime,
+                    Spine.time,
+                    Spine.Logging.lib,
+                    Spine.baseTypes,
+                    Spine.change,
+                    Spine.testlib,
+                    Spine.toolBase,
+                    Spine.pluginBase,
 
                     Grpc.core,
                     Grpc.protobuf,
@@ -404,24 +359,4 @@ fun Subproject.setupPublishing() {
     tasks.named("publish") {
         dependsOn("${project.path}:updateGitHubPages")
     }
-}
-
-/**
- * Adds explicit dependencies for the tasks of this subproject.
- */
-fun Subproject.addTaskDependencies() {
-    tasks {
-        afterEvaluate {
-            val generateRejections by existing
-            compileKotlin {
-                dependsOn(generateRejections)
-            }
-
-            val generateTestRejections by existing
-            compileTestKotlin {
-                dependsOn(generateTestRejections)
-            }
-        }
-    }
-    configureTaskDependencies()
 }

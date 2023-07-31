@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import static com.google.protobuf.TextFormat.shortDebugString;
  */
 final class LoggingServerErrorHandler extends LoggingHandler implements ServerErrorHandler {
 
+    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
     LoggingServerErrorHandler(FluentLogger logger, String messageFormat) {
         super(logger, messageFormat);
     }
