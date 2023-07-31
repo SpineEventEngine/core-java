@@ -28,6 +28,7 @@ package io.spine.core;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
@@ -37,6 +38,7 @@ import io.spine.validate.FieldAwareMessage;
 
 import java.util.Optional;
 
+import static io.spine.type.ProtoTexts.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -133,7 +135,10 @@ interface EventContextMixin extends EventContextOrBuilder,
                             .build();
                     return Optional.of(id);
                 } else {
-                    _warn().log("Cannot determine root message ID.");
+                    _warn().log(
+                            "Cannot determine root message ID. Event context: `%s`.",
+                            shortDebugString(this)
+                    );
                     return Optional.empty();
                 }
         }
@@ -168,7 +173,7 @@ interface EventContextMixin extends EventContextOrBuilder,
     @SuppressWarnings({"OverlyComplexMethod", "MagicNumber", "deprecation"})    // see the docs.
     @Override
     @Internal
-    default Object readValue(Descriptors.FieldDescriptor field) {
+    default Object readValue(FieldDescriptor field) {
         switch (field.getIndex()) {
             case 0:
                 return getTimestamp();
