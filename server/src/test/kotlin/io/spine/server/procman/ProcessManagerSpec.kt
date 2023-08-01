@@ -41,7 +41,7 @@ import io.spine.protobuf.pack
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.entity.given.Given
-import io.spine.server.entity.rejection.StandardRejections
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.procman.given.dispatch.PmDispatcher
 import io.spine.server.procman.given.pm.GivenMessages
 import io.spine.server.procman.given.pm.GivenMessages.addTask
@@ -51,6 +51,7 @@ import io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived
 import io.spine.server.procman.given.pm.GivenMessages.ownerChanged
 import io.spine.server.procman.given.pm.GivenMessages.quizStarted
 import io.spine.server.procman.given.pm.GivenMessages.startProject
+import io.spine.server.procman.given.pm.GivenMessages.throwEntityAlreadyArchived
 import io.spine.server.procman.given.pm.GivenMessages.throwRuntimeException
 import io.spine.server.procman.given.pm.QuizGiven
 import io.spine.server.procman.given.pm.QuizGiven.answerQuestion
@@ -92,6 +93,7 @@ import io.spine.testing.server.model.ModelTests
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -271,9 +273,9 @@ internal class ProcessManagerSpec {
 
         @Test
         fun events() {
-            testDispatchEvent(messageOfType(PmProjectCreated::class.java))
-            testDispatchEvent(messageOfType(PmTaskAdded::class.java))
-            testDispatchEvent(messageOfType(PmProjectStarted::class.java))
+            testDispatchEvent(PmProjectCreated::class.java)
+            testDispatchEvent(PmTaskAdded::class.java)
+            testDispatchEvent(PmProjectStarted::class.java)
         }
     }
 
@@ -284,10 +286,7 @@ internal class ProcessManagerSpec {
 
         @BeforeEach
         fun setupContext() {
-            context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                    .add(TestProcessManagerRepo())
-            ).tolerateFailures()
+            context = blackBoxWith(TestProcessManagerRepo()).tolerateFailures()
         }
 
         @AfterEach
@@ -295,9 +294,9 @@ internal class ProcessManagerSpec {
 
         @Test
         fun rejection() {
-            context.receivesCommand(GivenMessages.throwEntityAlreadyArchived())
+            context.receivesCommand(throwEntityAlreadyArchived())
             context.assertEvents()
-                .withType(StandardRejections.EntityAlreadyArchived::class.java)
+                .withType(EntityAlreadyArchived::class.java)
                 .hasSize(1)
             assertNoEntity()
         }
@@ -321,10 +320,7 @@ internal class ProcessManagerSpec {
 
         @BeforeEach
         fun setupContext() {
-            context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                    .add(TestProcessManagerRepo())
-            )
+            context = blackBoxWith(TestProcessManagerRepo())
         }
 
         @AfterEach
@@ -427,7 +423,7 @@ internal class ProcessManagerSpec {
         fun event() {
             val envelope = EventEnvelope.of(GivenEvent.arbitrary())
             val outcome = PmDispatcher.dispatch(processManager, envelope)
-            Assertions.assertTrue(outcome.hasIgnored())
+            assertTrue(outcome.hasIgnored())
         }
     }
 
@@ -458,10 +454,7 @@ internal class ProcessManagerSpec {
             val questions: Iterable<PmQuestionId> = Lists.newArrayList()
             val startQuiz = startQuiz(quizId, questions)
             val answerQuestion = answerQuestion(quizId, QuizGiven.newAnswer())
-            val context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                    .add(QuizProcmanRepository())
-            )
+            val context = blackBoxWith(QuizProcmanRepository())
             val assertEvents = context
                 .receivesCommands(startQuiz, answerQuestion)
                 .assertEvents()
@@ -503,7 +496,7 @@ internal class ProcessManagerSpec {
                 PmNotificationSent::class.java,
                 PmIterationPlanned::class.java,
                 PmIterationStarted::class.java,
-                StandardRejections.EntityAlreadyArchived::class.java
+                EntityAlreadyArchived::class.java
             )
         }
 
@@ -524,3 +517,12 @@ internal class ProcessManagerSpec {
         private val PRODUCER_ID = Identifier.pack(TestProcessManager.ID)
     }
 }
+
+/**
+ * Creates a [BlackBox] with the given [ProcessManagerRepository] as the only repository.
+ */
+fun blackBoxWith(repository: ProcessManagerRepository<*, *, *>): BlackBox =
+    BlackBox.from(
+        BoundedContextBuilder.assumingTests()
+            .add(repository)
+    )
