@@ -34,4 +34,4 @@ import io.spine.core.UserId
 public fun actorRequestFactory(actor: UserId): ActorRequestFactory =
     ActorRequestFactory.newBuilder()
         .setActor(actor)
-        .build();
+        .build()

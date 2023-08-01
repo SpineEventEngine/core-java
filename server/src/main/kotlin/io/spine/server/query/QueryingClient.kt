@@ -29,7 +29,6 @@ package io.spine.server.query
 import io.grpc.stub.StreamObserver
 import io.spine.base.EntityState
 import io.spine.base.Identifier
-import io.spine.client.ActorRequestFactory
 import io.spine.client.Query
 import io.spine.client.QueryResponse
 import io.spine.client.actorRequestFactory
