@@ -30,6 +30,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.server.BoundedContext;
+import io.spine.server.command.Assign;
 import io.spine.server.command.AssigneeEntity;
 import io.spine.server.command.Commander;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -38,13 +40,18 @@ import io.spine.server.entity.HasVersionColumn;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
+import io.spine.server.event.React;
 import io.spine.server.log.LoggingEntity;
 import io.spine.server.procman.model.ProcessManagerClass;
+import io.spine.server.query.Querying;
+import io.spine.server.query.QueryingClient;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.validate.ValidatingBuilder;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.Ignored.ignored;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -86,7 +93,17 @@ public abstract class ProcessManager<I,
                    Commander,
                    HasVersionColumn<I, S>,
                    HasLifecycleColumns<I, S>,
+                   Querying,
                    LoggingEntity {
+
+    /**
+     * The context in which this process manager is executed.
+     *
+     * <p>May be {@code null} if the process manager is not yet attached to a context.
+     *
+     * @see ProcessManagerRepository#configure(ProcessManager)
+     */
+    private @MonotonicNonNull BoundedContext context = null;
 
     /**
      * Creates a new instance.
@@ -103,6 +120,34 @@ public abstract class ProcessManager<I,
      */
     protected ProcessManager(I id) {
         super(id);
+    }
+
+    /**
+     * Assigns the passed bounded context to this process manager.
+     */
+    final void injectContext(BoundedContext context) {
+        checkNotNull(context);
+        if (this.context != null) {
+            throw newIllegalStateException(
+                    "The process manager `%s` is already placed into the Bounded Context `%s`.",
+                    toString(),
+                    this.context.name()
+            );
+        }
+        this.context = context;
+    }
+
+    /**
+     * Returns a new instance of {@link QueryingClient} for querying the state of entities
+     * of the specified type.
+     *
+     * @param type the entity state type
+     * @return a new instance of QueryingClient
+     * @param <P> the type of the entity state
+     */
+    @Override
+    public <P extends EntityState<?>> QueryingClient<P> select(Class<P> type) {
+        return new QueryingClient<>(context, type, toString());
     }
 
     @Internal
@@ -223,7 +268,9 @@ public abstract class ProcessManager<I,
 
     @Override
     protected String missingTxMessage() {
-        return "`ProcessManager` modification is not available this way. " +
-                "Please modify the state from a command handling or event reacting method.";
+        return "`ProcessManager` modification is not available this way." +
+                " Please modify the state from a command handling (`@"
+                + Assign.class.getSimpleName() + "`)" +
+                " or event reacting (`@" + React.class.getSimpleName() + "`) method.";
     }
 }

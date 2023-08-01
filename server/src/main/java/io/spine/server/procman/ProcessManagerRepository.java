@@ -231,7 +231,7 @@ public abstract class ProcessManagerRepository<I,
     private void checkNotDeaf() {
         if (!dispatchesCommands() && !dispatchesEvents()) {
             throw newIllegalStateException(
-                    "Process managers of the repository %s have no command handlers, " +
+                    "Process managers of the repository `%s` have no command handlers, " +
                             "and do not react to any events.", this);
         }
     }
@@ -393,15 +393,16 @@ public abstract class ProcessManagerRepository<I,
      * before it is returned by the repository as the result of creating a new process manager
      * instance or finding existing one.
      *
-     * <p>Default implementation does nothing. Overriding repositories may use this method for
-     * injecting dependencies that process managers need to have.
+     * <p>Default implementation attaches the process manager to the bounded context,
+     * so that it can perform querying. Overriding repositories may use this method for
+     * injecting other dependencies that process managers need to have.
      *
      * @param processManager
      *         the process manager to configure
      */
-    @SuppressWarnings("NoopMethodInAbstractClass") // see Javadoc
+    @OverridingMethodsMustInvokeSuper
     protected void configure(@SuppressWarnings("unused") P processManager) {
-        // Do nothing.
+        processManager.injectContext(context());
     }
 
     /**
