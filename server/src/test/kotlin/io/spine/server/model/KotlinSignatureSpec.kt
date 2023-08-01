@@ -27,6 +27,7 @@
 package io.spine.server.model
 
 import com.google.common.truth.Truth8.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.core.Subscribe
 import io.spine.server.event.AbstractEventSubscriber
 import io.spine.server.event.model.SubscriberSignature
