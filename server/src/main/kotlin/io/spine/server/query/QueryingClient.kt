@@ -32,6 +32,7 @@ import io.spine.base.Identifier
 import io.spine.client.ActorRequestFactory
 import io.spine.client.Query
 import io.spine.client.QueryResponse
+import io.spine.client.actorRequestFactory
 import io.spine.core.userId
 import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContext
@@ -50,9 +51,7 @@ public class QueryingClient<T : EntityState<*>>(
 ) {
 
     private val actor = userId { value = actorName }
-    private val factory = ActorRequestFactory.newBuilder()
-        .setActor(actor)
-        .build()
+    private val factory = actorRequestFactory(actor)
 
     /**
      * Obtains a state of an entity by its ID.
@@ -85,7 +84,7 @@ public class QueryingClient<T : EntityState<*>>(
      *          if the given ID is not of one of the supported types.
      * @see [id]
      */
-    @Deprecated(message = "Use `id(id)` instead.", replaceWith = ReplaceWith("id(id)"))
+    @Deprecated(message = "Use `findById(id)` instead.", replaceWith = ReplaceWith("findById(id)"))
     public fun find(id: Any): Optional<T> = Optional.ofNullable(findById(id))
 
     /**
@@ -101,7 +100,7 @@ public class QueryingClient<T : EntityState<*>>(
      *          if the given ID is not of one of the supported types.
      * @see [id]
      */
-    @Deprecated(message = "Use `id()` instead.", replaceWith = ReplaceWith("id(id)"))
+    @Deprecated(message = "Use `findById()` instead.", replaceWith = ReplaceWith("findById(id)"))
     public fun withId(id: Any): Optional<T> = Optional.ofNullable(findById(id))
 
     /**
