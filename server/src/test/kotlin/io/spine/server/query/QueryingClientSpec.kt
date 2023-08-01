@@ -92,11 +92,10 @@ internal class QueryingClientSpec {
     @Test
     fun `fetch the only one`() {
         val client = QueryingClient(context, RangeStats::class.java, actor)
-        val rangeStats = client.find(range)
+        val rangeStats = client.findById(range)
 
-        rangeStats shouldBePresent {
-            range shouldBe Companion.range
-        }
+        rangeStats shouldNotBe null
+        rangeStats?.range shouldBe range
     }
 
     @Test
@@ -106,8 +105,8 @@ internal class QueryingClientSpec {
             minValue = -200
             maxValue = 200
         }
-        val rangeStats = client.find(nonExisting)
+        val rangeStats = client.findById(nonExisting)
 
-        rangeStats shouldBe empty()
+        rangeStats shouldBe null
     }
 }

@@ -43,8 +43,7 @@ import java.util.*
  *
  * @param T the type of entity states to query.
  */
-public class QueryingClient<T : EntityState<*>>
-constructor(
+public class QueryingClient<T : EntityState<*>>(
     private val context: BoundedContext,
     private val type: Class<T>,
     actorName: String
@@ -60,22 +59,34 @@ constructor(
      *
      * The value of the ID must be one of the [supported types][io.spine.base.Identifier].
      *
-     * @return the state of the entity or empty `Optional` if the entity with the given ID
-     *         was not found
+     * @return the state of the entity or `null`, if the entity with the given ID was not found.
      * @throws IllegalArgumentException
-     *          if the given ID is not of one of the supported types
+     *          if the given ID is not of one of the supported types.
      */
-    public fun find(id: Any): Optional<T> {
+    public fun findById(id: Any): T? {
         Identifier.checkSupported(id.javaClass)
         val query = buildQuery(id)
         val results = execute(query)
-        return if (results.isEmpty()) {
-            Optional.empty()
+        return if (results.isNotEmpty()) {
+            results.theOnly()
         } else {
-            val value = results.theOnly()
-            Optional.of(value)
+            null
         }
     }
+
+    /**
+     * Obtains a state of an entity by its ID.
+     *
+     * The value of the ID must be one of the [supported types][io.spine.base.Identifier].
+     *
+     * @return the state of the entity or empty `Optional` if the entity with the given ID
+     *         was not found.
+     * @throws IllegalArgumentException
+     *          if the given ID is not of one of the supported types.
+     * @see [id]
+     */
+    @Deprecated(message = "Use `id(id)` instead.", replaceWith = ReplaceWith("id(id)"))
+    public fun find(id: Any): Optional<T> = Optional.ofNullable(findById(id))
 
     /**
      * Obtains a state of an entity by its ID.
@@ -85,12 +96,13 @@ constructor(
      * Does the same as [find] and provided for fluent calls when called after [Querying.select]
      *
      * @return the state of the entity or empty `Optional` if the entity with the given ID
-     *         was not found
+     *         was not found.
      * @throws IllegalArgumentException
-     *          if the given ID is not of one of the supported types
-     * @see [find]
+     *          if the given ID is not of one of the supported types.
+     * @see [id]
      */
-    public fun withId(id: Any): Optional<T> = find(id)
+    @Deprecated(message = "Use `id()` instead.", replaceWith = ReplaceWith("id(id)"))
+    public fun withId(id: Any): Optional<T> = Optional.ofNullable(findById(id))
 
     /**
      * Selects all entities of the given type.
