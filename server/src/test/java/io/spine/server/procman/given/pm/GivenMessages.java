@@ -105,7 +105,7 @@ public final class GivenMessages {
 
     public static PmQuizStarted quizStarted() {
         return PmQuizStarted.newBuilder()
-                .setQuizId(messageOfType(PmQuizId.class))
+                .setQuiz(messageOfType(PmQuizId.class))
                 .build();
     }
 

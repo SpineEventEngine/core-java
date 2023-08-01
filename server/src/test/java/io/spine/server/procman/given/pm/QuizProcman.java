@@ -53,9 +53,9 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     @Assign
     PmQuizStarted handle(PmStartQuiz command) {
-        builder().setId(command.getQuizId());
+        builder().setId(command.getQuiz());
         return PmQuizStarted.newBuilder()
-                .setQuizId(command.getQuizId())
+                .setQuiz(command.getQuiz())
                 .addAllQuestion(command.getQuestionList())
                 .build();
     }
@@ -63,7 +63,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
     @Assign
     PmQuestionAnswered handle(PmAnswerQuestion command) {
         var event = PmQuestionAnswered.newBuilder()
-                .setQuizId(command.getQuizId())
+                .setQuiz(command.getQuiz())
                 .setAnswer(command.getAnswer())
                 .build();
         return event;
@@ -71,15 +71,15 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     @React
     Nothing on(PmQuizStarted event) {
-        builder().setId(event.getQuizId());
+        builder().setId(event.getQuiz());
         return nothing();
     }
 
     @React
     EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> on(PmQuestionAnswered event) {
         var answer = event.getAnswer();
-        var examId = event.getQuizId();
-        var questionId = answer.getQuestionId();
+        var quiz = event.getQuiz();
+        var questionId = answer.getQuestion();
 
         if (questionIsClosed(questionId)) {
             return EitherOf3.withC(nothing());
@@ -88,14 +88,14 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
         var answerIsCorrect = answer.getCorrect();
         if (answerIsCorrect) {
             var reaction = PmQuestionSolved.newBuilder()
-                    .setQuizId(examId)
-                    .setQuestionId(questionId)
+                    .setQuiz(quiz)
+                    .setQuestion(questionId)
                     .build();
             return EitherOf3.withA(reaction);
         } else {
             var reaction = PmQuestionFailed.newBuilder()
-                    .setQuizId(examId)
-                    .setQuestionId(questionId)
+                    .setQuiz(quiz)
+                    .setQuestion(questionId)
                     .build();
             return EitherOf3.withB(reaction);
         }
@@ -109,7 +109,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     @React
     Nothing on(PmQuestionSolved event) {
-        var questionId = event.getQuestionId();
+        var questionId = event.getQuestion();
         removeOpenQuestion(questionId);
         builder().addSolvedQuestion(questionId);
         return nothing();
@@ -117,7 +117,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
 
     @React
     Nothing on(PmQuestionFailed event) {
-        var questionId = event.getQuestionId();
+        var questionId = event.getQuestion();
         removeOpenQuestion(questionId);
         builder().addFailedQuestion(questionId);
         return nothing();

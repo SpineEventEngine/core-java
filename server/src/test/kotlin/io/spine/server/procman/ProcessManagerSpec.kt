@@ -25,7 +25,6 @@
  */
 package io.spine.server.procman
 
-import com.google.common.collect.Lists
 import com.google.common.truth.IntegerSubject
 import com.google.common.truth.Subject
 import com.google.common.truth.Truth.assertThat
@@ -448,13 +447,13 @@ internal class ProcessManagerSpec {
         @Test
         fun `for an either of three event reaction`() {
             val quizId = QuizGiven.newQuizId()
-            val questions: Iterable<PmQuestionId> = Lists.newArrayList()
+            val questions = listOf<PmQuestionId>()
             val startQuiz = startQuiz(quizId, questions)
             val answerQuestion = answerQuestion(quizId, QuizGiven.newAnswer())
             val context = blackBoxWith(QuizProcmanRepository())
-            val assertEvents = context
-                .receivesCommands(startQuiz, answerQuestion)
-                .assertEvents()
+
+            val assertEvents = context.receivesCommands(startQuiz, answerQuestion).assertEvents()
+
             assertEvents.hasSize(2)
             assertEvents.withType(PmQuizStarted::class.java)
                 .hasSize(1)
@@ -506,6 +505,13 @@ internal class ProcessManagerSpec {
                 PmQuizStarted::class.java,
                 PmQuestionAnswered::class.java
             )
+        }
+    }
+
+    @Test
+    fun `query projections of the same context`() {
+        blackBoxWith(TestProcessManagerRepo()).use {
+
         }
     }
 

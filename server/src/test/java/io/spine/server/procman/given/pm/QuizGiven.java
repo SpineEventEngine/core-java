@@ -45,22 +45,22 @@ public class QuizGiven {
 
     public static PmQuizId newQuizId() {
         return PmQuizId.newBuilder()
-                       .setId(newUuid())
-                       .build();
+                .setId(newUuid())
+                .build();
     }
 
     public static PmStartQuiz startQuiz(PmQuizId id, Iterable<? extends PmQuestionId> problems) {
         return PmStartQuiz.newBuilder()
-                          .setQuizId(id)
-                          .addAllQuestion(problems)
-                          .build();
+                .setQuiz(id)
+                .addAllQuestion(problems)
+                .build();
     }
 
     public static PmAnswerQuestion answerQuestion(PmQuizId id, PmAnswer answer) {
         return PmAnswerQuestion.newBuilder()
-                               .setQuizId(id)
-                               .setAnswer(answer)
-                               .build();
+                .setQuiz(id)
+                .setAnswer(answer)
+                .build();
     }
 
     public static PmAnswer newAnswer() {
@@ -69,14 +69,14 @@ public class QuizGiven {
 
     private static PmQuestionId newQuestionId() {
         return PmQuestionId.newBuilder()
-                           .setId(newUuid())
-                           .build();
+                .setId(newUuid())
+                .build();
     }
 
     public static PmAnswer newAnswer(PmQuestionId id, boolean correct) {
         return PmAnswer.newBuilder()
-                       .setQuestionId(id)
-                       .setCorrect(correct)
-                       .build();
+                .setQuestion(id)
+                .setCorrect(correct)
+                .build();
     }
 }
