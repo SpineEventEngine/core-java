@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,109 +23,102 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.procman.given.pm
 
-package io.spine.server.procman.given.pm;
-
-import io.spine.server.command.Assign;
-import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.tuple.EitherOf3;
-import io.spine.test.procman.quiz.PmQuestionId;
-import io.spine.test.procman.quiz.PmQuiz;
-import io.spine.test.procman.quiz.PmQuizId;
-import io.spine.test.procman.quiz.command.PmAnswerQuestion;
-import io.spine.test.procman.quiz.command.PmStartQuiz;
-import io.spine.test.procman.quiz.event.PmQuestionAnswered;
-import io.spine.test.procman.quiz.event.PmQuestionFailed;
-import io.spine.test.procman.quiz.event.PmQuestionSolved;
-import io.spine.test.procman.quiz.event.PmQuizStarted;
+import io.spine.server.command.Assign
+import io.spine.server.event.React
+import io.spine.server.model.Nothing
+import io.spine.server.procman.ProcessManager
+import io.spine.server.procman.ProcessManagerRepository
+import io.spine.server.tuple.EitherOf3
+import io.spine.test.procman.quiz.PmQuestionId
+import io.spine.test.procman.quiz.PmQuiz
+import io.spine.test.procman.quiz.PmQuizId
+import io.spine.test.procman.quiz.command.PmAnswerQuestion
+import io.spine.test.procman.quiz.command.PmStartQuiz
+import io.spine.test.procman.quiz.event.PmQuestionAnswered
+import io.spine.test.procman.quiz.event.PmQuestionFailed
+import io.spine.test.procman.quiz.event.PmQuestionSolved
+import io.spine.test.procman.quiz.event.PmQuizStarted
+import io.spine.test.procman.quiz.event.pmQuestionAnswered
+import io.spine.test.procman.quiz.event.pmQuestionFailed
+import io.spine.test.procman.quiz.event.pmQuestionSolved
+import io.spine.test.procman.quiz.event.pmQuizStarted
 
 /**
- * A quiz is started using {@link PmStartQuiz Start Quiz command} which defines a question set, and 
- * the question are answered using {@link PmAnswerQuestion Answer Question commands}.
+ * A quiz is started using [Start Quiz command][PmStartQuiz] which defines a question set, and
+ * the question are answered using [Answer Question commands][PmAnswerQuestion].
  */
-class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder> {
-
-    protected QuizProcman(PmQuizId id) {
-        super(id);
-    }
+internal class QuizProcman(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder>(id) {
 
     @Assign
-    PmQuizStarted handle(PmStartQuiz command) {
-        builder().setId(command.getQuiz());
-        return PmQuizStarted.newBuilder()
-                .setQuiz(command.getQuiz())
-                .addAllQuestion(command.getQuestionList())
-                .build();
-    }
-
-    @Assign
-    PmQuestionAnswered handle(PmAnswerQuestion command) {
-        var event = PmQuestionAnswered.newBuilder()
-                .setQuiz(command.getQuiz())
-                .setAnswer(command.getAnswer())
-                .build();
-        return event;
-    }
-
-    @React
-    Nothing on(PmQuizStarted event) {
-        builder().setId(event.getQuiz());
-        return nothing();
-    }
-
-    @React
-    EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> on(PmQuestionAnswered event) {
-        var answer = event.getAnswer();
-        var quiz = event.getQuiz();
-        var questionId = answer.getQuestion();
-
-        if (questionIsClosed(questionId)) {
-            return EitherOf3.withC(nothing());
+    fun handle(command: PmStartQuiz): PmQuizStarted {
+        builder().setId(command.quiz)
+        return pmQuizStarted {
+            quiz = command.quiz
+            question.addAll(command.questionList)
         }
+    }
 
-        var answerIsCorrect = answer.getCorrect();
-        if (answerIsCorrect) {
-            var reaction = PmQuestionSolved.newBuilder()
-                    .setQuiz(quiz)
-                    .setQuestion(questionId)
-                    .build();
-            return EitherOf3.withA(reaction);
+    @Assign
+    fun handle(command: PmAnswerQuestion): PmQuestionAnswered = pmQuestionAnswered {
+        quiz = command.quiz
+        answer = command.answer
+    }
+
+    @React
+    fun on(event: PmQuizStarted): Nothing {
+        builder().setId(event.quiz)
+        return nothing()
+    }
+
+    @React
+    fun on(event: PmQuestionAnswered): EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> {
+        val answer = event.answer
+        val question = answer.question
+        if (question.isClosed()) {
+            return EitherOf3.withC(nothing())
+        }
+        return if (answer.correct) {
+            EitherOf3.withA(pmQuestionSolved {
+                quiz = event.quiz
+                this.question = question
+            })
         } else {
-            var reaction = PmQuestionFailed.newBuilder()
-                    .setQuiz(quiz)
-                    .setQuestion(questionId)
-                    .build();
-            return EitherOf3.withB(reaction);
+            EitherOf3.withB(pmQuestionFailed {
+                quiz = event.quiz
+                this.question = question
+            })
         }
     }
 
-    private boolean questionIsClosed(PmQuestionId questionId) {
-        var openQuestions = builder().getOpenQuestionList();
-        var containedInOpenQuestions = openQuestions.contains(questionId);
-        return !containedInOpenQuestions;
+    private fun PmQuestionId.isClosed(): Boolean {
+        val openQuestions = builder().openQuestionList
+        val isOpen = openQuestions.contains(this)
+        return !isOpen
     }
 
     @React
-    Nothing on(PmQuestionSolved event) {
-        var questionId = event.getQuestion();
-        removeOpenQuestion(questionId);
-        builder().addSolvedQuestion(questionId);
-        return nothing();
+    fun on(event: PmQuestionSolved): Nothing {
+        val questionId = event.question
+        removeOpenQuestion(questionId)
+        builder().addSolvedQuestion(questionId)
+        return nothing()
     }
 
     @React
-    Nothing on(PmQuestionFailed event) {
-        var questionId = event.getQuestion();
-        removeOpenQuestion(questionId);
-        builder().addFailedQuestion(questionId);
-        return nothing();
+    fun on(event: PmQuestionFailed): Nothing {
+        val questionId = event.question
+        removeOpenQuestion(questionId)
+        builder()!!.addFailedQuestion(questionId)
+        return nothing()
     }
 
-    private void removeOpenQuestion(PmQuestionId questionId) {
-        var openQuestions = builder().getOpenQuestionList();
-        var index = openQuestions.indexOf(questionId);
-        builder().removeOpenQuestion(index);
+    private fun removeOpenQuestion(question: PmQuestionId) {
+        val openQuestions = builder().openQuestionList
+        val index = openQuestions.indexOf(question)
+        builder().removeOpenQuestion(index)
     }
 }
+
+internal class QuizProcmanRepository : ProcessManagerRepository<PmQuizId, QuizProcman, PmQuiz>()

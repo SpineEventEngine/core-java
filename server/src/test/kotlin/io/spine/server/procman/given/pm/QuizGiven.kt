@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,60 +23,50 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.procman.given.pm
 
-package io.spine.server.procman.given.pm;
-
-import io.spine.test.procman.quiz.PmAnswer;
-import io.spine.test.procman.quiz.PmQuestionId;
-import io.spine.test.procman.quiz.PmQuizId;
-import io.spine.test.procman.quiz.command.PmAnswerQuestion;
-import io.spine.test.procman.quiz.command.PmStartQuiz;
-
-import static io.spine.base.Identifier.newUuid;
+import io.spine.base.Identifier
+import io.spine.test.procman.quiz.PmAnswer
+import io.spine.test.procman.quiz.PmQuestionId
+import io.spine.test.procman.quiz.PmQuizId
+import io.spine.test.procman.quiz.pmQuizId
+import io.spine.test.procman.quiz.command.PmAnswerQuestion
+import io.spine.test.procman.quiz.command.PmStartQuiz
+import io.spine.test.procman.quiz.command.pmAnswerQuestion
+import io.spine.test.procman.quiz.command.pmStartQuiz
+import io.spine.test.procman.quiz.pmAnswer
+import io.spine.test.procman.quiz.pmQuestionId
 
 /**
  * Factory methods for creating test values.
  */
-public class QuizGiven {
+object QuizGiven {
 
-    /** Prevents instantiation of this utility class. */
-    private QuizGiven() {
+    fun newQuizId(): PmQuizId = pmQuizId {
+        id = Identifier.newUuid()
     }
 
-    public static PmQuizId newQuizId() {
-        return PmQuizId.newBuilder()
-                .setId(newUuid())
-                .build();
+    fun startQuiz(id: PmQuizId, problems: Iterable<PmQuestionId>): PmStartQuiz = pmStartQuiz {
+        quiz = id
+        question.addAll(problems)
     }
 
-    public static PmStartQuiz startQuiz(PmQuizId id, Iterable<? extends PmQuestionId> problems) {
-        return PmStartQuiz.newBuilder()
-                .setQuiz(id)
-                .addAllQuestion(problems)
-                .build();
+    fun answerQuestion(id: PmQuizId, answer: PmAnswer): PmAnswerQuestion = pmAnswerQuestion {
+        quiz = id
+        this.answer = answer
     }
 
-    public static PmAnswerQuestion answerQuestion(PmQuizId id, PmAnswer answer) {
-        return PmAnswerQuestion.newBuilder()
-                .setQuiz(id)
-                .setAnswer(answer)
-                .build();
-    }
+    private fun newQuestionId(): PmQuestionId =
+        pmQuestionId {
+            id = Identifier.newUuid()
+        }
 
-    public static PmAnswer newAnswer() {
-        return newAnswer(newQuestionId(), true);
-    }
-
-    private static PmQuestionId newQuestionId() {
-        return PmQuestionId.newBuilder()
-                .setId(newUuid())
-                .build();
-    }
-
-    public static PmAnswer newAnswer(PmQuestionId id, boolean correct) {
-        return PmAnswer.newBuilder()
-                .setQuestion(id)
-                .setCorrect(correct)
-                .build();
+    @JvmOverloads
+    fun newAnswer(
+        id: PmQuestionId = newQuestionId(),
+        correct: Boolean = true
+    ): PmAnswer = pmAnswer {
+        question = id
+        this.correct = correct
     }
 }

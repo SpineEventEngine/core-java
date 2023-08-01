@@ -41,6 +41,7 @@ import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.pack
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
+import io.spine.server.entity.Repository
 import io.spine.server.entity.given.Given
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.procman.given.dispatch.PmDispatcher
@@ -524,8 +525,10 @@ internal class ProcessManagerSpec {
 /**
  * Creates a [BlackBox] with the given [ProcessManagerRepository] as the only repository.
  */
-fun blackBoxWith(repository: ProcessManagerRepository<*, *, *>): BlackBox =
-    BlackBox.from(
-        BoundedContextBuilder.assumingTests()
-            .add(repository)
-    )
+fun blackBoxWith(vararg repository: Repository<*, *>): BlackBox {
+    val context = BoundedContextBuilder.assumingTests()
+    repository.forEach {
+        context.add(it)
+    }
+    return BlackBox.from(context)
+}
