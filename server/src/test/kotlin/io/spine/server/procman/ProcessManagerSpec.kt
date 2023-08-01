@@ -59,8 +59,8 @@ import io.spine.server.procman.given.pm.QuizGiven
 import io.spine.server.procman.given.pm.QuizGiven.answerQuestion
 import io.spine.server.procman.given.pm.QuizGiven.startQuiz
 import io.spine.server.procman.given.pm.QuizProcmanRepository
-import io.spine.server.procman.given.pm.TestProcessManager
-import io.spine.server.procman.given.pm.TestProcessManagerRepo
+import io.spine.server.procman.given.pm.LastSignalMemo
+import io.spine.server.procman.given.pm.LastSignalMemoRepo
 import io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass
 import io.spine.server.type.CommandEnvelope
 import io.spine.server.type.EventEnvelope
@@ -106,14 +106,14 @@ internal class ProcessManagerSpec {
     private val requestFactory = TestActorRequestFactory(javaClass)
 
     private lateinit var context: BoundedContext
-    private lateinit var processManager: TestProcessManager
+    private lateinit var processManager: LastSignalMemo
 
     @BeforeEach
     fun initContextAndProcessManager() {
         ModelTests.dropAllModels()
         context = BoundedContextBuilder.assumingTests(true).build()
-        processManager = Given.processManagerOfClass(TestProcessManager::class.java)
-            .withId(TestProcessManager.ID)
+        processManager = Given.processManagerOfClass(LastSignalMemo::class.java)
+            .withId(LastSignalMemo.ID)
             .withVersion(VERSION)
             .withState(ElephantProcess.getDefaultInstance())
             .build()
@@ -231,7 +231,7 @@ internal class ProcessManagerSpec {
         val event = events[0]
         event shouldNotBe null
         val message = AnyPacker.unpack(event.message, PmProjectCreated::class.java)
-        message.projectId shouldBe TestProcessManager.ID
+        message.projectId shouldBe LastSignalMemo.ID
     }
 
     @Nested internal inner class
@@ -283,7 +283,7 @@ internal class ProcessManagerSpec {
 
         @BeforeEach
         fun setupContext() {
-            context = blackBoxWith(TestProcessManagerRepo()).tolerateFailures()
+            context = blackBoxWith(LastSignalMemoRepo()).tolerateFailures()
         }
 
         @AfterEach
@@ -305,7 +305,7 @@ internal class ProcessManagerSpec {
         }
 
         private fun assertNoEntity() {
-            context.assertEntity(TestProcessManager.ID, TestProcessManager::class.java)
+            context.assertEntity(LastSignalMemo.ID, LastSignalMemo::class.java)
                 .doesNotExist()
         }
     }
@@ -317,7 +317,7 @@ internal class ProcessManagerSpec {
 
         @BeforeEach
         fun setupContext() {
-            context = blackBoxWith(TestProcessManagerRepo())
+            context = blackBoxWith(LastSignalMemoRepo())
         }
 
         @AfterEach
@@ -331,7 +331,7 @@ internal class ProcessManagerSpec {
             /**
              * Tests transformation of a command into another command.
              *
-             * @see TestProcessManager.transform
+             * @see LastSignalMemo.transform
              */
             @Test
             fun `by transform incoming command`() =
@@ -343,7 +343,7 @@ internal class ProcessManagerSpec {
             /**
              * Tests generation of a command in response to incoming event.
              *
-             * @see TestProcessManager.on
+             * @see LastSignalMemo.on
              */
             @Test
             fun `on incoming event`() =
@@ -366,7 +366,7 @@ internal class ProcessManagerSpec {
             /**
              * Tests splitting incoming command into two.
              *
-             * @see TestProcessManager.split
+             * @see LastSignalMemo.split
              */
             @Test
             fun `when splitting incoming command`() {
@@ -469,7 +469,7 @@ internal class ProcessManagerSpec {
 
         @Test
         fun `produced commands`() {
-            val pmClass = asProcessManagerClass(TestProcessManager::class.java)
+            val pmClass = asProcessManagerClass(LastSignalMemo::class.java)
             val commands = pmClass.outgoingCommands()
             assertCommandClassesExactly(
                 commands,
@@ -484,7 +484,7 @@ internal class ProcessManagerSpec {
 
         @Test
         fun `produced events`() {
-            val pmClass = asProcessManagerClass(TestProcessManager::class.java)
+            val pmClass = asProcessManagerClass(LastSignalMemo::class.java)
             val events = pmClass.outgoingEvents()
             assertEventClassesExactly(
                 events,
@@ -499,7 +499,7 @@ internal class ProcessManagerSpec {
 
         @Test
         fun `handled external event classes`() {
-            val pmClass = asProcessManagerClass(TestProcessManager::class.java)
+            val pmClass = asProcessManagerClass(LastSignalMemo::class.java)
             val externalEvents = pmClass.externalEvents()
             assertEventClassesExactly(
                 externalEvents,
@@ -511,14 +511,14 @@ internal class ProcessManagerSpec {
 
     @Test
     fun `query projections of the same context`() {
-        blackBoxWith(TestProcessManagerRepo()).use {
+        blackBoxWith(LastSignalMemoRepo()).use {
 
         }
     }
 
     companion object {
         private const val VERSION = 2
-        private val PRODUCER_ID = Identifier.pack(TestProcessManager.ID)
+        private val PRODUCER_ID = Identifier.pack(LastSignalMemo.ID)
     }
 }
 

@@ -34,13 +34,13 @@ import io.spine.test.procman.quiz.event.PmQuizStarted;
 
 import static io.spine.server.route.EventRoute.withId;
 
-public final class TestProcessManagerRepo
-        extends ProcessManagerRepository<ProjectId, TestProcessManager, ElephantProcess> {
+public final class LastSignalMemoRepo
+        extends ProcessManagerRepository<ProjectId, LastSignalMemo, ElephantProcess> {
 
     @Override
     protected void setupEventRouting(EventRouting<ProjectId> routing) {
         super.setupEventRouting(routing);
         routing.route(PmQuizStarted.class,
-                      (event, context) -> withId(TestProcessManager.ID));
+                      (event, context) -> withId(LastSignalMemo.ID));
     }
 }

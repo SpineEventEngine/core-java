@@ -71,12 +71,13 @@ import static io.spine.testdata.Sample.messageOfType;
 /**
  * A test Process Manager which remembers past message as its state.
  */
-public class TestProcessManager
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+public class LastSignalMemo
         extends ProcessManager<ProjectId, ElephantProcess, ElephantProcess.Builder> {
 
     public static final ProjectId ID = messageOfType(ProjectId.class);
 
-    public TestProcessManager(ProjectId id) {
+    public LastSignalMemo(ProjectId id) {
         super(id);
     }
 
