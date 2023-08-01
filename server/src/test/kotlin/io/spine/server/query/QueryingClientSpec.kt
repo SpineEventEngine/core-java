@@ -26,7 +26,6 @@
 
 package io.spine.server.query
 
-import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.spine.grpc.StreamObservers
@@ -38,7 +37,6 @@ import io.spine.server.given.context.counting.command.generateNumbers
 import io.spine.server.given.context.counting.createCountingContext
 import io.spine.server.given.context.counting.range
 import io.spine.testing.client.TestActorRequestFactory
-import java.util.Optional.empty
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
