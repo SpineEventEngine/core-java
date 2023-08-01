@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.Any
 import com.google.protobuf.Message
 import com.google.protobuf.Timestamp
+import io.kotest.matchers.shouldBe
 import io.spine.base.Identifier
 import io.spine.base.Time
 import io.spine.core.UserId
@@ -44,7 +45,6 @@ import io.spine.time.ZoneIds
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -124,8 +124,8 @@ internal class ActorRequestFactorySpec {
             actor = ACTOR
             zoneId = ZONE_ID
         }
-        assertThat(builder.actor).isEqualTo(ACTOR)
-        assertThat(builder.zoneId).isEqualTo(ZONE_ID)
+        builder.actor shouldBe ACTOR
+        builder.zoneId shouldBe ZONE_ID
     }
 
     @Test
@@ -135,8 +135,8 @@ internal class ActorRequestFactorySpec {
 
     @Test
     fun `when created, store user and timezone`() {
-        assertEquals(ACTOR, factory.actor())
-        assertEquals(ZONE_ID, factory.zoneId())
+        factory.actor() shouldBe ACTOR
+        factory.zoneId() shouldBe ZONE_ID
     }
 
     @Test
@@ -144,8 +144,8 @@ internal class ActorRequestFactorySpec {
         val aFactory = requestFactoryBuilder()
             .setActor(ACTOR)
             .build()
-        assertThat(aFactory.actor()).isEqualTo(ACTOR)
-        assertThat(aFactory.zoneId()).isEqualTo(ZoneIds.systemDefault())
+        aFactory.actor() shouldBe ACTOR
+        aFactory.zoneId() shouldBe ZoneIds.systemDefault()
     }
 
     @Test
@@ -155,8 +155,7 @@ internal class ActorRequestFactorySpec {
         val movedFactory = factory.switchTimeZone(newZone)
         assertThat(movedFactory.zoneId())
             .isNotEqualTo(factory.zoneId())
-        assertThat(movedFactory.zoneId())
-            .isEqualTo(newZone)
+        movedFactory.zoneId() shouldBe newZone
     }
 
     @Nested
@@ -181,8 +180,7 @@ internal class ActorRequestFactorySpec {
                 .setActor(ACTOR)
                 .build()
             val expected = ZoneIds.of(CustomTimeProvider.ZONE)
-            assertThat(factory.zoneId())
-                .isEqualTo(expected)
+            factory.zoneId() shouldBe expected
         }
     }
 

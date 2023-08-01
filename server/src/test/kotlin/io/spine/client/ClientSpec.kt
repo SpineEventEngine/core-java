@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@
 package io.spine.client
 
 import com.google.common.collect.ImmutableList
-import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.client.EntityStateFilter.eq
 import io.spine.client.EventFilter.eq
 import io.spine.server.BoundedContextBuilder
@@ -41,8 +41,6 @@ import io.spine.test.client.users.event.UserLoggedIn
 import io.spine.test.client.users.event.UserLoggedOut
 import io.spine.testing.core.given.GivenUserId
 import io.spine.testing.logging.mute.MuteLogging
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -58,36 +56,34 @@ internal class ClientSpec : AbstractClientTest() {
 
     @Test
     fun `be opened upon creation`() {
-        assertTrue(client().isOpen)
+        client().isOpen shouldBe true
     }
 
     @Test
     fun `close upon request`() {
         val client = client()
         client.close()
-        assertFalse(client.isOpen)
+        client.isOpen shouldBe false
     }
 
     @Test
     fun `have 'shutdown()' alias method`() {
         val client = client()
         client.shutdown()
-        assertFalse(client.isOpen)
+        client.isOpen shouldBe false
     }
 
     @Test
     fun `create requests on behalf of a user`() {
         val expected = GivenUserId.generated()
         val request = client().onBehalfOf(expected)
-        assertThat(request.user())
-            .isEqualTo(expected)
+        request.user() shouldBe expected
     }
 
     @Test
     fun `create requests for a guest user`() {
         val request = client().asGuest()
-        assertThat(request.user())
-            .isEqualTo(Client.DEFAULT_GUEST_ID)
+        request.user() shouldBe Client.DEFAULT_GUEST_ID
     }
 
     @Nested
@@ -133,11 +129,11 @@ internal class ClientSpec : AbstractClientTest() {
             val client = client()
             val remembered = client.subscriptions()
             subscriptions.forEach { s ->
-                assertTrue(remembered.contains(s))
+                remembered.contains(s) shouldBe true
             }
             subscriptions.forEach{ s ->
                 remembered.cancel(s)
-                assertFalse(remembered.contains(s))
+                remembered.contains(s) shouldBe false
             }
         }
 
@@ -145,11 +141,11 @@ internal class ClientSpec : AbstractClientTest() {
         fun `clear subscriptions when closing`() {
             val client = client()
             val subscriptions = client.subscriptions()
-            this.subscriptions.forEach {
-                    s -> assertTrue(subscriptions.contains(s))
+            this.subscriptions.forEach { s ->
+                subscriptions.contains(s) shouldBe true
             }
             client.close()
-            assertThat(subscriptions.isEmpty).isTrue()
+            subscriptions.isEmpty shouldBe true
         }
     }
 

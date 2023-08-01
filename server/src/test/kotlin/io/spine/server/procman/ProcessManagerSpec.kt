@@ -32,6 +32,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import com.google.protobuf.Any
 import com.google.protobuf.Message
+import io.kotest.matchers.shouldBe
 import io.spine.base.CommandMessage
 import io.spine.base.EventMessage
 import io.spine.base.Identifier
@@ -91,9 +92,6 @@ import io.spine.testing.server.TestEventFactory
 import io.spine.testing.server.blackbox.BlackBox
 import io.spine.testing.server.model.ModelTests
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -164,14 +162,13 @@ internal class ProcessManagerSpec {
     @Nested
     @DisplayName("dispatch")
     internal inner class Dispatch {
+
         @Test
-        @DisplayName("command")
         fun command() {
             testDispatchCommand(addTask())
         }
 
         @Test
-        @DisplayName("event")
         fun event() {
             val eventMessages = testDispatchEvent(PmProjectStarted::class.java)
             assertThat(eventMessages).hasSize(1)
@@ -231,10 +228,9 @@ internal class ProcessManagerSpec {
         val events = testDispatchCommand(createProject())
         assertThat(events).hasSize(1)
         val event = events[0]
-        assertNotNull(event)
+        event shouldNotBe null
         val message = AnyPacker.unpack(event.message, PmProjectCreated::class.java)
-        assertThat(message.projectId)
-            .isEqualTo(TestProcessManager.ID)
+        message.projectId shouldBe TestProcessManager.ID
     }
 
     @Nested internal inner class
@@ -313,8 +309,8 @@ internal class ProcessManagerSpec {
         }
     }
 
-    @Nested
-    internal inner class `create command(s)` {
+    @Nested internal inner class
+    `create command(s)` {
 
         private lateinit var context: BlackBox
 
@@ -402,8 +398,8 @@ internal class ProcessManagerSpec {
         }
     }
 
-    @Nested
-    internal inner class `fail when dispatching unknown` {
+    @Nested internal inner class
+    `fail when dispatching unknown` {
 
         @Test
         fun command() {
@@ -423,7 +419,7 @@ internal class ProcessManagerSpec {
         fun event() {
             val envelope = EventEnvelope.of(GivenEvent.arbitrary())
             val outcome = PmDispatcher.dispatch(processManager, envelope)
-            assertTrue(outcome.hasIgnored())
+            outcome.hasIgnored() shouldBe true
         }
     }
 

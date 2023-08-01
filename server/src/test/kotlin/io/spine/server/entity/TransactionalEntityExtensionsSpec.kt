@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
  */
 package io.spine.server.entity
 
-import com.google.common.truth.Truth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.server.test.shared.StringEntity
 import io.spine.testing.TestValues.randomString
 import org.junit.jupiter.api.DisplayName
@@ -39,8 +39,7 @@ internal class TransactionalEntityExtensionsSpec {
         val entity = createEntity()
         val str = randomString()
         entity.applyUpdate(str)
-        assertThat(entity.value())
-            .isEqualTo(str)
+        entity.value() shouldBe str
     }
 
     @Test
@@ -48,8 +47,7 @@ internal class TransactionalEntityExtensionsSpec {
         val entity = createEntity()
         val str = randomString()
         entity.txApplyAlteration(str)
-        assertThat(entity.value())
-            .isEqualTo(str)
+        entity.value() shouldBe str
     }
 }
 

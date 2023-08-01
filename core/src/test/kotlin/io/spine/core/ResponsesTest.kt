@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,11 @@
 package io.spine.core
 
 import com.google.common.truth.extensions.proto.ProtoTruth
+import io.kotest.matchers.shouldBe
 import io.spine.base.Error
 import io.spine.core.Responses.ok
 import io.spine.testing.UtilityClassTest
 import io.spine.validate.NonValidated
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -47,8 +46,8 @@ internal class ResponsesTest : UtilityClassTest<Responses>(Responses::class.java
     @Test
     fun `recognize OK response`() {
         val ok = ok()
-        assertTrue(ok.isOk)
-        assertFalse(ok.isError)
+        ok.isOk shouldBe true
+        ok.isError shouldBe false
     }
 
     /**
@@ -69,7 +68,7 @@ internal class ResponsesTest : UtilityClassTest<Responses>(Responses::class.java
             .setStatus(asIfError)
             .buildPartial()
 
-        assertFalse(error.isOk)
-        assertTrue(error.isError)
+        error.isOk shouldBe false
+        error.isError shouldBe true
     }
 }

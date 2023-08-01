@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@
  */
 package io.spine.core
 
-import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
+import io.kotest.matchers.shouldBe
 import io.spine.base.CommandMessage
 import io.spine.base.Identifier.newUuid
 import io.spine.protobuf.Durations2.seconds
@@ -76,8 +76,7 @@ internal class CommandSpec {
     fun `extract message from given command`() {
         val message = testCommandMessage { id = newUuid() }
         val command = command(message)
-        assertThat(command.enclosedMessage())
-            .isEqualTo(message)
+        command.enclosedMessage() shouldBe message
     }
 
     @Nested
@@ -86,15 +85,13 @@ internal class CommandSpec {
         @Test
         fun `after given time`() {
             val command = command(stopProject)
-            assertThat(command.isAfter(secondsAgo(5)))
-                .isTrue()
+            command.isAfter(secondsAgo(5)) shouldBe true
         }
 
         @Test
         fun `before given time`() {
             val command = command(startProject)
-            assertThat(command.isBefore(Future.secondsFromNow(10)))
-                .isTrue()
+            command.isBefore(Future.secondsFromNow(10)) shouldBe true
         }
 
         @Test
@@ -114,20 +111,20 @@ internal class CommandSpec {
             val filteredCommands = commands.filter { c ->
                 c.isBetween(minutesAgo(3), secondsAgo(10))
             }
-            assertThat(filteredCommands.count()).isEqualTo(3)
+            filteredCommands.count() shouldBe 3
         }
     }
 
     @Test
     fun `consider command scheduled when command delay is set`() {
         val cmd = commandWithDelay(createProject, seconds(10))
-        assertThat(cmd.isScheduled).isTrue()
+        cmd.isScheduled shouldBe true
     }
 
     @Test
     fun `consider command not scheduled when no scheduling options are present`() {
         val cmd = command(createProject)
-        assertThat(cmd.isScheduled).isFalse()
+        cmd.isScheduled shouldBe false
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 package io.spine.core
 
 import com.google.common.testing.NullPointerTester
-import com.google.common.truth.Truth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.core.Versions.checkIsIncrement
 import io.spine.core.Versions.increment
 import io.spine.testing.UtilityClassTest
@@ -56,6 +56,6 @@ internal class VersionsTest : UtilityClassTest<Versions>(Versions::class.java) {
     @Test
     fun `increment 'Version'`() {
         val v1 = withNumber(1)
-        assertThat(increment(v1).number).isEqualTo(v1.number + 1)
+        increment(v1).number shouldBe v1.number + 1
     }
 }

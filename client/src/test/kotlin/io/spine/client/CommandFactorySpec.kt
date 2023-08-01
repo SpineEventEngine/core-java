@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
  */
 package io.spine.client
 
-import com.google.common.truth.Truth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.base.CommandMessage
 import io.spine.base.Identifier.newUuid
 import io.spine.client.given.CommandFactoryTestEnv.INVALID_COMMAND
@@ -37,7 +37,6 @@ import io.spine.time.ZoneIds
 import io.spine.time.testing.Future
 import io.spine.time.testing.Past
 import io.spine.validate.ValidationException
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -85,14 +84,14 @@ internal class CommandFactorySpec {
             val beforeCall = Past.secondsAgo(1)
             val command = factory.create(command())
             val afterCall = Future.secondsFromNow(1)
-            assertTrue(command.isBetween(beforeCall, afterCall))
+            command.isBetween(beforeCall, afterCall) shouldBe true
         }
 
         @Test
         fun `with given entity version`() {
             val command = factory.create(command(), 2)
             val context = command.context()
-            assertThat(context.targetVersion).isEqualTo(2)
+            context.targetVersion shouldBe 2
         }
 
         @Test
@@ -105,8 +104,7 @@ internal class CommandFactorySpec {
 
             val command = mtFactory.command().create(command())
 
-            assertThat(command.context().actorContext.tenantId)
-                .isEqualTo(tenantId)
+            command.context().actorContext.tenantId shouldBe tenantId
         }
 
         private fun command(): CommandMessage = cmdCreateProject { id = newUuid() }
