@@ -24,14 +24,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.testing.blackbox
+package io.spine.testing.server.blackbox
 
+import io.spine.server.BoundedContextBuilder
 import io.spine.server.entity.Entity
-import io.spine.testing.server.blackbox.BlackBox
+import io.spine.server.entity.Repository
 import io.spine.testing.server.entity.EntitySubject
+import kotlin.reflect.KClass
 
 /**
  * Creates [EntitySubject] for the entity of the type [E] with the given ID of type [I].
  */
 public inline fun <reified E: Entity<I, *>, I> BlackBox.assertEntity(id: I): EntitySubject =
     assertEntity(id, E::class.java)
+
+/**
+ * Creates a [BlackBox] with the given repositories.
+ */
+public fun blackBoxWith(vararg repository: Repository<*, *>): BlackBox {
+    val context = BoundedContextBuilder.assumingTests()
+    repository.forEach {
+        context.add(it)
+    }
+    return BlackBox.from(context)
+}
+
+/**
+ * Creates a [BlackBox] with the given classes of entities.
+ */
+public fun <I, E : Entity<I, *>> blackBoxWith(vararg entityClass: KClass<out E>): BlackBox {
+    val context = BoundedContextBuilder.assumingTests()
+    entityClass.forEach {
+        context.add(it.java)
+    }
+    return BlackBox.from(context)
+}

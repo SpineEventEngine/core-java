@@ -39,8 +39,6 @@ import io.spine.base.Identifier
 import io.spine.core.Event
 import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.pack
-import io.spine.server.BoundedContextBuilder
-import io.spine.server.entity.Repository
 import io.spine.server.entity.given.Given
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
 import io.spine.server.model.Nothing
@@ -62,8 +60,8 @@ import io.spine.server.procman.given.pm.QuizGiven.newAnswer
 import io.spine.server.procman.given.pm.QuizGiven.newQuestionId
 import io.spine.server.procman.given.pm.QuizGiven.newQuizId
 import io.spine.server.procman.given.pm.QuizGiven.startQuiz
-import io.spine.server.procman.given.pm.QuizRepository
-import io.spine.server.procman.given.pm.QuizStatsRepository
+import io.spine.server.procman.given.pm.QuizProcess
+import io.spine.server.procman.given.pm.QuizStatsView
 import io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass
 import io.spine.server.type.CommandEnvelope
 import io.spine.server.type.EventEnvelope
@@ -95,6 +93,7 @@ import io.spine.testing.server.Assertions.assertEventClassesExactly
 import io.spine.testing.server.EventSubject
 import io.spine.testing.server.TestEventFactory
 import io.spine.testing.server.blackbox.BlackBox
+import io.spine.testing.server.blackbox.blackBoxWith
 import io.spine.testing.server.model.ModelTests
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -454,8 +453,8 @@ internal class ProcessManagerSpec {
             }
 
             val assertEvents = blackBoxWith(
-                QuizRepository(),
-                QuizStatsRepository()
+                QuizProcess::class,
+                QuizStatsView::class
             ).use {
                 it.receivesCommands(commands).assertEvents()
             }
@@ -529,8 +528,8 @@ internal class ProcessManagerSpec {
         // The PM should produce a terminal event with the loaded projection state.
         var assertEvents: EventSubject
         blackBoxWith(
-            QuizRepository(),
-            QuizStatsRepository()
+            QuizProcess::class,
+            QuizStatsView::class
         ).use {
             assertEvents = it.receivesCommands(commands).assertEvents()
         }
@@ -553,13 +552,3 @@ internal class ProcessManagerSpec {
     }
 }
 
-/**
- * Creates a [BlackBox] with the given [ProcessManagerRepository] as the only repository.
- */
-fun blackBoxWith(vararg repository: Repository<*, *>): BlackBox {
-    val context = BoundedContextBuilder.assumingTests()
-    repository.forEach {
-        context.add(it)
-    }
-    return BlackBox.from(context)
-}

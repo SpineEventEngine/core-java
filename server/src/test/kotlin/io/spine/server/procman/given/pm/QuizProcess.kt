@@ -151,8 +151,6 @@ internal class QuizProcess(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQu
     }
 }
 
-internal class QuizRepository : ProcessManagerRepository<PmQuizId, QuizProcess, PmQuiz>()
-
 internal class QuizStatsView: Projection<PmQuizId, PmQuizStats, PmQuizStats.Builder>() {
 
     @Subscribe
@@ -172,5 +170,3 @@ internal class QuizStatsView: Projection<PmQuizId, PmQuizStats, PmQuizStats.Buil
         failedQuestions += 1
     }
 }
-
-internal class QuizStatsRepository : ProjectionRepository<PmQuizId, QuizStatsView, PmQuizStats>()
