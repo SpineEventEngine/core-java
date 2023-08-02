@@ -39,11 +39,11 @@ import io.spine.base.Identifier
 import io.spine.core.Event
 import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.pack
-import io.spine.server.BoundedContext
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.entity.Repository
 import io.spine.server.entity.given.Given
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
+import io.spine.server.model.Nothing
 import io.spine.server.procman.given.dispatch.PmDispatcher
 import io.spine.server.procman.given.pm.GivenMessages
 import io.spine.server.procman.given.pm.GivenMessages.addTask
@@ -84,7 +84,6 @@ import io.spine.test.procman.event.PmOwnerChanged
 import io.spine.test.procman.event.PmProjectCreated
 import io.spine.test.procman.event.PmProjectStarted
 import io.spine.test.procman.event.PmTaskAdded
-import io.spine.test.procman.quiz.PmQuestionId
 import io.spine.test.procman.quiz.event.PmQuestionAnswered
 import io.spine.test.procman.quiz.event.PmQuizFinished
 import io.spine.test.procman.quiz.event.PmQuizStarted
@@ -110,23 +109,16 @@ internal class ProcessManagerSpec {
     private val eventFactory = TestEventFactory.newInstance(PRODUCER_ID, javaClass)
     private val requestFactory = TestActorRequestFactory(javaClass)
 
-    private lateinit var context: BoundedContext
     private lateinit var processManager: LastSignalMemo
 
     @BeforeEach
     fun initContextAndProcessManager() {
         ModelTests.dropAllModels()
-        context = BoundedContextBuilder.assumingTests(true).build()
         processManager = Given.processManagerOfClass(LastSignalMemo::class.java)
             .withId(LastSignalMemo.ID)
             .withVersion(VERSION)
             .withState(ElephantProcess.getDefaultInstance())
             .build()
-    }
-
-    @AfterEach
-    fun closeContext() {
-        context.close()
     }
 
     @CanIgnoreReturnValue
@@ -453,19 +445,27 @@ internal class ProcessManagerSpec {
         @Test
         fun `for an either of three event reaction`() {
             val quiz = newQuizId()
-            val questions = listOf<PmQuestionId>()
-            val startQuiz = startQuiz(quiz, questions)
-            val answerQuestion = answerQuestion(quiz, newAnswer())
-            val context = blackBoxWith(QuizRepository())
+            val numQuestions = 4
+            val questions = generateSequence { newQuestionId() }.take(numQuestions).toList()
+            val commands = buildList<CommandMessage> {
+                add(startQuiz(quiz, questions))
+                // Make all answers correct for simplicity.
+                addAll(questions.map { answerQuestion(quiz, newAnswer(it)) })
+            }
 
-            val assertEvents = context.receivesCommands(startQuiz, answerQuestion).assertEvents()
+            val assertEvents = blackBoxWith(
+                QuizRepository(),
+                QuizStatsRepository()
+            ).use {
+                it.receivesCommands(commands).assertEvents()
+            }
 
-            assertEvents.hasSize(2)
+            assertEvents.withType(Nothing::class.java)
+                .isEmpty()
             assertEvents.withType(PmQuizStarted::class.java)
                 .hasSize(1)
             assertEvents.withType(PmQuestionAnswered::class.java)
-                .hasSize(1)
-            context.close()
+                .hasSize(numQuestions)
         }
     }
 
@@ -517,7 +517,7 @@ internal class ProcessManagerSpec {
     @Test
     fun `query projections of the same context`() {
         val quiz = newQuizId()
-        val questions = listOf(newQuestionId(), newQuestionId(), newQuestionId())
+        val questions = generateSequence { newQuestionId() }.take(3).toList()
         val commands = buildList<CommandMessage> {
             add(startQuiz(quiz, questions))
             // Make all answers correct for simplicity.
