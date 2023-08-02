@@ -81,7 +81,7 @@ public class QueryingClient<T : EntityState<*>>(
      *         was not found.
      * @throws IllegalArgumentException
      *          if the given ID is not of one of the supported types.
-     * @see [id]
+     * @see [findById]
      */
     @Deprecated(message = "Use `findById(id)` instead.", replaceWith = ReplaceWith("findById(id)"))
     public fun find(id: Any): Optional<T> = Optional.ofNullable(findById(id))
@@ -97,7 +97,7 @@ public class QueryingClient<T : EntityState<*>>(
      *         was not found.
      * @throws IllegalArgumentException
      *          if the given ID is not of one of the supported types.
-     * @see [id]
+     * @see [findById]
      */
     @Deprecated(message = "Use `findById()` instead.", replaceWith = ReplaceWith("findById(id)"))
     public fun withId(id: Any): Optional<T> = Optional.ofNullable(findById(id))
