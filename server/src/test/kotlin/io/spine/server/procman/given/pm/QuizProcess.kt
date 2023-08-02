@@ -31,9 +31,7 @@ import io.spine.server.entity.alter
 import io.spine.server.event.React
 import io.spine.server.model.Nothing
 import io.spine.server.procman.ProcessManager
-import io.spine.server.procman.ProcessManagerRepository
 import io.spine.server.projection.Projection
-import io.spine.server.projection.ProjectionRepository
 import io.spine.server.tuple.EitherOf2
 import io.spine.server.tuple.EitherOf3
 import io.spine.test.procman.quiz.PmQuestionId
