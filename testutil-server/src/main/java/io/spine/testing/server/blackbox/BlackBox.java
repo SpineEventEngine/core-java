@@ -62,6 +62,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -274,13 +275,15 @@ public abstract class BlackBox implements Logging, Closeable {
     }
 
     /**
-     * Sends off a provided command to the Bounded Context.
+     * Sends off provided commands to the Bounded Context.
      *
      * @param domainCommands
      *         a list of domain commands to be dispatched to the Bounded Context
      * @return current instance
+     * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
-    private BlackBox receivesCommands(Collection<CommandMessage> domainCommands) {
+    @CanIgnoreReturnValue
+    public final BlackBox receivesCommands(List<CommandMessage> domainCommands) {
         checkNotNull(domainCommands);
         var posted = setup().postCommands(domainCommands);
         postedCommands.addAll(posted);
@@ -318,7 +321,6 @@ public abstract class BlackBox implements Logging, Closeable {
      * @return current instance
      * @apiNote Returned value can be ignored when this method invoked for test setup.
      */
-    @SuppressWarnings("OverloadedVarargsMethod")    // Different number of mandatory args.
     @CanIgnoreReturnValue
     public final BlackBox
     receivesEvents(EventMessage first, EventMessage second, EventMessage... rest) {
