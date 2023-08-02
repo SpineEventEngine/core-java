@@ -25,35 +25,46 @@
  */
 package io.spine.server.procman.given.pm
 
+import io.spine.core.Subscribe
 import io.spine.server.command.Assign
+import io.spine.server.entity.alter
 import io.spine.server.event.React
 import io.spine.server.model.Nothing
 import io.spine.server.procman.ProcessManager
 import io.spine.server.procman.ProcessManagerRepository
+import io.spine.server.projection.Projection
+import io.spine.server.projection.ProjectionRepository
+import io.spine.server.tuple.EitherOf2
 import io.spine.server.tuple.EitherOf3
 import io.spine.test.procman.quiz.PmQuestionId
 import io.spine.test.procman.quiz.PmQuiz
 import io.spine.test.procman.quiz.PmQuizId
+import io.spine.test.procman.quiz.PmQuizStats
 import io.spine.test.procman.quiz.command.PmAnswerQuestion
 import io.spine.test.procman.quiz.command.PmStartQuiz
 import io.spine.test.procman.quiz.event.PmQuestionAnswered
 import io.spine.test.procman.quiz.event.PmQuestionFailed
 import io.spine.test.procman.quiz.event.PmQuestionSolved
+import io.spine.test.procman.quiz.event.PmQuizFinished
 import io.spine.test.procman.quiz.event.PmQuizStarted
 import io.spine.test.procman.quiz.event.pmQuestionAnswered
 import io.spine.test.procman.quiz.event.pmQuestionFailed
 import io.spine.test.procman.quiz.event.pmQuestionSolved
+import io.spine.test.procman.quiz.event.pmQuizFinished
 import io.spine.test.procman.quiz.event.pmQuizStarted
 
 /**
  * A quiz is started using [Start Quiz command][PmStartQuiz] which defines a question set, and
  * the question are answered using [Answer Question commands][PmAnswerQuestion].
  */
-internal class QuizProcman(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder>(id) {
+internal class QuizProcess(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQuiz.Builder>(id) {
 
     @Assign
     fun handle(command: PmStartQuiz): PmQuizStarted {
-        builder().setId(command.quiz)
+        alter {
+            id = command.quiz
+            addAllOpenQuestion(command.questionList)
+        }
         return pmQuizStarted {
             quiz = command.quiz
             question.addAll(command.questionList)
@@ -61,14 +72,15 @@ internal class QuizProcman(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQu
     }
 
     @Assign
-    fun handle(command: PmAnswerQuestion): PmQuestionAnswered = pmQuestionAnswered {
-        quiz = command.quiz
-        answer = command.answer
-    }
+    fun handle(command: PmAnswerQuestion): PmQuestionAnswered =
+        pmQuestionAnswered {
+            quiz = command.quiz
+            answer = command.answer
+        }
 
     @React
     fun on(event: PmQuizStarted): Nothing {
-        builder().setId(event.quiz)
+        alter { id = event.quiz }
         return nothing()
     }
 
@@ -99,26 +111,66 @@ internal class QuizProcman(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQu
     }
 
     @React
-    fun on(event: PmQuestionSolved): Nothing {
-        val questionId = event.question
-        removeOpenQuestion(questionId)
-        builder().addSolvedQuestion(questionId)
-        return nothing()
+    fun on(event: PmQuestionSolved): EitherOf2<Nothing, PmQuizFinished> {
+        val question = event.question
+        alter {
+            removeOpenQuestion(question)
+            addSolvedQuestion(question)
+        }
+        return onAnsweredQuestion()
     }
 
     @React
-    fun on(event: PmQuestionFailed): Nothing {
-        val questionId = event.question
-        removeOpenQuestion(questionId)
-        builder()!!.addFailedQuestion(questionId)
-        return nothing()
+    fun on(event: PmQuestionFailed): EitherOf2<Nothing, PmQuizFinished> {
+        val question = event.question
+        alter {
+            removeOpenQuestion(question)
+            addFailedQuestion(question)
+        }
+        return onAnsweredQuestion()
     }
 
-    private fun removeOpenQuestion(question: PmQuestionId) {
-        val openQuestions = builder().openQuestionList
+    private fun PmQuiz.Builder.removeOpenQuestion(question: PmQuestionId) {
+        val openQuestions = openQuestionList
         val index = openQuestions.indexOf(question)
-        builder().removeOpenQuestion(index)
+        removeOpenQuestion(index)
+    }
+
+    private fun onAnsweredQuestion(): EitherOf2<Nothing, PmQuizFinished> {
+        return if (builder().openQuestionList.isEmpty()) {
+            val loaded = select(PmQuizStats::class.java).findById(id())
+            EitherOf2.withB(pmQuizFinished {
+                quiz = id()
+                loaded?.let {
+                    stats = it
+                }
+            })
+        } else {
+            EitherOf2.withA(nothing())
+        }
     }
 }
 
-internal class QuizProcmanRepository : ProcessManagerRepository<PmQuizId, QuizProcman, PmQuiz>()
+internal class QuizRepository : ProcessManagerRepository<PmQuizId, QuizProcess, PmQuiz>()
+
+internal class QuizStatsView: Projection<PmQuizId, PmQuizStats, PmQuizStats.Builder>() {
+
+    @Subscribe
+    fun on(event: PmQuizStarted) = alter {
+        id = event.quiz
+    }
+
+    @Subscribe
+    @Suppress("UNUSED_PARAMETER")
+    fun on(event: PmQuestionAnswered) = alter {
+        solvedQuestions += 1
+    }
+
+    @Subscribe
+    @Suppress("UNUSED_PARAMETER")
+    fun on(event: PmQuestionFailed) = alter {
+        failedQuestions += 1
+    }
+}
+
+internal class QuizStatsRepository : ProjectionRepository<PmQuizId, QuizStatsView, PmQuizStats>()

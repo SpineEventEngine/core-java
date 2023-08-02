@@ -61,3 +61,8 @@ message PmQuestionFailed {
     PmQuizId quiz = 1 [(required) = true];
     PmQuestionId question = 2 [(required) = true];
 }
+
+message PmQuizFinished {
+    PmQuizId quiz = 1 [(required) = true];
+    PmQuizStats stats = 2 [(required) = true];
+}

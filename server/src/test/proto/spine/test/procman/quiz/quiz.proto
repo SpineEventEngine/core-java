@@ -59,7 +59,6 @@ message PmAnswer {
 message PmQuizStats {
     option (entity).kind = PROJECTION;
     PmQuizId id = 1 [(required) = true];
-    int32 open_questions = 2;
-    int32 solved_questions = 3;
-    int32 failed_questions = 4;
+    int32 solved_questions = 2;
+    int32 failed_questions = 3;
 }

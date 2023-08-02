@@ -55,12 +55,15 @@ import io.spine.server.procman.given.pm.GivenMessages.quizStarted
 import io.spine.server.procman.given.pm.GivenMessages.startProject
 import io.spine.server.procman.given.pm.GivenMessages.throwEntityAlreadyArchived
 import io.spine.server.procman.given.pm.GivenMessages.throwRuntimeException
-import io.spine.server.procman.given.pm.QuizGiven
-import io.spine.server.procman.given.pm.QuizGiven.answerQuestion
-import io.spine.server.procman.given.pm.QuizGiven.startQuiz
-import io.spine.server.procman.given.pm.QuizProcmanRepository
 import io.spine.server.procman.given.pm.LastSignalMemo
 import io.spine.server.procman.given.pm.LastSignalMemoRepo
+import io.spine.server.procman.given.pm.QuizGiven.answerQuestion
+import io.spine.server.procman.given.pm.QuizGiven.newAnswer
+import io.spine.server.procman.given.pm.QuizGiven.newQuestionId
+import io.spine.server.procman.given.pm.QuizGiven.newQuizId
+import io.spine.server.procman.given.pm.QuizGiven.startQuiz
+import io.spine.server.procman.given.pm.QuizRepository
+import io.spine.server.procman.given.pm.QuizStatsRepository
 import io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass
 import io.spine.server.type.CommandEnvelope
 import io.spine.server.type.EventEnvelope
@@ -83,12 +86,14 @@ import io.spine.test.procman.event.PmProjectStarted
 import io.spine.test.procman.event.PmTaskAdded
 import io.spine.test.procman.quiz.PmQuestionId
 import io.spine.test.procman.quiz.event.PmQuestionAnswered
+import io.spine.test.procman.quiz.event.PmQuizFinished
 import io.spine.test.procman.quiz.event.PmQuizStarted
 import io.spine.testdata.Sample.messageOfType
 import io.spine.testing.client.TestActorRequestFactory
 import io.spine.testing.logging.mute.MuteLogging
 import io.spine.testing.server.Assertions.assertCommandClassesExactly
 import io.spine.testing.server.Assertions.assertEventClassesExactly
+import io.spine.testing.server.EventSubject
 import io.spine.testing.server.TestEventFactory
 import io.spine.testing.server.blackbox.BlackBox
 import io.spine.testing.server.model.ModelTests
@@ -443,15 +448,15 @@ internal class ProcessManagerSpec {
          * containing [Nothing]. This is done because the answered
          * question is not part of a quiz.
          *
-         * @see io.spine.server.procman.given.pm.QuizProcman
+         * @see io.spine.server.procman.given.pm.QuizProcess
          */
         @Test
         fun `for an either of three event reaction`() {
-            val quizId = QuizGiven.newQuizId()
+            val quiz = newQuizId()
             val questions = listOf<PmQuestionId>()
-            val startQuiz = startQuiz(quizId, questions)
-            val answerQuestion = answerQuestion(quizId, QuizGiven.newAnswer())
-            val context = blackBoxWith(QuizProcmanRepository())
+            val startQuiz = startQuiz(quiz, questions)
+            val answerQuestion = answerQuestion(quiz, newAnswer())
+            val context = blackBoxWith(QuizRepository())
 
             val assertEvents = context.receivesCommands(startQuiz, answerQuestion).assertEvents()
 
@@ -511,9 +516,35 @@ internal class ProcessManagerSpec {
 
     @Test
     fun `query projections of the same context`() {
-        blackBoxWith(LastSignalMemoRepo()).use {
-
+        val quiz = newQuizId()
+        val questions = listOf(newQuestionId(), newQuestionId(), newQuestionId())
+        val commands = buildList<CommandMessage> {
+            add(startQuiz(quiz, questions))
+            // Make all answers correct for simplicity.
+            addAll(questions.map { answerQuestion(quiz, newAnswer(it)) })
         }
+
+        // Execute the commands in the context with both PM and a projection repository
+        // which subscribes to events the PM produces.
+        // The PM should produce a terminal event with the loaded projection state.
+        var assertEvents: EventSubject
+        blackBoxWith(
+            QuizRepository(),
+            QuizStatsRepository()
+        ).use {
+            assertEvents = it.receivesCommands(commands).assertEvents()
+        }
+
+        // See that the PM produced the expected terminal event.
+        val finishedEvents = assertEvents.withType(PmQuizFinished::class.java)
+        finishedEvents.hasSize(1)
+        val event: Event = finishedEvents.actual()[0]
+        val eventMessage = event.message.unpack(PmQuizFinished::class.java)
+
+        // Confirm that PM produced the event with loaded projection state.
+        // See `QuizProcess.onAnsweredQuestion()` for details.
+        eventMessage.stats.id shouldBe quiz
+        eventMessage.stats.solvedQuestions shouldBe questions.size
     }
 
     companion object {

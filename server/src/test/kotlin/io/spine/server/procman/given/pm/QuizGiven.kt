@@ -56,7 +56,7 @@ object QuizGiven {
         this.answer = answer
     }
 
-    private fun newQuestionId(): PmQuestionId =
+    fun newQuestionId(): PmQuestionId =
         pmQuestionId {
             id = Identifier.newUuid()
         }
