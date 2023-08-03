@@ -26,7 +26,6 @@
 
 package io.spine.server.query
 
-import io.kotest.matchers.optional.shouldBePresent
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.spine.grpc.StreamObservers
@@ -38,7 +37,6 @@ import io.spine.server.given.context.counting.command.generateNumbers
 import io.spine.server.given.context.counting.createCountingContext
 import io.spine.server.given.context.counting.range
 import io.spine.testing.client.TestActorRequestFactory
-import java.util.Optional.empty
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
@@ -92,11 +90,10 @@ internal class QueryingClientSpec {
     @Test
     fun `fetch the only one`() {
         val client = QueryingClient(context, RangeStats::class.java, actor)
-        val rangeStats = client.find(range)
+        val rangeStats = client.findById(range)
 
-        rangeStats shouldBePresent {
-            range shouldBe Companion.range
-        }
+        rangeStats shouldNotBe null
+        rangeStats?.range shouldBe range
     }
 
     @Test
@@ -106,8 +103,8 @@ internal class QueryingClientSpec {
             minValue = -200
             maxValue = 200
         }
-        val rangeStats = client.find(nonExisting)
+        val rangeStats = client.findById(nonExisting)
 
-        rangeStats shouldBe empty()
+        rangeStats shouldBe null
     }
 }

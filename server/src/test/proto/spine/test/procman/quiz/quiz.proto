@@ -52,6 +52,13 @@ message PmQuestionId {
 }
 
 message PmAnswer {
-    PmQuestionId question_id = 1 [(required) = true];
+    PmQuestionId question = 1 [(required) = true];
     bool correct = 2 [(required) = true];
+}
+
+message PmQuizStats {
+    option (entity).kind = PROJECTION;
+    PmQuizId id = 1 [(required) = true];
+    int32 solved_questions = 2;
+    int32 failed_questions = 3;
 }

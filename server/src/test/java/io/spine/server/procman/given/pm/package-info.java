@@ -26,7 +26,7 @@
 
 /**
  * This package contains test environment classes for
- * {@link io.spine.server.procman.ProcessManagerTest}.
+ * {@link io.spine.server.procman.ProcessManagerSpec}.
  */
 
 @CheckReturnValue

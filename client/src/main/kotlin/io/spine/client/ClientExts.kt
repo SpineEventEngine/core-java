@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.pm;
+package io.spine.client
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.procman.quiz.PmQuiz;
-import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.core.UserId
 
-public class QuizProcmanRepository extends ProcessManagerRepository<PmQuizId, QuizProcman, PmQuiz> {
-}
+/**
+ * Creates a new instance of [ActorRequestFactory] with the passed actor.
+ */
+public fun actorRequestFactory(actor: UserId): ActorRequestFactory =
+    ActorRequestFactory.newBuilder()
+        .setActor(actor)
+        .build()

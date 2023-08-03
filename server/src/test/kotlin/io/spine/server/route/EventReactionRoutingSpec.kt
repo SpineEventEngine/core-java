@@ -30,7 +30,7 @@ import io.spine.server.given.context.users.SessionProjection
 import io.spine.server.given.context.users.createUsersContext
 import io.spine.server.given.context.users.event.rUserSignedIn
 import io.spine.server.given.context.users.rSession
-import io.spine.server.testing.blackbox.assertEntity
+import io.spine.testing.server.blackbox.assertEntity
 import io.spine.testing.core.given.GivenUserId
 import io.spine.testing.server.blackbox.BlackBox
 import org.junit.jupiter.api.Disabled

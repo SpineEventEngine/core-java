@@ -38,26 +38,31 @@ option java_multiple_files = true;
 import "spine/test/procman/quiz/quiz.proto";
 
 message PmQuizStarted {
-    PmQuizId quiz_id = 1 [(required) = true];
+    PmQuizId quiz = 1 [(required) = true];
     repeated PmQuestionId question = 2;
 }
 
 message PmQuestionAnswered {
-    PmQuizId quiz_id = 1 [(required) = true];
+    PmQuizId quiz = 1 [(required) = true];
     PmAnswer answer = 2 [(required) = true];
 }
 
 message PmQuestionSolved {
-    PmQuizId quiz_id = 1 [(required) = true];
-    PmQuestionId question_id = 2 [(required) = true];
+    PmQuizId quiz = 1 [(required) = true];
+    PmQuestionId question = 2 [(required) = true];
 }
 
 message PmQuestionAlreadySolved {
-    PmQuizId quiz_id = 1 [(required) = true];
-    PmQuestionId question_id = 2 [(required) = true];
+    PmQuizId quiz = 1 [(required) = true];
+    PmQuestionId question = 2 [(required) = true];
 }
 
 message PmQuestionFailed {
-    PmQuizId quiz_id = 1 [(required) = true];
-    PmQuestionId question_id = 2 [(required) = true];
+    PmQuizId quiz = 1 [(required) = true];
+    PmQuestionId question = 2 [(required) = true];
+}
+
+message PmQuizFinished {
+    PmQuizId quiz = 1 [(required) = true];
+    PmQuizStats stats = 2 [(required) = true];
 }

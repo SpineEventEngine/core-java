@@ -29,9 +29,9 @@ package io.spine.server.query
 import io.grpc.stub.StreamObserver
 import io.spine.base.EntityState
 import io.spine.base.Identifier
-import io.spine.client.ActorRequestFactory
 import io.spine.client.Query
 import io.spine.client.QueryResponse
+import io.spine.client.actorRequestFactory
 import io.spine.core.userId
 import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContext
@@ -43,17 +43,34 @@ import java.util.*
  *
  * @param T the type of entity states to query.
  */
-public class QueryingClient<T : EntityState<*>>
-constructor(
+public class QueryingClient<T : EntityState<*>>(
     private val context: BoundedContext,
     private val type: Class<T>,
     actorName: String
 ) {
 
     private val actor = userId { value = actorName }
-    private val factory = ActorRequestFactory.newBuilder()
-        .setActor(actor)
-        .build()
+    private val factory = actorRequestFactory(actor)
+
+    /**
+     * Obtains a state of an entity by its ID.
+     *
+     * The value of the ID must be one of the [supported types][io.spine.base.Identifier].
+     *
+     * @return the state of the entity or `null`, if the entity with the given ID was not found.
+     * @throws IllegalArgumentException
+     *          if the given ID is not of one of the supported types.
+     */
+    public fun findById(id: Any): T? {
+        Identifier.checkSupported(id.javaClass)
+        val query = buildQuery(id)
+        val results = execute(query)
+        return if (results.isNotEmpty()) {
+            results.theOnly()
+        } else {
+            null
+        }
+    }
 
     /**
      * Obtains a state of an entity by its ID.
@@ -61,21 +78,13 @@ constructor(
      * The value of the ID must be one of the [supported types][io.spine.base.Identifier].
      *
      * @return the state of the entity or empty `Optional` if the entity with the given ID
-     *         was not found
+     *         was not found.
      * @throws IllegalArgumentException
-     *          if the given ID is not of one of the supported types
+     *          if the given ID is not of one of the supported types.
+     * @see [findById]
      */
-    public fun find(id: Any): Optional<T> {
-        Identifier.checkSupported(id.javaClass)
-        val query = buildQuery(id)
-        val results = execute(query)
-        return if (results.isEmpty()) {
-            Optional.empty()
-        } else {
-            val value = results.theOnly()
-            Optional.of(value)
-        }
-    }
+    @Deprecated(message = "Use `findById(id)` instead.", replaceWith = ReplaceWith("findById(id)"))
+    public fun find(id: Any): Optional<T> = Optional.ofNullable(findById(id))
 
     /**
      * Obtains a state of an entity by its ID.
@@ -85,12 +94,13 @@ constructor(
      * Does the same as [find] and provided for fluent calls when called after [Querying.select]
      *
      * @return the state of the entity or empty `Optional` if the entity with the given ID
-     *         was not found
+     *         was not found.
      * @throws IllegalArgumentException
-     *          if the given ID is not of one of the supported types
-     * @see [find]
+     *          if the given ID is not of one of the supported types.
+     * @see [findById]
      */
-    public fun withId(id: Any): Optional<T> = find(id)
+    @Deprecated(message = "Use `findById()` instead.", replaceWith = ReplaceWith("findById(id)"))
+    public fun withId(id: Any): Optional<T> = Optional.ofNullable(findById(id))
 
     /**
      * Selects all entities of the given type.

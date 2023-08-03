@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
  */
 package io.spine.server.bus
 
-import com.google.common.truth.Truth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.base.Identifier.newUuid
 import io.spine.core.Ack
 import io.spine.core.Command
@@ -86,11 +86,11 @@ internal class MessageIdExtensionsSpec {
 
         private fun assertIdEquals(ack: Ack) {
             val id = AnyPacker.unpack(ack.messageId)
-            assertThat(id).isEqualTo(ID)
+            id shouldBe ID
         }
 
         private fun assertStatusCase(ack: Ack, status: StatusCase) {
-            assertThat(ack.status.statusCase).isEqualTo(status)
+            ack.status.statusCase shouldBe status
         }
     }
 }

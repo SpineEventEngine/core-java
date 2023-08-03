@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2022, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.testing.blackbox
+package io.spine.server.procman.given.pm;
 
-import io.spine.server.entity.Entity
-import io.spine.testing.server.blackbox.BlackBox
-import io.spine.testing.server.entity.EntitySubject
+import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.route.EventRouting;
+import io.spine.test.procman.ElephantProcess;
+import io.spine.test.procman.ProjectId;
+import io.spine.test.procman.quiz.event.PmQuizStarted;
 
-/**
- * Creates [EntitySubject] for the entity of the type [E] with the given ID of type [I].
- */
-public inline fun <reified E: Entity<I, *>, I> BlackBox.assertEntity(id: I): EntitySubject =
-    assertEntity(id, E::class.java)
+import static io.spine.server.route.EventRoute.withId;
+
+public final class LastSignalMemoRepo
+        extends ProcessManagerRepository<ProjectId, LastSignalMemo, ElephantProcess> {
+
+    @Override
+    protected void setupEventRouting(EventRouting<ProjectId> routing) {
+        super.setupEventRouting(routing);
+        routing.route(PmQuizStarted.class,
+                      (event, context) -> withId(LastSignalMemo.ID));
+    }
+}

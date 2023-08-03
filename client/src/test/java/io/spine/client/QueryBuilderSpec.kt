@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import com.google.protobuf.Message
 import com.google.protobuf.Timestamp
 import com.google.protobuf.util.Durations
 import com.google.protobuf.util.Timestamps.subtract
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.spine.base.EntityState
 import io.spine.base.Identifier.newUuid
 import io.spine.base.Time
@@ -57,17 +59,8 @@ import io.spine.type.TypeUrl
 import java.util.*
 import java.util.stream.Collectors.toList
 import kotlin.Any
-import kotlin.IllegalArgumentException
 import kotlin.Int
 import kotlin.String
-import kotlin.Unit
-import kotlin.apply
-import kotlin.arrayOf
-import kotlin.with
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -159,17 +152,17 @@ internal class QueryBuilderSpec {
         @Test
         fun `by only entity type`() {
             val query = factory.select(TEST_ENTITY_TYPE).build()
-            assertNotNull(query)
+            query shouldNotBe null
 
             with(query.format) {
-                assertFalse(hasFieldMask())
-                assertThat(orderByCount).isEqualTo(0)
-                assertThat(limit).isEqualTo(0)
+                hasFieldMask() shouldBe false
+                orderByCount shouldBe 0
+                limit shouldBe 0
             }
 
             with(query.target) {
-                assertTrue(includeAll)
-                assertThat(type).isEqualTo(TEST_ENTITY_TYPE_URL.value())
+                includeAll shouldBe true
+                type shouldBe TEST_ENTITY_TYPE_URL.value()
             }
         }
 
@@ -178,19 +171,19 @@ internal class QueryBuilderSpec {
             val query = factory.select(TEST_ENTITY_TYPE)
                 .orderBy(FIRST_FIELD, ASCENDING)
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
 
             with(query.format) {
                 val expectedOrderBy = orderBy(FIRST_FIELD, ASCENDING)
 
-                assertFalse(hasFieldMask())
-                assertThat(getOrderBy(0)).isEqualTo(expectedOrderBy)
-                assertThat(limit).isEqualTo(0)
+                hasFieldMask() shouldBe false
+                getOrderBy(0) shouldBe expectedOrderBy
+                limit shouldBe 0
             }
 
             with(query.target) {
-                assertTrue(includeAll)
-                assertThat(type).isEqualTo(TEST_ENTITY_TYPE_URL.value())
+                includeAll shouldBe true
+                type shouldBe TEST_ENTITY_TYPE_URL.value()
             }
         }
 
@@ -201,19 +194,19 @@ internal class QueryBuilderSpec {
                 .orderBy(SECOND_FIELD, DESCENDING)
                 .limit(expectedLimit)
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
 
             with(query.format) {
                 val expectedOrderBy = orderBy(SECOND_FIELD, DESCENDING)
 
-                assertFalse(hasFieldMask())
-                assertThat(getOrderBy(0)).isEqualTo(expectedOrderBy)
-                assertThat(limit).isEqualTo(expectedLimit)
+                hasFieldMask() shouldBe false
+                getOrderBy(0) shouldBe expectedOrderBy
+                limit shouldBe expectedLimit
             }
 
             with(query.target) {
-                assertTrue(includeAll)
-                assertThat(type).isEqualTo(TEST_ENTITY_TYPE_URL.value())
+                includeAll shouldBe true
+                type shouldBe TEST_ENTITY_TYPE_URL.value()
             }
         }
 
@@ -224,11 +217,11 @@ internal class QueryBuilderSpec {
             val query = factory.select(TEST_ENTITY_TYPE)
                 .byId(id1, id2)
                 .build()
-            assertNotNull(query)
-            assertFalse(query.format.hasFieldMask())
+            query shouldNotBe null
+            query.format.hasFieldMask() shouldBe false
 
             val target = query.target
-            assertFalse(target.includeAll)
+            target.includeAll shouldBe false
 
             val entityFilters = target.filters
             val idFilter = entityFilters.idFilter
@@ -251,10 +244,10 @@ internal class QueryBuilderSpec {
             val query = factory.select(TEST_ENTITY_TYPE)
                 .withMask(fieldName)
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
 
             val format = query.format
-            assertTrue(format.hasFieldMask())
+            format.hasFieldMask() shouldBe true
 
             val mask = format.fieldMask
             val fieldNames: Collection<String> = mask.pathsList
@@ -270,10 +263,10 @@ internal class QueryBuilderSpec {
             val query = factory.select(TEST_ENTITY_TYPE)
                 .where(eq(columnName, columnValue))
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
 
             val target = query.target
-            assertFalse(target.includeAll)
+            target.includeAll shouldBe false
 
             val entityFilters = target.filters
             val aggregatingFilters = entityFilters.filterList
@@ -284,10 +277,10 @@ internal class QueryBuilderSpec {
             assertThat(filters).hasSize(1)
 
             val actualValue = findByName(filters, columnName).value
-            assertNotNull(columnValue)
+            columnValue shouldNotBe null
             val messageValue = AnyPacker.unpack(actualValue, Int32Value::class.java)
             val actualGenericValue = messageValue.value
-            assertEquals(columnValue, actualGenericValue)
+            actualGenericValue shouldBe columnValue
         }
 
         @Test
@@ -302,9 +295,9 @@ internal class QueryBuilderSpec {
                     eq(columnName2, columnValue2)
                 )
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
             val target = query.target
-            assertFalse(target.includeAll)
+            target.includeAll shouldBe false
             val entityFilters = target.filters
             val aggregatingFilters = entityFilters.filterList
             assertThat(aggregatingFilters)
@@ -312,13 +305,13 @@ internal class QueryBuilderSpec {
             val filters: Collection<Filter> = aggregatingFilters[0]
                 .filterList
             val actualValue1 = findByName(filters, columnName1).value
-            assertNotNull(actualValue1)
+            actualValue1 shouldNotBe null
             val actualGenericValue1 = toObject(actualValue1, Int::class.java)
-            assertEquals(columnValue1, actualGenericValue1)
+            actualGenericValue1 shouldBe columnValue1
             val actualValue2 = findByName(filters, columnName2).value
-            assertNotNull(actualValue2)
+            actualValue2 shouldNotBe null
             val actualGenericValue2: Message = toObject(actualValue2, TestEntityId::class.java)
-            assertEquals(columnValue2, actualGenericValue2)
+            actualGenericValue2 shouldBe columnValue2
         }
 
         /**
@@ -353,17 +346,11 @@ internal class QueryBuilderSpec {
             val allFilters: List<Filter>
             val eitherFilters: List<Filter>
             if (firstFilter.operator == ALL) {
-                assertEquals(
-                    EITHER,
-                    secondFilter.operator
-                )
+                secondFilter.operator shouldBe EITHER
                 allFilters = firstFilter.filterList
                 eitherFilters = secondFilter.filterList
             } else {
-                assertEquals(
-                    ALL,
-                    secondFilter.operator
-                )
+                secondFilter.operator shouldBe ALL
                 eitherFilters = firstFilter.filterList
                 allFilters = secondFilter.filterList
             }
@@ -374,37 +361,27 @@ internal class QueryBuilderSpec {
             val companySizeLowerBound = allFilters[0]
             val columnName1 = companySizeLowerBound.fieldPath
                 .getFieldName(0)
-            assertEquals(companySizeColumn, columnName1)
-            assertEquals(
-                50L, toObject(companySizeLowerBound.value, Int::class.java).toLong()
-            )
-            assertEquals(
-                Filter.Operator.GREATER_OR_EQUAL,
-                companySizeLowerBound.operator
-            )
+            columnName1 shouldBe companySizeColumn
+            toObject(companySizeLowerBound.value, Int::class.java).toLong() shouldBe 50L
+            companySizeLowerBound.operator shouldBe Filter.Operator.GREATER_OR_EQUAL
             val companySizeHigherBound = allFilters[1]
             val columnName2 = companySizeHigherBound.fieldPath
                 .getFieldName(0)
-            assertEquals(companySizeColumn, columnName2)
-            assertEquals(
-                1000L, toObject(companySizeHigherBound.value, Int::class.java).toLong()
-            )
-            assertEquals(Filter.Operator.LESS_OR_EQUAL, companySizeHigherBound.operator)
+            columnName2 shouldBe companySizeColumn
+            toObject(companySizeHigherBound.value, Int::class.java).toLong() shouldBe 1000L
+            companySizeHigherBound.operator shouldBe Filter.Operator.LESS_OR_EQUAL
             val establishedTimeFilter = eitherFilters[0]
             val columnName3 = establishedTimeFilter.fieldPath
                 .getFieldName(0)
-            assertEquals(establishedTimeColumn, columnName3)
-            assertEquals(
-                twoDaysAgo,
-                toObject(establishedTimeFilter.value, Timestamp::class.java)
-            )
-            assertEquals(Filter.Operator.GREATER_THAN, establishedTimeFilter.operator)
+            columnName3 shouldBe establishedTimeColumn
+            toObject(establishedTimeFilter.value, Timestamp::class.java) shouldBe twoDaysAgo
+            establishedTimeFilter.operator shouldBe Filter.Operator.GREATER_THAN
             val countryFilter = eitherFilters[1]
             val columnName4 = countryFilter.fieldPath
                 .getFieldName(0)
-            assertEquals(countryColumn, columnName4)
-            assertEquals(countryName, toObject(countryFilter.value, String::class.java))
-            assertEquals(Filter.Operator.EQUAL, countryFilter.operator)
+            columnName4 shouldBe countryColumn
+            toObject(countryFilter.value, String::class.java) shouldBe countryName
+            countryFilter.operator shouldBe Filter.Operator.EQUAL
         }
 
         /**
@@ -430,7 +407,7 @@ internal class QueryBuilderSpec {
                 .orderBy(SECOND_FIELD, DESCENDING)
                 .limit(limit)
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
             val format = query.format
             val mask = format.fieldMask
             val fieldNames: Collection<String> = mask.pathsList
@@ -438,7 +415,7 @@ internal class QueryBuilderSpec {
             assertFieldNames.hasSize(1)
             assertFieldNames.containsExactly(fieldName)
             val target = query.target
-            assertFalse(target.includeAll)
+            target.includeAll shouldBe false
             val entityFilters = target.filters
             val idFilter = entityFilters.idFilter
             val idValues: Collection<AnyProto> = idFilter.idList
@@ -461,21 +438,21 @@ internal class QueryBuilderSpec {
             assertThat(filters)
                 .hasSize(2)
             val actualValue1 = findByName(filters, columnName1).value
-            assertNotNull(actualValue1)
+            actualValue1 shouldNotBe null
             val actualGenericValue1 =
                 toObject(actualValue1, Int::class.java)
-            assertEquals(columnValue1, actualGenericValue1)
+            actualGenericValue1 shouldBe columnValue1
             val actualValue2 = findByName(filters, columnName2).value
-            assertNotNull(actualValue2)
+            actualValue2 shouldNotBe null
             val actualGenericValue2: Message =
                 toObject(actualValue2, TestEntityId::class.java)
-            assertEquals(columnValue2, actualGenericValue2)
+            actualGenericValue2 shouldBe columnValue2
             val expectedOrderBy = orderBy(
                 SECOND_FIELD,
                 DESCENDING
             )
-            assertEquals(expectedOrderBy, format.getOrderBy(0))
-            assertThat(format.limit).isEqualTo(limit)
+            format.getOrderBy(0) shouldBe expectedOrderBy
+            format.limit shouldBe limit
         }
 
         private fun findByName(filters: Iterable<Filter>, name: String): Filter {
@@ -506,7 +483,7 @@ internal class QueryBuilderSpec {
                 .byId(*intIds)
                 .byId(*messageIds)
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
 
             val target = query.target
             val filters = target.filters
@@ -530,7 +507,7 @@ internal class QueryBuilderSpec {
                 .withMask(iterableFields)
                 .withMask(*arrayFields)
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
 
             val mask = query.format.fieldMask
             val maskFields: Collection<String> = mask.pathsList
@@ -549,8 +526,8 @@ internal class QueryBuilderSpec {
                 .limit(5)
                 .limit(expectedLimit)
                 .build()
-            assertNotNull(query)
-            assertThat(query.format.limit).isEqualTo(expectedLimit)
+            query shouldNotBe null
+            query.format.limit shouldBe expectedLimit
         }
 
         @Test
@@ -561,10 +538,9 @@ internal class QueryBuilderSpec {
                 .orderBy(SECOND_FIELD, DESCENDING)
                 .orderBy(FIRST_FIELD, DESCENDING)
                 .build()
-            assertNotNull(query)
+            query shouldNotBe null
 
-            assertThat(query.format.getOrderBy(0))
-                .isEqualTo(orderBy(FIRST_FIELD, DESCENDING))
+            query.format.getOrderBy(0) shouldBe orderBy(FIRST_FIELD, DESCENDING)
         }
     }
 

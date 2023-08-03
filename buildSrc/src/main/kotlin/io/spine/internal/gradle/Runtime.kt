@@ -26,17 +26,17 @@
 
 package io.spine.internal.gradle
 
-import com.google.common.base.Joiner
-import io.spine.internal.dependency.Flogger
 import java.io.File
 import java.io.InputStream
 import java.io.StringWriter
+import java.lang.ProcessBuilder.Redirect.PIPE
 import java.util.*
 
-object Runtime {
-    @Suppress("unused")
-    val flogger = Flogger.Runtime
-}
+/**
+ * Utilities for working with processes from Gradle code.
+ */
+@Suppress("unused")
+private const val ABOUT = ""
 
 /**
  * Executor of CLI commands.
@@ -60,23 +60,26 @@ class Cli(private val workingFolder: File) {
         val outWriter = StringWriter()
         val errWriter = StringWriter()
 
-        val process = ProcessBuilder(*command)
-            .directory(workingFolder)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
+        val process = ProcessBuilder(*command).apply {
+            directory(workingFolder)
+            redirectOutput(PIPE)
+            redirectError(PIPE)
+        }.start()
 
-        process.inputStream!!.pourTo(outWriter)
-        process.errorStream!!.pourTo(errWriter)
-        val exitCode = process.waitFor()
+        val exitCode = process.run {
+            inputStream!!.pourTo(outWriter)
+            errorStream!!.pourTo(errWriter)
+            waitFor()
+        }
 
         if (exitCode == 0) {
             return outWriter.toString()
         } else {
-            val cmdAsString = Joiner.on(" ").join(command.iterator())
-            val errorMsg = "Command `$cmdAsString` finished with exit code $exitCode:" +
-                    " ${System.lineSeparator()}$errWriter" +
-                    " ${System.lineSeparator()}$outWriter."
+            val commandLine = command.joinToString(" ")
+            val nl = System.lineSeparator()
+            val errorMsg = "Command `$commandLine` finished with exit code $exitCode:" +
+                    "$nl$errWriter" +
+                    "$nl$outWriter."
             throw IllegalStateException(errorMsg)
         }
     }

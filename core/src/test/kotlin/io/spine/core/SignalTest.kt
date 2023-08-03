@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
  */
 package io.spine.core
 
-import com.google.common.truth.Truth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.base.EventMessage
 import io.spine.protobuf.AnyPacker
 import io.spine.test.core.ProjectCreated
@@ -42,12 +42,9 @@ internal class SignalTest {
     @Test
     fun `verify type of the enclosed message`() {
         val event = stubEvent()
-        assertThat(event.`is`(ProjectCreated::class.java))
-            .isTrue()
-        assertThat(event.`is`(EventMessage::class.java))
-            .isTrue()
-        assertThat(event.`is`(TaskAssigned::class.java))
-            .isFalse()
+        event.`is`(ProjectCreated::class.java) shouldBe true
+        event.`is`(EventMessage::class.java) shouldBe true
+        event.`is`(TaskAssigned::class.java) shouldBe false
     }
 
     /**

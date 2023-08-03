@@ -75,6 +75,10 @@ message Task {
 }
 
 // Remembers the commands and events.
+//
+// They say that elephants never forget.
+// Our process remembers only the last handled signal.
+//
 message ElephantProcess {
 
     option (entity).kind = PROCESS_MANAGER;

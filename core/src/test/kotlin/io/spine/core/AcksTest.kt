@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
  */
 package io.spine.core
 
-import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.core.Acks.toCommandId
 import io.spine.core.Responses.statusOk
 import io.spine.protobuf.pack
@@ -50,7 +50,7 @@ internal class AcksTest : UtilityClassTest<Acks>(Acks::class.java) {
         fun `returning ID value`() {
             val commandId = CommandId.generate()
             val ack = newAck(commandId)
-            assertThat(toCommandId(ack)).isEqualTo(commandId)
+            toCommandId(ack) shouldBe commandId
         }
 
         @Test

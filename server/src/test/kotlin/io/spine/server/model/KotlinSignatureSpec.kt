@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@
 package io.spine.server.model
 
 import com.google.common.truth.Truth8.assertThat
+import io.kotest.matchers.shouldBe
 import io.spine.core.Subscribe
 import io.spine.server.event.AbstractEventSubscriber
 import io.spine.server.event.model.SubscriberSignature
 import io.spine.server.given.model.signature.CoinTossed
 import io.spine.server.model.MatchCriterion.ACCESS_MODIFIER
 import java.lang.reflect.Method
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -63,7 +63,7 @@ class KotlinMethodSignatureSpec {
         val method = subscriberIn(TfInternalWithPrivate::class.java)
         val mismatch = ACCESS_MODIFIER.test(method, SubscriberSignature())
         assertThat(mismatch).isPresent()
-        assertTrue(mismatch.get().isWarning)
+        mismatch.get().isWarning shouldBe true
     }
 
     private fun subscriberIn(cls: Class<*>): Method {

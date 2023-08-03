@@ -43,7 +43,7 @@ import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
 
 import static io.spine.server.event.RejectionFactory.reject;
-import static io.spine.server.procman.given.pm.TestProcessManager.ID;
+import static io.spine.server.procman.given.pm.LastSignalMemo.ID;
 import static io.spine.testdata.Sample.messageOfType;
 
 /**
@@ -87,7 +87,7 @@ public final class GivenMessages {
 
     public static EventEnvelope
     entityAlreadyArchived(Class<? extends CommandMessage> commandClass) {
-        var id = Identifier.pack(TestProcessManager.class.getName());
+        var id = Identifier.pack(LastSignalMemo.class.getName());
         var command = Given.ACommand.withMessage(messageOfType(commandClass));
         var throwable = EntityAlreadyArchived.newBuilder()
                 .setEntityId(id)
@@ -105,7 +105,7 @@ public final class GivenMessages {
 
     public static PmQuizStarted quizStarted() {
         return PmQuizStarted.newBuilder()
-                .setQuizId(messageOfType(PmQuizId.class))
+                .setQuiz(messageOfType(PmQuizId.class))
                 .build();
     }
 
