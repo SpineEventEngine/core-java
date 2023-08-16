@@ -30,7 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.BindableService;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -41,6 +41,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
+import static java.lang.String.format;
 
 /**
  * Exposes one or more Bounded Contexts via gRPC.
@@ -52,7 +53,7 @@ import static io.spine.util.Preconditions2.checkNotEmptyOrBlank;
  *     <li>{@link SubscriptionService}.
  * </ul>
  */
-public final class Server implements Logging {
+public final class Server implements WithLogging {
 
     /** Bounded Contexts exposed by the server. */
     private final ImmutableSet<BoundedContext> contexts;
@@ -96,13 +97,11 @@ public final class Server implements Logging {
     public void start() throws IOException {
         grpcContainer.start();
         grpcContainer.addShutdownHook();
-        var info = _info();
-        grpcContainer
-                .port()
-                .ifPresent(p -> info.log("Server started, listening to the port %d.", p));
-        grpcContainer
-                .serverName()
-                .ifPresent(n -> info.log("In-process server started with the name `%s`.", n));
+        var info = logger().atInfo();
+        grpcContainer.port().ifPresent(
+                p -> info.log(() -> format("Server started, listening to the port %d.", p)));
+        grpcContainer.serverName().ifPresent(
+                n -> info.log(() -> format("In-process server started with the name `%s`.", n)));
     }
 
     /**
@@ -117,8 +116,7 @@ public final class Server implements Logging {
      * Initiates an orderly shutdown in which existing calls continue but new calls are rejected.
      */
     public void shutdown() {
-        var info = _info();
-        info.log("Shutting down the server...");
+        logger().atInfo().log(() -> "Shutting down the server...");
         grpcContainer.shutdown();
         contexts.forEach(context -> {
             try {
@@ -126,11 +124,11 @@ public final class Server implements Logging {
             } catch (Exception e) {
                 var contextName = context.name()
                                          .getValue();
-                _error().withCause(e)
-                        .log("Unable to close the `%s` Context.", contextName);
+                logger().atError().withCause(e).log(() -> format(
+                        "Unable to close the `%s` Context.", contextName));
             }
         });
-        info.log("Server shut down.");
+        logger().atInfo().log(() -> "Server shut down.");
     }
 
     /**

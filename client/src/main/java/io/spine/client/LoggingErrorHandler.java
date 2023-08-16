@@ -26,21 +26,22 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
+import io.spine.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import static java.lang.String.format;
 
 final class LoggingErrorHandler extends LoggingHandler implements ErrorHandler {
 
     private final @Nullable Object param;
 
-    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
-    LoggingErrorHandler(FluentLogger logger, String messageFormat, @Nullable Object param) {
+    LoggingErrorHandler(Logger<?> logger, String messageFormat, @Nullable Object param) {
         super(logger, messageFormat);
         this.param = param;
     }
 
     @Override
     public void accept(Throwable throwable) {
-        error(throwable).log(messageFormat(), param);
+        error(throwable).log(() -> format(messageFormat(), param));
     }
 }

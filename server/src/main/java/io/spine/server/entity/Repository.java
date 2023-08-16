@@ -34,7 +34,7 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.base.MessageContext;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.Closeable;
@@ -75,7 +75,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>
-        implements ContextAware, Closeable, Logging {
+        implements ContextAware, Closeable, WithLogging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 

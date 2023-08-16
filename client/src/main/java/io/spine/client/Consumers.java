@@ -32,7 +32,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.MessageContext;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Supplier;
@@ -71,7 +71,7 @@ import static com.google.common.base.Preconditions.checkState;
  *         or the same type as {@code <M>} if the messages do not have a context
  */
 abstract class Consumers<M extends Message, C extends MessageContext, W extends Message>
-        implements Logging {
+        implements WithLogging {
 
     private final ImmutableSet<MessageConsumer<M, C>> consumers;
     private final ErrorHandler streamingErrorHandler;

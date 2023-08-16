@@ -34,7 +34,7 @@ import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.Status;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -65,7 +65,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * the subscriptions depends on the nature of the posted command and the outcome
  * expected by the client application.
  */
-public final class CommandRequest extends ClientRequestBase implements Logging {
+public final class CommandRequest extends ClientRequestBase implements WithLogging {
 
     private final CommandMessage message;
     private final MultiEventConsumers.Builder eventConsumers;

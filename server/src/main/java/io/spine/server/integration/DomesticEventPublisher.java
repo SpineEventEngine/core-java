@@ -27,7 +27,6 @@ package io.spine.server.integration;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import io.spine.logging.Logging;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
@@ -44,7 +43,7 @@ import static io.spine.server.dispatch.DispatchOutcomes.publishedToRemote;
  * Their set is determined by the {@linkplain ExternalEventsWanted
  * configuration messages}, received by the associated instance of {@code IntegrationBroker}.
  */
-final class DomesticEventPublisher implements EventDispatcher, Logging {
+final class DomesticEventPublisher implements EventDispatcher {
 
     private final ImmutableSet<EventClass> eventClasses;
     private final IntegrationBroker broker;

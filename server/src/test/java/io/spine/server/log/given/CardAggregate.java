@@ -51,6 +51,7 @@ import static io.spine.server.log.given.Books.SMALL_GREEN_BOOK;
 import static io.spine.server.log.given.Books.dddDistilled;
 import static io.spine.server.log.given.Books.domainDrivenDesign;
 import static io.spine.server.log.given.Books.implementingDdd;
+import static java.lang.String.format;
 
 public final class CardAggregate
         extends Aggregate<LibraryCardId, LibraryCard, LibraryCard.Builder>
@@ -72,12 +73,14 @@ public final class CardAggregate
                 event.addBook(book);
                 var authors = book.getAuthorList();
                 var firstAuthor = authors.get(0);
-                _fine().log("Adding to order: %s by %s %s",
+                logger().atDebug().log(() -> format(
+                        "Adding to order: %s by %s %s",
                             book.getTitle(),
                             firstAuthor.getGivenName(),
-                            firstAuthor.getFamilyName());
+                            firstAuthor.getFamilyName()));
             } else {
-                _warn().log("Cannot lend an unknown book. ISBN: `%s`", bookId.getValue());
+                logger().atWarning().log(() -> format(
+                        "Cannot lend an unknown book. ISBN: `%s`", bookId.getValue()));
                 unknownBooks.add(bookId);
             }
         }
@@ -98,8 +101,8 @@ public final class CardAggregate
             var rejection = UnknownBook.newBuilder()
                     .addAllBook(ImmutableList.of(isbn))
                     .build();
-            _error().withCause(rejection)
-                    .log("Cannot return an unknown book. ISBN: `%s`", isbn.getValue());
+            logger().atError().withCause(rejection).log(() -> format(
+                    "Cannot return an unknown book. ISBN: `%s`", isbn.getValue()));
             throw rejection;
         } else {
             return BookReturned.newBuilder()

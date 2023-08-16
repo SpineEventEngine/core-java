@@ -55,6 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.Ignored.ignored;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -261,8 +262,9 @@ public abstract class ProcessManager<I,
             var outcome = commanderMethod.get().invoke(this, event);
             return outcome;
         }
-        _debug().log("Process manager `%s` filtered out and ignored the event `%s` with id `%s`.",
-                     thisClass, event.messageClass(), event.id().value());
+        logger().atDebug().log(() -> format(
+                "Process manager `%s` filtered out and ignored the event `%s` with id `%s`.",
+                     thisClass, event.messageClass(), event.id().value()));
         return ignored(thisClass, event);
     }
 

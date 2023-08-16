@@ -28,7 +28,7 @@ package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.AbstractCommander;
@@ -44,12 +44,13 @@ import static io.spine.server.command.model.AssigneeClass.asCommandAssigneeClass
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.lang.String.format;
 
 /**
  * Ensures that there are no duplicating command-handling methods among the passed classes.
  */
 @SuppressWarnings("unused") // Use by `model-tools`.
-public final class DuplicateHandlerCheck implements Logging {
+public final class DuplicateHandlerCheck implements WithLogging {
 
     /**
      * Maps a raw class to a function that creates an appropriate model class, which in turn
@@ -90,7 +91,7 @@ public final class DuplicateHandlerCheck implements Logging {
      * Performs the check for the passed classes.
      */
     public void check(Iterable<Class<?>> classes) {
-        _debug().log("Dropping models...");
+        logger().atDebug().log(() -> "Dropping models...");
         Model.dropAllModels();
         for (var cls : classes) {
             add(cls);
@@ -105,13 +106,12 @@ public final class DuplicateHandlerCheck implements Logging {
      * known to the Model.
      */
     public void add(Class<?> cls) {
-        var debug = _debug();
         for (var keyClass : appenders.keySet()) {
             if (keyClass.isAssignableFrom(cls)) {
                 var appender = appenders.get(keyClass);
                 checkState(appender != null, "No appender found for `%s`.", keyClass.getName());
                 appender.apply(cls);
-                debug.log("`%s` has been added to the Model.", cls);
+                logger().atDebug().log(() -> format("`%s` has been added to the Model.", cls));
                 return;
             }
         }

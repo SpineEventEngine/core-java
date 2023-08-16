@@ -41,7 +41,7 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.core.Response;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -56,6 +56,7 @@ import static com.google.common.collect.Sets.union;
 import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
+import static java.lang.String.format;
 
 /**
  * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
@@ -65,7 +66,7 @@ import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
  */
 public final class SubscriptionService
         extends SubscriptionServiceGrpc.SubscriptionServiceImplBase
-        implements Logging {
+        implements WithLogging {
 
     private final TypeDictionary types;
     private final SubscriptionImpl subscriptions;
@@ -119,15 +120,15 @@ public final class SubscriptionService
         try {
             consumer.accept(safeObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-            _error().withCause(e)
-                    .log(errorMessage);
+            logger().atError().withCause(e).log(() -> errorMessage);
             safeObserver.onError(e);
         }
     }
 
     @Override
     public void subscribe(Topic topic, StreamObserver<Subscription> observer) {
-        _debug().log("Creating the subscription to the topic: `%s`.", topic);
+        logger().atDebug().log(() -> format(
+                "Creating the subscription to the topic: `%s`.", topic));
         runThreadSafe(
                 (safeObserver) -> subscriptions.serve(topic, safeObserver, null),
                 observer, "Error processing subscription request."
@@ -136,7 +137,7 @@ public final class SubscriptionService
 
     @Override
     public void activate(Subscription subscription, StreamObserver<SubscriptionUpdate> observer) {
-        _debug().log("Activating the subscription: `%s`.", subscription);
+        logger().atDebug().log(() -> format("Activating the subscription: `%s`.", subscription));
         runThreadSafe(
                 (safeObserver) -> {
                     var callback = forwardingTo(safeObserver);
@@ -149,7 +150,8 @@ public final class SubscriptionService
 
     @Override
     public void cancel(Subscription subscription, StreamObserver<Response> observer) {
-        _debug().log("Incoming cancel request for the subscription topic: `%s`.", subscription);
+        logger().atDebug().log(() -> format(
+                "Incoming cancel request for the subscription topic: `%s`.", subscription));
         runThreadSafe(
                 (safeObserver) -> cancellation.serve(subscription, safeObserver, null),
                 observer, "Error processing cancel subscription request."
@@ -201,10 +203,11 @@ public final class SubscriptionService
                                       @Nullable Object params) {
             List<BoundedContext> contexts = new ArrayList<>(contexts());
             contexts.sort(Ordering.natural());
-            _warn().log("Unable to find a Bounded Context for type `%s`." +
-                                " Creating a subscription in contexts: %s.",
-                        topic.getTarget().type(),
-                        contextsAsString(contexts));
+            logger().atWarning().log(() -> format(
+                    "Unable to find a Bounded Context for type `%s`." +
+                            " Creating a subscription in contexts: %s.",
+                    topic.getTarget().type(),
+                    contextsAsString(contexts)));
             var subscription = Subscriptions.from(topic);
             for (var context : contexts) {
                 var stand = context.stand();
@@ -290,10 +293,11 @@ public final class SubscriptionService
                                       StreamObserver<Response> observer,
                                       @Nullable Object params) {
             var contexts = contexts();
-            _warn().log("Trying to cancel a subscription `%s` which could not be found. " +
-                                "Cancelling it in all known contexts, where is may reside: %s.",
-                        lazy(subscription::toShortString),
-                        contextsAsString(contexts));
+            logger().atWarning().log(() -> format(
+                    "Trying to cancel a subscription `%s` which could not be found. " +
+                            "Cancelling it in all known contexts, where is may reside: %s.",
+                    lazy(subscription::toShortString),
+                    contextsAsString(contexts)));
             var gatheringObserver = StreamObservers.<Response>memoizingObserver();
             for (var context : contexts) {
                 if(context.stand().hasSubscription(subscription.getId())) {

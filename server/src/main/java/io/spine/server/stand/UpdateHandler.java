@@ -31,7 +31,7 @@ import io.spine.client.IdFilter;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -47,7 +47,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * notifies the {@linkplain #setCallback(SubscriptionCallback) callback} with
  * the detected {@linkplain SubscriptionUpdate subscription updates}.
  */
-abstract class UpdateHandler implements Logging {
+abstract class UpdateHandler implements WithLogging {
 
     private final Subscription subscription;
 
@@ -103,7 +103,7 @@ abstract class UpdateHandler implements Logging {
         try {
             callback.accept(update);
         } catch (Throwable t) {
-            _error().withCause(t).log();
+            logger().atError().withCause(t).log();
         }
     }
 

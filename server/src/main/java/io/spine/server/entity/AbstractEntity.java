@@ -29,7 +29,6 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
@@ -39,6 +38,10 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.logging.Level;
+import io.spine.logging.LogSite;
+import io.spine.logging.LoggingApi;
+import io.spine.logging.LoggingFactory;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
@@ -54,15 +57,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.logging.Logging.loggerFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.Validate.check;
 import static io.spine.validate.Validate.validateChange;
 import static io.spine.validate.Validate.violationsOf;
+import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 
 /**
  * Abstract base for entities.
@@ -552,7 +554,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     @Override
     public void beforeInvoke(Receptor<?, ?, ?, ?> method) {
         checkNotNull(method);
-        var logger = loggerFor(getClass());
+        var logger = LoggingFactory.getLogger(getKotlinClass(getClass()));
         this.receptorLog = new ReceptorLog(logger, method);
     }
 
@@ -578,10 +580,11 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      *         logging methods instead of calling {@code at(..)} directly.
      * @see io.spine.server.log.LoggingEntity
      */
-    public final FluentLogger.Api at(Level logLevel) {
+    public final LoggingApi<?> at(Level logLevel) {
         return receptorLog != null
                ? receptorLog.at(logLevel)
-               : loggerFor(getClass()).at(logLevel);
+               : LoggingFactory.getLogger(getKotlinClass(getClass()))
+                               .at(logLevel);
     }
 
     @Override

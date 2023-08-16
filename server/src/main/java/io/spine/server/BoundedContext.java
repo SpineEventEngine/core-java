@@ -30,7 +30,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
@@ -62,8 +62,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
 
 /**
  * A logical and structural boundary of a model.
@@ -87,7 +87,10 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *         Martin Fowler on Bounded Contexts</a>
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
-public abstract class BoundedContext implements Comparable<BoundedContext>, Closeable, Logging {
+public abstract class BoundedContext
+        implements Comparable<BoundedContext>,
+                   Closeable,
+                   WithLogging {
 
     /** Basic features of the context. */
     private final ContextSpec spec;
@@ -425,7 +428,7 @@ public abstract class BoundedContext implements Comparable<BoundedContext>, Clos
         importBus.close();
         shutDownRepositories();
 
-        _debug().log("%s", lazy(() -> closed(nameForLogging())));
+        logger().atDebug().log(() -> format("%s", closed(nameForLogging())));
     }
 
     @Override

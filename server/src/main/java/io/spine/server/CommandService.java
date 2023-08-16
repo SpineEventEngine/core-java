@@ -33,7 +33,7 @@ import io.spine.base.Errors;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.type.CommandClass;
 import io.spine.type.MessageClass;
@@ -44,6 +44,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.server.bus.MessageIdExtensions.causedError;
+import static java.lang.String.format;
 
 /**
  * The service which accepts a command from a client application and posts it to
@@ -51,7 +52,7 @@ import static io.spine.server.bus.MessageIdExtensions.causedError;
  */
 public final class CommandService
         extends CommandServiceGrpc.CommandServiceImplBase
-        implements Logging {
+        implements WithLogging {
 
     private final CommandServiceImpl impl;
 
@@ -59,6 +60,7 @@ public final class CommandService
      * Constructs new instance using the map from a {@code CommandClass} to
      * a {@code BoundedContext} instance which handles the command.
      */
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // Safe, injected at the end of the ctor.
     private CommandService(TypeDictionary types) {
         super();
         this.impl = new CommandServiceImpl(this, types);
@@ -108,8 +110,8 @@ public final class CommandService
         @Override
         protected void handleInternal(Command cmd, StreamObserver<Ack> observer) {
             var unpublishedLanguage = new UnpublishedLanguageException(cmd.enclosedMessage());
-            _error().withCause(unpublishedLanguage)
-                    .log("Unpublished command posted to `%s`.", serviceName());
+            logger().atError().withCause(unpublishedLanguage).log(() -> format(
+                    "Unpublished command posted to `%s`.", serviceName()));
             var error = Errors.fromThrowable(unpublishedLanguage);
             respondWithError(cmd, error, observer);
         }
@@ -123,8 +125,8 @@ public final class CommandService
                                       StreamObserver<Ack> observer,
                                       @Nullable Object params) {
             var unsupported = new UnsupportedCommandException(cmd);
-            _error().withCause(unsupported)
-                    .log("Unsupported command posted to `%s`.", serviceName());
+            logger().atError().withCause(unsupported).log(() -> format(
+                    "Unsupported command posted to `%s`.", serviceName()));
             var error = unsupported.asError();
             respondWithError(cmd, error, observer);
         }

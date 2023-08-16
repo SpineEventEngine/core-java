@@ -35,7 +35,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.Closeable;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.server.type.SignalEnvelope;
@@ -50,6 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.server.bus.MessageIdExtensions.acknowledge;
 import static io.spine.util.Preconditions2.checkNotDefaultArg;
+import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
 /**
@@ -66,7 +67,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
                           E extends SignalEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
                           D extends MessageDispatcher<C, E>>
-        implements Closeable, Logging {
+        implements Closeable, WithLogging {
 
     /** Dispatchers of messages by their class. */
     private final DispatcherRegistry<C, E, D> registry;
@@ -340,10 +341,8 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
             try {
                 dispatch(envelope);
             } catch (Throwable t) {
-                _error().withCause(t)
-                        .log("Error when dispatching %s[ID: %s].",
-                             envelope.messageClass(),
-                             signalId);
+                logger().atError().withCause(t).log(() -> format(
+                        "Error when dispatching %s[ID: %s].", envelope.messageClass(), signalId));
                 throw t;
             } finally {
                 onDispatched(signalId);

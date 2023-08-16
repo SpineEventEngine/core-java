@@ -30,16 +30,16 @@ import io.grpc.stub.StreamObserver;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.client.grpc.QueryServiceGrpc;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.model.UnknownEntityStateTypeException;
 import io.spine.server.stand.InvalidRequestException;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.flogger.LazyArgs.lazy;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static java.lang.String.format;
 
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
@@ -48,10 +48,11 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  */
 public final class QueryService
         extends QueryServiceGrpc.QueryServiceImplBase
-        implements Logging {
+        implements WithLogging {
 
     private final QueryServiceImpl impl;
 
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // Safe as we're injecting at the end.
     private QueryService(TypeDictionary types) {
         super();
         this.impl = new QueryServiceImpl(this, types);
@@ -78,7 +79,8 @@ public final class QueryService
      */
     @Override
     public void read(Query query, StreamObserver<QueryResponse> observer) {
-        _debug().log("Incoming query: `%s`.", lazy(() -> shortDebugString(query)));
+        logger().atDebug().log(() -> format(
+                "Incoming query: `%s`.", shortDebugString(query)));
         impl.serve(query, observer, null);
     }
 
@@ -102,12 +104,11 @@ public final class QueryService
                 var stand = context.stand();
                 stand.execute(query, observer);
             } catch (InvalidRequestException e) {
-                _error().log("Invalid request. `%s`", e.asError());
+                logger().atError().log(() -> format("Invalid request. `%s`", e.asError()));
                 var exception = invalidArgumentWithCause(e);
                 observer.onError(exception);
             } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
-                _error().withCause(e)
-                        .log("Error processing query.");
+                logger().atError().withCause(e).log(() -> "Error processing query.");
                 observer.onError(e);
             }
         }
@@ -117,8 +118,7 @@ public final class QueryService
                                       StreamObserver<QueryResponse> observer,
                                       @Nullable Object params) {
             var exception = new UnknownEntityStateTypeException(query.targetType());
-            _error().withCause(exception)
-                    .log();
+            logger().atError().withCause(exception).log();
             observer.onError(exception);
         }
     }

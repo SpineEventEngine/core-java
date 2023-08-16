@@ -28,10 +28,12 @@ package io.spine.server;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.lang.String.format;
 
 /**
  * Abstract for builder of service classes.
@@ -42,7 +44,7 @@ import java.util.Set;
  *         the self-type of the builder for return type covariance
  */
 public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder<T, B>>
-        implements Logging {
+        implements WithLogging {
 
     private final Set<BoundedContext> contexts = new HashSet<>();
 
@@ -82,9 +84,10 @@ public abstract class AbstractServiceBuilder<T, B extends AbstractServiceBuilder
      */
     void warnIfEmpty(T service) {
         if (isEmpty()) {
-            _warn().log("The created `%s` serves no types because" +
-                                " no bounded contexts were added to its builder.",
-                        service.getClass().getSimpleName());
+            logger().atWarning().log(() -> format(
+                    "The created `%s` serves no types because" +
+                            " no bounded contexts were added to its builder.",
+                    service.getClass().getSimpleName()));
         }
     }
 

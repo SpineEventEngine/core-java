@@ -37,7 +37,8 @@ import io.spine.client.grpc.SubscriptionServiceGrpc;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceBlockingStub;
 import io.spine.client.grpc.SubscriptionServiceGrpc.SubscriptionServiceStub;
 import io.spine.core.Response;
-import io.spine.logging.Logging;
+import io.spine.logging.Logger;
+import io.spine.logging.WithLogging;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashSet;
@@ -69,7 +70,7 @@ import static java.util.Collections.synchronizedSet;
  * @see ClientRequest#subscribeToEvent(Class)
  * @see CommandRequest#post()
  */
-public final class Subscriptions implements Logging {
+public final class Subscriptions implements WithLogging {
 
     private final SubscriptionServiceStub service;
     private final SubscriptionServiceBlockingStub blockingServiceStub;
@@ -256,8 +257,7 @@ public final class Subscriptions implements Logging {
                            ));
         }
 
-        @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
-        private FluentLogger logger() {
+        private Logger<?> logger() {
             return Subscriptions.this.logger();
         }
     }

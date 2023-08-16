@@ -26,17 +26,16 @@
 
 package io.spine.server.log;
 
-import com.google.common.flogger.FluentLogger;
-import io.spine.logging.Logging;
-
-import java.util.logging.Level;
+import io.spine.logging.Level;
+import io.spine.logging.LoggingApi;
+import io.spine.logging.WithLogging;
 
 /**
- * A {@link Logging} trait for entities.
+ * A {@link WithLogging} trait for entities.
  *
- * <p>When adding logs in an entity, use this interface over {@link Logging}.
+ * <p>When adding logs in an entity, use this interface over {@link WithLogging}.
  */
-public interface LoggingEntity extends Logging {
+public interface LoggingEntity extends WithLogging {
 
     /**
      * Creates a {@code FluentLogger.Api} with the given level.
@@ -49,40 +48,5 @@ public interface LoggingEntity extends Logging {
      *         implements this interface, the underscore logging methods will have the same
      *         behaviour regarding the log site as does the {@code AbstractEntity.at(Level)} method.
      */
-    FluentLogger.Api at(Level level);
-
-    @Override
-    default FluentLogger.Api _severe() {
-        return at(Level.SEVERE);
-    }
-
-    @Override
-    default FluentLogger.Api _warn() {
-        return at(Level.WARNING);
-    }
-
-    @Override
-    default FluentLogger.Api _info() {
-        return at(Level.INFO);
-    }
-
-    @Override
-    default FluentLogger.Api _config() {
-        return at(Level.CONFIG);
-    }
-
-    @Override
-    default FluentLogger.Api _fine() {
-        return at(Level.FINE);
-    }
-
-    @Override
-    default FluentLogger.Api _finer() {
-        return at(Level.FINER);
-    }
-
-    @Override
-    default FluentLogger.Api _finest() {
-        return at(Level.FINEST);
-    }
+    LoggingApi<?> at(Level level);
 }

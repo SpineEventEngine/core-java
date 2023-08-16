@@ -26,8 +26,8 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
+import io.spine.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -39,7 +39,7 @@ abstract class LoggingHandlerWithType extends LoggingHandler {
 
     private final Class<? extends Message> type;
 
-    LoggingHandlerWithType(FluentLogger logger,
+    LoggingHandlerWithType(Logger<?> logger,
                            String messageFormat,
                            Class<? extends Message> type) {
         super(logger, messageFormat);

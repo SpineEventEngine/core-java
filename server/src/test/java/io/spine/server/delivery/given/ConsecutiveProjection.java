@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.core.Subscribe;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
@@ -63,7 +63,7 @@ import static java.lang.String.format;
  */
 public class ConsecutiveProjection
         extends Projection<String, ConsecutiveNumberView, ConsecutiveNumberView.Builder>
-        implements Logging {
+        implements WithLogging {
 
     private static UsageMode mode = UsageMode.POSITIVES_ONLY;
 
@@ -94,11 +94,9 @@ public class ConsecutiveProjection
         var lastValue = state().getLastValue();
         var difference = abs(newValue) - abs(lastValue);
         if (difference != 1) {
-            var message =
-                    format("`ConsecutiveNumberProjection` with ID `%s` got wrong value. " +
-                                   "Current value is %d, but got `%d`.",
-                           id, lastValue, newValue);
-            _warn().log(message);
+            logger().atWarning().log(() -> format(
+                    "`ConsecutiveNumberProjection` with ID `%s` got wrong value." +
+                    " Current value is %d, but got `%d`.", id, lastValue, newValue));
         } else {
             builder().setLastValue(newValue);
         }

@@ -31,7 +31,7 @@ import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.base.Error;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageId;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
 import io.spine.server.Identity;
@@ -53,6 +53,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static io.spine.server.Ignored.ignored;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.server.tenant.TenantAwareRunner.with;
+import static java.lang.String.format;
 
 /**
  * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
@@ -64,7 +65,7 @@ import static io.spine.server.tenant.TenantAwareRunner.with;
  * @see io.spine.core.Subscribe
  */
 public abstract class AbstractEventSubscriber
-        implements EventDispatcher, EventSubscriber, ContextAware, Logging {
+        implements EventDispatcher, EventSubscriber, ContextAware, WithLogging {
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
@@ -128,8 +129,9 @@ public abstract class AbstractEventSubscriber
 
     private void logOnIgnored(EventEnvelope event) {
         if (!event.isEntityStateUpdate()) {
-            _debug().log("Subscriber `%s` filtered out and ignored event %s[ID: %s].",
-                         thisClass, event.messageClass(), event.id().value());
+            logger().atDebug().log(() -> format(
+                    "Subscriber `%s` filtered out and ignored event %s[ID: %s].",
+                    thisClass, event.messageClass(), event.id().value()));
         }
     }
 

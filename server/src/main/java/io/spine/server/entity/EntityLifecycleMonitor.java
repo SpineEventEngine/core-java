@@ -33,7 +33,6 @@ import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.MessageId;
 import io.spine.core.Signal;
-import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.validate.NonValidated;
 import io.spine.validate.ValidationError;
@@ -62,7 +61,7 @@ import static com.google.common.base.Preconditions.checkState;
  *         ID type of the entity under transaction
  */
 @Internal
-public final class EntityLifecycleMonitor<I> implements TransactionListener<I>, Logging {
+public final class EntityLifecycleMonitor<I> implements TransactionListener<I> {
 
     private final Repository<I, ?> repository;
     private final List<MessageId> acknowledgedMessages;

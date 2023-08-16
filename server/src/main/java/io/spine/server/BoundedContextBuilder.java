@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.InMemoryRootDirectory;
 import io.spine.server.bus.BusFilter;
@@ -68,13 +68,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.BoundedContextNames.assumingTestsValue;
 import static io.spine.server.ContextSpec.multitenant;
 import static io.spine.server.ContextSpec.singleTenant;
+import static java.lang.String.format;
 
 /**
  * A builder for producing {@code BoundedContext} instances.
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 // OK for this central piece.
-public final class BoundedContextBuilder implements Logging {
+public final class BoundedContextBuilder implements WithLogging {
 
     private final ContextSpec spec;
 
@@ -565,7 +566,7 @@ public final class BoundedContextBuilder implements Logging {
     public BoundedContext build() {
         var system = buildSystem();
         var result = buildDomain(system);
-        _debug().log("%s created.", result.nameForLogging());
+        logger().atDebug().log(() -> format("%s created.", result.nameForLogging()));
 
         registerRepositories(result);
         registerDispatchers(result);
@@ -589,7 +590,7 @@ public final class BoundedContextBuilder implements Logging {
     private void registerRepositories(BoundedContext result) {
         for (var repository : repositories) {
             result.register(repository);
-            _debug().log("`%s` registered.", repository);
+            logger().atDebug().log(() -> format("`%s` registered.", repository));
         }
     }
 

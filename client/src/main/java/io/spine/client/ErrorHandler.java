@@ -28,6 +28,7 @@ package io.spine.client;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
+import io.spine.logging.Logger;
 
 import java.util.function.Consumer;
 
@@ -54,7 +55,7 @@ public interface ErrorHandler extends Consumer<Throwable> {
      */
     @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
     static ErrorHandler
-    logError(FluentLogger logger, String messageFormat, Class<? extends Message> type) {
+    logError(Logger<?> logger, String messageFormat, Class<? extends Message> type) {
         return new LoggingTypeErrorHandler(logger, messageFormat, type);
     }
 }

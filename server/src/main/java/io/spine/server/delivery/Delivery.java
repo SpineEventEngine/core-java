@@ -35,7 +35,7 @@ import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
@@ -52,6 +52,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.flogger.LazyArgs.lazy;
+import static java.lang.String.format;
 import static java.util.Collections.synchronizedList;
 
 /**
@@ -223,7 +224,7 @@ import static java.util.Collections.synchronizedList;
  * {@linkplain  io.spine.server.BoundedContextBuilder#build() built}.
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // It's fine for a centerpiece.
-public final class Delivery implements Logging {
+public final class Delivery implements WithLogging {
 
     /**
      * The width of the deduplication window in a local environment.
@@ -651,9 +652,9 @@ public final class Delivery implements Logging {
             try {
                 observer.onMessage(message);
             } catch (Exception e) {
-                _error().withCause(e)
-                        .log("Error calling a shard observer with the message %s.",
-                             lazy(() -> Stringifiers.toString(message)));
+                logger().atError().withCause(e).log(() -> format(
+                        "Error calling a shard observer with the message %s.",
+                        Stringifiers.toString(message)));
             }
         }
     }

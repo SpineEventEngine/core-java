@@ -34,7 +34,7 @@ import io.spine.base.Error;
 import io.spine.core.MessageId;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.BoundedContext;
 import io.spine.server.ContextAware;
@@ -71,7 +71,7 @@ import static java.lang.String.format;
  * @see React reactors
  */
 public abstract class AbstractEventReactor
-        implements EventReactor, EventDispatcher, ContextAware, Logging {
+        implements EventReactor, EventDispatcher, ContextAware, WithLogging {
 
     private final EventReactorClass<?> thisClass = EventReactorClass.asReactorClass(getClass());
     private final Supplier<MessageId> eventAnchor = memoize(() -> Identity.ofSingleton(getClass()));
@@ -136,7 +136,7 @@ public abstract class AbstractEventReactor
             var eventId = event.id();
             var msg = format("Reactor `%s` filtered out and ignored event %s[ID: %s].",
                              thisClass, event.messageClass(), eventId.value());
-            _debug().log(msg);
+            logger().atDebug().log(() -> msg);
             return ignored(event, msg);
         }
     }

@@ -26,10 +26,9 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.flogger.StackSize;
 import com.google.errorprone.annotations.FormatMethod;
 import com.google.errorprone.annotations.FormatString;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.system.server.DiagnosticEvent;
 
 import static io.spine.type.Json.toJson;
@@ -39,7 +38,7 @@ import static java.lang.String.format;
  * Provides a handy shortcut for logging exceptions happened during
  * {@linkplain DiagnosticEvent events} handling.
  */
-interface DiagnosticLogging extends Logging {
+interface DiagnosticLogging extends WithLogging {
 
     /**
      * Performs exception logging of the supplied {@code event}.
@@ -63,14 +62,12 @@ interface DiagnosticLogging extends Logging {
      */
     @SuppressWarnings("FloggerLogString")
     default void log(String msg, DiagnosticEvent event) {
-        var severeLogger = logger()
-                .atSevere()
-                .withStackTrace(StackSize.NONE);
-        var loggingEnabled = severeLogger.isEnabled();
+        var errorLogger = logger().atError();
+        var loggingEnabled = errorLogger.isEnabled();
         var eventJson = toJson(event);
         if (loggingEnabled) {
-            severeLogger.log(msg);
-            severeLogger.log(eventJson);
+            errorLogger.log(() -> msg);
+            errorLogger.log(() -> eventJson);
         } else {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
             // Edge case for disabled/misconfigured logging .

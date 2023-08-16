@@ -26,17 +26,18 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
+import io.spine.logging.Logger;
+import io.spine.logging.LoggingApi;
 
 /**
  * Abstract base for error handlers that write a message to the associated logger.
  *
- * <p>The handler always uses {@linkplain FluentLogger#atSevere() severe} level.
+ * <p>The handler always uses {@linkplain Logger#atError() ERROR} level.
  */
 @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
 abstract class LoggingHandler {
 
-    private final FluentLogger logger;
+    private final Logger<?> logger;
     private final String messageFormat;
 
     /**
@@ -46,12 +47,12 @@ abstract class LoggingHandler {
      * @param messageFormat
      *         the formatting message for an error text
      */
-    LoggingHandler(FluentLogger logger, String messageFormat) {
+    LoggingHandler(Logger<?> logger, String messageFormat) {
         this.logger = logger;
         this.messageFormat = messageFormat;
     }
 
-    final FluentLogger logger() {
+    final Logger<?> logger() {
         return logger;
     }
 
@@ -60,12 +61,12 @@ abstract class LoggingHandler {
     }
 
     /** Obtains logging API at {@code sever} level. */
-    protected final FluentLogger.Api error() {
-        return logger().atSevere();
+    protected final LoggingApi<?> error() {
+        return logger().atError();
     }
 
     /** Obtains logging API at {@code sever} level and initializes it with the passed cause. */
-    protected final FluentLogger.Api error(Throwable cause) {
+    protected final LoggingApi<?> error(Throwable cause) {
         return error().withCause(cause);
     }
 }
