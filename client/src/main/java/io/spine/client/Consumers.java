@@ -107,7 +107,7 @@ abstract class Consumers<M extends Message, C extends MessageContext, W extends 
             "SerializableInnerClassWithNonSerializableOuterClass" /* for `TypeToken` work */,
             "unchecked" /* The returned type is a class of messages, which is protected
                            by generic params of this class. */})
-    private final Class<? extends Message> messageType() {
+    private Class<? extends Message> messageType() {
         var result = new TypeToken<M>(getClass()){}.getRawType();
         return (Class<? extends Message>) result;
     }

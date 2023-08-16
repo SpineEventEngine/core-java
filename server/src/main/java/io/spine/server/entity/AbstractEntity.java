@@ -39,7 +39,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.logging.Level;
-import io.spine.logging.LogSite;
 import io.spine.logging.LoggingApi;
 import io.spine.logging.LoggingFactory;
 import io.spine.server.entity.model.EntityClass;

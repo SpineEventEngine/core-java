@@ -37,7 +37,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-import static com.google.common.flogger.LazyArgs.lazy;
 import static java.lang.String.format;
 
 /**
