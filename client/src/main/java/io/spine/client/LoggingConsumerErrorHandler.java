@@ -26,7 +26,6 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 import io.spine.logging.Logger;
 
@@ -34,8 +33,7 @@ import static io.spine.client.DelegatingConsumer.toRealConsumer;
 import static java.lang.String.format;
 
 /**
- * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() severe} level
- * of the passed logger.
+ * Logs the fact of the error using the {@code ERROR} level of the passed logger.
  *
  * @param <M>
  *         the type of the messages delivered to the consumer

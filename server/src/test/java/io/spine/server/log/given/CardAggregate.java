@@ -28,6 +28,7 @@ package io.spine.server.log.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.spine.logging.WithLogging;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -38,7 +39,6 @@ import io.spine.server.log.BorrowBooks;
 import io.spine.server.log.Isbn;
 import io.spine.server.log.LibraryCard;
 import io.spine.server.log.LibraryCardId;
-import io.spine.server.log.LoggingEntity;
 import io.spine.server.log.ReturnBook;
 import io.spine.server.log.UnknownBook;
 
@@ -55,7 +55,7 @@ import static java.lang.String.format;
 
 public final class CardAggregate
         extends Aggregate<LibraryCardId, LibraryCard, LibraryCard.Builder>
-        implements LoggingEntity {
+        implements WithLogging {
 
     private static final ImmutableMap<Isbn, Book> knownBooks = ImmutableMap.of(
             BIG_BLUE_BOOK, domainDrivenDesign(),

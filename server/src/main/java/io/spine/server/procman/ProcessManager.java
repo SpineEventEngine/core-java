@@ -30,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.logging.WithLogging;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.AssigneeEntity;
@@ -41,7 +42,6 @@ import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.React;
-import io.spine.server.log.LoggingEntity;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.query.Querying;
 import io.spine.server.query.QueryingClient;
@@ -95,7 +95,7 @@ public abstract class ProcessManager<I,
                    HasVersionColumn<I, S>,
                    HasLifecycleColumns<I, S>,
                    Querying,
-                   LoggingEntity {
+                   WithLogging {
 
     /**
      * The context in which this process manager is executed.

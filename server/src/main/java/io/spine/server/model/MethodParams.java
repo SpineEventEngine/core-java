@@ -93,6 +93,10 @@ public final class MethodParams {
         return params.size();
     }
 
+    public ImmutableList<Class<?>> asList() {
+        return params;
+    }
+
     /**
      * Obtains the argument filter if it is specified for the first argument of
      * this instance of method parameters.

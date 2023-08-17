@@ -38,14 +38,13 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.logging.Level;
-import io.spine.logging.LoggingApi;
 import io.spine.logging.LoggingFactory;
+import io.spine.logging.MetadataKey;
+import io.spine.logging.context.ScopedLoggingContext;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.server.log.ReceptorLifecycle;
-import io.spine.server.log.ReceptorLog;
 import io.spine.server.model.Receptor;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -59,11 +58,12 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.check;
 import static io.spine.validate.Validate.validateChange;
 import static io.spine.validate.Validate.violationsOf;
-import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
 
 /**
  * Abstract base for entities.
@@ -78,7 +78,7 @@ import static kotlin.jvm.JvmClassMappingKt.getKotlinClass;
             fields. See Effective Java 2nd Ed. Item #71. */,
         "ClassWithTooManyMethods"})
 public abstract class AbstractEntity<I, S extends EntityState<I>>
-        implements Entity<I, S>, ReceptorLifecycle {
+        implements Entity<I, S>, ReceptorLifecycle<AbstractEntity<I, S>> {
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -125,7 +125,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     private volatile boolean lifecycleFlagsChanged;
 
-    private @Nullable ReceptorLog receptorLog;
+    private @Nullable AutoCloseable loggingContext = null;
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -549,41 +549,35 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         return version.getTimestamp();
     }
 
+    @SuppressWarnings("rawtypes") // to avoid generics hell.
+    private static final MetadataKey<List> PARAMETER_TYPES =
+            LoggingFactory.INSTANCE.singleMetadataKey("parameterTypes", List.class);
+
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void beforeInvoke(Receptor<?, ?, ?, ?> method) {
+    public void beforeInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
         checkNotNull(method);
-        var logger = LoggingFactory.getLogger(getKotlinClass(getClass()));
-        this.receptorLog = new ReceptorLog(logger, method);
+        var paramTypes = method.params().asList()
+                .stream()
+                .map(Class::getSimpleName)
+                .collect(toImmutableList());
+        loggingContext = ScopedLoggingContext.newContext()
+            .withMetadata(PARAMETER_TYPES, paramTypes)
+            .install();
     }
 
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void afterInvoke(Receptor<?, ?, ?, ?> method) {
-        this.receptorLog = null;
-    }
-
-    /**
-     * Obtains a new fluent logging API at the given level.
-     *
-     * <p>If called from within a handler method, the resulting log will reference the handler
-     * method as the log site. Otherwise, equivalent to
-     * {@code Logging.loggerFor(getClass()).at(logLevel)}.
-     *
-     * @param logLevel
-     *         the log level
-     * @return new fluent logging API
-     * @apiNote This method mirrors the declaration of
-     *         {@link io.spine.server.log.LoggingEntity#at(Level)}. It is recommended to implement
-     *         the {@link io.spine.server.log.LoggingEntity} interface and use the underscore
-     *         logging methods instead of calling {@code at(..)} directly.
-     * @see io.spine.server.log.LoggingEntity
-     */
-    public final LoggingApi<?> at(Level logLevel) {
-        return receptorLog != null
-               ? receptorLog.at(logLevel)
-               : LoggingFactory.getLogger(getKotlinClass(getClass()))
-                               .at(logLevel);
+    public void afterInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
+        if (loggingContext != null) {
+            try {
+                loggingContext.close();
+            } catch (Exception e) {
+                throw newIllegalStateException(e,
+                           "Unable to close the logging context `%s`.", loggingContext);
+            }
+            loggingContext = null;
+        }
     }
 
     @Override
