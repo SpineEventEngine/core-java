@@ -60,6 +60,8 @@ import io.spine.server.model.Receptor;
  *     <li>{@code on(UserSignedUp)}.
  *     <li>{@code afterInvoke([instance representing on(UserSignedUp) method])}.
  * </ol>
+ *
+ * @param <T> the type of the target object exposing the receptor method
  */
 public interface ReceptorLifecycle<T> {
 
