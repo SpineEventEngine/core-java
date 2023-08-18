@@ -81,6 +81,17 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         implements Entity<I, S>, ReceptorLifecycle<AbstractEntity<I, S>> {
 
     /**
+     * The key for the metadata value which contains the list with the names of
+     * parameter types of a receptor.
+     *
+     * @see #beforeInvoke(Receptor)
+     * @see #afterInvoke(Receptor)
+     */
+    @SuppressWarnings("rawtypes") // to avoid generics hell.
+    private static final MetadataKey<List> RECEPTOR_PARAM_TYPES =
+            LoggingFactory.singleMetadataKey("receptor_param_types", List.class);
+
+    /**
      * Lazily initialized reference to the model class of this entity.
      *
      * @see #thisClass()
@@ -126,6 +137,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     private volatile boolean lifecycleFlagsChanged;
 
     private @Nullable AutoCloseable loggingContext = null;
+
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -549,10 +561,17 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         return version.getTimestamp();
     }
 
-    @SuppressWarnings("rawtypes") // to avoid generics hell.
-    private static final MetadataKey<List> PARAMETER_TYPES =
-            LoggingFactory.INSTANCE.singleMetadataKey("parameterTypes", List.class);
-
+    /**
+     * Creates new {@link ScopedLoggingContext} containing the names of the types of
+     * the parameters of the given {@link Receptor}.
+     *
+     * <p>The list will be displayed as {@code CONTEXT} metadata in a log record,
+     * iff the receptor performs logging.
+     *
+     * @param method the receptor method which is going to be called
+     *
+     * @see #afterInvoke(Receptor)
+     */
     @OverridingMethodsMustInvokeSuper
     @Override
     public void beforeInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
@@ -562,10 +581,15 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
                 .map(Class::getSimpleName)
                 .collect(toImmutableList());
         loggingContext = ScopedLoggingContext.newContext()
-            .withMetadata(PARAMETER_TYPES, paramTypes)
+            .withMetadata(RECEPTOR_PARAM_TYPES, paramTypes)
             .install();
     }
 
+    /**
+     * Releases the {@link #loggingContext} installed by {@link #beforeInvoke(Receptor)}.
+     *
+     * @see #beforeInvoke(Receptor)
+     */
     @OverridingMethodsMustInvokeSuper
     @Override
     public void afterInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
