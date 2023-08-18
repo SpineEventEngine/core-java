@@ -167,6 +167,7 @@ object Spine {
         const val backend = "$group:spine-logging-backend:$version"
         const val context = "$group:spine-logging-context:$version"
         const val floggerApi = "$group:spine-flogger-api:$version"
+        const val floggerGrpcContext = "$group:spine-flogger-grpc-context:$version"
         const val smokeTest = "$group:spine-logging-smoke-test:$version"
     }
 

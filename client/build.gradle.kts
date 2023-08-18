@@ -38,6 +38,10 @@ dependencies {
     api(Grpc.protobuf)
     api(project(":core"))
 
+    // This dependency is needed for Logging contexts to work.
+    // Since we depend on gRPC, we can use the implementation of the context based on gRPC.
+    implementation(Spine.Logging.floggerGrpcContext)
+
     testImplementation(Spine.testlib)
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))

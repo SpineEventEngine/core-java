@@ -76,7 +76,7 @@ class LoggingEntityTest extends LoggingTest {
                 .hasMessageThat()
                 .containsMatch(implementingDdd().getTitle());
         assertLog
-                .hasMethodNameThat()
+                .hasMessageThat()
                 .contains(command.getClass().getSimpleName());
     }
 

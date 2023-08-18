@@ -328,6 +328,7 @@ fun Subproject.forceConfigurations() {
                        See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
                        .configureProtocPlugins()` method which sets the version from resources. */
                     Grpc.ProtocPlugin.artifact,
+                    Grpc.api,
                     JUnit.runner,
 
                     Spine.base,
