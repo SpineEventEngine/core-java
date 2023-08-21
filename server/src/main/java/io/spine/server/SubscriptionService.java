@@ -295,7 +295,7 @@ public final class SubscriptionService
             var contexts = contexts();
             logger().atWarning().log(() -> format(
                     "Trying to cancel a subscription `%s` which could not be found. " +
-                            "Cancelling it in all known contexts, where is may reside: %s.",
+                            "Cancelling it in all known contexts, where it may reside: %s.",
                     lazy(subscription::toShortString),
                     contextsAsString(contexts)));
             var gatheringObserver = StreamObservers.<Response>memoizingObserver();

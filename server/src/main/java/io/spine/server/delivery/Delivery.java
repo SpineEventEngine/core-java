@@ -652,7 +652,7 @@ public final class Delivery implements WithLogging {
                 observer.onMessage(message);
             } catch (Exception e) {
                 logger().atError().withCause(e).log(() -> format(
-                        "Error calling a shard observer with the message %s.",
+                        "Error calling a shard observer with the message `%s`.",
                         Stringifiers.toString(message)));
             }
         }

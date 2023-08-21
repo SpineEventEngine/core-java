@@ -263,7 +263,7 @@ public abstract class ProcessManager<I,
             return outcome;
         }
         logger().atDebug().log(() -> format(
-                "Process manager `%s` filtered out and ignored the event `%s` with id `%s`.",
+                "The process manager `%s` filtered out and ignored the event `%s` with ID `%s`.",
                      thisClass, event.messageClass(), event.id().value()));
         return ignored(thisClass, event);
     }

@@ -148,10 +148,10 @@ public final class RepositoryCache<I, E extends Entity<I, ?>> implements WithLog
         var entity = cache.get(idInTenant);
         if (entity == null) {
             logger().atWarning().log(() -> format(
-                    "Cannot find the cached entity in the cache for ID `%s`. " +
-                            "Cache keys: %s. IDs to cache: %s." +
-                            "Most likely, the entity was dispatched with messages " +
-                            "but was never loaded by its repository.",
+                    "Cannot find the cached entity in the cache for ID `%s`." +
+                            " Cache keys: `%s`. IDs to cache: `%s`." +
+                            " Most likely, the entity was dispatched with messages" +
+                            " but was never loaded by its repository.",
                     idInTenant, cache.keySet(), idsToCache));
             return;
         }
