@@ -58,7 +58,6 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.check;
@@ -576,10 +575,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     @Override
     public void beforeInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
         checkNotNull(method);
-        var paramTypes = method.params().asList()
-                .stream()
-                .map(Class::getSimpleName)
-                .collect(toImmutableList());
+        var paramTypes = method.params().simpleNames();
         loggingContext = ScopedLoggingContext.newContext()
             .withMetadata(RECEPTOR_PARAM_TYPES, paramTypes)
             .install();

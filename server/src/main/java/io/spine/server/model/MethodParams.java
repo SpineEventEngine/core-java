@@ -39,6 +39,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.server.model.TypeMatcher.exactly;
 
 /**
@@ -93,8 +94,13 @@ public final class MethodParams {
         return params.size();
     }
 
-    public ImmutableList<Class<?>> asList() {
-        return params;
+    /**
+     * Obtains the simple names of the method parameters.
+     */
+    public ImmutableList<String> simpleNames() {
+        return params.stream()
+                .map(Class::getSimpleName)
+                .collect(toImmutableList());
     }
 
     /**
