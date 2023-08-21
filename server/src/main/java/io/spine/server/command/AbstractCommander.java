@@ -33,7 +33,7 @@ import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
@@ -59,7 +59,7 @@ import static java.lang.String.format;
  */
 public abstract class AbstractCommander
         extends AbstractCommandDispatcher
-        implements Commander, EventDispatcherDelegate, Logging {
+        implements Commander, EventDispatcherDelegate, WithLogging {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     @LazyInit
@@ -122,7 +122,7 @@ public abstract class AbstractCommander
             var eventId = event.id();
             var msg = format("Commander `%s` filtered out and ignored event %s[ID: %s].",
                              this, event.messageClass(), eventId.value());
-            _debug().log(msg);
+            logger().atDebug().log(() -> msg);
             var result = ignored(event, msg);
             return result;
         }

@@ -47,7 +47,6 @@ import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.type.TypeUrl;
-import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -67,7 +66,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.check;
-import static io.spine.validate.Validate.checkValid;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -491,8 +490,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         boolean deleted = event.map(value -> deleteAndPostEvent(id, value))
                                .orElseGet(() -> delete(id));
         if (!deleted) {
-            _warn().log("Could not delete an entity record of type `%s` with ID `%s`.",
-                        entityStateType(), id);
+            logger().atWarning().log(() -> format(
+                    "Could not delete an entity record of type `%s` with ID `%s`.",
+                    entityStateType(), id));
         }
     }
 

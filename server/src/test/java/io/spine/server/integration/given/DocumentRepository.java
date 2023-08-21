@@ -36,6 +36,7 @@ import io.spine.server.route.EventRouting;
 import java.util.Set;
 
 import static io.spine.server.route.EventRoute.withId;
+import static java.lang.String.format;
 
 public final class DocumentRepository
         extends AggregateRepository<DocumentId, DocumentAggregate, Document> {
@@ -72,8 +73,8 @@ public final class DocumentRepository
         var id = event.getId();
         var aggregate = find(id);
         if (aggregate.isEmpty()) {
-            _debug().log("`Document` aggregate is not found by ID `%s`. " +
-                                 "Creating a new instance.", id);
+            logger().atDebug().log(() -> format(
+                    "`Document` aggregate is not found by ID `%s`. Creating a new instance.", id));
         }
         return withId(id);
     }

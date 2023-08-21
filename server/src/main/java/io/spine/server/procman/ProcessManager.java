@@ -30,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
+import io.spine.logging.WithLogging;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.AssigneeEntity;
@@ -41,7 +42,6 @@ import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.React;
-import io.spine.server.log.LoggingEntity;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.query.Querying;
 import io.spine.server.query.QueryingClient;
@@ -55,6 +55,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.Ignored.ignored;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -94,7 +95,7 @@ public abstract class ProcessManager<I,
                    HasVersionColumn<I, S>,
                    HasLifecycleColumns<I, S>,
                    Querying,
-                   LoggingEntity {
+                   WithLogging {
 
     /**
      * The context in which this process manager is executed.
@@ -261,8 +262,9 @@ public abstract class ProcessManager<I,
             var outcome = commanderMethod.get().invoke(this, event);
             return outcome;
         }
-        _debug().log("Process manager `%s` filtered out and ignored the event `%s` with id `%s`.",
-                     thisClass, event.messageClass(), event.id().value());
+        logger().atDebug().log(() -> format(
+                "The process manager `%s` filtered out and ignored the event `%s` with ID `%s`.",
+                     thisClass, event.messageClass(), event.id().value()));
         return ignored(thisClass, event);
     }
 

@@ -26,14 +26,14 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
+import io.spine.logging.Logger;
 
 import static io.spine.client.DelegatingConsumer.toRealConsumer;
+import static java.lang.String.format;
 
 /**
- * Logs the fact of the error using the {@linkplain FluentLogger#atSevere() severe} level
- * of the passed logger.
+ * Logs the fact of the error using the {@code ERROR} level of the passed logger.
  *
  * @param <M>
  *         the type of the messages delivered to the consumer
@@ -53,8 +53,7 @@ final class LoggingConsumerErrorHandler<M extends Message>
      * @param type
      *         the type of the message which caused the error
      */
-    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
-    LoggingConsumerErrorHandler(FluentLogger logger,
+    LoggingConsumerErrorHandler(Logger<?> logger,
                                 String messageFormat,
                                 Class<? extends Message> type) {
         super(logger, messageFormat, type);
@@ -63,6 +62,6 @@ final class LoggingConsumerErrorHandler<M extends Message>
     @Override
     public void accept(MessageConsumer<M, ?> consumer, Throwable throwable) {
         var consumerToReport = toRealConsumer(consumer);
-        error(throwable).log(messageFormat(), consumerToReport, typeName());
+        error(throwable).log(() -> format(messageFormat(), consumerToReport, typeName()));
     }
 }

@@ -44,7 +44,7 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.Closeable;
@@ -86,7 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
-public abstract class BlackBox implements Logging, Closeable {
+public abstract class BlackBox implements WithLogging, Closeable {
 
     /**
      * The context under the test.

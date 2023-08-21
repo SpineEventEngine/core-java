@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.logging.Logging;
 import io.spine.server.dispatch.BatchDispatchOutcome;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.entity.EntityLifecycleMonitor;
@@ -60,8 +59,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
                                  M extends SignalEnvelope<?, ?, ?>>
-        extends EntityMessageEndpoint<I, A, M>
-        implements Logging {
+        extends EntityMessageEndpoint<I, A, M> {
 
     AggregateEndpoint(AggregateRepository<I, A, ?> repository, M envelope) {
         super(repository, envelope);

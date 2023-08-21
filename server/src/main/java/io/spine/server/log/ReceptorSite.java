@@ -27,9 +27,8 @@
 package io.spine.server.log;
 
 import com.google.common.base.Objects;
-import com.google.common.flogger.LogSite;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.code.java.ClassName;
+import io.spine.logging.LogSite;
 import io.spine.server.model.Receptor;
 
 import java.lang.reflect.Method;
@@ -46,7 +45,7 @@ import static java.util.stream.Collectors.joining;
  * The site never provides a line number or a file name.
  */
 @Immutable
-final class ReceptorSite extends LogSite {
+final class ReceptorSite implements LogSite {
 
     @SuppressWarnings("Immutable")
     private final Method method;
@@ -74,14 +73,7 @@ final class ReceptorSite extends LogSite {
 
     @Override
     public int getLineNumber() {
-        return UNKNOWN_LINE;
-    }
-
-    @Override
-    public String getFileName() {
-        var className = ClassName.of(method.getDeclaringClass())
-                                 .topLevelClass();
-        return className.value() + ".java";
+        return -1;
     }
 
     @Override

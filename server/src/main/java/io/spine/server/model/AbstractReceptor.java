@@ -285,9 +285,10 @@ class AbstractReceptor<T,
         var signal = envelope.outerObject().messageId();
         var outcome = DispatchOutcome.newBuilder()
                 .setPropagatedSignal(signal);
+        @SuppressWarnings("unchecked") // The cast is protected by the receptor creation.
         var lifecycle = target instanceof ReceptorLifecycle
-                                            ? (ReceptorLifecycle) target
-                                            : null;
+                        ? (ReceptorLifecycle<T>) target
+                        : null;
         if (lifecycle != null) {
             lifecycle.beforeInvoke(this);
         }

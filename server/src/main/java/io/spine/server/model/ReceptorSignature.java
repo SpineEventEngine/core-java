@@ -27,7 +27,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.type.MessageEnvelope;
 
 import java.lang.annotation.Annotation;
@@ -67,7 +67,8 @@ import static java.util.stream.Collectors.toList;
  *         the type of envelope, which is used to invoke the receptors
  */
 public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
-                                        E extends MessageEnvelope<?, ?, ?>> implements Logging {
+                                        E extends MessageEnvelope<?, ?, ?>>
+        implements WithLogging {
 
     private final Class<? extends Annotation> annotation;
 
@@ -150,7 +151,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
         if (!warnings.isEmpty()) {
             warnings.stream()
                     .map(SignatureMismatch::toString)
-                    .forEach(this._warn()::log);
+                    .forEach(msg -> this.logger().atWarning().log(() -> msg));
         }
         return true;
     }

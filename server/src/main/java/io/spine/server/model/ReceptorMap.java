@@ -32,7 +32,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.errorprone.annotations.Immutable;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EnvelopeWithOrigin;
 import io.spine.server.type.SignalEnvelope;
@@ -64,7 +64,7 @@ import static java.util.Comparator.comparing;
 public final class ReceptorMap<M extends MessageClass<?>,
                                P extends MessageClass<?>,
                                R extends Receptor<?, M, ?, P>>
-        implements Serializable, Logging {
+        implements Serializable, WithLogging {
 
     private static final long serialVersionUID = 0L;
 
@@ -201,7 +201,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
             var msg = format(
                     "No receptor method found for the type `%s`.", message.messageClass()
             );
-            _error().log(msg);
+            logger().atError().log(() -> msg);
             return new ModelError(msg);
         });
     }

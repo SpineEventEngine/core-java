@@ -27,7 +27,7 @@
 package io.spine.server.aggregate;
 
 import io.spine.base.EntityState;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
@@ -104,7 +104,7 @@ public final class AggregateTestSupport {
      * A window into Spine's logging from the {@code static} execution context
      * of this {@code AggregateTestSupport} utility.
      */
-    private static final class Logger implements Logging {
+    private static final class Logger implements WithLogging {
 
         /**
          * Prints the {@code Error} details as a warning-level log message,
@@ -112,7 +112,7 @@ public final class AggregateTestSupport {
          */
         private void warnIfErroneous(DispatchOutcome outcome) {
             if(outcome.hasError()) {
-                _warn().log(toJson(outcome.getError()));
+                logger().atWarning().log(() -> toJson(outcome.getError()));
             }
         }
     }

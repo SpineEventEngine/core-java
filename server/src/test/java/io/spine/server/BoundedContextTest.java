@@ -32,7 +32,6 @@ import com.google.common.collect.Sets;
 import com.google.common.testing.EqualsTester;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
-import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.server.bc.given.AnotherProjectAggregate;
 import io.spine.server.bc.given.FinishedProjectProjection;
@@ -70,6 +69,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.logging.JvmLoggerKt.toJavaLogging;
 import static io.spine.testing.TestValues.nullRef;
 import static io.spine.testing.TestValues.randomString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -410,7 +410,7 @@ class BoundedContextTest {
 
         private final BoundedContextName contextName = newName("TestDomain");
         private final BoundedContextName systemContextName = contextName.toSystem();
-        private final Level debugLevel = Logging.debugLevel();
+        private final Level debugLevel = toJavaLogging(io.spine.logging.Level.Companion.getDEBUG());
 
         private Interceptor domainInterceptor;
         private Interceptor systemInterceptor;

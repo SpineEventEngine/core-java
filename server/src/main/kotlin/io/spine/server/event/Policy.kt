@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableSet
 import com.google.protobuf.Message
 import io.spine.base.EventMessage
 import io.spine.core.ContractFor
-import io.spine.logging.Logging
+import io.spine.logging.WithLogging
 import io.spine.server.BoundedContext
 import io.spine.server.type.EventClass
 
@@ -55,7 +55,7 @@ import io.spine.server.type.EventClass
  * ```
  * @param E the type of the event handled by this policy
  */
-public abstract class Policy<E : EventMessage> : AbstractEventReactor(), Logging {
+public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLogging {
 
     protected lateinit var context: BoundedContext
 

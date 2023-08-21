@@ -26,8 +26,10 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
+import io.spine.logging.Logger;
+
+import static java.lang.String.format;
 
 /**
  * Logs the fact of an error caused by handling a message of the passed type.
@@ -45,8 +47,7 @@ final class LoggingTypeErrorHandler extends LoggingHandlerWithType implements Er
      * @param type
      *         the type of the message which caused the error
      */
-    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
-    LoggingTypeErrorHandler(FluentLogger logger,
+    LoggingTypeErrorHandler(Logger<?> logger,
                             String messageFormat,
                             Class<? extends Message> type) {
         super(logger, messageFormat, type);
@@ -54,6 +55,6 @@ final class LoggingTypeErrorHandler extends LoggingHandlerWithType implements Er
 
     @Override
     public void accept(Throwable throwable) {
-        error(throwable).log(messageFormat(), typeName());
+        error(throwable).log(() -> format(messageFormat(), typeName()));
     }
 }

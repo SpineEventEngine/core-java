@@ -28,7 +28,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.type.EventClass;
@@ -51,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *         register} with an {@code ImportBus} of their parent Bounded Context.
  */
 @Internal
-public final class EventImportDispatcher<I> implements EventDispatcher, Logging {
+public final class EventImportDispatcher<I> implements EventDispatcher, WithLogging {
 
     private final AggregateRepository<I, ?, ?> repository;
 

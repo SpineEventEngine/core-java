@@ -26,24 +26,25 @@
 
 package io.spine.client;
 
-import com.google.common.flogger.FluentLogger;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.logging.Logger;
 
 import static com.google.protobuf.TextFormat.shortDebugString;
+import static java.lang.String.format;
 
 /**
  * A posting handler which logs the error.
  */
 final class LoggingServerErrorHandler extends LoggingHandler implements ServerErrorHandler {
 
-    @SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
-    LoggingServerErrorHandler(FluentLogger logger, String messageFormat) {
+    LoggingServerErrorHandler(Logger<?> logger, String messageFormat) {
         super(logger, messageFormat);
     }
 
     @Override
     public void accept(Message message, Error error) {
-        error().log(messageFormat(), shortDebugString(message), shortDebugString(error));
+        error().log(() -> format(
+                messageFormat(), shortDebugString(message), shortDebugString(error)));
     }
 }

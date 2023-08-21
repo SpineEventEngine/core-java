@@ -26,9 +26,7 @@
 
 package io.spine.server.log;
 
-import com.google.common.flogger.FluentLogger;
 import io.spine.core.UserId;
-import io.spine.logging.Logging;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
@@ -39,29 +37,18 @@ import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
-import java.util.logging.Level;
-
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.log.given.Books.THE_HOBBIT;
 import static io.spine.server.log.given.Books.implementingDdd;
 import static java.util.logging.Level.ALL;
-import static java.util.logging.Level.CONFIG;
 import static java.util.logging.Level.FINE;
-import static java.util.logging.Level.FINER;
-import static java.util.logging.Level.FINEST;
-import static java.util.logging.Level.INFO;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Level.WARNING;
 
 @MuteLogging
-@DisplayName("`LoggingEntity` should")
-class LoggingEntityTest extends LoggingTest {
+@DisplayName("`AbstractEntity` logging should")
+class AbstractEntityLoggingTest extends LoggingTest {
 
-    LoggingEntityTest() {
+    AbstractEntityLoggingTest() {
         super(CardAggregate.class, ALL);
     }
 
@@ -89,7 +76,7 @@ class LoggingEntityTest extends LoggingTest {
                 .hasMessageThat()
                 .containsMatch(implementingDdd().getTitle());
         assertLog
-                .hasMethodNameThat()
+                .hasMessageThat()
                 .contains(command.getClass().getSimpleName());
     }
 
@@ -140,89 +127,5 @@ class LoggingEntityTest extends LoggingTest {
         return LibraryCardId.newBuilder()
                     .setReader(reader)
                     .build();
-    }
-
-    @Nested
-    @DisplayName("support method")
-    class Support {
-
-        private String message;
-
-        @BeforeEach
-        void randomizeMessage() {
-            message = newUuid();
-        }
-
-        @Test
-        @DisplayName("`_severe`")
-        void severe() {
-            testLevel(Logging::_severe, SEVERE);
-        }
-
-        @Test
-        @DisplayName("`_warn`")
-        void warn() {
-            testLevel(Logging::_warn, WARNING);
-        }
-
-        @Test
-        @DisplayName("`_info`")
-        void info() {
-            testLevel(Logging::_info, INFO);
-        }
-
-        @Test
-        @DisplayName("`_config`")
-        void config() {
-            testLevel(Logging::_config, CONFIG);
-        }
-
-        @Test
-        @DisplayName("`_fine`")
-        void fine() {
-            testLevel(Logging::_fine, FINE);
-        }
-
-        @Test
-        @DisplayName("`_finer`")
-        void finer() {
-            testLevel(Logging::_finer, FINER);
-        }
-
-        @Test
-        @DisplayName("`_finest`")
-        void finest() {
-            testLevel(Logging::_finest, FINEST);
-        }
-
-        @Test
-        @DisplayName("`_error`")
-        void error() {
-            testLevel(Logging::_error, Logging.errorLevel());
-        }
-
-        @Test
-        @DisplayName("`_debug`")
-        void debug() {
-            testLevel(Logging::_debug, Logging.debugLevel());
-        }
-
-        @Test
-        @DisplayName("`_trace`")
-        void trace() {
-            testLevel(Logging::_trace, FINEST);
-        }
-
-        @SuppressWarnings("FloggerLogString")
-        private void testLevel(Function<Logging, FluentLogger.Api> underscoreFunc,
-                               Level expectedLevel) {
-            var aggregate = new CardAggregate();
-            underscoreFunc.apply(aggregate).log(message);
-            var assertLog = assertLog().record();
-            assertLog.hasLevelThat()
-                     .isEqualTo(expectedLevel);
-            assertLog.hasMessageThat()
-                     .isEqualTo(message);
-        }
     }
 }

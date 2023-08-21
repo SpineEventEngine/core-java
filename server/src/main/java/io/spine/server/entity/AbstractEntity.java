@@ -29,7 +29,6 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.flogger.FluentLogger;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
@@ -39,11 +38,13 @@ import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.logging.LoggingFactory;
+import io.spine.logging.MetadataKey;
+import io.spine.logging.context.ScopedLoggingContext;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.server.log.ReceptorLifecycle;
-import io.spine.server.log.ReceptorLog;
 import io.spine.server.model.Receptor;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -54,12 +55,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.logging.Logging.loggerFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.check;
 import static io.spine.validate.Validate.validateChange;
 import static io.spine.validate.Validate.violationsOf;
@@ -77,7 +77,18 @@ import static io.spine.validate.Validate.violationsOf;
             fields. See Effective Java 2nd Ed. Item #71. */,
         "ClassWithTooManyMethods"})
 public abstract class AbstractEntity<I, S extends EntityState<I>>
-        implements Entity<I, S>, ReceptorLifecycle {
+        implements Entity<I, S>, ReceptorLifecycle<AbstractEntity<I, S>> {
+
+    /**
+     * The key for the metadata value which contains the list with the names of
+     * parameter types of a receptor.
+     *
+     * @see #beforeInvoke(Receptor)
+     * @see #afterInvoke(Receptor)
+     */
+    @SuppressWarnings("rawtypes") // to avoid generics hell.
+    private static final MetadataKey<List> RECEPTOR_PARAM_TYPES =
+            LoggingFactory.singleMetadataKey("receptor_param_types", List.class);
 
     /**
      * Lazily initialized reference to the model class of this entity.
@@ -124,7 +135,8 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     private volatile boolean lifecycleFlagsChanged;
 
-    private @Nullable ReceptorLog receptorLog;
+    private @Nullable AutoCloseable loggingContext = null;
+
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -548,40 +560,44 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         return version.getTimestamp();
     }
 
+    /**
+     * Creates new {@link ScopedLoggingContext} containing the names of the types of
+     * the parameters of the given {@link Receptor}.
+     *
+     * <p>The list will be displayed as {@code CONTEXT} metadata in a log record,
+     * iff the receptor performs logging.
+     *
+     * @param method the receptor method which is going to be called
+     *
+     * @see #afterInvoke(Receptor)
+     */
     @OverridingMethodsMustInvokeSuper
     @Override
-    public void beforeInvoke(Receptor<?, ?, ?, ?> method) {
+    public void beforeInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
         checkNotNull(method);
-        var logger = loggerFor(getClass());
-        this.receptorLog = new ReceptorLog(logger, method);
-    }
-
-    @OverridingMethodsMustInvokeSuper
-    @Override
-    public void afterInvoke(Receptor<?, ?, ?, ?> method) {
-        this.receptorLog = null;
+        var paramTypes = method.params().simpleNames();
+        loggingContext = ScopedLoggingContext.newContext()
+            .withMetadata(RECEPTOR_PARAM_TYPES, paramTypes)
+            .install();
     }
 
     /**
-     * Obtains a new fluent logging API at the given level.
+     * Releases the {@link #loggingContext} installed by {@link #beforeInvoke(Receptor)}.
      *
-     * <p>If called from within a handler method, the resulting log will reference the handler
-     * method as the log site. Otherwise, equivalent to
-     * {@code Logging.loggerFor(getClass()).at(logLevel)}.
-     *
-     * @param logLevel
-     *         the log level
-     * @return new fluent logging API
-     * @apiNote This method mirrors the declaration of
-     *         {@link io.spine.server.log.LoggingEntity#at(Level)}. It is recommended to implement
-     *         the {@link io.spine.server.log.LoggingEntity} interface and use the underscore
-     *         logging methods instead of calling {@code at(..)} directly.
-     * @see io.spine.server.log.LoggingEntity
+     * @see #beforeInvoke(Receptor)
      */
-    public final FluentLogger.Api at(Level logLevel) {
-        return receptorLog != null
-               ? receptorLog.at(logLevel)
-               : loggerFor(getClass()).at(logLevel);
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void afterInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
+        if (loggingContext != null) {
+            try {
+                loggingContext.close();
+            } catch (Exception e) {
+                throw newIllegalStateException(e,
+                           "Unable to close the logging context `%s`.", loggingContext);
+            }
+            loggingContext = null;
+        }
     }
 
     @Override

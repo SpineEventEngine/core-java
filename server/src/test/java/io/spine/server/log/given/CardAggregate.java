@@ -28,6 +28,7 @@ package io.spine.server.log.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.spine.logging.WithLogging;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -38,7 +39,6 @@ import io.spine.server.log.BorrowBooks;
 import io.spine.server.log.Isbn;
 import io.spine.server.log.LibraryCard;
 import io.spine.server.log.LibraryCardId;
-import io.spine.server.log.LoggingEntity;
 import io.spine.server.log.ReturnBook;
 import io.spine.server.log.UnknownBook;
 
@@ -51,10 +51,11 @@ import static io.spine.server.log.given.Books.SMALL_GREEN_BOOK;
 import static io.spine.server.log.given.Books.dddDistilled;
 import static io.spine.server.log.given.Books.domainDrivenDesign;
 import static io.spine.server.log.given.Books.implementingDdd;
+import static java.lang.String.format;
 
 public final class CardAggregate
         extends Aggregate<LibraryCardId, LibraryCard, LibraryCard.Builder>
-        implements LoggingEntity {
+        implements WithLogging {
 
     private static final ImmutableMap<Isbn, Book> knownBooks = ImmutableMap.of(
             BIG_BLUE_BOOK, domainDrivenDesign(),
@@ -72,12 +73,14 @@ public final class CardAggregate
                 event.addBook(book);
                 var authors = book.getAuthorList();
                 var firstAuthor = authors.get(0);
-                _fine().log("Adding to order: %s by %s %s",
+                logger().atDebug().log(() -> format(
+                        "Adding to order: %s by %s %s",
                             book.getTitle(),
                             firstAuthor.getGivenName(),
-                            firstAuthor.getFamilyName());
+                            firstAuthor.getFamilyName()));
             } else {
-                _warn().log("Cannot lend an unknown book. ISBN: `%s`", bookId.getValue());
+                logger().atWarning().log(() -> format(
+                        "Cannot lend an unknown book. ISBN: `%s`", bookId.getValue()));
                 unknownBooks.add(bookId);
             }
         }
@@ -98,8 +101,8 @@ public final class CardAggregate
             var rejection = UnknownBook.newBuilder()
                     .addAllBook(ImmutableList.of(isbn))
                     .build();
-            _error().withCause(rejection)
-                    .log("Cannot return an unknown book. ISBN: `%s`", isbn.getValue());
+            logger().atError().withCause(rejection).log(() -> format(
+                    "Cannot return an unknown book. ISBN: `%s`", isbn.getValue()));
             throw rejection;
         } else {
             return BookReturned.newBuilder()

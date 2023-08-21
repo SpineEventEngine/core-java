@@ -32,13 +32,14 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.GeneratedMixin;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.validate.FieldAwareMessage;
 
 import java.util.Optional;
 
 import static io.spine.type.ProtoTexts.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.lang.String.format;
 
 /**
  * Mixin interface for {@link EventContext}s.
@@ -50,7 +51,7 @@ interface EventContextMixin extends EventContextOrBuilder,
                                     WithTime,
                                     EnrichableMessageContext,
                                     FieldAwareMessage,
-                                    Logging {
+                                    WithLogging {
 
     /**
      * Obtains an actor context for the event context.
@@ -134,10 +135,9 @@ interface EventContextMixin extends EventContextOrBuilder,
                             .build();
                     return Optional.of(id);
                 } else {
-                    _warn().log(
+                    logger().atWarning().log(() -> format(
                             "Cannot determine root message ID. Event context: `%s`.",
-                            shortDebugString(this)
-                    );
+                            shortDebugString(this)));
                     return Optional.empty();
                 }
         }

@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.logging.Logging;
+import io.spine.logging.WithLogging;
 import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
@@ -98,7 +98,7 @@ public class CommandHandlerTestEnv {
         }
     }
 
-    public static class TestCommandAssignee extends AbstractAssignee implements Logging {
+    public static class TestCommandAssignee extends AbstractAssignee implements WithLogging {
 
         private final ImmutableList<EventMessage> eventsOnStartProjectCmd =
                 createEventsOnStartProjectCmd();

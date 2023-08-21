@@ -60,15 +60,17 @@ import io.spine.server.model.Receptor;
  *     <li>{@code on(UserSignedUp)}.
  *     <li>{@code afterInvoke([instance representing on(UserSignedUp) method])}.
  * </ol>
+ *
+ * @param <T> the type of the target object exposing the receptor method
  */
-public interface ReceptorLifecycle {
+public interface ReceptorLifecycle<T> {
 
     /**
      * A callback for a handler method invocation start.
      *
      * <p>The handler method is invoked immediately after this method.
      */
-    void beforeInvoke(Receptor<?, ?, ?, ?> method);
+    void beforeInvoke(Receptor<T, ?, ?, ?> method);
 
     /**
      * A callback for a handler method invocation end.
@@ -76,5 +78,5 @@ public interface ReceptorLifecycle {
      * <p>This method is invoked immediately after the handler method, even if it has thrown
      * an exception.
      */
-    void afterInvoke(Receptor<?, ?, ?, ?> method);
+    void afterInvoke(Receptor<T, ?, ?, ?> method);
 }
