@@ -45,10 +45,10 @@ import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.FINE;
 
 @MuteLogging
-@DisplayName("`LoggingEntity` should")
-class LoggingEntityTest extends LoggingTest {
+@DisplayName("`AbstractEntity` logging should")
+class AbstractEntityLoggingTest extends LoggingTest {
 
-    LoggingEntityTest() {
+    AbstractEntityLoggingTest() {
         super(CardAggregate.class, ALL);
     }
 
