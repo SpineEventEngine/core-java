@@ -33,7 +33,7 @@ package io.spine.internal.dependency
 )
 object Protobuf {
     private const val group = "com.google.protobuf"
-    const val version       = "3.23.4"
+    const val version       = "3.24.1"
     val libs = listOf(
         "${group}:protobuf-java:${version}",
         "${group}:protobuf-java-util:${version}",
