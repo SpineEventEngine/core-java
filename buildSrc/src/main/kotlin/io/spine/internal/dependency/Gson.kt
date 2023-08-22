@@ -34,6 +34,6 @@ package io.spine.internal.dependency
  */
 @Suppress("unused", "ConstPropertyName")
 object Gson {
-    private const val version = "2.9.0"
+    private const val version = "2.10.1"
     const val lib = "com.google.code.gson:gson:${version}"
 }
