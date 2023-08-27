@@ -43,7 +43,6 @@ import io.spine.test.delivery.EmitNextNumber;
 import io.spine.testing.SlowTest;
 import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -104,45 +103,56 @@ public class CatchUpTest extends AbstractDeliveryTest {
                          .clear();
     }
 
-    @Nested
-    @DisplayName("given the time is provided with nanosecond resolution")
-    class NanosecondsResolution {
-
-        @Test
-        @DisplayName("catch up only particular instances by their IDs")
-        public void withNanosByIds() throws InterruptedException {
-            testCatchUpByIds();
-        }
-
-        @Test
-        @DisplayName("catch up all of projection instances " +
-                "and respect the order of the delivered events")
-        public void withNanosAllInOrder() throws InterruptedException {
-            testCatchUpAll();
-        }
+    /**
+     * This test is intentionally left {@code public}.
+     *
+     * <p>See the class-level docs.
+     */
+    @Test
+    @DisplayName("given the time is provided with nanosecond resolution " +
+            "catch up only particular instances by their IDs")
+    public void withNanosByIds() throws InterruptedException {
+        testCatchUpByIds();
     }
 
-    @Nested
-    @DisplayName("given the time is provided with millisecond resolution")
-    class MillisecondResolution {
+    /**
+     * This test is intentionally left {@code public}.
+     *
+     * <p>See the class-level docs.
+     */
+    @Test
+    @DisplayName("given the time is provided with nanosecond resolution" +
+            " catch up all of projection instances " +
+            "and respect the order of the delivered events")
+    public void withNanosAllInOrder() throws InterruptedException {
+        testCatchUpAll();
+    }
 
-        @BeforeEach
-        void useMillis() {
-            setupMillis();
-        }
+    /**
+     * This test is intentionally left {@code public}.
+     *
+     * <p>See the class-level docs.
+     */
+    @Test
+    @DisplayName("given the time is provided with millisecond resolution" +
+            " catch up only particular instances by their IDs")
+    public void withMillisByIds() throws InterruptedException {
+        setupMillis();
+        testCatchUpByIds();
+    }
 
-        @Test
-        @DisplayName("catch up only particular instances by their IDs")
-        public void withMillisByIds() throws InterruptedException {
-            testCatchUpByIds();
-        }
-
-        @Test
-        @DisplayName("catch up all of projection instances and " +
-                "respect the order of the delivered events")
-        public void withMillisAllInOrder() throws InterruptedException {
-            testCatchUpAll();
-        }
+    /**
+     * This test is intentionally left {@code public}.
+     *
+     * <p>See the class-level docs.
+     */
+    @Test
+    @DisplayName("given the time is provided with millisecond resolution " +
+            "catch up all of projection instances and " +
+            "respect the order of the delivered events")
+    public void withMillisAllInOrder() throws InterruptedException {
+        setupMillis();
+        testCatchUpAll();
     }
 
     @Test
@@ -333,7 +343,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
             var maybeState = projectionRepo.find(identifier);
             assertThat(maybeState).isPresent();
 
-            var state = maybeState.get().state();
+            var state = maybeState.get()
+                                  .state();
             assertThat(state.getLastValue()).isEqualTo(negativeExpected);
         }
     }
@@ -345,9 +356,9 @@ public class CatchUpTest extends AbstractDeliveryTest {
     private static List<Integer> readLastValues(ConsecutiveProjection.Repo repo,
                                                 String[] ids) {
         return Arrays.stream(ids)
-                     .map((id) -> findView(repo, id).state()
-                                                    .getLastValue())
-                     .collect(toList());
+                .map((id) -> findView(repo, id).state()
+                                               .getLastValue())
+                .collect(toList());
     }
 
     private static List<EmitNextNumber> generateEmissionCommands(int howMany, String[] ids) {
@@ -364,8 +375,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
     private static List<Callable<Object>>
     asPostCommandJobs(BlackBox ctx, List<EmitNextNumber> commands) {
         return commands.stream()
-                       .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
-                       .collect(toList());
+                .map(cmd -> (Callable<Object>) () -> ctx.receivesCommand(cmd))
+                .collect(toList());
     }
 
     private static void setupMillis() {
@@ -373,8 +384,8 @@ public class CatchUpTest extends AbstractDeliveryTest {
     }
 
     /**
-     * A time provider which provides the current time based upon JDK's wall clock, i.e. without
-     * the emulated nanoseconds.
+     * A time provider which provides the current time based upon JDK's wall clock,
+     * i.e. without the emulated nanoseconds.
      */
     private static class WithMillisOnlyResolution implements Time.Provider {
 
