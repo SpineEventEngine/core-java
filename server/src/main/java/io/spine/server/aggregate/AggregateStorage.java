@@ -417,7 +417,9 @@ public class AggregateStorage<I, S extends EntityState<I>>
      */
     protected Iterator<AggregateEventRecord>
     historyBackward(I id, int batchSize, @Nullable Version startingFrom) {
-        return historyBackward.read(id, batchSize, startingFrom);
+        var original = historyBackward.read(id, batchSize, startingFrom);
+        var copied = ImmutableList.copyOf(original);
+        return copied.iterator();
     }
 
     /**
