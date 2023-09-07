@@ -58,6 +58,19 @@ import static java.util.stream.Collectors.toList;
 @SPI
 public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
 
+    /**
+     * Creates a new instance of this storage.
+     *
+     * <p>Generally, {@code InboxStorage} instances should be single-tenant only.
+     * It is so, because no distinction should be made for processing of {@code InboxMessage}s,
+     * since it is batch-based anyway, and splitting batches even more (across tenants)
+     * reduces the performance.
+     *
+     * @param factory
+     *         storage factory to create an underlying record storage
+     * @param multitenant
+     *         whether {@code InboxStorage} should be multi-tenant
+     */
     public InboxStorage(StorageFactory factory, boolean multitenant) {
         super(Delivery.contextSpec(multitenant),
               factory.createRecordStorage(Delivery.contextSpec(multitenant), spec()));

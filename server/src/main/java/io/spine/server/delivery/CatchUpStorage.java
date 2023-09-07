@@ -44,6 +44,19 @@ import static io.spine.server.delivery.CatchUpColumn.projection_type;
 @SPI
 public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
 
+    /**
+     * Creates a new instance of this storage.
+     *
+     * <p>It is recommended to have {@code CatchUpStorage} instances single-tenant only.
+     * It is so, because no distinction should be made for processing of {@code InboxMessage}s
+     * sent during the catch-up process, since it is batch-based anyway,
+     * and splitting batches even more (across tenants) reduces the performance.
+     *
+     * @param factory
+     *         storage factory to create an underlying record storage
+     * @param multitenant
+     *         whether {@code CatchUpStorage} should be multi-tenant
+     */
     public CatchUpStorage(StorageFactory factory, boolean multitenant) {
         super(Delivery.contextSpec(multitenant),
               factory.createRecordStorage(Delivery.contextSpec(multitenant), getSpec()));

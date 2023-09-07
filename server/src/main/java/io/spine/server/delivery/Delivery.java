@@ -792,7 +792,13 @@ public final class Delivery implements WithLogging {
 
     /**
      * Returns the specification of a Bounded Context describing the {@code Delivery} flow.
-     * @param multitenant whether the Bounded Context supports multi-tenancy
+     *
+     * <p>Usually, this context is single-tenant, as the batch processing
+     * of {@code InboxMessage}s is more effective when the batches are not
+     * split across tenants.
+     *
+     * @param multitenant
+     *         whether the Bounded Context supports multi-tenancy
      */
     @SuppressWarnings({"TestOnlyProblems" /* The called code is not test-only. */,
             "WeakerAccess" /* Used in descendant libraries to configure storage. */})
