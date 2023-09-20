@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,3 +95,17 @@ public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : Validat
     val builder = builder()
     block(builder)
 }
+
+/**
+ * Obtains the entity state.
+ *
+ * This is a shortcut for `state()`.
+ *
+ * @param I the type of the entity identifiers.
+ * @param E the type of the transactional entity.
+ * @param S the type of the entity state.
+ * @param B the type of the entity state builder.
+ */
+public val <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
+        E.state: S
+    get() = state()
