@@ -117,9 +117,13 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      * <p>Lazily initialized to the {@linkplain #defaultState() default state},
      * if {@linkplain #state() accessed} before {@linkplain #setState(EntityState)}
      * initialization}.
+     *
+     * @apiNote The field is named with the underscore prefix to avoid
+     * name clash with the extension property name in Kotlin.
      */
+    @SuppressWarnings("FieldNamingConvention") // See `apiNote` above.
     @LazyInit
-    private volatile @MonotonicNonNull S state;
+    private volatile @MonotonicNonNull S _state;
 
     /** The version of the entity. */
     private volatile Version version;
@@ -202,13 +206,13 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     @Override
     public final S state() {
         ensureAccessToState();
-        var result = state;
+        var result = _state;
         if (result == null) {
             synchronized (this) {
-                result = state;
+                result = _state;
                 if (result == null) {
-                    state = defaultState();
-                    result = state;
+                    _state = defaultState();
+                    result = _state;
                 }
             }
         }
@@ -264,7 +268,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      * Sets the entity state to the passed value.
      */
     void setState(S newState) {
-        this.state = checkNotNull(newState);
+        this._state = checkNotNull(newState);
     }
 
     /**

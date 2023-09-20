@@ -89,5 +89,5 @@ private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.B
         setState(builder().build())
     }
 
-    fun value(): String = state().value
+    fun value(): String = state.value
 }
