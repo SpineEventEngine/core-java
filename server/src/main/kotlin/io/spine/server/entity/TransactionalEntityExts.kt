@@ -29,6 +29,7 @@
 package io.spine.server.entity
 
 import io.spine.base.EntityState
+import io.spine.core.Version
 import io.spine.validate.ValidatingBuilder
 
 /**
@@ -95,6 +96,34 @@ public fun <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : Validat
     val builder = builder()
     block(builder)
 }
+
+/**
+ * Obtains the entity identifier.
+ *
+ * This is a shortcut for `id()`.
+ *
+ * @param I the type of the entity identifiers.
+ * @param E the type of the transactional entity.
+ * @param S the type of the entity state.
+ * @param B the type of the entity state builder.
+ */
+public val <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
+        E.id: I
+    get() = id()
+
+/**
+ * Obtains the entity version.
+ *
+ * This is a shortcut for `version()`.
+ *
+ * @param I the type of the entity identifiers.
+ * @param E the type of the transactional entity.
+ * @param S the type of the entity state.
+ * @param B the type of the entity state builder.
+ */
+public val <I, E : TransactionalEntity<I, S, B>, S : EntityState<I>, B : ValidatingBuilder<S>>
+        E.version: Version
+    get() = version()
 
 /**
  * Obtains the entity state.

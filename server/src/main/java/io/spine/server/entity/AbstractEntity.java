@@ -104,8 +104,12 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      *
      * <p>Assigned either through the {@linkplain #AbstractEntity(Object) constructor which
      * accepts the ID}, or via {@link #setId(Object)}. Is never {@code null}.
+     *
+     * @apiNote The field is named with the underscore prefix to avoid
+     *          name clash with the extension property name in Kotlin.
      */
-    private @MonotonicNonNull I id;
+    @SuppressWarnings("FieldNamingConvention") // See `apiNote` above.
+    private @MonotonicNonNull I _id;
 
     /** Cached version of string ID. */
     @LazyInit
@@ -119,16 +123,24 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      * initialization}.
      *
      * @apiNote The field is named with the underscore prefix to avoid
-     * name clash with the extension property name in Kotlin.
+     *          name clash with the extension property name in Kotlin.
      */
     @SuppressWarnings("FieldNamingConvention") // See `apiNote` above.
     @LazyInit
     private volatile @MonotonicNonNull S _state;
 
-    /** The version of the entity. */
-    private volatile Version version;
+    /**
+     * The version of the entity.
+     *
+     * @apiNote The field is named with the underscore prefix to avoid
+     *          name clash with the extension property name in Kotlin.
+     */
+    @SuppressWarnings("FieldNamingConvention") // See `apiNote` above.
+    private volatile Version _version;
 
-    /** The lifecycle flags of the entity. */
+    /**
+     * The lifecycle flags of the entity.
+     */
     private volatile @MonotonicNonNull LifecycleFlags lifecycleFlags;
 
     /**
@@ -139,8 +151,15 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     private volatile boolean lifecycleFlagsChanged;
 
+    /**
+     * A context for the logging operations performed by the entity in a receptor.
+     *
+     * <p>Is {@code null} if the entity is not within one of its receptors.
+     *
+     * @see #beforeInvoke(Receptor)
+     * @see #afterInvoke(Receptor)
+     */
     private @Nullable AutoCloseable loggingContext = null;
-
 
     /**
      * Creates a new instance with the zero version and cleared lifecycle flags.
@@ -167,12 +186,12 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     @SuppressWarnings("InstanceVariableUsedBeforeInitialized") // checked in `if`
     final void setId(I id) {
         checkNotNull(id);
-        if (this.id != null) {
-            checkState(id.equals(this.id),
+        if (this._id != null) {
+            checkState(id.equals(this._id),
                        "Entity ID already assigned to `%s`." +
-                               " Attempted to reassign to `%s`.", this.id, id);
+                               " Attempted to reassign to `%s`.", this._id, id);
         }
-        this.id = id;
+        this._id = id;
     }
 
     /**
@@ -192,7 +211,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
 
     @Override
     public I id() {
-        return checkNotNull(id);
+        return checkNotNull(_id);
     }
 
     /**
@@ -497,7 +516,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     final void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
         check(newVersion);
-        if (version.equals(newVersion)) {
+        if (_version.equals(newVersion)) {
             return;
         }
         var currentVersionNumber = versionNumber();
@@ -529,7 +548,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     }
 
     void setVersion(Version version) {
-        this.version = version;
+        this._version = version;
     }
 
     private Version incrementedVersion() {
@@ -544,7 +563,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     @Override
     public Version version() {
-        return version;
+        return _version;
     }
 
     /**
@@ -554,14 +573,14 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     int incrementVersion() {
         setVersion(incrementedVersion());
-        return version.getNumber();
+        return _version.getNumber();
     }
 
     /**
      * Obtains timestamp of the entity version.
      */
     public Timestamp whenModified() {
-        return version.getTimestamp();
+        return _version.getTimestamp();
     }
 
     /**
