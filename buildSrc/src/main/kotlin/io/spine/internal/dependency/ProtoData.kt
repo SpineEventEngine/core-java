@@ -34,6 +34,10 @@ package io.spine.internal.dependency
 @Suppress("unused", "ConstPropertyName")
 object ProtoData {
     const val version = "0.11.6"
+
+    /**
+     * The version of ProtoData used in McJava for building McJava.
+     */
     const val dogfoodingVersion = "0.11.6"
     const val group = "io.spine.protodata"
     const val compiler = "$group:protodata-compiler:$version"
