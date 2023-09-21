@@ -154,7 +154,7 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     /**
      * A context for the logging operations performed by the entity in a receptor.
      *
-     * <p>Is {@code null} if the entity is not within one of its receptors.
+     * <p>This field is {@code null}, if the entity is not being accessed through a receptor.
      *
      * @see #beforeInvoke(Receptor)
      * @see #afterInvoke(Receptor)
