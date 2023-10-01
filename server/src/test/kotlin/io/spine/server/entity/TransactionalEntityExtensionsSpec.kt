@@ -37,17 +37,29 @@ internal class TransactionalEntityExtensionsSpec {
     @Test
     fun `add 'update' block handler for passing properties to 'builder'`() {
         val entity = createEntity()
+        val prevVersion = entity.version
+        val prevId = entity.id
         val str = randomString()
-        entity.applyUpdate(str)
+
+        entity.doUpdate(str)
+
         entity.value() shouldBe str
+        entity.version.isIncrement(prevVersion) shouldBe true
+        entity.id shouldBe prevId
     }
 
     @Test
     fun `add 'alter' block handler for passing properties to 'builder'`() {
         val entity = createEntity()
+        val prevVersion = entity.version
+        val prevId = entity.id
         val str = randomString()
-        entity.txApplyAlteration(str)
+
+        entity.doAlter(str)
+
         entity.value() shouldBe str
+        entity.version.isIncrement(prevVersion) shouldBe true
+        entity.id shouldBe prevId
     }
 }
 
@@ -64,8 +76,8 @@ private fun createEntity() : Fixture {
 }
 
 /**
- * An entity which uses the [TransactionalEntity] extension functions in its [applyUpdate]
- * and [applyAlteration] methods.
+ * An entity which uses the [TransactionalEntity] extension functions in its [doUpdate]
+ * and [doAlter] methods.
  */
 private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.Builder>() {
 
@@ -73,21 +85,21 @@ private class Fixture : TransactionalEntity<String, StringEntity, StringEntity.B
         setId(randomString())
     }
 
-    fun applyUpdate(s: String) {
+    fun doUpdate(s: String) {
         val builder = update {
             value = s
         }
         setState(builder.build())
+        incrementVersion()
     }
 
-    fun applyAlteration(s: String): Unit = alter {
-        value = s
-    }
-
-    fun txApplyAlteration(s: String) {
-        applyAlteration(s)
+    fun doAlter(s: String) {
+        alter {
+            value = s
+        }
         setState(builder().build())
+        incrementVersion()
     }
 
-    fun value(): String = state().value
+    fun value(): String = state.value
 }
