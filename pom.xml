@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.158</version>
+<version>2.0.0-SNAPSHOT.159</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -79,14 +79,14 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
-    <artifactId>spine-flogger-grpc-context</artifactId>
-    <version>2.0.0-SNAPSHOT.215</version>
+    <artifactId>spine-logging</artifactId>
+    <version>2.0.0-SNAPSHOT.225</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
-    <artifactId>spine-logging</artifactId>
-    <version>2.0.0-SNAPSHOT.215</version>
+    <artifactId>spine-logging-grpc-context</artifactId>
+    <version>2.0.0-SNAPSHOT.225</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
