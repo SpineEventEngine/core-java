@@ -51,7 +51,12 @@ package io.spine.internal.dependency
  *
  * See [`SpineEventEngine/ProtoData`](https://github.com/SpineEventEngine/ProtoData/).
  */
-@Suppress("unused", "ConstPropertyName")
+@Suppress(
+    "unused" /* Some subprojects do not use ProtoData directly. */,
+    "ConstPropertyName" /* We use custom convention for artifact properties. */,
+    "MemberVisibilityCanBePrivate" /* The properties are used directly by other subprojects. */,
+    "KDocUnresolvedReference" /* Referencing private properties in constructor KDoc. */
+)
 object ProtoData {
     const val group = "io.spine.protodata"
     const val pluginId = "io.spine.protodata"
@@ -96,7 +101,7 @@ object ProtoData {
      *
      * If either [VERSION_ENV] or [DF_VERSION_ENV] is set, those versions are used instead of
      * the hardcoded ones. Also, in this mode, the [pluginLib] coordinates are changed so that
-     * it points at a locally published artifact. Otherwise it points at an artifact that would be
+     * it points at a locally published artifact. Otherwise, it points at an artifact that would be
      * published to a public plugin registry.
      */
     init {
