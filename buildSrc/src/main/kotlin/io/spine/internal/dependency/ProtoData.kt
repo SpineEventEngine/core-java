@@ -29,21 +29,105 @@ package io.spine.internal.dependency
 /**
  * Dependencies on ProtoData modules.
  *
+ * In order to use locally published ProtoData version instead of the version from a public plugin
+ * registry, set the `PROTO_DATA_VERSION` and/or the `PROTO_DATA_DF_VERSION` environment variables
+ * and stop the Gradle daemons so that Gradle observes the env change:
+ * ```
+ * export PROTO_DATA_VERSION=0.43.0-local
+ * export PROTO_DATA_DF_VERSION=0.41.0
+ *
+ * ./gradle --stop
+ * ./gradle build   # Conduct the intended checks.
+ * ```
+ *
+ * Then, in order to reset the console to run the usual versions again, remove the values of
+ * the environment variables and stop the daemon:
+ * ```
+ * export PROTO_DATA_VERSION=""
+ * export PROTO_DATA_DF_VERSION=""
+ *
+ * ./gradle --stop
+ * ```
+ *
  * See [`SpineEventEngine/ProtoData`](https://github.com/SpineEventEngine/ProtoData/).
  */
-@Suppress("unused", "ConstPropertyName")
+@Suppress(
+    "unused" /* Some subprojects do not use ProtoData directly. */,
+    "ConstPropertyName" /* We use custom convention for artifact properties. */,
+    "MemberVisibilityCanBePrivate" /* The properties are used directly by other subprojects. */,
+    "KDocUnresolvedReference" /* Referencing private properties in constructor KDoc. */
+)
 object ProtoData {
-    const val version = "0.11.6"
+    const val group = "io.spine.protodata"
+    const val pluginId = "io.spine.protodata"
 
     /**
-     * The version of ProtoData used in McJava for building McJava.
+     * The version of ProtoData dependencies.
      */
-    const val dogfoodingVersion = "0.11.6"
-    const val group = "io.spine.protodata"
-    const val compiler = "$group:protodata-compiler:$version"
+    val version: String
+    private const val fallbackVersion = "0.11.0"
 
-    const val codegenJava = "io.spine.protodata:protodata-codegen-java:$version"
+    /**
+     * The distinct version of ProtoData used by other build tools.
+     *
+     * When ProtoData is used both for building the project and as a part of the Project's
+     * transitional dependencies, this is the version used to build the project itself.
+     */
+    val dogfoodingVersion: String
+    private const val fallbackDfVersion = "0.9.11"
 
-    const val pluginId = "io.spine.protodata"
-    const val pluginLib = "${Spine.group}:protodata:$version"
+    /**
+     * The artifact for the ProtoData Gradle plugin.
+     */
+    val pluginLib: String
+
+    val compiler
+        get() = "$group:protodata-compiler:$version"
+    val codegenJava
+        get() = "$group:protodata-codegen-java:$version"
+
+    /**
+     * An env variable storing a custom [version].
+     */
+    private const val VERSION_ENV = "PROTO_DATA_VERSION"
+
+    /**
+     * An env variable storing a custom [dogfoodingVersion].
+     */
+    private const val DF_VERSION_ENV = "PROTO_DATA_DF_VERSION"
+
+    /**
+     * Sets up the versions and artifacts for the build to use.
+     *
+     * If either [VERSION_ENV] or [DF_VERSION_ENV] is set, those versions are used instead of
+     * the hardcoded ones. Also, in this mode, the [pluginLib] coordinates are changed so that
+     * it points at a locally published artifact. Otherwise, it points at an artifact that would be
+     * published to a public plugin registry.
+     */
+    init {
+        val experimentVersion = System.getenv(VERSION_ENV)
+        val experimentDfVersion = System.getenv(DF_VERSION_ENV)
+        if (experimentVersion?.isNotBlank() == true || experimentDfVersion?.isNotBlank() == true) {
+            version = experimentVersion ?: fallbackVersion
+            dogfoodingVersion = experimentDfVersion ?: fallbackDfVersion
+
+            pluginLib = "${group}:gradle-plugin:$version"
+            println("""
+
+                ❗ Running an experiment with ProtoData. ❗
+                -----------------------------------------
+                    Regular version     = v$version
+                    Dogfooding version  = v$dogfoodingVersion
+                
+                    ProtoData Gradle plugin can now be loaded from Maven Local.
+                    
+                    To reset the versions, erase the `$$VERSION_ENV` and `$$DF_VERSION_ENV` environment variables. 
+
+            """.trimIndent())
+        } else {
+            version = fallbackVersion
+            dogfoodingVersion = fallbackDfVersion
+            pluginLib = "${Spine.group}:protodata:$version"
+        }
+    }
 }

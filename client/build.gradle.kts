@@ -40,7 +40,7 @@ dependencies {
 
     // This dependency is needed for Logging contexts to work.
     // Since we depend on gRPC, we can use the implementation of the context based on gRPC.
-    implementation(Spine.Logging.floggerGrpcContext)
+    implementation(Spine.Logging.grpcContext)
 
     testImplementation(Spine.testlib)
     testImplementation(project(":testutil-client"))
