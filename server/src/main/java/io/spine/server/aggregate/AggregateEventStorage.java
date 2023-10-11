@@ -99,4 +99,14 @@ public class AggregateEventStorage
     protected void deleteAll(Iterable<AggregateEventRecordId> ids) {
         super.deleteAll(ids);
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method is exposed to {@code public} for SPI users.
+     */
+    @Override
+    public void write(AggregateEventRecord record) {
+        super.write(record);
+    }
 }

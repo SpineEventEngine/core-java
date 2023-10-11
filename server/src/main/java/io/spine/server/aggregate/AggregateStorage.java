@@ -72,7 +72,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <h3>Storing Aggregate events</h3>
  *
  * <p>Each Aggregate is an event-sourced Entity. To load an Aggregate instance, one plays all
- * of the events emitted by it, eventually obtaining the last known state. While the Event Store
+ * the events emitted by it, eventually obtaining the last known state. While the Event Store
  * of a Bounded Context, to which some Aggregate belongs, stores all domain events, using it
  * for the sake of loading an Aggregate is inefficient in most cases. An overwhelming number of
  * the domain events emitted in a Bounded Context and the restrictions applied by an underlying
@@ -300,7 +300,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
      *         the record to write
      */
     protected void writeEventRecord(I id, AggregateEventRecord record) {
-        eventStorage.write(record.getId(), record);
+        eventStorage.write(record);
     }
 
     /**

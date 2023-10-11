@@ -169,13 +169,13 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
 
     private void store(Event event) {
         var toStore = event.clearEnrichments();
-        write(toStore.getId(), toStore);
+        write(toStore);
     }
 
     private void store(Iterable<Event> events) {
         var records = stream(events)
                 .map(Event::clearEnrichments)
-                .map((e) -> RecordWithColumns.create(e.getId(), e, recordSpec()))
+                .map((e) -> RecordWithColumns.create(e, recordSpec()))
                 .collect(toImmutableList());
         writeAll(records);
     }
