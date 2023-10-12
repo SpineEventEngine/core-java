@@ -89,7 +89,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/mc-java">spine-mc-java</a>
          */
-        const val mcJava = "2.0.0-SNAPSHOT.170"
+        const val mcJava = "2.0.0-SNAPSHOT.171"
 
         /**
          * The version of [Spine.baseTypes].

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,141 +23,123 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.route
 
-package io.spine.server.route;
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.spine.base.CommandMessage
+import io.spine.base.Identifier
+import io.spine.core.CommandContext
+import io.spine.server.route.CommandRouting.Companion.newInstance
+import io.spine.server.type.CommandEnvelope
+import io.spine.test.commands.CmdCreateProject
+import io.spine.test.route.RegisterUser
+import io.spine.testing.TestValues
+import io.spine.testing.client.TestActorRequestFactory
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.base.CommandMessage;
-import io.spine.core.CommandContext;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.test.commands.CmdCreateProject;
-import io.spine.test.route.RegisterUser;
-import io.spine.testing.client.TestActorRequestFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.TestValues.random;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-/* OK as custom routes do not refer to the test suite. */
 @DisplayName("`CommandRouting` should")
-class CommandRoutingTest {
+internal class CommandRoutingTest {
 
-    private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(CommandRoutingTest.class);
+    /** A custom default route.  */
+    private val customDefault =
+        CommandRoute { msg: CommandMessage, ctx: CommandContext -> DEFAULT_ANSWER }
 
-    /** Default result of the command routing function. */
-    private static final long DEFAULT_ANSWER = 42L;
+    /** A custom command path for `StringValue` command messages.  */
+    private val customRoute =
+        CommandRoute { msg: RegisterUser, ctx: CommandContext -> CUSTOM_ANSWER }
 
-    /** Custom result of the command routing function. */
-    private static final long CUSTOM_ANSWER = 100500L;
-
-    /** A custom default route. */
-    private final CommandRoute<Long, CommandMessage> customDefault = (msg, ctx) -> DEFAULT_ANSWER;
-
-    /** A custom command path for {@code StringValue} command messages. */
-    private final CommandRoute<Long, RegisterUser> customRoute = (msg, ctx) -> CUSTOM_ANSWER;
-
-    /** The object under tests. */
-    private CommandRouting<Long> commandRouting;
+    /** The object under tests.  */
+    private lateinit var commandRouting: CommandRouting<Long>
 
     @BeforeEach
-    void setUp() {
-        commandRouting = CommandRouting.newInstance(Long.class);
+    fun setUp() {
+        commandRouting = newInstance(Long::class.java)
     }
 
     @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        var nullPointerTester = new NullPointerTester()
-                .setDefault(CommandContext.class, CommandContext.getDefaultInstance());
-
-        nullPointerTester.testAllPublicInstanceMethods(commandRouting);
-        nullPointerTester.testAllPublicStaticMethods(CommandRouting.class);
+    fun `have default route`() {
+        commandRouting.defaultRoute() shouldNotBe null
+        commandRouting.defaultRoute().shouldBeInstanceOf<DefaultCommandRoute<*>>()
     }
 
     @Test
-    @DisplayName("have default route")
-    void haveDefaultRoute() {
-        assertNotNull(commandRouting.defaultRoute());
-        assertTrue(commandRouting.defaultRoute() instanceof DefaultCommandRoute);
+    fun `replace default route`() {
+        commandRouting.replaceDefault(customDefault) shouldBe commandRouting
+        commandRouting.defaultRoute() shouldBe customDefault
     }
 
     @Test
-    @DisplayName("replace default route")
-    void replaceDefaultRoute() {
-        assertEquals(commandRouting, commandRouting.replaceDefault(customDefault));
-        assertEquals(customDefault, commandRouting.defaultRoute());
-    }
-
-    @Test
-    @DisplayName("add custom route")
-    void addCustomRoute() {
+    fun `add custom route`() {
         // Assert the result of the adding routing call. It modifies the routing.
-        assertThat(commandRouting.route(RegisterUser.class, customRoute))
-                .isEqualTo(commandRouting);
+        commandRouting.route<RegisterUser>(customRoute) shouldBe commandRouting
 
-        assertThat(commandRouting.get(RegisterUser.class))
-                .hasValue(customRoute);
+        commandRouting.find<RegisterUser>() shouldBe customRoute
     }
 
     @Test
-    @DisplayName("not allow overwriting set route")
-    void notOverwriteSetRoute() {
-        commandRouting.route(RegisterUser.class, customRoute);
-        assertThrows(IllegalStateException.class,
-                     () -> commandRouting.route(RegisterUser.class, customRoute));
+    fun `not allow overwriting set route`() {
+        commandRouting.route<RegisterUser>(customRoute)
+        assertThrows<IllegalStateException> {
+            commandRouting.route<RegisterUser>(customRoute)
+        }
     }
 
     @Test
-    @DisplayName("remove previously set route")
-    void removePreviouslySetRoute() {
-        commandRouting.route(RegisterUser.class, customRoute);
-        commandRouting.remove(RegisterUser.class);
+    fun `remove previously set route`() {
+        commandRouting.route<RegisterUser>(customRoute)
+        commandRouting.remove<RegisterUser>()
+        commandRouting.find<RegisterUser>() shouldBe null
     }
 
     @Test
-    @DisplayName("throw ISE on removal if route is not set")
-    void notRemoveIfRouteNotSet() {
-        assertThrows(IllegalStateException.class, () -> commandRouting.remove(RegisterUser.class));
+    fun `throw ISE on removal if route is not set`() {
+        assertThrows<IllegalStateException> {
+            commandRouting.remove<RegisterUser>()
+        }
     }
 
     @Test
-    @DisplayName("apply default route")
-    void applyDefaultRoute() {
+    fun `apply default route`() {
         // Replace the default route since we have custom command message.
-        commandRouting.replaceDefault(customDefault)
-                      // Have custom route too.
-                      .route(RegisterUser.class, customRoute);
+        commandRouting.replaceDefault(customDefault) // Have custom route too.
+            .route<RegisterUser>(customRoute)
 
-        var cmd = CmdCreateProject.newBuilder().setId(newUuid()).build();
-        var command = CommandEnvelope.of(requestFactory.createCommand(cmd));
+        val cmd = CmdCreateProject.newBuilder().setId(Identifier.newUuid()).build()
+        val command = CommandEnvelope.of(requestFactory.createCommand(cmd))
 
-        long id = commandRouting.apply(command.message(), command.context());
+        val id = commandRouting.apply(command.message(), command.context())
 
-        assertEquals(DEFAULT_ANSWER, id);
+        id shouldBe DEFAULT_ANSWER
     }
 
     @Test
-    @DisplayName("apply custom route")
-    void applyCustomRoute() {
-        var cmd = RegisterUser.newBuilder().setId(random(1, 100)).build();
-        var command = CommandEnvelope.of(
-                requestFactory.createCommand(cmd)
-        );
+    fun `apply custom route`() {
+        val cmd = RegisterUser.newBuilder().setId(TestValues.random(1, 100).toLong()).build()
+        val command = CommandEnvelope.of(
+            requestFactory.createCommand(cmd)
+        )
         // Have custom route.
-        commandRouting.route(RegisterUser.class, customRoute);
+        commandRouting.route(RegisterUser::class.java, customRoute)
 
-        long id = commandRouting.apply(command.message(), command.context());
+        val id = commandRouting.apply(command.message(), command.context())
 
-        assertEquals(CUSTOM_ANSWER, id);
+        id shouldBe CUSTOM_ANSWER
+    }
+
+    companion object {
+        private val requestFactory = TestActorRequestFactory(
+            CommandRoutingTest::class.java
+        )
+
+        /** Default result of the command routing function.  */
+        private const val DEFAULT_ANSWER = 42L
+
+        /** Custom result of the command routing function.  */
+        private const val CUSTOM_ANSWER = 100500L
     }
 }

@@ -23,129 +23,176 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.route
 
-package io.spine.server.route;
-
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
-import io.spine.base.CommandMessage;
-import io.spine.core.CommandContext;
-
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Preconditions
+import com.google.errorprone.annotations.CanIgnoreReturnValue
+import io.spine.base.CommandMessage
+import io.spine.base.RejectionThrowable
+import io.spine.core.CommandContext
+import java.util.*
 
 /**
- * A routing schema used by a {@link io.spine.server.commandbus.CommandDispatcher CommandDispatcher}
- * for delivering a command to its handler.
+ * A routing schema used by a [CommandDispatcher][io.spine.server.commandbus.CommandDispatcher]
+ * for delivering a command to its [receptor][io.spine.server.model.Receptor].
  *
- * <p>A routing schema consists of a default route and custom routes per command class.
- * When finding a command target, the {@code CommandRouting} will see if there is a custom route
- * set for the type of the command. If not found, the {@linkplain DefaultCommandRoute default route}
- * will be {@linkplain CommandRoute#apply(Message, Message) applied}.
+ * A routing schema consists of a default route and custom routes per command class.
+ * When finding a command target, the `CommandRouting` will see if there is a custom route
+ * set for the type of the command. If not found, the [default route][DefaultCommandRoute]
+ * will be [applied][CommandRoute.apply].
  *
- * @param <I> the type of the entity IDs of this repository
+ * @param I the type of the entity IDs used by this command routing.
  */
-public final class CommandRouting<I> extends MessageRouting<CommandMessage, CommandContext, I> {
-
-    private static final long serialVersionUID = 0L;
-
-    private CommandRouting(CommandRoute<I, CommandMessage> defaultRoute) {
-        super(defaultRoute);
+public class CommandRouting<I>
+private constructor(defaultRoute: CommandRoute<I, CommandMessage>) :
+    MessageRouting<CommandMessage, CommandContext, I>(defaultRoute)
+{
+    public override fun defaultRoute(): CommandRoute<I, CommandMessage> {
+        return super.defaultRoute() as CommandRoute<I, CommandMessage>
     }
 
     /**
-     * Creates a new command routing.
+     * Sets a custom route for the passed command type. Shortcut for [CommandRouting.route].
      *
-     * @param <I>
-     *         the type of entity identifiers returned by new routing
-     * @param idClass
-     *         the class of target entity identifiers
-     * @return new routing instance
+     * @param C the type of the command message to route.
      */
-    public static <I> CommandRouting<I> newInstance(Class<I> idClass) {
-        CommandRoute<I, CommandMessage> defaultRoute = DefaultCommandRoute.newInstance(idClass);
-        return new CommandRouting<>(defaultRoute);
-    }
-
-    @Override
-    public CommandRoute<I, CommandMessage> defaultRoute() {
-        return (CommandRoute<I, CommandMessage>) super.defaultRoute();
-    }
+    public inline fun <reified C : CommandMessage> route(
+        via: CommandRoute<I, C>
+    ): CommandRouting<I> = route(C::class.java, via)
 
     /**
      * Sets new default route in the schema.
      *
-     * @param newDefault the new route to be used as default
-     * @return {@code this} to allow chained calls when configuring the routing
+     * @param newDefault the new route to be used as default.
+     * @return `this` to allow chained calls when configuring the routing.
      */
     @CanIgnoreReturnValue
-    public CommandRouting<I> replaceDefault(CommandRoute<I, CommandMessage> newDefault) {
-        checkNotNull(newDefault);
-        return (CommandRouting<I>) super.replaceDefault(newDefault);
+    public fun replaceDefault(newDefault: CommandRoute<I, CommandMessage>): CommandRouting<I> {
+        return super.replaceDefault(newDefault) as CommandRouting<I>
     }
 
     /**
-     * Sets a custom route for the passed command type.
+     * Sets a custom route for the given command type [C].
      *
-     * <p>Such mapping may be required for the following cases:
-     * <ul>
-     *   <li>The first field of the command message is not an ID of the entity which handles the
-     *   command as required by the {@linkplain DefaultCommandRoute default route}.
-     *   <li>The command needs to be dispatched to an entity which ID differs from the value set
-     *   in the first command message field.
-     * </ul>
+     * Such a mapping may be required if the first field of the command message is
+     * not an ID of the entity which handles the command as required by
+     * the [default route][DefaultCommandRoute].
      *
-     * <p>The type of the command can be a class or an interface. If a routing schema needs to
-     * contain entries for specific classes and an interface that these classes implement, routes
-     * for interfaces should be defined <em>after</em> entries for the classes:
+     * It could be because the first command field is of different type, or, when
+     * we need to re-direct the command to an entity with a different ID.
      *
-     * <pre>{@code
-     * customRouting.route(MyCommandClass.class, (event, context) -> { ... })
-     *              .route(MyCommandInterface.class, (event, context) -> { ... });
-     * }</pre>
+     * ### Routing commands with a common interface
+     * The type of the command can be a class or an interface. If a routing schema needs to
+     * contain entries for command classes *and* an interface that these commands implement, routes
+     * for interfaces should be defined *after* entries for the classes:
      *
+     * ```kotlin
+     * customRouting.route<MyCommandClass> { event, context -> ... }
+     *              .route<MyCommandInterface> { event, context ->  ... }
+     * ```
      * Defining an entry for an interface and then for the class which implements the interface will
-     * result in {@code IllegalStateException}.
+     * result in `IllegalStateException`.
      *
      * @param commandType
      *         the type of the command message
      * @param via
      *         the route to be used for this type of commands
-     * @param <C>
-     *         the type of the command message
-     * @return {@code this} to allow chained calls when configuring the routing
+     * @param C the type of the command message
+     * @return `this` to allow chained calls when configuring the routing.
      * @throws IllegalStateException
-     *         if the route for this command class is already set either directly or
-     *         via a super-interface
+     *          if the route for this command class is already set either directly or
+     *          via a super-interface.
      */
     @CanIgnoreReturnValue
-    public <C extends CommandMessage>
-    CommandRouting<I> route(Class<C> commandType, CommandRoute<I, C> via)
-            throws IllegalStateException {
-        @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        var casted = (RouteFn<CommandMessage, CommandContext, I>) via;
-        addRoute(commandType, casted);
-        return this;
+    public fun <C : CommandMessage> route(
+        commandType: Class<C>,
+        via: CommandRoute<I, C>
+    ): CommandRouting<I> {
+        @Suppress("UNCHECKED_CAST") // The cast is required to adapt the type to internal API.
+        val casted = via as RouteFn<CommandMessage, CommandContext, I>
+        addRoute(commandType, casted)
+        return this
     }
 
     /**
      * Obtains a route for the passed command class.
      *
-     * @param commandClass
-     *         the class of the command messages
-     * @param <C>
-     *         the type of the command message
-     * @return optionally available route
+     * @param C the type of the command message.
+     * @return optionally available route for [C].
      */
-    public <C extends CommandMessage> Optional<CommandRoute<I, C>> get(Class<C> commandClass) {
-        var match = routeFor(commandClass);
-        if (match.found()) {
-            @SuppressWarnings({"unchecked", "RedundantSuppression"})
-            // protected by generic params of this class
-            var result = Optional.of((CommandRoute<I, C>) match.route());
-            return result;
+    public inline fun <reified C : CommandMessage> find(): CommandRoute<I, C>? =
+        find(C::class.java)
+
+    /**
+     * Obtains a route for the passed command class.
+     *
+     * @param commandClass
+     *         the class of the command messages.
+     * @param C the type of the command message.
+     * @return optionally available route for [C].
+     */
+    public fun <C : CommandMessage> find(commandClass: Class<C>): CommandRoute<I, C>? {
+        val match: Match = routeFor(commandClass)
+        return if (match.found()) {
+            @Suppress("UNCHECKED_CAST") // protected by generic params of this class
+            match.route() as CommandRoute<I, C>
+        } else {
+            null
         }
-        return Optional.empty();
+    }
+
+    /**
+     * Obtains a route for the passed command class.
+     */
+    @Deprecated("Use `find` instead.", ReplaceWith("find(commandClass)"))
+    public fun <C : CommandMessage> get(commandClass: Class<C>): Optional<CommandRoute<I, C>> {
+        return Optional.ofNullable(find(commandClass))
+    }
+
+    /**
+     * Removes a route for the passed command class.
+     *
+     * @param C the type of the command for which to remove the routing.
+     * @throws IllegalStateException
+     *          if a custom route for this message class was not previously set.
+     */
+    public inline fun <reified C : CommandMessage> remove(): Unit =
+        remove(C::class.java)
+
+    public companion object {
+
+        @Suppress("ConstPropertyName")
+        private const val serialVersionUID: Long = 0L
+
+        /**
+         * Creates a new command routing.
+         *
+         * @param I
+         *         the type of entity identifiers returned by new routing.
+         * @param idClass
+         *         the class of target entity identifiers.
+         * @return new routing instance.
+         */
+        @JvmStatic
+        public fun <I> newInstance(idClass: Class<I>): CommandRouting<I> {
+            val defaultRoute = DefaultCommandRoute.newInstance(idClass)
+            return CommandRouting(defaultRoute)
+        }
+
+        /**
+         * Tells that the [command] cannot be routed by throwing [IllegalStateException].
+         *
+         * The function is expected to be called by command routing functions
+         * when they cannot route a command.
+         *
+         * @param cause
+         *         the cause of not being able to route a command.
+         *
+         * @throws IllegalStateException always.
+         */
+        @JvmStatic
+        public fun unableToRoute(command: CommandMessage, cause: RejectionThrowable) {
+            throw IllegalStateException("Unable to route command `$command`.", cause)
+        }
     }
 }
