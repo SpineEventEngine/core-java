@@ -71,7 +71,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.Iterators.transform;
-import static io.spine.type.Json.toJson;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
@@ -80,6 +79,7 @@ import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
 import static io.spine.server.dispatch.DispatchOutcomes.maybeSentToInbox;
 import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.tenant.TenantAwareRunner.with;
+import static io.spine.type.Json.toJson;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Objects.requireNonNull;
 
