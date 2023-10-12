@@ -112,7 +112,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
      *         the type of the command message
      * @param via
      *         the route to be used for this type of commands
-     * @param <M>
+     * @param <C>
      *         the type of the command message
      * @return {@code this} to allow chained calls when configuring the routing
      * @throws IllegalStateException
@@ -120,8 +120,8 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
      *         via a super-interface
      */
     @CanIgnoreReturnValue
-    public <M extends CommandMessage>
-    CommandRouting<I> route(Class<M> commandType, CommandRoute<I, M> via)
+    public <C extends CommandMessage>
+    CommandRouting<I> route(Class<C> commandType, CommandRoute<I, C> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
         var casted = (RouteFn<CommandMessage, CommandContext, I>) via;
@@ -134,16 +134,16 @@ public final class CommandRouting<I> extends MessageRouting<CommandMessage, Comm
      *
      * @param commandClass
      *         the class of the command messages
-     * @param <M>
+     * @param <C>
      *         the type of the command message
      * @return optionally available route
      */
-    public <M extends CommandMessage> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
+    public <C extends CommandMessage> Optional<CommandRoute<I, C>> get(Class<C> commandClass) {
         var match = routeFor(commandClass);
         if (match.found()) {
             @SuppressWarnings({"unchecked", "RedundantSuppression"})
             // protected by generic params of this class
-            var result = Optional.of((CommandRoute<I, M>) match.route());
+            var result = Optional.of((CommandRoute<I, C>) match.route());
             return result;
         }
         return Optional.empty();
