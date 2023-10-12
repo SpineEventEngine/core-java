@@ -27,7 +27,7 @@ package io.spine.server.given.context.switchman
 
 import io.spine.server.aggregate.AggregateRepository
 import io.spine.server.given.context.switchman.command.SetSwitch
-import io.spine.server.given.context.switchman.rejection.SwitchmanUnavailable
+import io.spine.server.given.context.switchman.rejection.switchmanUnavailable
 import io.spine.server.route.CommandRouting
 
 /**
@@ -54,15 +54,13 @@ class SwitchmanBureau : AggregateRepository<String, Switchman, SwitchmanLog>() {
          * In case the switchman isn't available, throws a `RuntimeException`.
          */
         private fun routeToSwitchman(cmd: SetSwitch): String {
-            val switchmanName = cmd.switchmanName
-            if (switchmanName == MISSING_SWITCHMAN_NAME) {
-                throw IllegalStateException(
-                    SwitchmanUnavailable.newBuilder()
-                        .setSwitchmanName(switchmanName)
-                        .build()
-                )
+            val name = cmd.switchmanName
+            if (name == MISSING_SWITCHMAN_NAME) {
+                error(switchmanUnavailable {
+                    switchmanName = MISSING_SWITCHMAN_NAME
+                })
             }
-            return switchmanName
+            return name
         }
     }
 }
