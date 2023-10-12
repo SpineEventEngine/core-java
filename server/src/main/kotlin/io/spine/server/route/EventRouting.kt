@@ -25,14 +25,12 @@
  */
 package io.spine.server.route
 
-import com.google.common.base.Preconditions
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.EventMessage
 import io.spine.core.EventContext
 import io.spine.system.server.event.EntityStateChanged
 import java.util.*
 import java.util.function.BiFunction
-import java.util.function.Function
 
 /**
  * A routing schema used to deliver events.
