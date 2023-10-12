@@ -30,11 +30,11 @@ package io.spine.internal.dependency
  * Dependencies on ProtoData modules.
  *
  * In order to use locally published ProtoData version instead of the version from a public plugin
- * registry, set the `PROTO_DATA_VERSION` and/or the `PROTO_DATA_DF_VERSION` environment variables
+ * registry, set the `PROTODATA_VERSION` and/or the `PROTODATA_DF_VERSION` environment variables
  * and stop the Gradle daemons so that Gradle observes the env change:
  * ```
- * export PROTO_DATA_VERSION=0.43.0-local
- * export PROTO_DATA_DF_VERSION=0.41.0
+ * export PROTODATA_VERSION=0.43.0-local
+ * export PROTODATA_DF_VERSION=0.41.0
  *
  * ./gradle --stop
  * ./gradle build   # Conduct the intended checks.
@@ -43,8 +43,8 @@ package io.spine.internal.dependency
  * Then, in order to reset the console to run the usual versions again, remove the values of
  * the environment variables and stop the daemon:
  * ```
- * export PROTO_DATA_VERSION=""
- * export PROTO_DATA_DF_VERSION=""
+ * export PROTODATA_VERSION=""
+ * export PROTODATA_DF_VERSION=""
  *
  * ./gradle --stop
  * ```
@@ -65,7 +65,7 @@ object ProtoData {
      * The version of ProtoData dependencies.
      */
     val version: String
-    private const val fallbackVersion = "0.11.0"
+    private const val fallbackVersion = "0.13.1"
 
     /**
      * The distinct version of ProtoData used by other build tools.
@@ -74,13 +74,15 @@ object ProtoData {
      * transitional dependencies, this is the version used to build the project itself.
      */
     val dogfoodingVersion: String
-    private const val fallbackDfVersion = "0.9.11"
+    private const val fallbackDfVersion = "0.13.1"
 
     /**
      * The artifact for the ProtoData Gradle plugin.
      */
     val pluginLib: String
 
+    val api
+        get() = "$group:protodata-api:$version"
     val compiler
         get() = "$group:protodata-compiler:$version"
     val codegenJava
@@ -89,12 +91,12 @@ object ProtoData {
     /**
      * An env variable storing a custom [version].
      */
-    private const val VERSION_ENV = "PROTO_DATA_VERSION"
+    private const val VERSION_ENV = "PROTODATA_VERSION"
 
     /**
      * An env variable storing a custom [dogfoodingVersion].
      */
-    private const val DF_VERSION_ENV = "PROTO_DATA_DF_VERSION"
+    private const val DF_VERSION_ENV = "PROTODATA_DF_VERSION"
 
     /**
      * Sets up the versions and artifacts for the build to use.
