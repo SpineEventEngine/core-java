@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@
  */
 package io.spine.server.route
 
-import com.google.common.base.Preconditions
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.CommandMessage
 import io.spine.base.RejectionThrowable
@@ -43,22 +42,13 @@ import java.util.*
  *
  * @param I the type of the entity IDs used by this command routing.
  */
-public class CommandRouting<I>
+public class CommandRouting<I: Any>
 private constructor(defaultRoute: CommandRoute<I, CommandMessage>) :
     MessageRouting<CommandMessage, CommandContext, I>(defaultRoute)
 {
     public override fun defaultRoute(): CommandRoute<I, CommandMessage> {
         return super.defaultRoute() as CommandRoute<I, CommandMessage>
     }
-
-    /**
-     * Sets a custom route for the passed command type. Shortcut for [CommandRouting.route].
-     *
-     * @param C the type of the command message to route.
-     */
-    public inline fun <reified C : CommandMessage> route(
-        via: CommandRoute<I, C>
-    ): CommandRouting<I> = route(C::class.java, via)
 
     /**
      * Sets new default route in the schema.
@@ -93,15 +83,33 @@ private constructor(defaultRoute: CommandRoute<I, CommandMessage>) :
      * Defining an entry for an interface and then for the class which implements the interface will
      * result in `IllegalStateException`.
      *
-     * @param commandType
-     *         the type of the command message
      * @param via
-     *         the route to be used for this type of commands
-     * @param C the type of the command message
+     *         the route to be used for this type of commands.
+     * @param C the type of the command message.
      * @return `this` to allow chained calls when configuring the routing.
      * @throws IllegalStateException
      *          if the route for this command class is already set either directly or
      *          via a super-interface.
+     */
+    public inline fun <reified C : CommandMessage> route(
+        via: CommandRoute<I, C>
+    ): CommandRouting<I> = route(C::class.java, via)
+
+    /**
+     * Sets a custom route for the given command type [C].
+     *
+     * This is the Java version of `public inline fun` [route].
+     *
+     * @param commandType
+     *         the type of the command message.
+     * @param via
+     *         the route to be used for this type of commands.
+     * @param C the type of the command message.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException
+     *          if the route for this command class is already set either directly or
+     *          via a super-interface.
+     * @see route
      */
     @CanIgnoreReturnValue
     public fun <C : CommandMessage> route(
@@ -174,7 +182,7 @@ private constructor(defaultRoute: CommandRoute<I, CommandMessage>) :
          * @return new routing instance.
          */
         @JvmStatic
-        public fun <I> newInstance(idClass: Class<I>): CommandRouting<I> {
+        public fun <I: Any> newInstance(idClass: Class<I>): CommandRouting<I> {
             val defaultRoute = DefaultCommandRoute.newInstance(idClass)
             return CommandRouting(defaultRoute)
         }

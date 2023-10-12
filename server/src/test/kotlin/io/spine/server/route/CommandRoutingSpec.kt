@@ -43,15 +43,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 @DisplayName("`CommandRouting` should")
-internal class CommandRoutingTest {
+internal class CommandRoutingSpec {
 
     /** A custom default route.  */
     private val customDefault =
-        CommandRoute { msg: CommandMessage, ctx: CommandContext -> DEFAULT_ANSWER }
+        CommandRoute { _: CommandMessage, _: CommandContext -> DEFAULT_ANSWER }
 
     /** A custom command path for `StringValue` command messages.  */
     private val customRoute =
-        CommandRoute { msg: RegisterUser, ctx: CommandContext -> CUSTOM_ANSWER }
+        CommandRoute { _: RegisterUser, _: CommandContext -> CUSTOM_ANSWER }
 
     /** The object under tests.  */
     private lateinit var commandRouting: CommandRouting<Long>
@@ -133,7 +133,7 @@ internal class CommandRoutingTest {
 
     companion object {
         private val requestFactory = TestActorRequestFactory(
-            CommandRoutingTest::class.java
+            CommandRoutingSpec::class.java
         )
 
         /** Default result of the command routing function.  */

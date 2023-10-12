@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,221 +23,285 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.route
 
-package io.spine.server.route;
-
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
-import io.spine.system.server.event.EntityStateChanged;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Preconditions
+import com.google.errorprone.annotations.CanIgnoreReturnValue
+import io.spine.base.EventMessage
+import io.spine.core.EventContext
+import io.spine.system.server.event.EntityStateChanged
+import java.util.*
+import java.util.function.BiFunction
+import java.util.function.Function
 
 /**
  * A routing schema used to deliver events.
  *
- * <p>A routing schema consists of a default route and custom routes per event class.
- * When calculating a set of event targets, {@code EventRouting} will see if there is
+ * A routing schema consists of a default route and custom routes per event class.
+ * When calculating a set of event targets, `EventRouting` will see if there is
  * a custom route set for the type of the event. If not found, the default route will be
- * {@linkplain EventRoute#apply(Message, Message) applied}.
+ * [applied][EventRoute.apply].
  *
- * @param <I> the type of the entity IDs to which events are routed
+ * @param I the type of the entity IDs to which events are routed.
  */
-public final class EventRouting<I>
-        extends MessageRouting<EventMessage, EventContext, Set<I>>
-        implements EventRoute<I, EventMessage> {
-
-    private static final long serialVersionUID = 0L;
-
-    /**
-     * Creates a new instance with the passed default route.
-     *
-     * @param defaultRoute
-     *        the route to use if a custom one is not {@linkplain #route(Class, EventRoute) set}
-     */
-    private EventRouting(EventRoute<I, EventMessage> defaultRoute) {
-        super(defaultRoute);
-    }
+@Suppress("TooManyFunctions") // We want both inline and Java versions of the methods.
+public class EventRouting<I: Any>
+/**
+ * Creates a new instance with the passed default route.
+ *
+ * @param defaultRoute
+ *         the route to use if a custom one is not [set][.route].
+ */
+private constructor(defaultRoute: EventRoute<I, EventMessage>) :
+    MessageRouting<EventMessage, EventContext, Set<I>>(defaultRoute),
+    EventRoute<I, EventMessage> {
 
     /**
-     * Creates a new event routing with the passed default route.
-     *
-     * @param defaultRoute
-     *         the default route
-     * @param <I>
-     *         the type of entity identifiers returned by new routing
-     * @return new routing instance
+     * Overrides for return type covariance.
      */
-    @CanIgnoreReturnValue
-    public static <I> EventRouting<I> withDefault(EventRoute<I, EventMessage> defaultRoute) {
-        checkNotNull(defaultRoute);
-        return new EventRouting<>(defaultRoute);
-    }
-
-    /**
-     * Creates a new event routing with the default one by event producer ID.
-     *
-     * @see #withDefault(EventRoute)
-     * @see EventRoute#byProducerId()
-     */
-    public static <I> EventRouting<I> withDefaultByProducerId() {
-        return withDefault(EventRoute.byProducerId());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides for return type covariance.
-     */
-    @Override
-    public EventRoute<I, EventMessage> defaultRoute() {
-        return (EventRoute<I, EventMessage>) super.defaultRoute();
+    public override fun defaultRoute(): EventRoute<I, EventMessage> {
+        @Suppress("UNCHECKED_CAST")
+        return super.defaultRoute() as EventRoute<I, EventMessage>
     }
 
     /**
      * Sets new default route in the schema.
      *
      * @param newDefault the new route to be used as default
-     * @return {@code this} to allow chained calls when configuring the routing
+     * @return `this` to allow chained calls when configuring the routing
      */
     @CanIgnoreReturnValue
-    public EventRouting<I> replaceDefault(EventRoute<I, EventMessage> newDefault) {
-        return (EventRouting<I>) super.replaceDefault(newDefault);
+    public fun replaceDefault(newDefault: EventRoute<I, EventMessage>): EventRouting<I> {
+        return super.replaceDefault(newDefault) as EventRouting<I>
     }
 
     /**
      * Sets a custom route for the passed event type.
      *
-     * <p>Such mapping may be required for the following cases:
-     * <ul>
-     *   <li>An event message should be matched to more than one entity, for example, several
-     *   projections updated in response to one event.
-     *   <li>The type of an event producer ID (stored in the event context) differs from the type
-     *   of entity identifiers ({@code <I>}.
-     * </ul>
+     * Such mapping may be required for the following cases:
      *
-     * <p>The type of the event can be a class or an interface. If a routing schema needs to contain
+     *  * An event message should be matched to more than one entity, for example, several
+     * projections updated in response to one event.
+     *  * The type of event producer ID (stored in the event context) differs from the type
+     * of entity identifiers (`<I>`.
+     *
+     * The type of the event can be a class or an interface. If a routing schema needs to contain
      * entries for specific classes and an interface that these classes implement, routes for
-     * interfaces should be defined <em>after</em> entries for the classes:
+     * interfaces should be defined *after* entries for the classes:
      *
-     * <pre>{@code
-     * customRouting.route(MyEventClass.class, (event, context) -> { ... })
-     *              .route(MyEventInterface.class, (event, context) -> { ... });
-     * }</pre>
-     *
+     * ```kotlin
+     * customRouting.route<MyEventClass> { event, context -> ... }
+     *              .route<MyEventInterface> { event, context -> ... }
+     * ```
      * Defining an entry for an interface and then for the class which implements the interface will
-     * result in {@code IllegalStateException}.
+     * result in `IllegalStateException`.
      *
-     * <p>If there is no specific route for an event type, the {@linkplain #defaultRoute()
-     * default route} will be used.
+     * If there is no specific route for an event type, the [default route][defaultRoute]
+     * will be used.
+     *
+     * @param via
+     *         the instance of the route to be used.
+     * @param E the type of the event message.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException
+     *          if the route for this event type is already set either directly or
+     *          via a super-interface.
+     */
+    public inline fun <reified E : EventMessage> route(via: EventRoute<I, in E>): EventRouting<I> =
+        route(E::class.java, via)
+
+    /**
+     * Sets a custom route for the passed event type.
+     *
+     * This is a Java version of `public inline fun` [route].
      *
      * @param eventType
-     *         the type of events to route
+     *         the type of events to route.
      * @param via
-     *         the instance of the route to be used
-     * @param <E>
-     *         the type of the event message
-     * @return {@code this} to allow chained calls when configuring the routing
+     *         the instance of the route to be used.
+     * @param E the type of the event message.
+     * @return `this` to allow chained calls when configuring the routing.
      * @throws IllegalStateException
-     *         if the route for this event type is already set either directly or
-     *         via a super-interface
+     *          if the route for this event type is already set either directly or
+     *          via a super-interface.
      */
     @CanIgnoreReturnValue
-    public <E extends EventMessage>
-    EventRouting<I> route(Class<E> eventType, EventRoute<I, ? super E> via)
-            throws IllegalStateException {
-        @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        var casted = (RouteFn<EventMessage, EventContext, Set<I>>) via;
-        addRoute(eventType, casted);
-        return this;
+    public fun <E : EventMessage> route(
+        eventType: Class<E>,
+        via: EventRoute<I, in E>
+    ): EventRouting<I> {
+        @Suppress("UNCHECKED_CAST") // The cast is required to adapt the type to internal API.
+        val casted = via as RouteFn<EventMessage, EventContext, Set<I>>
+        addRoute(eventType, casted)
+        return this
     }
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity
      * ID from the passed function.
      *
-     * <p>This is a convenience method for configuring routing when an event is to be delivered
-     * to only one entity which ID is calculated from the event message. A simplest case of that
+     * This is a convenience method for configuring routing when an event is to be delivered
+     * to only one entity which ID is calculated from the event message. The simplest case of that
      * would be passing a method reference for an accessor of a field of the event message
      * which contains the ID of interest.
      *
-     * @param eventType
-     *         the type of the event to route
      * @param via
-     *         the function for obtaining the target entity ID
-     * @param <E>
-     *         the type of the event message
-     * @return {@code this} to allow chained calls when configuring routing
-     * @see #route(Class, EventRoute)
-     * @see #unicast(Class, BiFunction)
+     *         the function for obtaining the target entity ID.
+     * @param E the type of the event message.
+     * @return `this` to allow chained calls when configuring routing
+     *
+     * @see route
+     */
+    public inline fun <reified E : EventMessage> unicast(
+        noinline via: (E) -> I
+    ): EventRouting<I> = unicast(E::class.java, via)
+
+    /**
+     * Sets a custom route for the passed event type by obtaining the target entity
+     * ID from the passed function.
+     *
+     * This is a Java version of `public inline fun` [unicast].
+     *
+     * @param eventType
+     *         the type of the event to route.
+     * @param via
+     *         the function for obtaining the target entity ID.
+     * @param E the type of the event message.
+     * @return `this` to allow chained calls when configuring routing.
+     *
+     * @see route
+     * @see unicast
      */
     @CanIgnoreReturnValue
-    public <E extends EventMessage>
-    EventRouting<I> unicast(Class<E> eventType, Function<E, I> via) {
-        checkNotNull(via);
-        return route(eventType, new EventFnRoute<>(via));
-    }
+    public fun <E : EventMessage> unicast(
+        eventType: Class<E>,
+        via: (E) -> I
+    ): EventRouting<I> = route(eventType, EventFnRoute(via))
+
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity
      * ID from the passed function over event message and its context.
      *
-     * <p>This is a convenience method for configuring routing when an event is to be delivered
+     * This is a convenience method for configuring routing when an event is to be delivered
      * to only one entity which ID is calculated from the event message and its context.
      *
-     * @param eventType
-     *         the type of the event to route
      * @param via
-     *         the supplier of the target entity ID
-     * @param <E>
-     *         the type of the event message
-     * @return {@code this} to allow chained calls when configuring routing
-     * @see #route(Class, EventRoute)
-     * @see #unicast(Class, Function)
+     *         the supplier of the target entity ID.
+     * @param E the type of the event message.
+     * @return `this` to allow chained calls when configuring routing.
+     *
+     * @see route
+     */
+    public inline fun <reified E : EventMessage> unicast(
+        noinline via: (E, EventContext) -> I
+    ): EventRouting<I> = unicast(E::class.java, via)
+
+    /**
+     * Sets a custom route for the passed event type by obtaining the target entity
+     * ID from the passed function over event message and its context.
+     *
+     * This is a Java version of `public inline fun` [unicast].
+     *
+     * @param eventType
+     *         the type of the event to route.
+     * @param via
+     *         the supplier of the target entity ID.
+     * @param E the type of the event message.
+     * @return `this` to allow chained calls when configuring routing.
+     *
+     * @see route
+     * @see unicast
      */
     @CanIgnoreReturnValue
-    public <E extends EventMessage>
-    EventRouting<I> unicast(Class<E> eventType, BiFunction<E, EventContext, I> via) {
-        checkNotNull(via);
-        return route(eventType, new EventFnRoute<>(via));
-    }
+    public fun <E : EventMessage> unicast(
+        eventType: Class<E>,
+        via: BiFunction<E, EventContext, I>
+    ): EventRouting<I> = route(eventType, EventFnRoute(via))
 
     /**
      * Sets a custom routing schema for entity state updates.
      *
      * @param routing
-     *         the routing schema for entity state updates
-     * @return {@code this} to allow chained calls when configuring the routing
+     *         the routing schema for entity state updates.
+     * @return `this` to allow chained calls when configuring the routing.
      * @throws IllegalStateException
-     *         if a route for {@link EntityStateChanged} is already set
+     *          if a route for [EntityStateChanged] is already set.
      */
     @CanIgnoreReturnValue
-    public EventRouting<I> routeStateUpdates(StateUpdateRouting<I> routing) {
-        checkNotNull(routing);
-        return route(EntityStateChanged.class, routing.eventRoute());
-    }
+    public fun routeStateUpdates(routing: StateUpdateRouting<I>): EventRouting<I> =
+        route(EntityStateChanged::class.java, routing.eventRoute())
 
     /**
      * Obtains a route for the passed event class.
      *
-     * @param eventClass the class of the event messages
-     * @param <M>        the type of the event message
-     * @return optionally available route
+     * @param E the type of the event message.
+     * @return optionally available route.
      */
-    public <M extends EventMessage> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        var match = routeFor(eventClass);
-        if (match.found()) {
-            @SuppressWarnings({"unchecked", "RedundantSuppression"})
-            // protected by generic params of this class
-            var result = Optional.of((EventRoute<I, M>) match.route());
-            return result;
+    public inline fun <reified E: EventMessage> find(): EventRoute<I, E>? =
+        find(E::class.java)
+
+    /**
+     * Obtains a route for the passed event class.
+     *
+     * @param eventClass
+     *         the class of the event messages.
+     * @param E the type of the event message.
+     * @return optionally available route.
+     */
+    public fun <E : EventMessage> find(eventClass: Class<E>): EventRoute<I, E>? {
+        val match: Match = routeFor(eventClass)
+        return if (match.found()) {
+            @Suppress("UNCHECKED_CAST") // protected by generic params of this class
+            return match.route() as EventRoute<I, E>
+        } else {
+            null
         }
-        return Optional.empty();
+    }
+
+    /**
+     * Obtains a route for the passed event class.
+     */
+    @Deprecated("Use `find` instead.", ReplaceWith("find(eventClass)"))
+    public fun <E : EventMessage> get(eventClass: Class<E>): Optional<EventRoute<I, E>> =
+        Optional.ofNullable(find(eventClass))
+
+    /**
+     * Removes a route for the given event message class.
+     *
+     * @throws IllegalStateException
+     *          if a custom route for this message class was not previously set, or already removed.
+     */
+    public inline fun <reified E : EventMessage> remove(): Unit =
+        remove(E::class.java)
+
+    public companion object {
+
+        @Suppress("ConstPropertyName")
+        private const val serialVersionUID = 0L
+
+        /**
+         * Creates a new event routing with the passed default route.
+         *
+         * @param defaultRoute
+         *         the default route.
+         * @param I the type of entity identifiers returned by new routing.
+         * @return new routing instance.
+         */
+        @JvmStatic
+        @CanIgnoreReturnValue
+        public fun <I : Any> withDefault(
+            defaultRoute: EventRoute<I, EventMessage>
+        ): EventRouting<I> = EventRouting(defaultRoute)
+
+        /**
+         * Creates a new event routing with the default one by event producer ID.
+         *
+         * @see withDefault
+         * @see EventRoute.byProducerId
+         */
+        @JvmStatic
+        public fun <I: Any> withDefaultByProducerId(): EventRouting<I> =
+            withDefault(EventRoute.byProducerId())
     }
 }

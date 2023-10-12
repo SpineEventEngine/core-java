@@ -94,7 +94,7 @@ import static java.util.Objects.requireNonNull;
  *         the type of the state of aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState<I>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository,
@@ -426,7 +426,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
 
     private Set<I> route(EventEnvelope event) {
         var route = route(eventRouting(), event);
-        return route.orElse(ImmutableSet.of());
+        @SuppressWarnings("unchecked")
+        var result = (Set<I>) route.orElse(ImmutableSet.of());
+        return result;
     }
 
     /**
