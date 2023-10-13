@@ -48,7 +48,7 @@ import io.spine.server.route.EventRouting
 class Log : Aggregate<Long, LogState, LogState.Builder>() {
 
     @React
-    fun on(rejection: SwitchmanUnavailable): SwitchmanAbsenceRecorded =
+    internal fun on(rejection: SwitchmanUnavailable): SwitchmanAbsenceRecorded =
         switchmanAbsenceRecorded {
             switchmanName = rejection.switchmanName
             timestamp = Time.currentTime()
@@ -60,7 +60,7 @@ class Log : Aggregate<Long, LogState, LogState.Builder>() {
     }
 
     @React
-    fun on(event: SwitchPositionConfirmed): SwitchWorkRecorded =
+    internal fun on(event: SwitchPositionConfirmed): SwitchWorkRecorded =
         switchWorkRecorded {
             switchId = event.switchId
             switchmanName = event.switchmanName

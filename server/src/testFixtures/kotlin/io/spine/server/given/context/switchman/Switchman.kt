@@ -40,7 +40,7 @@ class Switchman internal constructor(id: String) :
     Aggregate<String, SwitchmanLog, SwitchmanLog.Builder>(id) {
 
     @Assign
-    fun on(cmd: SetSwitch): SwitchPositionConfirmed =
+    internal fun on(cmd: SetSwitch): SwitchPositionConfirmed =
         switchPositionConfirmed {
             switchmanName = id()
             switchId = cmd.switchId

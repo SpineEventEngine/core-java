@@ -73,7 +73,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
     private RouteFn<M, C, R> defaultRoute;
 
     MessageRouting(RouteFn<M, C, R> defaultRoute) {
-        this.defaultRoute = defaultRoute;
+        this.defaultRoute = checkNotNull(defaultRoute);
     }
 
     /**

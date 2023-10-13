@@ -29,6 +29,7 @@ import io.spine.server.aggregate.AggregateRepository
 import io.spine.server.given.context.switchman.command.SetSwitch
 import io.spine.server.given.context.switchman.rejection.SwitchmanUnavailable
 import io.spine.server.route.CommandRouting
+import io.spine.server.route.CommandRouting.Companion.unableToRoute
 
 /**
  * A repository which fires a rejection in response to a command with a particular
@@ -38,7 +39,7 @@ class SwitchmanBureau : AggregateRepository<String, Switchman, SwitchmanLog>() {
 
     override fun setupCommandRouting(routing: CommandRouting<String>) {
         super.setupCommandRouting(routing)
-        routing.route(SetSwitch::class.java) { cmd, _ -> routeToSwitchman(cmd) }
+        routing.route<SetSwitch> { cmd, _ -> routeToSwitchman(cmd) }
     }
 
     companion object {
@@ -54,15 +55,16 @@ class SwitchmanBureau : AggregateRepository<String, Switchman, SwitchmanLog>() {
          * In case the switchman isn't available, throws a `RuntimeException`.
          */
         private fun routeToSwitchman(cmd: SetSwitch): String {
-            val switchmanName = cmd.switchmanName
-            if (switchmanName == MISSING_SWITCHMAN_NAME) {
-                throw IllegalStateException(
+            val name = cmd.switchmanName
+            if (name == MISSING_SWITCHMAN_NAME) {
+                unableToRoute(
+                    cmd,
                     SwitchmanUnavailable.newBuilder()
-                        .setSwitchmanName(switchmanName)
+                        .setSwitchmanName(name)
                         .build()
                 )
             }
-            return switchmanName
+            return name
         }
     }
 }

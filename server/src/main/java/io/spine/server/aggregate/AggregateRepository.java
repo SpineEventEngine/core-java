@@ -71,7 +71,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.Iterators.transform;
-import static io.spine.type.Json.toJson;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.delivery.InboxLabel.HANDLE_COMMAND;
@@ -80,6 +79,7 @@ import static io.spine.server.delivery.InboxLabel.REACT_UPON_EVENT;
 import static io.spine.server.dispatch.DispatchOutcomes.maybeSentToInbox;
 import static io.spine.server.dispatch.DispatchOutcomes.sentToInbox;
 import static io.spine.server.tenant.TenantAwareRunner.with;
+import static io.spine.type.Json.toJson;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Objects.requireNonNull;
 
@@ -94,7 +94,7 @@ import static java.util.Objects.requireNonNull;
  *         the type of the state of aggregates managed by this repository
  * @see Aggregate
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S extends EntityState<I>>
         extends Repository<I, A>
         implements CommandDispatcher, EventProducingRepository,
@@ -426,7 +426,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
 
     private Set<I> route(EventEnvelope event) {
         var route = route(eventRouting(), event);
-        return route.orElse(ImmutableSet.of());
+        @SuppressWarnings("unchecked")
+        var result = (Set<I>) route.orElse(ImmutableSet.of());
+        return result;
     }
 
     /**

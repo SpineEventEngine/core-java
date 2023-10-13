@@ -57,6 +57,8 @@ buildscript {
     doForceVersions(configurations)
     configurations {
         all {
+            exclude(group = "io.spine", module = "spine-flogger-api")
+            exclude(group = "io.spine", module = "spine-logging-backend")
             resolutionStrategy {
                 val spine = io.spine.internal.dependency.Spine
                 force(
@@ -64,7 +66,6 @@ buildscript {
                     spine.toolBase,
                     spine.server,
                     io.spine.internal.dependency.Spine.Logging.lib,
-                    io.spine.internal.dependency.Spine.Logging.backend,
                     io.spine.internal.dependency.Spine.Logging.floggerApi,
                     io.spine.internal.dependency.Validation.runtime,
                 )
@@ -319,8 +320,12 @@ fun Subproject.forceConfigurations() {
         excludeProtobufLite()
 
         all {
+            exclude(group = "io.spine", module = "spine-flogger-api")
+            exclude(group = "io.spine", module = "spine-logging-backend")
+            exclude(group = "io.spine", module = "spine-validate")
+
             resolutionStrategy {
-                exclude("io.spine", "spine-validate")
+
                 force(
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
@@ -335,7 +340,6 @@ fun Subproject.forceConfigurations() {
                     Validation.runtime,
                     Spine.time,
                     Spine.Logging.lib,
-                    Spine.Logging.backend,
                     Spine.Logging.floggerApi,
                     Spine.baseTypes,
                     Spine.change,
