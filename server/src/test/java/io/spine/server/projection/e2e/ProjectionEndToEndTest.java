@@ -66,11 +66,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("`Projection` should")
-class ProjectionEndToEndTest {
+@DisplayName("In end-to-end usage scenario, `Projection` should")
+@SuppressWarnings("WeakerAccess" /* Open for re-using in descendant Spine libraries.*/)
+public class ProjectionEndToEndTest {
 
     @AfterEach
-    void tearDown() {
+    protected void tearDown() {
         ServerEnvironment.instance()
                          .reset();
     }
