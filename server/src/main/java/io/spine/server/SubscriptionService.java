@@ -53,7 +53,6 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.union;
-import static com.google.common.flogger.LazyArgs.lazy;
 import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.server.stand.SubscriptionCallback.forwardingTo;
 import static java.lang.String.format;
@@ -296,8 +295,9 @@ public final class SubscriptionService
             logger().atWarning().log(() -> format(
                     "Trying to cancel a subscription `%s` which could not be found. " +
                             "Cancelling it in all known contexts, where it may reside: %s.",
-                    lazy(subscription::toShortString),
-                    contextsAsString(contexts)));
+                    subscription.toShortString(),
+                    contextsAsString(contexts))
+            );
             var gatheringObserver = StreamObservers.<Response>memoizingObserver();
             for (var context : contexts) {
                 if(context.stand().hasSubscription(subscription.getId())) {

@@ -45,7 +45,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
          */
-        const val base = "2.0.0-SNAPSHOT.189"
+        const val base = "2.0.0-SNAPSHOT.190"
 
         /**
          * The version of [Spine.reflect].
@@ -59,7 +59,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/logging">spine-logging</a>
          */
-        const val logging = "2.0.0-SNAPSHOT.215"
+        const val logging = "2.0.0-SNAPSHOT.232"
 
         /**
          * The version of [Spine.testlib].
@@ -75,7 +75,7 @@ object Spine {
          * @see [Spine.CoreJava.server]
          * @see <a href="https://github.com/SpineEventEngine/core-java">core-java</a>
          */
-        const val core = "2.0.0-SNAPSHOT.157"
+        const val core = "2.0.0-SNAPSHOT.159"
 
         /**
          * The version of [Spine.modelCompiler].
@@ -89,7 +89,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/mc-java">spine-mc-java</a>
          */
-        const val mcJava = "2.0.0-SNAPSHOT.170"
+        const val mcJava = "2.0.0-SNAPSHOT.171"
 
         /**
          * The version of [Spine.baseTypes].
@@ -103,7 +103,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/time">spine-time</a>
          */
-        const val time = "2.0.0-SNAPSHOT.133"
+        const val time = "2.0.0-SNAPSHOT.134"
 
         /**
          * The version of [Spine.change].
@@ -124,7 +124,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/tool-base">spine-tool-base</a>
          */
-        const val toolBase = "2.0.0-SNAPSHOT.183"
+        const val toolBase = "2.0.0-SNAPSHOT.186"
 
         /**
          * The version of [Spine.javadocTools].
@@ -164,11 +164,30 @@ object Spine {
     object Logging {
         const val version = ArtifactVersion.logging
         const val lib = "$group:spine-logging:$version"
-        const val backend = "$group:spine-logging-backend:$version"
-        const val context = "$group:spine-logging-context:$version"
-        const val floggerApi = "$group:spine-flogger-api:$version"
-        const val floggerGrpcContext = "$group:spine-flogger-grpc-context:$version"
+
+        const val log4j2Backend = "$group:spine-logging-log4j2-backend:$version"
+        const val stdContext = "$group:spine-logging-std-context:$version"
+        const val grpcContext = "$group:spine-logging-grpc-context:$version"
         const val smokeTest = "$group:spine-logging-smoke-test:$version"
+
+        // Transitive dependencies.
+        // Make `public` and use them to force a version in a particular repository, if needed.
+        internal const val julBackend = "$group:spine-logging-jul-backend:$version"
+        internal const val middleware = "$group:spine-logging-middleware:$version"
+        internal const val platformGenerator = "$group:spine-logging-platform-generator:$version"
+        internal const val jvmDefaultPlatform = "$group:spine-logging-jvm-default-platform:$version"
+
+        @Deprecated(
+            message = "Please use `Logging.lib` instead.",
+            replaceWith = ReplaceWith("lib")
+        )
+        const val floggerApi = "$group:spine-flogger-api:$version"
+
+        @Deprecated(
+            message = "Please use `grpcContext` instead.",
+            replaceWith = ReplaceWith("grpcContext")
+        )
+        const val floggerGrpcContext = "$group:spine-flogger-grpc-context:$version"
     }
 
     /**

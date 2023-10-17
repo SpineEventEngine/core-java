@@ -136,6 +136,8 @@ public abstract class EventDispatchingRepository<I,
      */
     protected Set<I> route(EventEnvelope event) {
         var targets = route(eventRouting(), event);
-        return targets.orElse(ImmutableSet.of());
+        @SuppressWarnings("unchecked")
+        var result = (Set<I>) targets.orElse(ImmutableSet.of());
+        return result;
     }
 }

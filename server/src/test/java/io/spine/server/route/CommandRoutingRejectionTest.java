@@ -116,6 +116,8 @@ class CommandRoutingRejectionTest {
         // Post a command with the argument which causes rejection in routing.
         var commandToReject = requestFactory.createCommand(
                 SetSwitch.newBuilder()
+                         // This name is specifically checked in the routing function to
+                         // throw an error.
                          .setSwitchmanName(MISSING_SWITCHMAN_NAME)
                          .setSwitchId(generateSwitchId())
                          .setPosition(SwitchPosition.LEFT)
