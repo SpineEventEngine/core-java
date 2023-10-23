@@ -120,18 +120,20 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Enti
     }
 
     /**
-     * Derived classes may override to additionally tune the passed entity builder.
+     * Sets lifecycle flags in the builder from the entity.
      *
-     * <p>Default implementation does nothing.
+     * <p>Derived classes may override to additionally tune
+     * the passed entity builder.
      *
      * @param builder
      *         the entity builder to update
      * @param entity
      *         the entity which data is passed to the {@link EntityRecord} we are building
      */
-    @SuppressWarnings("NoopMethodInAbstractClass") // Avoid forcing empty implementations.
+    @SuppressWarnings("WeakerAccess" /* To allow overriding from outside of this package. */)
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
-        // Do nothing.
+        builder.setVersion(entity.version())
+               .setLifecycleFlags(entity.lifecycleFlags());
     }
 
     /**
