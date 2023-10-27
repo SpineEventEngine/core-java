@@ -31,8 +31,10 @@ import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.Mirror;
 
@@ -194,7 +196,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     }
 
     private class MigrationBatch {
-        private final Collection<EntityRecordWithColumns<I>> entityRecords;
+        private final Collection<RecordWithColumns<I, EntityRecord>> entityRecords;
         private final Collection<Mirror> migratedMirrors;
 
         private MigrationBatch(int expectedSize) {
@@ -218,7 +220,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
             });
         }
 
-        private Collection<EntityRecordWithColumns<I>> entityRecords() {
+        private Collection<RecordWithColumns<I, EntityRecord>> entityRecords() {
             return entityRecords;
         }
 

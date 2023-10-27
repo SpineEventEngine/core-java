@@ -40,10 +40,12 @@ import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.EntityRecordSpec;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.entity.storage.given.TaskViewProjection;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
 import io.spine.test.storage.StgProject;
@@ -73,6 +75,9 @@ public final class EntityRecordStorageTestEnv {
     /** Prevents instantiation of this utility class. */
     private EntityRecordStorageTestEnv() {
     }
+
+    private static final MessageRecordSpec<StgProjectId, EntityRecord> spec =
+            SpecScanner.scan(TestCounterEntity.class);
 
     public static EntityRecord buildStorageRecord(StgProjectId id,
                                                   EntityState<StgProjectId> state) {
@@ -128,16 +133,17 @@ public final class EntityRecordStorageTestEnv {
         TestTransaction.delete(entity);
     }
 
-    public static <I> EntityRecordWithColumns<I> withLifecycleColumns(I id, EntityRecord record) {
-        var result = EntityRecordWithColumns.create(id, record);
+    public static RecordWithColumns<StgProjectId, EntityRecord>
+    withLifecycleColumns(EntityRecord record) {
+        var result = RecordWithColumns.create(record, spec);
         return result;
     }
 
-    public static List<EntityRecordWithColumns<StgProjectId>>
+    public static List<RecordWithColumns<StgProjectId, EntityRecord>>
     recordsWithColumnsFrom(Map<StgProjectId, EntityRecord> recordMap) {
-        return recordMap.entrySet()
+        return recordMap.values()
                 .stream()
-                .map(entry -> withLifecycleColumns(entry.getKey(), entry.getValue()))
+                .map(EntityRecordStorageTestEnv::withLifecycleColumns)
                 .collect(toList());
     }
 
@@ -166,9 +172,9 @@ public final class EntityRecordStorageTestEnv {
         return record;
     }
 
-    public static EntityRecordWithColumns<StgProjectId>
+    public static RecordWithColumns<StgProjectId, EntityRecord>
     recordWithCols(Entity<StgProjectId, ?> entity, EntityRecord record) {
-        return EntityRecordWithColumns.create(entity, record);
+        return RecordWithColumns.create(record, SpecScanner.scan(entity));
     }
 
     public static EntityRecordWithColumns<StgProjectId>
@@ -188,8 +194,8 @@ public final class EntityRecordStorageTestEnv {
         return ImmutableSet.of(name(), estimateInDays(), status(), dueDate());
     }
 
-    public static EntityRecordSpec<TaskViewId, TaskView, TaskViewProjection> spec() {
-        return EntityRecordSpec.of(TaskViewProjection.class);
+    public static MessageRecordSpec<TaskViewId, EntityRecord> spec() {
+        return SpecScanner.scan(TaskViewProjection.class);
     }
 
     @SuppressWarnings("unused") // Reflective access

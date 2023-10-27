@@ -26,6 +26,7 @@
 
 package io.spine.server.entity.storage;
 
+import io.spine.base.EntityState;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.server.entity.Entity;
@@ -34,33 +35,28 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.function.Function;
 
 /**
- * A type of {@link Column}s which values are calculated on top of an instance of {@code Entity}.
- *
- * <p>It serves as an adapter for the columns using another type as a source for extracting
- * values, which may be obtained from an instance of {@code Entity}. In particular, it converts
- * the Entity state-based columns (which originally use Protobuf {@code Message}s as a source
- * for values) into the columns taking {@code Entity} instance to calculate their values.
- * In this way, Entity state-based columns become uniform with other Entity instance-based columns,
- * such as lifecycle columns.
+ * A type of {@link Column}s which values are calculated
+ * on top of an instance of {@code Entity} state.
  *
  * <p>The returning column preserves the name and the type of the wrapped original column.
  *
  * <p>Callee must supply a new getter to extract the value for the resulting column from
- * the {@code Entity}. However, due to the limitations of Java generics, the type of
+ * the {@code Entity} state. However, due to the limitations of Java generics, the type of
  * the returning value is not checked to be the same as the original type of the wrapped column.
  * See the implementation note on this matter.
  *
- * @param <E>
- *         the type of {@code Entity} serving as a source for the column value
+ * @param <S>
+ *         the type of {@code Entity} state serving as a source for the column value
  * @implNote This class uses a raw form of the returning value for
  *         {@link #type() Class type()} method, since it is not possible to use the type of the
  *         wrapped column to parameterize the type of the returning value of {@code Class<T>}.
  */
+// TODO:alex.tymchenko:2023-10-27: kill!
 @SuppressWarnings({"rawtypes", "unchecked"})    /* See the impl. note. */
-final class AsEntityColumn<E extends Entity<?, ?>> implements Column<E, Object> {
+final class AsEntityColumn<S extends EntityState<?>> implements Column<S, Object> {
 
     private final Column<?, ?> column;
-    private final Function<E, Object> getter;
+    private final Function<S, Object> getter;
 
     /**
      * Creates a new instance of the adapter-column.
@@ -68,9 +64,9 @@ final class AsEntityColumn<E extends Entity<?, ?>> implements Column<E, Object> 
      * @param column
      *         the column to wrap
      * @param getter
-     *         a getter extracting the column value from the {@code Entity}
+     *         a getter extracting the column value from the {@code Entity} state
      */
-    AsEntityColumn(Column<?, ?> column, Function<E, Object> getter) {
+    AsEntityColumn(Column<?, ?> column, Function<S, Object> getter) {
         this.column = column;
         this.getter = getter;
     }
@@ -86,7 +82,7 @@ final class AsEntityColumn<E extends Entity<?, ?>> implements Column<E, Object> 
     }
 
     @Override
-    public @Nullable Object valueIn(E source) {
+    public @Nullable Object valueIn(S source) {
         return getter.apply(source);
     }
 }

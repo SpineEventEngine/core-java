@@ -28,15 +28,11 @@ package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
-import io.spine.base.EntityState;
 import io.spine.base.Identifier;
-import io.spine.protobuf.AnyPacker;
 import io.spine.query.ColumnName;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.WithLifecycle;
-import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.RecordWithColumns;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -62,28 +58,25 @@ public final class EntityRecordWithColumns<I>
         super(id, record, columns);
     }
 
-    /**
-     * Creates the new instance of {@code EntityRecordWithColumns} by evaluating the values
-     * of the passed columns for the passed entity.
-     *
-     * @param entity
-     *         the entity to use as a provider of the record identifier and the column values
-     * @param record
-     *         the record prepared for storage
-     * @param <I>
-     *         the type of the entity identifiers
-     * @param <E>
-     *         the type of the entity
-     * @return a new instance of {@code EntityRecordWithColumns}
-     */
-    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
-    EntityRecordWithColumns<I> create(E entity, EntityRecord record) {
-        checkNotNull(entity);
-        checkNotNull(record);
-        var recordSpec = EntityRecordSpec.of(entity);
-        var storageFields = recordSpec.valuesIn(entity);
-        return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
-    }
+    // TODO:alex.tymchenko:2023-10-27: kill!
+//    /**
+//     * Creates the new instance of {@code EntityRecordWithColumns} by evaluating the values
+//     * of the passed columns for the passed entity.
+//     *
+//     * @param record
+//     *         the record prepared for storage
+//     * @param <I>
+//     *         the type of the entity identifiers
+//     * @return a new instance of {@code EntityRecordWithColumns}
+//     */
+//    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
+//    EntityRecordWithColumns<I> create(E entity, EntityRecord record) {
+//        checkNotNull(entity);
+//        checkNotNull(record);
+//        var recordSpec = EntityRecordSpec.of(entity);
+//        var storageFields = recordSpec.valuesIn(entity);
+//        return new EntityRecordWithColumns<>(entity.id(), record, storageFields);
+//    }
 
     /**
      * Creates the new instance of {@code EntityRecordWithColumns} using the pre-created
@@ -107,49 +100,51 @@ public final class EntityRecordWithColumns<I>
         return new EntityRecordWithColumns<>(id, record, lifecycleValues);
     }
 
-    /**
-     * Creates a new instance of {@code EntityRecordWithColumns} using the pre-created
-     * entity record and the entity class.
-     *
-     * <p>This method considers both lifecycle and state-based columns.
-     *
-     * <p>It is a responsibility of the caller to provide a record with the matching
-     * identifier and state types.
-     *
-     * @param record
-     *         the record prepared for storage
-     * @param entityClass
-     *         the class of entity which is stored as the given {@code EntityRecord}
-     * @param <I>
-     *         the type of the entity's identifier
-     * @param <S>
-     *         the type of the entity's state
-     * @param <E>
-     *         the type of the entity
-     */
-    @SuppressWarnings("unchecked") // see the docs.
-    public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
-    create(EntityRecord record, Class<E> entityClass) {
-        checkNotNull(record);
-        checkNotNull(entityClass);
+//    /**
+//     * Creates a new instance of {@code EntityRecordWithColumns} using the pre-created
+//     * entity record and the entity class.
+//     *
+//     * <p>This method considers both lifecycle and state-based columns.
+//     *
+//     * <p>It is a responsibility of the caller to provide a record with the matching
+//     * identifier and state types.
+//     *
+//     * @param record
+//     *         the record prepared for storage
+//     * @param entityClass
+//     *         the class of entity which is stored as the given {@code EntityRecord}
+//     * @param <I>
+//     *         the type of the entity's identifier
+//     * @param <S>
+//     *         the type of the entity's state
+//     * @param <E>
+//     *         the type of the entity
+//     */
+//    @SuppressWarnings("unchecked") // see the docs.
+//    public static <I, S extends EntityState<I>, E extends Entity<I, S>> EntityRecordWithColumns<I>
+//    create(EntityRecord record, Class<E> entityClass) {
+//        checkNotNull(record);
+//        checkNotNull(entityClass);
+//
+//        var stateValues = stateColumnsFrom(record, entityClass);
+//        var lifecycleValues = EntityRecordColumn.valuesIn(record);
+//        var allColumnValues = merge(stateValues, lifecycleValues);
+//        var result = (EntityRecordWithColumns<I>) of(record, allColumnValues);
+//        return result;
+//    }
 
-        var stateValues = stateColumnsFrom(record, entityClass);
-        var lifecycleValues = EntityRecordColumn.valuesIn(record);
-        var allColumnValues = merge(stateValues, lifecycleValues);
-        var result = (EntityRecordWithColumns<I>) of(record, allColumnValues);
-        return result;
-    }
-
-    @SuppressWarnings("unchecked") /* See the docs for `create(record, entityClass)`. */
-    private static <I, S extends EntityState<I>, E extends Entity<I, S>>
-    Map<ColumnName, @Nullable Object> stateColumnsFrom(EntityRecord record, Class<E> entityClass) {
-        var entityClazz = EntityClass.asParameterizedEntityClass(entityClass);
-        var columnsScanner = new Scanner<>(entityClazz);
-        var entityState = (S) AnyPacker.unpack(record.getState());
-
-        var stateValues = columnsScanner.stateColumns().valuesIn(entityState);
-        return stateValues;
-    }
+    // TODO:alex.tymchenko:2023-10-27: kill?
+//    @SuppressWarnings("unchecked") /* See the docs for `create(record, entityClass)`. */
+//    private static <I, S extends EntityState<I>, E extends Entity<I, S>>
+//    Map<ColumnName, @Nullable Object> stateColumnsFrom(EntityRecord record, Class<E> entityClass) {
+//        // TODO:alex.tymchenko:2023-10-27: reuse this expression?
+//        var entityClazz = EntityClass.asParameterizedEntityClass(entityClass);
+//        var columnsScanner = new Scanner<>(entityClazz);
+//        var entityState = (S) AnyPacker.unpack(record.getState());
+//
+//        var stateValues = columnsScanner.stateColumns().valuesIn(entityState);
+//        return stateValues;
+//    }
 
     private static Map<ColumnName, Object> merge(Map<ColumnName, @Nullable Object> stateValues,
                                                  Map<ColumnName, Object> lifecycleValues) {

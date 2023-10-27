@@ -39,12 +39,15 @@ import io.spine.query.Subject;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
 
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
 import static io.spine.server.entity.storage.EntityRecordColumn.isLifecycleColumn;
@@ -73,6 +76,8 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     private final RecordQuery<I, EntityRecord> findActiveRecordsQuery;
 
+    private final Class<S> stateClass;
+
     /**
      * Creates a new instance.
      *
@@ -80,20 +85,42 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      * is created. It may be used by other framework libraries and SPI users to set properties
      * of an underlying DBMS (such as DB table names), with which this record storage interacts.
      *
-     * @param context specification of the Bounded Context in which the created storage will be used
-     * @param factory storage factory
-     * @param entityClass class of an Entity which data is stored in the created storage
+     * @param context
+     *         specification of the Bounded Context in which the created storage will be used
+     * @param factory
+     *         storage factory
+     * @param entityClass
+     *         class of an Entity which data is stored in the created storage
      */
     public EntityRecordStorage(ContextSpec context,
                                StorageFactory factory,
                                Class<? extends Entity<I, S>> entityClass) {
-        super(context, factory.createRecordStorage(context, spec(entityClass)));
+        super(context, factory.createRecordStorage(context, messageSpec(entityClass)));
         this.findActiveRecordsQuery = findActiveRecords();
+        this.stateClass = stateClassOf(entityClass);
     }
 
-    private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
-    spec(Class<? extends Entity<I, S>> entityClass) {
-        return EntityRecordSpec.of(entityClass);
+    // TODO:alex.tymchenko:2023-10-27: kill!
+//    private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
+//    spec(Class<? extends Entity<I, S>> entityClass) {
+//        return EntityRecordSpec.of(entityClass);
+//    }
+
+    @SuppressWarnings("unchecked" /* Safety of casts is guaranteed by `I` and `S` boundaries. */)
+    private static <I, S extends EntityState<I>> MessageRecordSpec<I, EntityRecord>
+    messageSpec(Class<? extends Entity<I, S>> entityClass) {
+        var cls = asEntityClass(entityClass);
+        var idClass = (Class<I>) cls.idClass();
+        var stateClass = (Class<S>) cls.stateClass();
+        var spec = SpecScanner.scan(idClass, stateClass);
+        return spec;
+    }
+
+    /**
+     * Returns the type of the state for the entities, which records are stored.
+     */
+    public final Class<S> stateClass() {
+        return stateClass;
     }
 
     /**
@@ -195,7 +222,8 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public synchronized void write(I id, EntityRecord record) {
-        var wrapped = EntityRecordWithColumns.create(id, record);
+        // TODO:alex.tymchenko:2023-10-27: check that ID matches.
+        var wrapped = RecordWithColumns.create(record, recordSpec());
         write(wrapped);
     }
 
@@ -238,13 +266,12 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     @Internal
     @Override
     @SuppressWarnings("unchecked")  // Guaranteed by the generic declaration of `EntityRecordSpec`.
-    public final EntityRecordSpec<I, S, ?> recordSpec() {
-        return (EntityRecordSpec<I, S, ?>) super.recordSpec();
+    public final MessageRecordSpec<I, EntityRecord> recordSpec() {
+        return (MessageRecordSpec<I, EntityRecord>) super.recordSpec();
     }
 
-    @SuppressWarnings("unchecked")  // ensured by the `Entity` declaration.
     private Class<I> idType() {
-        return (Class<I>) recordSpec().entityClass().idClass();
+        return recordSpec().idType();
     }
 
     private static boolean hasNoIds(Query<?, ?> query) {

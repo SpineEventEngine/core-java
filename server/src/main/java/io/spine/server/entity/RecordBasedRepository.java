@@ -503,8 +503,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     RecordWithColumns<I, EntityRecord> toRecord(E entity) {
         var record = storageConverter().convert(entity);
         requireNonNull(record);
-        RecordWithColumns<I, EntityRecord> result =
-                EntityRecordWithColumns.create(entity, record);
+        var result = RecordWithColumns.create(record, recordStorage().recordSpec());
         return result;
     }
 

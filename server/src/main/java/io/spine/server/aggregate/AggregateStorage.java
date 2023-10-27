@@ -40,10 +40,10 @@ import io.spine.query.EntityQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.QueryConverter;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -368,14 +368,12 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     private Class<? extends EntityState<?>> stateClass() {
-        return stateStorage.recordSpec()
-                           .entityClass()
-                           .stateClass();
+        return stateStorage.stateClass();
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
         var record = AggregateRecords.newStateRecord(aggregate, queryingEnabled);
-        var result = EntityRecordWithColumns.create(aggregate, record);
+        var result = RecordWithColumns.create(record, stateStorage.recordSpec());
         stateStorage.write(result);
     }
 

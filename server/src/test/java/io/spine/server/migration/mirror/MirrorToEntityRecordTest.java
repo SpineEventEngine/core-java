@@ -26,9 +26,10 @@
 
 package io.spine.server.migration.mirror;
 
-import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.migration.mirror.given.ParcelAgg;
 import io.spine.server.migration.mirror.given.ParcelId;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.system.server.Mirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,10 +37,10 @@ import org.junit.jupiter.api.Test;
 import java.util.function.Function;
 
 import static io.spine.server.migration.mirror.given.DeliveryService.generateCourier;
-import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertLifecycleColumns;
-import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertStateColumns;
 import static io.spine.server.migration.mirror.given.DeliveryService.generateInProgressParcel;
 import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertEntityRecord;
+import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertLifecycleColumns;
+import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.assertStateColumns;
 import static io.spine.server.migration.mirror.given.MirrorToEntityRecordTestEnv.mirror;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -49,7 +50,7 @@ final class MirrorToEntityRecordTest {
     @Test
     @DisplayName("transform a `Mirror` into an `EntityRecordWithColumns`")
     void mapMirrorToEntityRecord() {
-        Function<Mirror, EntityRecordWithColumns<ParcelId>> transformation =
+        Function<Mirror, RecordWithColumns<ParcelId, EntityRecord>> transformation =
                 new MirrorToEntityRecord<>(ParcelAgg.class);
 
         var parcel = generateInProgressParcel();

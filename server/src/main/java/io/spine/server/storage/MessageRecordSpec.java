@@ -26,6 +26,7 @@
 
 package io.spine.server.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -150,6 +151,14 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
     @Override
     public ImmutableSet<Column<?, ?>> columns() {
         return ImmutableSet.copyOf(columns.values());
+    }
+
+    /**
+     * Returns the total number of columns in this specification.
+     */
+    @VisibleForTesting
+    public int columnCount() {
+        return columns.size();
     }
 
     @Override

@@ -30,6 +30,8 @@ import io.spine.base.EntityState;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.SpecScanner;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.system.server.Mirror;
 
 import javax.annotation.concurrent.Immutable;
@@ -56,7 +58,7 @@ import java.util.function.Function;
  */
 @Immutable
 final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>>
-        implements Function<Mirror, EntityRecordWithColumns<I>> {
+        implements Function<Mirror, RecordWithColumns<I, EntityRecord>> {
 
     private final Class<A> aggregateClass;
 
@@ -76,14 +78,15 @@ final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregat
      * its identifier and/or state types differ from the ones, declared for the aggregate.
      */
     @Override
-    public EntityRecordWithColumns<I> apply(Mirror mirror) {
+    public RecordWithColumns<I, EntityRecord> apply(Mirror mirror) {
         var record = EntityRecord.newBuilder()
                 .setEntityId(mirror.getId().getValue())
                 .setState(mirror.getState())
                 .setVersion(mirror.getVersion())
                 .setLifecycleFlags(mirror.getLifecycle())
                 .build();
-        var recordWithColumns = EntityRecordWithColumns.create(record, aggregateClass);
+        var spec = SpecScanner.scan(aggregateClass);
+        var recordWithColumns = RecordWithColumns.create(record, spec);
         return recordWithColumns;
     }
 }

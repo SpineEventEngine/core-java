@@ -37,8 +37,8 @@ import io.spine.client.DeletedColumn;
 import io.spine.query.ColumnName;
 import io.spine.query.RecordColumn;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.given.EntityWithoutCustomColumns;
 import io.spine.server.entity.storage.given.TestEntity;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.given.TestColumnMapping;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
@@ -137,18 +137,19 @@ class EntityRecordWithColumnsTest {
         assertThrows(IllegalStateException.class, () -> record.columnValue(nonExistentName));
     }
 
-    @Test
-    @DisplayName("have `Entity` lifecycle columns even if the entity does not define custom ones")
-    void supportEmptyColumns() {
-        var entity = new EntityWithoutCustomColumns(TASK_ID);
-
-        var columns = EntityRecordSpec.of(entity);
-        var storageFields = columns.valuesIn(entity);
-
-        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        assertThat(record.columnNames())
-                .containsExactlyElementsIn(EntityRecordColumn.names());
-    }
+    // TODO:alex.tymchenko:2023-10-27: kill?
+//    @Test
+//    @DisplayName("have `Entity` lifecycle columns even if the entity does not define custom ones")
+//    void supportEmptyColumns() {
+//        var entity = new EntityWithoutCustomColumns(TASK_ID);
+//
+//        var columns = EntityRecordSpec.of(entity);
+//        var storageFields = columns.valuesIn(entity);
+//
+//        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+//        assertThat(record.columnNames())
+//                .containsExactlyElementsIn(EntityRecordColumn.names());
+//    }
 
     @Test
     @DisplayName("return column value by column name")
@@ -191,23 +192,24 @@ class EntityRecordWithColumnsTest {
     @DisplayName("support being initialized with")
     class BeInitializedWith {
 
-        @Test
-        @DisplayName("an `Entity` identifier and a record")
-        void idAndRecord() {
-            var rawRecord = sampleEntityRecord();
-            Long id = 199L;
-            var result = EntityRecordWithColumns.create(id, rawRecord);
-            assertThat(result).isNotNull();
-            assertThat(result.id()).isEqualTo(id);
-            assertThat(result.record()).isEqualTo(rawRecord);
-        }
+        // TODO:alex.tymchenko:2023-10-27: kill!
+//        @Test
+//        @DisplayName("an `Entity` identifier and a record")
+//        void idAndRecord() {
+//            var rawRecord = sampleEntityRecord();
+//            Long id = 199L;
+//            var result = EntityRecordWithColumns.create(id, rawRecord);
+//            assertThat(result).isNotNull();
+//            assertThat(result.id()).isEqualTo(id);
+//            assertThat(result.record()).isEqualTo(rawRecord);
+//        }
 
         @Test
         @DisplayName("an `Entity` and a record")
         void entityAndRecord() {
             var entity = new TestEntity(PROJECT_ID);
             var rawRecord = sampleEntityRecord();
-            var result = EntityRecordWithColumns.create(entity, rawRecord);
+            var result = RecordWithColumns.create(rawRecord, SpecScanner.scan(entity));
             assertThat(result).isNotNull();
             assertThat(result.id()).isEqualTo(PROJECT_ID);
             assertThat(result.record()).isEqualTo(rawRecord);

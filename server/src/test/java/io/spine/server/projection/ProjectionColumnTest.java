@@ -30,9 +30,10 @@ import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.client.VersionColumn;
 import io.spine.query.ColumnName;
-import io.spine.server.entity.storage.EntityRecordSpec;
-import io.spine.server.projection.given.SavedString;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.projection.given.SavingProjection;
+import io.spine.server.storage.MessageRecordSpec;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,8 +44,8 @@ import static com.google.common.truth.Truth8.assertThat;
 @DisplayName("`Projection` should have columns")
 class ProjectionColumnTest {
 
-    private static final EntityRecordSpec<String, SavedString, SavingProjection> recordSpec =
-            EntityRecordSpec.of(SavingProjection.class);
+    private static final MessageRecordSpec<String, EntityRecord> recordSpec =
+            SpecScanner.scan(SavingProjection.class);
 
     @Test
     @DisplayName("`version`")
