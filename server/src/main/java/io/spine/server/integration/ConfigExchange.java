@@ -66,7 +66,7 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
 
     /**
      * Starts observing the {@link ExternalEventsWanted} messages sent by other Bounded Contexts
-     * and, if applicable, creates the corresponding subscriptions in the passed {@code bus}.
+     * and, if applicable, creates the corresponding subscriptions in passed {@code bus}.
      *
      * <p>After such subscriptions are created, the matching events travelling through the bus
      * will be transmitted to other Bounded Contexts via this exchange.
