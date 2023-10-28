@@ -170,10 +170,10 @@ public abstract class BlackBox implements WithLogging, Closeable {
         this.failedHandlerGuard = new FailedHandlerGuard();
         this.actor = defaultActor();
         builder.addCommandListener(commands)
-              .addEventListener(events)
-              .addEventDispatcher(failedHandlerGuard)
-              .addEventDispatcher(new UnsupportedCommandGuard(builder.name().getValue()))
-              .addEventDispatcher(DiagnosticLog.instance());
+               .addEventListener(events)
+               .addEventDispatcher(failedHandlerGuard)
+               .addEventDispatcher(new UnsupportedCommandGuard(builder.name().getValue()))
+               .addEventDispatcher(DiagnosticLog.instance());
         var created = this;
         builder.setOnBuild(context -> {
             created.clientFactory = new ClientFactory(context);
