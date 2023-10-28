@@ -52,8 +52,8 @@ final class MtBlackBox extends BlackBox {
     /**
      * Creates a new multi-tenant instance.
      */
-    MtBlackBox(BoundedContextBuilder b) {
-        super(b);
+    MtBlackBox(BoundedContextBuilder b, @Nullable Runnable customCleanup) {
+        super(b, customCleanup);
     }
 
     /**

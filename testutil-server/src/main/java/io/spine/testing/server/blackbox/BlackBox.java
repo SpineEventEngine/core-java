@@ -58,12 +58,14 @@ import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -73,7 +75,6 @@ import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.server.blackbox.Actor.defaultActor;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -91,12 +92,12 @@ public abstract class BlackBox implements WithLogging, Closeable {
     /**
      * The context under the test.
      */
-    private final BoundedContext context;
+    private @MonotonicNonNull BoundedContext context;
 
     /**
      * A factory of {@link Client}s which send requests to this context.
      */
-    private final ClientFactory clientFactory;
+    private @MonotonicNonNull ClientFactory clientFactory;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -140,35 +141,61 @@ public abstract class BlackBox implements WithLogging, Closeable {
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
     public static BlackBox from(BoundedContextBuilder builder) {
+        var supplier = initLazilyFrom(builder, null);
+        var ignored = builder.build();
+        return supplier.get();
+    }
+
+    /**
+     * Creates new instance obtaining configuration parameters from the passed builder.
+     *
+     * @param builder
+     *         the builder of the context under the test
+     * @param customCleanup
+     *         if not `null`, the procedure to be executed in {@link #close()}
+     *         <em>before</em> closing other resources of the blackbox
+     */
+    public static BlackBox from(BoundedContextBuilder builder, @Nullable Runnable customCleanup) {
         var result =
                 builder.isMultitenant()
-                ? new MtBlackBox(builder)
-                : new StBlackBox(builder);
+                ? new MtBlackBox(builder, customCleanup)
+                : new StBlackBox(builder, customCleanup);
         return result;
     }
 
-    BlackBox(BoundedContextBuilder builder) {
+    public static Supplier<BlackBox> initLazilyFrom(BoundedContextBuilder builder,
+                                                    @Nullable Runnable customCleanup) {
+        var result = new AtomicReference<BlackBox>();
+        builder.setOnBeforeBuild(configuredBuilder -> {
+            var box = builder.isMultitenant()
+                      ? new MtBlackBox(configuredBuilder, customCleanup)
+                      : new StBlackBox(configuredBuilder, customCleanup);
+            result.set(box);
+        });
+        return result::get;
+    }
+
+    BlackBox(BoundedContextBuilder builder, @Nullable Runnable customCleanup) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
         this.events = new EventCollector();
         this.postedEvents = synchronizedSet(new HashSet<>());
         this.failedHandlerGuard = new FailedHandlerGuard();
-        var wiredCopy = wiredCopyOf(builder);
-        this.context = wiredCopy.build();
         this.actor = defaultActor();
-        this.clientFactory = new ClientFactory(context);
-    }
-
-    private BoundedContextBuilder wiredCopyOf(BoundedContextBuilder builder) {
-        var result = builder.testingCopy();
-        result.addCommandListener(commands)
+        builder.addCommandListener(commands)
               .addEventListener(events)
               .addEventDispatcher(failedHandlerGuard)
-              .addEventDispatcher(new UnsupportedCommandGuard(result.name()
-                                                                    .getValue()))
+              .addEventDispatcher(new UnsupportedCommandGuard(builder.name().getValue()))
               .addEventDispatcher(DiagnosticLog.instance());
-        return result;
+        if(customCleanup != null) {
+            builder.setOnBeforeClose((ignored) -> customCleanup.run());
+        }
+        var created = this;
+        builder.setOnBuild(context -> {
+            created.clientFactory = new ClientFactory(context);
+            created.context = context;
+        });
     }
 
     /**
@@ -478,20 +505,13 @@ public abstract class BlackBox implements WithLogging, Closeable {
      */
     @Override
     public final void close() {
-        if (!isOpen()) {
-            return;
-        }
-        try {
-            context.close();
-            clientFactory.close();
-        } catch (Exception e) {
-            throw illegalStateWithCauseOf(e);
-        }
+        context.closeIfOpen();
+        clientFactory.closeIfOpen();
     }
 
     @Override
     public boolean isOpen() {
-        return context().isOpen();
+        return context.isOpen() || clientFactory.isOpen();
     }
 
     /**

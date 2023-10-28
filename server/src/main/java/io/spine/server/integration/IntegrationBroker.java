@@ -29,6 +29,7 @@ package io.spine.server.integration;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.server.BoundedContext;
+import io.spine.server.Closeable;
 import io.spine.server.ContextAware;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.EventDispatcher;
@@ -115,7 +116,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  * between the Contexts.
  */
 @Internal
-public final class IntegrationBroker implements ContextAware, AutoCloseable {
+public final class IntegrationBroker implements ContextAware, Closeable {
 
     private final SubscriberHub subscriberHub;
     private final PublisherHub publisherHub;
@@ -201,6 +202,11 @@ public final class IntegrationBroker implements ContextAware, AutoCloseable {
         }
         subscriberHub.close();
         publisherHub.close();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return subscriberHub.isOpen();
     }
 
     @Override

@@ -33,6 +33,7 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.testing.client.TestActorRequestFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -42,8 +43,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 final class StBlackBox extends BlackBox {
 
-    StBlackBox(BoundedContextBuilder b) {
-        super(b);
+    StBlackBox(BoundedContextBuilder b, @Nullable Runnable customCleanup) {
+        super(b, customCleanup);
     }
 
     @Override

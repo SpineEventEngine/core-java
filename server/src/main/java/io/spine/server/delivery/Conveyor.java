@@ -54,13 +54,13 @@ import static java.util.stream.Collectors.toList;
  * <p>Collects the state updates of the messages and allows to flush the pending changes to the
  * respective {@link InboxStorage} in a bulk.
  *
- * <p>By accessing the {@linkplain DeliveredMessages cache}, knows which messages were marked
+ * <p>By accessing the {@linkplain DeliveredMessagesCache cache}, knows which messages were marked
  * delivered by the instances of {@code Conveyor} in the previous {@code DeliveryStage}s.
  */
 final class Conveyor implements Iterable<InboxMessage> {
 
     private final Map<InboxMessageId, InboxMessage> messages = new LinkedHashMap<>();
-    private final DeliveredMessages deliveredMessages;
+    private final DeliveredMessagesCache deliveredMessagesCache;
     private final Set<InboxMessageId> dirtyMessages = new HashSet<>();
     private final Set<InboxMessage> removals = new HashSet<>();
     private final Set<InboxMessage> duplicates = new HashSet<>();
@@ -71,11 +71,11 @@ final class Conveyor implements Iterable<InboxMessage> {
      *
      * @param messages
      *         messages to process
-     * @param deliveredMessages
+     * @param deliveredMessagesCache
      *         cache of the previously delivered messages
      */
-    Conveyor(Collection<InboxMessage> messages, DeliveredMessages deliveredMessages) {
-        this.deliveredMessages = deliveredMessages;
+    Conveyor(Collection<InboxMessage> messages, DeliveredMessagesCache deliveredMessagesCache) {
+        this.deliveredMessagesCache = deliveredMessagesCache;
         for (var message : messages) {
             this.messages.put(message.getId(), message);
         }
@@ -97,7 +97,7 @@ final class Conveyor implements Iterable<InboxMessage> {
      */
     void markDelivered(InboxMessage message) {
         changeStatus(message, DELIVERED);
-        deliveredMessages.recordDelivered(message);
+        deliveredMessagesCache.recordDelivered(message);
     }
 
     /**
@@ -191,13 +191,13 @@ final class Conveyor implements Iterable<InboxMessage> {
      *
      * <p>This includes both the IDs of messages delivered within the lifetime of this conveyor
      * instance and of the messages delivered
-     * {@linkplain Conveyor#Conveyor(Collection, DeliveredMessages) before it}.
+     * {@linkplain Conveyor#Conveyor(Collection, DeliveredMessagesCache) before it}.
      */
     Set<DispatchingId> allDelivered() {
         var recentlyDelivered = recentlyDelivered()
                 .map(DispatchingId::new)
                 .collect(Collectors.toSet());
-        var result = Sets.union(recentlyDelivered, deliveredMessages.allDelivered());
+        var result = Sets.union(recentlyDelivered, deliveredMessagesCache.allDelivered());
         return result;
     }
 

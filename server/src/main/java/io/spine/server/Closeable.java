@@ -27,6 +27,7 @@
 package io.spine.server;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * Base interface for server-side objects that may hold resources that need to be released
@@ -55,5 +56,22 @@ public interface Closeable extends AutoCloseable {
      */
     default void checkOpen() throws IllegalStateException {
         checkState(isOpen(), "`%s` is already closed.", this);
+    }
+
+    /**
+     * Performs the release of the resources held by this object only if it is still open.
+     * Otherwise, does nothing.
+     *
+     * @throws IllegalStateException
+     *          if an exception occurs on {@link #close()}
+     */
+    default void closeIfOpen() {
+        if (isOpen()) {
+            try {
+                close();
+            } catch (Exception e) {
+                throw illegalStateWithCauseOf(e);
+            }
+        }
     }
 }

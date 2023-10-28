@@ -26,6 +26,7 @@
 package io.spine.server.transport;
 
 import io.spine.annotation.SPI;
+import io.spine.server.Closeable;
 
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +46,7 @@ import static java.util.Collections.unmodifiableSet;
  *         the type of grouped channels
  */
 @SPI
-public abstract class ChannelHub<C extends MessageChannel> implements AutoCloseable {
+public abstract class ChannelHub<C extends MessageChannel> implements Closeable {
 
     private final TransportFactory transportFactory;
     private final Map<ChannelId, C> channels = new ConcurrentHashMap<>();
@@ -110,6 +111,11 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
             }
         }
         return toRemove;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return !channels.isEmpty();
     }
 
     @Override

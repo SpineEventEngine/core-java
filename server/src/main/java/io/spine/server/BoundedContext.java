@@ -59,6 +59,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -86,7 +87,7 @@ import static java.lang.String.format;
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
  *         Martin Fowler on Bounded Contexts</a>
  */
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class BoundedContext
         implements Comparable<BoundedContext>,
                    Closeable,
@@ -122,6 +123,8 @@ public abstract class BoundedContext
     /** Provides access to internally-used features of the context. */
     private final InternalAccess internalAccess;
 
+    private final @Nullable Consumer<BoundedContext> onBeforeClose;
+
     /**
      * Creates new instance.
      *
@@ -145,6 +148,8 @@ public abstract class BoundedContext
         this.importBus = buildImportBus(tenantIndex);
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
         this.internalAccess = new InternalAccess();
+        this.onBeforeClose = builder.getOnBeforeClose();
+
     }
 
     /**
@@ -421,19 +426,29 @@ public abstract class BoundedContext
      */
     @Override
     public void close() throws Exception {
-        commandBus.close();
-        eventBus.close();
-        broker.close();
-        stand.close();
-        importBus.close();
-        shutDownRepositories();
+        var isOpen = isOpen();
+        if (isOpen && onBeforeClose != null) {
+            onBeforeClose.accept(this);
+        }
 
-        logger().atDebug().log(() -> format("%s", closed(nameForLogging())));
+        commandBus.closeIfOpen();
+        eventBus.closeIfOpen();
+        broker.closeIfOpen();
+        stand.closeIfOpen();
+        importBus.closeIfOpen();
+
+        if (isOpen) {
+            shutDownRepositories();
+        }
+
+        if (isOpen) {
+            logger().atDebug().log(() -> format("%s", closed(nameForLogging())));
+        }
     }
 
     @Override
     public boolean isOpen() {
-        return !guard.isClosed();
+        return commandBus.isOpen();
     }
 
     final String nameForLogging() {
