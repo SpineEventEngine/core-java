@@ -141,41 +141,27 @@ public abstract class BlackBox implements WithLogging, Closeable {
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
     public static BlackBox from(BoundedContextBuilder builder) {
-        var supplier = initLazilyFrom(builder, null);
+        var supplier = initLazilyFrom(builder);
         var ignored = builder.build();
         return supplier.get();
     }
 
     /**
-     * Creates new instance obtaining configuration parameters from the passed builder.
-     *
-     * @param builder
-     *         the builder of the context under the test
-     * @param customCleanup
-     *         if not `null`, the procedure to be executed in {@link #close()}
-     *         <em>before</em> closing other resources of the blackbox
+     * Arranged a delayed creation of new {@code Blackbox} obtaining configuration parameters
+     * from the passed builder.
      */
-    public static BlackBox from(BoundedContextBuilder builder, @Nullable Runnable customCleanup) {
-        var result =
-                builder.isMultitenant()
-                ? new MtBlackBox(builder, customCleanup)
-                : new StBlackBox(builder, customCleanup);
-        return result;
-    }
-
-    public static Supplier<BlackBox> initLazilyFrom(BoundedContextBuilder builder,
-                                                    @Nullable Runnable customCleanup) {
+    public static Supplier<BlackBox> initLazilyFrom(BoundedContextBuilder builder) {
         var result = new AtomicReference<BlackBox>();
         builder.setOnBeforeBuild(configuredBuilder -> {
             var box = builder.isMultitenant()
-                      ? new MtBlackBox(configuredBuilder, customCleanup)
-                      : new StBlackBox(configuredBuilder, customCleanup);
+                      ? new MtBlackBox(configuredBuilder)
+                      : new StBlackBox(configuredBuilder);
             result.set(box);
         });
         return result::get;
     }
 
-    BlackBox(BoundedContextBuilder builder, @Nullable Runnable customCleanup) {
+    BlackBox(BoundedContextBuilder builder) {
         super();
         this.commands = new CommandCollector();
         this.postedCommands = synchronizedSet(new HashSet<>());
@@ -188,9 +174,6 @@ public abstract class BlackBox implements WithLogging, Closeable {
               .addEventDispatcher(failedHandlerGuard)
               .addEventDispatcher(new UnsupportedCommandGuard(builder.name().getValue()))
               .addEventDispatcher(DiagnosticLog.instance());
-        if(customCleanup != null) {
-            builder.setOnBeforeClose((ignored) -> customCleanup.run());
-        }
         var created = this;
         builder.setOnBuild(context -> {
             created.clientFactory = new ClientFactory(context);

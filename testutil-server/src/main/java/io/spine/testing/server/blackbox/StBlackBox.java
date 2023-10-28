@@ -43,8 +43,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 final class StBlackBox extends BlackBox {
 
-    StBlackBox(BoundedContextBuilder b, @Nullable Runnable customCleanup) {
-        super(b, customCleanup);
+    StBlackBox(BoundedContextBuilder b) {
+        super(b);
     }
 
     @Override
