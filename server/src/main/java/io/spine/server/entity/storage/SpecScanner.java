@@ -35,7 +35,6 @@ import io.spine.base.Identifier;
 import io.spine.client.ArchivedColumn;
 import io.spine.client.DeletedColumn;
 import io.spine.client.VersionColumn;
-import io.spine.protobuf.AnyPacker;
 import io.spine.query.Column;
 import io.spine.query.Column.Getter;
 import io.spine.query.EntityColumn;
@@ -63,8 +62,27 @@ import static java.util.Objects.requireNonNull;
 /**
  * Scans Proto definitions of stored {@code Message}s and determines
  * the record specification.
+ *
+ * <p>Scans and extracts the definitions of {@link Column}s to be stored
+ * for a particular {@code Entity}.
+ *
+ * <p>The resulting columns include both the entity state-based columns declared with
+ * {@link io.spine.option.OptionsProto#column (column)} Proto option and the columns
+ * storing lifecycle and version attributes of an {@code Entity}.
+ *
+ * @implNote Client-side API includes generic definitions of lifecycle and version columns
+ *         (such as {@link ArchivedColumn}). However, their code cannot depend on the {@code Entity}
+ *         type directly, as the {@code client} module has no dependency on {@code server} module.
+ *         Therefore, this column scanning process wires those generic column definitions with an
+ *         actual {@code Entity} type, instances of which serve as a data source for each column.
+ *         Also, instead of scanning the {@code (column)} options from an entity state
+ *         {@code Message} directly, this scanner uses a Spine compiler-generated shortcut method
+ *         called {@code definitions()} which returns the set of {@link EntityColumn}s.
+ *         Such an approach improves the scanning performance and preserve the types of generic
+ *         parameters code-generated for each {@code EntityColumn}.
  */
 @Internal
+@SuppressWarnings("Immutable") //// TODO:alex.tymchenko:2023-10-28: address!
 public final class SpecScanner {
 
     /**
@@ -87,7 +105,7 @@ public final class SpecScanner {
     private SpecScanner() {
     }
 
-    static <I, S extends EntityState<I>> MessageRecordSpec<I, EntityRecord>
+    public static <I, S extends EntityState<I>> MessageRecordSpec<I, EntityRecord>
     scan(Class<I> idClass, Class<S> stateClass) {
         Set<RecordColumn<EntityRecord, ?>> accumulator = new HashSet<>();
 
@@ -143,21 +161,30 @@ public final class SpecScanner {
             stateCls = cls;
         }
 
-        private synchronized S unpack(Any value) {
+        private synchronized S process(Any value) {
             @Nullable S alreadyUnpacked = cache.get(value);
             if (alreadyUnpacked != null) {
                 return alreadyUnpacked;
             }
-            var state = AnyPacker.unpack(value, stateCls);
+            var state = unpack(value, stateCls);
             cache.put(value, state);
             return state;
         }
     }
 
-    @NonNull
+    @SuppressWarnings("ReturnOfNull" /* By design. */)
     private static <I, S extends EntityState<I>>
     Getter<EntityRecord, Object> getter(Column<S, ?> stateColumn, MemoizingUnpacker<I, S> unpacker) {
-        return r -> requireNonNull(stateColumn.valueIn(unpacker.unpack(r.getState())));
+        return r -> {
+            var state = r.getState();
+            if(state.equals(Any.getDefaultInstance())) {
+                // This may happen for `Aggregate` state,
+                // if its visibility does not allow querying.
+                return null;
+            }
+            var value = stateColumn.valueIn(unpacker.process(state));
+            return requireNonNull(value);
+        };
     }
 
     @NonNull

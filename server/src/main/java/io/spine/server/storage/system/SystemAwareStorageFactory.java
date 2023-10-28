@@ -37,7 +37,7 @@ import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.store.EmptyEventStore;
-import io.spine.server.storage.RecordSpec;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -116,7 +116,7 @@ public final class SystemAwareStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> RecordStorage<I, M>
-    createRecordStorage(ContextSpec context, RecordSpec<I, M, ?> recordSpec) {
+    createRecordStorage(ContextSpec context, MessageRecordSpec<I, M> recordSpec) {
         return delegate.createRecordStorage(context, recordSpec);
     }
 

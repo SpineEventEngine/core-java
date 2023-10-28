@@ -31,7 +31,7 @@ import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.storage.RecordSpec;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -56,7 +56,7 @@ public final class PreparedStorageFactory {
 
             @Override
             public <I, R extends Message> RecordStorage<I, R> createRecordStorage(
-                    ContextSpec context, RecordSpec<I, R, ?> spec) {
+                    ContextSpec context, MessageRecordSpec<I, R> spec) {
                 return InMemoryStorageFactory.newInstance().createRecordStorage(context, spec);
             }
 

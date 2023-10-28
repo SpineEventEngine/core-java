@@ -28,19 +28,31 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableMap;
 import io.spine.base.Identifier;
+import io.spine.protobuf.AnyPacker;
 import io.spine.query.ColumnName;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.StorageConverter;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.SpecScanner;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordWithColumns;
+import io.spine.server.storage.given.GivenStorageProject;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.TaskId;
+import io.spine.test.storage.StgProject;
+import io.spine.test.storage.StgProjectId;
 import io.spine.testdata.Sample;
+import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
+import static io.spine.base.Identifier.pack;
+import static io.spine.base.Identifier.pack;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.anyColumn;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.anyValue;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.booleanColumn;
@@ -53,6 +65,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("`RecordQueryMatcher` should")
 class RecordQueryMatcherTest {
 
+    private static final MessageRecordSpec<StgProjectId, EntityRecord> spec =
+            SpecScanner.scan(StgProjectId.class, StgProject.class);
+
     @Test
     @DisplayName("match everything except `null` to empty query")
     void matchEverythingToEmpty() {
@@ -60,7 +75,7 @@ class RecordQueryMatcherTest {
         RecordQueryMatcher<?, EntityRecord> matcher = new RecordQueryMatcher<>(sampleSubject);
 
         assertFalse(matcher.test(nullRef()));
-        assertTrue(matcher.test(EntityRecordWithColumns.of(sampleEntityRecord())));
+        assertTrue(matcher.test(RecordWithColumns.create(sampleEntityRecord(), ));
     }
 
     @Test
@@ -71,9 +86,9 @@ class RecordQueryMatcherTest {
 
         var matcher = new RecordQueryMatcher<>(subject);
         var matching = sampleEntityRecord(genericId);
-        var nonMatching = sampleEntityRecord(Sample.messageOfType(ProjectId.class));
-        EntityRecordWithColumns<ProjectId> matchingRecord = EntityRecordWithColumns.of(matching);
-        EntityRecordWithColumns<ProjectId> nonMatchingRecord = EntityRecordWithColumns.of(nonMatching);
+        var nonMatching = sampleEntityRecord(Sample.messageOfType(StgProject.class));
+        var matchingRecord = EntityRecordWithColumns.<ProjectId>of(matching);
+        var nonMatchingRecord = EntityRecordWithColumns.<ProjectId>of(nonMatching);
         assertTrue(matcher.test(matchingRecord));
         assertFalse(matcher.test(nonMatchingRecord));
     }
@@ -88,7 +103,7 @@ class RecordQueryMatcherTest {
 
         var matcher = new RecordQueryMatcher<>(query.subject());
 
-        var matching = sampleEntityRecord(Sample.messageOfType(TaskId.class));
+        var matching = sampleEntityRecord();
         Map<ColumnName, Object> matchingColumns = ImmutableMap.of(columnName, actualValue);
         var matchingRecord = EntityRecordWithColumns.of(matching, matchingColumns);
 
@@ -132,12 +147,16 @@ class RecordQueryMatcherTest {
     }
 
     private static EntityRecord sampleEntityRecord() {
-        return sampleEntityRecord(Identifier.newUuid());
+        var id = GivenStorageProject.newId();
+        return sampleEntityRecord(id);
     }
 
-    private static EntityRecord sampleEntityRecord(Object id) {
+    private static EntityRecord sampleEntityRecord(StgProjectId id) {
+        var state = GivenStorageProject.newState(id);
         return EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(id))
+                .setState(pack(state))
+                .setVersion(GivenVersion.withNumber(11))
                 .build();
     }
 }

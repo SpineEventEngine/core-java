@@ -26,11 +26,9 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.base.EntityState;
 import io.spine.client.ArchivedColumn;
 import io.spine.query.Column;
 import io.spine.query.EntityColumn;
-import io.spine.server.entity.Entity;
 
 /**
  * Scans and extracts the definitions of {@link Column}s to be stored
@@ -55,7 +53,7 @@ import io.spine.server.entity.Entity;
  *         Such an approach improves the scanning performance and preserve the types of generic
  *         parameters code-generated for each {@code EntityColumn}.
  */
-final class Scanner<S extends EntityState<?>, E extends Entity<?, S>> {
+final class Scanner/*<S extends EntityState<?>, E extends Entity<?, S>>*/ {
 
     // TODO:alex.tymchenko:2023-10-27: kill and use `SpecScanner` under this name.
 //    /**

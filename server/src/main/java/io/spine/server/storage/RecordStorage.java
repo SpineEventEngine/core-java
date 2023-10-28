@@ -56,7 +56,7 @@ import java.util.Optional;
 @SuppressWarnings("ClassWithTooManyMethods")    // This is a centerpiece.
 public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
 
-    private final RecordSpec<I, R, ?> recordSpec;
+    private final MessageRecordSpec<I, R> recordSpec;
 
     /**
      * Creates the new storage instance.
@@ -66,7 +66,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * @param recordSpec
      *         definitions of the columns to store along with each record
      */
-    protected RecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
+    protected RecordStorage(ContextSpec context, MessageRecordSpec<I, R> recordSpec) {
         super(context.isMultitenant());
         this.recordSpec = recordSpec;
     }
@@ -325,7 +325,7 @@ public abstract class RecordStorage<I, R extends Message> extends AbstractStorag
      * Returns the specification of the record format, in which the message record should be stored.
      */
     @Internal
-    protected RecordSpec<I, R, ?> recordSpec() {
+    protected MessageRecordSpec<I, R> recordSpec() {
         return recordSpec;
     }
 

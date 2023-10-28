@@ -97,7 +97,7 @@ public interface StorageFactory extends AutoCloseable {
      *         to create a private instance of a record storage.
      */
     <I, R extends Message> RecordStorage<I, R>
-    createRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec);
+    createRecordStorage(ContextSpec context, MessageRecordSpec<I, R> recordSpec);
 
     /**
      * Creates a new {@link AggregateStorage}.

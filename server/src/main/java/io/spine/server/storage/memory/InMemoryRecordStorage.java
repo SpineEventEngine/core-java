@@ -29,7 +29,7 @@ package io.spine.server.storage.memory;
 import com.google.protobuf.Message;
 import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
-import io.spine.server.storage.RecordSpec;
+import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordWithColumns;
 
@@ -47,7 +47,7 @@ public class InMemoryRecordStorage<I, R extends Message> extends RecordStorage<I
 
     private final MultitenantStorage<TenantRecords<I, R>> multitenantStorage;
 
-    InMemoryRecordStorage(ContextSpec context, RecordSpec<I, R, ?> recordSpec) {
+    InMemoryRecordStorage(ContextSpec context, MessageRecordSpec<I, R> recordSpec) {
         super(context, recordSpec);
         this.multitenantStorage =
                 new MultitenantStorage<>(context.isMultitenant()) {

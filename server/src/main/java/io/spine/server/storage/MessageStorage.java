@@ -124,18 +124,6 @@ public abstract class MessageStorage<I, M extends Message> extends RecordStorage
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides for the type covariance.
-     */
-    @Internal
-    @Override
-    @SuppressWarnings("unchecked")  // Columns of the stored messages are taken from the messages.
-    protected RecordSpec<I, M, M> recordSpec() {
-        return (RecordSpec<I, M, M>) super.recordSpec();
-    }
-
-    /**
      * Extracts the identifier and the columns from the given message, creating
      * a new {@code RecordWithColumns}.
      */

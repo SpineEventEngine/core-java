@@ -38,6 +38,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.HasLifecycleColumns;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.StorageConverter;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityRecordStorage;
@@ -174,6 +175,13 @@ public final class EntityRecordStorageTestEnv {
 
     public static RecordWithColumns<StgProjectId, EntityRecord>
     recordWithCols(Entity<StgProjectId, ?> entity, EntityRecord record) {
+        return RecordWithColumns.create(record, SpecScanner.scan(entity));
+    }
+
+    public static RecordWithColumns<StgProjectId, EntityRecord>
+    recordWithCols(Entity<StgProjectId, ?> entity) {
+        var record = StorageConverter.toEntityRecord(entity)
+                                     .build();
         return RecordWithColumns.create(record, SpecScanner.scan(entity));
     }
 

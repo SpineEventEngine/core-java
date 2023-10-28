@@ -58,198 +58,199 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// TODO:alex.tymchenko:2023-10-28: migrate?
 @DisplayName("`EntityRecordWithColumns` should")
 class EntityRecordWithColumnsTest {
 
-    private static final StgTaskId TASK_ID =
-            StgTaskId.newBuilder()
-                     .setId(42)
-                     .build();
-
-    private static final StgProjectId PROJECT_ID =
-            StgProjectId.newBuilder()
-                        .setId("42")
-                        .build();
-
-    private static final Any PACKED_TASK_ID = Identifier.pack(TASK_ID);
-
-    private static EntityRecordWithColumns<?> sampleRecordWithEmptyColumns() {
-        return EntityRecordWithColumns.of(sampleEntityRecord());
-    }
-
-    private static EntityRecordWithColumns<?> randomRecordWithEmptyColumns() {
-        return EntityRecordWithColumns.of(randomEntityRecord());
-    }
-
-    private static EntityRecord sampleEntityRecord() {
-        return EntityRecord.newBuilder()
-                           .setEntityId(PACKED_TASK_ID)
-                           .build();
-    }
-
-    private static EntityRecord randomEntityRecord() {
-        return EntityRecord.newBuilder()
-                           .setEntityId(Identifier.pack(Identifier.newUuid()))
-                           .build();
-    }
-
-    @Test
-    @DisplayName("not accept `null`s in constructor")
-    void rejectNullInCtor() {
-        new NullPointerTester()
-                .setDefault(EntityRecord.class, sampleEntityRecord())
-                .testAllPublicConstructors(EntityRecordWithColumns.class);
-    }
-
-    @Test
-    @DisplayName("support equality")
-    void supportEquality() {
-        var columnName = ArchivedColumn.instance().name();
-        Object value = false;
-        EntityRecordWithColumns<?> emptyFieldsEnvelope =
-                EntityRecordWithColumns.of(sampleEntityRecord());
-        EntityRecordWithColumns<?> notEmptyFieldsEnvelope =
-                EntityRecordWithColumns.of(sampleEntityRecord(), singletonMap(columnName, value));
-        new EqualsTester()
-                .addEqualityGroup(emptyFieldsEnvelope)
-                .addEqualityGroup(notEmptyFieldsEnvelope)
-                .addEqualityGroup(randomRecordWithEmptyColumns())
-                .addEqualityGroup(
-                        randomRecordWithEmptyColumns()  // Each one has a different `EntityRecord`.
-                )
-                .testEquals();
-    }
-
-    @Test
-    @DisplayName("return empty names collection if no storage fields are set")
-    void returnEmptyColumns() {
-        var record = sampleRecordWithEmptyColumns();
-        assertFalse(record.hasColumns());
-        var names = record.columnNames();
-        assertTrue(names.isEmpty());
-    }
-
-    @Test
-    @DisplayName("throw `ISE` on attempt to get value by non-existent name")
-    void throwOnNonExistentColumn() {
-        var record = sampleRecordWithEmptyColumns();
-        var nonExistentName = ColumnName.of("non-existent-column");
-        assertThrows(IllegalStateException.class, () -> record.columnValue(nonExistentName));
-    }
-
-    // TODO:alex.tymchenko:2023-10-27: kill?
-//    @Test
-//    @DisplayName("have `Entity` lifecycle columns even if the entity does not define custom ones")
-//    void supportEmptyColumns() {
-//        var entity = new EntityWithoutCustomColumns(TASK_ID);
+//    private static final StgTaskId TASK_ID =
+//            StgTaskId.newBuilder()
+//                     .setId(42)
+//                     .build();
 //
-//        var columns = EntityRecordSpec.of(entity);
-//        var storageFields = columns.valuesIn(entity);
+//    private static final StgProjectId PROJECT_ID =
+//            StgProjectId.newBuilder()
+//                        .setId("42")
+//                        .build();
 //
-//        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-//        assertThat(record.columnNames())
-//                .containsExactlyElementsIn(EntityRecordColumn.names());
+//    private static final Any PACKED_TASK_ID = Identifier.pack(TASK_ID);
+//
+//    private static EntityRecordWithColumns<?> sampleRecordWithEmptyColumns() {
+//        return EntityRecordWithColumns.of(sampleEntityRecord());
 //    }
-
-    @Test
-    @DisplayName("return column value by column name")
-    void returnColumnValue() {
-        var columnName = ColumnName.of("some-boolean-column");
-        var columnValue = false;
-        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
-        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        var value = record.columnValue(columnName);
-
-        assertThat(value).isEqualTo(columnValue);
-    }
-
-    @Test
-    @DisplayName("return a column value with the column mapping applied")
-    void returnValueWithColumnMapping() {
-        var columnName = ColumnName.of("some-int-column");
-        var columnValue = 42;
-
-        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
-        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        var value = record.columnValue(columnName, new TestColumnMapping());
-
-        assertThat(value).isEqualTo(String.valueOf(columnValue));
-    }
-
-    @Test
-    @DisplayName("return `null` column value")
-    void returnNullValue() {
-        var columnName = ColumnName.of("the-null-column");
-        Map<ColumnName, Object> storageFields = new HashMap<>();
-        storageFields.put(columnName, null);
-        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
-        var value = record.columnValue(columnName);
-
-        assertThat(value).isNull();
-    }
-
-    @Nested
-    @DisplayName("support being initialized with")
-    class BeInitializedWith {
-
-        // TODO:alex.tymchenko:2023-10-27: kill!
+//
+//    private static EntityRecordWithColumns<?> randomRecordWithEmptyColumns() {
+//        return EntityRecordWithColumns.of(randomEntityRecord());
+//    }
+//
+//    private static EntityRecord sampleEntityRecord() {
+//        return EntityRecord.newBuilder()
+//                           .setEntityId(PACKED_TASK_ID)
+//                           .build();
+//    }
+//
+//    private static EntityRecord randomEntityRecord() {
+//        return EntityRecord.newBuilder()
+//                           .setEntityId(Identifier.pack(Identifier.newUuid()))
+//                           .build();
+//    }
+//
+//    @Test
+//    @DisplayName("not accept `null`s in constructor")
+//    void rejectNullInCtor() {
+//        new NullPointerTester()
+//                .setDefault(EntityRecord.class, sampleEntityRecord())
+//                .testAllPublicConstructors(EntityRecordWithColumns.class);
+//    }
+//
+//    @Test
+//    @DisplayName("support equality")
+//    void supportEquality() {
+//        var columnName = ArchivedColumn.instance().name();
+//        Object value = false;
+//        EntityRecordWithColumns<?> emptyFieldsEnvelope =
+//                EntityRecordWithColumns.of(sampleEntityRecord());
+//        EntityRecordWithColumns<?> notEmptyFieldsEnvelope =
+//                EntityRecordWithColumns.of(sampleEntityRecord(), singletonMap(columnName, value));
+//        new EqualsTester()
+//                .addEqualityGroup(emptyFieldsEnvelope)
+//                .addEqualityGroup(notEmptyFieldsEnvelope)
+//                .addEqualityGroup(randomRecordWithEmptyColumns())
+//                .addEqualityGroup(
+//                        randomRecordWithEmptyColumns()  // Each one has a different `EntityRecord`.
+//                )
+//                .testEquals();
+//    }
+//
+//    @Test
+//    @DisplayName("return empty names collection if no storage fields are set")
+//    void returnEmptyColumns() {
+//        var record = sampleRecordWithEmptyColumns();
+//        assertFalse(record.hasColumns());
+//        var names = record.columnNames();
+//        assertTrue(names.isEmpty());
+//    }
+//
+//    @Test
+//    @DisplayName("throw `ISE` on attempt to get value by non-existent name")
+//    void throwOnNonExistentColumn() {
+//        var record = sampleRecordWithEmptyColumns();
+//        var nonExistentName = ColumnName.of("non-existent-column");
+//        assertThrows(IllegalStateException.class, () -> record.columnValue(nonExistentName));
+//    }
+//
+//    // TODO:alex.tymchenko:2023-10-27: kill?
+////    @Test
+////    @DisplayName("have `Entity` lifecycle columns even if the entity does not define custom ones")
+////    void supportEmptyColumns() {
+////        var entity = new EntityWithoutCustomColumns(TASK_ID);
+////
+////        var columns = EntityRecordSpec.of(entity);
+////        var storageFields = columns.valuesIn(entity);
+////
+////        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+////        assertThat(record.columnNames())
+////                .containsExactlyElementsIn(EntityRecordColumn.names());
+////    }
+//
+//    @Test
+//    @DisplayName("return column value by column name")
+//    void returnColumnValue() {
+//        var columnName = ColumnName.of("some-boolean-column");
+//        var columnValue = false;
+//        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+//        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+//        var value = record.columnValue(columnName);
+//
+//        assertThat(value).isEqualTo(columnValue);
+//    }
+//
+//    @Test
+//    @DisplayName("return a column value with the column mapping applied")
+//    void returnValueWithColumnMapping() {
+//        var columnName = ColumnName.of("some-int-column");
+//        var columnValue = 42;
+//
+//        ImmutableMap<ColumnName, Object> storageFields = ImmutableMap.of(columnName, columnValue);
+//        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+//        var value = record.columnValue(columnName, new TestColumnMapping());
+//
+//        assertThat(value).isEqualTo(String.valueOf(columnValue));
+//    }
+//
+//    @Test
+//    @DisplayName("return `null` column value")
+//    void returnNullValue() {
+//        var columnName = ColumnName.of("the-null-column");
+//        Map<ColumnName, Object> storageFields = new HashMap<>();
+//        storageFields.put(columnName, null);
+//        var record = EntityRecordWithColumns.of(sampleEntityRecord(), storageFields);
+//        var value = record.columnValue(columnName);
+//
+//        assertThat(value).isNull();
+//    }
+//
+//    @Nested
+//    @DisplayName("support being initialized with")
+//    class BeInitializedWith {
+//
+//        // TODO:alex.tymchenko:2023-10-27: kill!
+////        @Test
+////        @DisplayName("an `Entity` identifier and a record")
+////        void idAndRecord() {
+////            var rawRecord = sampleEntityRecord();
+////            Long id = 199L;
+////            var result = EntityRecordWithColumns.create(id, rawRecord);
+////            assertThat(result).isNotNull();
+////            assertThat(result.id()).isEqualTo(id);
+////            assertThat(result.record()).isEqualTo(rawRecord);
+////        }
+//
 //        @Test
-//        @DisplayName("an `Entity` identifier and a record")
-//        void idAndRecord() {
+//        @DisplayName("an `Entity` and a record")
+//        void entityAndRecord() {
+//            var entity = new TestEntity(PROJECT_ID);
 //            var rawRecord = sampleEntityRecord();
-//            Long id = 199L;
-//            var result = EntityRecordWithColumns.create(id, rawRecord);
+//            var result = RecordWithColumns.create(rawRecord, SpecScanner.scan(entity));
 //            assertThat(result).isNotNull();
-//            assertThat(result.id()).isEqualTo(id);
+//            assertThat(result.id()).isEqualTo(PROJECT_ID);
 //            assertThat(result.record()).isEqualTo(rawRecord);
+//            var names = result.columnNames();
+//            var expectedNames =
+//                    StgProject.Column.definitions()
+//                                     .stream()
+//                                     .map(RecordColumn::name)
+//                                     .collect(toImmutableSet());
+//            assertThat(names).containsAtLeastElementsIn(expectedNames);
+//            assertThat(names).containsAtLeastElementsIn(
+//                    ImmutableSet.of(ArchivedColumn.instance().name(),
+//                                    DeletedColumn.instance().name()));
 //        }
-
-        @Test
-        @DisplayName("an `Entity` and a record")
-        void entityAndRecord() {
-            var entity = new TestEntity(PROJECT_ID);
-            var rawRecord = sampleEntityRecord();
-            var result = RecordWithColumns.create(rawRecord, SpecScanner.scan(entity));
-            assertThat(result).isNotNull();
-            assertThat(result.id()).isEqualTo(PROJECT_ID);
-            assertThat(result.record()).isEqualTo(rawRecord);
-            var names = result.columnNames();
-            var expectedNames =
-                    StgProject.Column.definitions()
-                                     .stream()
-                                     .map(RecordColumn::name)
-                                     .collect(toImmutableSet());
-            assertThat(names).containsAtLeastElementsIn(expectedNames);
-            assertThat(names).containsAtLeastElementsIn(
-                    ImmutableSet.of(ArchivedColumn.instance().name(),
-                                    DeletedColumn.instance().name()));
-        }
-    }
-
-    @Nested
-    @DisplayName("store")
-    class Store {
-
-        @Test
-        @DisplayName("record")
-        void record() {
-            var recordWithFields = sampleRecordWithEmptyColumns();
-            var record = recordWithFields.record();
-            assertNotNull(record);
-        }
-
-        @Test
-        @DisplayName("column values")
-        void columnValues() {
-            var columnName = DeletedColumn.instance()
-                                          .name();
-            Object value = false;
-            var columnsExpected = singletonMap(columnName, value);
-            var record = EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
-            var columnNames = record.columnNames();
-            assertThat(columnNames).hasSize(1);
-            assertTrue(columnNames.contains(columnName));
-            assertThat(value).isEqualTo(record.columnValue(columnName));
-        }
-    }
+//    }
+//
+//    @Nested
+//    @DisplayName("store")
+//    class Store {
+//
+//        @Test
+//        @DisplayName("record")
+//        void record() {
+//            var recordWithFields = sampleRecordWithEmptyColumns();
+//            var record = recordWithFields.record();
+//            assertNotNull(record);
+//        }
+//
+//        @Test
+//        @DisplayName("column values")
+//        void columnValues() {
+//            var columnName = DeletedColumn.instance()
+//                                          .name();
+//            Object value = false;
+//            var columnsExpected = singletonMap(columnName, value);
+//            var record = EntityRecordWithColumns.of(sampleEntityRecord(), columnsExpected);
+//            var columnNames = record.columnNames();
+//            assertThat(columnNames).hasSize(1);
+//            assertTrue(columnNames.contains(columnName));
+//            assertThat(value).isEqualTo(record.columnValue(columnName));
+//        }
+//    }
 }

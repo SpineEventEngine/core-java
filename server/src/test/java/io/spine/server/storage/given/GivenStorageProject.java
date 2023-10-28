@@ -34,6 +34,7 @@ import io.spine.test.storage.StgProject.Status;
 import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgTask;
 
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
@@ -87,5 +88,24 @@ public final class GivenStorageProject {
                 .addTask(StgTask.getDefaultInstance())
                 .build();
         return project;
+    }
+
+    /**
+     * Generates new identifier of {@code StgProjectId} type.
+     */
+    public static StgProjectId newId() {
+        return StgProjectId.newBuilder()
+                .setId(newUuid())
+                .build();
+    }
+
+    /**
+     * Creates a randomly generated {@code StgProject}.
+     *
+     * @see #newState(StgProjectId)
+     */
+    public static StgProject newState() {
+        var id = newId();
+        return newState(id);
     }
 }

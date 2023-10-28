@@ -46,6 +46,7 @@ import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
@@ -222,8 +223,11 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Override
     public synchronized void write(I id, EntityRecord record) {
-        // TODO:alex.tymchenko:2023-10-27: check that ID matches.
         var wrapped = RecordWithColumns.create(record, recordSpec());
+        checkState(id.equals(wrapped.id()),
+                   "Identifier `%s` passed into `write(id, record)` " +
+                           "does not match the one in the record (`%s`).",
+                   id, wrapped.id());
         write(wrapped);
     }
 
@@ -265,9 +269,8 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Internal
     @Override
-    @SuppressWarnings("unchecked")  // Guaranteed by the generic declaration of `EntityRecordSpec`.
     public final MessageRecordSpec<I, EntityRecord> recordSpec() {
-        return (MessageRecordSpec<I, EntityRecord>) super.recordSpec();
+        return super.recordSpec();
     }
 
     private Class<I> idType() {
