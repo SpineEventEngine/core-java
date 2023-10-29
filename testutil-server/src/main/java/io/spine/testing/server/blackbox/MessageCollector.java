@@ -57,7 +57,7 @@ import static java.util.Optional.ofNullable;
  * @param <E>
  *         the type of the message envelopes
  */
-abstract class MessageCollector<I extends SignalId,
+public abstract class MessageCollector<I extends SignalId,
                                 T extends Signal<I, ?, ?>,
                                 E extends MessageEnvelope<I, T, ?>>
         implements Listener<E> {

@@ -33,5 +33,5 @@ import io.spine.server.type.CommandEnvelope;
 /**
  * Remembers commands posted to a Command Bus.
  */
-final class CommandCollector extends MessageCollector<CommandId, Command, CommandEnvelope> {
+public final class CommandCollector extends MessageCollector<CommandId, Command, CommandEnvelope> {
 }
