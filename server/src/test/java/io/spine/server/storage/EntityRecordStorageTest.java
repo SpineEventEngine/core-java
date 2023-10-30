@@ -40,7 +40,6 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntity;
 import io.spine.server.storage.given.GivenStorageProject;
 import io.spine.test.storage.StgProject;
@@ -75,6 +74,7 @@ import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newEntity
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newRecord;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.recordWithCols;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.recordsWithColumnsFrom;
+import static io.spine.server.storage.given.GivenStorageProject.newEntityRecord;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.test.storage.StgProject.Status.CANCELLED;
 import static io.spine.test.storage.StgProject.Status.CANCELLED_VALUE;
@@ -491,13 +491,12 @@ public class EntityRecordStorageTest
             var storage = storage();
             var bulkSize = 5;
 
-            Map<StgProjectId, EntityRecordWithColumns<StgProjectId>> initial =
+            Map<StgProjectId, RecordWithColumns<StgProjectId, EntityRecord>> initial =
                     new HashMap<>(bulkSize);
 
             for (var i = 0; i < bulkSize; i++) {
-                var id = newId();
-                var record = newStorageRecord(id);
-                initial.put(id, newRecord(id, record));
+                var record = newEntityRecord();
+                initial.put(record.id(), record);
             }
             storage.writeAll(initial.values());
 

@@ -37,12 +37,10 @@ import io.spine.query.EntityColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.HasLifecycleColumns;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.StorageConverter;
 import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.entity.storage.given.TaskViewProjection;
 import io.spine.server.storage.MessageRecordSpec;
@@ -79,41 +77,6 @@ public final class EntityRecordStorageTestEnv {
 
     private static final MessageRecordSpec<StgProjectId, EntityRecord> spec =
             SpecScanner.scan(TestCounterEntity.class);
-
-    public static EntityRecord buildStorageRecord(StgProjectId id,
-                                                  EntityState<StgProjectId> state) {
-        var wrappedState = pack(state);
-        var record = EntityRecord.newBuilder()
-                .setEntityId(pack(id))
-                .setState(wrappedState)
-                .setVersion(GivenVersion.withNumber(0))
-                .build();
-        return record;
-    }
-
-    public static EntityRecord buildStorageRecord(StgProjectId id,
-                                                  EntityState<StgProjectId> state,
-                                                  LifecycleFlags lifecycleFlags) {
-        var wrappedState = pack(state);
-        var record = EntityRecord.newBuilder()
-                .setEntityId(pack(id))
-                .setState(wrappedState)
-                .setVersion(GivenVersion.withNumber(0))
-                .setLifecycleFlags(lifecycleFlags)
-                .build();
-        return record;
-    }
-
-    public static EntityRecord buildStorageRecord(TestCounterEntity entity) {
-        var wrappedState = pack(entity.state());
-        var record = EntityRecord.newBuilder()
-                .setEntityId(pack(entity.id()))
-                .setState(wrappedState)
-                .setVersion(GivenVersion.withNumber(0))
-                .setLifecycleFlags(entity.lifecycleFlags())
-                .build();
-        return record;
-    }
 
     /**
      * Creates new instance of the test entity.
@@ -183,11 +146,6 @@ public final class EntityRecordStorageTestEnv {
         var record = StorageConverter.toEntityRecord(entity)
                                      .build();
         return RecordWithColumns.create(record, SpecScanner.scan(entity));
-    }
-
-    public static EntityRecordWithColumns<StgProjectId>
-    newRecord(StgProjectId id, EntityRecord record) {
-        return EntityRecordWithColumns.create(id, record);
     }
 
     public static void assertQueryHasSingleResult(
