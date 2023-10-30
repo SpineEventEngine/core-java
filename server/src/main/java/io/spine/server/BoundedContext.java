@@ -46,13 +46,10 @@ import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.event.store.DefaultEventStore;
 import io.spine.server.integration.IntegrationBroker;
 import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.server.trace.TracerFactory;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.SystemClient;
@@ -457,15 +454,15 @@ public abstract class BoundedContext
      *
      * <p>This method performs the following:
      * <ol>
-     *     <li>Closes associated {@link StorageFactory}.
+     *     <li>Invokes {@link BoundedContextBuilder#getOnBeforeClose onBeforeClose} if it was
+     *      configured when the context was {@linkplain BoundedContextBuilder built}.
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
      *     <li>Closes {@link IntegrationBroker}.
-     *     <li>Closes {@link DefaultEventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Closes {@link ImportBus}.
-     *     <li>Closes {@link TracerFactory} if it is present.
      *     <li>Closes all registered {@linkplain Repository repositories}.
+     *     <li>Removes a {@link Probe}, if it was {@linkplain #install(Probe) installed}.
      * </ol>
      *
      * @throws Exception
@@ -561,7 +558,6 @@ public abstract class BoundedContext
         eventBus.add(probe.eventListener());
         probe.eventDispatchers()
              .forEach(this::registerEventDispatcher);
-
         this.probe = probe;
     }
 

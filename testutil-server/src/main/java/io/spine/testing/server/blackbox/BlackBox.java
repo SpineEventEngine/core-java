@@ -55,20 +55,18 @@ import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
-import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.blackbox.probe.CommandCollector;
 import io.spine.testing.server.blackbox.probe.EventCollector;
 import io.spine.testing.server.blackbox.probe.Probe;
+import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -95,7 +93,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     /**
      * The context under the test.
      */
-    private @MonotonicNonNull BoundedContext context;
+    private final BoundedContext context;
 
     /**
      * The probe inserted into the context under the test.
@@ -105,7 +103,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     /**
      * A factory of {@link Client}s which send requests to this context.
      */
-    private @MonotonicNonNull ClientFactory clientFactory;
+    private final ClientFactory clientFactory;
 
     /**
      * Information about the current user and the time-zone.
@@ -132,35 +130,19 @@ public abstract class BlackBox implements WithLogging, Closeable {
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
     public static BlackBox from(BoundedContextBuilder builder) {
-        var supplier = initLazilyFrom(builder);
-        var ignored = builder.build();
-        return supplier.get();
+        var context = builder.build();
+        var box = builder.isMultitenant()
+                  ? new MtBlackBox(context)
+                  : new StBlackBox(context);
+        return box;
     }
 
-    /**
-     * Arranged a delayed creation of new {@code Blackbox} obtaining configuration parameters
-     * from the passed builder.
-     */
-    public static Supplier<BlackBox> initLazilyFrom(BoundedContextBuilder builder) {
-        var result = new AtomicReference<BlackBox>();
-        builder.setOnBeforeBuild(configuredBuilder -> {
-            var box = builder.isMultitenant()
-                      ? new MtBlackBox(configuredBuilder)
-                      : new StBlackBox(configuredBuilder);
-            result.set(box);
-        });
-        return result::get;
-    }
-
-    BlackBox(BoundedContextBuilder builder) {
+    BlackBox(BoundedContext context) {
         super();
+        this.context = context;
         this.probe = new Probe();
-        var created = this;
-        builder.setOnBuild(context -> {
-            created.clientFactory = new ClientFactory(context);
-            context.install(probe);
-            created.context = context;
-        });
+        context.install(probe);
+        this.clientFactory = new ClientFactory(context);
         this.actor = defaultActor();
         this.postedCommands = synchronizedSet(new HashSet<>());
         this.postedEvents = synchronizedSet(new HashSet<>());

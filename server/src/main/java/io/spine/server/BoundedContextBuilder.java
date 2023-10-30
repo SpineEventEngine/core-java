@@ -104,8 +104,6 @@ public final class BoundedContextBuilder implements WithLogging {
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
 
-    private @Nullable Consumer<BoundedContextBuilder> onBeforeBuild = null;
-    private @Nullable Consumer<BoundedContext> onBuild = null;
     private @Nullable Consumer<BoundedContext> onBeforeClose = null;
 
     /**
@@ -541,9 +539,6 @@ public final class BoundedContextBuilder implements WithLogging {
      * @return new {@code BoundedContext}
      */
     public BoundedContext build() {
-        if (onBeforeBuild != null) {
-            onBeforeBuild.accept(this);
-        }
         var system = buildSystem();
         var result = buildDomain(system);
         logger().atDebug()
@@ -554,9 +549,6 @@ public final class BoundedContextBuilder implements WithLogging {
         ServerEnvironment.instance()
                          .delivery()
                          .registerDispatchersIn(result);
-        if (onBuild != null) {
-            onBuild.accept(result);
-        }
         return result;
     }
 
@@ -567,14 +559,15 @@ public final class BoundedContextBuilder implements WithLogging {
         return eventBus.build();
     }
 
-    public void setOnBeforeBuild(Consumer<BoundedContextBuilder> consumer) {
-        this.onBeforeBuild = checkNotNull(consumer);
-    }
-
-    public void setOnBuild(Consumer<BoundedContext> consumer) {
-        this.onBuild = checkNotNull(consumer);
-    }
-
+    /**
+     * Sets the action to be performed before the context is closed.
+     *
+     * <p>The action is performed after the context is closed, but before the
+     * {@linkplain BoundedContext#onClose() context's own action} is performed.
+     *
+     * @param consumer
+     *         the action to perform
+     */
     public void setOnBeforeClose(Consumer<BoundedContext> consumer) {
         this.onBeforeClose = checkNotNull(consumer);
     }

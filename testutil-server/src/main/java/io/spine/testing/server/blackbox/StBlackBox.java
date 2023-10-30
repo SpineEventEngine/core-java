@@ -31,7 +31,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContextBuilder;
+import io.spine.server.BoundedContext;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.blackbox.probe.CommandCollector;
 import io.spine.testing.server.blackbox.probe.EventCollector;
@@ -44,8 +44,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 final class StBlackBox extends BlackBox {
 
-    StBlackBox(BoundedContextBuilder b) {
-        super(b);
+    StBlackBox(BoundedContext c) {
+        super(c);
     }
 
     @Override
