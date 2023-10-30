@@ -189,11 +189,6 @@ all modules and does not describe the project structure per-subproject.
     <version>3.24.1</version>
   </dependency>
   <dependency>
-    <groupId>com.puppycrawl.tools</groupId>
-    <artifactId>checkstyle</artifactId>
-    <version>10.3.4</version>
-  </dependency>
-  <dependency>
     <groupId>io.gitlab.arturbosch.detekt</groupId>
     <artifactId>detekt-cli</artifactId>
     <version>1.23.0</version>

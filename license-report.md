@@ -278,10 +278,6 @@
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.3.4.
-     * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
-     * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 2.7.0.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
      * **License:** [MIT](https://raw.githubusercontent.com/korlibs/korge-next/master/korge/LICENSE.txt)
@@ -289,22 +285,6 @@
 1.  **Group** : com.squareup. **Name** : javapoet. **Version** : 1.13.0.
      * **Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-beanutils. **Name** : commons-beanutils. **Version** : 1.9.4.
-     * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
-     * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
-     * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.3.
-     * **Project URL:** [http://picocli.info](http://picocli.info)
-     * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.github.davidburstrom.contester. **Name** : contester-breakpoint. **Version** : 0.2.0.
      * **Project URL:** [https://github.com/davidburstrom/contester](https://github.com/davidburstrom/contester)
@@ -493,10 +473,6 @@
      * **License:** [LGPL, version 2.1](http://www.gnu.org/licenses/licenses.html)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 3.1.0.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 11.4.
-     * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
-     * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
-
 1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.55.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
@@ -507,25 +483,12 @@
      * **Project URL:** [http://saxon.sourceforge.net/](http://saxon.sourceforge.net/)
      * **License:** [Mozilla Public License Version 1.0](http://www.mozilla.org/MPL/MPL-1.0.txt)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.11.1.
-     * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
-     * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
-
 1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.7.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.8.1.
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.client5. **Name** : httpclient5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5-h2. **Version** : 5.1.3.
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apiguardian. **Name** : apiguardian-api. **Version** : 1.1.2.
@@ -573,12 +536,6 @@
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.8.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
-     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
-     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
-     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
-     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jboss.forge.roaster. **Name** : roaster-api. **Version** : 2.28.0.Final.
      * **License:** [Eclipse Public License version 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -784,23 +741,14 @@
      * **Project URL:** [https://github.com/hrldcpr/pcollections](https://github.com/hrldcpr/pcollections)
      * **License:** [The MIT License](https://opensource.org/licenses/mit-license.php)
 
-1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
-     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
-     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [WTFPL](http://www.wtfpl.net/)
-
 1.  **Group** : org.snakeyaml. **Name** : snakeyaml-engine. **Version** : 2.6.
      * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml-engine](https://bitbucket.org/snakeyaml/snakeyaml-engine)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 4.4.3.
-     * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
-     * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Oct 17 17:48:03 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 30 17:28:45 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1043,10 +991,6 @@ This report was generated on **Tue Oct 17 17:48:03 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.3.4.
-     * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
-     * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 2.7.0.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
      * **License:** [MIT](https://raw.githubusercontent.com/korlibs/korge-next/master/korge/LICENSE.txt)
@@ -1054,22 +998,6 @@ This report was generated on **Tue Oct 17 17:48:03 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.squareup. **Name** : javapoet. **Version** : 1.13.0.
      * **Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-beanutils. **Name** : commons-beanutils. **Version** : 1.9.4.
-     * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
-     * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
-     * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.3.
-     * **Project URL:** [http://picocli.info](http://picocli.info)
-     * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.github.davidburstrom.contester. **Name** : contester-breakpoint. **Version** : 0.2.0.
      * **Project URL:** [https://github.com/davidburstrom/contester](https://github.com/davidburstrom/contester)
@@ -1258,10 +1186,6 @@ This report was generated on **Tue Oct 17 17:48:03 WEST 2023** using [Gradle-Lic
      * **License:** [LGPL, version 2.1](http://www.gnu.org/licenses/licenses.html)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 3.1.0.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 11.4.
-     * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
-     * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
-
 1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.55.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
@@ -1272,25 +1196,12 @@ This report was generated on **Tue Oct 17 17:48:03 WEST 2023** using [Gradle-Lic
      * **Project URL:** [http://saxon.sourceforge.net/](http://saxon.sourceforge.net/)
      * **License:** [Mozilla Public License Version 1.0](http://www.mozilla.org/MPL/MPL-1.0.txt)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.11.1.
-     * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
-     * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
-
 1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.7.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.8.1.
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.client5. **Name** : httpclient5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5-h2. **Version** : 5.1.3.
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apiguardian. **Name** : apiguardian-api. **Version** : 1.1.2.
@@ -1338,12 +1249,6 @@ This report was generated on **Tue Oct 17 17:48:03 WEST 2023** using [Gradle-Lic
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.8.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
-     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
-     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
-     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
-     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jboss.forge.roaster. **Name** : roaster-api. **Version** : 2.28.0.Final.
      * **License:** [Eclipse Public License version 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -1549,23 +1454,14 @@ This report was generated on **Tue Oct 17 17:48:03 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/hrldcpr/pcollections](https://github.com/hrldcpr/pcollections)
      * **License:** [The MIT License](https://opensource.org/licenses/mit-license.php)
 
-1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
-     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
-     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [WTFPL](http://www.wtfpl.net/)
-
 1.  **Group** : org.snakeyaml. **Name** : snakeyaml-engine. **Version** : 2.6.
      * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml-engine](https://bitbucket.org/snakeyaml/snakeyaml-engine)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 4.4.3.
-     * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
-     * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 30 17:28:45 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -1852,10 +1748,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.3.4.
-     * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
-     * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 2.7.0.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
      * **License:** [MIT](https://raw.githubusercontent.com/korlibs/korge-next/master/korge/LICENSE.txt)
@@ -1863,22 +1755,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.squareup. **Name** : javapoet. **Version** : 1.13.0.
      * **Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-beanutils. **Name** : commons-beanutils. **Version** : 1.9.4.
-     * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
-     * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
-     * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.3.
-     * **Project URL:** [http://picocli.info](http://picocli.info)
-     * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.github.davidburstrom.contester. **Name** : contester-breakpoint. **Version** : 0.2.0.
      * **Project URL:** [https://github.com/davidburstrom/contester](https://github.com/davidburstrom/contester)
@@ -2071,10 +1947,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
      * **License:** [LGPL, version 2.1](http://www.gnu.org/licenses/licenses.html)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 3.1.0.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 11.4.
-     * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
-     * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
-
 1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.55.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
@@ -2085,25 +1957,12 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
      * **Project URL:** [http://saxon.sourceforge.net/](http://saxon.sourceforge.net/)
      * **License:** [Mozilla Public License Version 1.0](http://www.mozilla.org/MPL/MPL-1.0.txt)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.11.1.
-     * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
-     * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
-
 1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.7.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.8.1.
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.client5. **Name** : httpclient5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5-h2. **Version** : 5.1.3.
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apiguardian. **Name** : apiguardian-api. **Version** : 1.1.2.
@@ -2151,12 +2010,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.8.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
-     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
-     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
-     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
-     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jboss.forge.roaster. **Name** : roaster-api. **Version** : 2.28.0.Final.
      * **License:** [Eclipse Public License version 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -2362,23 +2215,14 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/hrldcpr/pcollections](https://github.com/hrldcpr/pcollections)
      * **License:** [The MIT License](https://opensource.org/licenses/mit-license.php)
 
-1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
-     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
-     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [WTFPL](http://www.wtfpl.net/)
-
 1.  **Group** : org.snakeyaml. **Name** : snakeyaml-engine. **Version** : 2.6.
      * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml-engine](https://bitbucket.org/snakeyaml/snakeyaml-engine)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 4.4.3.
-     * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
-     * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 30 17:28:46 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -2774,10 +2618,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.3.4.
-     * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
-     * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 2.7.0.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
      * **License:** [MIT](https://raw.githubusercontent.com/korlibs/korge-next/master/korge/LICENSE.txt)
@@ -2785,22 +2625,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.squareup. **Name** : javapoet. **Version** : 1.13.0.
      * **Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-beanutils. **Name** : commons-beanutils. **Version** : 1.9.4.
-     * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
-     * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
-     * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.3.
-     * **Project URL:** [http://picocli.info](http://picocli.info)
-     * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.github.davidburstrom.contester. **Name** : contester-breakpoint. **Version** : 0.2.0.
      * **Project URL:** [https://github.com/davidburstrom/contester](https://github.com/davidburstrom/contester)
@@ -3001,10 +2825,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
      * **License:** [LGPL, version 2.1](http://www.gnu.org/licenses/licenses.html)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 3.1.0.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 11.4.
-     * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
-     * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
-
 1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.55.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
@@ -3015,25 +2835,12 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
      * **Project URL:** [http://saxon.sourceforge.net/](http://saxon.sourceforge.net/)
      * **License:** [Mozilla Public License Version 1.0](http://www.mozilla.org/MPL/MPL-1.0.txt)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.11.1.
-     * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
-     * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
-
 1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.7.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.8.1.
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.client5. **Name** : httpclient5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5-h2. **Version** : 5.1.3.
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apiguardian. **Name** : apiguardian-api. **Version** : 1.1.2.
@@ -3081,12 +2888,6 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.8.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
-     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
-     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
-     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
-     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jboss.forge.roaster. **Name** : roaster-api. **Version** : 2.28.0.Final.
      * **License:** [Eclipse Public License version 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -3295,23 +3096,14 @@ This report was generated on **Tue Oct 17 17:48:04 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/hrldcpr/pcollections](https://github.com/hrldcpr/pcollections)
      * **License:** [The MIT License](https://opensource.org/licenses/mit-license.php)
 
-1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
-     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
-     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [WTFPL](http://www.wtfpl.net/)
-
 1.  **Group** : org.snakeyaml. **Name** : snakeyaml-engine. **Version** : 2.6.
      * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml-engine](https://bitbucket.org/snakeyaml/snakeyaml-engine)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 4.4.3.
-     * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
-     * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 30 17:28:46 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -3707,10 +3499,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.3.4.
-     * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
-     * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 2.7.0.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
      * **License:** [MIT](https://raw.githubusercontent.com/korlibs/korge-next/master/korge/LICENSE.txt)
@@ -3718,22 +3506,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.squareup. **Name** : javapoet. **Version** : 1.13.0.
      * **Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-beanutils. **Name** : commons-beanutils. **Version** : 1.9.4.
-     * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
-     * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
-     * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.3.
-     * **Project URL:** [http://picocli.info](http://picocli.info)
-     * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.github.davidburstrom.contester. **Name** : contester-breakpoint. **Version** : 0.2.0.
      * **Project URL:** [https://github.com/davidburstrom/contester](https://github.com/davidburstrom/contester)
@@ -3934,10 +3706,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
      * **License:** [LGPL, version 2.1](http://www.gnu.org/licenses/licenses.html)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 3.1.0.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 11.4.
-     * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
-     * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
-
 1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.55.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
@@ -3948,25 +3716,12 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
      * **Project URL:** [http://saxon.sourceforge.net/](http://saxon.sourceforge.net/)
      * **License:** [Mozilla Public License Version 1.0](http://www.mozilla.org/MPL/MPL-1.0.txt)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.11.1.
-     * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
-     * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
-
 1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.7.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.8.1.
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.client5. **Name** : httpclient5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5-h2. **Version** : 5.1.3.
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apiguardian. **Name** : apiguardian-api. **Version** : 1.1.2.
@@ -4014,12 +3769,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.8.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
-     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
-     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
-     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
-     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jboss.forge.roaster. **Name** : roaster-api. **Version** : 2.28.0.Final.
      * **License:** [Eclipse Public License version 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -4228,23 +3977,14 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/hrldcpr/pcollections](https://github.com/hrldcpr/pcollections)
      * **License:** [The MIT License](https://opensource.org/licenses/mit-license.php)
 
-1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
-     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
-     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [WTFPL](http://www.wtfpl.net/)
-
 1.  **Group** : org.snakeyaml. **Name** : snakeyaml-engine. **Version** : 2.6.
      * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml-engine](https://bitbucket.org/snakeyaml/snakeyaml-engine)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 4.4.3.
-     * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
-     * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 30 17:28:47 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
@@ -4640,10 +4380,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.google.truth.extensions. **Name** : truth-proto-extension. **Version** : 1.1.5.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.3.4.
-     * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
-     * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 2.7.0.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
      * **License:** [MIT](https://raw.githubusercontent.com/korlibs/korge-next/master/korge/LICENSE.txt)
@@ -4651,22 +4387,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
 1.  **Group** : com.squareup. **Name** : javapoet. **Version** : 1.13.0.
      * **Project URL:** [http://github.com/square/javapoet/](http://github.com/square/javapoet/)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-beanutils. **Name** : commons-beanutils. **Version** : 1.9.4.
-     * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
-     * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
-     * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : info.picocli. **Name** : picocli. **Version** : 4.6.3.
-     * **Project URL:** [http://picocli.info](http://picocli.info)
-     * **License:** [The Apache Software License, version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : io.github.davidburstrom.contester. **Name** : contester-breakpoint. **Version** : 0.2.0.
      * **Project URL:** [https://github.com/davidburstrom/contester](https://github.com/davidburstrom/contester)
@@ -4915,10 +4635,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
      * **License:** [LGPL, version 2.1](http://www.gnu.org/licenses/licenses.html)
 
 1.  **Group** : net.ltgt.gradle. **Name** : gradle-errorprone-plugin. **Version** : 3.1.0.**No license information found**
-1.  **Group** : net.sf.saxon. **Name** : Saxon-HE. **Version** : 11.4.
-     * **Project URL:** [http://www.saxonica.com/](http://www.saxonica.com/)
-     * **License:** [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/2.0/)
-
 1.  **Group** : net.sourceforge.pmd. **Name** : pmd-core. **Version** : 6.55.0.
      * **License:** [BSD-style](http://pmd.sourceforge.net/license.html)
 
@@ -4929,25 +4645,12 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
      * **Project URL:** [http://saxon.sourceforge.net/](http://saxon.sourceforge.net/)
      * **License:** [Mozilla Public License Version 1.0](http://www.mozilla.org/MPL/MPL-1.0.txt)
 
-1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.11.1.
-     * **Project URL:** [https://www.antlr.org/](https://www.antlr.org/)
-     * **License:** [BSD-3-Clause](https://www.antlr.org/license.html)
-
 1.  **Group** : org.antlr. **Name** : antlr4-runtime. **Version** : 4.7.2.
      * **Project URL:** [http://www.antlr.org](http://www.antlr.org)
      * **License:** [The BSD License](http://www.antlr.org/license.html)
 
 1.  **Group** : org.apache.commons. **Name** : commons-lang3. **Version** : 3.8.1.
      * **Project URL:** [http://commons.apache.org/proper/commons-lang/](http://commons.apache.org/proper/commons-lang/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.client5. **Name** : httpclient5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5. **Version** : 5.1.3.
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : org.apache.httpcomponents.core5. **Name** : httpcore5-h2. **Version** : 5.1.3.
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : org.apiguardian. **Name** : apiguardian-api. **Version** : 1.1.2.
@@ -4995,12 +4698,6 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
 
 1.  **Group** : org.jacoco. **Name** : org.jacoco.report. **Version** : 0.8.8.
      * **License:** [Eclipse Public License 2.0](https://www.eclipse.org/legal/epl-2.0/)
-
-1.  **Group** : org.javassist. **Name** : javassist. **Version** : 3.28.0-GA.
-     * **Project URL:** [http://www.javassist.org/](http://www.javassist.org/)
-     * **License:** [Apache License 2.0](http://www.apache.org/licenses/)
-     * **License:** [LGPL 2.1](http://www.gnu.org/licenses/lgpl-2.1.html)
-     * **License:** [MPL 1.1](http://www.mozilla.org/MPL/MPL-1.1.html)
 
 1.  **Group** : org.jboss.forge.roaster. **Name** : roaster-api. **Version** : 2.28.0.Final.
      * **License:** [Eclipse Public License version 1.0](http://www.eclipse.org/legal/epl-v10.html)
@@ -5209,20 +4906,11 @@ This report was generated on **Tue Oct 17 17:48:05 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/hrldcpr/pcollections](https://github.com/hrldcpr/pcollections)
      * **License:** [The MIT License](https://opensource.org/licenses/mit-license.php)
 
-1.  **Group** : org.reflections. **Name** : reflections. **Version** : 0.10.2.
-     * **Project URL:** [http://github.com/ronmamo/reflections](http://github.com/ronmamo/reflections)
-     * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [WTFPL](http://www.wtfpl.net/)
-
 1.  **Group** : org.snakeyaml. **Name** : snakeyaml-engine. **Version** : 2.6.
      * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml-engine](https://bitbucket.org/snakeyaml/snakeyaml-engine)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.xmlresolver. **Name** : xmlresolver. **Version** : 4.4.3.
-     * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
-     * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Tue Oct 17 17:48:06 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Oct 30 17:28:47 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
