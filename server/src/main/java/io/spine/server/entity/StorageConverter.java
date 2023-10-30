@@ -151,20 +151,15 @@ public abstract class StorageConverter<I, E extends Entity<I, S>, S extends Enti
      * Updates the builder with required values, if needed.
      *
      * <p>Derived classes may override to additionally tune
-     * the passed entity builder.
-     *
-     * <p>By default, this method does nothing.
+     * the passed entity record builder.
      *
      * @param builder
      *         the entity builder to update
      * @param entity
      *         the entity which data is passed to the {@link EntityRecord} we are building
      */
-    // TODO:alex.tymchenko:2023-10-28: make abstract? Or kill?
     @SuppressWarnings({"WeakerAccess", "unused"})
-    protected void updateBuilder(EntityRecord.Builder builder, E entity) {
-        // Do nothing by default.
-    }
+    protected abstract void updateBuilder(EntityRecord.Builder builder, E entity);
 
     /**
      * Derived classes must implement providing state injection into the passed entity.

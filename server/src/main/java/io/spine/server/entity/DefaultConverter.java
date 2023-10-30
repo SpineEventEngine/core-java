@@ -62,6 +62,11 @@ final class DefaultConverter<I, E extends AbstractEntity<I, S>, S extends Entity
         return new DefaultConverter<>(stateType, factory, fieldMask);
     }
 
+    @Override
+    protected void updateBuilder(EntityRecord.Builder builder, E entity) {
+        // Do nothing here.
+    }
+
     /**
      * Injects the state into an entity.
      *
