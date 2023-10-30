@@ -51,13 +51,13 @@ import static java.util.Optional.ofNullable;
  * Abstract base for message listeners that collect messages posted to a bus.
  *
  * @param <I>
- *         the type of the message identifiers
+ *         the type of the signal identifiers
  * @param <T>
- *         the type of the outer objects of messages
+ *         the type of the collected signals
  * @param <E>
  *         the type of the message envelopes
  */
-public abstract class MessageCollector<I extends SignalId,
+abstract class MessageCollector<I extends SignalId,
                                 T extends Signal<I, ?, ?>,
                                 E extends MessageEnvelope<I, T, ?>>
         implements Listener<E> {
@@ -87,14 +87,14 @@ public abstract class MessageCollector<I extends SignalId,
     }
 
     /**
-     * Obtains immutable list with outer objects of messages collected so far.
+     * Obtains an immutable list with outer objects of messages collected so far.
      */
     public final ImmutableList<T> all() {
         return ImmutableList.copyOf(outerObjects);
     }
 
     /**
-     * Obtains immutable list with outer objects of messages belonging to the passed tenant.
+     * Obtains an immutable list with outer objects of messages belonging to the passed tenant.
      */
     public final ImmutableList<T> ofTenant(TenantId tenantId) {
         checkNotNull(tenantId);

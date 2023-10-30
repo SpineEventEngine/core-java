@@ -28,10 +28,12 @@
  * This package contains diagnostic utilities for
  * {@link io.spine.server.BoundedContext io.spine.server.BoundedContext}.
  */
+@Internal
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.testing.server.blackbox.probe;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

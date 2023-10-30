@@ -471,8 +471,8 @@ public abstract class BlackBox implements WithLogging, Closeable {
     abstract TestActorRequestFactory requestFactory();
 
     /**
-     * Obtains immutable list of commands generated in this Bounded Context in response to posted
-     * messages.
+     * Obtains an immutable list of commands generated in this Bounded Context in response
+     * to posted messages.
      *
      * <p>The returned list does <em>NOT</em> contain commands posted to this Bounded Context
      * during test setup.
@@ -480,7 +480,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     private ImmutableList<Command> commands() {
         var wasNotReceived =
                 ((Predicate<Command>) postedCommands::contains).negate();
-        return select(probe.commands())
+        return select(probe.commandListener())
                 .stream()
                 .filter(wasNotReceived)
                 .collect(toImmutableList());
@@ -511,11 +511,11 @@ public abstract class BlackBox implements WithLogging, Closeable {
     abstract ImmutableList<Event> select(EventCollector collector);
 
     /**
-     * Obtains immutable list of all the events in this Bounded Context.
+     * Obtains an immutable list of all the events in this Bounded Context.
      */
     @VisibleForTesting
     final ImmutableList<Event> allEvents() {
-        return select(probe.events());
+        return select(probe.eventListener());
     }
 
     /**

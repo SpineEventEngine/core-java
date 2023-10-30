@@ -44,7 +44,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Performs logging of failed signals handlers or fails the test
  * depending upon the current context exception tolerance.
  */
-public final class FailedHandlerGuard extends AbstractEventSubscriber implements DiagnosticLogging {
+public final class FailedHandlerGuard
+        extends AbstractEventSubscriber
+        implements DiagnosticLogging {
 
     private HandlerFailureTolerance tolerance = HandlerFailureTolerance.RAISE_AND_FAIL;
 

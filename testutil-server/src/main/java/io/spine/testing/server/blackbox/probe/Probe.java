@@ -28,17 +28,18 @@ package io.spine.testing.server.blackbox.probe;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.BoundedContext;
-import io.spine.server.BoundedContextBuilder;
-import io.spine.server.bus.Listener;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.type.CommandEnvelope;
-import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * An implementation of {@link BoundedContext.Probe} which is used by
+ * {@link io.spine.testing.server.blackbox.BlackBox BlackBox} to collect
+ * commands and events produced by a {@link BoundedContext} being tested.
+ */
 public class Probe implements BoundedContext.Probe {
 
     private @Nullable BoundedContext context;
@@ -60,6 +61,9 @@ public class Probe implements BoundedContext.Probe {
      */
     private final FailedHandlerGuard failedHandlerGuard;
 
+    /**
+     * Creates a new instance.
+     */
     public Probe() {
         this.commands = new CommandCollector();
         this.events = new EventCollector();
@@ -77,26 +81,21 @@ public class Probe implements BoundedContext.Probe {
         return context != null;
     }
 
-    public CommandCollector commands() {
-        return commands;
-    }
-
-    public EventCollector events() {
-        return events;
-    }
-
+    /**
+     * Obtains a {@link FailedHandlerGuard} instance used by this probe.
+     */
     public FailedHandlerGuard failedHandlerGuard() {
         return failedHandlerGuard;
     }
 
     @Override
-    public Listener<CommandEnvelope> commandListener() {
-        return commands();
+    public CommandCollector commandListener() {
+        return commands;
     }
 
     @Override
-    public Listener<EventEnvelope> eventListener() {
-        return events();
+    public EventCollector eventListener() {
+        return events;
     }
 
     @Override

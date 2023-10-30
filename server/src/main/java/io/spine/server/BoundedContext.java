@@ -602,9 +602,26 @@ public abstract class BoundedContext
         return name().hashCode();
     }
 
+    /**
+     * A diagnostic probe which can be {@linkplain #install(Probe) installed} into
+     * a Bounded Context to collect information about the commands and events processed by it.
+     */
     public interface Probe extends ContextAware {
+
+        /**
+         * The listener of commands posted processed by the context.
+         */
         Listener<CommandEnvelope> commandListener();
+
+        /**
+         * The listener of events posted processed by the context.
+         */
         Listener<EventEnvelope> eventListener();
+
+        /**
+         * Obtains the event dispatchers exposed by the probe for gathering
+         * additional information about the events.
+         */
         Set<EventDispatcher> eventDispatchers();
     }
 
