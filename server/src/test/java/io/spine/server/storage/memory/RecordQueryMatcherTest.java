@@ -27,18 +27,19 @@
 package io.spine.server.storage.memory;
 
 import io.spine.server.storage.RecordWithColumns;
-import io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv;
-import io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.StgProjectColumns;
+import io.spine.server.storage.given.GivenStorageProject.StgProjectColumns;
+import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
+import static io.spine.server.storage.given.GivenStorageProject.projectMessageSpec;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.newBuilder;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.recordSubject;
-import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.projectSpec;
 import static io.spine.testdata.Sample.messageOfType;
 import static io.spine.testing.TestValues.nullRef;
 
@@ -53,7 +54,7 @@ class RecordQueryMatcherTest {
 
         assertThat(matcher.test(nullRef()))
                 .isFalse();
-        assertThat(matcher.test(RecordWithColumns.create(newState(), projectSpec())))
+        assertThat(matcher.test(asRecord(newState())))
                 .isTrue();
     }
 
@@ -67,8 +68,8 @@ class RecordQueryMatcherTest {
         var matcher = new RecordQueryMatcher<>(subject);
         var matching = newState(matchingId);
         var nonMatching = newState(nonMatchingId);
-        var matchingRecord = RecordWithColumns.create(matching, projectSpec());
-        var nonMatchingRecord = RecordWithColumns.create(nonMatching, projectSpec());
+        var matchingRecord = asRecord(matching);
+        var nonMatchingRecord = asRecord(nonMatching);
         assertThat(matcher.test(matchingRecord))
                 .isTrue();
         assertThat(matcher.test(nonMatchingRecord))
@@ -82,9 +83,9 @@ class RecordQueryMatcherTest {
         var matchingName = matchingState.getName();
         var query = newBuilder().where(StgProjectColumns.name).is(matchingName).build();
         var matcher = new RecordQueryMatcher<>(query.subject());
-        var matchingRecord = RecordWithColumns.create(matchingState, projectSpec());
+        var matchingRecord = asRecord(matchingState);
         var nonMatching = newState();
-        var nonMatchingRecord = RecordWithColumns.create(nonMatching, projectSpec());
+        var nonMatchingRecord = asRecord(nonMatching);
 
         assertThat(matcher.test(matchingRecord))
                 .isTrue();
@@ -92,13 +93,18 @@ class RecordQueryMatcherTest {
                 .isFalse();
     }
 
+    @NonNull
+    private static RecordWithColumns<StgProjectId, StgProject> asRecord(StgProject state) {
+        return RecordWithColumns.create(state, projectMessageSpec());
+    }
+
     @Test
     @DisplayName("match `Any` instances")
     void matchAnyInstances() {
         var matchingState = newState();
         var queryValue = pack(matchingState);
-        var matchingRecord = RecordWithColumns.create(matchingState, projectSpec());
-        var nonMatchingRecord = RecordWithColumns.create(newState(), projectSpec());
+        var matchingRecord = asRecord(matchingState);
+        var nonMatchingRecord = asRecord(newState());
 
         var query = newBuilder()
                 .where(StgProjectColumns.state_as_any).is(queryValue).build();
@@ -117,7 +123,7 @@ class RecordQueryMatcherTest {
                 .build();
         var matcher = new RecordQueryMatcher<>(query);
 
-        var recordWithColumns = RecordWithColumns.create(newState(), projectSpec());
+        var recordWithColumns = asRecord(newState());
         assertThat(matcher.test(recordWithColumns))
                 .isFalse();
     }

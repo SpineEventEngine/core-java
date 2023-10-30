@@ -26,43 +26,20 @@
 
 package io.spine.server.storage.memory.given;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Timestamp;
-import io.spine.protobuf.AnyPacker;
-import io.spine.query.Columns;
-import io.spine.query.RecordColumn;
-import io.spine.query.RecordColumns;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
 import io.spine.query.Subject;
-import io.spine.server.storage.MessageRecordSpec;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 
 /**
  * The test environment for {@link io.spine.server.storage.memory.RecordQueryMatcher} tests.
- *
- * <p>Provides various types of {@linkplain RecordColumn record columns}
- * that can be used to emulate a client-side query.
  */
 @SuppressWarnings("BadImport")       // `create` looks fine in this context.
 public final class RecordQueryMatcherTestEnv {
 
-    private static final MessageRecordSpec<StgProjectId, StgProject> spec =
-            new MessageRecordSpec<>(StgProjectId.class,
-                                    StgProject.class,
-                                    StgProject::getId,
-                                    StgProjectColumns.definitions());
-
     /** Prevents instantiation of this test env class. */
     private RecordQueryMatcherTestEnv() {
-    }
-
-    /**
-     * Returns the record specification for {@code StgProject}.
-     */
-    public static MessageRecordSpec<StgProjectId, StgProject> projectSpec() {
-        return spec;
     }
 
     /**
@@ -94,34 +71,5 @@ public final class RecordQueryMatcherTestEnv {
      */
     public static RecordQueryBuilder<StgProjectId, StgProject> newBuilder() {
         return RecordQuery.newBuilder(StgProjectId.class, StgProject.class);
-    }
-
-    /**
-     * Columns of {@code StgProject} stored as record.
-     */
-    @RecordColumns(ofType = StgProject.class)
-    public static final class StgProjectColumns {
-
-        private StgProjectColumns() {
-        }
-
-        public static final RecordColumn<StgProject, String> name =
-                RecordColumn.create("name", String.class, StgProject::getName);
-
-        public static final RecordColumn<StgProject, Timestamp> due_date =
-                RecordColumn.create("due_date", Timestamp.class, StgProject::getDueDate);
-
-        public static final RecordColumn<StgProject, Any> state_as_any =
-                RecordColumn.create("state_as_any", Any.class, AnyPacker::pack);
-
-        public static final RecordColumn<StgProject, String> random_non_stored_column =
-                RecordColumn.create("random_non_stored_column", String.class, (p) -> "31415926");
-
-        /**
-         * Returns all the column definitions.
-         */
-        public static Columns<StgProject> definitions() {
-            return Columns.of(name, due_date, state_as_any);
-        }
     }
 }

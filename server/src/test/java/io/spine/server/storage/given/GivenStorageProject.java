@@ -26,13 +26,24 @@
 
 package io.spine.server.storage.given;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.Identifier;
+import io.spine.protobuf.AnyPacker;
+import io.spine.query.Columns;
+import io.spine.query.RecordColumn;
+import io.spine.query.RecordColumns;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.SpecScanner;
+import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProject.Status;
 import io.spine.test.storage.StgProjectId;
 import io.spine.test.storage.StgTask;
+import io.spine.testing.core.given.GivenVersion;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
@@ -40,6 +51,15 @@ import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 
 public final class GivenStorageProject {
+
+    private static final MessageRecordSpec<StgProjectId, StgProject> messageSpec =
+            new MessageRecordSpec<>(StgProjectId.class,
+                                    StgProject.class,
+                                    StgProject::getId,
+                                    StgProjectColumns.definitions());
+
+    private static final MessageRecordSpec<StgProjectId, EntityRecord> entityRecordSpec =
+            SpecScanner.scan(StgProjectId.class, StgProject.class);
 
     /**
      * Prevents this utility from instantiation.
@@ -107,5 +127,56 @@ public final class GivenStorageProject {
     public static StgProject newState() {
         var id = newId();
         return newState(id);
+    }
+
+    /**
+     * Returns the record specification for {@code StgProject}.
+     */
+    public static MessageRecordSpec<StgProjectId, StgProject> projectMessageSpec() {
+        return messageSpec;
+    }
+
+    /**
+     * Generates a new {@code StgProject} as Entity,
+     * and wraps it into a {@code RecordWithColumns}.
+     */
+    public static RecordWithColumns<StgProjectId, EntityRecord> newEntityRecord() {
+        var project = newState();
+        var record = EntityRecord.newBuilder()
+                .setEntityId(Identifier.pack(project.getId()))
+                .setVersion(GivenVersion.withNumber(7))
+                .setState(AnyPacker.pack(project))
+                .build();
+        var result = RecordWithColumns.create(record, entityRecordSpec);
+        return result;
+    }
+
+    /**
+     * Columns of {@code StgProject} stored as record.
+     */
+    @RecordColumns(ofType = StgProject.class)
+    public static final class StgProjectColumns {
+
+        private StgProjectColumns() {
+        }
+
+        public static final RecordColumn<StgProject, String> name =
+                RecordColumn.create("name", String.class, StgProject::getName);
+
+        public static final RecordColumn<StgProject, Timestamp> due_date =
+                RecordColumn.create("due_date", Timestamp.class, StgProject::getDueDate);
+
+        public static final RecordColumn<StgProject, Any> state_as_any =
+                RecordColumn.create("state_as_any", Any.class, AnyPacker::pack);
+
+        public static final RecordColumn<StgProject, String> random_non_stored_column =
+                RecordColumn.create("random_non_stored_column", String.class, (p) -> "31415926");
+
+        /**
+         * Returns all the column definitions.
+         */
+        public static Columns<StgProject> definitions() {
+            return Columns.of(name, due_date, state_as_any);
+        }
     }
 }
