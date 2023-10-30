@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.probe;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
@@ -34,8 +34,8 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.HandlerFailedUnexpectedly;
 
-import static io.spine.type.Json.toJson;
 import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
+import static io.spine.type.Json.toJson;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -97,7 +97,7 @@ public final class FailedHandlerGuard extends AbstractEventSubscriber implements
     /**
      * Asks the guard to tolerate exceptions.
      */
-    void tolerateFailures() {
+    public void tolerateFailures() {
         tolerance = HandlerFailureTolerance.LOG;
     }
 

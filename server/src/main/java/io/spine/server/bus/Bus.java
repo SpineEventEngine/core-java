@@ -93,7 +93,8 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      *         exposed} by the dispatcher is empty
      */
     public void register(D dispatcher) {
-        registry().register(checkNotNull(dispatcher));
+        checkNotNull(dispatcher);
+        registry().register(dispatcher);
     }
 
     /**
@@ -102,14 +103,29 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      * @param dispatcher the dispatcher to unregister
      */
     public void unregister(D dispatcher) {
-        registry().unregister(checkNotNull(dispatcher));
+        checkNotNull(dispatcher);
+        registry().unregister(dispatcher);
+    }
+
+    public void unregister(DispatcherDelegate<C, E> delegate) {
+        checkNotNull(delegate);
+    }
+
+    public void add(Listener<E> listener) {
+        checkNotNull(listener);
+        listeners.add(listener);
+    }
+
+    public void remove(Listener<E> listener) {
+        checkNotNull(listener);
+        listeners.remove(listener);
     }
 
     /**
      * Posts the message to the bus.
      *
      * @param message  the message to post
-     * @param observer the observer to receive outcome of the operation
+     * @param observer the observer to receive an outcome of the operation
      * @see #post(Iterable, StreamObserver) for posing multiple messages at once
      */
     public final void post(T message, StreamObserver<Ack> observer) {
@@ -132,18 +148,18 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      * {@link io.spine.base.Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
-     * {@linkplain io.spine.base.RejectionThrowable rejection} may result either a rejection status or
-     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance.
+     * {@linkplain io.spine.base.RejectionThrowable rejection} may result either a rejection
+     * status or an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance.
      * The rejection status may only pop up if the {@link MessageDispatcher} processes the message
      * sequentially and throws the rejection (wrapped in a
-     * the {@linkplain io.spine.base.RejectionThrowable RejectionThrowables}) instead of handling them.
-     * Otherwise, the {@code OK} status should be expected.
+     * the {@linkplain io.spine.base.RejectionThrowable RejectionThrowables}) instead of
+     * handling them. Otherwise, the {@code OK} status should be expected.
      *
      * <p>Note that {@linkplain StreamObserver#onError StreamObserver.onError()} is never called
      * for the passed observer, since errors are propagated as statuses of {@code Ack} response.
      *
      * @param messages the messages to post
-     * @param observer the observer to receive outcome of the operation
+     * @param observer the observer to receive the outcome of the operation
      */
     public final void post(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);

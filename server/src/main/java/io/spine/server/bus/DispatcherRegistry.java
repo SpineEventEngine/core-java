@@ -86,6 +86,18 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
         }
     }
 
+    public void unregister(DispatcherDelegate<C, E> delegate) {
+        checkNotNull(delegate);
+        @SuppressWarnings("unchecked") // Checked with `instanceof`.
+        var delegatingDispatcher = dispatchers.values().stream()
+                .filter(d -> d instanceof DelegatingDispatcher)
+                .map(d -> (DelegatingDispatcher<C, E>) d)
+                .filter(d -> d.delegate().equals(delegate))
+                .map(d -> (D) d)
+                .findFirst();
+        delegatingDispatcher.ifPresent(this::unregister);
+    }
+
     /**
      * Unregisters all dispatchers.
      */

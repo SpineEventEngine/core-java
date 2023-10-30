@@ -27,6 +27,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.bus.DispatcherDelegate;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
@@ -61,7 +62,8 @@ import io.spine.server.type.CommandEnvelope;
  * @see DelegatingCommandDispatcher
  */
 @Internal
-public interface CommandDispatcherDelegate {
+public interface CommandDispatcherDelegate
+        extends DispatcherDelegate<CommandClass, CommandEnvelope> {
 
     /**
      * Obtains the classes of dispatched commands.
@@ -69,7 +71,7 @@ public interface CommandDispatcherDelegate {
     ImmutableSet<CommandClass> commandClasses();
 
     /**
-     * Dispatches the command  and returns the outcome of the dispatching.
+     * Dispatches the command and returns the outcome of the dispatching.
      */
     DispatchOutcome dispatchCommand(CommandEnvelope envelope);
 

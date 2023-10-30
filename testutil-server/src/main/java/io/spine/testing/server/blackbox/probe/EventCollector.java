@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.server.blackbox.probe;
+
+import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.testing.server.blackbox.BlackBox
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside the Bounded Context.
- * 
- * @see io.spine.testing.server.blackbox.BlackBox
+ * Remembers events posted to an Event Bus.
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.testing.server.blackbox;
-
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+public final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
+}

@@ -84,8 +84,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SuppressWarnings("AbstractClassWithoutAbstractMethods") // designed for the various storage impls.
 public abstract class AggregateHistoryTruncationTest {
 
-    private static final SequenceId ID = SequenceId
-            .newBuilder()
+    private static final SequenceId ID = SequenceId.newBuilder()
             .setValue(newUuid())
             .build();
 
@@ -101,49 +100,50 @@ public abstract class AggregateHistoryTruncationTest {
                     BoundedContextBuilder.assumingTests()
                                          .add(repo)
             );
+            try (context) {
+                // Set the starting numbers.
+                var setStartingNumbers = SetStartingNumbers.newBuilder()
+                        .setId(ID)
+                        .setNumberOne(0)
+                        .setNumberTwo(1)
+                        .build();
+                context.receivesCommand(setStartingNumbers)
+                       .assertEvents()
+                       .withType(StartingNumbersSet.class)
+                       .hasSize(1);
+                // Send a lot of `MoveSequence` events, so several snapshots are created.
+                var moveSequence = MoveSequence.newBuilder()
+                        .setId(ID)
+                        .build();
+                var snapshotTrigger = repo.snapshotTrigger();
+                for (var i = 0; i < snapshotTrigger * 5 + 1; i++) {
+                    context.receivesCommand(moveSequence);
+                }
 
-            // Set the starting numbers.
-            var setStartingNumbers = SetStartingNumbers.newBuilder()
-                    .setId(ID)
-                    .setNumberOne(0)
-                    .setNumberTwo(1)
-                    .build();
-            context.receivesCommand(setStartingNumbers)
-                   .assertEvents()
-                   .withType(StartingNumbersSet.class)
-                   .hasSize(1);
-            // Send a lot of `MoveSequence` events, so several snapshots are created.
-            var moveSequence = MoveSequence.newBuilder()
-                    .setId(ID)
-                    .build();
-            var snapshotTrigger = repo.snapshotTrigger();
-            for (var i = 0; i < snapshotTrigger * 5 + 1; i++) {
+                // Compare against the numbers calculated by hand.
+                var expectedNumberOne = 121393;
+                var expectedNumberTwo = 196418;
+                assertThat(lastNumberOne())
+                        .isEqualTo(expectedNumberOne);
+                assertThat(lastNumberTwo())
+                        .isEqualTo(expectedNumberTwo);
+
+                // Truncate the storage.
+                var storage = repo.aggregateStorage();
+                var countBeforeTruncate = recordCount(storage);
+                assertThat(countBeforeTruncate)
+                        .isGreaterThan(snapshotTrigger);
+                storage.truncateOlderThan(0);
+                var countAfterTruncate = recordCount(storage);
+                assertThat(countAfterTruncate)
+                        .isAtMost(snapshotTrigger);
+
+                // Run one more command and check the result.
+                var expectedNext = lastNumberOne() + lastNumberTwo();
                 context.receivesCommand(moveSequence);
+                assertThat(lastNumberTwo())
+                        .isEqualTo(expectedNext);
             }
-
-            // Compare against the numbers calculated by hand.
-            var expectedNumberOne = 121393;
-            var expectedNumberTwo = 196418;
-            assertThat(lastNumberOne())
-                    .isEqualTo(expectedNumberOne);
-            assertThat(lastNumberTwo())
-                    .isEqualTo(expectedNumberTwo);
-
-            // Truncate the storage.
-            var storage = repo.aggregateStorage();
-            var countBeforeTruncate = recordCount(storage);
-            assertThat(countBeforeTruncate)
-                    .isGreaterThan(snapshotTrigger);
-            storage.truncateOlderThan(0);
-            var countAfterTruncate = recordCount(storage);
-            assertThat(countAfterTruncate)
-                    .isAtMost(snapshotTrigger);
-
-            // Run one more command and check the result.
-            var expectedNext = lastNumberOne() + lastNumberTwo();
-            context.receivesCommand(moveSequence);
-            assertThat(lastNumberTwo())
-                    .isEqualTo(expectedNext);
         }
 
         private int recordCount(AggregateStorage<SequenceId, Sequence> storage) {

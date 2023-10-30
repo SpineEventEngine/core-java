@@ -28,6 +28,7 @@ package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
+import io.spine.server.bus.DispatcherDelegate;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -44,7 +45,7 @@ import io.spine.server.type.EventEnvelope;
  * @see DelegatingEventDispatcher
  */
 @Internal
-public interface EventDispatcherDelegate {
+public interface EventDispatcherDelegate extends DispatcherDelegate<EventClass, EventEnvelope> {
 
     /**
      * Obtains all event classes dispatched by this delegate.
@@ -96,7 +97,7 @@ public interface EventDispatcherDelegate {
     /**
      * Checks if this dispatcher can dispatch the given event.
      *
-     * <p>By default, all events are permitted. Implementations may change this behaviour to reject
+     * <p>By default, all events are permitted. Implementations may change this behavior to reject
      * certain events as early as possible.
      *
      * @param envelope

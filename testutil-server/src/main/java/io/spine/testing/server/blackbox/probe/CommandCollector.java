@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.probe;
 
-import io.spine.core.Event;
-import io.spine.core.EventId;
-import io.spine.server.type.EventEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
+import io.spine.server.type.CommandEnvelope;
 
 /**
- * Remembers events posted to an Event Bus.
+ * Remembers commands posted to a Command Bus.
  */
-public final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
+public final class CommandCollector extends MessageCollector<CommandId, Command, CommandEnvelope> {
 }

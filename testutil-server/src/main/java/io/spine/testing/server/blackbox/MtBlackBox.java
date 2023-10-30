@@ -34,6 +34,8 @@ import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.blackbox.probe.CommandCollector;
+import io.spine.testing.server.blackbox.probe.EventCollector;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

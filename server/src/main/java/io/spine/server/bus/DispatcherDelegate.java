@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.server.bus;
 
-/**
- * Configures the behavior of the {@link BlackBox} on handling runtime exceptions
- * thrown from the handler methods.
- */
-enum HandlerFailureTolerance {
+import io.spine.server.type.MessageEnvelope;
+import io.spine.type.MessageClass;
 
-    /**
-     * Identifies that exceptions must be only logged.
-     */
-    LOG,
+public interface DispatcherDelegate<C extends MessageClass<?>,
+                                    E extends MessageEnvelope<?, ?, ?>> {
 
-    /**
-     * Identifies that exceptions must be raised and tests must be failed.
-     */
-    RAISE_AND_FAIL
 }

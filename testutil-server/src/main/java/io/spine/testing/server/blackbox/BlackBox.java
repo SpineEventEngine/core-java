@@ -56,6 +56,9 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.entity.EntitySubject;
+import io.spine.testing.server.blackbox.probe.CommandCollector;
+import io.spine.testing.server.blackbox.probe.EventCollector;
+import io.spine.testing.server.blackbox.probe.Probe;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -152,10 +155,10 @@ public abstract class BlackBox implements WithLogging, Closeable {
     BlackBox(BoundedContextBuilder builder) {
         super();
         this.probe = new Probe();
-        probe.installIn(builder);
         var created = this;
         builder.setOnBuild(context -> {
             created.clientFactory = new ClientFactory(context);
+            context.install(probe);
             created.context = context;
         });
         this.actor = defaultActor();

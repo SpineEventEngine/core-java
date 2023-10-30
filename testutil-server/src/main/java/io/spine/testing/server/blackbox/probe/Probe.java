@@ -24,11 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.probe;
 
+import com.google.common.collect.ImmutableSet;
+import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
+import io.spine.server.bus.Listener;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class Probe {
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+public class Probe implements BoundedContext.Probe {
+
+    private @Nullable BoundedContext context;
 
     /**
      * Collects all commands, including posted to the context during its setup or
@@ -47,10 +60,21 @@ public class Probe {
      */
     private final FailedHandlerGuard failedHandlerGuard;
 
-    Probe() {
+    public Probe() {
         this.commands = new CommandCollector();
         this.events = new EventCollector();
         this.failedHandlerGuard = new FailedHandlerGuard();
+    }
+
+    @Override
+    public void registerWith(BoundedContext context) {
+        checkNotRegistered();
+        this.context = checkNotNull(context);
+    }
+
+    @Override
+    public boolean isRegistered() {
+        return context != null;
     }
 
     public CommandCollector commands() {
@@ -65,12 +89,25 @@ public class Probe {
         return failedHandlerGuard;
     }
 
-    public void installIn(BoundedContextBuilder builder) {
-        builder.addCommandListener(commands())
-               .addEventListener(events())
-               .addEventDispatcher(failedHandlerGuard())
-               .addEventDispatcher(new UnsupportedCommandGuard(builder.name()
-                                                                      .getValue()))
-               .addEventDispatcher(DiagnosticLog.instance());
+    @Override
+    public Listener<CommandEnvelope> commandListener() {
+        return commands();
+    }
+
+    @Override
+    public Listener<EventEnvelope> eventListener() {
+        return events();
+    }
+
+    @Override
+    public Set<EventDispatcher> eventDispatchers() {
+        checkRegistered();
+        assert(context != null);
+        var commandGuard = new UnsupportedCommandGuard(context.name().value());
+        return ImmutableSet.of(
+                failedHandlerGuard(),
+                commandGuard,
+                DiagnosticLog.instance()
+        );
     }
 }

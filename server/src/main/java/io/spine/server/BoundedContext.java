@@ -34,6 +34,7 @@ import io.spine.logging.WithLogging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRootDirectory;
 import io.spine.server.aggregate.ImportBus;
+import io.spine.server.bus.Listener;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -52,6 +53,8 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.trace.TracerFactory;
+import io.spine.server.type.CommandEnvelope;
+import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.type.TypeName;
@@ -69,7 +72,7 @@ import static java.lang.String.format;
 /**
  * A logical and structural boundary of a model.
  *
- * <p>Logically, a Bounded Context represents a sub-system built to be described with the same
+ * <p>Logically, a Bounded Context represents a subsystem built to be described with the same
  * Ubiquitous Language. Any term within a single bounded context has a single meaning and may or
  * may not map to another term in the language of another Bounded Context.
  *
@@ -120,10 +123,15 @@ public abstract class BoundedContext
     /** The index of tenants having data in this context. */
     private final TenantIndex tenantIndex;
 
-    /** Provides access to internally-used features of the context. */
+    /** Provides access to internally used features of the context. */
     private final InternalAccess internalAccess;
 
     private final @Nullable Consumer<BoundedContext> onBeforeClose;
+
+    /**
+     * The currently installed probe.
+     */
+    private @Nullable Probe probe;
 
     /**
      * Creates new instance.
@@ -149,7 +157,6 @@ public abstract class BoundedContext
         this.aggregateRootDirectory = builder.aggregateRootDirectory();
         this.internalAccess = new InternalAccess();
         this.onBeforeClose = builder.getOnBeforeClose();
-
     }
 
     /**
@@ -238,6 +245,7 @@ public abstract class BoundedContext
      *
      * @see #registerCommandDispatcher(CommandDispatcherDelegate)
      */
+    @SuppressWarnings("WeakerAccess") // This class is effectively `sealed`, so this is stricter.
     protected void registerCommandDispatcher(CommandDispatcher dispatcher) {
         checkNotNull(dispatcher);
         registerIfAware(dispatcher);
@@ -259,6 +267,13 @@ public abstract class BoundedContext
         checkNotNull(dispatcher);
         if (dispatcher.dispatchesCommands()) {
             registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
+        }
+    }
+
+    private void unregisterCommandDispatcher(CommandDispatcherDelegate dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesCommands()) {
+            commandBus().unregister(dispatcher);
         }
     }
 
@@ -290,6 +305,25 @@ public abstract class BoundedContext
         }
     }
 
+    protected void unregisterEventDispatcher(EventDispatcher dispatcher) {
+        checkNotNull(dispatcher);
+        Security.allowOnlyFrameworkServer();
+        unregisterIfAware(dispatcher);
+        if (dispatcher.dispatchesEvents()) {
+            var eventBus = eventBus();
+            eventBus.unregister(dispatcher);
+            var systemReadSide = systemClient().readSide();
+            systemReadSide.unregister(dispatcher);
+        }
+        if (dispatcher.dispatchesExternalEvents()) {
+            broker.unregister(dispatcher);
+        }
+        if (dispatcher instanceof CommandDispatcherDelegate) {
+            var commandDispatcher = (CommandDispatcherDelegate) dispatcher;
+            unregisterCommandDispatcher(commandDispatcher);
+        }
+    }
+
     /**
      * Registers the passed delegate of an {@link EventDispatcher} with the buses of this context.
      *
@@ -310,6 +344,19 @@ public abstract class BoundedContext
             var contextAware = (ContextAware) contextPart;
             if (!contextAware.isRegistered()) {
                 contextAware.registerWith(this);
+            }
+        }
+    }
+
+    /**
+     * If the given {@code contextPart} is {@link ContextAware},
+     * {@linkplain ContextAware#unregister() unregisters} it from this context.
+     */
+    private static void unregisterIfAware(Object contextPart) {
+        if (contextPart instanceof ContextAware) {
+            var contextAware = (ContextAware) contextPart;
+            if (contextAware.isRegistered()) {
+                contextAware.unregister();
             }
         }
     }
@@ -440,7 +487,9 @@ public abstract class BoundedContext
         if (isOpen) {
             shutDownRepositories();
         }
-
+        if (hasProbe()) {
+            removeProbe();
+        }
         if (isOpen) {
             logger().atDebug().log(() -> format("%s", closed(nameForLogging())));
         }
@@ -503,6 +552,39 @@ public abstract class BoundedContext
         return name().value().compareTo(another.name().value());
     }
 
+    public final void install(Probe probe) {
+        checkNotNull(probe);
+        checkState(this.probe == null,
+                   "Probe is already installed (`%s`). Please remove previous probe first.", probe);
+        probe.registerWith(this);
+        commandBus.add(probe.commandListener());
+        eventBus.add(probe.eventListener());
+        probe.eventDispatchers()
+             .forEach(this::registerEventDispatcher);
+
+        this.probe = probe;
+    }
+
+    /**
+     * Removes the currently installed probe, unregistering it with this context.
+     *
+     * @throws IllegalStateException
+     *          if no probe was installed before
+     */
+    public final void removeProbe() {
+        checkState(probe != null, "Probe is not installed.");
+        commandBus.remove(probe.commandListener());
+        eventBus.remove(probe.eventListener());
+        probe.eventDispatchers()
+             .forEach(this::unregisterEventDispatcher);
+        probe.unregister();
+        probe = null;
+    }
+
+    public final boolean hasProbe() {
+        return probe != null;
+    }
+
     /**
      * Returns {@code true} if another bounded context has the same name as this one,
      * {@code false} otherwise.
@@ -524,13 +606,19 @@ public abstract class BoundedContext
         return name().hashCode();
     }
 
+    public interface Probe extends ContextAware {
+        Listener<CommandEnvelope> commandListener();
+        Listener<EventEnvelope> eventListener();
+        Set<EventDispatcher> eventDispatchers();
+    }
+
     /**
      * Provides access to features of {@link BoundedContext} used internally by the framework.
      */
     @Internal
     public final class InternalAccess {
 
-        /** Prevents instantiation from outside. */
+        /** Prevents instantiation from the outside. */
         private InternalAccess() {
         }
 
@@ -574,7 +662,7 @@ public abstract class BoundedContext
          * Obtains repositories of the context.
          *
          * @throws IllegalStateException
-         *         if there is not repository entities of which have the passed state
+         *         if there are no repository entities of which have the passed state
          */
         public Repository<?, ?> getRepository(Class<? extends EntityState<?>> stateClass) {
             return guard.get(stateClass);
@@ -591,7 +679,7 @@ public abstract class BoundedContext
          * the requested entity is {@linkplain Visibility#NONE not visible}.
          *
          * @param stateCls
-         *         the class of the state of the entity managed by the resulting repository
+         *         the class of the entity state managed by the resulting repository
          * @return the requested repository or {@link Optional#empty()} if the repository manages
          *         a {@linkplain Visibility#NONE non-visible} entity
          * @throws IllegalStateException
