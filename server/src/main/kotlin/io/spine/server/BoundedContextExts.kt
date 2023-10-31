@@ -29,8 +29,14 @@ package io.spine.server
 import io.spine.base.EntityState
 import io.spine.server.entity.Entity
 
+/**
+ * Tells if the bounded context has entities of the given type.
+ */
 public inline fun <reified E: Entity<*, *>> BoundedContext.hasEntitiesOfType(): Boolean =
     hasEntitiesOfType(E::class.java)
 
+/**
+ * Tells if the bounded context has entities with the given state type.
+ */
 public inline fun <reified S: EntityState<*>> BoundedContext.hasEntitiesWithState(): Boolean =
     hasEntitiesWithState(S::class.java)

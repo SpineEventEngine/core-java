@@ -134,7 +134,7 @@ public abstract class BoundedContext
      * Creates new instance.
      *
      * @throws IllegalStateException
-     *         if called from a derived class, which is not a part of the framework
+     *          if called from a derived class, which is not a part of the framework
      * @apiNote
      * This constructor is for internal use of the framework. Application developers should not
      * create classes derived from {@code BoundedContext}.
@@ -277,11 +277,12 @@ public abstract class BoundedContext
     /**
      * Registering the passed event dispatcher with the buses of this context.
      *
-     * <p>If the passed instance dispatches domestic events, registers it with the {@code EventBus}.
-     * If the passed instance dispatches external events, registers it with
+     * <p>If the given instance dispatches domestic events, registers it with the {@code EventBus}.
+     * If the given instance dispatches external events, registers it with
      * the {@code IntegrationBroker}.
      *
      * @see #registerEventDispatcher(EventDispatcherDelegate)
+     * @see #unregisterEventDispatcher(EventDispatcher)
      */
     protected void registerEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
@@ -302,7 +303,16 @@ public abstract class BoundedContext
         }
     }
 
-    protected void unregisterEventDispatcher(EventDispatcher dispatcher) {
+    /**
+     * Unregisters the passed event dispatcher from the buses of this context.
+     *
+     * <p>If the given instance dispatches domestic events, unregisters it from
+     * the {@code EventBus}. If the given instance dispatches external events, unregisters it from
+     * the {@code IntegrationBroker}.
+     *
+     * @see #registerEventDispatcher(EventDispatcher)
+     */
+    private void unregisterEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
         Security.allowOnlyFrameworkServer();
         unregisterIfAware(dispatcher);
@@ -748,6 +758,9 @@ public abstract class BoundedContext
             return tenantIndex;
         }
 
+        /**
+         * Obtains an {@link AggregateRootDirectory} of this {@code BoundedContext}.
+         */
         public AggregateRootDirectory aggregateRootDirectory() {
             return aggregateRootDirectory;
         }

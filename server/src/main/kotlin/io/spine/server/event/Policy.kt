@@ -27,7 +27,6 @@
 package io.spine.server.event
 
 import com.google.common.collect.ImmutableSet
-import com.google.protobuf.Message
 import io.spine.base.EventMessage
 import io.spine.core.ContractFor
 import io.spine.logging.WithLogging
