@@ -30,7 +30,6 @@ import com.example.ForeignContextConfig
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
 import com.google.common.testing.EqualsTester
-import com.google.protobuf.Message
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -39,13 +38,13 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.optional.shouldBeEmpty
 import io.kotest.matchers.optional.shouldBePresent
-import io.kotest.matchers.optional.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.spine.annotation.Internal
 import io.spine.base.EventMessage
 import io.spine.core.BoundedContextName
 import io.spine.core.BoundedContextNames
+import io.spine.core.External
 import io.spine.logging.Level.Companion.DEBUG
 import io.spine.logging.toJavaLogging
 import io.spine.option.EntityOption.Visibility.FULL
@@ -70,6 +69,7 @@ import io.spine.server.event.Policy
 import io.spine.server.event.React
 import io.spine.server.type.CommandEnvelope
 import io.spine.server.type.EventEnvelope
+import io.spine.system.server.ConstraintViolated
 import io.spine.system.server.SystemClient
 import io.spine.system.server.SystemContext
 import io.spine.test.bc.Project
@@ -634,7 +634,7 @@ private class EmptyProbe : BoundedContext.Probe {
     override fun commandListener(): Listener<CommandEnvelope> = Listener<CommandEnvelope> { _ -> }
     override fun eventListener(): Listener<EventEnvelope> = Listener<EventEnvelope> { _ -> }
     override fun eventDispatchers(): Set<EventDispatcher> = mutableSetOf(
-            StubPolicy1(), StubPolicy2()
+            StubPolicy1(), StubPolicy2(), StubPolicy3()
         )
 }
 
@@ -646,4 +646,13 @@ private class StubPolicy1: Policy<SomethingHappened>() {
 private class StubPolicy2: Policy<SomethingElseHappened>() {
     @React
     override fun whenever(event: SomethingElseHappened): Iterable<EventMessage> = setOf()
+}
+
+/**
+ * A policy which reacts to an external event.
+ */
+private class StubPolicy3: Policy<ConstraintViolated>() {
+    @React
+    override fun whenever(@External event: ConstraintViolated): Iterable<EventMessage> = setOf()
+
 }
