@@ -54,15 +54,15 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
 /**
- * Abstract base for buses.
+ * Abstract base for message buses.
  *
  * @param <T> the type of outer objects (containing messages of interest) that are posted to the bus
  * @param <E> the type of envelopes for outer objects used by this bus
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
  */
-@SuppressWarnings("ClassWithTooManyMethods")    // It's OK.
 @Internal
+@SuppressWarnings("ClassWithTooManyMethods") // OK the abstract bus.
 public abstract class Bus<T extends Signal<?, ?, ?>,
                           E extends SignalEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
@@ -75,6 +75,11 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     /** Listeners of the messages posted to the bus. */
     private final Listeners<E> listeners;
 
+    /**
+     * A supplier of the filter chain, which can be configured by the derived classes.
+     *
+     * @see #setupFilters(Iterable)
+     */
     private final Supplier<FilterChain<E>> filterChain;
 
     protected Bus(BusBuilder<?, T, E, C, D> builder) {
@@ -94,28 +99,38 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      */
     public void register(D dispatcher) {
         checkNotNull(dispatcher);
-        registry().register(dispatcher);
+        registry.register(dispatcher);
     }
 
     /**
-     * Unregisters dispatching for message classes of the passed dispatcher.
+     * Stops dispatching messages the given dispatcher.
      *
      * @param dispatcher the dispatcher to unregister
      */
     public void unregister(D dispatcher) {
         checkNotNull(dispatcher);
-        registry().unregister(dispatcher);
+        registry.unregister(dispatcher);
     }
 
+    /**
+     * Stops dispatching messages the given dispatcher delegate.
+     */
     public void unregister(DispatcherDelegate<C, E> delegate) {
         checkNotNull(delegate);
+        registry.unregister(delegate);
     }
 
+    /**
+     * Adds the passed listener to the bus.
+     */
     public void add(Listener<E> listener) {
         checkNotNull(listener);
         listeners.add(listener);
     }
 
+    /**
+     * Removes the passed listener from the bus.
+     */
     public void remove(Listener<E> listener) {
         checkNotNull(listener);
         listeners.remove(listener);
@@ -227,7 +242,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     @Override
     public void close() throws Exception {
         filterChain().close();
-        registry().unregisterAll();
+        registry.unregisterAll();
     }
 
     /**
@@ -343,8 +358,10 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
      *
-     * @param envelopes the envelopes to post
-     * @param observer  the observer to be notified of the operation result
+     * @param envelopes
+     *         the envelopes to post
+     * @param observer
+     *         the observer to be notified of the operation result
      * @see #dispatch(SignalEnvelope)
      */
     @SuppressWarnings("ProhibitedExceptionThrown") // Rethrow a caught exception.
@@ -418,8 +435,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      */
     @OverridingMethodsMustInvokeSuper
     protected Iterable<BusFilter<E>> setupFilters(Iterable<BusFilter<E>> filters) {
-        return ImmutableList
-                .<BusFilter<E>>builder()
+        return ImmutableList.<BusFilter<E>>builder()
                 .add(new ValidatingFilter<>(validator()))
                 .add(new DeadMessageFilter<>(deadMessageHandler(), registry()))
                 .addAll(filters)

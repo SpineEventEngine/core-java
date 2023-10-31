@@ -41,7 +41,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * <p>There can be only one dispatcher per command class.
  */
-class CommandDispatcherRegistry
+public final class CommandDispatcherRegistry
         extends DispatcherRegistry<CommandClass, CommandEnvelope, CommandDispatcher> {
 
     /**

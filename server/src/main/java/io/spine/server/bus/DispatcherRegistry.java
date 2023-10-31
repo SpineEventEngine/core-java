@@ -54,10 +54,9 @@ import static com.google.common.collect.Multimaps.synchronizedMultimap;
  * @param <D>
  *         the type of the message dispatchers
  */
-public abstract class
-DispatcherRegistry<C extends MessageClass<? extends Message>,
-                   E extends MessageEnvelope<?, ?, ?>,
-                   D extends MessageDispatcher<C, E>> {
+public abstract class DispatcherRegistry<C extends MessageClass<? extends Message>,
+                                         E extends MessageEnvelope<?, ?, ?>,
+                                         D extends MessageDispatcher<C, E>> {
     /**
      * The map from a message class to one or more dispatchers of
      * messages of this class.
@@ -79,7 +78,6 @@ DispatcherRegistry<C extends MessageClass<? extends Message>,
     public void unregister(D dispatcher) {
         checkNotNull(dispatcher);
         checkNotEmpty(dispatcher);
-
         Set<C> messageClasses = dispatcher.messageClasses();
         for (var messageClass : messageClasses) {
             dispatchers.remove(messageClass, dispatcher);

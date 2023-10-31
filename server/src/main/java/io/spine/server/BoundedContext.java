@@ -537,7 +537,7 @@ public abstract class BoundedContext
     @Internal
     public final InternalAccess internalAccess() {
         Security.allowOnlyFrameworkServer();
-        return this.internalAccess;
+        return internalAccess;
     }
 
     /**
@@ -549,10 +549,22 @@ public abstract class BoundedContext
         return name().value().compareTo(another.name().value());
     }
 
+    /**
+     * Installs the passed probe into this context.
+     *
+     * @see #hasProbe()
+     * @see #probe()
+     * @see #removeProbe()
+     * @throws IllegalStateException
+     *          if another probe is already installed
+     */
     public final void install(Probe probe) {
         checkNotNull(probe);
-        checkState(this.probe == null,
+        checkState(this.probe == null || probe.equals(this.probe),
                    "Probe is already installed (`%s`). Please remove previous probe first.", probe);
+        if (probe.equals(this.probe)) {
+            return;
+        }
         probe.registerWith(this);
         commandBus.add(probe.commandListener());
         eventBus.add(probe.eventListener());

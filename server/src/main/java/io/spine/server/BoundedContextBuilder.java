@@ -563,13 +563,14 @@ public final class BoundedContextBuilder implements WithLogging {
      * Sets the action to be performed before the context is closed.
      *
      * <p>The action is performed after the context is closed, but before the
-     * {@linkplain BoundedContext#onClose() context's own action} is performed.
+     * {@linkplain BoundedContext#close() context's own action} is performed.
      *
      * @param consumer
      *         the action to perform
      */
-    public void setOnBeforeClose(Consumer<BoundedContext> consumer) {
+    public BoundedContextBuilder setOnBeforeClose(Consumer<BoundedContext> consumer) {
         this.onBeforeClose = checkNotNull(consumer);
+        return this;
     }
 
     @Nullable Consumer<BoundedContext> getOnBeforeClose() {

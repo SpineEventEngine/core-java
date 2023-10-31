@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
 import com.google.common.testing.EqualsTester
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth8
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -43,7 +42,8 @@ import io.spine.core.BoundedContextName
 import io.spine.core.BoundedContextNames
 import io.spine.logging.Level.Companion.DEBUG
 import io.spine.logging.toJavaLogging
-import io.spine.option.EntityOption
+import io.spine.option.EntityOption.Visibility.FULL
+import io.spine.server.BoundedContextBuilder.assumingTests
 import io.spine.server.bc.given.AnotherProjectAggregate
 import io.spine.server.bc.given.FinishedProjectProjection
 import io.spine.server.bc.given.ProjectAggregate
@@ -54,8 +54,12 @@ import io.spine.server.bc.given.ProjectRemovalProcman
 import io.spine.server.bc.given.ProjectReport
 import io.spine.server.bc.given.SecretProjectRepository
 import io.spine.server.bc.given.TestEventSubscriber
+import io.spine.server.bus.Listener
 import io.spine.server.entity.Entity
 import io.spine.server.entity.Repository
+import io.spine.server.event.EventDispatcher
+import io.spine.server.type.CommandEnvelope
+import io.spine.server.type.EventEnvelope
 import io.spine.system.server.SystemClient
 import io.spine.system.server.SystemContext
 import io.spine.test.bc.Project
@@ -64,6 +68,7 @@ import io.spine.testing.TestValues
 import io.spine.testing.logging.Interceptor
 import io.spine.testing.server.model.ModelTests
 import java.util.function.BooleanSupplier
+import java.util.function.Consumer
 import java.util.logging.Level
 import java.util.stream.Stream
 import org.junit.jupiter.api.AfterEach
@@ -72,6 +77,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.function.Executable
 import org.junit.jupiter.params.ParameterizedTest
@@ -88,6 +94,7 @@ import org.junit.jupiter.params.provider.MethodSource
  *  * `spine/test/bc/events.proto` — events.
  */
 @DisplayName("`BoundedContext` should")
+@Suppress("TestFunctionName") // For readability of methods named after class names.
 internal class BoundedContextSpec {
     private val subscriber = TestEventSubscriber()
 
@@ -98,19 +105,20 @@ internal class BoundedContextSpec {
     @BeforeEach
     fun setUp() {
         ModelTests.dropAllModels()
-        context = BoundedContextBuilder.assumingTests(true).build()
+        context = assumingTests(true).build()
     }
 
     @AfterEach
     fun tearDown() {
         if (handlersRegistered) {
-            context.eventBus()
-                .unregister(subscriber)
+            context.eventBus().unregister(subscriber)
         }
-        context.close()
+        if (context.isOpen) {
+            context.close()
+        }
     }
 
-    /** Registers all test repositories, handlers, etc.  */
+    /** Registers all test repositories, handlers, etc. */
     private fun registerAll() {
         context.register(DefaultRepository.of(ProjectAggregate::class.java))
         context.eventBus().register(subscriber)
@@ -119,8 +127,12 @@ internal class BoundedContextSpec {
 
     @Nested
     @DisplayName("provide access to")
-    @Suppress("TestFunctionName") // For readability of methods named after class names.
     internal inner class Return {
+
+        @Test
+        fun CommandBus() {
+            context.commandBus() shouldNotBe null
+        }
 
         @Test
         fun EventBus() {
@@ -128,26 +140,55 @@ internal class BoundedContextSpec {
         }
 
         @Test
-        fun IntegrationBroker() {
-            context.internalAccess().broker() shouldNotBe null
+        fun ImportBus() {
+            context.importBus() shouldNotBe null
         }
 
         @Test
-        fun CommandDispatcher() {
-            context.commandBus() shouldNotBe null
+        fun Stand() {
+            context.stand() shouldNotBe null
         }
 
         @Test
         fun `multitenancy state`() {
-            BoundedContextBuilder.assumingTests(true).build().use {
+            assumingTests(true).build().use {
                 it.isMultitenant shouldBe true
+            }
+        }
+
+        @Test
+        fun SystemClient() {
+            context.systemClient() shouldNotBe null
+        }
+    }
+
+
+    @Nested
+    @DisplayName("provide internal secured access to")
+    inner class InternalAccess {
+
+        private val internalAccess = context.internalAccess()
+
+        @Test
+        fun IntegrationBroker() {
+            internalAccess.broker() shouldNotBe null
+        }
+
+        @Test
+        fun TenantIndex() {
+            internalAccess.tenantIndex() shouldNotBe null
+        }
+
+        @Test
+        fun `prohibiting access from outside of the 'server' package`() {
+            assertThrows<SecurityException> {
+                Consumer<Any> { context.internalAccess() }
             }
         }
     }
 
     @Nested
     @DisplayName("register")
-    @Suppress("TestFunctionName") // For readability of methods named after class names.
     internal inner class Register {
 
         @Test
@@ -222,7 +263,7 @@ internal class BoundedContextSpec {
 
     @Test
     fun `propagate registered repositories to 'Stand'`() {
-        val context = BoundedContextBuilder.assumingTests().build()
+        val context = assumingTests().build()
         val stand = context.stand()
 
         val repo = DefaultRepository.of(ProjectAggregate::class.java)
@@ -257,7 +298,6 @@ internal class BoundedContextSpec {
 
     @Nested
     @DisplayName("assign own multitenancy state to")
-    @Suppress("TestFunctionName") // for readability of methods named after class names.
     internal inner class AssignMultitenancyState {
 
         private lateinit var context: BoundedContext
@@ -267,12 +307,14 @@ internal class BoundedContextSpec {
             context = multiTenant()
             assertMultitenancyEqual(
                 { context.isMultitenant },
-                { context.commandBus().isMultitenant })
+                { context.commandBus().isMultitenant }
+            )
 
             context = singleTenant()
             assertMultitenancyEqual(
                 { context.isMultitenant },
-                { context.commandBus().isMultitenant })
+                { context.commandBus().isMultitenant }
+            )
         }
 
         @Test
@@ -281,13 +323,15 @@ internal class BoundedContextSpec {
 
             assertMultitenancyEqual(
                 { context.isMultitenant },
-                { context.stand().isMultitenant })
+                { context.stand().isMultitenant }
+            )
 
             context = singleTenant()
 
             assertMultitenancyEqual(
                 { context.isMultitenant },
-                { context.stand().isMultitenant })
+                { context.stand().isMultitenant }
+            )
         }
 
         private fun assertMultitenancyEqual(s1: BooleanSupplier, s2: BooleanSupplier) {
@@ -295,24 +339,24 @@ internal class BoundedContextSpec {
         }
 
         private fun multiTenant(): BoundedContext =
-            BoundedContextBuilder.assumingTests(true).build()
+            assumingTests(true).build()
 
         private fun singleTenant(): BoundedContext =
-            BoundedContextBuilder.assumingTests(false).build()
+            assumingTests(false).build()
     }
 
     /**
      * Simply checks that the result isn't empty to cover the integration with
      * [VisibilityGuard].
      *
-     * See [tests of VisibilityGuard][io.spine.server.entity.VisibilityGuardTest]
+     * See [tests of VisibilityGuard][io.spine.server.VisibilityGuard]
      * for how visibility filtering works.
      */
     @Test
     fun `obtain entity types by visibility`() {
-        context.stateTypes(EntityOption.Visibility.FULL).shouldBeEmpty()
+        context.stateTypes(FULL).shouldBeEmpty()
         registerAll()
-        context.stateTypes(EntityOption.Visibility.FULL).shouldNotBeEmpty()
+        context.stateTypes(FULL).shouldNotBeEmpty()
     }
 
     @Test
@@ -334,7 +378,7 @@ internal class BoundedContextSpec {
     @DisplayName("prohibit 3rd-party descendants")
     fun `prohibit 3rd-party descendants`() {
         assertThrows<IllegalStateException> {
-            object : BoundedContext(BoundedContextBuilder.assumingTests()) {
+            object : BoundedContext(assumingTests()) {
                 @Internal
                 override fun systemClient(): SystemClient = TestValues.nullRef()
             }
@@ -395,7 +439,6 @@ internal class BoundedContextSpec {
 
     @Nested
     @DisplayName("do not allow registration calls from outside the `io.spine.server` package for")
-    @Suppress("TestFunctionName") // For readability of methods named after class names.
     internal inner class RestrictRegistrationCalls {
 
         @Test
@@ -424,11 +467,16 @@ internal class BoundedContextSpec {
         val c2 = BoundedContext.singleTenant("Two").build()
         val c1m = BoundedContext.multitenant("One").build()
         val c2m = BoundedContext.multitenant("Two").build()
-
-        EqualsTester()
-            .addEqualityGroup(c1, c1m)
-            .addEqualityGroup(c2, c2m)
-            .testEquals()
+        try {
+            EqualsTester()
+                .addEqualityGroup(c1, c1m)
+                .addEqualityGroup(c2, c2m)
+                .testEquals()
+        } finally {
+            listOf(c1, c2, c1m, c2m).forEach {
+                it.close()
+            }
+        }
     }
 
     @Test
@@ -436,9 +484,71 @@ internal class BoundedContextSpec {
         val c1 = BoundedContext.singleTenant("1").build()
         val c2 = BoundedContext.singleTenant("2").build()
 
-        assertThat(c1).isLessThan(c2)
-        assertThat(c2).isGreaterThan(c1)
-        assertThat(c1).isEqualTo(BoundedContext.multitenant("1").build())
+        try {
+            assertThat(c1).isLessThan(c2)
+            assertThat(c2).isGreaterThan(c1)
+            assertThat(c1).isEqualTo(BoundedContext.multitenant("1").build())
+        } finally {
+            listOf(c1, c2).forEach {
+                it.close()
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("support `Probe`")
+    inner class SupportProbe {
+
+        private val probe: BoundedContext.Probe = EmptyProbe()
+
+        @BeforeEach
+        fun installProbe() {
+            context.install(probe)
+        }
+
+        @AfterEach
+        fun removeProbe() {
+            if (context.hasProbe()) {
+                context.removeProbe()
+            }
+        }
+
+        @Test
+        fun installation() {
+            context.hasProbe() shouldBe true
+        }
+
+        @Test
+        fun removal() {
+            context.hasProbe() shouldBe true
+            context.removeProbe()
+            context.hasProbe() shouldBe false
+        }
+
+        @Test
+        fun `allowing passing the same instance`() {
+            assertDoesNotThrow {
+                context.install(probe)
+            }
+        }
+
+        @Test
+        fun `removal when the context closes`() {
+            context.close()
+            context.hasProbe() shouldBe false
+        }
+    }
+
+    @Test
+    fun `call 'onBeforeClose' when configured`() {
+        var called = false
+        val context = assumingTests()
+            .setOnBeforeClose { called = true }
+            .build()
+        context.use {
+            it.close()
+        }
+        called shouldBe true
     }
 
     companion object {
@@ -486,4 +596,15 @@ internal class BoundedContextSpec {
             return result
         }
     }
+}
+
+private class EmptyProbe : BoundedContext.Probe {
+    private lateinit var context: BoundedContext
+    override fun registerWith(context: BoundedContext) {
+        this.context = context
+    }
+    override fun isRegistered(): Boolean = this::context.isInitialized
+    override fun commandListener(): Listener<CommandEnvelope> = Listener<CommandEnvelope> { _ -> }
+    override fun eventListener(): Listener<EventEnvelope> = Listener<EventEnvelope> { _ -> }
+    override fun eventDispatchers(): Set<EventDispatcher> = mutableSetOf()
 }
