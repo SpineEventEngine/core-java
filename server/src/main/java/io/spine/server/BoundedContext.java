@@ -577,6 +577,17 @@ public abstract class BoundedContext
         probe = null;
     }
 
+    /**
+     * Obtains the currently installed {@link Probe} or {@link Optional#empty()} if no probe
+     * is installed.
+     */
+    public final Optional<Probe> probe() {
+        return Optional.ofNullable(probe);
+    }
+
+    /**
+     * Returns {@code true} if a {@link Probe} is installed, {@code false} otherwise.
+     */
     public final boolean hasProbe() {
         return probe != null;
     }
