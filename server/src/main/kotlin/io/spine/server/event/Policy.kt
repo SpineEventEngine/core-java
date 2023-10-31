@@ -32,7 +32,6 @@ import io.spine.core.ContractFor
 import io.spine.logging.WithLogging
 import io.spine.server.BoundedContext
 import io.spine.server.type.EventClass
-import io.spine.string.Diags
 
 /**
  * A policy converts one event into zero to many other events.
