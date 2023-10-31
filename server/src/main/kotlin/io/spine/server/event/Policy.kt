@@ -87,7 +87,7 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLog
         check(classes.size == 1) {
             "A policy should handle only one event." +
                     " `${javaClass.name}` attempts to handle ${classes.size}:" +
-                    " [${classes.stream().collect(Diags.toEnumerationBackticked())}]."
+                    " [${classes.joinToString(separator = "`, `", prefix = "`", postfix = "`")}]."
         }
     }
 }
