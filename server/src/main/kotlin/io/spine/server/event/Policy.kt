@@ -33,6 +33,7 @@ import io.spine.core.ContractFor
 import io.spine.logging.WithLogging
 import io.spine.server.BoundedContext
 import io.spine.server.type.EventClass
+import io.spine.string.Diags
 
 /**
  * A policy converts one event into zero to many other events.
@@ -63,7 +64,7 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLog
      * Handles an event and produces some number of events in response.
      */
     @ContractFor(handler = React::class)
-    protected abstract fun whenever(event: E): Iterable<Message>
+    protected abstract fun whenever(event: E): Iterable<EventMessage>
 
     final override fun registerWith(context: BoundedContext) {
         super.registerWith(context)
@@ -85,7 +86,9 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLog
     private fun checkReceptors(events: Iterable<EventClass>) {
         val classes = events.toList()
         check(classes.size == 1) {
-            "Policy `${javaClass.name}` handles too many events: [${classes.joinToString()}]."
+            "A policy should handle only one event." +
+                    " `${javaClass.name}` attempts to handle ${classes.size}:" +
+                    " [${classes.stream().collect(Diags.toEnumerationBackticked())}]."
         }
     }
 }

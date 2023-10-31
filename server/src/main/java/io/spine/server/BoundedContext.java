@@ -524,8 +524,7 @@ public abstract class BoundedContext
      */
     @Override
     public String toString() {
-        return spec.name()
-                   .getValue();
+        return spec.name().value();
     }
 
     /**

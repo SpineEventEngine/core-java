@@ -25,24 +25,32 @@
  */
 package io.spine.server
 
+import com.example.ForeignClass
 import com.example.ForeignContextConfig
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Sets
 import com.google.common.testing.EqualsTester
-import com.google.common.truth.Truth.assertThat
+import com.google.protobuf.Message
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.comparables.shouldBeGreaterThan
+import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.optional.shouldBeEmpty
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.optional.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.spine.annotation.Internal
+import io.spine.base.EventMessage
 import io.spine.core.BoundedContextName
 import io.spine.core.BoundedContextNames
 import io.spine.logging.Level.Companion.DEBUG
 import io.spine.logging.toJavaLogging
 import io.spine.option.EntityOption.Visibility.FULL
+import io.spine.server.BoundedContext.multitenant
+import io.spine.server.BoundedContext.singleTenant
 import io.spine.server.BoundedContextBuilder.assumingTests
 import io.spine.server.bc.given.AnotherProjectAggregate
 import io.spine.server.bc.given.FinishedProjectProjection
@@ -58,17 +66,20 @@ import io.spine.server.bus.Listener
 import io.spine.server.entity.Entity
 import io.spine.server.entity.Repository
 import io.spine.server.event.EventDispatcher
+import io.spine.server.event.Policy
+import io.spine.server.event.React
 import io.spine.server.type.CommandEnvelope
 import io.spine.server.type.EventEnvelope
 import io.spine.system.server.SystemClient
 import io.spine.system.server.SystemContext
 import io.spine.test.bc.Project
 import io.spine.test.bc.SecretProject
+import io.spine.test.shared.event.SomethingElseHappened
+import io.spine.test.shared.event.SomethingHappened
 import io.spine.testing.TestValues
 import io.spine.testing.logging.Interceptor
 import io.spine.testing.server.model.ModelTests
 import java.util.function.BooleanSupplier
-import java.util.function.Consumer
 import java.util.logging.Level
 import java.util.stream.Stream
 import org.junit.jupiter.api.AfterEach
@@ -96,9 +107,10 @@ import org.junit.jupiter.params.provider.MethodSource
 @DisplayName("`BoundedContext` should")
 @Suppress("TestFunctionName") // For readability of methods named after class names.
 internal class BoundedContextSpec {
-    private val subscriber = TestEventSubscriber()
 
     private lateinit var context: BoundedContext
+
+    private val subscriber = TestEventSubscriber()
 
     private var handlersRegistered = false
 
@@ -162,27 +174,31 @@ internal class BoundedContextSpec {
         }
     }
 
-
     @Nested
     @DisplayName("provide internal secured access to")
     inner class InternalAccess {
 
-        private val internalAccess = context.internalAccess()
+        private lateinit var access: BoundedContext.InternalAccess
+
+        @BeforeEach
+        fun getAccess() {
+            access = context.internalAccess()
+        }
 
         @Test
         fun IntegrationBroker() {
-            internalAccess.broker() shouldNotBe null
+            access.broker() shouldNotBe null
         }
 
         @Test
         fun TenantIndex() {
-            internalAccess.tenantIndex() shouldNotBe null
+            access.tenantIndex() shouldNotBe null
         }
 
         @Test
         fun `prohibiting access from outside of the 'server' package`() {
             assertThrows<SecurityException> {
-                Consumer<Any> { context.internalAccess() }
+                ForeignClass.callInternalOf(context)
             }
         }
     }
@@ -397,7 +413,7 @@ internal class BoundedContextSpec {
 
         @BeforeEach
         fun closeContext() {
-            val context = BoundedContext.singleTenant(contextName.value).build()
+            val context = singleTenant(contextName.value).build()
             domainInterceptor = Interceptor(DomainContext::class.java, debugLevel)
             domainInterceptor.intercept()
             systemInterceptor = Interceptor(SystemContext::class.java, debugLevel)
@@ -432,7 +448,7 @@ internal class BoundedContextSpec {
     @Test
     fun `return its name in 'toString()'`() {
         val name = TestValues.randomString()
-        BoundedContext.singleTenant(name).build().use {
+        singleTenant(name).build().use {
             it.toString() shouldBe name
         }
     }
@@ -463,10 +479,10 @@ internal class BoundedContextSpec {
 
     @Test
     fun `be equal to another context by its name`() {
-        val c1 = BoundedContext.singleTenant("One").build()
-        val c2 = BoundedContext.singleTenant("Two").build()
-        val c1m = BoundedContext.multitenant("One").build()
-        val c2m = BoundedContext.multitenant("Two").build()
+        val c1 = singleTenant("One").build()
+        val c2 = singleTenant("Two").build()
+        val c1m = multitenant("One").build()
+        val c2m = multitenant("Two").build()
         try {
             EqualsTester()
                 .addEqualityGroup(c1, c1m)
@@ -481,13 +497,14 @@ internal class BoundedContextSpec {
 
     @Test
     fun `be comparable by its name`() {
-        val c1 = BoundedContext.singleTenant("1").build()
-        val c2 = BoundedContext.singleTenant("2").build()
-
+        val c1 = singleTenant("1").build()
+        val c2 = singleTenant("2").build()
         try {
-            assertThat(c1).isLessThan(c2)
-            assertThat(c2).isGreaterThan(c1)
-            assertThat(c1).isEqualTo(BoundedContext.multitenant("1").build())
+            c1 shouldBeLessThan c2
+            c2 shouldBeGreaterThan c1
+            multitenant("1").build().use {
+                c1 shouldBe it
+            }
         } finally {
             listOf(c1, c2).forEach {
                 it.close()
@@ -496,7 +513,7 @@ internal class BoundedContextSpec {
     }
 
     @Nested
-    @DisplayName("support `Probe`")
+    @DisplayName("support diagnostics via `Probe`")
     inner class SupportProbe {
 
         private val probe: BoundedContext.Probe = EmptyProbe()
@@ -516,6 +533,9 @@ internal class BoundedContextSpec {
         @Test
         fun installation() {
             context.hasProbe() shouldBe true
+            context.probe().shouldBePresent {
+                it shouldBe probe
+            }
         }
 
         @Test
@@ -526,9 +546,16 @@ internal class BoundedContextSpec {
         }
 
         @Test
-        fun `allowing passing the same instance`() {
+        fun `allowing passing the same probe`() {
             assertDoesNotThrow {
                 context.install(probe)
+            }
+        }
+
+        @Test
+        fun `prohibiting setting another probe`() {
+            assertThrows<IllegalStateException> {
+                context.install(EmptyProbe())
             }
         }
 
@@ -606,5 +633,17 @@ private class EmptyProbe : BoundedContext.Probe {
     override fun isRegistered(): Boolean = this::context.isInitialized
     override fun commandListener(): Listener<CommandEnvelope> = Listener<CommandEnvelope> { _ -> }
     override fun eventListener(): Listener<EventEnvelope> = Listener<EventEnvelope> { _ -> }
-    override fun eventDispatchers(): Set<EventDispatcher> = mutableSetOf()
+    override fun eventDispatchers(): Set<EventDispatcher> = mutableSetOf(
+            StubPolicy1(), StubPolicy2()
+        )
+}
+
+private class StubPolicy1: Policy<SomethingHappened>() {
+    @React
+    override fun whenever(event: SomethingHappened): Iterable<EventMessage> = setOf()
+}
+
+private class StubPolicy2: Policy<SomethingElseHappened>() {
+    @React
+    override fun whenever(event: SomethingElseHappened): Iterable<EventMessage> = setOf()
 }

@@ -23,28 +23,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+syntax = "proto3";
 
-package com.example;
+package spine.test.event;
 
-import io.spine.server.BoundedContext;
-import io.spine.server.security.GivenRestrictedApi;
-import io.spine.server.security.Security;
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.test.shared.event";
+option java_outer_classname = "SharedEventsProto";
+option java_multiple_files = true;
 
 /**
- * A test environment class from outside the framework package structure for testing
- * {@link Security#allowOnlyFrameworkServer()}.
- *
- * @see io.spine.server.security.InvocationGuardTest.ServerFramework#prohibitingFromOutside()
+ * This is a stub event message for the cases when we need just a valid event message and
+ * are not interested in its contents.
  */
-public final class ForeignClass {
+message SomethingHappened {
+    string description = 1;
+}
 
-    private ForeignClass() {}
-
-    public static void attemptToCallRestrictedApi() {
-        GivenRestrictedApi.guardedMethod();
-    }
-
-    public static void callInternalOf(BoundedContext context) {
-        context.internalAccess();
-    }
+/**
+ * Similar to `SomethingHappened` but with a different type for cases when more than one
+ * stub event is required.
+ */
+message SomethingElseHappened {
+    string description = 1;
 }
