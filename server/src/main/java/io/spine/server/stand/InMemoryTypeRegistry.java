@@ -71,7 +71,7 @@ final class InMemoryTypeRegistry implements TypeRegistry {
 
         if (repository instanceof QueryableRepository) {
             @SuppressWarnings("unchecked")  /* Guaranteed by the `QueryableRepository` contract. */
-                    var recordRepo = (QueryableRepository<I, ?>) repository;
+            var recordRepo = (QueryableRepository<I, ?>) repository;
             repositories.put(entityType, recordRepo);
         }
         if (repository instanceof AggregateRepository) {
