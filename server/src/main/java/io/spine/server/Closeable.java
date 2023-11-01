@@ -27,7 +27,6 @@
 package io.spine.server;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * Base interface for server-side objects that may hold resources that need to be released

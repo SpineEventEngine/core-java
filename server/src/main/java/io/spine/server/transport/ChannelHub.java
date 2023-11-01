@@ -103,7 +103,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements Closeable 
             if (channel.isStale()) {
                 try {
                     channel.close();
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     throw illegalStateWithCauseOf(e);
                 } finally {
                     toRemove.add(channelId);

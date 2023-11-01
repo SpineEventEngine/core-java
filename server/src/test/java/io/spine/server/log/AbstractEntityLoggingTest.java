@@ -27,7 +27,6 @@
 package io.spine.server.log;
 
 import io.spine.core.UserId;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
 import io.spine.testing.core.given.GivenUserId;

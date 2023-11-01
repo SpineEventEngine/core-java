@@ -28,7 +28,6 @@ package io.spine.system.server;
 
 import io.spine.core.UserId;
 import io.spine.net.EmailAddress;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.system.server.given.diagnostics.ValidatedAggregate;
 import io.spine.system.server.given.diagnostics.VerificationProcman;
 import io.spine.system.server.given.diagnostics.ViolationsWatch;
@@ -37,7 +36,6 @@ import io.spine.system.server.test.StartVerification;
 import io.spine.system.server.test.ValidateAndSet;
 import io.spine.system.server.test.ValidatedId;
 import io.spine.testing.logging.mute.MuteLogging;
-import io.spine.testing.server.blackbox.BlackBox;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

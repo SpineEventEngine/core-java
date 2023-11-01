@@ -875,7 +875,6 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @Test
         @DisplayName("closed as `BlackBoxContext` is closed")
-        @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting an exception. */
         void closedAsBlackBoxContextClosed() {
             var factory = context().clients();
             var client = factory.withMatchingTenant();

@@ -114,7 +114,7 @@ class AggregateRepositoryTest {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         context().close();
     }
 

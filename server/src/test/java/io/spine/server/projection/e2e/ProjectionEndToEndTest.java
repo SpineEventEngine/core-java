@@ -126,8 +126,7 @@ class ProjectionEndToEndTest {
 
     @Test
     @DisplayName("receive entity state updates along with system event context")
-    @SuppressWarnings("OverlyCoupledMethod")
-    void receiveEntityStateUpdatesAndEventContext() throws Exception {
+    void receiveEntityStateUpdatesAndEventContext() {
         var repository = new GroupProjection.Repository();
         var groups = BoundedContextBuilder.assumingTests().build();
         groups.internalAccess()
