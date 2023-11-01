@@ -29,7 +29,11 @@ package io.spine.server.bus;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
-public interface DispatcherDelegate<C extends MessageClass<?>,
-                                    E extends MessageEnvelope<?, ?, ?>> {
-
+/**
+ * A delegate of a {@link DelegatingDispatcher}.
+ *
+ * @param <C> the type of the dispatched message class
+ * @param <E> the type of the message envelope
+ */
+public interface DispatcherDelegate<C extends MessageClass<?>, E extends MessageEnvelope<?, ?, ?>> {
 }
