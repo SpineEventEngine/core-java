@@ -61,4 +61,7 @@ interface EventRegistry extends AutoCloseable {
      * Retrieves all stored event types as {@link EventClass} instances.
      */
     ImmutableSet<EventClass> eventClasses();
+
+    @Override
+    void close();
 }

@@ -174,12 +174,9 @@ public final class ThirdPartyContext implements Closeable {
      * Closes this Context and clean up underlying resources.
      *
      * <p>Attempts of emitting an event from a closed Context result in an exception.
-     *
-     * @throws Exception
-     *         if the underlying {@link BoundedContext} fails to close
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         context.close();
     }
 

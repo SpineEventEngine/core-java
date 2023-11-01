@@ -40,7 +40,7 @@ public interface MessageChannel extends AutoCloseable {
     ChannelId id();
 
     /**
-     * Allows to understand whether this channel is stale and can be closed.
+     * Allows understanding whether this channel is stale and can be closed.
      *
      * @return {@code true} if the channel is stale, {@code false} otherwise
      */
@@ -68,4 +68,7 @@ public interface MessageChannel extends AutoCloseable {
                 .build();
         return channelId;
     }
+
+    @Override
+    void close();
 }

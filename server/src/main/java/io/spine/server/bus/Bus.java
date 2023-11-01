@@ -235,12 +235,9 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
 
     /**
      * Closes the {@linkplain BusFilter filters} of this bus and unregisters all the dispatchers.
-     *
-     * @throws Exception if either filters or the {@linkplain DispatcherRegistry} throws
-     *         an exception
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         filterChain().close();
         registry.unregisterAll();
     }

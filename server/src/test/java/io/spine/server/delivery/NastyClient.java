@@ -29,7 +29,6 @@ package io.spine.server.delivery;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.CalcAggregate;
 import io.spine.server.delivery.given.CalculatorSignal;
@@ -102,46 +101,44 @@ class NastyClient {
      *         the identifiers of target entities
      */
     void runWith(Set<String> targets) {
-        var context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(repository)
-        );
-        var memoizer = subscribeToDelivered();
+        try (var context = BlackBox.singleTenantWith(repository)) {
+            var memoizer = subscribeToDelivered();
 
-        var streamSize = targets.size() * 30;
+            var streamSize = targets.size() * 30;
 
-        var targetsIterator = Iterators.cycle(targets);
-        var commands = commands(streamSize, targetsIterator);
-        var importEvents = eventsToImport(streamSize, targetsIterator);
-        var reactEvents = eventsToReact(streamSize, targetsIterator);
+            var targetsIterator = Iterators.cycle(targets);
+            var commands = commands(streamSize, targetsIterator);
+            var importEvents = eventsToImport(streamSize, targetsIterator);
+            var reactEvents = eventsToReact(streamSize, targetsIterator);
 
-        postAsync(context, commands, importEvents, reactEvents);
+            postAsync(context, commands, importEvents, reactEvents);
 
-        Stream<CalculatorSignal> signals =
-                concat(commands.stream(), importEvents.stream(), reactEvents.stream());
+            Stream<CalculatorSignal> signals =
+                    concat(commands.stream(), importEvents.stream(), reactEvents.stream());
 
-        signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
+            signalsPerTarget = signals.collect(groupingBy(CalculatorSignal::getCalculatorId));
 
-        for (var calcId : signalsPerTarget.keySet()) {
+            for (var calcId : signalsPerTarget.keySet()) {
 
-            var receivedMessages = memoizer.messagesBy(calcId);
-            Set<CalculatorSignal> targetSignals =
-                    ImmutableSet.copyOf(signalsPerTarget.get(calcId));
-            assertEquals(targetSignals, receivedMessages);
+                var receivedMessages = memoizer.messagesBy(calcId);
+                Set<CalculatorSignal> targetSignals =
+                        ImmutableSet.copyOf(signalsPerTarget.get(calcId));
+                assertEquals(targetSignals, receivedMessages);
 
-            var sumForTarget =
-                    targetSignals.stream()
-                                 .map(CalculatorSignal::getValue)
-                                 .reduce(0, Integer::sum);
-            var expectedState = Calc.newBuilder()
-                    .setId(calcId)
-                    .setSum(sumForTarget)
-                    .build();
-            context.assertState(calcId, Calc.class)
-                   .isEqualTo(expectedState);
+                var sumForTarget =
+                        targetSignals.stream()
+                                .map(CalculatorSignal::getValue)
+                                .reduce(0, Integer::sum);
+                var expectedState = Calc.newBuilder()
+                        .setId(calcId)
+                        .setSum(sumForTarget)
+                        .build();
+                context.assertState(calcId, Calc.class)
+                       .isEqualTo(expectedState);
 
+            }
+            ensureInboxesEmpty();
         }
-        ensureInboxesEmpty();
     }
 
     /**

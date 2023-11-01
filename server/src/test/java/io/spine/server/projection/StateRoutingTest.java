@@ -29,7 +29,6 @@ package io.spine.server.projection;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.route.given.sur.ArtistMood;
 import io.spine.server.route.given.sur.ArtistMoodRepo;
 import io.spine.server.route.given.sur.Gallery;
@@ -55,13 +54,11 @@ class StateRoutingTest {
 
     @BeforeEach
     void setupContext() {
-        context = BlackBox.from(
-                BoundedContextBuilder
-                        .assumingTests()
-                        .add(MagazineAggregate.class)
-                        .add(new ArtistMoodRepo())
-                        .add(new Gallery())
-                        .add(WorksProjection.class)
+        context = BlackBox.singleTenantWith(
+                MagazineAggregate.class,
+                new ArtistMoodRepo(),
+                new Gallery(),
+                WorksProjection.class
         );
     }
 

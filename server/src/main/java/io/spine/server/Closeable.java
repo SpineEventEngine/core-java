@@ -50,6 +50,14 @@ public interface Closeable extends AutoCloseable {
     boolean isOpen();
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to remove the checked exception from the signature.
+     */
+    @Override
+    void close();
+
+    /**
      * Ensures that the object is {@linkplain #isOpen() open}.
      *
      * @throws IllegalStateException otherwise

@@ -119,7 +119,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements Closeable 
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         for (var channel : channels.values()) {
             channel.close();
         }

@@ -196,7 +196,7 @@ public final class IntegrationBroker implements ContextAware, Closeable {
      * Removes all subscriptions and closes all the underlying transport channels.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (config != null) {
             config.close();
         }

@@ -474,12 +474,9 @@ public abstract class BoundedContext
      *     <li>Closes all registered {@linkplain Repository repositories}.
      *     <li>Removes a {@link Probe}, if it was {@linkplain #install(Probe) installed}.
      * </ol>
-     *
-     * @throws Exception
-     *         caused by closing one of the components
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         var isOpen = isOpen();
         if (isOpen && onBeforeClose != null) {
             onBeforeClose.accept(this);

@@ -139,9 +139,10 @@ public final class BoundedContextBuilder implements WithLogging {
     @Internal
     @VisibleForTesting
     public static BoundedContextBuilder assumingTests(boolean multitenant) {
+        var name = assumingTestsValue();
         var spec = multitenant
-                   ? multitenant(assumingTestsValue())
-                   : singleTenant(assumingTestsValue());
+                   ? multitenant(name)
+                   : singleTenant(name);
         return new BoundedContextBuilder(spec);
     }
 

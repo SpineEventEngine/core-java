@@ -33,7 +33,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.AggregateStorageTest.TestAggregate;
@@ -96,10 +95,7 @@ public abstract class AggregateHistoryTruncationTest {
         @DisplayName("restore the `Aggregate` state properly")
         void restoreAggregateState() {
             var repo = new FibonacciRepository();
-            var context = BlackBox.from(
-                    BoundedContextBuilder.assumingTests()
-                                         .add(repo)
-            );
+            var context = BlackBox.singleTenantWith(repo);
             try (context) {
                 // Set the starting numbers.
                 var setStartingNumbers = SetStartingNumbers.newBuilder()

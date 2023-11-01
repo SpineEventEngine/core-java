@@ -596,10 +596,7 @@ class ProcessManagerRepositoryTest
                 .newBuilder()
                 .setProjectId(projectId)
                 .build();
-        var context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(new EventDiscardingProcManRepository())
-        );
+        var context = BlackBox.singleTenantWith(new EventDiscardingProcManRepository());
 
         context.receivesCommand(command)
                .assertEvents()

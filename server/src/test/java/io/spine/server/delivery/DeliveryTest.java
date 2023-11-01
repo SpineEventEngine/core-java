@@ -31,7 +31,6 @@ import com.google.protobuf.util.Durations;
 import io.spine.base.Identifier;
 import io.spine.environment.Tests;
 import io.spine.protobuf.Messages;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.given.DeliveryTestEnv.RawMessageMemoizer;
 import io.spine.server.delivery.given.DeliveryTestEnv.ShardIndexMemoizer;
@@ -347,11 +346,10 @@ public class DeliveryTest extends AbstractDeliveryTest {
         changeShardCountTo(20);
         TaskView.enableStrictMode();
 
-        var context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(TaskAggregate.class)
-                                     .add(new TaskAssignment.Repository())
-                                     .add(new TaskView.Repository())
+        var context = BlackBox.singleTenantWith(
+                TaskAggregate.class,
+                new TaskAssignment.Repository(),
+                new TaskView.Repository()
         );
         var commands = generateCommands(200);
         var service = newFixedThreadPool(20);
@@ -386,26 +384,25 @@ public class DeliveryTest extends AbstractDeliveryTest {
         var directDelivery = Delivery.direct();
         ServerEnvironment.when(Tests.class)
                          .use(directDelivery);
+        try (var context = BlackBox.singleTenantWith(
+                TaskAggregate.class,
+                new TaskAssignment.Repository(),
+                new TaskView.Repository())
+        ) {
+            var commands = generateCommands(200);
+            for (var command : commands) {
+                context.receivesCommand(command);
+                var taskId = command.getId();
+                var subject = context.assertEntity(taskId, TaskView.class);
+                subject.exists();
 
-        var context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(TaskAggregate.class)
-                                     .add(new TaskAssignment.Repository())
-                                     .add(new TaskView.Repository())
-        );
-        var commands = generateCommands(200);
-        for (var command : commands) {
-            context.receivesCommand(command);
-            var taskId = command.getId();
-            var subject = context.assertEntity(taskId, TaskView.class);
-            subject.exists();
+                var actualView = (TaskView) subject.actual();
+                var state = actualView.state();
+                var actualAssignee = state.getAssignee();
 
-            var actualView = (TaskView) subject.actual();
-            var state = actualView.state();
-            var actualAssignee = state.getAssignee();
-
-            assertThat(state.getId()).isEqualTo(taskId);
-            assertThat(Messages.isDefault(actualAssignee)).isFalse();
+                assertThat(state.getId()).isEqualTo(taskId);
+                assertThat(Messages.isDefault(actualAssignee)).isFalse();
+            }
         }
     }
 

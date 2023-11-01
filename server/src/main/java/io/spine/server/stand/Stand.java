@@ -380,7 +380,7 @@ public class Stand implements Closeable {
      * Closes the {@code Stand} performing necessary cleanups.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         typeRegistry.close();
         eventRegistry.close();
     }

@@ -156,7 +156,7 @@ class ClientFactory implements Closeable {
      */
     @Override
     @SuppressWarnings("TestOnlyProblems" /* Calling the production-level method. */)
-    public void close() throws Exception {
+    public void close() {
         if (!isOpen() || isNull(grpcContainer)) {
             return;
         }

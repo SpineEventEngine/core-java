@@ -108,10 +108,7 @@ class AbstractEntityLoggingTest extends LoggingTest {
     }
 
     private static BlackBox context() {
-        return BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(CardAggregate.class)
-        );
+        return BlackBox.singleTenantWith(CardAggregate.class);
     }
 
     private static BorrowBooks borrowBooks(UserId reader) {

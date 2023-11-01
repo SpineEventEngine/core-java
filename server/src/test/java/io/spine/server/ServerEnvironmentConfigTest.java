@@ -453,7 +453,7 @@ class ServerEnvironmentConfigTest {
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             delegate.close();
         }
     }

@@ -61,6 +61,7 @@ import io.spine.testing.server.blackbox.probe.Probe;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -76,6 +77,7 @@ import static com.google.common.collect.Lists.asList;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.testing.server.blackbox.Actor.defaultActor;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedSet;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -127,14 +129,103 @@ public abstract class BlackBox implements WithLogging, Closeable {
     private final Set<Event> postedEvents;
 
     /**
+     * Creates new instance obtaining configuration parameters from the given context instance.
+     */
+    public static BlackBox from(BoundedContext context) {
+        var box = context.isMultitenant()
+                  ? new MtBlackBox(context)
+                  : new StBlackBox(context);
+        return box;
+    }
+
+    /**
      * Creates new instance obtaining configuration parameters from the passed builder.
      */
     public static BlackBox from(BoundedContextBuilder builder) {
         var context = builder.build();
-        var box = builder.isMultitenant()
-                  ? new MtBlackBox(context)
-                  : new StBlackBox(context);
-        return box;
+        return from(context);
+    }
+
+    /**
+     * Creates a {@code BlackBox} over a single-tenant context with the given components.
+     *
+     * @see #with(boolean, Object...)
+     */
+    public static BlackBox singleTenantWith(Object... components) {
+        return with(false, components);
+    }
+
+    /**
+     * Creates a {@code BlackBox} over a single-tenant context with the given name and components.
+     *
+     * @see #with(boolean, Object...)
+     */
+    public static BlackBox singleTenant(String name, Object... components) {
+        return with(BoundedContext.singleTenant(name), components);
+    }
+
+    /**
+     * Creates a {@code BlackBox} over a multi-tenant context with the given components.
+     *
+     * @see #with(boolean, Object...)
+     */
+    public static BlackBox multiTenantWith(Object... components) {
+        return with(false, components);
+    }
+
+    /**
+     * Creates a {@code BlackBox} over a context with the given components.
+     *
+     * <p>The components can be either {@link Repository} or {@link Entity} classes.
+     *
+     * <p>For creating a test environment with other components, please use
+     * {@link BoundedContextBuilder} and then {@link #from(BoundedContext)}.
+     *
+     * @param multitenant
+     *         whether the context under the test is multitenant
+     * @param components
+     *         repositories or entity classes to be added to the context under the test
+     */
+    public static BlackBox with(boolean multitenant, Object... components) {
+        var builder = BoundedContextBuilder.assumingTests(multitenant);
+        return with(builder, components);
+    }
+
+    /**
+     * Creates a {@code BlackBox} over a context with the given components.
+     *
+     * <p>The components can be either {@link Repository} or {@link Entity} classes.
+     *
+     * <p>For creating a test environment with other components, please use
+     * {@link BoundedContextBuilder} and then {@link #from(BoundedContext)}.
+     *
+     * @param builder
+     *         the context builder to use for creating the context under the test
+     * @param components
+     *         repositories or entity classes to be added to the context under the test
+     */
+    public static BlackBox with(BoundedContextBuilder builder, Object... components) {
+        for (var c : components) {
+            if (c instanceof Repository) {
+                builder.add((Repository<?, ?>) c);
+            } else if (c instanceof Class<?>) {
+                if (Entity.class.isAssignableFrom((Class<?>) c)) {
+                    var entityClass = cast((Class<?>)c);
+                    builder.add(entityClass);
+                }
+            } else {
+                throw newIllegalArgumentException(
+                        "Unsupported component type: `%s`.", c.getClass().getName()
+                );
+            }
+        }
+        return from(builder);
+    }
+
+    private static <I, E extends Entity<I, ?>> Class<? extends E> cast(Class<?> cls) {
+        @SuppressWarnings("unchecked") // Safe due to the `isAssignableFrom` check.
+        var result = (Class<? extends E>) cls;
+        return result;
     }
 
     BlackBox(BoundedContext context) {

@@ -33,7 +33,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.Events;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.aggregate.given.repo.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.repo.EventDiscardingAggregateRepository;
 import io.spine.server.aggregate.given.repo.FailingAggregateRepository;
@@ -504,10 +503,7 @@ class AggregateRepositoryTest {
         @BeforeEach
         void createAnotherRepository() {
             resetRepository();
-            context = BlackBox.from(
-                    BoundedContextBuilder.assumingTests()
-                                         .add(repository())
-            );
+            context = BlackBox.singleTenantWith(repository());
         }
 
         @Test
@@ -573,15 +569,12 @@ class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            var context = BlackBox.from(
-                    BoundedContextBuilder.assumingTests()
-                                         .add(new EventDiscardingAggregateRepository())
-            );
-            context.receivesCommands(create, start)
-                   .receivesEvent(archived);
-            context.assertEvents()
-                   .isEmpty();
-            context.close();
+            try (var context = BlackBox.singleTenantWith(new EventDiscardingAggregateRepository())) {
+                context.receivesCommands(create, start)
+                       .receivesEvent(archived);
+                context.assertEvents()
+                       .isEmpty();
+            }
         }
 
         private void assertEventVersions(int... expectedVersions) {

@@ -33,7 +33,6 @@ import io.spine.client.Query;
 import io.spine.client.QueryFactory;
 import io.spine.client.QueryId;
 import io.spine.client.Target;
-import io.spine.server.BoundedContext;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.MenuRepository;
 import io.spine.system.server.Mirror;
@@ -73,9 +72,7 @@ class EntityQueryProcessorTest {
     @BeforeEach
     void setUp() {
         ProjectionRepository<?, ?, ?> repository = new MenuRepository();
-        context = BlackBox.from(
-                BoundedContext.singleTenant("Cafeteria")
-                              .add(repository));
+        context = BlackBox.singleTenant("Cafeteria", repository);
         processor = new EntityQueryProcessor(repository);
         fill();
     }
