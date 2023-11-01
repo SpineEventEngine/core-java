@@ -606,7 +606,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
     }
 
     @Nested
-    @DisplayName("clreate an instance using passed components")
+    @DisplayName("create an instance using passed components")
     class CreateWith {
 
         @Test
@@ -863,7 +863,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
             assertThat(clientRequest.run(BbProjectView.query().build()))
                     .hasSize(0);
 
-            // Let's send a command with each of APIs.
+            // Let's send a command with each of the APIs.
             clientRequest.command(Given.createProject()).postAndForget();
             context().receivesCommand(Given.createProject());
 

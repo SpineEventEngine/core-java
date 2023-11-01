@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@link io.spine.testing.server.blackbox.BlackBox BlackBox} to collect
  * commands and events produced by a {@link BoundedContext} being tested.
  */
-public class Probe implements BoundedContext.Probe {
+public final class BlackboxProbe implements BoundedContext.Probe {
 
     private @Nullable BoundedContext context;
 
@@ -64,7 +64,7 @@ public class Probe implements BoundedContext.Probe {
     /**
      * Creates a new instance.
      */
-    public Probe() {
+    public BlackboxProbe() {
         this.commands = new CommandCollector();
         this.events = new EventCollector();
         this.failedHandlerGuard = new FailedHandlerGuard();

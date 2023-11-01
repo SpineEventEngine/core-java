@@ -57,7 +57,7 @@ import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
 import io.spine.testing.server.blackbox.probe.CommandCollector;
 import io.spine.testing.server.blackbox.probe.EventCollector;
-import io.spine.testing.server.blackbox.probe.Probe;
+import io.spine.testing.server.blackbox.probe.BlackboxProbe;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
@@ -70,6 +70,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.asList;
@@ -99,7 +100,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     /**
      * The probe inserted into the context under the test.
      */
-    private final Probe probe;
+    private final BlackboxProbe probe;
 
     /**
      * A factory of {@link Client}s which send requests to this context.
@@ -169,6 +170,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
      * @see #with(boolean, Object...)
      */
     public static BlackBox multiTenantWith(Object... components) {
+        checkNotNull(components);
         return with(true, components);
     }
 
@@ -186,6 +188,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
      *         repositories or entity classes to be added to the context under the test
      */
     public static BlackBox with(boolean multitenant, Object... components) {
+        checkNotNull(components);
         var builder = BoundedContextBuilder.assumingTests(multitenant);
         return with(builder, components);
     }
@@ -205,7 +208,9 @@ public abstract class BlackBox implements WithLogging, Closeable {
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // We allow passing `Object`s to simplify setup.
     public static BlackBox with(BoundedContextBuilder builder, Object... components) {
+        checkNotNull(components);
         for (var c : components) {
+            checkArgument(c != null, "Null component is not allowed.");
             if (c instanceof Repository) {
                 builder.add((Repository<?, ?>) c);
             } else if (c instanceof Class<?>) {
@@ -231,7 +236,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     BlackBox(BoundedContext context) {
         super();
         this.context = context;
-        this.probe = new Probe();
+        this.probe = new BlackboxProbe();
         context.install(probe);
         this.clientFactory = new ClientFactory(context);
         this.actor = defaultActor();
