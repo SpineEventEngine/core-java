@@ -69,6 +69,11 @@ public interface MessageChannel extends AutoCloseable {
         return channelId;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to remove the checked exception from the signature.
+     */
     @Override
     void close();
 }

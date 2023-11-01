@@ -62,7 +62,7 @@ import static java.util.Collections.singleton;
  * @param <D> the type of dispatches used by this bus
  */
 @Internal
-@SuppressWarnings("ClassWithTooManyMethods") // OK the abstract bus.
+@SuppressWarnings("ClassWithTooManyMethods") // OK for the abstract bus.
 public abstract class Bus<T extends Signal<?, ?, ?>,
                           E extends SignalEnvelope<?, T, ?>,
                           C extends MessageClass<? extends Message>,
@@ -103,7 +103,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     }
 
     /**
-     * Stops dispatching messages the given dispatcher.
+     * Stops dispatching messages using the given dispatcher.
      *
      * @param dispatcher the dispatcher to unregister
      */

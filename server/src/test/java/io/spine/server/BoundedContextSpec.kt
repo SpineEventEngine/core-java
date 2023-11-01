@@ -175,7 +175,7 @@ internal class BoundedContextSpec {
     }
 
     @Nested
-    @DisplayName("provide internal secured access to")
+    @DisplayName("provide guarded internal access to")
     inner class InternalAccess {
 
         private lateinit var access: BoundedContext.InternalAccess
@@ -514,7 +514,7 @@ internal class BoundedContextSpec {
 
     @Nested
     @DisplayName("support diagnostics via `Probe`")
-    inner class SupportProbe {
+    inner class SupportBlackboxProbe {
 
         private val probe: BoundedContext.Probe = EmptyProbe()
 

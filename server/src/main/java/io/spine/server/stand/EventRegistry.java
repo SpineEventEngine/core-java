@@ -62,6 +62,11 @@ interface EventRegistry extends AutoCloseable {
      */
     ImmutableSet<EventClass> eventClasses();
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to remove the checked exception from the signature.
+     */
     @Override
     void close();
 }

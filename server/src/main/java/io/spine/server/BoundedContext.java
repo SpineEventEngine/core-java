@@ -638,12 +638,12 @@ public abstract class BoundedContext
     public interface Probe extends ContextAware {
 
         /**
-         * The listener of commands posted processed by the context.
+         * The listener of commands processed by the context.
          */
         Listener<CommandEnvelope> commandListener();
 
         /**
-         * The listener of events posted processed by the context.
+         * The listener of events processed by the context.
          */
         Listener<EventEnvelope> eventListener();
 
