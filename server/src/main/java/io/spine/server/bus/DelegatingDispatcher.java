@@ -30,6 +30,12 @@ import io.spine.annotation.Internal;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
+/**
+ * A dispatcher which delegates the responsibilities to an aggregated {@link DispatcherDelegate}.
+ *
+ * @param <C> the type of the message class
+ * @param <E> the type of the message envelope
+ */
 @Internal
 public interface DelegatingDispatcher<C extends MessageClass<?>,
                                       E extends MessageEnvelope<?, ?, ?>>
