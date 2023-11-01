@@ -61,7 +61,6 @@ import io.spine.testing.server.blackbox.probe.Probe;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -170,7 +169,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
      * @see #with(boolean, Object...)
      */
     public static BlackBox multiTenantWith(Object... components) {
-        return with(false, components);
+        return with(true, components);
     }
 
     /**
@@ -204,6 +203,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
      * @param components
      *         repositories or entity classes to be added to the context under the test
      */
+    @SuppressWarnings("ChainOfInstanceofChecks") // We allow passing `Object`s to simplify setup.
     public static BlackBox with(BoundedContextBuilder builder, Object... components) {
         for (var c : components) {
             if (c instanceof Repository) {
@@ -583,8 +583,8 @@ public abstract class BlackBox implements WithLogging, Closeable {
     abstract ImmutableList<Command> select(CommandCollector collector);
 
     /**
-     * Obtains immutable list of events generated in this Bounded Context in response to posted
-     * messages.
+     * Obtains an immutable list of events generated in this Bounded Context in response
+     * to posted messages.
      *
      * <p>The returned list does <em>NOT</em> contain events posted to this Bounded Context
      * during test setup.
