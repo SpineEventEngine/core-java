@@ -31,12 +31,13 @@ import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 /**
- * A dispatcher which delegates the responsibilities to a {@link DispatcherDelegate}.
+ * A dispatcher which passes the responsibilities to its {@linkplain #delegate() delegate}.
  *
  * @param <C>
  *         the type of the message class
  * @param <E>
  *         the type of the message envelope
+ * @see DispatcherDelegate
  */
 @Internal
 public interface DelegatingDispatcher<C extends MessageClass<?>,

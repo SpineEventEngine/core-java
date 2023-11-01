@@ -121,7 +121,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     }
 
     /**
-     * Adds the passed listener to the bus.
+     * Adds the given listener to the bus.
      */
     public void add(Listener<E> listener) {
         checkNotNull(listener);
@@ -129,7 +129,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     }
 
     /**
-     * Removes the passed listener from the bus.
+     * Removes the given listener from the bus.
      */
     public void remove(Listener<E> listener) {
         checkNotNull(listener);

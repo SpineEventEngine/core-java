@@ -38,18 +38,18 @@ import io.spine.server.type.CommandEnvelope;
  * the {@link io.spine.server.commandbus.CommandDispatcher CommandDispatcher}.
  *
  * <p>A typical example of a {@code CommandDispatcherDelegate} usage is a routine, which
- * simultaneously dispatches different types of {@linkplain com.google.protobuf.Message messages}
- * in addition to {@code Command}s.
+ * simultaneously dispatches different types of messages (e.g., {@code Event}s) in addition
+ * to {@code Command}s.
  *
  * <p>In this case such a class would have to implement several
  * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} child interfaces
  * (such as {@link io.spine.server.commandbus.CommandDispatcher CommandDispatcher} or
  * {@link io.spine.server.event.EventDispatcher EventDispatcher}). However, it is impossible
  * to implement the same {@link io.spine.server.bus.MessageDispatcher#messageClasses()
- * getMessageClasses()} method several times with the different types of {@code MessageClass}es
+ * messageClasses()} method several times with the different types of {@code MessageClass}es
  * returned.
  *
- * <p>The same interference takes place in attempt to implement
+ * <p>The same interference takes place in an attempt to implement
  * {@link io.spine.server.bus.UnicastDispatcher#dispatch(io.spine.server.type.MessageEnvelope)
  * UnicastDispatcher.dispatch(MessageEnvelope)} method with the different types of
  * {@code MessageEnvelope}s dispatches simultaneously.

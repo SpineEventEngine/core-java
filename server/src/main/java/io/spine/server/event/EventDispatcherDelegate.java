@@ -37,10 +37,14 @@ import io.spine.server.type.EventEnvelope;
  * A common interface for objects which need to dispatch {@linkplain io.spine.core.Event events},
  * but are unable to implement {@link io.spine.server.event.EventDispatcher EventDispatcher}.
  *
- * <p>This interface defines own contract (instead of extending {@link
- * io.spine.server.bus.MessageDispatcher MessageDispatcher} to allow classes that dispatch
- * messages other than events (by implementing {@link io.spine.server.bus.MessageDispatcher
- * MessageDispatcher}), and dispatch events by implementing this interface.
+ * <p>This interface defines own contract for dispatching events, instead of extending
+ * the {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} interface.
+ * Such an arrangement allows classes that dispatch messages other than events
+ * (by implementing {@link io.spine.server.bus.MessageDispatcher MessageDispatcher}), also
+ * dispatch events by implementing <em>this</em> interface.
+ *
+ * <p>Also this interface provides separate methods for obtaining
+ * {@linkplain #domesticEvents() domestic} and {@linkplain #externalEvents() external} event types.
  *
  * @see DelegatingEventDispatcher
  */
