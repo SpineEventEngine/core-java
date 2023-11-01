@@ -75,11 +75,7 @@ public interface Closeable extends AutoCloseable {
      */
     default void closeIfOpen() {
         if (isOpen()) {
-            try {
-                close();
-            } catch (Exception e) {
-                throw illegalStateWithCauseOf(e);
-            }
+            close();
         }
     }
 }
