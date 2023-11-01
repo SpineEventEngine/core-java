@@ -32,8 +32,14 @@ import io.spine.type.MessageClass;
 /**
  * A delegate of a {@link DelegatingDispatcher}.
  *
- * @param <C> the type of the dispatched message class
- * @param <E> the type of the message envelope
+ * @param <C>
+ *         the type of the dispatched message class
+ * @param <E>
+ *         the type of the message envelope
+ * @apiNote The generic parameters are the same as the ones of the {@link DelegatingDispatcher}
+ *      to which this delegate belongs. Even though they are not used in this interface directly,
+ *      they bring semantic meaning to the interface and code clarity at the usage sites.
  */
+@SuppressWarnings("unused")
 public interface DispatcherDelegate<C extends MessageClass<?>, E extends MessageEnvelope<?, ?, ?>> {
 }
