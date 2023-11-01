@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Timestamp;
 import io.spine.environment.Tests;
-import io.spine.server.BoundedContextBuilder;
+import io.spine.server.Closeable;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.CatchUpStatus;
 import io.spine.server.delivery.CatchUpStorage;
@@ -58,7 +58,7 @@ import static java.util.stream.Collectors.toList;
  * A convenience wrapper over the {@link CounterView} repository and the {@link BlackBox}
  * Bounded Context to be used in the catch-up tests.
  */
-public class CounterCatchUp {
+public class CounterCatchUp implements Closeable {
 
     private final CounterView.Repository repo;
     private final BlackBox ctx;
@@ -67,10 +67,7 @@ public class CounterCatchUp {
     public CounterCatchUp(String... ids) {
         this.ids = ids.clone();
         this.repo = new CounterView.Repository();
-        this.ctx = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(repo)
-        );
+        this.ctx = BlackBox.singleTenantWith(repo);
     }
 
     public void addHistory(Timestamp when, List<NumberAdded> events) {
@@ -178,5 +175,15 @@ public class CounterCatchUp {
         delivery.subscribe(new LocalDispatchingObserver());
         ServerEnvironment.when(Tests.class)
                          .use(delivery);
+    }
+
+    @Override
+    public void close() {
+        ctx.close();
+    }
+
+    @Override
+    public boolean isOpen() {
+        return ctx.isOpen();
     }
 }

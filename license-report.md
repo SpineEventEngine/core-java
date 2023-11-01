@@ -1,6 +1,6 @@
 
 
-# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.160`
+# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.170`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -27,11 +27,10 @@
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -39,15 +38,15 @@
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.57.2.
@@ -129,27 +128,27 @@
      * **Project URL:** [https://jcommander.org](https://jcommander.org)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.2.**No license information found**
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.3.**No license information found**
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -231,12 +230,11 @@
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -250,15 +248,15 @@
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -800,12 +798,12 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 13 00:27:07 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Nov 01 15:46:08 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.160`
+# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.170`
 
 ## Runtime
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -824,11 +822,10 @@ This report was generated on **Fri Oct 13 00:27:07 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -836,15 +833,15 @@ This report was generated on **Fri Oct 13 00:27:07 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.109.**No license information found**
@@ -894,27 +891,27 @@ This report was generated on **Fri Oct 13 00:27:07 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://jcommander.org](https://jcommander.org)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.2.**No license information found**
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.3.**No license information found**
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -996,12 +993,11 @@ This report was generated on **Fri Oct 13 00:27:07 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -1015,15 +1011,15 @@ This report was generated on **Fri Oct 13 00:27:07 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -1565,12 +1561,12 @@ This report was generated on **Fri Oct 13 00:27:07 WEST 2023** using [Gradle-Lic
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Nov 01 15:46:08 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.160`
+# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.170`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -1597,11 +1593,10 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1609,15 +1604,15 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.57.2.
@@ -1699,27 +1694,27 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://jcommander.org](https://jcommander.org)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.2.**No license information found**
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.3.**No license information found**
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1805,12 +1800,11 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -1824,15 +1818,15 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -2378,12 +2372,12 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Nov 01 15:46:09 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.160`
+# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.170`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2422,12 +2416,11 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -2437,15 +2430,15 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.1.5.
@@ -2625,27 +2618,27 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://jcommander.org](https://jcommander.org)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.2.**No license information found**
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.3.**No license information found**
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2727,12 +2720,11 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -2746,15 +2738,15 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -3311,12 +3303,12 @@ This report was generated on **Fri Oct 13 00:27:08 WEST 2023** using [Gradle-Lic
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 13 00:27:09 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Nov 01 15:46:09 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.160`
+# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.170`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -3355,12 +3347,11 @@ This report was generated on **Fri Oct 13 00:27:09 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -3370,15 +3361,15 @@ This report was generated on **Fri Oct 13 00:27:09 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.1.5.
@@ -3558,27 +3549,27 @@ This report was generated on **Fri Oct 13 00:27:09 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://jcommander.org](https://jcommander.org)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.2.**No license information found**
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.3.**No license information found**
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3660,12 +3651,11 @@ This report was generated on **Fri Oct 13 00:27:09 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -3679,15 +3669,15 @@ This report was generated on **Fri Oct 13 00:27:09 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -4244,12 +4234,12 @@ This report was generated on **Fri Oct 13 00:27:09 WEST 2023** using [Gradle-Lic
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Nov 01 15:46:10 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.160`
+# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.170`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -4288,12 +4278,11 @@ This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -4303,15 +4292,15 @@ This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.1.5.
@@ -4491,27 +4480,27 @@ This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://jcommander.org](https://jcommander.org)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.2.**No license information found**
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson. **Name** : jackson-bom. **Version** : 2.15.3.**No license information found**
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-annotations. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-core. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-core](https://github.com/FasterXML/jackson-core)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.core. **Name** : jackson-databind. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson](https://github.com/FasterXML/jackson)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-xml. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-dataformat-xml](https://github.com/FasterXML/jackson-dataformat-xml)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.2.
+1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -4593,12 +4582,11 @@ This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava. **Version** : 32.1.3-jre.
      * **Project URL:** [https://github.com/google/guava](https://github.com/google/guava)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.guava. **Name** : guava-parent. **Version** : 32.1.2-jre.**No license information found**
-1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.2-jre.
+1.  **Group** : com.google.guava. **Name** : guava-testlib. **Version** : 32.1.3-jre.
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : listenablefuture. **Version** : 9999.0-empty-to-avoid-conflict-with-guava.
@@ -4612,15 +4600,15 @@ This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-Lic
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.24.4.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.1.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.24.4.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -5225,4 +5213,4 @@ This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-Lic
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Fri Oct 13 00:27:10 WEST 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Wed Nov 01 15:46:10 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

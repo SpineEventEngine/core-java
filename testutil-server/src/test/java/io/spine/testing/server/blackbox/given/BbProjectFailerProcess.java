@@ -34,10 +34,11 @@ import io.spine.testing.server.blackbox.BbProjectFailer;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.command.BbFailProject;
 import io.spine.testing.server.blackbox.event.BbProjectFailed;
+import io.spine.testing.server.blackbox.probe.FailedHandlerGuard;
 
 /**
  * Test environment for testing
- * {@link io.spine.testing.server.blackbox.FailedHandlerGuard FailedHandlerGuard} integration.
+ * {@link FailedHandlerGuard FailedHandlerGuard} integration.
  */
 public final class BbProjectFailerProcess
         extends ProcessManager<BbProjectId, BbProjectFailer, BbProjectFailer.Builder> {

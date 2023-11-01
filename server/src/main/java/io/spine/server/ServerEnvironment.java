@@ -343,7 +343,7 @@ public final class ServerEnvironment implements AutoCloseable {
     }
 
     /**
-     * Allows to configure values used by the {@code ServerEnvironment} for the given type.
+     * Allows configuring values used by the {@code ServerEnvironment} for the given type.
      */
     public static class TypeConfigurator {
 

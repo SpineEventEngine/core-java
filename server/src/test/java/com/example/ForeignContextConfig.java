@@ -46,7 +46,7 @@ import static io.spine.server.dispatch.DispatchOutcomes.successfulOutcome;
  * Test environment class for testing {@code BoundedContext} configuration from
  * outside the framework.
  *
- * @see io.spine.server.BoundedContextTest.RestrictRegistrationCalls
+ * @see io.spine.server.BoundedContextSpec.RestrictRegistrationCalls
  */
 public final class ForeignContextConfig {
 

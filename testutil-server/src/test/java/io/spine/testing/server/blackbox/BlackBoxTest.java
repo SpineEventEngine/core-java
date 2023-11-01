@@ -450,7 +450,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
     }
 
     @Test
-    @DisplayName("throw `IllegalStateException` on Bounded Context close error")
+    @DisplayName("pass exception thrown when 'Bounded Context' is closed")
     void throwIllegalStateExceptionOnClose() {
         var throwingRepo = new RepositoryThrowingExceptionOnClose() {
             @Override
@@ -459,11 +459,9 @@ abstract class BlackBoxTest<T extends BlackBox> {
             }
         };
 
-        var ctx = BlackBox.from(
-                newBuilder().add(throwingRepo)
-        );
-
-        assertThrows(IllegalStateException.class, ctx::close);
+        try (var ctx = BlackBox.singleTenantWith(throwingRepo)) {
+            assertThrows(RuntimeException.class, ctx::close);
+        }
     }
 
     @Nested
@@ -496,16 +494,14 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @Test
         void singleTenant() {
-            var builder = BoundedContextBuilder
-                    .assumingTests(false)
+            var builder = BoundedContextBuilder.assumingTests(false)
                     .enrichEventsUsing(enricher);
             assertBlackBox(builder, StBlackBox.class);
         }
 
         @Test
         void multiTenant() {
-            var builder = BoundedContextBuilder
-                    .assumingTests(true)
+            var builder = BoundedContextBuilder.assumingTests(true)
                     .setTenantIndex(tenantIndex)
                     .enrichEventsUsing(enricher);
             assertBlackBox(builder, MtBlackBox.class);
@@ -580,7 +576,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
         }
 
         private void assertTenantIndex() {
-            if(context().isMultitenant()) {
+            if (context().isMultitenant()) {
                 assertThat(tenantIndex())
                         .isSameInstanceAs(tenantIndex);
             }
@@ -606,6 +602,19 @@ abstract class BlackBoxTest<T extends BlackBox> {
             repos.forEach(repository -> builder.add(repository.entityStateType()
                                                               .toTypeName()));
             return builder.build();
+        }
+    }
+
+    @Nested
+    @DisplayName("create an instance using passed components")
+    class CreateWith {
+
+        @Test
+        @DisplayName("multitenant")
+        void multitenant() {
+            try(var ctx = BlackBox.multiTenantWith(new BbProjectRepository())) {
+                assertThat(ctx.context().isMultitenant()).isTrue();
+            }
         }
     }
 
@@ -854,7 +863,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
             assertThat(clientRequest.run(BbProjectView.query().build()))
                     .hasSize(0);
 
-            // Let's send a command with each of APIs.
+            // Let's send a command with each of the APIs.
             clientRequest.command(Given.createProject()).postAndForget();
             context().receivesCommand(Given.createProject());
 
@@ -866,7 +875,6 @@ abstract class BlackBoxTest<T extends BlackBox> {
 
         @Test
         @DisplayName("closed as `BlackBoxContext` is closed")
-        @SuppressWarnings("ResultOfMethodCallIgnored")  /* Expecting an exception. */
         void closedAsBlackBoxContextClosed() {
             var factory = context().clients();
             var client = factory.withMatchingTenant();

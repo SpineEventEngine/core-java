@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.probe;
 
 import com.google.errorprone.annotations.FormatMethod;
 import com.google.errorprone.annotations.FormatString;
@@ -49,7 +49,9 @@ interface DiagnosticLogging extends WithLogging {
      *         the arguments, if any, for the error message
      */
     @FormatMethod
-    default void log(DiagnosticEvent event, @FormatString String errorMessage, Object... formatArgs) {
+    default void log(DiagnosticEvent event,
+                     @FormatString String errorMessage,
+                     Object... formatArgs) {
         var msg = format(errorMessage, formatArgs);
         log(msg, event);
     }
@@ -70,7 +72,7 @@ interface DiagnosticLogging extends WithLogging {
             errorLogger.log(() -> eventJson);
         } else {
             @SuppressWarnings("UseOfSystemOutOrSystemErr")
-            // Edge case for disabled/misconfigured logging .
+            // Edge case for disabled/misconfigured logging.
             var stderr = System.err;
             stderr.println(msg);
             stderr.println(eventJson);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.probe;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.extensions.proto.ProtoTruth;
@@ -51,9 +51,9 @@ import static java.util.Optional.ofNullable;
  * Abstract base for message listeners that collect messages posted to a bus.
  *
  * @param <I>
- *         the type of the message identifiers
+ *         the type of the signal identifiers
  * @param <T>
- *         the type of the outer objects of messages
+ *         the type of the collected signals
  * @param <E>
  *         the type of the message envelopes
  */
@@ -87,14 +87,14 @@ abstract class MessageCollector<I extends SignalId,
     }
 
     /**
-     * Obtains immutable list with outer objects of messages collected so far.
+     * Obtains an immutable list with outer objects of messages collected so far.
      */
     public final ImmutableList<T> all() {
         return ImmutableList.copyOf(outerObjects);
     }
 
     /**
-     * Obtains immutable list with outer objects of messages belonging to the passed tenant.
+     * Obtains an immutable list with outer objects of messages belonging to the passed tenant.
      */
     public final ImmutableList<T> ofTenant(TenantId tenantId) {
         checkNotNull(tenantId);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.probe;
+
+import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
 
 /**
- * Configures the behavior of the {@link BlackBox} on handling runtime exceptions
- * thrown from the handler methods.
+ * Remembers events posted to an Event Bus.
  */
-enum HandlerFailureTolerance {
-
-    /**
-     * Identifies that exceptions must be only logged.
-     */
-    LOG,
-
-    /**
-     * Identifies that exceptions must be raised and tests must be failed.
-     */
-    RAISE_AND_FAIL
+public final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
 }

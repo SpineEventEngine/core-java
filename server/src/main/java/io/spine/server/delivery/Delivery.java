@@ -197,7 +197,7 @@ import static java.util.Collections.synchronizedList;
  * performing the actual message dispatching rely onto this knowledge and deduplicate
  * the messages prior to calling the target's endpoint.
  *
- * <p>Additionally, the {@code Delivery} provides a {@linkplain DeliveredMessages cache of recently
+ * <p>Additionally, the {@code Delivery} provides a {@linkplain DeliveredMessagesCache cache of recently
  * delivered messages}. Each instance of the {@code Conveyor} has an access to it and uses it
  * in deduplication procedures.
  *
@@ -298,7 +298,7 @@ public final class Delivery implements WithLogging {
     /**
      * The cache of the locally delivered messages.
      */
-    private final DeliveredMessages deliveredMessages;
+    private final DeliveredMessagesCache deliveredMessagesCache;
 
     /**
      * The maximum amount of messages to deliver within a {@link DeliveryStage}.
@@ -325,7 +325,7 @@ public final class Delivery implements WithLogging {
         this.pageSize = builder.getPageSize();
         this.deliveries = new InboxDeliveries();
         this.shardObservers = synchronizedList(new ArrayList<>());
-        this.deliveredMessages = new DeliveredMessages();
+        this.deliveredMessagesCache = new DeliveredMessagesCache();
     }
 
     /**
@@ -571,7 +571,7 @@ public final class Delivery implements WithLogging {
     private DeliveryStage deliverMessages(ImmutableList<InboxMessage> messages,
                                           ShardIndex index,
                                           Iterable<CatchUp> catchUpJobs) {
-        var conveyor = new Conveyor(messages, deliveredMessages);
+        var conveyor = new Conveyor(messages, deliveredMessagesCache);
         DeliveryAction action = new GroupByTargetAndDeliver(deliveries, monitor, conveyor);
         List<Station> stations = conveyorStationsFor(catchUpJobs, action);
         var stage = launch(conveyor, stations, index);

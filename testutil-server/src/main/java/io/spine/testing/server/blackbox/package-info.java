@@ -32,7 +32,7 @@
  * <p>One such black box example is for {@link io.spine.testing.server.blackbox.BlackBox
  * Bounded Context testing}. It allows sending Commands and Events to the 
  * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
+ * inside the Bounded Context.
  * 
  * @see io.spine.testing.server.blackbox.BlackBox
  */

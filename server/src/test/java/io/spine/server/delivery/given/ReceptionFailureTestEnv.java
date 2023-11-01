@@ -28,7 +28,6 @@ package io.spine.server.delivery.given;
 
 import com.google.common.collect.ImmutableList;
 import io.spine.environment.Tests;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.DefaultRepository;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Delivery;
@@ -60,10 +59,7 @@ public final class ReceptionFailureTestEnv {
 
     public static BlackBox blackBox() {
         var repository = DefaultRepository.of(ReceptionistAggregate.class);
-        var context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(repository)
-        );
+        var context = BlackBox.singleTenantWith(repository);
         return context;
     }
 

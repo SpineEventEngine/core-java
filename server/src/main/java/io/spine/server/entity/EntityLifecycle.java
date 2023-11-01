@@ -114,7 +114,7 @@ public class EntityLifecycle {
     private final EventFilter eventFilter;
 
     /**
-     * The message ID of of the associated {@link Entity} state.
+     * The message ID of the associated {@link Entity} state.
      */
     private final MessageId entityId;
 

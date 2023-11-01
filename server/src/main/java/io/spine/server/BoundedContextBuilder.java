@@ -73,8 +73,7 @@ import static java.lang.String.format;
 /**
  * A builder for producing {@code BoundedContext} instances.
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
-// OK for this central piece.
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
 public final class BoundedContextBuilder implements WithLogging {
 
     private final ContextSpec spec;
@@ -82,8 +81,8 @@ public final class BoundedContextBuilder implements WithLogging {
     private final CommandBus.Builder commandBus = CommandBus.newBuilder();
 
     /**
-     * Command dispatchers to be registered with the context {@link CommandBus} after the Bounded
-     * Context creation.
+     * Command dispatchers to be registered with the context {@link CommandBus}
+     * after the Bounded Context creation.
      */
     private final Collection<CommandDispatcher> commandDispatchers = new ArrayList<>();
 
@@ -104,6 +103,8 @@ public final class BoundedContextBuilder implements WithLogging {
 
     /** Repositories to be registered with the Bounded Context being built after its creation. */
     private final Collection<Repository<?, ?>> repositories = new ArrayList<>();
+
+    private @Nullable Consumer<BoundedContext> onBeforeClose = null;
 
     /**
      * Creates a new builder with the given spec.
@@ -138,9 +139,10 @@ public final class BoundedContextBuilder implements WithLogging {
     @Internal
     @VisibleForTesting
     public static BoundedContextBuilder assumingTests(boolean multitenant) {
+        var name = assumingTestsValue();
         var spec = multitenant
-                   ? multitenant(assumingTestsValue())
-                   : singleTenant(assumingTestsValue());
+                   ? multitenant(name)
+                   : singleTenant(name);
         return new BoundedContextBuilder(spec);
     }
 
@@ -222,14 +224,6 @@ public final class BoundedContextBuilder implements WithLogging {
         return this;
     }
 
-    /**
-     * Obtains {@code EventEnricher} assigned to the context to be built, or
-     * empty {@code Optional} if no enricher was assigned prior to this call.
-     */
-    public Optional<EventEnricher> eventEnricher() {
-        return eventBus.enricher();
-    }
-
     @CanIgnoreReturnValue
     public BoundedContextBuilder setTenantIndex(TenantIndex tenantIndex) {
         if (isMultitenant()) {
@@ -278,7 +272,7 @@ public final class BoundedContextBuilder implements WithLogging {
      * Adds the given assignee to the Bounded Context.
      *
      * @param assignee
-     *          the assignee to add
+     *         the assignee to add
      */
     @CanIgnoreReturnValue
     public BoundedContextBuilder addAssignee(AbstractAssignee assignee) {
@@ -289,7 +283,8 @@ public final class BoundedContextBuilder implements WithLogging {
      * Adds the passed command dispatcher to the dispatcher registration list which will be
      * processed after the Bounded Context is created.
      *
-     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     * @apiNote This method is also capable of registering
+     *         {@linkplain Repository repositories}
      *         that implement {@code CommandDispatcher}, but the {@link #add(Repository)} method
      *         should be preferred for this purpose.
      */
@@ -326,7 +321,8 @@ public final class BoundedContextBuilder implements WithLogging {
      * Adds the passed event dispatcher to the dispatcher registration list which will be processed
      * after the Bounded Context is created.
      *
-     * @apiNote This method is also capable of registering {@linkplain Repository repositories}
+     * @apiNote This method is also capable of registering
+     *         {@linkplain Repository repositories}
      *         that implement {@code EventDispatcher}, but the {@link #add(Repository)} method
      *         should be preferred for this purpose.
      */
@@ -459,8 +455,8 @@ public final class BoundedContextBuilder implements WithLogging {
         checkNotNull(entityClass);
         var result =
                 repositories.stream()
-                            .anyMatch(repository -> repository.entityClass()
-                                                              .equals(entityClass));
+                        .anyMatch(repository -> repository.entityClass()
+                                                          .equals(entityClass));
         return result;
     }
 
@@ -483,26 +479,6 @@ public final class BoundedContextBuilder implements WithLogging {
      */
     public ImmutableList<Repository<?, ?>> repositories() {
         return ImmutableList.copyOf(repositories);
-    }
-
-    /**
-     * Obtains the list of command dispatchers added to the builder by the time of the call.
-     *
-     * <p>Adding dispatchers to the builder after this method returns will not update the
-     * returned list.
-     */
-    public ImmutableList<CommandDispatcher> commandDispatchers() {
-        return ImmutableList.copyOf(commandDispatchers);
-    }
-
-    /**
-     * Obtains the list of event dispatchers added to the builder by the time of the call.
-     *
-     * <p>Adding dispatchers to the builder after this method returns will not update the
-     * returned list.
-     */
-    public ImmutableList<EventDispatcher> eventDispatchers() {
-        return ImmutableList.copyOf(eventDispatchers);
     }
 
     /**
@@ -566,7 +542,8 @@ public final class BoundedContextBuilder implements WithLogging {
     public BoundedContext build() {
         var system = buildSystem();
         var result = buildDomain(system);
-        logger().atDebug().log(() -> format("%s created.", result.nameForLogging()));
+        logger().atDebug()
+                .log(() -> format("%s created.", result.nameForLogging()));
 
         registerRepositories(result);
         registerDispatchers(result);
@@ -583,6 +560,24 @@ public final class BoundedContextBuilder implements WithLogging {
         return eventBus.build();
     }
 
+    /**
+     * Sets the action to be performed before the context is closed.
+     *
+     * <p>The action is performed after the context is closed, but before the
+     * {@linkplain BoundedContext#close() context's own action} is performed.
+     *
+     * @param consumer
+     *         the action to perform
+     */
+    public BoundedContextBuilder setOnBeforeClose(Consumer<BoundedContext> consumer) {
+        this.onBeforeClose = checkNotNull(consumer);
+        return this;
+    }
+
+    @Nullable Consumer<BoundedContext> getOnBeforeClose() {
+        return onBeforeClose;
+    }
+
     CommandBus buildCommandBus() {
         return commandBus.build();
     }
@@ -590,7 +585,8 @@ public final class BoundedContextBuilder implements WithLogging {
     private void registerRepositories(BoundedContext result) {
         for (var repository : repositories) {
             result.register(repository);
-            logger().atDebug().log(() -> format("`%s` registered.", repository));
+            logger().atDebug()
+                    .log(() -> format("`%s` registered.", repository));
         }
     }
 
@@ -660,26 +656,5 @@ public final class BoundedContextBuilder implements WithLogging {
             result.withSubscriptionRegistryFrom(systemStand);
         }
         return result.build();
-    }
-
-    /**
-     * Creates a copy of this context builder for the purpose of testing.
-     */
-    @Internal
-    @VisibleForTesting
-    public BoundedContextBuilder testingCopy() {
-        var copy = new BoundedContextBuilder(this.spec, this.systemSettings);
-        var enricher = eventEnricher()
-                .orElseGet(() -> EventEnricher.newBuilder().build());
-        copy.enrichEventsUsing(enricher);
-        tenantIndex().ifPresent(copy::setTenantIndex);
-        repositories().forEach(copy::add);
-        commandDispatchers().forEach(copy::addCommandDispatcher);
-        commandBus.filters().forEach(copy::addCommandFilter);
-        commandBus.listeners().forEach(copy::addCommandListener);
-        eventDispatchers().forEach(copy::addEventDispatcher);
-        eventBus.filters().forEach(copy::addEventFilter);
-        eventBus.listeners().forEach(copy::addEventListener);
-        return copy;
     }
 }

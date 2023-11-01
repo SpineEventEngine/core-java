@@ -31,9 +31,11 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.BoundedContextBuilder;
+import io.spine.server.BoundedContext;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.blackbox.probe.CommandCollector;
+import io.spine.testing.server.blackbox.probe.EventCollector;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -52,8 +54,8 @@ final class MtBlackBox extends BlackBox {
     /**
      * Creates a new multi-tenant instance.
      */
-    MtBlackBox(BoundedContextBuilder b) {
-        super(b);
+    MtBlackBox(BoundedContext c) {
+        super(c);
     }
 
     /**

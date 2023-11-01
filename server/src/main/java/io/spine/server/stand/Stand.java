@@ -41,6 +41,7 @@ import io.spine.core.Origin;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.Closeable;
 import io.spine.server.EventProducer;
 import io.spine.server.Identity;
 import io.spine.server.bus.Listener;
@@ -83,8 +84,7 @@ import static io.spine.grpc.StreamObservers.ack;
  * @see <a href="https://spine.io/docs/concepts/diagrams/spine-architecture-diagram-full-screen.html">
  *     Spine Architecture Diagram</a>
  */
-@SuppressWarnings("OverlyCoupledClass")
-public class Stand implements AutoCloseable {
+public class Stand implements Closeable {
 
     /**
      * Used to return an empty result collection for {@link Query}.
@@ -371,11 +371,16 @@ public class Stand implements AutoCloseable {
         eventRegistry.register(producer);
     }
 
+    @Override
+    public boolean isOpen() {
+        return typeRegistry.isOpen();
+    }
+
     /**
      * Closes the {@code Stand} performing necessary cleanups.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         typeRegistry.close();
         eventRegistry.close();
     }

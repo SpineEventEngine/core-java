@@ -27,7 +27,6 @@
 package io.spine.server.event
 
 import com.google.common.collect.ImmutableSet
-import com.google.protobuf.Message
 import io.spine.base.EventMessage
 import io.spine.core.ContractFor
 import io.spine.logging.WithLogging
@@ -63,7 +62,7 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLog
      * Handles an event and produces some number of events in response.
      */
     @ContractFor(handler = React::class)
-    protected abstract fun whenever(event: E): Iterable<Message>
+    protected abstract fun whenever(event: E): Iterable<EventMessage>
 
     final override fun registerWith(context: BoundedContext) {
         super.registerWith(context)
@@ -85,7 +84,9 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLog
     private fun checkReceptors(events: Iterable<EventClass>) {
         val classes = events.toList()
         check(classes.size == 1) {
-            "Policy `${javaClass.name}` handles too many events: [${classes.joinToString()}]."
+            "A policy should handle only one event." +
+                    " `${javaClass.name}` attempts to handle ${classes.size}:" +
+                    " [${classes.joinToString(separator = "`, `", prefix = "`", postfix = "`")}]."
         }
     }
 }
