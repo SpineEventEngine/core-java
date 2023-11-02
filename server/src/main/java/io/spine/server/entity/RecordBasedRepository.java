@@ -42,7 +42,6 @@ import io.spine.client.Targets;
 import io.spine.core.Signal;
 import io.spine.query.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;

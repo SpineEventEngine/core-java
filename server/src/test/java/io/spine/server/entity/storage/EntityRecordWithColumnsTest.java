@@ -26,37 +26,7 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.testing.EqualsTester;
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import io.spine.base.Identifier;
-import io.spine.client.ArchivedColumn;
-import io.spine.client.DeletedColumn;
-import io.spine.query.ColumnName;
-import io.spine.query.RecordColumn;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.given.TestEntity;
-import io.spine.server.storage.RecordWithColumns;
-import io.spine.server.storage.given.TestColumnMapping;
-import io.spine.test.storage.StgProject;
-import io.spine.test.storage.StgProjectId;
-import io.spine.test.storage.StgTaskId;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static com.google.common.truth.Truth.assertThat;
-import static java.util.Collections.singletonMap;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // TODO:alex.tymchenko:2023-10-28: migrate?
 @DisplayName("`EntityRecordWithColumns` should")
