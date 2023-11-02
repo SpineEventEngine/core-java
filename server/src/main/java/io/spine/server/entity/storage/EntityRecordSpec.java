@@ -83,57 +83,6 @@ public final class EntityRecordSpec<I, S extends EntityState<I>, E extends Entit
         this.columns = columns;
     }
 
-    // TODO:alex.tymchenko:2023-10-27: kill?
-//    /**
-//     * Gathers columns declared by the entity class.
-//     *
-//     * @param entityClass
-//     *         the class of the entity
-//     * @param <I>
-//     *         the type of the entity identifiers
-//     * @param <E>
-//     *         the type of the entity
-//     * @param <S>
-//     *         the type of the entity state
-//     */
-//    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
-//    EntityRecordSpec<I, S, E> of(EntityClass<E> entityClass) {
-//        checkNotNull(entityClass);
-//        var scanner = new Scanner<>(entityClass);
-//        return new EntityRecordSpec<>(entityClass, scanner.columns());
-//    }
-
-    // TODO:alex.tymchenko:2023-10-27: kill both!
-//    /**
-//     * Gathers columns declared by the class of the passed entity.
-//     *
-//     * @param entity
-//     *         the entity instance
-//     * @param <I>
-//     *         the type of the entity identifiers
-//     * @param <E>
-//     *         the type of the entity
-//     * @param <S>
-//     *         the type of the entity state
-//     */
-//    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
-//    EntityRecordSpec<I, S, E> of(E entity) {
-//        checkNotNull(entity);
-//        @SuppressWarnings("unchecked")  // Ensured by the entity type declaration.
-//        var modelClass = (EntityClass<E>) entity.modelClass();
-//        var scanner = new Scanner<>(modelClass);
-//        return new EntityRecordSpec<>(modelClass, scanner.columns());
-//    }
-//
-//    /**
-//     * Gathers columns of the entity class.
-//     */
-//    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
-//    EntityRecordSpec<I, S, E> of(Class<E> cls) {
-//        var aClass = asParameterizedEntityClass(cls);
-//        return of(aClass);
-//    }
-
     /**
      * Extracts column values from the entity.
      *
