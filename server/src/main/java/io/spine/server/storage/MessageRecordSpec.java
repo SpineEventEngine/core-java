@@ -54,16 +54,17 @@ import static com.google.common.collect.Streams.stream;
  * the message record for further querying. Each column defines a way to calculate the stored value
  * basing on the passed message.
  *
- * <p>This specification is not well-suited for describing the storage of
- * {@link io.spine.server.entity.EntityRecord}s, as the values of their columns may be calculated
- * from both the entity state and {@code Entity} instance attributes.
- * See {@link io.spine.server.entity.storage.EntityRecordSpec EntityRecordSpec} for more details.
+ * <p>In case an instance of {@code EntityRecord} is described by this spec,
+ * a special set of accessors for ID and Entity state columns is set.
+ * This is done via {@link io.spine.server.entity.storage.SpecScanner SpecScanner}
+ * which perform analysis of Entity state, and creates getters for properties,
+ * considering that an instance of {@code Any} (being {@code EntityRecord.state} field)
+ * must be unpacked first.
  *
  * @param <I>
  *         the type of record identifiers
  * @param <R>
  *         the type of the record
- * @see io.spine.server.entity.storage.EntityRecordSpec
  */
 @Immutable
 public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I, R, R> {
@@ -167,7 +168,7 @@ public final class MessageRecordSpec<I, R extends Message> extends RecordSpec<I,
     }
 
     /**
-     * A method object to extract the value of an record identifier given an instance of a record.
+     * A method object to extract the value of a record identifier given an instance of a record.
      *
      * <p>Once some storage is passed a record to store, the value of the record identifier has
      * to be determined. To avoid passing the ID value for each record, one defines an way
