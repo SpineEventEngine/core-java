@@ -60,8 +60,8 @@ import static io.spine.server.entity.storage.ToEntityRecordQuery.transform;
  * <p>Delegates all storage operations to the underlying
  * {@link io.spine.server.storage.RecordStorage RecordStorage}. For that, creates a new
  * {@code RecordStorage} instance through the provided {@code StorageFactory} and configures
- * it with the {@linkplain EntityRecordSpec record specification} corresponding
- * to the stored Entity.
+ * it with the {@linkplain MessageRecordSpec record specification} corresponding
+ * to the stored {@code EntityRecord}.
  *
  * @param <I>
  *         the type of the identifiers of stored entities
