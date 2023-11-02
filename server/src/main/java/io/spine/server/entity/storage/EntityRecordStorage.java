@@ -101,11 +101,6 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
         this.stateClass = stateClassOf(entityClass);
     }
 
-    // TODO:alex.tymchenko:2023-10-27: kill!
-//    private static <I, S extends EntityState<I>> EntityRecordSpec<I, S, ?>
-//    spec(Class<? extends Entity<I, S>> entityClass) {
-//        return EntityRecordSpec.of(entityClass);
-//    }
 
     @SuppressWarnings("unchecked" /* Safety of casts is guaranteed by `I` and `S` boundaries. */)
     private static <I, S extends EntityState<I>> MessageRecordSpec<I, EntityRecord>
