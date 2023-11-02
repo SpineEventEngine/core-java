@@ -26,6 +26,7 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
@@ -60,14 +61,11 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Scans Proto definitions of stored {@code Message}s and determines
- * the record specification.
+ * Scans Proto definitions of Entities and their states, and determines
+ * the {@linkplain MessageRecordSpec record specification} for storage.
  *
- * <p>Scans and extracts the definitions of {@link Column}s to be stored
- * for a particular {@code Entity}.
- *
- * <p>The resulting columns include both the entity state-based columns declared with
- * {@link io.spine.option.OptionsProto#column (column)} Proto option and the columns
+ * <p>The resulting spec includes both the entity state-based columns declared with
+ * {@link io.spine.option.OptionsProto#column (column)} Proto option, and the columns
  * storing lifecycle and version attributes of an {@code Entity}.
  *
  * @implNote Client-side API includes generic definitions of lifecycle and version columns
@@ -105,6 +103,26 @@ public final class SpecScanner {
     private SpecScanner() {
     }
 
+    /**
+     * Determines the specification of the passed entity
+     * by the types of its ID and state.
+     *
+     * <p>The resulting specification is composed in relation
+     * to storing Entity as {@code EntityRecord}, along with some columns.
+     *
+     * @param idClass
+     *         type of Entity identifiers
+     * @param stateClass
+     *         type of Entity state
+     * @param <I>
+     *         type of Entity identifiers, as bounding generic parameter
+     * @param <S>
+     *         type of Entity state, bounded with {@code I}
+     *         as a type of its identifier
+     * @return a new record specification
+     */
+    @Internal
+    @VisibleForTesting
     public static <I, S extends EntityState<I>> MessageRecordSpec<I, EntityRecord>
     scan(Class<I> idClass, Class<S> stateClass) {
         Set<RecordColumn<EntityRecord, ?>> accumulator = new HashSet<>();
@@ -129,6 +147,22 @@ public final class SpecScanner {
         return result;
     }
 
+    /**
+     * Determines the specification of the passed entity
+     * by the Entity instance.
+     *
+     * <p>The resulting specification is composed in relation
+     * to storing Entity as {@code EntityRecord}, along with some columns.
+     *
+     * @param entity
+     *         entity to scan
+     * @param <I>
+     *         type of Entity identifiers, as bounding generic parameter
+     * @param <S>
+     *         type of Entity state, bounded with {@code I}
+     *         as a type of its identifier
+     * @return a new record specification
+     */
     @SuppressWarnings("unchecked" /* Casts are ensured by `Entity` declaration. */)
     public static <I, S extends EntityState<I>>
     MessageRecordSpec<I, EntityRecord> scan(Entity<I, S> entity) {
@@ -137,6 +171,22 @@ public final class SpecScanner {
         return scan(entityCls);
     }
 
+    /**
+     * Determines the specification of the passed entity
+     * by the passed Entity class.
+     *
+     * <p>The resulting specification is composed in relation
+     * to storing Entity as {@code EntityRecord}, along with some columns.
+     *
+     * @param cls
+     *         entity class to scan
+     * @param <I>
+     *         type of Entity identifiers, as bounding generic parameter
+     * @param <S>
+     *         type of Entity state, bounded with {@code I}
+     *         as a type of its identifier
+     * @return a new record specification
+     */
     public static <I, S extends EntityState<I>>
     MessageRecordSpec<I, EntityRecord> scan(Class<? extends Entity<I, S>> cls) {
         checkNotNull(cls);
@@ -151,6 +201,17 @@ public final class SpecScanner {
         return (Class<Object>) stateCol.type();
     }
 
+    /**
+     * Unpacks Entity states from {@code Any} instances, caching the unpacked results.
+     *
+     * <p>This routine is used as a scoped cache for on-the-fly unpacking Entity state
+     * from {@code EntityRecord}s, and then passing them on to other operations,
+     * such as determining the column values.
+     *
+     * @param <I>
+     *         type of entit
+     * @param <S>
+     */
     private static final class MemoizingUnpacker<I, S extends EntityState<I>> {
 
         private final Class<S> stateCls;
@@ -174,10 +235,11 @@ public final class SpecScanner {
 
     @SuppressWarnings("ReturnOfNull" /* By design. */)
     private static <I, S extends EntityState<I>>
-    Getter<EntityRecord, Object> getter(Column<S, ?> stateColumn, MemoizingUnpacker<I, S> unpacker) {
+    Getter<EntityRecord, Object> getter(Column<S, ?> stateColumn,
+                                        MemoizingUnpacker<I, S> unpacker) {
         return r -> {
             var state = r.getState();
-            if(state.equals(Any.getDefaultInstance())) {
+            if (state.equals(Any.getDefaultInstance())) {
                 // This may happen for `Aggregate` state,
                 // if its visibility does not allow querying.
                 return null;

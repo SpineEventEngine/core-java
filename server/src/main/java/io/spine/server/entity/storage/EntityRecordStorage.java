@@ -47,7 +47,6 @@ import io.spine.server.storage.StorageFactory;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.server.entity.model.EntityClass.stateClassOf;
 import static io.spine.server.entity.storage.EntityRecordColumn.archived;
 import static io.spine.server.entity.storage.EntityRecordColumn.deleted;
@@ -96,20 +95,9 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
     public EntityRecordStorage(ContextSpec context,
                                StorageFactory factory,
                                Class<? extends Entity<I, S>> entityClass) {
-        super(context, factory.createRecordStorage(context, messageSpec(entityClass)));
+        super(context, factory.createRecordStorage(context, SpecScanner.scan(entityClass)));
         this.findActiveRecordsQuery = findActiveRecords();
         this.stateClass = stateClassOf(entityClass);
-    }
-
-
-    @SuppressWarnings("unchecked" /* Safety of casts is guaranteed by `I` and `S` boundaries. */)
-    private static <I, S extends EntityState<I>> MessageRecordSpec<I, EntityRecord>
-    messageSpec(Class<? extends Entity<I, S>> entityClass) {
-        var cls = asEntityClass(entityClass);
-        var idClass = (Class<I>) cls.idClass();
-        var stateClass = (Class<S>) cls.stateClass();
-        var spec = SpecScanner.scan(idClass, stateClass);
-        return spec;
     }
 
     /**
