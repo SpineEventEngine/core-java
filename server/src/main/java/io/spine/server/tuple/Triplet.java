@@ -36,7 +36,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 
 import static io.spine.server.tuple.Element.value;
-import static io.spine.server.tuple.Values.isOptionalPresent;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -134,24 +133,22 @@ public final class Triplet<A extends Message, B, C>
         return isOptionalPresent(value);
     }
 
-    @SuppressWarnings("unchecked")
     @CanIgnoreReturnValue
     private static <M extends Message> M checkNotNullOrEmpty(M value) {
         return checkNotNullOrEmpty(Triplet.class, value);
     }
 
-    @SuppressWarnings("unchecked")
     @CanIgnoreReturnValue
     private static <M extends Message> @Nullable M checkNotEmpty(@Nullable M value) {
         return checkNotEmpty(Triplet.class, value);
     }
 
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     private static <M extends Message> void checkAllNotNullOrEmpty(M... values) {
         checkAllNotNullOrEmpty(Triplet.class, values);
     }
 
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     private static <M extends Message> void checkAllNotEmpty(M... values) {
         checkAllNotEmpty(Triplet.class, values);
     }

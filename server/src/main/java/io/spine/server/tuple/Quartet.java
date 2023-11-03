@@ -37,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 
 import static io.spine.server.tuple.Element.value;
-import static io.spine.server.tuple.Values.isOptionalPresent;
 import static java.util.Optional.ofNullable;
 
 /**

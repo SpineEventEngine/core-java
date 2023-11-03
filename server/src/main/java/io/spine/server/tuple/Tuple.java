@@ -163,6 +163,20 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
     }
 
     /**
+     * If the passed {@code value} is an {@code Optional}, tells if its value is present.
+     *
+     * <p>Otherwise, returns {@code true}.
+     */
+    static boolean isOptionalPresent(Object value) {
+        checkNotNull(value);
+        if(!(value instanceof Optional)) {
+            return true;
+        }
+        var asOptional = (Optional<?>) value;
+        return asOptional.isPresent();
+    }
+
+    /**
      * Traverses through elements obtaining a message value from them.
      *
      * @param <M>

@@ -36,7 +36,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.tuple.Element.value;
-import static io.spine.server.tuple.Values.isOptionalPresent;
 import static java.util.Optional.ofNullable;
 
 /**
