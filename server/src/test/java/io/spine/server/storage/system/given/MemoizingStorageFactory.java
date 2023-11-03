@@ -35,7 +35,7 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.delivery.CatchUpStorage;
 import io.spine.server.delivery.InboxStorage;
 import io.spine.server.event.EventStore;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -83,7 +83,7 @@ public final class MemoizingStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> RecordStorage<I, M>
-    createRecordStorage(ContextSpec context, MessageRecordSpec<I, M> recordSpec) {
+    createRecordStorage(ContextSpec context, RecordSpec<I, M> recordSpec) {
         requestedStorages.add(recordSpec.storedType());
         return nullRef();
     }

@@ -37,7 +37,7 @@ import io.spine.query.RecordColumn;
 import io.spine.query.RecordColumns;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.SpecScanner;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProject.Status;
@@ -53,13 +53,13 @@ import static java.lang.System.nanoTime;
 
 public final class GivenStorageProject {
 
-    private static final MessageRecordSpec<StgProjectId, StgProject> messageSpec =
-            new MessageRecordSpec<>(StgProjectId.class,
-                                    StgProject.class,
-                                    StgProject::getId,
-                                    StgProjectColumns.definitions());
+    private static final RecordSpec<StgProjectId, StgProject> messageSpec =
+            new RecordSpec<>(StgProjectId.class,
+                             StgProject.class,
+                             StgProject::getId,
+                             StgProjectColumns.definitions());
 
-    private static final MessageRecordSpec<StgProjectId, EntityRecord> entityRecordSpec =
+    private static final RecordSpec<StgProjectId, EntityRecord> entityRecordSpec =
             SpecScanner.scan(StgProjectId.class, StgProject.class);
 
     /**
@@ -133,7 +133,7 @@ public final class GivenStorageProject {
     /**
      * Returns the record specification for {@code StgProject}.
      */
-    public static MessageRecordSpec<StgProjectId, StgProject> messageSpec() {
+    public static RecordSpec<StgProjectId, StgProject> messageSpec() {
         return messageSpec;
     }
 

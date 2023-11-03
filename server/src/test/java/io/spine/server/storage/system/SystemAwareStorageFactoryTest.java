@@ -34,7 +34,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ContextSpec;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.event.store.EmptyEventStore;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
@@ -116,8 +116,8 @@ class SystemAwareStorageFactoryTest {
         var factory = new MemoizingStorageFactory();
         var systemAware = SystemAwareStorageFactory.wrap(factory);
         var recordType = Project.class;
-        var spec = new MessageRecordSpec<>(ProjectId.class, Project.class,
-                                           i -> ProjectId.getDefaultInstance());
+        var spec = new RecordSpec<>(ProjectId.class, Project.class,
+                                    i -> ProjectId.getDefaultInstance());
         var storage = systemAware.createRecordStorage(CONTEXT, spec);
         assertThat(storage).isNull();
         assertThat(factory.requestedStorages())

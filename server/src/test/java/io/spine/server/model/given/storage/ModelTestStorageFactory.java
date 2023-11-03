@@ -29,7 +29,7 @@ package io.spine.server.model.given.storage;
 import com.google.protobuf.Message;
 import io.spine.server.ContextSpec;
 import io.spine.server.delivery.InboxMessage;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -51,7 +51,7 @@ public final class ModelTestStorageFactory implements StorageFactory {
     @Override
     public <I, R extends Message> RecordStorage<I, R> createRecordStorage(
             ContextSpec context,
-            MessageRecordSpec<I, R> recordSpec
+            RecordSpec<I, R> recordSpec
     ) {
         var storage = delegate.createRecordStorage(context, recordSpec);
         if (recordSpec.storedType().equals(InboxMessage.class)) {

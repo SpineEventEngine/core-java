@@ -73,11 +73,11 @@ public class RecordWithColumns<I, R extends Message> {
     }
 
     /**
-     * Creates a new record extracting the column values from the passed {@code Message} and setting
-     * the passed identifier value as the record identifier.
+     * Creates a new record extracting the column values from the passed record,
+     * and setting the passed identifier value as the record identifier.
      */
     public static <I, R extends Message>
-    RecordWithColumns<I, R> create(I identifier, R record, RecordSpec<I, R, R> recordSpec) {
+    RecordWithColumns<I, R> create(I identifier, R record, RecordSpec<I, R> recordSpec) {
         checkNotNull(identifier);
         checkNotNull(record);
         checkNotNull(recordSpec);
@@ -86,10 +86,11 @@ public class RecordWithColumns<I, R extends Message> {
     }
 
     /**
-     * Creates a new record extracting the column values from the passed {@code Message}.
+     * Creates a new record-with-columns,
+     * filling the column values by extracting them from the passed record.
      */
     public static <I, R extends Message>
-    RecordWithColumns<I, R> create(R record, RecordSpec<I, R, R> recordSpec) {
+    RecordWithColumns<I, R> create(R record, RecordSpec<I, R> recordSpec) {
         checkNotNull(record);
         checkNotNull(recordSpec);
         var storageFields = recordSpec.valuesIn(record);

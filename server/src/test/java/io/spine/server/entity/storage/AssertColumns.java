@@ -34,7 +34,7 @@ import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.query.EntityColumn;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
@@ -59,7 +59,7 @@ final class AssertColumns {
         assertThat(contains).isTrue();
     }
 
-    static void assertHasLifecycleColumns(MessageRecordSpec<?, EntityRecord> spec) {
+    static void assertHasLifecycleColumns(RecordSpec<?, EntityRecord> spec) {
         var columns = spec.columns();
         var names = columns.stream()
                 .map(Column::name)

@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.query.RecordQueryBuilder;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -76,12 +76,12 @@ public class InboxStorage extends MessageStorage<InboxMessageId, InboxMessage> {
               factory.createRecordStorage(Delivery.contextSpec(multitenant), spec()));
     }
 
-    private static MessageRecordSpec<InboxMessageId, InboxMessage> spec() {
+    private static RecordSpec<InboxMessageId, InboxMessage> spec() {
         @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}s.
-        var spec = new MessageRecordSpec<>(InboxMessageId.class,
-                                           InboxMessage.class,
-                                           InboxMessage::getId,
-                                           InboxColumn.definitions());
+        var spec = new RecordSpec<>(InboxMessageId.class,
+                                    InboxMessage.class,
+                                    InboxMessage::getId,
+                                    InboxColumn.definitions());
         return spec;
     }
 

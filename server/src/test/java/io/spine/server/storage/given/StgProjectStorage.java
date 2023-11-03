@@ -27,7 +27,7 @@
 package io.spine.server.storage.given;
 
 import io.spine.server.ContextSpec;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorageUnderTest;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.given.GivenStorageProject.StgProjectColumns;
@@ -51,9 +51,9 @@ public class StgProjectStorage extends RecordStorageUnderTest<StgProjectId, StgP
         super(context, factory.createRecordStorage(context, spec()));
     }
 
-    private static MessageRecordSpec<StgProjectId, StgProject> spec() {
+    private static RecordSpec<StgProjectId, StgProject> spec() {
         @SuppressWarnings("ConstantConditions")     // Proto getters return non-{@code null} values.
-        var spec = new MessageRecordSpec<>(StgProjectId.class, StgProject.class, StgProject::getId,
+        var spec = new RecordSpec<>(StgProjectId.class, StgProject.class, StgProject::getId,
                                            StgProjectColumns.definitions());
         return spec;
     }

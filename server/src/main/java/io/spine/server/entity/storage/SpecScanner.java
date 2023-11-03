@@ -41,8 +41,8 @@ import io.spine.query.RecordColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.storage.MessageRecordSpec;
-import io.spine.server.storage.MessageRecordSpec.ExtractId;
+import io.spine.server.storage.RecordSpec;
+import io.spine.server.storage.RecordSpec.ExtractId;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -58,7 +58,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Scans Proto definitions of Entities and their states, and determines
- * the {@linkplain MessageRecordSpec record specification} for storage.
+ * the {@linkplain RecordSpec record specification} for storage.
  *
  * <p>The resulting spec includes both the entity state-based columns declared with
  * {@link io.spine.option.OptionsProto#column (column)} Proto option, and the columns
@@ -119,7 +119,7 @@ public final class SpecScanner {
      */
     @Internal
     @VisibleForTesting
-    public static <I, S extends EntityState<I>> MessageRecordSpec<I, EntityRecord>
+    public static <I, S extends EntityState<I>> RecordSpec<I, EntityRecord>
     scan(Class<I> idClass, Class<S> stateClass) {
         Set<RecordColumn<EntityRecord, ?>> accumulator = new HashSet<>();
 
@@ -137,7 +137,7 @@ public final class SpecScanner {
         accumulator.add(EntityRecordColumn.deleted);
         accumulator.add(EntityRecordColumn.version);
 
-        var result = new MessageRecordSpec<>(
+        var result = new RecordSpec<>(
                 idClass, EntityRecord.class, idFromRecord(), ImmutableSet.copyOf(accumulator)
         );
         return result;
@@ -161,7 +161,7 @@ public final class SpecScanner {
      */
     @SuppressWarnings("unchecked" /* Casts are ensured by `Entity` declaration. */)
     public static <I, S extends EntityState<I>>
-    MessageRecordSpec<I, EntityRecord> scan(Entity<I, S> entity) {
+    RecordSpec<I, EntityRecord> scan(Entity<I, S> entity) {
         checkNotNull(entity);
         var entityCls = (Class<Entity<I, S>>) entity.getClass();
         return scan(entityCls);
@@ -184,7 +184,7 @@ public final class SpecScanner {
      * @return a new record specification
      */
     public static <I, S extends EntityState<I>>
-    MessageRecordSpec<I, EntityRecord> scan(Class<? extends Entity<I, S>> cls) {
+    RecordSpec<I, EntityRecord> scan(Class<? extends Entity<I, S>> cls) {
         checkNotNull(cls);
         var idClass = EntityClass.<I>idClass(cls);
         var stateClass = EntityClass.<S>stateClassOf(cls);

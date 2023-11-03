@@ -43,7 +43,7 @@ import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.entity.storage.SpecScanner;
 import io.spine.server.entity.storage.given.TaskViewProjection;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.test.entity.TaskView;
 import io.spine.test.entity.TaskViewId;
@@ -75,7 +75,7 @@ public final class EntityRecordStorageTestEnv {
     private EntityRecordStorageTestEnv() {
     }
 
-    private static final MessageRecordSpec<StgProjectId, EntityRecord> spec =
+    private static final RecordSpec<StgProjectId, EntityRecord> spec =
             SpecScanner.scan(TestCounterEntity.class);
 
     /**
@@ -160,7 +160,7 @@ public final class EntityRecordStorageTestEnv {
         return ImmutableSet.of(name(), estimateInDays(), status(), dueDate());
     }
 
-    public static MessageRecordSpec<TaskViewId, EntityRecord> taskViewSpec() {
+    public static RecordSpec<TaskViewId, EntityRecord> taskViewSpec() {
         return SpecScanner.scan(TaskViewProjection.class);
     }
 

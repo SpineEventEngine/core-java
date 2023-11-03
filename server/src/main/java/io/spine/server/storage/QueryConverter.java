@@ -81,7 +81,7 @@ public final class QueryConverter {
      * @return a new record query with the same semantic as the original filters and response format
      */
     public static <I, R extends Message> RecordQuery<I, R>
-    convert(TargetFilters filters, ResponseFormat format, RecordSpec<I, R, ?> spec) {
+    convert(TargetFilters filters, ResponseFormat format, RecordSpec<I, R> spec) {
         checkNotNull(spec);
         checkNotNull(filters);
         checkNotNull(format);
@@ -115,7 +115,7 @@ public final class QueryConverter {
      * @return a new record query
      */
     public static <I, R extends Message> RecordQuery<I, R>
-    newQuery(RecordSpec<I, R, ?> spec, ResponseFormat format) {
+    newQuery(RecordSpec<I, R> spec, ResponseFormat format) {
         checkNotNull(spec);
         checkNotNull(format);
 
@@ -128,7 +128,7 @@ public final class QueryConverter {
     }
 
     private static <I, R extends Message> void
-    filters(RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec, TargetFilters filters) {
+    filters(RecordQueryBuilder<I, R> builder, RecordSpec<I, R> spec, TargetFilters filters) {
         for (var composite : filters.getFilterList()) {
             convertComposite(composite, builder, spec);
         }
@@ -137,7 +137,7 @@ public final class QueryConverter {
     private static <I, R extends Message> void
     convertComposite(CompositeFilter composite,
                      RecordQueryBuilder<I, R> builder,
-                     RecordSpec<I, R, ?> spec) {
+                     RecordSpec<I, R> spec) {
         var compositeOperator = composite.getOperator();
 
         switch (compositeOperator) {
@@ -168,7 +168,7 @@ public final class QueryConverter {
     private static <I, R extends Message> RecordQueryBuilder<I, R>
     doCompositeWithAnd(CompositeFilter filter,
                        RecordQueryBuilder<I, R> builder,
-                       RecordSpec<I, R, ?> spec) {
+                       RecordSpec<I, R> spec) {
         for (var childFilter : filter.getFilterList()) {
             doSimpleFilter(childFilter, builder, spec);
         }
@@ -191,7 +191,7 @@ public final class QueryConverter {
     private static <I, R extends Message> RecordQueryBuilder<I, R>
     doCompositeWithOr(CompositeFilter filter,
                        RecordQueryBuilder<I, R> builder,
-                       RecordSpec<I, R, ?> spec) {
+                       RecordSpec<I, R> spec) {
         ImmutableList.Builder<Either<RecordQueryBuilder<I, R>>> eithers =
                 ImmutableList.builder();
 
@@ -214,7 +214,7 @@ public final class QueryConverter {
      */
     @SuppressWarnings("Immutable")  /* Using `builder` in lambda is fine. */
     private static <I, R extends Message> ImmutableList<Either<RecordQueryBuilder<I, R>>>
-    simpleFiltersToEither(List<Filter> simpleFilters, RecordSpec<I, R, ?> spec) {
+    simpleFiltersToEither(List<Filter> simpleFilters, RecordSpec<I, R> spec) {
         return simpleFilters
                 .stream()
                 .map((filter) ->
@@ -233,7 +233,7 @@ public final class QueryConverter {
      */
     @SuppressWarnings("Immutable")  /* Using `builder` in lambda is fine. */
     private static <I, R extends Message> ImmutableList<Either<RecordQueryBuilder<I, R>>>
-    compositesToEither(List<CompositeFilter> composites, RecordSpec<I, R, ?> spec) {
+    compositesToEither(List<CompositeFilter> composites, RecordSpec<I, R> spec) {
         return composites
                 .stream()
                 .map((composite) ->
@@ -250,7 +250,7 @@ public final class QueryConverter {
      * according to the record specification.
      */
     private static <I, R extends Message> void
-    doSimpleFilter(Filter filter, RecordQueryBuilder<I, R> builder, RecordSpec<I, R, ?> spec) {
+    doSimpleFilter(Filter filter, RecordQueryBuilder<I, R> builder, RecordSpec<I, R> spec) {
         var name = columnNameOf(filter);
         var column = findColumn(spec, name);
         var convertedColumn = new AsRecordColumn<R>(column);
@@ -305,7 +305,7 @@ public final class QueryConverter {
 
     private static <I, R extends Message>
     void orderByAndLimit(RecordQueryBuilder<I, R> builder,
-                         RecordSpec<I, R, ?> spec,
+                         RecordSpec<I, R> spec,
                          ResponseFormat format) {
         var hasOrderBy = false;
         for (var protoOrderBy : format.getOrderByList()) {
@@ -331,7 +331,7 @@ public final class QueryConverter {
     }
 
     private static <I, R extends Message> Column<?, ?>
-    findColumn(RecordSpec<I, R, ?> spec, ColumnName columnName) {
+    findColumn(RecordSpec<I, R> spec, ColumnName columnName) {
         var maybeColumn = spec.findColumn(columnName);
         checkArgument(maybeColumn.isPresent(),
                       "Cannot find the column `%s` for the type `%s`.",

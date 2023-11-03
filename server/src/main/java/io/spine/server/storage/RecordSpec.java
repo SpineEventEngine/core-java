@@ -26,52 +26,115 @@
 
 package io.spine.server.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
+import io.spine.query.RecordColumn;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.collect.Streams.stream;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Defines the specification of a record in a storage.
  *
- * <p>Enumerates the record columns to store along with the record itself.
+ * <p>Defines the identifier column and the collection of the data columns to store along with
+ * the message record for further querying. Each column defines a way to calculate the stored value
+ * basing on the passed message.
+ *
+ * <p>In case an instance of {@code EntityRecord} is described by this spec,
+ * a special set of accessors for ID and Entity state columns is set.
+ * This is done via {@link io.spine.server.entity.storage.SpecScanner SpecScanner}
+ * which perform analysis of Entity state, and creates getters for properties,
+ * considering that an instance of {@code Any} (being {@code EntityRecord.state} field)
+ * must be unpacked first.
  *
  * @param <I>
  *         the type of the record identifier
  * @param <R>
  *         the type of the stored record
- * @param <S>
- *         the type of the source object on top of which the values of the columns are extracted
  */
 @SPI
-public abstract class RecordSpec<I, R, S> {
+public final class RecordSpec<I, R extends Message> {
 
+    /**
+     * Type of stored record.
+     */
     private final Class<R> storedType;
+
+    /**
+     * Type of record identifier.
+     */
     private final Class<I> idType;
 
     /**
-     * Creates a new {@code RecordSpec} instance for the record of the passed type.
-     *
-     * @param idType the type of the record identifiers
-     * @param storedType the type of the record
+     * A method object to extract the record identifier, once such a record is passed.
      */
-    protected RecordSpec(Class<I> idType, Class<R> storedType) {
-        this.idType = idType;
-        this.storedType = storedType;
+    private final ExtractId<R, I> extractId;
+
+    /**
+     * The columns to store along with the record itself.
+     */
+    private final ImmutableMap<ColumnName, RecordColumn<R, ?>> columns;
+
+    /**
+     * Creates a new record specification listing the columns to store along with the record.
+     *
+     * @param idType
+     *         the type of the record identifier
+     * @param recordType
+     *         the type of the record
+     * @param extractId
+     *         a method object to extract the value of an identifier given an instance of a record
+     * @param columns
+     *         the definitions of the columns to store along with the record
+     */
+    public RecordSpec(Class<I> idType,
+                      Class<R> recordType,
+                      ExtractId<R, I> extractId,
+                      Iterable<RecordColumn<R, ?>> columns) {
+        this.idType = checkNotNull(idType);
+        this.storedType = checkNotNull(recordType);
+        this.extractId = checkNotNull(extractId);
+        checkNotNull(columns);
+        this.columns =
+                stream(columns).collect(
+                        toImmutableMap(RecordColumn::name, (c) -> c)
+                );
     }
 
     /**
-     * Returns the type of object, serving as the original source for the stored record
-     * of type {@code R}.
+     * Creates a new record specification.
+     *
+     * <p>The specifications created implies that no columns are stored for the record.
+     * To define the stored columns,
+     * please use {@linkplain #RecordSpec(Class, Class, ExtractId, Iterable)
+     * another ctor}.
+     *
+     * @param idType
+     *         the type of the record identifier
+     * @param recordType
+     *         the type of the record
+     * @param extractId
+     *         a method object to extract the value of an identifier given an instance of a record
      */
-    public abstract Class<? extends Message> sourceType();
+    public RecordSpec(Class<I> idType, Class<R> recordType, ExtractId<R, I> extractId) {
+        this(idType, recordType, extractId, ImmutableList.of());
+    }
 
     /**
      * Returns the type of the stored record.
@@ -88,15 +151,6 @@ public abstract class RecordSpec<I, R, S> {
     }
 
     /**
-     * Reads the values of all columns specified for the record from the passed source.
-     *
-     * @param source
-     *         the object from which the column values are read
-     * @return {@code Map} of column names and their respective values
-     */
-    protected abstract Map<ColumnName, @Nullable Object> valuesIn(S source);
-
-    /**
      * Reads the identifier value of the record.
      *
      * @param source
@@ -106,7 +160,12 @@ public abstract class RecordSpec<I, R, S> {
      *         implementations provided outside of this module, such as Spine storage
      *         factory on top of Google Datastore.
      */
-    public abstract I idValueIn(S source);
+    public I idValueIn(R source) {
+        checkNotNull(source);
+        return extractId.apply(source);
+    }
+
+    // TODO:alex.tymchenko:2023-11-03: deduplicate?
 
     /**
      * Extracts the identifier value from the record of a compatible type.
@@ -115,7 +174,40 @@ public abstract class RecordSpec<I, R, S> {
      *         the record containing the ID to extract
      * @return the value of record identifier
      */
-    public abstract I idFromRecord(R record);
+    public I idFromRecord(R record) {
+        return idValueIn(record);
+    }
+
+    /**
+     * Returns the definitions of the record columns set by this specification.
+     */
+    public ImmutableSet<Column<?, ?>> columns() {
+        return ImmutableSet.copyOf(columns.values());
+    }
+
+    /**
+     * Returns the total number of columns in this specification.
+     */
+    @VisibleForTesting
+    public int columnCount() {
+        return columns.size();
+    }
+
+    /**
+     * Reads the values of all columns specified for the record from the passed source.
+     *
+     * @param record
+     *         the object from which the column values are read
+     * @return {@code Map} of column names and their respective values
+     */
+    public Map<ColumnName, @Nullable Object> valuesIn(R record) {
+        checkNotNull(record);
+        Map<ColumnName, @Nullable Object> result = new HashMap<>();
+        columns.forEach(
+                (name, column) -> result.put(name, column.valueIn(record))
+        );
+        return result;
+    }
 
     /**
      * Finds the column in this specification by the column name.
@@ -125,12 +217,21 @@ public abstract class RecordSpec<I, R, S> {
      * @return the column wrapped into {@code Optional},
      *         or {@code Optional.empty()} if no column is found
      */
-    public abstract Optional<Column<?, ?>> findColumn(ColumnName name);
+    public Optional<Column<?, ?>> findColumn(ColumnName name) {
+        checkNotNull(name);
+        var result = columns.get(name);
+        return Optional.ofNullable(result);
+    }
+
+    // TODO:alex.tymchenko:2023-11-03: kill?
 
     /**
-     * Returns the definitions of the record columns set by this specification.
+     * Returns the type of object, serving as the original source for the stored record
+     * of type {@code R}.
      */
-    public abstract ImmutableSet<Column<?, ?>> columns();
+    public Class<R> sourceType() {
+        return storedType();
+    }
 
     /**
      * Finds the column in this specification by the column name.
@@ -148,5 +249,32 @@ public abstract class RecordSpec<I, R, S> {
                 .orElseThrow(() -> newIllegalArgumentException(
                         "Cannot find the column `%s` in the record specification of type `%s`.",
                         name, storedType));
+    }
+
+    /**
+     * A method object to extract the value of a record identifier given an instance of a record.
+     *
+     * <p>Once some storage is passed a record to store, the value of the record identifier has
+     * to be determined. To avoid passing the ID value for each record, one defines an way
+     * to obtain the identifier value from the record instance itself — by defining
+     * an {@code ExtractId} as a part of the record specification for the storage.
+     *
+     * @param <R>
+     *         the type of records from which to extract the ID value
+     * @param <I>
+     *         the type of the record identifiers to retrieve
+     */
+    @Immutable
+    @FunctionalInterface
+    public interface ExtractId<R extends Message, I> extends Function<R, I> {
+
+        /**
+         * {@inheritDoc}
+         *
+         * This method differs from its parent by the fact it never returns {@code null}.
+         */
+        @Override
+        @CanIgnoreReturnValue
+        I apply(@Nullable R input);
     }
 }

@@ -29,7 +29,7 @@ package io.spine.server.delivery;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
@@ -63,11 +63,11 @@ public class CatchUpStorage extends MessageStorage<CatchUpId, CatchUp> {
     }
 
     @SuppressWarnings("ConstantConditions")     // Protobuf getters do not return {@code null}.
-    private static MessageRecordSpec<CatchUpId, CatchUp> getSpec() {
-        return new MessageRecordSpec<>(CatchUpId.class,
-                                       CatchUp.class,
-                                       CatchUp::getId,
-                                       CatchUpColumn.definitions());
+    private static RecordSpec<CatchUpId, CatchUp> getSpec() {
+        return new RecordSpec<>(CatchUpId.class,
+                                CatchUp.class,
+                                CatchUp::getId,
+                                CatchUpColumn.definitions());
     }
 
     /**

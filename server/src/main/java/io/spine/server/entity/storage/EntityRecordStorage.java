@@ -39,7 +39,7 @@ import io.spine.query.Subject;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordStorageDelegate;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
@@ -59,7 +59,7 @@ import static io.spine.server.entity.storage.ToEntityRecordQuery.transform;
  * <p>Delegates all storage operations to the underlying
  * {@link io.spine.server.storage.RecordStorage RecordStorage}. For that, creates a new
  * {@code RecordStorage} instance through the provided {@code StorageFactory} and configures
- * it with the {@linkplain MessageRecordSpec record specification} corresponding
+ * it with the {@linkplain RecordSpec record specification} corresponding
  * to the stored {@code EntityRecord}.
  *
  * @param <I>
@@ -252,7 +252,7 @@ public class EntityRecordStorage<I, S extends EntityState<I>>
      */
     @Internal
     @Override
-    public final MessageRecordSpec<I, EntityRecord> recordSpec() {
+    public final RecordSpec<I, EntityRecord> recordSpec() {
         return super.recordSpec();
     }
 

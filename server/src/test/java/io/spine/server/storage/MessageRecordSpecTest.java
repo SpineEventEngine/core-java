@@ -66,9 +66,9 @@ import static io.spine.test.entity.TaskView.Column.status;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("`MessageRecordSpec` should")
+@DisplayName("`RecordSpec` should")
 @SuppressWarnings("DuplicateStringLiteralInspection")   /* Similar tests have similar names. */
-class MessageRecordSpecTest {
+class RecordSpecTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -90,7 +90,7 @@ class MessageRecordSpecTest {
         }
 
         @SuppressWarnings("OptionalGetWithoutIsPresent" /* Checked via an assertion. */)
-        private void assertColumn(MessageRecordSpec<StgProjectId, StgProject> spec,
+        private void assertColumn(RecordSpec<StgProjectId, StgProject> spec,
                                   RecordColumn<StgProject, ?> column) {
             var found = spec.findColumn(column.name());
             assertThat(found).isPresent();
