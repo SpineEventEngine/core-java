@@ -29,6 +29,7 @@ package io.spine.server.event
 import io.kotest.matchers.shouldBe
 import io.spine.core.External
 import io.spine.server.model.Nothing
+import io.spine.server.tuple.EitherOf2
 import io.spine.test.shared.event.SomethingHappened
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -38,6 +39,13 @@ import org.junit.jupiter.api.assertThrows
 internal class PolicySpec {
 
     @Test
+    fun `do not allow adding more react methods`() {
+        assertThrows<IllegalStateException> {
+            GreedyPolicy()
+        }
+    }
+
+    @Test
     fun `allow using 'Just' in return value`() {
         val policy = object : Policy<SomethingHappened>() {
             @React
@@ -45,15 +53,24 @@ internal class PolicySpec {
                 return Just.nothing
             }
         }
-
-        policy.whenever(SomethingHappened.getDefaultInstance()) shouldBe Just.nothing
+        policy.whenever(somethingHappened) shouldBe Just.nothing
     }
 
     @Test
-    fun `do not allow adding more react methods`() {
-        assertThrows<IllegalStateException> {
-            GreedyPolicy()
+    fun `allow using 'Either' in return value`() {
+        object : Policy<SomethingHappened>() {
+            @React
+            public override fun whenever(event: SomethingHappened): EitherOf2<Nothing, Nothing> {
+                return EitherOf2.withA(nothing)
+            }
+        }.let {
+            it.whenever(somethingHappened) shouldBe EitherOf2.withA(nothing)
         }
+    }
+
+    companion object {
+        val somethingHappened = SomethingHappened.getDefaultInstance()
+        val nothing = Nothing.getDefaultInstance()
     }
 }
 

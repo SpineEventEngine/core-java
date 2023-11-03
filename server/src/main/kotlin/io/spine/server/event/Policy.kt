@@ -27,6 +27,7 @@
 package io.spine.server.event
 
 import com.google.common.collect.ImmutableSet
+import com.google.protobuf.Message
 import io.spine.base.EventMessage
 import io.spine.core.ContractFor
 import io.spine.logging.WithLogging
@@ -107,9 +108,26 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLog
 
     /**
      * Handles an event and produces some number of events in response.
+     *
+     * ### API NOTE
+     *
+     * This method returns `Iterable<Message>` instead of `Iterable<EventMessage>`,
+     * to allow implementing classes declare the return types using classes descending from
+     * [Either][io.spine.server.tuple.Either]. For example, `EitherOf2<Event1, Event2>`.
+     *
+     * `Either` implements `Iterable<Message>`. Classes extending `Either` have two or
+     * more generic parameters bounded by `Message`, not `EventMessage`.
+     * Therefore, these classes will not be accepted as return types of
+     * the overridden methods because `Iterable<EventMessage>` will not be
+     * a super type for them.
+     *
+     * Policy authors should declare return types of the overridden methods as described
+     * in the [class documentation][Policy].
+     *
+     * @see Policy
      */
     @ContractFor(handler = React::class)
-    protected abstract fun whenever(event: E): Iterable<EventMessage>
+    protected abstract fun whenever(event: E): Iterable<Message>
 
     final override fun registerWith(context: BoundedContext) {
         super.registerWith(context)
