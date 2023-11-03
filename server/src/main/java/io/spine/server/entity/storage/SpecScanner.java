@@ -34,15 +34,12 @@ import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.base.Identifier;
 import io.spine.client.ArchivedColumn;
-import io.spine.client.DeletedColumn;
-import io.spine.client.VersionColumn;
 import io.spine.query.Column;
 import io.spine.query.Column.Getter;
 import io.spine.query.EntityColumn;
 import io.spine.query.RecordColumn;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.WithLifecycle;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageRecordSpec.ExtractId;
@@ -53,7 +50,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -137,9 +133,9 @@ public final class SpecScanner {
             accumulator.add(recordColumn);
         }
 
-        accumulator.add(wrap(ArchivedColumn.instance(), WithLifecycle::isArchived));
-        accumulator.add(wrap(DeletedColumn.instance(), WithLifecycle::isDeleted));
-        accumulator.add(wrap(VersionColumn.instance(), EntityRecord::getVersion));
+        accumulator.add(EntityRecordColumn.archived);
+        accumulator.add(EntityRecordColumn.deleted);
+        accumulator.add(EntityRecordColumn.version);
 
         var result = new MessageRecordSpec<>(
                 idClass, EntityRecord.class, idFromRecord(), ImmutableSet.copyOf(accumulator)
@@ -260,12 +256,6 @@ public final class SpecScanner {
                 return (I) Identifier.unpack(input.getEntityId());
             }
         };
-    }
-
-    private static <V> RecordColumn<EntityRecord, V>
-    wrap(Column<?, V> origin, Function<EntityRecord, V> getter) {
-        var result = new RecordColumn<>(origin.name(), origin.type(), getter::apply);
-        return result;
     }
 
     /**

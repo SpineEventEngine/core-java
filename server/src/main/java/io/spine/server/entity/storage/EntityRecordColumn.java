@@ -27,7 +27,6 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.client.ArchivedColumn;
@@ -41,7 +40,6 @@ import io.spine.query.RecordColumns;
 import io.spine.server.entity.EntityRecord;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 /**
@@ -59,9 +57,8 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  *         (e.g. {@link ArchivedColumn}) and its {@code EntityRecord}-based counterpart
  *         (i.e. {@link EntityRecordColumn#archived EntityRecordColumn.archived}).
  */
-@RecordColumns(ofType = EntityRecord.class)
 @Internal
-// TODO:alex.tymchenko:2023-11-03: review the access level and usages.
+@RecordColumns(ofType = EntityRecord.class)
 public final class EntityRecordColumn {
 
     /**
@@ -113,22 +110,10 @@ public final class EntityRecordColumn {
     }
 
     /**
-     * Evaluates the columns against the passed record and returns the value of each column
-     * along with its name.
-     */
-    public static ImmutableMap<ColumnName, Object> valuesIn(EntityRecord record) {
-        checkNotNull(record);
-        ImmutableMap<ColumnName, Object> values =
-                all.stream()
-                   .collect(toImmutableMap(Column::name, c -> c.valueIn(record)));
-        return values;
-    }
-
-    /**
      * Tells whether the passed column is either {@linkplain ArchivedColumn archived}
      * or {@linkplain DeletedColumn deleted}.
      */
-    public static boolean isLifecycleColumn(Column<?, ?> column) {
+    static boolean isLifecycleColumn(Column<?, ?> column) {
         checkNotNull(column);
         var name = column.name();
         return name.equals(archived.name()) || name.equals(deleted.name());
