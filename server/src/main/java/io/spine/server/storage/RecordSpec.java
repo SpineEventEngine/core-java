@@ -139,14 +139,14 @@ public final class RecordSpec<I, R extends Message> {
     /**
      * Returns the type of the stored record.
      */
-    public final Class<R> storedType() {
+    public Class<R> storedType() {
         return storedType;
     }
 
     /**
      * Returns the type of the record identifiers.
      */
-    public final Class<I> idType() {
+    public Class<I> idType() {
         return idType;
     }
 
@@ -156,26 +156,10 @@ public final class RecordSpec<I, R extends Message> {
      * @param source
      *         the object providing the ID value
      * @return the value of the identifier
-     * @apiNote This method is made {@code public} in order to be accessible to storage
-     *         implementations provided outside of this module, such as Spine storage
-     *         factory on top of Google Datastore.
      */
     public I idValueIn(R source) {
         checkNotNull(source);
         return extractId.apply(source);
-    }
-
-    // TODO:alex.tymchenko:2023-11-03: deduplicate?
-
-    /**
-     * Extracts the identifier value from the record of a compatible type.
-     *
-     * @param record
-     *         the record containing the ID to extract
-     * @return the value of record identifier
-     */
-    public I idFromRecord(R record) {
-        return idValueIn(record);
     }
 
     /**
@@ -223,16 +207,6 @@ public final class RecordSpec<I, R extends Message> {
         return Optional.ofNullable(result);
     }
 
-    // TODO:alex.tymchenko:2023-11-03: kill?
-
-    /**
-     * Returns the type of object, serving as the original source for the stored record
-     * of type {@code R}.
-     */
-    public Class<R> sourceType() {
-        return storedType();
-    }
-
     /**
      * Finds the column in this specification by the column name.
      *
@@ -244,7 +218,7 @@ public final class RecordSpec<I, R extends Message> {
      * @throws IllegalArgumentException
      *         if the column is not found
      */
-    public final Column<?, ?> get(ColumnName name) throws IllegalArgumentException {
+    public Column<?, ?> get(ColumnName name) throws IllegalArgumentException {
         return findColumn(name)
                 .orElseThrow(() -> newIllegalArgumentException(
                         "Cannot find the column `%s` in the record specification of type `%s`.",

@@ -110,7 +110,7 @@ class RecordSpecTest {
         void returnIdValue() {
             var id = newId();
             var project = newState(id);
-            var actual = messageSpec().idFromRecord(project);
+            var actual = messageSpec().idValueIn(project);
             assertThat(actual).isEqualTo(id);
         }
     }
@@ -214,7 +214,7 @@ class RecordSpecTest {
                     status().name(), state.getStatus(),
                     dueDate().name(), state.getDueDate()
             );
-            var actual = spec.idFromRecord(record);
+            var actual = spec.idValueIn(record);
             assertThat(actual)
                     .isEqualTo(state.getId());
         }
