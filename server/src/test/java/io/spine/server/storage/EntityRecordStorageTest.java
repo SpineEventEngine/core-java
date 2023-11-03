@@ -74,7 +74,7 @@ import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newEntity
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.newRecord;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.recordWithCols;
 import static io.spine.server.storage.given.EntityRecordStorageTestEnv.recordsWithColumnsFrom;
-import static io.spine.server.storage.given.GivenStorageProject.newEntityRecord;
+import static io.spine.server.storage.given.GivenStorageProject.newEntityRecordWithCols;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.test.storage.StgProject.Status.CANCELLED;
 import static io.spine.test.storage.StgProject.Status.CANCELLED_VALUE;
@@ -495,7 +495,7 @@ public class EntityRecordStorageTest
                     new HashMap<>(bulkSize);
 
             for (var i = 0; i < bulkSize; i++) {
-                var record = newEntityRecord();
+                var record = newEntityRecordWithCols();
                 initial.put(record.id(), record);
             }
             storage.writeAll(initial.values());

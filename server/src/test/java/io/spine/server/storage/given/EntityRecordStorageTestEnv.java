@@ -160,7 +160,7 @@ public final class EntityRecordStorageTestEnv {
         return ImmutableSet.of(name(), estimateInDays(), status(), dueDate());
     }
 
-    public static MessageRecordSpec<TaskViewId, EntityRecord> spec() {
+    public static MessageRecordSpec<TaskViewId, EntityRecord> taskViewSpec() {
         return SpecScanner.scan(TaskViewProjection.class);
     }
 

@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
-import static io.spine.server.storage.given.GivenStorageProject.projectMessageSpec;
+import static io.spine.server.storage.given.GivenStorageProject.messageSpec;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.newBuilder;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.recordSubject;
 import static io.spine.testdata.Sample.messageOfType;
@@ -95,7 +95,7 @@ class RecordQueryMatcherTest {
 
     @NonNull
     private static RecordWithColumns<StgProjectId, StgProject> asRecord(StgProject state) {
-        return RecordWithColumns.create(state, projectMessageSpec());
+        return RecordWithColumns.create(state, messageSpec());
     }
 
     @Test

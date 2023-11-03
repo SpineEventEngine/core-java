@@ -47,6 +47,7 @@ import io.spine.testing.core.given.GivenVersion;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
+import static io.spine.query.RecordColumn.create;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 
@@ -132,15 +133,15 @@ public final class GivenStorageProject {
     /**
      * Returns the record specification for {@code StgProject}.
      */
-    public static MessageRecordSpec<StgProjectId, StgProject> projectMessageSpec() {
+    public static MessageRecordSpec<StgProjectId, StgProject> messageSpec() {
         return messageSpec;
     }
 
     /**
-     * Generates a new {@code StgProject} as Entity,
+     * Generates a new {@code StgProject} as an Entity state,
      * and wraps it into a {@code RecordWithColumns}.
      */
-    public static RecordWithColumns<StgProjectId, EntityRecord> newEntityRecord() {
+    public static RecordWithColumns<StgProjectId, EntityRecord> newEntityRecordWithCols() {
         var project = newState();
         var record = EntityRecord.newBuilder()
                 .setEntityId(Identifier.pack(project.getId()))
@@ -166,6 +167,9 @@ public final class GivenStorageProject {
         public static final RecordColumn<StgProject, Timestamp> due_date =
                 RecordColumn.create("due_date", Timestamp.class, StgProject::getDueDate);
 
+        public static final RecordColumn<StgProject, String>
+                status = create("status", String.class, (r) -> r.getStatus().name());
+
         public static final RecordColumn<StgProject, Any> state_as_any =
                 RecordColumn.create("state_as_any", Any.class, AnyPacker::pack);
 
@@ -176,7 +180,7 @@ public final class GivenStorageProject {
          * Returns all the column definitions.
          */
         public static Columns<StgProject> definitions() {
-            return Columns.of(name, due_date, state_as_any);
+            return Columns.of(name, due_date, status, state_as_any);
         }
     }
 }

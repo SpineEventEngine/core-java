@@ -30,6 +30,7 @@ import io.spine.server.ContextSpec;
 import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.RecordStorageUnderTest;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.given.GivenStorageProject.StgProjectColumns;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
 
@@ -39,10 +40,10 @@ import io.spine.test.storage.StgProjectId;
  * <p>While the message itself is marked as an entity state, this storage operates with it
  * like it is an ordinary message record.
  *
- * <p>This storage defines several {@linkplain StgColumn custom columns} to use in tests.
+ * <p>This storage defines several {@linkplain StgProjectColumns custom columns} to use in tests.
  *
  * @see RecordStorageDelegateTest
- * @see StgColumn
+ * @see StgProjectColumns
  */
 public class StgProjectStorage extends RecordStorageUnderTest<StgProjectId, StgProject> {
 
@@ -53,7 +54,7 @@ public class StgProjectStorage extends RecordStorageUnderTest<StgProjectId, StgP
     private static MessageRecordSpec<StgProjectId, StgProject> spec() {
         @SuppressWarnings("ConstantConditions")     // Proto getters return non-{@code null} values.
         var spec = new MessageRecordSpec<>(StgProjectId.class, StgProject.class, StgProject::getId,
-                                           StgColumn.definitions());
+                                           StgProjectColumns.definitions());
         return spec;
     }
 }
