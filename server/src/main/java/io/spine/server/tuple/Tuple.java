@@ -46,11 +46,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Abstract base for tuple classes.
- *
- * @param <M>
- *         the type of the tuple first element
  */
-public abstract class Tuple<M extends Message> implements Iterable<M>, Serializable {
+public abstract class Tuple implements Iterable<Message>, Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -86,7 +83,7 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
      * @throws IllegalArgumentException if the passed value is {@link Empty}
      */
     @CanIgnoreReturnValue
-    static <M extends Message, T extends Tuple<?>>
+    static <M extends Message, T extends Tuple>
     @Nullable M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
         if (value == null) {
             return null;
@@ -103,7 +100,7 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
 
     @CanIgnoreReturnValue
     @SuppressWarnings("ConstantConditions") /* `checkNotNull` is used by design. */
-    static <M extends Message, T extends Tuple<?>>
+    static <M extends Message, T extends Tuple>
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
         var result = checkNotEmpty(checkingClass, value);
         checkNotNull(result);
@@ -111,7 +108,7 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
     }
 
     @SafeVarargs
-    static <M extends Message, T extends Tuple<?>>
+    static <M extends Message, T extends Tuple>
     void checkAllNotNullOrEmpty(Class<T> checkingClass, M... values) {
         for (var value : values) {
             checkNotNullOrEmpty(checkingClass, value);
@@ -119,7 +116,7 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
     }
 
     @SafeVarargs
-    static <M extends Message, T extends Tuple<?>>
+    static <M extends Message, T extends Tuple>
     void checkAllNotEmpty(Class<T> checkingClass, M... values) {
         for (var value : values) {
             checkNotEmpty(checkingClass, value);
@@ -127,8 +124,8 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
     }
 
     @Override
-    public final @NonNull Iterator<M> iterator() {
-        Iterator<M> result = new ExtractingIterator<>(values);
+    public final @NonNull Iterator<Message> iterator() {
+        Iterator<Message> result = new ExtractingIterator(values);
         return result;
     }
 
@@ -158,7 +155,7 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
         if (!(obj instanceof Tuple)) {
             return false;
         }
-        var other = (Tuple<?>) obj;
+        var other = (Tuple) obj;
         return Objects.equals(this.values, other.values);
     }
 
@@ -178,12 +175,8 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
 
     /**
      * Traverses through elements obtaining a message value from them.
-     *
-     * @param <M>
-     *         the type of the messages extracted by the iterator
      */
-    private static final class ExtractingIterator<M extends Message>
-            extends UnmodifiableIterator<M> {
+    private static final class ExtractingIterator extends UnmodifiableIterator<Message> {
 
         private final Iterator<Element> source;
 
@@ -198,10 +191,9 @@ public abstract class Tuple<M extends Message> implements Iterable<M>, Serializa
         }
 
         @Override
-        public M next() {
+        public Message next() {
             var next = source.next();
-            @SuppressWarnings("unchecked")
-            var result = (M) next.toMessage();
+            var result = next.toMessage();
             return result;
         }
     }

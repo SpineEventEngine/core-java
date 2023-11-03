@@ -58,7 +58,7 @@ import static java.util.Optional.ofNullable;
  *         the type of the fourth element
  */
 public final class Quartet<A extends Message, B, C, D>
-        extends Tuple<A>
+        extends Tuple
         implements AValue<A>, BValue<B>, CValue<C>, DValue<D> {
 
     private static final long serialVersionUID = 0L;

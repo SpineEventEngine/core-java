@@ -38,7 +38,7 @@ import io.spine.server.tuple.Tuple
  *
  * @param E the type of the event.
  */
-public class Just<E : EventMessage>(event: E) : Tuple<E>(event) {
+public class Just<E : EventMessage>(event: E) : Tuple(event) {
 
     public companion object {
 

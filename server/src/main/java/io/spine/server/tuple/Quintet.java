@@ -61,8 +61,8 @@ import static java.util.Optional.ofNullable;
  *         the type of the fifth element
  */
 public final class Quintet<A extends Message, B, C, D, E>
-    extends Tuple<A>
-    implements AValue<A>, BValue<B>, CValue<C>, DValue<D>, EValue<E> {
+        extends Tuple
+        implements AValue<A>, BValue<B>, CValue<C>, DValue<D>, EValue<E> {
 
     private static final long serialVersionUID = 0L;
 

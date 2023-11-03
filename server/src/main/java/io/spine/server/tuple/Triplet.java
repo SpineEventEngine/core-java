@@ -55,7 +55,7 @@ import static java.util.Optional.ofNullable;
  *         the type of the third element
  */
 public final class Triplet<A extends Message, B, C>
-        extends Tuple<A>
+        extends Tuple
         implements AValue<A>, BValue<B>, CValue<C> {
 
     private static final long serialVersionUID = 0L;

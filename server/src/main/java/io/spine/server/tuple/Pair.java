@@ -53,7 +53,7 @@ import static java.util.Optional.ofNullable;
  *         the type of the second element
  */
 public final class Pair<A extends Message, B>
-        extends Tuple<A>
+        extends Tuple
         implements AValue<A>, BValue<B> {
 
     private static final long serialVersionUID = 0L;
