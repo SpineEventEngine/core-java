@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import static java.util.Optional.ofNullable;
  *         the type of the second element
  */
 public final class Pair<A extends Message, B>
-        extends Tuple
+        extends Tuple<A>
         implements AValue<A>, BValue<B> {
 
     private static final long serialVersionUID = 0L;

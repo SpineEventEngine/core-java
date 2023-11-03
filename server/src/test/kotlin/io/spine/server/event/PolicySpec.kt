@@ -26,48 +26,48 @@
 
 package io.spine.server.event
 
-import io.spine.base.EventMessage
+import io.kotest.matchers.shouldBe
+import io.spine.core.External
 import io.spine.server.model.Nothing
-import io.spine.server.tuple.Tuple
+import io.spine.test.shared.event.SomethingHappened
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-/**
- * A tuple of one event.
- *
- * Used when returning an `Iterable` from a handler method for better readability over
- * `Iterable<E>` or `List<E>`.
- *
- * @param E the type of the event.
- */
-public class Just<E : EventMessage>(event: E) : Tuple<E>(event) {
+@DisplayName("`Policy` should")
+internal class PolicySpec {
 
-    public companion object {
-
-        @Suppress("ConstPropertyName") // Following Java conventions.
-        private const val serialVersionUID: Long = 0L
-
-        /**
-         * The instance of `Just<Nothing>`.
-         */
-        public val nothing: Just<Nothing> by lazy {
-            Just(Nothing.getDefaultInstance())
+    @Test
+    fun `allow using 'Just' in return value`() {
+        val policy = object : Policy<SomethingHappened>() {
+            @React
+            public override fun whenever(event: SomethingHappened): Just<Nothing> {
+                return Just.nothing
+            }
         }
 
-        /**
-         * A factory method for Java.
-         *
-         * Prefer the primary constructor in Kotlin.
-         *
-         * This method is intended to be imported statically.
-         */
-        @JvmStatic
-        public fun <E : EventMessage> just(event: E): Just<E> = Just(event)
-
-        /**
-         * Obtains the instance of `Just<Noting>` for Java code.
-         *
-         * Prefer the [nothing] property of the companion object in Kotlin.
-         */
-        @JvmStatic
-        public fun nothing(): Just<Nothing> = nothing
+        policy.whenever(SomethingHappened.getDefaultInstance()) shouldBe Just.nothing
     }
+
+    @Test
+    fun `do not allow adding more react methods`() {
+        assertThrows<IllegalStateException> {
+            GreedyPolicy()
+        }
+    }
+}
+
+/**
+ * The policy which attempts to define a `@React` receptor to handle more than one
+ * event type, as required by the `Policy` contract.
+ */
+private class GreedyPolicy : Policy<Nothing>() {
+
+    @React
+    override fun whenever(@External event: Nothing): Just<Nothing> =
+        Just.nothing
+
+    @React
+    fun on(@Suppress("UNUSED_PARAMETER") e: SomethingHappened): Just<Nothing> =
+        Just.nothing
 }

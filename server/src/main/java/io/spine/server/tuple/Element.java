@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.server.model.Nothing;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -67,7 +68,11 @@ final class Element implements Serializable {
             this.type = Type.OPTIONAL;
         } else if (value instanceof GeneratedMessageV3) {
             var messageV3 = (GeneratedMessageV3) value;
-            checkNotDefault(messageV3);
+            // Treat `Nothing` as a special case, allowing its default instance
+            // so that `Just<Nothing>` is possible.
+            if (!(value instanceof Nothing)) {
+                checkNotDefault(messageV3);
+            }
             this.type = Type.MESSAGE;
         } else {
             throw newIllegalArgumentException(
@@ -82,7 +87,7 @@ final class Element implements Serializable {
      * Obtains the value of the element by its index and casts it to the type {@code <T>}.
      */
     @SuppressWarnings("TypeParameterUnusedInFormals") // See Javadoc.
-    static <T> T value(Tuple tuple, IndexOf index) {
+    static <M extends Message, T> T value(Tuple<M> tuple, IndexOf index) {
         @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
         var value = (T) tuple.get(index.value());
         return value;

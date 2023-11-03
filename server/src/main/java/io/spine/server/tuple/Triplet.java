@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import static java.util.Optional.ofNullable;
  *         the type of the third element
  */
 public final class Triplet<A extends Message, B, C>
-        extends Tuple
+        extends Tuple<A>
         implements AValue<A>, BValue<B>, CValue<C> {
 
     private static final long serialVersionUID = 0L;
@@ -134,23 +134,25 @@ public final class Triplet<A extends Message, B, C>
         return isOptionalPresent(value);
     }
 
+    @SuppressWarnings("unchecked")
     @CanIgnoreReturnValue
     private static <M extends Message> M checkNotNullOrEmpty(M value) {
         return checkNotNullOrEmpty(Triplet.class, value);
     }
 
+    @SuppressWarnings("unchecked")
     @CanIgnoreReturnValue
     private static <M extends Message> @Nullable M checkNotEmpty(@Nullable M value) {
         return checkNotEmpty(Triplet.class, value);
     }
 
-    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
-    private static void checkAllNotNullOrEmpty(Message... values) {
+    @SuppressWarnings("unchecked")
+    private static <M extends Message> void checkAllNotNullOrEmpty(M... values) {
         checkAllNotNullOrEmpty(Triplet.class, values);
     }
 
-    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
-    private static void checkAllNotEmpty(Message... values) {
+    @SuppressWarnings("unchecked")
+    private static <M extends Message> void checkAllNotEmpty(M... values) {
         checkAllNotEmpty(Triplet.class, values);
     }
 }
