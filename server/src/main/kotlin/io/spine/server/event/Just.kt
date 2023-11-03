@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@
 package io.spine.server.event
 
 import io.spine.base.EventMessage
+import io.spine.server.model.Nothing
 import io.spine.server.tuple.Tuple
 
 /**
  * A tuple of one event.
  *
- * Used when returning an iterable from a handler method for better readability over `List<E>`.
+ * Used when returning an `Iterable` from a handler method for better readability over
+ * `Iterable<E>` or `List<E>`.
  *
  * @param E the type of the event.
  */
@@ -40,7 +42,15 @@ public class Just<E : EventMessage>(event: E) : Tuple(event) {
 
     public companion object {
 
+        @Suppress("ConstPropertyName") // Following Java conventions.
         private const val serialVersionUID: Long = 0L
+
+        /**
+         * The instance of `Just<Nothing>`.
+         */
+        public val nothing: Just<Nothing> by lazy {
+            Just(Nothing.getDefaultInstance())
+        }
 
         /**
          * A factory method for Java.
@@ -51,5 +61,13 @@ public class Just<E : EventMessage>(event: E) : Tuple(event) {
          */
         @JvmStatic
         public fun <E : EventMessage> just(event: E): Just<E> = Just(event)
+
+        /**
+         * Obtains the instance of `Just<Noting>` for Java code.
+         *
+         * Prefer the [nothing] property of the companion object in Kotlin.
+         */
+        @JvmStatic
+        public fun nothing(): Just<Nothing> = nothing
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,34 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.tuple;
-
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+package io.spine.server.model
 
 /**
- * A utility for working with {@link Tuple} values.
+ * The alias for cases of naming collisions between
+ * [io.spine.server.model.Nothing] and [kotlin.Nothing].
  */
-final class Values {
+public typealias NothingHappened = Nothing
 
-    /**
-     * Prevents this utility class from instantiation.
-     */
-    private Values() {
-    }
+/**
+ * The alias for cases of naming collisions between
+ * [io.spine.server.model.Nothing] and [kotlin.Nothing].
+ */
+public typealias NoReaction = Nothing
 
-    /**
-     * If the passed {@code value} is an {@code Optional}, tells if its value is present.
-     *
-     * <p>Otherwise, returns {@code true}.
-     */
-    static boolean isOptionalPresent(Object value) {
-        checkNotNull(value);
-        if(!(value instanceof Optional)) {
-            return true;
-        }
-        var asOptional = (Optional<?>) value;
-        return asOptional.isPresent();
-    }
-}

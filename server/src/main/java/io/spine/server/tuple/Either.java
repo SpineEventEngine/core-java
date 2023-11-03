@@ -52,7 +52,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
     protected Either(Message value, int index) {
         /* We need instances of GeneratedMessageV3 as they are Serializable.
            The only known case of message class which does not descend from
-           GeneratedMessageV3 is DynamicMessage, and  Spine does not support it. */
+           GeneratedMessageV3 is DynamicMessage, and Spine SDK does not support it. */
         this.value = (GeneratedMessageV3) checkNotNull(value);
         checkArgument(index >= 0, "Index must be greater or equal zero");
         this.index = index;

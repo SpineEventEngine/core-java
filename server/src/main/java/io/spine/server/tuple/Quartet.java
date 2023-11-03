@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 
 import static io.spine.server.tuple.Element.value;
-import static io.spine.server.tuple.Values.isOptionalPresent;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -170,13 +169,13 @@ public final class Quartet<A extends Message, B, C, D>
         return checkNotEmpty(Quartet.class, value);
     }
 
-    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
-    private static void checkAllNotNullOrEmpty(Message... values) {
+    @SafeVarargs
+    private static <M extends Message> void checkAllNotNullOrEmpty(M... values) {
         checkAllNotNullOrEmpty(Quartet.class, values);
     }
 
-    @SuppressWarnings("OverloadedVarargsMethod") // to avoid repeated usage of this class name.
-    private static void checkAllNotEmpty(Message... values) {
+    @SafeVarargs
+    private static <M extends Message> void checkAllNotEmpty(M... values) {
         checkAllNotEmpty(Quartet.class, values);
     }
 }
