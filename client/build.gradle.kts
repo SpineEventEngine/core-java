@@ -24,7 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.testing.exposeTestConfiguration
 
@@ -38,6 +41,7 @@ dependencies {
     api(Grpc.protobuf)
     api(project(":core"))
 
+    implementation(Grpc.inProcess)
     // This dependency is needed for Logging contexts to work.
     // Since we depend on gRPC, we can use the implementation of the context based on gRPC.
     implementation(Spine.Logging.grpcContext)

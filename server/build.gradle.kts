@@ -48,6 +48,8 @@ dependencies {
      */
     api(Validation.runtime)
 
+    implementation(Grpc.inProcess)
+
     with(AutoService) {
         testAnnotationProcessor(processor)
         testCompileOnly(annotations)

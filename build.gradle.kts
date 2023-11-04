@@ -29,7 +29,9 @@
 import Build_gradle.Subproject
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Grpc
+import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Spine
 import io.spine.internal.dependency.Validation
 import io.spine.internal.gradle.VersionWriter
@@ -61,7 +63,9 @@ buildscript {
             exclude(group = "io.spine", module = "spine-logging-backend")
             resolutionStrategy {
                 val spine = io.spine.internal.dependency.Spine
+                @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
+                    io.spine.internal.dependency.Kotlin.stdLibJdk7,
                     spine.base,
                     spine.toolBase,
                     spine.server,
@@ -326,7 +330,10 @@ fun Subproject.forceConfigurations() {
 
             resolutionStrategy {
 
+                @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
+                    Kotlin.stdLibJdk7,
+                    Guava.lib,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
                        for the gRPC plugin.

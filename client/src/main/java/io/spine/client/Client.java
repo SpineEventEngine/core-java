@@ -150,7 +150,8 @@ public final class Client implements AutoCloseable {
     }
 
     /**
-     * Creates a client which will be connected to the in-process server with the passed name.
+     * Creates a builder for the client which will be connected to the in-process
+     * server with the given name.
      *
      * <p>The client is fully-featured, high performance, and is useful in testing.
      *
@@ -361,10 +362,10 @@ public final class Client implements AutoCloseable {
         }
 
         private Builder(String processServerName) {
-            this(channelForTesting(processServerName));
+            this(inprocessChannel(processServerName));
         }
 
-        private static ManagedChannel channelForTesting(String serverName) {
+        private static ManagedChannel inprocessChannel(String serverName) {
             var result = InProcessChannelBuilder.forName(serverName)
                     .directExecutor()
                     .build();
@@ -393,7 +394,7 @@ public final class Client implements AutoCloseable {
         /**
          * Assigns the ID of the user for performing requests on behalf of non-logged in user.
          *
-         * <p>If the not set directly, the value {@code "guest"} will be used.
+         * <p>If is not set directly, the value {@code "guest"} will be used.
          *
          * @param guestUser
          *         non-null and non-default value

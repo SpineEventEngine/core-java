@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Spine
 import io.spine.internal.dependency.Validation
 import io.spine.internal.gradle.testing.exposeTestConfiguration
