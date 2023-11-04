@@ -27,6 +27,7 @@
 /**
  *  The version of this library.
  *
- * For versions of Spine-based dependencies, please see [io.spine.internal.dependency.Spine].
+ * For versions of Spine-based dependencies,
+ * please see [io.spine.internal.dependency.Spine].
  */
 val versionToPublish: String by extra("2.0.0-SNAPSHOT.173")
