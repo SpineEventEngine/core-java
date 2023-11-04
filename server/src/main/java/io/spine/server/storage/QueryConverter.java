@@ -87,7 +87,7 @@ public final class QueryConverter {
         checkNotNull(format);
 
         var idType = spec.idType();
-        var recordType = spec.storedType();
+        var recordType = spec.recordType();
         var builder = RecordQuery.newBuilder(idType, recordType);
 
         identifiers(builder, filters.getIdFilter());
@@ -120,7 +120,7 @@ public final class QueryConverter {
         checkNotNull(format);
 
         var idType = spec.idType();
-        var recordType = spec.storedType();
+        var recordType = spec.recordType();
         var builder = RecordQuery.newBuilder(idType, recordType);
         fieldMask(builder, format);
         orderByAndLimit(builder, spec, format);
@@ -335,7 +335,7 @@ public final class QueryConverter {
         var maybeColumn = spec.findColumn(columnName);
         checkArgument(maybeColumn.isPresent(),
                       "Cannot find the column `%s` for the type `%s`.",
-                      columnName, spec.storedType());
+                      columnName, spec.recordType());
         var column = maybeColumn.get();
         return column;
     }

@@ -54,7 +54,7 @@ public final class ModelTestStorageFactory implements StorageFactory {
             RecordSpec<I, R> recordSpec
     ) {
         var storage = delegate.createRecordStorage(context, recordSpec);
-        if (recordSpec.storedType().equals(InboxMessage.class)) {
+        if (recordSpec.recordType().equals(InboxMessage.class)) {
             return new NeverForgettingStorage<>(context, storage);
         }
         return storage;

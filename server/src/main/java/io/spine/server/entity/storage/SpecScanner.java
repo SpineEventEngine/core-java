@@ -76,7 +76,6 @@ import static java.util.Objects.requireNonNull;
  *         parameters code-generated for each {@code EntityColumn}.
  */
 @Internal
-@SuppressWarnings("Immutable") //// TODO:alex.tymchenko:2023-10-28: address!
 public final class SpecScanner {
 
     /**
@@ -138,7 +137,11 @@ public final class SpecScanner {
         accumulator.add(EntityRecordColumn.version);
 
         var result = new RecordSpec<>(
-                idClass, EntityRecord.class, idFromRecord(), ImmutableSet.copyOf(accumulator)
+                idClass,
+                EntityRecord.class,
+                stateClass,
+                idFromRecord(),
+                ImmutableSet.copyOf(accumulator)
         );
         return result;
     }
@@ -205,8 +208,9 @@ public final class SpecScanner {
      * such as determining the column values.
      *
      * @param <I>
-     *         type of entit
+     *         type of entity identifier
      * @param <S>
+     *         type of entity state
      */
     private static final class MemoizingUnpacker<I, S extends EntityState<I>> {
 
@@ -229,7 +233,8 @@ public final class SpecScanner {
         }
     }
 
-    @SuppressWarnings("ReturnOfNull" /* By design. */)
+    @SuppressWarnings({"ReturnOfNull" /* By design. */,
+            "Immutable" /* Unpacker and state column are effectively immutable for given state. */})
     private static <I, S extends EntityState<I>>
     Getter<EntityRecord, Object> getter(Column<S, ?> stateColumn,
                                         MemoizingUnpacker<I, S> unpacker) {

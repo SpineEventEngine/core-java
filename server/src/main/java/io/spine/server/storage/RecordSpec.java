@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
@@ -68,13 +69,23 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @param <R>
  *         the type of the stored record
  */
-@SPI
 public final class RecordSpec<I, R extends Message> {
 
     /**
      * Type of stored record.
      */
-    private final Class<R> storedType;
+    private final Class<R> recordType;
+
+    /**
+     * Type of origin Proto message, which served as a source
+     * prior to potential transforming to a record of {@code recordType}.
+     *
+     * <p>If this {@code RecordSpec} describes a storage configuration
+     * of {@code EntityRecord}, this field is a type of corresponding Entity state.
+     *
+     * <p>In all other cases so far, this value equals to {@code recordType}.
+     */
+    private final Class<? extends Message> sourceType;
 
     /**
      * Type of record identifier.
@@ -98,6 +109,40 @@ public final class RecordSpec<I, R extends Message> {
      *         the type of the record identifier
      * @param recordType
      *         the type of the record
+     * @param sourceType
+     *         the type of origin Proto message, which served as a source
+     *         prior to potential transforming to a record of {@code recordType}
+     * @param extractId
+     *         a method object to extract the value of an identifier given an instance of a record
+     * @param columns
+     *         the definitions of the columns to store along with the record
+     * @apiNote This ctor is internal to framework, and used to create a record
+     *         specification for Entity states stored as {@code EntityRecord}s.
+     */
+    @Internal
+    public RecordSpec(Class<I> idType,
+                      Class<R> recordType,
+                      Class<? extends Message> sourceType,
+                      ExtractId<R, I> extractId,
+                      Iterable<RecordColumn<R, ?>> columns) {
+        this.idType = checkNotNull(idType);
+        this.recordType = checkNotNull(recordType);
+        this.sourceType = checkNotNull(sourceType);
+        this.extractId = checkNotNull(extractId);
+        checkNotNull(columns);
+        this.columns =
+                stream(columns).collect(
+                        toImmutableMap(RecordColumn::name, (c) -> c)
+                );
+    }
+
+    /**
+     * Creates a new record specification listing the columns to store along with the record.
+     *
+     * @param idType
+     *         the type of the record identifier
+     * @param recordType
+     *         the type of the record
      * @param extractId
      *         a method object to extract the value of an identifier given an instance of a record
      * @param columns
@@ -107,14 +152,7 @@ public final class RecordSpec<I, R extends Message> {
                       Class<R> recordType,
                       ExtractId<R, I> extractId,
                       Iterable<RecordColumn<R, ?>> columns) {
-        this.idType = checkNotNull(idType);
-        this.storedType = checkNotNull(recordType);
-        this.extractId = checkNotNull(extractId);
-        checkNotNull(columns);
-        this.columns =
-                stream(columns).collect(
-                        toImmutableMap(RecordColumn::name, (c) -> c)
-                );
+        this(idType, recordType, recordType, extractId, columns);
     }
 
     /**
@@ -139,8 +177,19 @@ public final class RecordSpec<I, R extends Message> {
     /**
      * Returns the type of the stored record.
      */
-    public Class<R> storedType() {
-        return storedType;
+    public Class<R> recordType() {
+        return recordType;
+    }
+
+    /**
+     * Returns the type of origin Proto message, which served as a source
+     * prior to potential transforming to a record of {@linkplain #recordType() record type}.
+     *
+     * <p>In case if {@code recordType()} is {@code EntityRecord},
+     * this method returns the type of Entity state.
+     */
+    public Class<? extends Message> sourceType() {
+        return sourceType;
     }
 
     /**
@@ -222,14 +271,14 @@ public final class RecordSpec<I, R extends Message> {
         return findColumn(name)
                 .orElseThrow(() -> newIllegalArgumentException(
                         "Cannot find the column `%s` in the record specification of type `%s`.",
-                        name, storedType));
+                        name, recordType));
     }
 
     /**
      * A method object to extract the value of a record identifier given an instance of a record.
      *
      * <p>Once some storage is passed a record to store, the value of the record identifier has
-     * to be determined. To avoid passing the ID value for each record, one defines an way
+     * to be determined. To avoid passing the ID value for each record, one defines a way
      * to obtain the identifier value from the record instance itself — by defining
      * an {@code ExtractId} as a part of the record specification for the storage.
      *

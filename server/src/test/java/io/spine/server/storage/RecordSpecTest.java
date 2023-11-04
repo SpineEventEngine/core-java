@@ -120,8 +120,16 @@ class RecordSpecTest {
     class WithEntityRecord {
 
         @Test
+        @DisplayName("return the type of Entity state")
+        void typeOfEntityState() {
+            var actual = taskViewSpec().sourceType();
+            assertThat(actual)
+                    .isEqualTo(TaskView.class);
+        }
+
+        @Test
         @DisplayName("return all definitions of the columns")
-        void returnAllColumns() {
+        void allColumns() {
             var columns = taskViewSpec().columns();
             var actualNames = toNames(columns);
 
@@ -144,7 +152,7 @@ class RecordSpecTest {
 
         @Test
         @DisplayName("return the number of columns")
-        void returnColumns() {
+        void countColumns() {
             var lifecycleColumnCount = EntityRecordColumn.names()
                                                          .size();
             var protoColumnCount = 4; // See `task_view.proto`.
@@ -186,7 +194,7 @@ class RecordSpecTest {
 
         @Test
         @DisplayName("return empty `Optional` when searching for a non-existent column")
-        void returnEmptyOptionalForNonExistent() {
+        void emptyOptionalForMissingColumn() {
             var nonExistent = ColumnName.of("non-existent-column");
             var result = taskViewSpec().findColumn(nonExistent);
 
