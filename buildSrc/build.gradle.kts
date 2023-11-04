@@ -34,8 +34,12 @@ plugins {
     java
     groovy
     `kotlin-dsl`
-    val licenseReportVersion = "2.1"
-    id("com.github.jk1.dependency-license-report").version(licenseReportVersion)
+
+    // https://github.com/jk1/Gradle-License-Report/releases
+    id("com.github.jk1.dependency-license-report").version("2.1")
+
+    // https://github.com/johnrengelman/shadow/releases
+    id("com.github.johnrengelman.shadow").version("7.1.2")
 }
 
 repositories {
