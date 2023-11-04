@@ -70,6 +70,7 @@ buildscript {
                     spine.toolBase,
                     spine.server,
                     io.spine.internal.dependency.Spine.Logging.lib,
+                    io.spine.internal.dependency.Spine.Logging.middleware,
                     io.spine.internal.dependency.Spine.Logging.floggerApi,
                     io.spine.internal.dependency.Validation.runtime,
                 )
@@ -347,6 +348,7 @@ fun Subproject.forceConfigurations() {
                     Validation.runtime,
                     Spine.time,
                     Spine.Logging.lib,
+                    Spine.Logging.middleware,
                     Spine.Logging.floggerApi,
                     Spine.baseTypes,
                     Spine.change,

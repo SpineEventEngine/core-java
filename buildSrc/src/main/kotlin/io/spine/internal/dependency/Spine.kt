@@ -59,7 +59,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/logging">spine-logging</a>
          */
-        const val logging = "2.0.0-SNAPSHOT.232"
+        const val logging = "2.0.0-SNAPSHOT.233"
 
         /**
          * The version of [Spine.testlib].
@@ -75,7 +75,7 @@ object Spine {
          * @see [Spine.CoreJava.server]
          * @see <a href="https://github.com/SpineEventEngine/core-java">core-java</a>
          */
-        const val core = "2.0.0-SNAPSHOT.159"
+        const val core = "2.0.0-SNAPSHOT.171"
 
         /**
          * The version of [Spine.modelCompiler].
@@ -173,7 +173,7 @@ object Spine {
         // Transitive dependencies.
         // Make `public` and use them to force a version in a particular repository, if needed.
         internal const val julBackend = "$group:spine-logging-jul-backend:$version"
-        internal const val middleware = "$group:spine-logging-middleware:$version"
+        const val middleware = "$group:spine-logging-middleware:$version"
         internal const val platformGenerator = "$group:spine-logging-platform-generator:$version"
         internal const val jvmDefaultPlatform = "$group:spine-logging-jvm-default-platform:$version"
 
