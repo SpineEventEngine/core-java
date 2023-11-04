@@ -24,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Spine
 import io.spine.internal.dependency.Validation
 import io.spine.internal.gradle.testing.exposeTestConfiguration
@@ -53,7 +52,7 @@ modelCompiler {
                 markFieldsAs("io.spine.core.EventField")
             }
 
-            // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
+            // Enable the strongly typed fields generation for `spine.core.EventContext` to allow
             // creation of typed event filters based on event context.
             forMessage("spine.core.EventContext") {
                 markFieldsAs("io.spine.core.EventContextField")

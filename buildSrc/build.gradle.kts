@@ -52,8 +52,18 @@ repositories {
  */
 val jacksonVersion = "2.15.3"
 
-val googleAuthToolVersion = "2.1.2"
+/**
+ * The version of Google Artifact Registry used by `buildSrc`.
+ *
+ * The version `2.1.5` is the latest before `2.2.0`, which introduces breaking changes.
+ *
+ * @see <a href="https://mvnrepository.com/artifact/com.google.cloud.artifactregistry/artifactregistry-auth-common">
+ *     Google Artifact Registry at Maven</a>
+ */
+val googleAuthToolVersion = "2.1.5"
+
 val licenseReportVersion = "2.1"
+
 val grGitVersion = "4.1.1"
 
 /**
@@ -148,7 +158,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
-    implementation("com.google.cloud.artifactregistry:artifactregistry-auth-common:$googleAuthToolVersion") {
+    implementation(
+        "com.google.cloud.artifactregistry:artifactregistry-auth-common:$googleAuthToolVersion"
+    ) {
         exclude(group = "com.google.guava")
     }
     implementation("com.google.guava:guava:$guavaVersion")

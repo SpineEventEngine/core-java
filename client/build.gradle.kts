@@ -24,10 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.testing.exposeTestConfiguration
 
