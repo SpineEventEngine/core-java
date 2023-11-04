@@ -27,7 +27,6 @@
 package io.spine.server.migration.mirror.given;
 
 import io.spine.environment.Tests;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.storage.EntityRecordStorage;
 import io.spine.server.migration.mirror.MirrorStorage;
@@ -54,10 +53,7 @@ public final class MirrorMigrationTestEnv {
         ServerEnvironment.when(Tests.class)
                          .use(PreparedStorageFactory.with(entityRecordStorage));
 
-        var context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(ParcelAgg.class)
-        );
+        var context = BlackBox.singleTenantWith(ParcelAgg.class);
         var client = context.clients()
                             .withMatchingTenant()
                             .asGuest();

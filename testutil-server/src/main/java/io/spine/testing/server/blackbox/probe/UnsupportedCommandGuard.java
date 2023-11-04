@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.testing.server.blackbox.probe;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
@@ -35,6 +35,7 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
+import io.spine.testing.server.blackbox.BlackBox;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND_VALUE;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.server.bus;
 
-import io.spine.core.Event;
-import io.spine.core.EventId;
-import io.spine.server.type.EventEnvelope;
+import io.spine.annotation.Internal;
+import io.spine.server.type.MessageEnvelope;
+import io.spine.type.MessageClass;
 
 /**
- * Remembers events posted to an Event Bus.
+ * A dispatcher which passes the responsibilities to its {@linkplain #delegate() delegate}.
+ *
+ * @param <C>
+ *         the type of the message class
+ * @param <E>
+ *         the type of the message envelope
+ * @see DispatcherDelegate
  */
-final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
+@Internal
+public interface DelegatingDispatcher<C extends MessageClass<?>,
+                                      E extends MessageEnvelope<?, ?, ?>>
+        extends MessageDispatcher<C, E> {
+
+    /**
+     * Obtains the dispatcher to which the messages should be delegated.
+     */
+    DispatcherDelegate<C, E> delegate();
 }

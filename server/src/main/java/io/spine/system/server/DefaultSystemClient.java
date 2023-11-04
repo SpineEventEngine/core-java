@@ -63,7 +63,7 @@ final class DefaultSystemClient implements SystemClient {
     }
 
     @Override
-    public void closeSystemContext() throws Exception {
+    public void closeSystemContext() {
         context.close();
     }
 

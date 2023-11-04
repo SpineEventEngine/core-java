@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox;
+package io.spine.server
+
+import io.spine.base.EntityState
+import io.spine.server.entity.Entity
 
 /**
- * Configures the behavior of the {@link BlackBox} on handling runtime exceptions
- * thrown from the handler methods.
+ * Tells if the bounded context has entities of the given type.
  */
-enum HandlerFailureTolerance {
+public inline fun <reified E: Entity<*, *>> BoundedContext.hasEntitiesOfType(): Boolean =
+    hasEntitiesOfType(E::class.java)
 
-    /**
-     * Identifies that exceptions must be only logged.
-     */
-    LOG,
-
-    /**
-     * Identifies that exceptions must be raised and tests must be failed.
-     */
-    RAISE_AND_FAIL
-}
+/**
+ * Tells if the bounded context has entities with the given state type.
+ */
+public inline fun <reified S: EntityState<*>> BoundedContext.hasEntitiesWithState(): Boolean =
+    hasEntitiesWithState(S::class.java)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,34 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.tuple;
+package io.spine.testing.server.blackbox.probe;
 
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.server.type.EventEnvelope;
 
 /**
- * A utility for working with {@link Tuple} values.
+ * Remembers events posted to an Event Bus.
  */
-final class Values {
-
-    /**
-     * Prevents this utility class from instantiation.
-     */
-    private Values() {
-    }
-
-    /**
-     * If the passed {@code value} is an {@code Optional}, tells if its value is present.
-     *
-     * <p>Otherwise, returns {@code true}.
-     */
-    static boolean isOptionalPresent(Object value) {
-        checkNotNull(value);
-        if(!(value instanceof Optional)) {
-            return true;
-        }
-        var asOptional = (Optional<?>) value;
-        return asOptional.isPresent();
-    }
+public final class EventCollector extends MessageCollector<EventId, Event, EventEnvelope> {
 }

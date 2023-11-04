@@ -27,7 +27,6 @@
 package io.spine.server.log;
 
 import io.spine.core.UserId;
-import io.spine.server.BoundedContextBuilder;
 import io.spine.server.log.given.Books;
 import io.spine.server.log.given.CardAggregate;
 import io.spine.testing.core.given.GivenUserId;
@@ -108,10 +107,7 @@ class AbstractEntityLoggingTest extends LoggingTest {
     }
 
     private static BlackBox context() {
-        return BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(CardAggregate.class)
-        );
+        return BlackBox.singleTenantWith(CardAggregate.class);
     }
 
     private static BorrowBooks borrowBooks(UserId reader) {

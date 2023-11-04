@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import io.spine.core.Events;
 import io.spine.core.MessageId;
 import io.spine.core.UserId;
 import io.spine.protobuf.TypeConverter;
-import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.given.groups.GroupId;
@@ -83,26 +82,26 @@ public class ProjectionEndToEndTest {
         var firstTaskAdded = GivenEventMessage.taskAdded();
         var secondTaskAdded = GivenEventMessage.taskAdded();
         var producerId = created.getProjectId();
-        var context = BlackBox.from(
-                BoundedContextBuilder.assumingTests()
-                                     .add(new EntitySubscriberProjection.Repository())
-                                     .add(new TestProjection.Repository())
-        );
-
-        context.receivesEventsProducedBy(producerId,
-                                         created,
-                                         firstTaskAdded,
-                                         secondTaskAdded);
-
-        context.assertState(
-                producerId,
-                ProjectTaskNames.newBuilder()
-                        .setProjectId(producerId)
-                        .setProjectName(created.getName())
-                        .addTaskName(firstTaskAdded.getTask().getTitle())
-                        .addTaskName(secondTaskAdded.getTask().getTitle())
-                        .build()
-        );
+        try (var context = BlackBox.singleTenantWith(
+                new EntitySubscriberProjection.Repository(),
+                new TestProjection.Repository())
+        ) {
+            context.receivesEventsProducedBy(producerId,
+                                             created,
+                                             firstTaskAdded,
+                                             secondTaskAdded);
+            context.assertState(
+                    producerId,
+                    ProjectTaskNames.newBuilder()
+                            .setProjectId(producerId)
+                            .setProjectName(created.getName())
+                            .addTaskName(firstTaskAdded.getTask()
+                                                       .getTitle())
+                            .addTaskName(secondTaskAdded.getTask()
+                                                        .getTitle())
+                            .build()
+            );
+        }
     }
 
     @Test
@@ -110,14 +109,8 @@ public class ProjectionEndToEndTest {
     void receiveExternal() {
         var established = GivenEventMessage.organizationEstablished();
 
-        var sender = BlackBox.from(
-                BoundedContext.singleTenant("Organizations")
-                              .add(new OrganizationProjection.Repository())
-        );
-        var receiver = BlackBox.from(
-                BoundedContext.singleTenant("Groups")
-                .add(new GroupNameProjection.Repository())
-        );
+        var sender = BlackBox.singleTenant("Organizations", new OrganizationProjection.Repository());
+        var receiver = BlackBox.singleTenant("Groups", new GroupNameProjection.Repository());
 
         var producerId = established.getId();
         sender.receivesEventsProducedBy(producerId, established);
@@ -134,8 +127,7 @@ public class ProjectionEndToEndTest {
 
     @Test
     @DisplayName("receive entity state updates along with system event context")
-    @SuppressWarnings("OverlyCoupledMethod")
-    void receiveEntityStateUpdatesAndEventContext() throws Exception {
+    void receiveEntityStateUpdatesAndEventContext() {
         var repository = new GroupProjection.Repository();
         var groups = BoundedContextBuilder.assumingTests().build();
         groups.internalAccess()

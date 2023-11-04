@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,15 +107,17 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return result;
     }
 
-    static <T extends Tuple>
-    void checkAllNotNullOrEmpty(Class<T> checkingClass, Message... values) {
+    @SafeVarargs
+    static <M extends Message, T extends Tuple>
+    void checkAllNotNullOrEmpty(Class<T> checkingClass, M... values) {
         for (var value : values) {
             checkNotNullOrEmpty(checkingClass, value);
         }
     }
 
-    static <T extends Tuple>
-    void checkAllNotEmpty(Class<T> checkingClass, Message... values) {
+    @SafeVarargs
+    static <M extends Message, T extends Tuple>
+    void checkAllNotEmpty(Class<T> checkingClass, M... values) {
         for (var value : values) {
             checkNotEmpty(checkingClass, value);
         }
@@ -155,6 +157,20 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         }
         var other = (Tuple) obj;
         return Objects.equals(this.values, other.values);
+    }
+
+    /**
+     * If the passed {@code value} is an {@code Optional}, tells if its value is present.
+     *
+     * <p>Otherwise, returns {@code true}.
+     */
+    static boolean isOptionalPresent(Object value) {
+        checkNotNull(value);
+        if(!(value instanceof Optional)) {
+            return true;
+        }
+        var asOptional = (Optional<?>) value;
+        return asOptional.isPresent();
     }
 
     /**

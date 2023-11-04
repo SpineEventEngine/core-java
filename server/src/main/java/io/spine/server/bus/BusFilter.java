@@ -123,7 +123,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * <p>By default, performs no action.
      */
     @Override
-    default void close() throws Exception {
+    default void close() {
         // NoOp by default.
     }
 }

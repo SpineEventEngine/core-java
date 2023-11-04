@@ -26,6 +26,7 @@
 
 package com.example;
 
+import io.spine.server.BoundedContext;
 import io.spine.server.security.GivenRestrictedApi;
 import io.spine.server.security.Security;
 
@@ -41,5 +42,9 @@ public final class ForeignClass {
 
     public static void attemptToCallRestrictedApi() {
         GivenRestrictedApi.guardedMethod();
+    }
+
+    public static void callInternalOf(BoundedContext context) {
+        context.internalAccess();
     }
 }

@@ -82,7 +82,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 public final class ImportBus
         extends UnicastBus<Event, EventEnvelope, EventClass, EventImportDispatcher<?>> {
 
-    private final ImportValidator validator = new ImportValidator();
+    private static final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
     private final TenantIndex tenantIndex;
 
@@ -164,7 +164,6 @@ public final class ImportBus
     private static final class Registry
             extends DispatcherRegistry<EventClass, EventEnvelope, EventImportDispatcher<?>> {
 
-        @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
         protected Optional<EventImportDispatcher<?>> dispatcherOf(EventEnvelope event) {
             return super.dispatcherOf(event);

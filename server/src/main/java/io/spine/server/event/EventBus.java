@@ -258,7 +258,7 @@ public final class EventBus
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         super.close();
         eventStore().close();
     }

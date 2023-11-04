@@ -35,7 +35,7 @@ import io.spine.type.MessageClass;
  * A dispatcher of a message.
  *
  * @param <C>
- *         the type of class of the dispatched messages
+ *         the type of message class of dispatched messages
  * @param <E>
  *         the type of the message envelopes
  */

@@ -120,7 +120,7 @@ final class ConfigExchange extends SingleChannelExchange implements AutoCloseabl
      * Bounded Context.
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         observers.forEach(ObserveWantedEvents::close);
         notifyTypesChanged();
     }
