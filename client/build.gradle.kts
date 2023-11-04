@@ -37,6 +37,7 @@ dependencies {
     api(Grpc.stub)
     api(Grpc.protobuf)
     api(project(":core"))
+    api(Spine.reflect)
 
     implementation(Grpc.inProcess)
     // This dependency is needed for Logging contexts to work.
