@@ -38,5 +38,5 @@ object CheckStyle {
      * The version to be used in the project.
      * @see <a href="https://checkstyle.sourceforge.io/releasenotes.html">Checkstyle</a>
      */
-    const val version = "10.3.4"
+    const val version = "10.11.0"
 }
