@@ -36,7 +36,11 @@ package io.spine.internal.dependency
 object CheckStyle {
     /**
      * The version to be used in the project.
+     *
+     * `10.12.1` is the last version in `10.12.0`, which does not introduce
+     * capability conflict over `google-collections` with Guava.
+     *
      * @see <a href="https://checkstyle.sourceforge.io/releasenotes.html">Checkstyle</a>
      */
-    const val version = "10.11.0"
+    const val version = "10.12.1"
 }
