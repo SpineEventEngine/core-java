@@ -57,10 +57,10 @@ val licenseReportVersion = "2.1"
 val grGitVersion = "4.1.1"
 
 /**
- * The version of the Kotlin Gradle plugin.
+ * The version of the Kotlin Gradle plugin and Kotlin binaries used by the build process.
  *
- * Please check that this value matches one defined in
- *  [io.spine.internal.dependency.Kotlin.version].
+ * This version may change from the [version of Kotlin][io.spine.internal.dependency.Kotlin.version]
+ * used by the project.
  */
 val kotlinVersion = "1.8.22"
 
