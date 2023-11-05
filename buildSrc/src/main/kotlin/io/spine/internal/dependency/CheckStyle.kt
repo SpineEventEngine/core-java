@@ -26,9 +26,21 @@
 
 package io.spine.internal.dependency
 
-// https://checkstyle.sourceforge.io/
-// See `io.spine.internal.gradle.checkstyle.CheckStyleConfig`.
+/**
+ * Dependencies on Checkstyle Java linter.
+ *
+ * @see <a href="https://checkstyle.sourceforge.io/">Checkstyle</a>
+ * @see [io.spine.internal.gradle.checkstyle.CheckStyleConfig]
+ */
 @Suppress("unused", "ConstPropertyName")
 object CheckStyle {
-    const val version = "10.3.4"
+    /**
+     * The version to be used in the project.
+     *
+     * `10.12.1` is the last version in `10.12.0`, which does not introduce
+     * capability conflict over `google-collections` with Guava.
+     *
+     * @see <a href="https://checkstyle.sourceforge.io/releasenotes.html">Checkstyle</a>
+     */
+    const val version = "10.12.1"
 }

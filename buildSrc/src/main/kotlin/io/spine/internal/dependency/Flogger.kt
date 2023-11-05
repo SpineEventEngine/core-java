@@ -27,6 +27,7 @@
 package io.spine.internal.dependency
 
 // https://github.com/google/flogger
+@Deprecated("Please use Spine Logging library instead.")
 @Suppress("unused", "ConstPropertyName")
 object Flogger {
     internal const val version = "0.7.4"

@@ -52,7 +52,7 @@ modelCompiler {
                 markFieldsAs("io.spine.core.EventField")
             }
 
-            // Enable the strongly-typed fields generation for `spine.core.EventContext` to allow
+            // Enable the strongly typed fields generation for `spine.core.EventContext` to allow
             // creation of typed event filters based on event context.
             forMessage("spine.core.EventContext") {
                 markFieldsAs("io.spine.core.EventContextField")

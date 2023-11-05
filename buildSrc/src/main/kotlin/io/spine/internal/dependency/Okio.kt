@@ -27,13 +27,12 @@
 package io.spine.internal.dependency
 
 /**
- * Okio is a transitive dependency which we don't use directly.
- * We `force` it in [forceVersions] (see `DependencyResolution.kt`).
+ * Okio is a transitive dependency, which we don't use directly.
+ *
+ * https://github.com/square/okio/tags
  */
 @Suppress("unused", "ConstPropertyName")
 object Okio {
-
-    // This is the last version before next major.
-    private const val version = "1.17.5"
+    private const val version = "3.6.0"
     const val lib = "com.squareup.okio:okio:${version}"
 }

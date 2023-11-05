@@ -31,6 +31,7 @@ package io.spine.internal.dependency
  *
  * [AssertK](https://github.com/willowtreeapps/assertk)
  */
+@Deprecated("Please use Kotest assertions instead.")
 @Suppress("unused", "ConstPropertyName")
 object AssertK {
     private const val version = "0.26.1"

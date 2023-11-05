@@ -28,14 +28,18 @@ package io.spine.internal.dependency
 
 // https://github.com/protocolbuffers/protobuf
 @Suppress(
-    "MemberVisibilityCanBePrivate" /* used directly from outside */,
-    "ConstPropertyName"
+    "MemberVisibilityCanBePrivate" /* used directly from the outside */,
+    "ConstPropertyName" /* https://bit.ly/kotlin-prop-names */
 )
 object Protobuf {
     private const val group = "com.google.protobuf"
-    const val version       = "3.24.4"
+    const val version       = "3.25.0"
+    /**
+     * The Java library containing proto definitions of Google Protobuf.
+     */
+    const val protoSrcLib = "${group}:protobuf-java:${version}"
     val libs = listOf(
-        "${group}:protobuf-java:${version}",
+        protoSrcLib,
         "${group}:protobuf-java-util:${version}",
         "${group}:protobuf-kotlin:${version}"
     )
@@ -45,7 +49,7 @@ object Protobuf {
     object GradlePlugin {
         /**
          * The version of this plugin is already specified in `buildSrc/build.gradle.kts` file.
-         * Thus, when applying the plugin in projects build files, only the [id] should be used.
+         * Thus, when applying the plugin to projects build files, only the [id] should be used.
          *
          * When changing the version, also change the version used in the `build.gradle.kts`.
          */

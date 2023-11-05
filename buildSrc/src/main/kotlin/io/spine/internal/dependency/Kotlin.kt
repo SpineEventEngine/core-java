@@ -35,15 +35,15 @@ object Kotlin {
      * When changing the version, also change the version used in the `buildSrc/build.gradle.kts`.
      */
     @Suppress("MemberVisibilityCanBePrivate") // used directly from outside
-    const val version = "1.9.0"
+    const val version = "1.9.20"
 
     /**
      * The version of the JetBrains annotations library, which is a transitive
      * dependency for us via Kotlin libraries.
      *
-     * https://github.com/JetBrains/java-annotations
+     * @see <a href="https://github.com/JetBrains/java-annotations">Java Annotations</a>
      */
-    private const val annotationsVersion = "23.0.0"
+    private const val annotationsVersion = "24.0.1"
 
     private const val group = "org.jetbrains.kotlin"
 

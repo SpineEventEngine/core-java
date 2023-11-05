@@ -33,6 +33,7 @@ import io.spine.core.ContractFor
 import io.spine.logging.WithLogging
 import io.spine.server.BoundedContext
 import io.spine.server.type.EventClass
+import io.spine.string.joinBackticked
 
 /**
  * A policy converts <em>one</em> event into zero to many other events.
@@ -151,7 +152,7 @@ public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLog
         check(classes.size == 1) {
             "A policy should handle only one event." +
                     " `${javaClass.name}` attempts to handle ${classes.size}:" +
-                    " [${classes.joinToString(separator = "`, `", prefix = "`", postfix = "`")}]."
+                    " [${classes.joinBackticked()}]."
         }
     }
 }

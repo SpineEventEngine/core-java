@@ -28,8 +28,8 @@ package io.spine.internal.dependency
 
 @Suppress("unused", "ConstPropertyName")
 object Netty {
-    // https://github.com/netty/netty/releases
-    private const val version = "4.1.96.Final"
+    // https://github.com/netty/netty/tags
+    private const val version = "4.1.100.Final"
     const val common = "io.netty:netty-common:${version}"
     const val buffer = "io.netty:netty-buffer:${version}"
     const val transport = "io.netty:netty-transport:${version}"
