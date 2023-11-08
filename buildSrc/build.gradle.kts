@@ -34,8 +34,12 @@ plugins {
     java
     groovy
     `kotlin-dsl`
-    val licenseReportVersion = "2.1"
-    id("com.github.jk1.dependency-license-report").version(licenseReportVersion)
+
+    // https://github.com/jk1/Gradle-License-Report/releases
+    id("com.github.jk1.dependency-license-report").version("2.1")
+
+    // https://github.com/johnrengelman/shadow/releases
+    id("com.github.johnrengelman.shadow").version("7.1.2")
 }
 
 repositories {
@@ -50,17 +54,27 @@ repositories {
  * Please keep this value in sync. with `io.spine.internal.dependency.Jackson.version`.
  * It's not a requirement, but would be good in terms of consistency.
  */
-val jacksonVersion = "2.13.4"
+val jacksonVersion = "2.15.3"
 
-val googleAuthToolVersion = "2.1.2"
+/**
+ * The version of Google Artifact Registry used by `buildSrc`.
+ *
+ * The version `2.1.5` is the latest before `2.2.0`, which introduces breaking changes.
+ *
+ * @see <a href="https://mvnrepository.com/artifact/com.google.cloud.artifactregistry/artifactregistry-auth-common">
+ *     Google Artifact Registry at Maven</a>
+ */
+val googleAuthToolVersion = "2.1.5"
+
 val licenseReportVersion = "2.1"
+
 val grGitVersion = "4.1.1"
 
 /**
- * The version of the Kotlin Gradle plugin.
+ * The version of the Kotlin Gradle plugin and Kotlin binaries used by the build process.
  *
- * Please check that this value matches one defined in
- *  [io.spine.internal.dependency.Kotlin.version].
+ * This version may change from the [version of Kotlin][io.spine.internal.dependency.Kotlin.version]
+ * used by the project.
  */
 val kotlinVersion = "1.8.22"
 
@@ -70,7 +84,7 @@ val kotlinVersion = "1.8.22"
  * Always use the same version as the one specified in [io.spine.internal.dependency.Guava].
  * Otherwise, when testing Gradle plugins, clashes may occur.
  */
-val guavaVersion = "32.1.2-jre"
+val guavaVersion = "32.1.3-jre"
 
 /**
  * The version of ErrorProne Gradle plugin.
@@ -100,7 +114,7 @@ val protobufPluginVersion = "0.9.4"
  * @see <a href="https://github.com/Kotlin/dokka/releases">
  *     Dokka Releases</a>
  */
-val dokkaVersion = "1.8.20"
+val dokkaVersion = "1.9.10"
 
 /**
  * The version of Detekt Gradle Plugin.
@@ -122,6 +136,7 @@ val koverVersion = "0.7.2"
 configurations.all {
     resolutionStrategy {
         force(
+            "com.google.guava:guava:${guavaVersion}",
             "com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion",
 
             // Force Kotlin lib versions avoiding using those bundled with Gradle.
@@ -147,7 +162,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
-    implementation("com.google.cloud.artifactregistry:artifactregistry-auth-common:$googleAuthToolVersion") {
+    implementation(
+        "com.google.cloud.artifactregistry:artifactregistry-auth-common:$googleAuthToolVersion"
+    ) {
         exclude(group = "com.google.guava")
     }
     implementation("com.google.guava:guava:$guavaVersion")
