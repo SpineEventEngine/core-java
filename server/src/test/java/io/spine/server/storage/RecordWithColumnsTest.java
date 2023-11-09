@@ -55,6 +55,7 @@ class RecordWithColumnsTest {
     @DisplayName("not accept `null`s in static API")
     void rejectNullInCtor() {
         new NullPointerTester()
+                .setDefault(RecordSpec.class, messageSpec())
                 .testAllPublicStaticMethods(RecordWithColumns.class);
     }
 
