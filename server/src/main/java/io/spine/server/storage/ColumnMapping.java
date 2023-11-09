@@ -26,7 +26,6 @@
 
 package io.spine.server.storage;
 
-import io.spine.annotation.SPI;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -42,7 +41,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @param <R>
  *         a supertype of all stored values
  */
-@SPI
 public interface ColumnMapping<R> {
 
     /**

@@ -27,7 +27,6 @@
 package io.spine.server.storage;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.SPI;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -40,7 +39,6 @@ import java.util.Optional;
  * @param <M>
  *         the type of records
  */
-@SPI
 public interface Storage<I, M extends Message> extends AutoCloseable {
 
     /**

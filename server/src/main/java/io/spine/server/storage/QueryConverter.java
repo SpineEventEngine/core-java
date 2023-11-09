@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
 import io.spine.client.CompositeFilter;
 import io.spine.client.Filter;
@@ -59,7 +58,6 @@ import static java.util.stream.Collectors.toList;
 /**
  * Converts the queries defined in Protobuf into the language of {@code io.spine.query} package.
  */
-@SPI
 public final class QueryConverter {
 
     private QueryConverter() {

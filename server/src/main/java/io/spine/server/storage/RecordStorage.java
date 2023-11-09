@@ -30,7 +30,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
 import io.spine.client.ResponseFormat;
 import io.spine.query.RecordQuery;
 import io.spine.query.RecordQueryBuilder;
@@ -52,7 +51,6 @@ import java.util.Optional;
  * @param <R>
  *         the type of the stored message records
  */
-@SPI
 @SuppressWarnings("ClassWithTooManyMethods")    // This is a centerpiece.
 public abstract class RecordStorage<I, R extends Message> extends AbstractStorage<I, R> {
 
