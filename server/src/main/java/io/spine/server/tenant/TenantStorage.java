@@ -73,7 +73,7 @@ public abstract class TenantStorage<T extends Message>
         var optional = read(id);
         if (optional.isEmpty()) {
             var newRecord = create(id);
-            write(id, newRecord);
+            write(newRecord);
         }
         cache(id);
     }

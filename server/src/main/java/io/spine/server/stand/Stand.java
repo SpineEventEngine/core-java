@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
@@ -47,9 +46,9 @@ import io.spine.server.Identity;
 import io.spine.server.bus.Listener;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityLifecycle;
-import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityRecordChange;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.StorageConverter;
 import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -146,12 +145,8 @@ public class Stand implements Closeable {
      */
     @VisibleForTesting
     void post(Entity<?, ?> entity, EntityLifecycle lifecycle) {
-        var id = Identifier.pack(entity.id());
-        var state = AnyPacker.pack(entity.state());
-        var record = EntityRecord.newBuilder()
-                .setEntityId(id)
-                .setState(state)
-                .build();
+        var record = StorageConverter.toEntityRecord(entity)
+                                     .build();
         var change = EntityRecordChange.newBuilder()
                 .setNewValue(record)
                 .build();

@@ -26,16 +26,16 @@
 
 package io.spine.server.migration.mirror;
 
+import com.google.common.collect.ImmutableList;
 import io.spine.query.RecordQuery;
 import io.spine.server.ContextSpec;
-import io.spine.server.storage.MessageRecordSpec;
 import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.Mirror;
 import io.spine.system.server.MirrorId;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * A contract for storages of legacy {@link Mirror} projections.
@@ -63,12 +63,12 @@ public final class MirrorStorage extends MessageStorage<MirrorId, Mirror> {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static MessageRecordSpec<MirrorId, Mirror> messageSpec() {
-        var spec = new MessageRecordSpec<>(
+    private static RecordSpec<MirrorId, Mirror> messageSpec() {
+        var spec = new RecordSpec<>(
                 MirrorId.class,
                 Mirror.class,
                 Mirror::getId,
-                List.of(
+                ImmutableList.of(
                         Mirror.Column.aggregateType(),
                         Mirror.Column.wasMigrated()
                 )

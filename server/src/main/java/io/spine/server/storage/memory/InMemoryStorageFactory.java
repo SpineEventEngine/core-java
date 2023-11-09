@@ -50,7 +50,7 @@ public final class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> InMemoryRecordStorage<I, M>
-    createRecordStorage(ContextSpec context, RecordSpec<I, M, ?> spec) {
+    createRecordStorage(ContextSpec context, RecordSpec<I, M> spec) {
         return new InMemoryRecordStorage<>(context, spec);
     }
 

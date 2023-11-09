@@ -83,8 +83,8 @@ public final class MemoizingStorageFactory implements StorageFactory {
 
     @Override
     public <I, M extends Message> RecordStorage<I, M>
-    createRecordStorage(ContextSpec context, RecordSpec<I, M, ?> recordSpec) {
-        requestedStorages.add(recordSpec.storedType());
+    createRecordStorage(ContextSpec context, RecordSpec<I, M> recordSpec) {
+        requestedStorages.add(recordSpec.recordType());
         return nullRef();
     }
 

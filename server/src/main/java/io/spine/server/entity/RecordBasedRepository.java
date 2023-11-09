@@ -42,7 +42,6 @@ import io.spine.client.Targets;
 import io.spine.core.Signal;
 import io.spine.query.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
@@ -503,8 +502,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     RecordWithColumns<I, EntityRecord> toRecord(E entity) {
         var record = storageConverter().convert(entity);
         requireNonNull(record);
-        RecordWithColumns<I, EntityRecord> result =
-                EntityRecordWithColumns.create(entity, record);
+        var result = RecordWithColumns.create(record, recordStorage().recordSpec());
         return result;
     }
 

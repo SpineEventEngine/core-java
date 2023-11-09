@@ -29,20 +29,21 @@ package io.spine.server.migration.mirror;
 import io.spine.base.EntityState;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.SpecScanner;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.system.server.Mirror;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.function.Function;
 
 /**
- * A transformation of a {@link Mirror} into an {@link EntityRecordWithColumns}.
+ * A transformation of a {@link Mirror} into an {@link RecordWithColumns}.
  *
  * <p>This transformation is applied to the mirror projections
  * in a scope of {@link MirrorMigration}.
  *
  * <p>{@code Mirror} itself can be directly transformed into an {@link EntityRecord}.
- * In order to get {@code EntityRecordWithColumns}, we need to know which columns should be
+ * In order to get {@code RecordWithColumns}, we need to know which columns should be
  * fetched from the entity's state. For this reason, aggregate class is passed along
  * the mirror itself. It contains information about which columns are declared to be stored
  * along the aggregate's state.
@@ -56,7 +57,7 @@ import java.util.function.Function;
  */
 @Immutable
 final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregate<I, S, ?>>
-        implements Function<Mirror, EntityRecordWithColumns<I>> {
+        implements Function<Mirror, RecordWithColumns<I, EntityRecord>> {
 
     private final Class<A> aggregateClass;
 
@@ -69,21 +70,22 @@ final class MirrorToEntityRecord<I, S extends EntityState<I>, A extends Aggregat
     }
 
     /**
-     * Transforms the passed {@link Mirror} into an {@link EntityRecordWithColumns}.
+     * Transforms the passed {@link Mirror} into an {@link RecordWithColumns}.
      *
      * <p>The method will throw an exception when the mirror is incompatible
      * with the {@linkplain #MirrorToEntityRecord(Class) used aggregate class}. Meaning,
      * its identifier and/or state types differ from the ones, declared for the aggregate.
      */
     @Override
-    public EntityRecordWithColumns<I> apply(Mirror mirror) {
+    public RecordWithColumns<I, EntityRecord> apply(Mirror mirror) {
         var record = EntityRecord.newBuilder()
                 .setEntityId(mirror.getId().getValue())
                 .setState(mirror.getState())
                 .setVersion(mirror.getVersion())
                 .setLifecycleFlags(mirror.getLifecycle())
                 .build();
-        var recordWithColumns = EntityRecordWithColumns.create(record, aggregateClass);
+        var spec = SpecScanner.scan(aggregateClass);
+        var recordWithColumns = RecordWithColumns.create(record, spec);
         return recordWithColumns;
     }
 }

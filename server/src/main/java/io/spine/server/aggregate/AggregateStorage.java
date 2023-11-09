@@ -40,10 +40,10 @@ import io.spine.query.EntityQuery;
 import io.spine.server.ContextSpec;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.QueryConverter;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -72,7 +72,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <h3>Storing Aggregate events</h3>
  *
  * <p>Each Aggregate is an event-sourced Entity. To load an Aggregate instance, one plays all
- * of the events emitted by it, eventually obtaining the last known state. While the Event Store
+ * the events emitted by it, eventually obtaining the last known state. While the Event Store
  * of a Bounded Context, to which some Aggregate belongs, stores all domain events, using it
  * for the sake of loading an Aggregate is inefficient in most cases. An overwhelming number of
  * the domain events emitted in a Bounded Context and the restrictions applied by an underlying
@@ -300,7 +300,7 @@ public class AggregateStorage<I, S extends EntityState<I>>
      *         the record to write
      */
     protected void writeEventRecord(I id, AggregateEventRecord record) {
-        eventStorage.write(record.getId(), record);
+        eventStorage.write(record);
     }
 
     /**
@@ -368,14 +368,12 @@ public class AggregateStorage<I, S extends EntityState<I>>
     }
 
     private Class<? extends EntityState<?>> stateClass() {
-        return stateStorage.recordSpec()
-                           .entityClass()
-                           .stateClass();
+        return stateStorage.stateClass();
     }
 
     protected void writeState(Aggregate<I, ?, ?> aggregate) {
         var record = AggregateRecords.newStateRecord(aggregate, queryingEnabled);
-        var result = EntityRecordWithColumns.create(aggregate, record);
+        var result = RecordWithColumns.create(record, stateStorage.recordSpec());
         stateStorage.write(result);
     }
 
@@ -417,7 +415,9 @@ public class AggregateStorage<I, S extends EntityState<I>>
      */
     protected Iterator<AggregateEventRecord>
     historyBackward(I id, int batchSize, @Nullable Version startingFrom) {
-        return historyBackward.read(id, batchSize, startingFrom);
+        var original = historyBackward.read(id, batchSize, startingFrom);
+        var copied = ImmutableList.copyOf(original);
+        return copied.iterator();
     }
 
     /**

@@ -35,7 +35,7 @@ import io.spine.logging.WithLogging;
 import io.spine.server.ContextSpec;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.MessageRecordSpec;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
@@ -75,9 +75,9 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
         this.log = new Log();
     }
 
-    private static MessageRecordSpec<EventId, Event> spec() {
-        var spec = new MessageRecordSpec<>(EventId.class, Event.class, Signal::id,
-                                           EventColumn.definitions());
+    private static RecordSpec<EventId, Event> spec() {
+        var spec = new RecordSpec<>(EventId.class, Event.class, Signal::id,
+                                    EventColumn.definitions());
         return spec;
     }
 
@@ -169,13 +169,13 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
 
     private void store(Event event) {
         var toStore = event.clearEnrichments();
-        write(toStore.getId(), toStore);
+        write(toStore);
     }
 
     private void store(Iterable<Event> events) {
         var records = stream(events)
                 .map(Event::clearEnrichments)
-                .map((e) -> RecordWithColumns.create(e.getId(), e, recordSpec()))
+                .map((e) -> RecordWithColumns.create(e, recordSpec()))
                 .collect(toImmutableList());
         writeAll(records);
     }

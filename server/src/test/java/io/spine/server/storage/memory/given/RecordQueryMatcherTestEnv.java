@@ -26,22 +26,14 @@
 
 package io.spine.server.storage.memory.given;
 
-import com.google.protobuf.Any;
-import io.spine.protobuf.AnyPacker;
-import io.spine.query.RecordColumn;
 import io.spine.query.RecordQuery;
+import io.spine.query.RecordQueryBuilder;
 import io.spine.query.Subject;
-import io.spine.server.entity.EntityRecord;
 import io.spine.test.storage.StgProject;
-import io.spine.testdata.Sample;
-
-import static io.spine.query.RecordColumn.create;
+import io.spine.test.storage.StgProjectId;
 
 /**
  * The test environment for {@link io.spine.server.storage.memory.RecordQueryMatcher} tests.
- *
- * <p>Provides various types of {@linkplain RecordColumn record columns}
- * that can be used to emulate a client-side query.
  */
 @SuppressWarnings("BadImport")       // `create` looks fine in this context.
 public final class RecordQueryMatcherTestEnv {
@@ -51,64 +43,33 @@ public final class RecordQueryMatcherTestEnv {
     }
 
     /**
-     * Creates an empty {@code Subject} for the {@link EntityRecord}.
+     * Creates an empty {@code Subject} for the {@code StgProject}.
      */
-    public static Subject<Object, EntityRecord> recordSubject() {
-        return RecordQuery.newBuilder(Object.class, EntityRecord.class)
-                          .build()
-                          .subject();
+    public static Subject<StgProjectId, StgProject> recordSubject() {
+        return RecordQuery.newBuilder(StgProjectId.class, StgProject.class)
+                .build()
+                .subject();
     }
 
     /**
-     * Creates a {@code Subject} for the {@link EntityRecord} with the given ID.
+     * Creates a {@code Subject} for the {@code EntityRecord} with the given ID.
      */
-    public static <I> Subject<I, EntityRecord> recordSubject(I id) {
-        return RecordQuery.newBuilder(parameterizedClsOf(id), EntityRecord.class)
-                          .id().is(id)
-                          .build()
-                          .subject();
+    public static Subject<StgProjectId, StgProject> recordSubject(StgProjectId id) {
+        return RecordQuery.newBuilder(parameterizedClsOf(id), StgProject.class)
+                .id().is(id)
+                .build()
+                .subject();
     }
 
-    @SuppressWarnings("unchecked")  // as per the declaration.
+    @SuppressWarnings("unchecked" /* As per the declaration. */)
     private static <I> Class<I> parameterizedClsOf(I id) {
         return (Class<I>) id.getClass();
     }
 
     /**
-     * A {@code Column} which holds an {@link Any} instance.
+     * Creates a new query builder targeting stored {@code StgProject} instances.
      */
-    public static RecordColumn<EntityRecord, Any> anyColumn() {
-        return create("wrapped_state", Any.class, (r) -> anyValue());
-    }
-
-    /**
-     * The {@link Any} value held by the corresponding {@linkplain #anyColumn() entity column}.
-     */
-    public static Any anyValue() {
-        var someMessage = Sample.messageOfType(StgProject.class);
-        var value = AnyPacker.pack(someMessage);
-        return value;
-    }
-
-    /**
-     * A {@code Column} which holds a {@code boolean} value.
-     */
-    public static RecordColumn<EntityRecord, Boolean> booleanColumn() {
-        return create("internal", Boolean.class, (r) -> booleanValue());
-    }
-
-    /**
-     * A {@code Column} which holds a {@code boolean} value.
-     */
-    public static RecordColumn<EntityRecord, Boolean> booleanColumn(String name) {
-        return create(name, Boolean.class, (r) -> booleanValue());
-    }
-
-    /**
-     * The {@code boolean} value held by the corresponding {@linkplain #booleanColumn() entity
-     * column}.
-     */
-    private static boolean booleanValue() {
-        return true;
+    public static RecordQueryBuilder<StgProjectId, StgProject> newBuilder() {
+        return RecordQuery.newBuilder(StgProjectId.class, StgProject.class);
     }
 }

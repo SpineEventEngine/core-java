@@ -224,11 +224,12 @@ public final class ToEntityRecordQuery<I, S extends EntityState<I>>
      * @return the same {@code builder} as passed, for call chaining
      */
     @CanIgnoreReturnValue
-    private RecordQueryBuilder<I, EntityRecord>
+    private <V> RecordQueryBuilder<I, EntityRecord>
     addParameter(RecordQueryBuilder<I, EntityRecord> builder, Column<?, ?> source,
-                 ComparisonOperator operator, Object value) {
-        var column = AsEntityRecordColumn.apply(source);
-
+                 ComparisonOperator operator, V value) {
+        @SuppressWarnings("unchecked")
+        var castSource = (Column<?, V>) source;
+        var column = AsEntityRecordColumn.apply(castSource);
         var where = builder.where(column);
         switch (operator) {
             case EQUALS:

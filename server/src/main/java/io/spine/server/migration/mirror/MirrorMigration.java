@@ -31,8 +31,9 @@ import io.spine.base.EntityState;
 import io.spine.server.ContextSpec;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordStorage;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.Mirror;
 
@@ -42,7 +43,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Migrates {@link Mirror} projections into {@link EntityRecordWithColumns}.
+ * Migrates {@link Mirror} projections to {@code EntityRecord} with columns.
  *
  * <p>{@code Mirror} projection was deprecated in Spine 2.0. Previously, it was used to store
  * aggregates' states to allow their querying. A single projection stored states of <b>all</b>
@@ -123,8 +124,8 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         this.entityRecordStorage = factory.createEntityRecordStorage(context, aggClass);
         this.transformation = new MirrorToEntityRecord<>(aggClass);
         this.aggregateType = AggregateClass.asAggregateClass(aggClass)
-                                          .stateTypeUrl()
-                                          .value();
+                                           .stateTypeUrl()
+                                           .value();
     }
 
     /**
@@ -158,7 +159,8 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
         mirrorStorage.writeBatch(batch.migratedMirrors());
 
         var migrated = MirrorsMigrated.newBuilder()
-                .setValue(batch.migratedMirrors().size())
+                .setValue(batch.migratedMirrors()
+                               .size())
                 .build();
 
         monitor.onBatchCompleted(migrated);
@@ -167,8 +169,10 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
 
     private Iterator<Mirror> fetchMirrors(int batchSize) {
         var query = mirrorStorage.queryBuilder()
-                                 .where(Mirror.Column.aggregateType()).is(aggregateType)
-                                 .where(Mirror.Column.wasMigrated()).is(false)
+                                 .where(Mirror.Column.aggregateType())
+                                 .is(aggregateType)
+                                 .where(Mirror.Column.wasMigrated())
+                                 .is(false)
                                  .sortAscendingBy(Mirror.Column.wasMigrated())
                                  .limit(batchSize)
                                  .build();
@@ -194,7 +198,8 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
     }
 
     private class MigrationBatch {
-        private final Collection<EntityRecordWithColumns<I>> entityRecords;
+
+        private final Collection<RecordWithColumns<I, EntityRecord>> entityRecords;
         private final Collection<Mirror> migratedMirrors;
 
         private MigrationBatch(int expectedSize) {
@@ -218,7 +223,7 @@ public final class MirrorMigration<I, S extends EntityState<I>, A extends Aggreg
             });
         }
 
-        private Collection<EntityRecordWithColumns<I>> entityRecords() {
+        private Collection<RecordWithColumns<I, EntityRecord>> entityRecords() {
             return entityRecords;
         }
 
