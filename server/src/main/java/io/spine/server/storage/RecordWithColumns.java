@@ -51,7 +51,7 @@ import static java.util.Collections.unmodifiableMap;
  * @param <R>
  *         the type of the stored records
  */
-public class RecordWithColumns<I, R extends Message> {
+public final class RecordWithColumns<I, R extends Message> {
 
     private final I id;
     private final R record;
@@ -64,7 +64,7 @@ public class RecordWithColumns<I, R extends Message> {
      */
     private final Map<ColumnName, @Nullable Object> storageFields;
 
-    protected RecordWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
+    private RecordWithColumns(I identifier, R record, Map<ColumnName, Object> storageFields) {
         this.id = checkNotNull(identifier);
         this.record = checkNotNull(record);
         this.storageFields = new HashMap<>(storageFields);
@@ -117,14 +117,14 @@ public class RecordWithColumns<I, R extends Message> {
     /**
      * Returns the identifier of the record.
      */
-    public final I id() {
+    public I id() {
         return id;
     }
 
     /**
      * Returns the message of the record.
      */
-    public final R record() {
+    public R record() {
         return record;
     }
 
@@ -133,7 +133,7 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * @return the storage field names
      */
-    public final ImmutableSet<ColumnName> columnNames() {
+    public ImmutableSet<ColumnName> columnNames() {
         return ImmutableSet.copyOf(storageFields.keySet());
     }
 
@@ -154,7 +154,7 @@ public class RecordWithColumns<I, R extends Message> {
      * @throws IllegalStateException
      *         if there is no column with the specified name
      */
-    public final @Nullable Object columnValue(ColumnName columnName) {
+    public @Nullable Object columnValue(ColumnName columnName) {
         return columnValue(columnName, DefaultColumnMapping.INSTANCE);
     }
 
@@ -163,7 +163,7 @@ public class RecordWithColumns<I, R extends Message> {
      *
      * <p>The specified column mapping will be used to do the column value conversion.
      */
-    public final <V> V columnValue(ColumnName columnName, ColumnMapping<V> columnMapping) {
+    public <V> V columnValue(ColumnName columnName, ColumnMapping<V> columnMapping) {
         checkNotNull(columnName);
         checkNotNull(columnMapping);
         if (!storageFields.containsKey(columnName)) {
@@ -185,14 +185,14 @@ public class RecordWithColumns<I, R extends Message> {
      * Tells if there are any {@linkplain io.spine.query.Column columns}
      * associated with this record.
      */
-    public final boolean hasColumns() {
+    public boolean hasColumns() {
         return !storageFields.isEmpty();
     }
 
     /**
      * Determines if there is a column with the specified name among the storage fields.
      */
-    public final boolean hasColumn(ColumnName name) {
+    public boolean hasColumn(ColumnName name) {
         var result = storageFields.containsKey(name);
         return result;
     }
@@ -204,7 +204,7 @@ public class RecordWithColumns<I, R extends Message> {
      * ImmutableMap} since the map values are {@code null}-able.
      */
     @Internal
-    protected final Map<ColumnName, @Nullable Object> storageFields() {
+    private Map<ColumnName, @Nullable Object> storageFields() {
         return unmodifiableMap(storageFields);
     }
 
