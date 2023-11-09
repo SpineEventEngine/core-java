@@ -200,39 +200,6 @@ public final class SpecScanner {
         return (Class<Object>) stateCol.type();
     }
 
-    /**
-     * Unpacks Entity states from {@code Any} instances, caching the unpacked results.
-     *
-     * <p>This routine is used as a scoped cache for on-the-fly unpacking Entity state
-     * from {@code EntityRecord}s, and then passing them on to other operations,
-     * such as determining the column values.
-     *
-     * @param <I>
-     *         type of entity identifier
-     * @param <S>
-     *         type of entity state
-     */
-    private static final class MemoizingUnpacker<I, S extends EntityState<I>> {
-
-        private final Class<S> stateCls;
-
-        private final Map<Any, S> cache = new HashMap<>();
-
-        private MemoizingUnpacker(Class<S> cls) {
-            stateCls = cls;
-        }
-
-        private synchronized S process(Any value) {
-            @Nullable S alreadyUnpacked = cache.get(value);
-            if (alreadyUnpacked != null) {
-                return alreadyUnpacked;
-            }
-            var state = unpack(value, stateCls);
-            cache.put(value, state);
-            return state;
-        }
-    }
-
     @SuppressWarnings({"ReturnOfNull" /* By design. */,
             "Immutable" /* Unpacker and state column are effectively immutable for given state. */})
     private static <I, S extends EntityState<I>>
@@ -307,5 +274,38 @@ public final class SpecScanner {
             }
         }
         return columnClass;
+    }
+
+    /**
+     * Unpacks Entity states from {@code Any} instances, caching the unpacked results.
+     *
+     * <p>This routine is used as a scoped cache for on-the-fly unpacking Entity state
+     * from {@code EntityRecord}s, and then passing them on to other operations,
+     * such as determining the column values.
+     *
+     * @param <I>
+     *         type of entity identifier
+     * @param <S>
+     *         type of entity state
+     */
+    private static final class MemoizingUnpacker<I, S extends EntityState<I>> {
+
+        private final Class<S> stateCls;
+
+        private final Map<Any, S> cache = new HashMap<>();
+
+        private MemoizingUnpacker(Class<S> cls) {
+            stateCls = cls;
+        }
+
+        private synchronized S process(Any value) {
+            @Nullable S alreadyUnpacked = cache.get(value);
+            if (alreadyUnpacked != null) {
+                return alreadyUnpacked;
+            }
+            var state = unpack(value, stateCls);
+            cache.put(value, state);
+            return state;
+        }
     }
 }
