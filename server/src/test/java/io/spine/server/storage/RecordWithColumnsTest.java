@@ -31,20 +31,18 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.query.RecordColumn;
 import io.spine.server.storage.given.GivenStorageProject.StgProjectColumns;
 import io.spine.server.storage.given.TestColumnMapping;
-import io.spine.test.storage.StgProject;
-import io.spine.test.storage.StgProjectId;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
-import static io.spine.server.storage.given.GivenStorageProject.StgProjectColumns.due_date;
 import static io.spine.server.storage.given.GivenStorageProject.StgProjectColumns.name;
 import static io.spine.server.storage.given.GivenStorageProject.StgProjectColumns.random_non_stored_column;
 import static io.spine.server.storage.given.GivenStorageProject.messageSpec;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
+import static io.spine.server.storage.given.GivenStorageProject.withCols;
+import static io.spine.server.storage.given.GivenStorageProject.withNoCols;
 import static io.spine.server.storage.given.TestColumnMapping.CONVERTED_STRING;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -64,22 +62,12 @@ class RecordWithColumnsTest {
     void supportEquality() {
         var record = newState();
         var noFields = withNoCols(record);
-        var withFieldsBySpec = withCols(record);
-        var withFieldsByIdAndSpec = RecordWithColumns.create(record.getId(), record, messageSpec());
+        var withColsBySpec = withCols(record);
+        var withColsByIdAndSpec = RecordWithColumns.create(record.getId(), record, messageSpec());
         new EqualsTester()
                 .addEqualityGroup(noFields)
-                .addEqualityGroup(withFieldsBySpec, withFieldsByIdAndSpec)
+                .addEqualityGroup(withColsBySpec, withColsByIdAndSpec)
                 .testEquals();
-    }
-
-    @Test
-    @DisplayName("return empty names collection if no storage fields are set")
-    void returnEmptyColumns() {
-        var record = withCols();
-        assertThat(record.hasColumns()).isFalse();
-
-        var names = record.columnNames();
-        assertThat(names.isEmpty()).isTrue();
     }
 
     @Test
@@ -90,31 +78,30 @@ class RecordWithColumnsTest {
                      () -> record.columnValue(random_non_stored_column.name()));
     }
 
-    @Test
-    @DisplayName("return column value by column name")
-    void returnColumnValue() {
-        var original = newState();
-        var withColumns = withCols(original);
-        var actual = withColumns.columnValue(due_date.name());
-
-        assertThat(actual)
-                .isEqualTo(original.getDueDate());
-    }
-
-    @Test
-    @DisplayName("return a column value with the column mapping applied")
-    void returnValueWithColumnMapping() {
-        var original = newState();
-        var withColumns = withCols(original);
-        var actual = withColumns.columnValue(name.name(), new TestColumnMapping());
-
-        assertThat(actual)
-                .isEqualTo(CONVERTED_STRING);
-    }
-
     @Nested
     @DisplayName("return")
-    class Store {
+    class Return {
+
+        @Test
+        @DisplayName("empty names collection if no storage fields are set")
+        void emptyCols() {
+            var record = withCols();
+            assertThat(record.hasColumns()).isFalse();
+
+            var names = record.columnNames();
+            assertThat(names.isEmpty()).isTrue();
+        }
+
+        @Test
+        @DisplayName("a column value with the column mapping applied")
+        void applyingColumnMapping() {
+            var original = newState();
+            var withColumns = withCols(original);
+            var actual = withColumns.columnValue(name.name(), new TestColumnMapping());
+
+            assertThat(actual)
+                    .isEqualTo(CONVERTED_STRING);
+        }
 
         @Test
         @DisplayName("original record")
@@ -145,21 +132,5 @@ class RecordWithColumnsTest {
                         isEqualTo(expected);
             }
         }
-    }
-
-    @NonNull
-    private static
-    RecordWithColumns<StgProjectId, StgProject> withCols(StgProject original) {
-        return RecordWithColumns.create(original, messageSpec());
-    }
-
-    private static
-    RecordWithColumns<StgProjectId, StgProject> withNoCols(StgProject record) {
-        return RecordWithColumns.of(record.getId(), record);
-    }
-
-    @NonNull
-    private static RecordWithColumns<StgProjectId, StgProject> withCols() {
-        return withNoCols(newState());
     }
 }

@@ -153,6 +153,34 @@ public final class GivenStorageProject {
     }
 
     /**
+     * Generates a new {@code StgProject} and turns it
+     * into a new {@code RecordWithColumns}, filling the columns
+     * with the respective values, as per {@linkplain #messageSpec() specification}.
+     */
+    public static RecordWithColumns<StgProjectId, StgProject> withCols() {
+        return withNoCols(newState());
+    }
+
+    /**
+     * Transforms a passed project into a new {@code RecordWithColumns},
+     * filling the columns with the respective values,
+     * as per {@linkplain #messageSpec() specification}.
+     */
+    public static
+    RecordWithColumns<StgProjectId, StgProject> withCols(StgProject project) {
+        return RecordWithColumns.create(project, messageSpec());
+    }
+
+    /**
+     * Transforms a passed project into a new {@code RecordWithColumns},
+     * but not configuring any columns at all.
+     */
+    public static
+    RecordWithColumns<StgProjectId, StgProject> withNoCols(StgProject project) {
+        return RecordWithColumns.of(project.getId(), project);
+    }
+
+    /**
      * Columns of {@code StgProject} stored as record.
      */
     @RecordColumns(ofType = StgProject.class)
