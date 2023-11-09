@@ -244,7 +244,7 @@ public final class QueryConverter {
     }
 
     /**
-     * Converts the a single filter into a condition and adds it to the passed builder
+     * Converts a single filter into a condition and adds it to the passed builder
      * according to the record specification.
      */
     private static <I, R extends Message> void
