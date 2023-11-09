@@ -215,6 +215,7 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
      * <p>If such mapping for the passed type exists, it will be retrieved by this method.
      */
     private Optional<ColumnTypeMapping<?, ? extends R>> customMappingFor(Class<?> columnType) {
+        @SuppressWarnings("DataFlowIssue" /* `customMapping()` is not nullable.*/)
         Optional<ColumnTypeMapping<?, ? extends R>> result =
                 customMapping().keySet()
                                .stream()
@@ -232,6 +233,7 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
      * the {@linkplain #ofEnum() enum type mapping} will be used.
      */
     private Optional<ColumnTypeMapping<?, ? extends R>> standardMappingFor(Class<?> columnType) {
+        @SuppressWarnings("DataFlowIssue" /* `standardTypesMapping.get()` has value. */)
         Optional<ColumnTypeMapping<?, ? extends R>> result =
                 standardTypesMapping.keySet()
                                     .stream()
