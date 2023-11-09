@@ -26,9 +26,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
@@ -47,9 +44,9 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>Since record columns are proto-based and have a limited amount of possible types, this class
  * allows descendants to override concrete type mapping rules in a convenient way.
  *
- * <p>Some of the types are expected to be mapped in a way so they support the ordering comparison
- * operators ("greater than", "less than or equals", etc.). For details, see
- * {@link io.spine.client.Filters}.
+ * <p>Some of the types are expected to be mapped in a way so that
+ * they support the ordering comparison operators ("greater than", "less than or equals", etc.).
+ * For details, see {@link io.spine.client.Filters}.
  *
  * @param <R>
  *         the type of stored records
@@ -57,7 +54,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
 
     /**
-     * The mapping rules of built-in proto types.
+     * The mapping rules of built-in Proto types.
      */
     private final
     ImmutableMap<Class<?>, Supplier<ColumnTypeMapping<?, ? extends R>>> standardTypesMapping
@@ -229,7 +226,7 @@ public abstract class AbstractColumnMapping<R> implements ColumnMapping<R> {
     }
 
     /**
-     * Searches for the column type mapping among standard proto type mappings.
+     * Searches for the column type mapping among standard Proto type mappings.
      *
      * <p>Inherited types are taken into account too, so if the passed type extends {@link Enum},
      * the {@linkplain #ofEnum() enum type mapping} will be used.
