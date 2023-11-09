@@ -26,10 +26,8 @@
 
 package io.spine.server.storage;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.query.ColumnName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -40,7 +38,6 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.Collections.unmodifiableMap;
 
 /**
  * A value of some message record along with the values
@@ -108,8 +105,7 @@ public final class RecordWithColumns<I, R extends Message> {
     /**
      * Creates a new instance from the passed record and storage fields.
      */
-    @VisibleForTesting
-    public static <I, R extends Message>
+    private static <I, R extends Message>
     RecordWithColumns<I, R> of(I identifier, R record, Map<ColumnName, Object> storageFields) {
         return new RecordWithColumns<>(identifier, record, storageFields);
     }
@@ -195,17 +191,6 @@ public final class RecordWithColumns<I, R extends Message> {
     public boolean hasColumn(ColumnName name) {
         var result = storageFields.containsKey(name);
         return result;
-    }
-
-    /**
-     * Returns an unmodifiable copy of the values of storage fields associated with this record.
-     *
-     * @apiNote This method does not return an {@link com.google.common.collect.ImmutableMap
-     * ImmutableMap} since the map values are {@code null}-able.
-     */
-    @Internal
-    private Map<ColumnName, @Nullable Object> storageFields() {
-        return unmodifiableMap(storageFields);
     }
 
     @Override
