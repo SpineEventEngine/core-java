@@ -35,7 +35,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.annotation.SPI;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.query.RecordColumn;
