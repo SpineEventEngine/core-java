@@ -29,7 +29,7 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
+import com.google.protobuf.util.Durations;
 import io.spine.base.EntityState;
 import io.spine.base.Time;
 import io.spine.core.ActorContext;
@@ -381,8 +381,8 @@ public class AggregateStorageTest
             var state = AggProject.getDefaultInstance();
             var minVersion = zero();
             var maxVersion = increment(minVersion);
-            var minTimestamp = Timestamps.MIN_VALUE;
-            var maxTimestamp = Timestamps.MAX_VALUE;
+            var minTimestamp = currentTime();
+            var maxTimestamp = add(minTimestamp, Durations.fromHours(1));
 
             // The first event is an event, which is the oldest, i.e. with the minimal version.
             var expectedFirst = eventFactory.createEvent(event(state), minVersion, maxTimestamp);

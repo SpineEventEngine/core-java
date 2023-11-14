@@ -26,12 +26,17 @@
 
 package io.spine.testing.server.entity.given;
 
-import com.google.protobuf.util.Timestamps;
+import com.google.protobuf.Duration;
+import com.google.protobuf.util.Durations;
 import io.spine.core.Version;
 
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
 
 public final class GivenEntityVersion {
+
+    private static final Duration TEN_DAYS = Durations.fromDays(10);
 
     /** Prevents instantiation of this test env class. */
     private GivenEntityVersion() {
@@ -48,7 +53,7 @@ public final class GivenEntityVersion {
     public static Version olderVersion() {
         var version = Version.newBuilder()
                 .setNumber(15)
-                .setTimestamp(Timestamps.MIN_VALUE)
+                .setTimestamp(subtract(currentTime(), TEN_DAYS))
                 .build();
         return version;
     }
@@ -56,7 +61,7 @@ public final class GivenEntityVersion {
     public static Version newerVersion() {
         var version = Version.newBuilder()
                 .setNumber(125)
-                .setTimestamp(Timestamps.MAX_VALUE)
+                .setTimestamp(add(currentTime(), TEN_DAYS))
                 .build();
         return version;
     }
