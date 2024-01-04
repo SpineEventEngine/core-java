@@ -24,28 +24,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("ConstPropertyName")
+
 package io.spine.internal.dependency
 
 /**
- * [J2ObjC](https://developers.google.com/j2objc) is a transitive dependency,
- * which we don't use directly. This object is used for forcing the version.
+ * The components of the IntelliJ Platform.
+ *
+ * Make sure to add the `intellijReleases` and `jetBrainsCacheRedirector`
+ * repositories to your project. See `kotlin/Repositories.kt` for details.
  */
-@Suppress("unused", "ConstPropertyName")
-object J2ObjC {
+@Suppress("unused")
+object IntelliJ {
+
     /**
-     * See [J2ObjC releases](https://github.com/google/j2objc/releases).
+     * The version of the IntelliJ platform.
      *
-     * `1.3` was the latest version available from Maven Central.
-     * Now `2.8` is the latest version available.
-     * As [HttpClient]
-     * [migrated](https://github.com/googleapis/google-http-java-client/releases/tag/v1.43.3) to v2,
-     * we set the latest v2 version as well.
-     *
-     * @see <a href="https://search.maven.org/artifact/com.google.j2objc/j2objc-annotations">
-     *     J2ObjC on Maven Central</a>
+     * This is the version used by Kotlin compiler `1.9.21`.
+     * Advance this version with caution because it may break the setup of
+     * IntelliJ platform standalone execution.
      */
-    private const val version = "2.8"
-    const val annotations = "com.google.j2objc:j2objc-annotations:${version}"
-    @Deprecated("Please use `annotations` instead.", ReplaceWith("annotations"))
-    const val lib = annotations
+    const val version = "213.7172.53"
+
+    object Platform {
+        private const val group = "com.jetbrains.intellij.platform"
+        const val core = "$group:core:$version"
+        const val util = "$group:util:$version"
+    }
+
+    object JavaPsi {
+        private const val group = "com.jetbrains.intellij.java"
+        const val api = "$group:java-psi:$version"
+        const val impl = "$group:java-psi-impl:$version"
+    }
 }

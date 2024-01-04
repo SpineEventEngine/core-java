@@ -29,6 +29,8 @@ package io.spine.internal.gradle.protobuf
 import com.google.protobuf.gradle.GenerateProtoTask
 import io.spine.internal.gradle.sourceSets
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import org.gradle.api.Project
 import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.SourceSet
@@ -112,22 +114,67 @@ fun GenerateProtoTask.setup() {
 
 /**
  * Tell `protoc` to generate descriptor set files under the project build dir.
+ *
+ * The name of the descriptor set file to be generated
+ * is made to be unique per project's Maven coordinates.
+ *
+ * As the last step of this task, writes a `desc.ref` file
+ * for the contextual source set, pointing to the generated descriptor set file.
+ * This is needed in order to allow other Spine libraries
+ * to locate and load the generated descriptor set files properly.
+ *
+ * Such a job is usually performed by Spine McJava plugin,
+ * however, it is not possible to use this plugin (or its code)
+ * in this repository due to cyclic dependencies.
  */
+@Suppress(
+    "TooGenericExceptionCaught" /* Handling all file-writing failures in the same way.*/)
 private fun GenerateProtoTask.setupDescriptorSetFileCreation() {
     // Tell `protoc` generate descriptor set file.
+    // The name of the generated file reflects project's Maven coordinates.
     val ssn = sourceSet.name
     generateDescriptorSet = true
     val descriptorsDir = "${project.buildDir}/descriptors/${ssn}"
+    val descriptorName = project.descriptorSetName(sourceSet)
     with(descriptorSetOptions) {
-        path = "$descriptorsDir/known_types_${ssn}.desc"
+        path = "$descriptorsDir/$descriptorName"
         includeImports = true
         includeSourceInfo = true
     }
+
     // Make the descriptor set file included into the resources.
     project.sourceSets.named(ssn) {
         resources.srcDirs(descriptorsDir)
     }
+
+    // Create a `desc.ref` in the same resource folder,
+    // with the name of the descriptor set file created above.
+    this.doLast {
+        val descRefFile = File(descriptorsDir, "desc.ref")
+        descRefFile.createNewFile()
+        try {
+            Files.write(descRefFile.toPath(), setOf(descriptorName), TRUNCATE_EXISTING)
+        } catch (e: Exception) {
+            project.logger.error("Error writing `${descRefFile.absolutePath}`.", e)
+            throw e
+        }
+    }
 }
+
+/**
+ * Returns a name of the descriptor file for the given [sourceSet],
+ * reflecting the Maven coordinates of Gradle artifact, and the source set
+ * for which the descriptor set name is to be generated.
+ *
+ * The returned value is just a file name, and does not contain a file path.
+ */
+private fun Project.descriptorSetName(sourceSet: SourceSet) =
+    arrayOf(
+        group.toString(),
+        name,
+        sourceSet.name,
+        version.toString()
+    ).joinToString(separator = "_", postfix = ".desc")
 
 /**
  * Copies files from the [outputBaseDir][GenerateProtoTask.outputBaseDir] into

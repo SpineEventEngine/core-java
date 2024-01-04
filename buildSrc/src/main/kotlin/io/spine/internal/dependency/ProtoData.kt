@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ package io.spine.internal.dependency
 /**
  * Dependencies on ProtoData modules.
  *
- * In order to use locally published ProtoData version instead of the version from a public plugin
+ * To use a locally published ProtoData version instead of the version from a public plugin
  * registry, set the `PROTODATA_VERSION` and/or the `PROTODATA_DF_VERSION` environment variables
  * and stop the Gradle daemons so that Gradle observes the env change:
  * ```
@@ -40,7 +40,7 @@ package io.spine.internal.dependency
  * ./gradle build   # Conduct the intended checks.
  * ```
  *
- * Then, in order to reset the console to run the usual versions again, remove the values of
+ * Then, to reset the console to run the usual versions again, remove the values of
  * the environment variables and stop the daemon:
  * ```
  * export PROTODATA_VERSION=""
@@ -65,7 +65,7 @@ object ProtoData {
      * The version of ProtoData dependencies.
      */
     val version: String
-    private const val fallbackVersion = "0.14.2"
+    private const val fallbackVersion = "0.16.1"
 
     /**
      * The distinct version of ProtoData used by other build tools.
@@ -74,19 +74,39 @@ object ProtoData {
      * transitional dependencies, this is the version used to build the project itself.
      */
     val dogfoodingVersion: String
-    private const val fallbackDfVersion = "0.14.2"
+    private const val fallbackDfVersion = "0.16.1"
 
     /**
      * The artifact for the ProtoData Gradle plugin.
      */
     val pluginLib: String
 
+    fun pluginLib(version: String): String =
+        "$group:gradle-plugin:$version"
+
+    fun api(version: String): String =
+        "$group:protodata-api:$version"
+
     val api
-        get() = "$group:protodata-api:$version"
+        get() = api(version)
+
     val compiler
         get() = "$group:protodata-compiler:$version"
+
+    val gradleApi
+        get() = "$group:protodata-gradle-api:$version"
+
+    val cliApi
+        get() = "$group:protodata-cli-api:$version"
+
+    fun codegenJava(version: String): String =
+        "$group:protodata-codegen-java:$version"
+
     val codegenJava
-        get() = "$group:protodata-codegen-java:$version"
+        get() = codegenJava(version)
+
+    val fatCli
+        get() = "$group:protodata-fat-cli:$version"
 
     /**
      * An env variable storing a custom [version].
@@ -113,7 +133,7 @@ object ProtoData {
             version = experimentVersion ?: fallbackVersion
             dogfoodingVersion = experimentDfVersion ?: fallbackDfVersion
 
-            pluginLib = "${group}:gradle-plugin:$version"
+            pluginLib = pluginLib(version)
             println("""
 
                 ❗ Running an experiment with ProtoData. ❗

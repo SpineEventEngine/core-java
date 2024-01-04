@@ -38,7 +38,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.storage.given.GivenStorageProject.newState;
 import static io.spine.server.storage.given.GivenStorageProject.messageSpec;
-import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.newBuilder;
+import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.newQueryBuilder;
 import static io.spine.server.storage.memory.given.RecordQueryMatcherTestEnv.recordSubject;
 import static io.spine.testdata.Sample.messageOfType;
 import static io.spine.testing.TestValues.nullRef;
@@ -81,7 +81,7 @@ class RecordQueryMatcherTest {
     void matchColumns() {
         var matchingState = newState();
         var matchingName = matchingState.getName();
-        var query = newBuilder().where(StgProjectColumns.name).is(matchingName).build();
+        var query = newQueryBuilder().where(StgProjectColumns.name).is(matchingName).build();
         var matcher = new RecordQueryMatcher<>(query.subject());
         var matchingRecord = asRecord(matchingState);
         var nonMatching = newState();
@@ -106,7 +106,7 @@ class RecordQueryMatcherTest {
         var matchingRecord = asRecord(matchingState);
         var nonMatchingRecord = asRecord(newState());
 
-        var query = newBuilder()
+        var query = newQueryBuilder()
                 .where(StgProjectColumns.state_as_any).is(queryValue).build();
         var matcher = new RecordQueryMatcher<>(query);
         assertThat(matcher.test(matchingRecord))
@@ -118,7 +118,7 @@ class RecordQueryMatcherTest {
     @Test
     @DisplayName("not match by wrong field name")
     void notMatchByWrongField() {
-        var query = newBuilder()
+        var query = newQueryBuilder()
                 .where(StgProjectColumns.random_non_stored_column).is("whatever")
                 .build();
         var matcher = new RecordQueryMatcher<>(query);
