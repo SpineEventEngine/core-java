@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ message CompositeFilter {
     CompositeOperator operator = 2 [(required) = true];
 
     // The list of child composite filters.
-    repeated CompositeFilter composite_filter = 3 [(validate) = true];;
+    repeated CompositeFilter composite_filter = 3 [(validate) = true];
 
     // An enumeration of all supported composite operators upon the filters.
     enum CompositeOperator {

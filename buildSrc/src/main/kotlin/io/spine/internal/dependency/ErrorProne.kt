@@ -48,9 +48,9 @@ object ErrorProne {
         const val id = "net.ltgt.errorprone"
         /**
          * The version of this plugin is already specified in `buildSrc/build.gradle.kts` file.
-         * Thus, when applying the plugin in projects build files, only the [id] should be used.
+         * Thus, when applying the plugin to projects build files, only the [id] should be used.
          *
-         * When the plugin is used as a library (e.g. in tools), its version and the library
+         * When the plugin is used as a library (e.g., in tools), its version and the library
          * artifacts are of importance.
          */
         const val version = "3.1.0"

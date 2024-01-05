@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2023, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.server.given.context.counting;
+package io.spine.internal.dependency
 
-import "spine/options.proto";
+@Suppress("unused", "ConstPropertyName")
+object KotlinX {
 
-option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.server.given.context.counting";
-option java_outer_classname = "RangeProto";
-option java_multiple_files = true;
+    const val group = "org.jetbrains.kotlinx"
 
-// A range of integer values.
-//
-// The range is empty if `min_value == max_value`.
-//
-message Range {
-    int32 min_value = 1;
-    int32 max_value = 2;
+    object Coroutines {
+
+        // https://github.com/Kotlin/kotlinx.coroutines
+        const val version = "1.7.3"
+        const val core = "$group:kotlinx-coroutines-core:$version"
+        const val jdk8 = "$group:kotlinx-coroutines-jdk8:$version"
+    }
 }

@@ -32,7 +32,6 @@ import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.JavaX
 import io.spine.internal.dependency.Kotest
-import io.spine.internal.dependency.Kotlin
 import io.spine.internal.dependency.Protobuf
 import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
@@ -169,9 +168,7 @@ fun Module.forceConfigurations() {
         excludeProtobufLite()
         all {
             resolutionStrategy {
-                @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7` version.
                 force(
-                    Kotlin.stdLibJdk7,
                     JUnit.bom,
                     JUnit.runner,
                     Dokka.BasePlugin.lib

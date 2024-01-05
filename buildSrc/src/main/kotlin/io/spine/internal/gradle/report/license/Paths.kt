@@ -40,7 +40,7 @@ internal object Paths {
      * Its contents describe the licensing information for each of the Java dependencies
      * which are referenced by Gradle projects in the repository.
      */
-    internal const val outputFilename = "license-report.md"
+    internal const val outputFilename = "dependencies.md"
 
     /**
      * The path to a directory, to which a per-project report is generated.

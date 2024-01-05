@@ -20,6 +20,6 @@ jobs:
           # Check out the `config` submodule to fetch the required script file.
           submodules: true
 
-      - name: Check that `pom.xml` and `license-report.md` are modified
+      - name: Check that both `pom.xml` and license report files are modified
         shell: bash
         run: chmod +x ./config/scripts/ensure-reports-updated.sh && ./config/scripts/ensure-reports-updated.sh

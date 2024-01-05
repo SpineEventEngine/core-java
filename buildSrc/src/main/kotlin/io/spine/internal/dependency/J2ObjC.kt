@@ -35,7 +35,7 @@ object J2ObjC {
     /**
      * See [J2ObjC releases](https://github.com/google/j2objc/releases).
      *
-     * `1.3.` was the latest version available from Maven Central.
+     * `1.3` was the latest version available from Maven Central.
      * Now `2.8` is the latest version available.
      * As [HttpClient]
      * [migrated](https://github.com/googleapis/google-http-java-client/releases/tag/v1.43.3) to v2,
