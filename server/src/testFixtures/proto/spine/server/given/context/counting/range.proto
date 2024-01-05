@@ -39,6 +39,6 @@ option java_multiple_files = true;
 // The range is empty if `min_value == max_value`.
 //
 message Range {
-    int32 min_value = 1 [(max).value = "max_value"];
+    int32 min_value = 1;
     int32 max_value = 2;
 }
