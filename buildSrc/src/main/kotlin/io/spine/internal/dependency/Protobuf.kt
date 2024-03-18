@@ -33,7 +33,7 @@ package io.spine.internal.dependency
 )
 object Protobuf {
     private const val group = "com.google.protobuf"
-    const val version       = "3.25.0"
+    const val version       = "3.25.1"
     /**
      * The Java library containing proto definitions of Google Protobuf.
      */

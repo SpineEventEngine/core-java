@@ -47,7 +47,6 @@ import io.spine.testing.core.given.GivenVersion;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.currentTime;
-import static io.spine.query.RecordColumn.create;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 
@@ -196,7 +195,7 @@ public final class GivenStorageProject {
                 RecordColumn.create("due_date", Timestamp.class, StgProject::getDueDate);
 
         public static final RecordColumn<StgProject, String>
-                status = create("status", String.class, (r) -> r.getStatus().name());
+                status = RecordColumn.create("status", String.class, (r) -> r.getStatus().name());
 
         public static final RecordColumn<StgProject, Any> state_as_any =
                 RecordColumn.create("state_as_any", Any.class, AnyPacker::pack);

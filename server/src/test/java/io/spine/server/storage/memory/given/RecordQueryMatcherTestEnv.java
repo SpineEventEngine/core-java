@@ -69,7 +69,7 @@ public final class RecordQueryMatcherTestEnv {
     /**
      * Creates a new query builder targeting stored {@code StgProject} instances.
      */
-    public static RecordQueryBuilder<StgProjectId, StgProject> newBuilder() {
+    public static RecordQueryBuilder<StgProjectId, StgProject> newQueryBuilder() {
         return RecordQuery.newBuilder(StgProjectId.class, StgProject.class);
     }
 }

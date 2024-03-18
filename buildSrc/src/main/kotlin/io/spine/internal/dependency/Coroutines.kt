@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,25 +27,15 @@
 package io.spine.internal.dependency
 
 /**
- * [J2ObjC](https://developers.google.com/j2objc) is a transitive dependency,
- * which we don't use directly. This object is used for forcing the version.
+ * Kotlin Coroutines.
+ * 
+ * @see <a href="https://github.com/Kotlin/kotlinx.coroutines">GitHub projecet</a>
  */
-@Suppress("unused", "ConstPropertyName")
-object J2ObjC {
-    /**
-     * See [J2ObjC releases](https://github.com/google/j2objc/releases).
-     *
-     * `1.3` was the latest version available from Maven Central.
-     * Now `2.8` is the latest version available.
-     * As [HttpClient]
-     * [migrated](https://github.com/googleapis/google-http-java-client/releases/tag/v1.43.3) to v2,
-     * we set the latest v2 version as well.
-     *
-     * @see <a href="https://search.maven.org/artifact/com.google.j2objc/j2objc-annotations">
-     *     J2ObjC on Maven Central</a>
-     */
-    private const val version = "2.8"
-    const val annotations = "com.google.j2objc:j2objc-annotations:${version}"
-    @Deprecated("Please use `annotations` instead.", ReplaceWith("annotations"))
-    const val lib = annotations
+@Suppress("unused")
+object Coroutines {
+    const val version = "1.6.4"
+    const val jdk8 = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$version"
+    const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
+    const val bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:$version"
+    const val coreJvm = "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$version"
 }

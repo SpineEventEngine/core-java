@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.kotlin.dsl.ScriptHandlerScope
+import org.gradle.kotlin.dsl.maven
 
 /**
  * Applies [standard][doApplyStandard] repositories to this [ScriptHandlerScope]
@@ -214,6 +215,12 @@ fun RepositoryHandler.spineArtifacts(): MavenArtifactRepository = maven {
     }
 }
 
+val RepositoryHandler.intellijReleases: MavenArtifactRepository
+    get() = maven("https://www.jetbrains.com/intellij-repository/releases")
+
+val RepositoryHandler.jetBrainsCacheRedirector: MavenArtifactRepository
+    get() = maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
+
 /**
  * Applies repositories commonly used by Spine Event Engine projects.
  */
@@ -235,6 +242,9 @@ fun RepositoryHandler.standardToSpineSdk() {
                 includeSpineOnly()
             }
         }
+
+    intellijReleases
+    jetBrainsCacheRedirector
 
     maven {
         url = URI(Repos.sonatypeSnapshots)

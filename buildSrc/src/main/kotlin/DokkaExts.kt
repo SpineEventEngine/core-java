@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,5 +180,23 @@ fun Project.dokkaJavaJar(): TaskProvider<Jar> = tasks.getOrCreate("dokkaJavaJar"
 
     tasks.dokkaHtmlTask()?.let{ dokkaTask ->
         this@getOrCreate.dependsOn(dokkaTask)
+    }
+}
+
+/**
+ * Disables Dokka and Javadoc tasks in this `Project`.
+ *
+ * This function could be useful to improve build speed when building subprojects containing
+ * test environments or integration test projects.
+ */
+@Suppress("unused")
+fun Project.disableDocumentationTasks() {
+    gradle.taskGraph.whenReady {
+        tasks.forEach { task ->
+            val lowercaseName = task.name.toLowerCase()
+            if (lowercaseName.contains("dokka") || lowercaseName.contains("javadoc")) {
+                task.enabled = false
+            }
+        }
     }
 }
