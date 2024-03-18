@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ object Validation {
     const val group = "io.spine.validation"
     const val runtime = "$group:spine-validation-java-runtime:$version"
     const val java = "$group:spine-validation-java:$version"
+    const val javaBundle = "$group:spine-validation-java-bundle:$version"
     const val model = "$group:spine-validation-model:$version"
     const val config = "$group:spine-validation-configuration:$version"
 }

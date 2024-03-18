@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ open class SpinePublishing(private val project: Project) {
     /**
      * Set of modules to be published.
      *
-     * Both module's name or path can be used.
+     * Both the module's name or path can be used.
      *
      * Use this property if the extension is configured from a root project's build file.
      *
@@ -180,7 +180,7 @@ open class SpinePublishing(private val project: Project) {
     /**
      * A prefix to be added before the name of each artifact.
      *
-     * Default value is "spine-".
+     * The default value is "spine-".
      */
     var artifactPrefix: String = "spine-"
 
@@ -188,7 +188,7 @@ open class SpinePublishing(private val project: Project) {
      * Allows disabling publishing of [protoJar] artifact, containing all Proto sources
      * from `sourceSets.main.proto`.
      *
-     * Here's an example of how to disable it for some of published modules:
+     * Here's an example of how to disable it for some of the published modules:
      *
      * ```
      * spinePublishing {
@@ -214,8 +214,8 @@ open class SpinePublishing(private val project: Project) {
      * }
      * ```
      *
-     * The resulting artifact is available under "proto" classifier. I.e., in Gradle 7+, one could
-     * depend on it like this:
+     * The resulting artifact is available under "proto" classifier.
+     * For example, in Gradle 7+, one could depend on it like this:
      *
      * ```
      * implementation("io.spine:spine-client:$version@proto")
@@ -227,7 +227,7 @@ open class SpinePublishing(private val project: Project) {
      * Allows enabling publishing of [testJar] artifact, containing compilation output
      * of "test" source set.
      *
-     * Here's an example of how to enable it for some of published modules:
+     * Here's an example of how to enable it for some of the published modules:
      *
      * ```
      * spinePublishing {

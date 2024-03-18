@@ -1,6 +1,6 @@
 
 
-# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.175`
+# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.176`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -23,14 +23,6 @@
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.7.4.
-     * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **License:** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.flogger. **Name** : flogger-system-backend. **Version** : 0.7.4.
-     * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **License:** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.google.guava. **Name** : failureaccess. **Version** : 1.0.1.
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -46,15 +38,15 @@
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.59.0.
@@ -94,11 +86,6 @@
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.110.**No license information found**
-1.  **Group** : org.checkerframework. **Name** : checker-compat-qual. **Version** : 2.5.3.
-     * **Project URL:** [https://checkerframework.org](https://checkerframework.org)
-     * **License:** [GNU General Public License, version 2 (GPL2), with the classpath exception](http://www.gnu.org/software/classpath/license.html)
-     * **License:** [The MIT License](http://opensource.org/licenses/MIT)
-
 1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 3.40.0.
      * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
      * **License:** [The MIT License](http://opensource.org/licenses/MIT)
@@ -111,20 +98,20 @@
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -266,15 +253,15 @@
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -310,9 +297,9 @@
      * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
+1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.16.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
@@ -669,7 +656,7 @@
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -697,16 +684,16 @@
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -817,12 +804,12 @@
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Mar 18 11:51:57 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.175`
+# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.176`
 
 ## Runtime
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -836,14 +823,6 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
 1.  **Group** : com.google.errorprone. **Name** : error_prone_annotations. **Version** : 2.23.0.
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.7.4.
-     * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **License:** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.flogger. **Name** : flogger-system-backend. **Version** : 0.7.4.
-     * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **License:** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : failureaccess. **Version** : 1.0.1.
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
@@ -860,23 +839,18 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.110.**No license information found**
-1.  **Group** : org.checkerframework. **Name** : checker-compat-qual. **Version** : 2.5.3.
-     * **Project URL:** [https://checkerframework.org](https://checkerframework.org)
-     * **License:** [GNU General Public License, version 2 (GPL2), with the classpath exception](http://www.gnu.org/software/classpath/license.html)
-     * **License:** [The MIT License](http://opensource.org/licenses/MIT)
-
 1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 3.40.0.
      * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
      * **License:** [The MIT License](http://opensource.org/licenses/MIT)
@@ -885,20 +859,20 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1040,15 +1014,15 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -1084,9 +1058,9 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
+1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.16.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
@@ -1443,7 +1417,7 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1471,16 +1445,16 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1591,12 +1565,12 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Mar 18 11:51:57 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.175`
+# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.176`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -1619,14 +1593,6 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.7.4.
-     * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **License:** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.google.flogger. **Name** : flogger-system-backend. **Version** : 0.7.4.
-     * **Project URL:** [https://github.com/google/flogger](https://github.com/google/flogger)
-     * **License:** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.google.guava. **Name** : failureaccess. **Version** : 1.0.1.
      * **Project URL:** [https://github.com/google/guava/](https://github.com/google/guava/)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1642,15 +1608,15 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : io.grpc. **Name** : grpc-api. **Version** : 1.59.0.
@@ -1690,11 +1656,6 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : io.spine.validation. **Name** : spine-validation-java-runtime. **Version** : 2.0.0-SNAPSHOT.110.**No license information found**
-1.  **Group** : org.checkerframework. **Name** : checker-compat-qual. **Version** : 2.5.3.
-     * **Project URL:** [https://checkerframework.org](https://checkerframework.org)
-     * **License:** [GNU General Public License, version 2 (GPL2), with the classpath exception](http://www.gnu.org/software/classpath/license.html)
-     * **License:** [The MIT License](http://opensource.org/licenses/MIT)
-
 1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 3.40.0.
      * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
      * **License:** [The MIT License](http://opensource.org/licenses/MIT)
@@ -1707,20 +1668,20 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1866,15 +1827,15 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -1910,9 +1871,9 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
+1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.16.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
@@ -2273,7 +2234,7 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2301,16 +2262,16 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2421,12 +2382,12 @@ This report was generated on **Mon Nov 13 17:56:28 WET 2023** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Mar 18 11:51:57 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.175`
+# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.176`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2479,15 +2440,15 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.1.5.
@@ -2607,20 +2568,20 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2792,15 +2753,15 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -2836,9 +2797,9 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
+1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.16.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
@@ -3207,7 +3168,7 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3235,16 +3196,16 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3358,12 +3319,12 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Mar 18 11:51:58 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.175`
+# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.176`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -3416,15 +3377,15 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.1.5.
@@ -3544,20 +3505,20 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3729,15 +3690,15 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -3773,9 +3734,9 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
+1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.16.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
@@ -4144,7 +4105,7 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4172,16 +4133,16 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4295,12 +4256,12 @@ This report was generated on **Mon Nov 13 17:56:29 WET 2023** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Mar 18 11:51:58 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.175`
+# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.176`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -4353,15 +4314,15 @@ This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.truth. **Name** : truth. **Version** : 1.1.5.
@@ -4481,20 +4442,20 @@ This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/JetBrains/java-annotations](https://github.com/JetBrains/java-annotations)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4666,15 +4627,15 @@ This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://github.com/google/j2objc/](https://github.com/google/j2objc/)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-java-util. **Version** : 3.25.1.
      * **Project URL:** [https://developers.google.com/protocol-buffers/](https://developers.google.com/protocol-buffers/)
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
-1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.0.
+1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
 
 1.  **Group** : com.google.protobuf. **Name** : protoc. **Version** : 3.24.1.
@@ -4710,9 +4671,9 @@ This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://commons.apache.org/proper/commons-beanutils/](https://commons.apache.org/proper/commons-beanutils/)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.15.
+1.  **Group** : commons-codec. **Name** : commons-codec. **Version** : 1.16.0.
      * **Project URL:** [https://commons.apache.org/proper/commons-codec/](https://commons.apache.org/proper/commons-codec/)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+     * **License:** [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : commons-collections. **Name** : commons-collections. **Version** : 3.2.2.
      * **Project URL:** [http://commons.apache.org/collections/](http://commons.apache.org/collections/)
@@ -5129,7 +5090,7 @@ This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-reflect. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -5157,16 +5118,16 @@ This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-Lice
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.20.**No license information found**
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-common. **Version** : 1.9.23.**No license information found**
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk7. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.20.
+1.  **Group** : org.jetbrains.kotlin. **Name** : kotlin-stdlib-jdk8. **Version** : 1.9.23.
      * **Project URL:** [https://kotlinlang.org/](https://kotlinlang.org/)
      * **License:** [The Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -5280,4 +5241,4 @@ This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-Lice
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 13 17:56:30 WET 2023** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Mar 18 11:51:59 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
