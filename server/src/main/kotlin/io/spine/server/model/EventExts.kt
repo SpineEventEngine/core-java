@@ -30,6 +30,7 @@ package io.spine.server.model
  * The alias for cases of naming collisions between
  * [io.spine.server.model.Nothing] and [kotlin.Nothing].
  */
+@Deprecated(message = "Please use `NoReaction` instead", replaceWith = ReplaceWith("NoReaction"))
 public typealias NothingHappened = Nothing
 
 /**

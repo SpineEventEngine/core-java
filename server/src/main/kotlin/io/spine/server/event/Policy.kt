@@ -66,8 +66,7 @@ import io.spine.string.joinBackticked
  * from your Kotlin method, or `Just.nothing()` from Java.
  *
  * If you need to avoid the naming collision with [kotlin.Nothing], consider using
- * type aliases [NothingHappened][io.spine.server.model.NothingHappened] or
- * [NoReaction][io.spine.server.model.NoReaction].
+ * the [NoReaction][io.spine.server.model.NoReaction] type alias.
  *
  * ### Returning one event
  * To return one event, declare `Just<MyEvent>` as the return type of the [whenever] method.
@@ -91,7 +90,6 @@ import io.spine.string.joinBackticked
  * @see [io.spine.server.tuple.Quartet]
  * @see [io.spine.server.tuple.Quintet]
  * @see [io.spine.server.model.Nothing]
- * @see [io.spine.server.model.NothingHappened]
  * @see [io.spine.server.model.NoReaction]
  */
 public abstract class Policy<E : EventMessage> : AbstractEventReactor(), WithLogging {
