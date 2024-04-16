@@ -36,7 +36,6 @@ import io.spine.internal.dependency.CommonsLogging
 import io.spine.internal.dependency.Dokka
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.FindBugs
-import io.spine.internal.dependency.Grpc
 import io.spine.internal.dependency.Gson
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.Hamcrest
@@ -93,7 +92,6 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         FindBugs.annotations,
         Gson.lib,
         Guava.lib,
-        Grpc.api,
         Kotlin.reflect,
         Kotlin.stdLib,
         Kotlin.stdLibCommon,

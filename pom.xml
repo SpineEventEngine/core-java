@@ -68,7 +68,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.198</version>
+    <version>2.0.0-SNAPSHOT.199</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -110,7 +110,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-runtime</artifactId>
-    <version>2.0.0-SNAPSHOT.110</version>
+    <version>2.0.0-SNAPSHOT.132</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -198,7 +198,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
-    <version>3.24.1</version>
+    <version>3.25.1</version>
   </dependency>
   <dependency>
     <groupId>com.puppycrawl.tools</groupId>
@@ -213,17 +213,17 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.57.2</version>
+    <version>1.59.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-fat-cli</artifactId>
-    <version>0.13.1</version>
+    <version>0.20.7</version>
   </dependency>
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-protoc</artifactId>
-    <version>0.13.1</version>
+    <version>0.20.7</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
@@ -233,43 +233,48 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-annotation</artifactId>
-    <version>2.0.0-SNAPSHOT.172</version>
+    <version>2.0.0-SNAPSHOT.205</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-base</artifactId>
-    <version>2.0.0-SNAPSHOT.172</version>
+    <version>2.0.0-SNAPSHOT.205</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-checks</artifactId>
-    <version>2.0.0-SNAPSHOT.172</version>
+    <version>2.0.0-SNAPSHOT.205</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
+    <artifactId>spine-mc-java-entity</artifactId>
+    <version>2.0.0-SNAPSHOT.205</version>
+  </dependency>
+  <dependency>
+    <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-plugins</artifactId>
-    <version>2.0.0-SNAPSHOT.172</version>
+    <version>2.0.0-SNAPSHOT.205</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-rejection</artifactId>
-    <version>2.0.0-SNAPSHOT.172</version>
+    <version>2.0.0-SNAPSHOT.205</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-tool-base</artifactId>
-    <version>2.0.0-SNAPSHOT.186</version>
+    <version>2.0.0-SNAPSHOT.208</version>
   </dependency>
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java</artifactId>
-    <version>2.0.0-SNAPSHOT.110</version>
+    <version>2.0.0-SNAPSHOT.132</version>
   </dependency>
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-bundle</artifactId>
-    <version>2.0.0-SNAPSHOT.110</version>
+    <version>2.0.0-SNAPSHOT.132</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>

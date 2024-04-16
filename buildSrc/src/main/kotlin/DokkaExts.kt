@@ -143,6 +143,7 @@ fun TaskContainer.dokkaHtmlTask(): DokkaTask? = this.findByName("dokkaHtml") as 
  * Dokka can properly generate documentation for either Kotlin or Java depending on
  * the configuration, but not both.
  */
+@Suppress("unused")
 internal fun GradleDokkaSourceSetBuilder.onlyJavaSources(): FileCollection {
     return sourceRoots.filter(File::isJavaSourceDirectory)
 }
@@ -166,6 +167,19 @@ fun Project.dokkaKotlinJar(): TaskProvider<Jar> = tasks.getOrCreate("dokkaKotlin
         this@getOrCreate.dependsOn(dokkaTask)
     }
 }
+
+/**
+ * Tells if this task belongs to the execution graph which contains publishing tasks.
+ *
+ * The task `"publishToMavenLocal"` is excluded from the check because it is a part of
+ * the local testing workflow.
+ */
+fun DokkaTask.isInPublishingGraph(): Boolean =
+    project.gradle.taskGraph.allTasks.any {
+        with(it.name) {
+            startsWith("publish") && !startsWith("publishToMavenLocal")
+        }
+    }
 
 /**
  * Locates or creates `dokkaJavaJar` task in this [Project].

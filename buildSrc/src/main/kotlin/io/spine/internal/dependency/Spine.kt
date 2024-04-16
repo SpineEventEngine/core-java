@@ -45,7 +45,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
          */
-        const val base = "2.0.0-SNAPSHOT.198"
+        const val base = "2.0.0-SNAPSHOT.199"
 
         /**
          * The version of [Spine.reflect].
@@ -75,7 +75,7 @@ object Spine {
          * @see [Spine.CoreJava.server]
          * @see <a href="https://github.com/SpineEventEngine/core-java">core-java</a>
          */
-        const val core = "2.0.0-SNAPSHOT.175"
+        const val core = "2.0.0-SNAPSHOT.176"
 
         /**
          * The version of [Spine.modelCompiler].
@@ -89,7 +89,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/mc-java">spine-mc-java</a>
          */
-        const val mcJava = "2.0.0-SNAPSHOT.172"
+        const val mcJava = "2.0.0-SNAPSHOT.205"
 
         /**
          * The version of [Spine.baseTypes].
@@ -124,7 +124,7 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/tool-base">spine-tool-base</a>
          */
-        const val toolBase = "2.0.0-SNAPSHOT.192"
+        const val toolBase = "2.0.0-SNAPSHOT.212"
 
         /**
          * The version of [Spine.javadocTools].
@@ -138,10 +138,6 @@ object Spine {
 
     @Deprecated("Use `Logging.lib` instead.", ReplaceWith("Logging.lib"))
     const val logging = "$group:spine-logging:${ArtifactVersion.logging}"
-    @Deprecated("Use `Logging.context` instead.", ReplaceWith("Logging.context"))
-    const val loggingContext = "$group:spine-logging-context:${ArtifactVersion.logging}"
-    @Deprecated("Use `Logging.backend` instead.", ReplaceWith("Logging.backend"))
-    const val loggingBackend = "$group:spine-logging-backend:${ArtifactVersion.logging}"
 
     const val reflect = "$group:spine-reflect:${ArtifactVersion.reflect}"
     const val baseTypes = "$group:spine-base-types:${ArtifactVersion.baseTypes}"
@@ -151,6 +147,8 @@ object Spine {
 
     const val testlib = "$toolsGroup:spine-testlib:${ArtifactVersion.testlib}"
     const val testUtilTime = "$toolsGroup:spine-testutil-time:${ArtifactVersion.time}"
+    const val psiJava = "$toolsGroup:spine-psi-java:${ArtifactVersion.toolBase}"
+    const val psiJavaBundle = "$toolsGroup:spine-psi-java-bundle:${ArtifactVersion.toolBase}"
     const val toolBase = "$toolsGroup:spine-tool-base:${ArtifactVersion.toolBase}"
     const val pluginBase = "$toolsGroup:spine-plugin-base:${ArtifactVersion.toolBase}"
     const val pluginTestlib = "$toolsGroup:spine-plugin-testlib:${ArtifactVersion.toolBase}"
@@ -173,7 +171,7 @@ object Spine {
         // Transitive dependencies.
         // Make `public` and use them to force a version in a particular repository, if needed.
         internal const val julBackend = "$group:spine-logging-jul-backend:$version"
-        const val middleware = "$group:spine-logging-middleware:$version"
+        internal const val middleware = "$group:spine-logging-middleware:$version"
         internal const val platformGenerator = "$group:spine-logging-platform-generator:$version"
         internal const val jvmDefaultPlatform = "$group:spine-logging-jvm-default-platform:$version"
 

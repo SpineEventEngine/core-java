@@ -66,13 +66,12 @@ buildscript {
                 @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
                     io.spine.internal.dependency.Kotlin.stdLibJdk7,
+                    io.spine.internal.dependency.Grpc.api,
                     spine.base,
                     spine.toolBase,
                     spine.server,
                     spine.reflect,
                     io.spine.internal.dependency.Spine.Logging.lib,
-                    io.spine.internal.dependency.Spine.Logging.middleware,
-                    io.spine.internal.dependency.Spine.Logging.floggerApi,
                     io.spine.internal.dependency.Validation.runtime,
                 )
             }
@@ -349,16 +348,16 @@ fun Subproject.forceConfigurations() {
                     Validation.runtime,
                     Spine.time,
                     Spine.Logging.lib,
-                    Spine.Logging.middleware,
-                    Spine.Logging.floggerApi,
                     Spine.baseTypes,
                     Spine.change,
                     Spine.reflect,
+                    Spine.server,
                     Spine.testlib,
                     Spine.toolBase,
                     Spine.pluginBase,
 
                     Grpc.core,
+                    Grpc.api,
                     Grpc.protobuf,
                     Grpc.stub
                 )

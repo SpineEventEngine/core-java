@@ -33,11 +33,32 @@ package io.spine.internal.dependency
  */
 @Suppress("unused", "ConstPropertyName")
 object Validation {
-    const val version = "2.0.0-SNAPSHOT.110"
+    /**
+     * The version of the Validation library artifacts.
+     */
+    const val version = "2.0.0-SNAPSHOT.132"
+
+    /**
+     * The distinct version of the Validation library used by build tools during
+     * the transition from a previous version when breaking API changes are introduced.
+     *
+     * When Validation is used both for building the project and as a part of the project's
+     * transitional dependencies, this is the version used to build the project itself to
+     * avoid errors caused by incompatible API changes.
+     */
+    const val dogfoodingVersion = "2.0.0-SNAPSHOT.132"
+
     const val group = "io.spine.validation"
-    const val runtime = "$group:spine-validation-java-runtime:$version"
-    const val java = "$group:spine-validation-java:$version"
-    const val javaBundle = "$group:spine-validation-java-bundle:$version"
-    const val model = "$group:spine-validation-model:$version"
-    const val config = "$group:spine-validation-configuration:$version"
+    private const val prefix = "spine-validation"
+
+    const val runtime = "$group:$prefix-java-runtime:$version"
+    const val java = "$group:$prefix-java:$version"
+
+    /** Obtains the artifact for the `java-bundle` artifact of the given version. */
+    fun javaBundle(version: String) = "$group:$prefix-java-bundle:$version"
+
+    val javaBundle = javaBundle(version)
+
+    const val model = "$group:$prefix-model:$version"
+    const val config = "$group:$prefix-configuration:$version"
 }
