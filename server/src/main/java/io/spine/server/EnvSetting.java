@@ -34,6 +34,8 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -87,20 +89,18 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>{@code EnvSetting} values do not determine the environment themselves: it's up to the
  * caller to ask for the appropriate one.
  *
- * <p>This implementation does <b>not</b> perform any synchronization, thus, if different threads
- * {@linkplain #use(Object, Class) configure} and {@linkplain #value(Class) read the value},
- * no effort is made to ensure any consistency.
- *
  * @param <V>
  *         the type of value
  */
-final class EnvSetting<V> {
+public final class EnvSetting<V> {
 
     private final Map<Class<? extends EnvironmentType>, Value<V>> environmentValues =
             new HashMap<>();
 
     private final Map<Class<? extends EnvironmentType>, Supplier<V>> fallbacks =
             new HashMap<>();
+
+    private final ReadWriteLock locker = new ReentrantReadWriteLock();
 
     /**
      * Creates a new instance without any fallback configuration.
@@ -115,7 +115,9 @@ final class EnvSetting<V> {
      * {@link #value(Class)} and {@link #optionalValue(Class)} return the {@code fallback} result.
      */
     EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
-        this.fallbacks.put(type, fallback);
+        lockWriteOperation(() -> {
+            this.fallbacks.put(type, fallback);
+        });
     }
 
     /**
@@ -123,8 +125,7 @@ final class EnvSetting<V> {
      * empty {@code Optional} otherwise.
      */
     Optional<V> optionalValue(Class<? extends EnvironmentType> type) {
-        Optional<V> result = valueFor(type);
-        return result;
+        return valueFor(type);
     }
 
     /**
@@ -155,12 +156,18 @@ final class EnvSetting<V> {
      *        unnecessary value instantiation.
      */
     void apply(SettingOperation<V> operation) throws Exception {
-        for (Value<V> v : environmentValues.values()) {
-            if(v.isResolved()) {
-                V value = v.get();
-                operation.accept(value);
+        lockWriteOperation(() -> {
+            for (Value<V> v : environmentValues.values()) {
+                if (v.isResolved()) {
+                    V value = v.get();
+                    try {
+                        operation.accept(value);
+                    } catch (Exception e) {
+                        throw illegalStateWithCauseOf(e);
+                    }
+                }
             }
-        }
+        });
     }
 
     /**
@@ -197,7 +204,7 @@ final class EnvSetting<V> {
      */
     @VisibleForTesting
     void reset() {
-        environmentValues.clear();
+        lockWriteOperation(environmentValues::clear);
     }
 
     /**
@@ -209,9 +216,11 @@ final class EnvSetting<V> {
      *         the type of the environment
      */
     void use(V value, Class<? extends EnvironmentType> type) {
-        checkNotNull(value);
-        checkNotNull(type);
-        this.environmentValues.put(type, new Value<>(value));
+        lockWriteOperation(() -> {
+            checkNotNull(value);
+            checkNotNull(type);
+            this.environmentValues.put(type, new Value<>(value));
+        });
     }
 
     /**
@@ -227,16 +236,18 @@ final class EnvSetting<V> {
      *         the type of the environment
      */
     void lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
-        checkNotNull(value);
-        checkNotNull(type);
-        this.environmentValues.put(type, new Value<>(value));
+        lockWriteOperation(() -> {
+            checkNotNull(value);
+            checkNotNull(type);
+            this.environmentValues.put(type, new Value<>(value));
+        });
     }
 
     private Optional<V> valueFor(Class<? extends EnvironmentType> type) {
         checkNotNull(type);
-        Value<V> value = this.environmentValues.get(type);
+        Value<V> value = lockReadOperation(() -> this.environmentValues.get(type));
         if (value == null) {
-            Supplier<V> resultSupplier = this.fallbacks.get(type);
+            Supplier<V> resultSupplier = lockReadOperation(() -> this.fallbacks.get(type));
             if (resultSupplier == null) {
                 return Optional.empty();
             }
@@ -247,6 +258,46 @@ final class EnvSetting<V> {
         }
         V result = value.get();
         return Optional.of(result);
+    }
+
+    /**
+     * Executes the provided operation with a write lock.
+     *
+     * <p>This ensures that the operation is executed with exclusive access, preventing
+     * other threads from performing read or write operations until the lock is released.
+     *
+     * @param operation
+     *         the operation to execute
+     */
+    private void lockWriteOperation(Runnable operation) {
+        locker.writeLock()
+              .lock();
+        try {
+            operation.run();
+        } finally {
+            locker.writeLock()
+                  .unlock();
+        }
+    }
+
+    /**
+     * Executes the provided operation with a read lock and returns the result.
+     *
+     * <p>This ensures that the operation is executed with shared access, allowing multiple
+     * threads to read concurrently, but preventing write operations until the lock is released.
+     *
+     * @param operation
+     *         the operation to execute
+     */
+    private <T> T lockReadOperation(Supplier<T> operation) {
+        locker.readLock()
+              .lock();
+        try {
+            return operation.get();
+        } finally {
+            locker.readLock()
+                  .unlock();
+        }
     }
 
     /**
