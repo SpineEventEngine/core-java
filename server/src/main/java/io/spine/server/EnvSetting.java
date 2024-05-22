@@ -27,6 +27,7 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.environment.Environment;
 import io.spine.environment.EnvironmentType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -36,6 +37,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -173,6 +175,18 @@ final class EnvSetting<V> {
         return result.orElseThrow(
                 () -> newIllegalStateException("Env setting for environment `%s` is unset.",
                                                type));
+    }
+
+    /**
+     * Returns the value corresponding to the current environment type.
+     *
+     * <p>If for the current environment, there is no value set in this setting
+     * return a fallback value. If no fallback was configured,
+     * an {@code IllegalStateException} is thrown.
+     */
+    V value() {
+        Environment environment = Environment.instance();
+        return value(environment.type());
     }
 
     /**
