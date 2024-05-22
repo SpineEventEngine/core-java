@@ -27,6 +27,7 @@
 package io.spine.server;
 
 import io.spine.environment.DefaultMode;
+import io.spine.environment.Environment;
 import io.spine.environment.EnvironmentType;
 import io.spine.environment.Tests;
 import io.spine.server.given.environment.Local;
@@ -109,6 +110,16 @@ class EnvSettingTest {
         @DisplayName("for a user-defined environment type")
         void forUserDefinedType() {
             testReturnsForEnv(Local.class);
+        }
+
+        @Test
+        @DisplayName("for the current environment type")
+        void forCurrentEnv() {
+            Environment environment = Environment.instance();
+            InMemoryStorageFactory factory = InMemoryStorageFactory.newInstance();
+            EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+            storageFactory.use(factory, environment.type());
+            assertThat(storageFactory.value()).isSameInstanceAs(factory);
         }
 
         private void testReturnsForEnv(Class<? extends EnvironmentType<?>> type) {
