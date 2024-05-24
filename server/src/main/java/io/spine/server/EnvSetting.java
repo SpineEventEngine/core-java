@@ -196,6 +196,13 @@ public final class EnvSetting<V> {
         return value(environment.type());
     }
 
+    V valueFor(Supplier<Class<? extends EnvironmentType>> type) {
+        return lockReadOperation(() -> {
+            Class<? extends EnvironmentType> environmentType = type.get();
+            return this.environmentValues.get(environmentType).value;
+        });
+    }
+
     /**
      * Clears this setting, forgetting all of the configured values.
      *
@@ -219,6 +226,14 @@ public final class EnvSetting<V> {
         lockWriteOperation(() -> {
             checkNotNull(value);
             checkNotNull(type);
+            this.environmentValues.put(type, new Value<>(value));
+        });
+    }
+
+    void useWithInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
+        lockWriteOperation(() -> {
+            checkNotNull(type);
+            V value = initializer.get();
             this.environmentValues.put(type, new Value<>(value));
         });
     }

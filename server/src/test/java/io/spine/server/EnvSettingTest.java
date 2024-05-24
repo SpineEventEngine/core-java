@@ -34,18 +34,32 @@ import io.spine.server.given.environment.Local;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.storage.system.given.MemoizingStorageFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.util.concurrent.Uninterruptibles.awaitUninterruptibly;
+import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.testing.Assertions.assertNpe;
+import static io.spine.testing.Tests.halt;
 import static io.spine.testing.Tests.nullRef;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static java.util.UUID.randomUUID;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @DisplayName("`EnvSetting` should")
 @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -230,6 +244,96 @@ class EnvSettingTest {
                     .isPresent();
             assertThat(resolved.get()).isTrue();
             assertThat(actual.get()).isSameInstanceAs(factory);
+        }
+    }
+
+    @Nested
+    @DisplayName("be a thread safety")
+    class ThreadSafety {
+
+        private ExecutorService readWriteExecutors;
+        private CountDownLatch latch;
+
+        @BeforeEach
+        void setUp() {
+            readWriteExecutors = Executors.newFixedThreadPool(3);
+            latch = new CountDownLatch(1);
+        }
+
+        @Test
+        @DisplayName("allowing multiple threads to read simultaneously " +
+                "without affecting the stored value")
+        void testReadOperations() {
+            EnvSetting<UUID> setting = new EnvSetting<>();
+            UUID initalValue = randomUUID();
+            setting.use(initalValue, Local.class);
+
+            Future<?> readBlockingFuture = readWriteExecutors.submit(() -> {
+                UUID actualValue = setting.valueFor(() -> {
+                    awaitUninterruptibly(latch);
+                    return Local.class;
+                });
+                assertThat(actualValue).isEqualTo(initalValue);
+            });
+
+            sleepUninterruptibly(100, MILLISECONDS);
+
+            UUID actualValue = setting.value(Local.class);
+            assertThat(actualValue).isEqualTo(initalValue);
+
+            latch.countDown();
+
+            awaitFutureCompletion(readBlockingFuture);
+        }
+
+        @Test
+        @DisplayName("allowing a write operation to holds exclusive access, " +
+                "blocking concurrent reads and writes until complete")
+        void testWriteOperations() {
+            EnvSetting<UUID> setting = new EnvSetting<>();
+            UUID initialValue = randomUUID();
+
+            Future<?> writeBlockingFuture = readWriteExecutors.submit(() -> {
+                setting.useWithInit(() -> {
+                    awaitUninterruptibly(latch);
+                    return initialValue;
+                }, Local.class);
+            });
+
+            sleepUninterruptibly(100, MILLISECONDS);
+
+            UUID rewrittenValue = randomUUID();
+            Future<?> writeFuture = readWriteExecutors.submit(() -> {
+                assertThat(setting.value(Local.class)).isEqualTo(initialValue);
+                setting.use(rewrittenValue, Local.class);
+            });
+
+            sleepUninterruptibly(100, MILLISECONDS);
+
+            latch.countDown();
+
+            awaitFutureCompletion(writeFuture);
+            awaitFutureCompletion(writeBlockingFuture);
+
+            assertThat(setting.value(Local.class)).isEqualTo(rewrittenValue);
+        }
+
+        @AfterEach
+        void tearDown() {
+            try {
+                readWriteExecutors.shutdownNow();
+                readWriteExecutors.awaitTermination(500, MILLISECONDS);
+            } catch (InterruptedException e) {
+                throw illegalStateWithCauseOf(e);
+            }
+        }
+
+        private void awaitFutureCompletion(Future<?> future) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw illegalStateWithCauseOf(e);
+            }
         }
     }
 
