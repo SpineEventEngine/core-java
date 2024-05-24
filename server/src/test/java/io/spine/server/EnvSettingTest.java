@@ -269,11 +269,12 @@ class EnvSettingTest {
             setting.use(initalValue, Local.class);
 
             Future<?> readBlockingFuture = readWriteExecutors.submit(() -> {
-                UUID actualValue = setting.valueFor(() -> {
+                Optional<UUID> actualValue = setting.valueFor(() -> {
                     awaitUninterruptibly(latch);
                     return Local.class;
                 });
-                assertThat(actualValue).isEqualTo(initalValue);
+                assertThat(actualValue).isPresent();
+                assertThat(actualValue.get()).isEqualTo(initalValue);
             });
 
             sleepUninterruptibly(100, MILLISECONDS);

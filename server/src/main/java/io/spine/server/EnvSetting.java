@@ -105,7 +105,7 @@ public final class EnvSetting<V> {
     /**
      * Creates a new instance without any fallback configuration.
      */
-    EnvSetting() {
+    public EnvSetting() {
     }
 
     /**
@@ -114,7 +114,7 @@ public final class EnvSetting<V> {
      * <p>If a value for {@code type} is not {@linkplain #use(Object, Class) set explicitly},
      * {@link #value(Class)} and {@link #optionalValue(Class)} return the {@code fallback} result.
      */
-    EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
+    public EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
         lockWriteOperation(() -> {
             this.fallbacks.put(type, fallback);
         });
@@ -124,7 +124,7 @@ public final class EnvSetting<V> {
      * If the value for the specified environment has been configured, returns it. Returns an
      * empty {@code Optional} otherwise.
      */
-    Optional<V> optionalValue(Class<? extends EnvironmentType> type) {
+    public Optional<V> optionalValue(Class<? extends EnvironmentType> type) {
         return valueFor(type);
     }
 
@@ -138,7 +138,7 @@ public final class EnvSetting<V> {
      * @param operation
      *         operation to run
      */
-    void ifPresentForEnvironment(Class<? extends EnvironmentType> type,
+    public void ifPresentForEnvironment(Class<? extends EnvironmentType> type,
                                  SettingOperation<V> operation) throws Exception {
         Optional<V> value = valueFor(type);
         if (value.isPresent()) {
@@ -155,7 +155,7 @@ public final class EnvSetting<V> {
      * @apiNote The not yet run {@linkplain #fallbacks fallback suppliers} are ignored to avoid an
      *        unnecessary value instantiation.
      */
-    void apply(SettingOperation<V> operation) throws Exception {
+    public void apply(SettingOperation<V> operation) throws Exception {
         lockWriteOperation(() -> {
             for (Value<V> v : environmentValues.values()) {
                 if (v.isResolved()) {
@@ -176,7 +176,7 @@ public final class EnvSetting<V> {
      * <p>If it is not set, returns a fallback value. If no fallback was configured, an
      * {@code IllegalStateException} is thrown.
      */
-    V value(Class<? extends EnvironmentType> type) {
+    public V value(Class<? extends EnvironmentType> type) {
         checkNotNull(type);
         Optional<V> result = valueFor(type);
         return result.orElseThrow(
@@ -191,15 +191,24 @@ public final class EnvSetting<V> {
      * return a fallback value. If no fallback was configured,
      * an {@code IllegalStateException} is thrown.
      */
-    V value() {
+    public V value() {
         Environment environment = Environment.instance();
         return value(environment.type());
     }
 
-    V valueFor(Supplier<Class<? extends EnvironmentType>> type) {
+    /**
+     * This is a test-only method allowing to retrieve the value for environment type
+     * passed through {@code Supplier}.
+     */
+    Optional<V> valueFor(Supplier<Class<? extends EnvironmentType>> type) {
         return lockReadOperation(() -> {
-            Class<? extends EnvironmentType> environmentType = type.get();
-            return this.environmentValues.get(environmentType).value;
+            Class<? extends EnvironmentType> envType = type.get();
+            checkNotNull(envType);
+            Value<V> value = this.environmentValues.get(envType);
+            if (value == null) {
+                return Optional.empty();
+            }
+            return Optional.of(value.value);
         });
     }
 
@@ -209,8 +218,7 @@ public final class EnvSetting<V> {
      * <p>Cached default values are also cleared and will be recalculated using the {@code
      * Supplier} passed to the {@linkplain #EnvSetting(Class, Supplier) constructor}.
      */
-    @VisibleForTesting
-    void reset() {
+    public void reset() {
         lockWriteOperation(environmentValues::clear);
     }
 
@@ -222,7 +230,7 @@ public final class EnvSetting<V> {
      * @param type
      *         the type of the environment
      */
-    void use(V value, Class<? extends EnvironmentType> type) {
+    public void use(V value, Class<? extends EnvironmentType> type) {
         lockWriteOperation(() -> {
             checkNotNull(value);
             checkNotNull(type);
@@ -230,10 +238,15 @@ public final class EnvSetting<V> {
         });
     }
 
+    /**
+     * This is a test-only method allowing to set the value for the specified environment type
+     * using the provided initializer.
+     */
     void useWithInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
         lockWriteOperation(() -> {
             checkNotNull(type);
             V value = initializer.get();
+            checkNotNull(value);
             this.environmentValues.put(type, new Value<>(value));
         });
     }
@@ -250,7 +263,7 @@ public final class EnvSetting<V> {
      * @param type
      *         the type of the environment
      */
-    void lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
+    public void lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
         lockWriteOperation(() -> {
             checkNotNull(value);
             checkNotNull(type);
