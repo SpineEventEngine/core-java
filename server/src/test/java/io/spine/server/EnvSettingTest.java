@@ -283,7 +283,6 @@ class EnvSettingTest {
                 "blocking concurrent reads and writes until complete")
         void testWriteOperations() {
             UUID initialValue = randomUUID();
-
             Future<?> writeBlockingFuture = runBlockingWriteOperation(Local.class, initialValue);
             sleepUninterruptibly(100, MILLISECONDS);
 
