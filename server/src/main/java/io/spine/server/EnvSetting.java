@@ -45,21 +45,20 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * A mutable value that may differ between {@linkplain EnvironmentType environment types}.
  *
  * <p>For example:
- * <pre>
- * EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
- * storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class);
- * storageFactory.use(new MemoizingStorageFactory(), Tests.class);
+ * <pre>{@code
+ *     EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
+ *     storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class);
+ *     storageFactory.use(new MemoizingStorageFactory(), Tests.class);
  *
- * // Provides the `StorageFactory` for the current environment of the application.
- * StorageFactory currentStorageFactory = storageFactory.value();
- * </pre>
+ *     // Provides the `StorageFactory` for the current environment of the application.
+ *     StorageFactory currentStorageFactory = storageFactory.value();
+ * }</pre>
  *
  * <h1>Fallback</h1>
  * <p>{@code EnvSetting} allows to configure a default value for an environment type. It is used
  * when the value for the environment hasn't been {@linkplain #use(Object, Class) set explicitly}.
- * <pre>
+ * <pre>{@code
  *      // Assuming the environment is `Tests`.
- *
  *     StorageFactory fallbackStorageFactory = createStorageFactory();
  *     EnvSetting<StorageFactory> setting =
  *         new EnvSetting<>(Tests.class, () -> fallbackStorageFactory);
@@ -67,14 +66,13 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *     // `use` was never called, so the fallback value is calculated and returned.
  *     assertThat(setting.optionalValue()).isPresent();
  *     assertThat(setting.value()).isSameInstanceAs(fallbackStorageFactory);
- * </pre>
+ * }</pre>
  *
  * <p>Fallback values are calculated once on first {@linkplain #value(Class) access} for the
  * specified environment. Every subsequent access returns the cached value.
- * <pre>
+ * <pre>{@code
  *      // This `Supplier` is calculated only once.
  *     Supplier<StorageFactory> fallbackStorage = InMemoryStorageFactory::newInstance;
- *
  *     EnvSetting<StorageFactory> setting = new EnvSetting<>(Tests.class, fallbackStorage);
  *
  *     // `Supplier` is calculated and cached.
@@ -82,7 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  *     // Fallback value is taken from cache.
  *     StorageFactory theSameFactory = setting.value();
- * </pre>
+ * }</pre>
  *
  * @param <V>
  *         the type of value
