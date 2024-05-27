@@ -282,7 +282,6 @@ class EnvSettingTest {
         @DisplayName("allowing a write operation to holds exclusive access, " +
                 "blocking concurrent reads and writes until complete")
         void testWriteOperations() {
-            EnvSetting<UUID> setting = new EnvSetting<>();
             UUID initialValue = randomUUID();
 
             Future<?> writeBlockingFuture = runBlockingWriteOperation(Local.class, initialValue);
