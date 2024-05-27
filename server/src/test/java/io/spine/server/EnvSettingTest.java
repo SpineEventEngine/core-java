@@ -247,7 +247,7 @@ class EnvSettingTest {
     }
 
     @Nested
-    @DisplayName("be a thread safety")
+    @DisplayName("be thread-safe")
     class ThreadSafety {
 
         private ExecutorService readWriteExecutors;
@@ -315,19 +315,19 @@ class EnvSettingTest {
          *
          * @param setting
          *         the environment setting to read from
-         * @param value
+         * @param expectedValue
          *         the expected value to verify the result of the read operation
          * @param <T>
          *         the type of value in the environment setting
          */
-        private <T> Future<?> runBlockingReadOperation(EnvSetting<T> setting, T value) {
+        private <T> Future<?> runBlockingReadOperation(EnvSetting<T> setting, T expectedValue) {
             return readWriteExecutors.submit(() -> {
                 Optional<T> actualValue = setting.valueFor(() -> {
                     awaitUninterruptibly(latch);
                     return Local.class;
                 });
                 assertThat(actualValue).isPresent();
-                assertThat(actualValue.get()).isEqualTo(value);
+                assertThat(actualValue.get()).isEqualTo(expectedValue);
             });
         }
 
