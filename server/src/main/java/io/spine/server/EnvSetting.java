@@ -26,7 +26,6 @@
 
 package io.spine.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.environment.Environment;
 import io.spine.environment.EnvironmentType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -242,7 +241,7 @@ public final class EnvSetting<V> {
      * This is a test-only method allowing to set the value for the specified environment type
      * using the provided initializer.
      */
-    void useWithInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
+    void useViaInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
         lockWriteOperation(() -> {
             checkNotNull(type);
             V value = initializer.get();
