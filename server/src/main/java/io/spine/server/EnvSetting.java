@@ -114,7 +114,7 @@ public final class EnvSetting<V> {
      * {@link #value(Class)} and {@link #optionalValue(Class)} return the {@code fallback} result.
      */
     public EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
-        lockUpdateOperation(() -> {
+        lockWriteOperation(() -> {
             this.fallbacks.put(type, fallback);
         });
     }
@@ -154,8 +154,8 @@ public final class EnvSetting<V> {
      * @apiNote The not yet run {@linkplain #fallbacks fallback suppliers} are ignored to avoid an
      *        unnecessary value instantiation.
      */
-    public void apply(SettingOperation<V> operation) throws Exception {
-        lockUpdateOperation(() -> {
+    public void apply(SettingOperation<V> operation) {
+        lockWriteOperation(() -> {
             for (Value<V> v : environmentValues.values()) {
                 if (v.isResolved()) {
                     V value = v.get();
@@ -196,8 +196,8 @@ public final class EnvSetting<V> {
     }
 
     /**
-     * This is a test-only method allowing to retrieve the value for environment type
-     * passed through {@code Supplier}.
+     * This is a test-only method that allows the retrieval of the value
+     * for an environment type passed through a {@code Supplier}.
      *
      * <p>The environment type is retrieved from {@code Supplier} under the read lock
      * for the possibility of controlling this lock.
@@ -222,7 +222,7 @@ public final class EnvSetting<V> {
      * Supplier} passed to the {@linkplain #EnvSetting(Class, Supplier) constructor}.
      */
     public void reset() {
-        lockUpdateOperation(environmentValues::clear);
+        lockWriteOperation(environmentValues::clear);
     }
 
     /**
@@ -236,21 +236,21 @@ public final class EnvSetting<V> {
     public void use(V value, Class<? extends EnvironmentType> type) {
         checkNotNull(value);
         checkNotNull(type);
-        lockUpdateOperation(() -> {
+        lockWriteOperation(() -> {
             this.environmentValues.put(type, new Value<>(value));
         });
     }
 
     /**
-     * This is a test-only method allowing to set the value for the specified environment type
-     * using the provided initializer.
+     * This is a test-only method that allows setting the value
+     * for the specified environment type using the provided initializer.
      *
      * <p>The value to set is initialized under the write lock
      * for the possibility of controlling this lock.
      */
     void useViaInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
         checkNotNull(type);
-        lockUpdateOperation(() -> {
+        lockWriteOperation(() -> {
             V value = initializer.get();
             checkNotNull(value);
             this.environmentValues.put(type, new Value<>(value));
@@ -272,7 +272,7 @@ public final class EnvSetting<V> {
     public void lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
         checkNotNull(value);
         checkNotNull(type);
-        lockUpdateOperation(() -> {
+        lockWriteOperation(() -> {
             this.environmentValues.put(type, new Value<>(value));
         });
     }
@@ -295,15 +295,15 @@ public final class EnvSetting<V> {
     }
 
     /**
-     * Executes the provided update operation with a write lock.
+     * Executes the provided operation with a write lock.
      *
      * <p>This ensures that the operation is executed with exclusive access, preventing
-     * other threads from performing read or update operations until the lock is released.
+     * other threads from performing read or write operations until the lock is released.
      *
      * @param operation
      *         the operation to execute
      */
-    private void lockUpdateOperation(Runnable operation) {
+    private void lockWriteOperation(Runnable operation) {
         locker.writeLock()
               .lock();
         try {
