@@ -114,7 +114,7 @@ public final class EnvSetting<V> {
      * {@link #value(Class)} and {@link #optionalValue(Class)} return the {@code fallback} result.
      */
     public EnvSetting(Class<? extends EnvironmentType> type, Supplier<V> fallback) {
-        lockWriteOperation(() -> {
+        lockUpdateOperation(() -> {
             this.fallbacks.put(type, fallback);
         });
     }
@@ -155,7 +155,7 @@ public final class EnvSetting<V> {
      *        unnecessary value instantiation.
      */
     public void apply(SettingOperation<V> operation) throws Exception {
-        lockWriteOperation(() -> {
+        lockUpdateOperation(() -> {
             for (Value<V> v : environmentValues.values()) {
                 if (v.isResolved()) {
                     V value = v.get();
@@ -198,17 +198,21 @@ public final class EnvSetting<V> {
     /**
      * This is a test-only method allowing to retrieve the value for environment type
      * passed through {@code Supplier}.
+     *
+     * <p>The environment type is retrieved from {@code Supplier} under the read lock
+     * for the possibility of controlling this lock.
      */
     Optional<V> valueFor(Supplier<Class<? extends EnvironmentType>> type) {
-        return lockReadOperation(() -> {
+        Value<V> value = lockReadOperation(() -> {
             Class<? extends EnvironmentType> envType = type.get();
             checkNotNull(envType);
-            Value<V> value = this.environmentValues.get(envType);
-            if (value == null) {
-                return Optional.empty();
-            }
-            return Optional.of(value.value);
+            return this.environmentValues.get(envType);
+
         });
+        if (value == null) {
+            return Optional.empty();
+        }
+        return Optional.of(value.value);
     }
 
     /**
@@ -218,7 +222,7 @@ public final class EnvSetting<V> {
      * Supplier} passed to the {@linkplain #EnvSetting(Class, Supplier) constructor}.
      */
     public void reset() {
-        lockWriteOperation(environmentValues::clear);
+        lockUpdateOperation(environmentValues::clear);
     }
 
     /**
@@ -230,9 +234,9 @@ public final class EnvSetting<V> {
      *         the type of the environment
      */
     public void use(V value, Class<? extends EnvironmentType> type) {
-        lockWriteOperation(() -> {
-            checkNotNull(value);
-            checkNotNull(type);
+        checkNotNull(value);
+        checkNotNull(type);
+        lockUpdateOperation(() -> {
             this.environmentValues.put(type, new Value<>(value));
         });
     }
@@ -240,10 +244,13 @@ public final class EnvSetting<V> {
     /**
      * This is a test-only method allowing to set the value for the specified environment type
      * using the provided initializer.
+     *
+     * <p>The value to set is initialized under the write lock
+     * for the possibility of controlling this lock.
      */
     void useViaInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
-        lockWriteOperation(() -> {
-            checkNotNull(type);
+        checkNotNull(type);
+        lockUpdateOperation(() -> {
             V value = initializer.get();
             checkNotNull(value);
             this.environmentValues.put(type, new Value<>(value));
@@ -263,9 +270,9 @@ public final class EnvSetting<V> {
      *         the type of the environment
      */
     public void lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
-        lockWriteOperation(() -> {
-            checkNotNull(value);
-            checkNotNull(type);
+        checkNotNull(value);
+        checkNotNull(type);
+        lockUpdateOperation(() -> {
             this.environmentValues.put(type, new Value<>(value));
         });
     }
@@ -288,15 +295,15 @@ public final class EnvSetting<V> {
     }
 
     /**
-     * Executes the provided operation with a write lock.
+     * Executes the provided update operation with a write lock.
      *
      * <p>This ensures that the operation is executed with exclusive access, preventing
-     * other threads from performing read or write operations until the lock is released.
+     * other threads from performing read or update operations until the lock is released.
      *
      * @param operation
      *         the operation to execute
      */
-    private void lockWriteOperation(Runnable operation) {
+    private void lockUpdateOperation(Runnable operation) {
         locker.writeLock()
               .lock();
         try {
