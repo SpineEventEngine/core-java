@@ -55,7 +55,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.awaitUninterruptibly;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.testing.Assertions.assertNpe;
-import static io.spine.testing.Tests.halt;
 import static io.spine.testing.Tests.nullRef;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.UUID.randomUUID;
@@ -265,25 +264,16 @@ class EnvSettingTest {
                 "without affecting the stored value")
         void testReadOperations() {
             EnvSetting<UUID> setting = new EnvSetting<>();
-            UUID initalValue = randomUUID();
-            setting.use(initalValue, Local.class);
+            UUID initialValue = randomUUID();
+            setting.use(initialValue, Local.class);
 
-            Future<?> readBlockingFuture = readWriteExecutors.submit(() -> {
-                Optional<UUID> actualValue = setting.valueFor(() -> {
-                    awaitUninterruptibly(latch);
-                    return Local.class;
-                });
-                assertThat(actualValue).isPresent();
-                assertThat(actualValue.get()).isEqualTo(initalValue);
-            });
-
+            Future<?> readBlockingFuture = runBlockingReadOperation(setting, initialValue);
             sleepUninterruptibly(100, MILLISECONDS);
 
             UUID actualValue = setting.value(Local.class);
-            assertThat(actualValue).isEqualTo(initalValue);
+            assertThat(actualValue).isEqualTo(initialValue);
 
             latch.countDown();
-
             awaitFutureCompletion(readBlockingFuture);
         }
 
@@ -294,25 +284,16 @@ class EnvSettingTest {
             EnvSetting<UUID> setting = new EnvSetting<>();
             UUID initialValue = randomUUID();
 
-            Future<?> writeBlockingFuture = readWriteExecutors.submit(() -> {
-                setting.useWithInit(() -> {
-                    awaitUninterruptibly(latch);
-                    return initialValue;
-                }, Local.class);
-            });
-
+            Future<?> writeBlockingFuture = runBlockingWriteOperation(setting, initialValue);
             sleepUninterruptibly(100, MILLISECONDS);
 
             UUID rewrittenValue = randomUUID();
-            Future<?> writeFuture = readWriteExecutors.submit(() -> {
-                assertThat(setting.value(Local.class)).isEqualTo(initialValue);
-                setting.use(rewrittenValue, Local.class);
-            });
-
+            Future<?> writeFuture = runVerifyingWriteOperation(setting,
+                                                               rewrittenValue,
+                                                               initialValue);
             sleepUninterruptibly(100, MILLISECONDS);
 
             latch.countDown();
-
             awaitFutureCompletion(writeFuture);
             awaitFutureCompletion(writeBlockingFuture);
 
@@ -327,6 +308,68 @@ class EnvSettingTest {
             } catch (InterruptedException e) {
                 throw illegalStateWithCauseOf(e);
             }
+        }
+
+        /**
+         * Submits a blocking read operation to the given setting and verifies the retrieved value.
+         *
+         * @param setting
+         *         the environment setting to read from
+         * @param value
+         *         the expected value to verify the result of the read operation
+         * @param <T>
+         *         the type of value in the environment setting
+         */
+        private <T> Future<?> runBlockingReadOperation(EnvSetting<T> setting, T value) {
+            return readWriteExecutors.submit(() -> {
+                Optional<T> actualValue = setting.valueFor(() -> {
+                    awaitUninterruptibly(latch);
+                    return Local.class;
+                });
+                assertThat(actualValue).isPresent();
+                assertThat(actualValue.get()).isEqualTo(value);
+            });
+        }
+
+        /**
+         * Submits a blocking write operation to the given setting.
+         *
+         * @param setting
+         *         the environment setting to write to
+         * @param valueToSet
+         *         the value to set
+         * @param <T>
+         *         the type of value in the environment setting
+         */
+        private <T> Future<?> runBlockingWriteOperation(EnvSetting<T> setting, T valueToSet) {
+            return readWriteExecutors.submit(() -> {
+                setting.useViaInit(() -> {
+                    awaitUninterruptibly(latch);
+                    return valueToSet;
+                }, Local.class);
+            });
+        }
+
+        /**
+         * Submits a non-blocking write operation to the provided setting and verifies
+         * the current value in the given setting before its update.
+         *
+         * @param setting
+         *         the environment setting to write to
+         * @param valueToSet
+         *         the new value to set
+         * @param currentValue
+         *         the expected current value to verify before updating
+         * @param <T>
+         *         the type of value in the environment setting
+         */
+        private <T> Future<?> runVerifyingWriteOperation(EnvSetting<T> setting,
+                                                         T valueToSet,
+                                                         T currentValue) {
+            return readWriteExecutors.submit(() -> {
+                assertThat(setting.value(Local.class)).isEqualTo(currentValue);
+                setting.useViaInit(() -> valueToSet, Local.class);
+            });
         }
 
         private void awaitFutureCompletion(Future<?> future) {
