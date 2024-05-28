@@ -16,7 +16,7 @@ This repository contains the code of:
 The project is under active ongoing development. 
 You are welcome to experiment and [provide your feedback][email-developers].
 
-The latest stable version is [1.9.0][latest-release].  
+The latest stable version is [1.9.1][latest-release].  
 
 ## Quick start and examples
 
@@ -57,7 +57,7 @@ latest version of the configuration files.
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
 [email-developers]: mailto:developers@spine.io
-[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.9.0
+[latest-release]: https://github.com/SpineEventEngine/core-java/releases/tag/v1.9.1
 [spine-site]: https://spine.io/
 [quick-start]: https://spine.io/docs/quick-start
 [spine-examples]: https://github.com/spine-examples
