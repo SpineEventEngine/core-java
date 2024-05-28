@@ -299,13 +299,9 @@ class EnvSettingTest {
         }
 
         @AfterEach
-        void tearDown() {
-            try {
-                readWriteExecutors.shutdownNow();
-                readWriteExecutors.awaitTermination(500, MILLISECONDS);
-            } catch (InterruptedException e) {
-                throw illegalStateWithCauseOf(e);
-            }
+        void tearDown() throws InterruptedException {
+            readWriteExecutors.shutdownNow();
+            readWriteExecutors.awaitTermination(500, MILLISECONDS);
         }
 
         /**
