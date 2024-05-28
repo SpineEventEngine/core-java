@@ -379,9 +379,9 @@ class EnvSettingTest {
         InMemoryStorageFactory localStorageFactory = InMemoryStorageFactory.newInstance();
 
         EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
-        storageFactory.use(defaultStorageFactory, DefaultMode.class);
-        storageFactory.use(testingStorageFactory, Tests.class);
-        storageFactory.use(localStorageFactory, Local.class);
+        storageFactory.use(defaultStorageFactory, DefaultMode.class)
+                      .use(testingStorageFactory, Tests.class)
+                      .use(localStorageFactory, Local.class);
 
         storageFactory.reset();
 
@@ -412,9 +412,9 @@ class EnvSettingTest {
 
         EnvSetting<StorageFactory> storageSetting = new EnvSetting<>();
 
-        storageSetting.use(defaultStorageFactory, DefaultMode.class);
-        storageSetting.use(testingStorageFactory, Tests.class);
-        storageSetting.use(localStorageFactory, Local.class);
+        storageSetting.use(defaultStorageFactory, DefaultMode.class)
+                      .use(testingStorageFactory, Tests.class)
+                      .use(localStorageFactory, Local.class);
 
         storageSetting.apply(AutoCloseable::close);
 
