@@ -26,6 +26,8 @@
 
 package io.spine.server;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.environment.Environment;
 import io.spine.environment.EnvironmentType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -47,8 +49,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * <p>For example:
  * <pre>{@code
  *     EnvSetting<StorageFactory> storageFactory = new EnvSetting<>();
- *     storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class);
- *     storageFactory.use(new MemoizingStorageFactory(), Tests.class);
+ *     storageFactory.use(InMemoryStorageFactory.newInstance(), Production.class)
+ *                   .use(new MemoizingStorageFactory(), Tests.class);
  *
  *     // Provides the `StorageFactory` for the current environment of the application.
  *     StorageFactory currentStorageFactory = storageFactory.value();
@@ -196,6 +198,7 @@ public final class EnvSetting<V> {
      * <p>The environment type is retrieved from {@code Supplier} under the read lock
      * for the possibility of controlling this lock.
      */
+    @VisibleForTesting
     Optional<V> valueFor(Supplier<Class<? extends EnvironmentType>> type) {
         Value<V> value = lockReadOperation(() -> {
             Class<? extends EnvironmentType> envType = type.get();
@@ -227,12 +230,14 @@ public final class EnvSetting<V> {
      * @param type
      *         the type of the environment
      */
-    public void use(V value, Class<? extends EnvironmentType> type) {
+    @CanIgnoreReturnValue
+    public EnvSetting<V> use(V value, Class<? extends EnvironmentType> type) {
         checkNotNull(value);
         checkNotNull(type);
         lockWriteOperation(() -> {
             this.environmentValues.put(type, new Value<>(value));
         });
+        return this;
     }
 
     /**
@@ -242,13 +247,16 @@ public final class EnvSetting<V> {
      * <p>The value to set is initialized under the write lock
      * for the possibility of controlling this lock.
      */
-    void useViaInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
+    @CanIgnoreReturnValue
+    @VisibleForTesting
+    EnvSetting<V> useViaInit(Supplier<V> initializer, Class<? extends EnvironmentType> type) {
         checkNotNull(type);
         lockWriteOperation(() -> {
             V value = initializer.get();
             checkNotNull(value);
             this.environmentValues.put(type, new Value<>(value));
         });
+        return this;
     }
 
     /**
@@ -263,12 +271,14 @@ public final class EnvSetting<V> {
      * @param type
      *         the type of the environment
      */
-    public void lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
+    @CanIgnoreReturnValue
+    public EnvSetting<V> lazyUse(Supplier<V> value, Class<? extends EnvironmentType> type) {
         checkNotNull(value);
         checkNotNull(type);
         lockWriteOperation(() -> {
             this.environmentValues.put(type, new Value<>(value));
         });
+        return this;
     }
 
     private Optional<V> valueFor(Class<? extends EnvironmentType> type) {
