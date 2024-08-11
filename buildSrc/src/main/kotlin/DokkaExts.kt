@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -143,6 +143,7 @@ fun TaskContainer.dokkaHtmlTask(): DokkaTask? = this.findByName("dokkaHtml") as 
  * Dokka can properly generate documentation for either Kotlin or Java depending on
  * the configuration, but not both.
  */
+@Suppress("unused")
 internal fun GradleDokkaSourceSetBuilder.onlyJavaSources(): FileCollection {
     return sourceRoots.filter(File::isJavaSourceDirectory)
 }
@@ -166,6 +167,19 @@ fun Project.dokkaKotlinJar(): TaskProvider<Jar> = tasks.getOrCreate("dokkaKotlin
         this@getOrCreate.dependsOn(dokkaTask)
     }
 }
+
+/**
+ * Tells if this task belongs to the execution graph which contains publishing tasks.
+ *
+ * The task `"publishToMavenLocal"` is excluded from the check because it is a part of
+ * the local testing workflow.
+ */
+fun DokkaTask.isInPublishingGraph(): Boolean =
+    project.gradle.taskGraph.allTasks.any {
+        with(it.name) {
+            startsWith("publish") && !startsWith("publishToMavenLocal")
+        }
+    }
 
 /**
  * Locates or creates `dokkaJavaJar` task in this [Project].

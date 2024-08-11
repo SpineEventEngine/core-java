@@ -24,19 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish
+package io.spine.internal.dependency
 
-import io.spine.internal.gradle.Repository
+// https://github.com/jk1/Gradle-License-Report
+@Suppress("unused")
+object LicenseReport {
+    private const val version = "1.16"
+    const val lib = "com.github.jk1:gradle-license-report:${version}"
 
-/**
- * Repositories to which we may publish.
- */
-object PublishingRepos {
-
-    val cloudArtifactRegistry = CloudArtifactRegistry.repository
-
-    /**
-     * Obtains a GitHub repository by the given name.
-     */
-    fun gitHub(repoName: String): Repository = GitHubPackages.repository(repoName)
+    object GradlePlugin {
+        const val version = LicenseReport.version
+        const val id = "com.github.jk1.dependency-license-report"
+        const val lib = LicenseReport.lib
+    }
 }

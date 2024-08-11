@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,9 @@ internal sealed class PublicationHandler(
      * Also, this function adds the [artifactPrefix][SpinePublishing.artifactPrefix] to
      * the [artifactId][MavenPublication.setArtifactId] of this publication,
      * if the prefix is not added yet.
+     *
+     * Finally, the Apache Software License 2.0 is set as the only license
+     * under which the published artifact is distributed.
      */
     protected fun MavenPublication.copyProjectAttributes() {
         groupId = project.group.toString()
@@ -99,6 +102,13 @@ internal sealed class PublicationHandler(
         }
         version = project.version.toString()
         pom.description.set(project.description)
+
+        pom.licenses {
+            license {
+                name.set("The Apache Software License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
     }
 }
 

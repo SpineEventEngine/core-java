@@ -24,19 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish
+package io.spine.internal.dependency
 
-import io.spine.internal.gradle.Repository
-
-/**
- * Repositories to which we may publish.
- */
-object PublishingRepos {
-
-    val cloudArtifactRegistry = CloudArtifactRegistry.repository
-
-    /**
-     * Obtains a GitHub repository by the given name.
-     */
-    fun gitHub(repoName: String): Repository = GitHubPackages.repository(repoName)
+// https://ajalt.github.io/clikt/
+object Clikt {
+    private const val version = "3.5.2"
+    const val lib = "com.github.ajalt.clikt:clikt:$version"
 }

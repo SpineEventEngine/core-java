@@ -34,12 +34,23 @@ package io.spine.internal.dependency
 object Protobuf {
     private const val group = "com.google.protobuf"
     const val version       = "3.25.1"
+
     /**
-     * The Java library containing proto definitions of Google Protobuf.
+     * The Java library with Protobuf data types.
      */
-    const val protoSrcLib = "${group}:protobuf-java:${version}"
+    const val javaLib = "${group}:protobuf-java:${version}"
+
+    /**
+     * The Java library containing proto definitions of Google Protobuf types.
+     */
+    @Suppress("unused")
+    const val protoSrcLib = javaLib
+
+    /**
+     * All Java and Kotlin libraries we depend on.
+     */
     val libs = listOf(
-        protoSrcLib,
+        javaLib,
         "${group}:protobuf-java-util:${version}",
         "${group}:protobuf-kotlin:${version}"
     )

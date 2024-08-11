@@ -24,19 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish
-
-import io.spine.internal.gradle.Repository
+package io.spine.internal.dependency
 
 /**
- * Repositories to which we may publish.
+ * Kotlin Symbol Processing API.
+ *
+ * @see <a href="https://github.com/google/ksp">KSP GitHub repository</a>
  */
-object PublishingRepos {
-
-    val cloudArtifactRegistry = CloudArtifactRegistry.repository
-
+object Ksp {
     /**
-     * Obtains a GitHub repository by the given name.
+     * The latest version compatible with Kotlin v1.8.22, which is bundled with Gradle 7.6.4.
      */
-    fun gitHub(repoName: String): Repository = GitHubPackages.repository(repoName)
+    const val version = "1.8.22-1.0.11"
+    const val id = "com.google.devtools.ksp"
 }

@@ -32,4 +32,5 @@ import org.jetbrains.dokka.gradle.DokkaTask
 /**
  * Finds the `dokkaHtml` Gradle task.
  */
+@Suppress("unused")
 fun TaskContainer.dokkaHtmlTask() = this.getByName("dokkaHtml") as DokkaTask

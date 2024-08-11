@@ -36,7 +36,7 @@ plugins {
     `kotlin-dsl`
 
     // https://github.com/jk1/Gradle-License-Report/releases
-    id("com.github.jk1.dependency-license-report").version("2.1")
+    id("com.github.jk1.dependency-license-report").version("2.7")
 
     // https://github.com/johnrengelman/shadow/releases
     id("com.github.johnrengelman.shadow").version("7.1.2")
@@ -66,7 +66,7 @@ val jacksonVersion = "2.15.3"
  */
 val googleAuthToolVersion = "2.1.5"
 
-val licenseReportVersion = "2.1"
+val licenseReportVersion = "2.7"
 
 val grGitVersion = "4.1.1"
 

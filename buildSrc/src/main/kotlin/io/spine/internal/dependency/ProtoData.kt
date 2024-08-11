@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -65,7 +65,7 @@ object ProtoData {
      * The version of ProtoData dependencies.
      */
     val version: String
-    private const val fallbackVersion = "0.19.1"
+    private const val fallbackVersion = "0.30.0"
 
     /**
      * The distinct version of ProtoData used by other build tools.
@@ -74,7 +74,7 @@ object ProtoData {
      * transitional dependencies, this is the version used to build the project itself.
      */
     val dogfoodingVersion: String
-    private const val fallbackDfVersion = "0.91.1"
+    private const val fallbackDfVersion = "0.27.0"
 
     /**
      * The artifact for the ProtoData Gradle plugin.
@@ -90,8 +90,15 @@ object ProtoData {
     val api
         get() = api(version)
 
+    @Deprecated("Use `backend` instead", ReplaceWith("backend"))
     val compiler
-        get() = "$group:protodata-compiler:$version"
+        get() = backend
+
+    val backend
+        get() = "$group:protodata-backend:$version"
+
+    val protocPlugin
+        get() = "$group:protodata-protoc:$version"
 
     val gradleApi
         get() = "$group:protodata-gradle-api:$version"
@@ -99,14 +106,25 @@ object ProtoData {
     val cliApi
         get() = "$group:protodata-cli-api:$version"
 
+    @Deprecated("Use `java()` instead", ReplaceWith("java(version)"))
     fun codegenJava(version: String): String =
-        "$group:protodata-codegen-java:$version"
+        java(version)
 
+    fun java(version: String): String =
+        "$group:protodata-java:$version"
+
+    @Deprecated("Use `java` instead.", ReplaceWith("java"))
     val codegenJava
-        get() = codegenJava(version)
+        get() = java(version)
+
+    val java
+        get() = java(version)
 
     val fatCli
         get() = "$group:protodata-fat-cli:$version"
+
+    val testlib
+        get() = "$group:protodata-testlib:$version"
 
     /**
      * An env variable storing a custom [version].
