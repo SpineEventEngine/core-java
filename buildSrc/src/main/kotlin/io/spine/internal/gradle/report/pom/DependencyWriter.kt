@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.io.Writer
 import java.util.*
 import kotlin.reflect.full.isSubclassOf
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.internal.artifacts.dependencies.AbstractExternalModuleDependency
 import org.gradle.kotlin.dsl.withGroovyBuilder
@@ -126,11 +127,32 @@ private fun Project.depsFromAllConfigurations(): Set<ModuleDependency> {
         }
         configuration.dependencies.filter { it.isExternal() }
             .forEach { dependency ->
-                val moduleDependency = ModuleDependency(project, configuration, dependency)
+                val forcedVersion = configuration.forcedVersionOf(dependency)
+                val moduleDependency =
+                    if (forcedVersion != null) {
+                        ModuleDependency(project, configuration, dependency, forcedVersion)
+                    } else {
+                        ModuleDependency(project, configuration, dependency)
+                    }
                 result.add(moduleDependency)
             }
     }
     return result
+}
+
+/**
+ * Searches for a forced version of given [dependency] in this [Configuration].
+ *
+ * Returns `null`, if it wasn't forced.
+ */
+private fun Configuration.forcedVersionOf(dependency: Dependency): String? {
+    val forcedModules = resolutionStrategy.forcedModules
+    val maybeForced = forcedModules.firstOrNull {
+        it.group == dependency.group
+                && it.name == dependency.name
+                && it.version != null
+    }
+    return maybeForced?.version
 }
 
 /**
@@ -160,7 +182,7 @@ private fun Project.deduplicate(dependencies: Set<ModuleDependency>): List<Modul
     logDuplicates(groups)
 
     val filtered = groups.map { group ->
-        group.value.maxByOrNull { dep -> dep.version!! }!!
+        group.value.maxByOrNull { dep -> dep.version }!!
     }
     return filtered
 }
@@ -177,7 +199,7 @@ private fun Project.logDuplicate(dependency: String, versions: List<ModuleDepend
     versions.forEach {
         logger.lifecycle(
             "module: {}, configuration: {}, version: {}",
-            it.module.name,
+            it.project.name,
             it.configuration.name,
             it.version
         )

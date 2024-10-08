@@ -24,19 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.publish
-
-import io.spine.internal.gradle.Repository
+package io.spine.internal.dependency
 
 /**
- * Repositories to which we may publish.
+ * A Kotlin wrapper over [Caffeine].
+ *
+ * @see <a href="https://github.com/sksamuel/aedile">Aedile at GitHub</a>
  */
-object PublishingRepos {
-
-    val cloudArtifactRegistry = CloudArtifactRegistry.repository
-
-    /**
-     * Obtains a GitHub repository by the given name.
-     */
-    fun gitHub(repoName: String): Repository = GitHubPackages.repository(repoName)
+@Suppress("unused")
+object Aedile {
+    private const val version = "1.3.1"
+    const val lib = "com.sksamuel.aedile:aedile-core:$version"
 }

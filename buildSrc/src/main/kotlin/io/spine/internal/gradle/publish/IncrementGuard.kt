@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -45,19 +45,20 @@ class IncrementGuard : Plugin<Project> {
     /**
      * Adds the [CheckVersionIncrement] task to the project.
      *
-     * Only adds the check if the project is built on Travis CI and the job is a pull request.
+     * The task is created anyway, but it is enabled only if:
+     *  1. The project is built on GitHub CI, and
+     *  2. The job is a pull request.
      *
-     * The task only runs on non-master branches on GitHub Actions. This is done
-     * to prevent unexpected CI fails when re-building `master` multiple times, creating git
-     * tags, and in other cases that go outside of the "usual" development cycle.
+     * The task only runs on non-master branches on GitHub Actions.
+     * This is done to prevent unexpected CI fails when re-building `master` multiple times,
+     * creating git tags, and in other cases that go outside the "usual" development cycle.
      */
     override fun apply(target: Project) {
         val tasks = target.tasks
         tasks.register(taskName, CheckVersionIncrement::class.java) {
-            repository = CloudRepo.published
+            repository = CloudArtifactRegistry.repository
             tasks.getByName("check").dependsOn(this)
 
-            shouldRunAfter("test")
             if (!shouldCheckVersion()) {
                 logger.info(
                     "The build does not represent a GitHub Actions feature branch job, " +
@@ -72,7 +73,7 @@ class IncrementGuard : Plugin<Project> {
      * Returns `true` if the current build is a GitHub Actions build which represents a push
      * to a feature branch.
      *
-     * Returns `false` if the associated reference is not a branch (e.g. a tag) or if it has
+     * Returns `false` if the associated reference is not a branch (e.g., a tag) or if it has
      * the name which ends with `master` or `main`.
      *
      * For example, on the following branches the method would return `false`:
