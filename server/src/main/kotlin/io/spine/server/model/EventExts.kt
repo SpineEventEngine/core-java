@@ -37,5 +37,8 @@ public typealias NothingHappened = Nothing
  * The alias for cases of naming collisions between
  * [io.spine.server.model.Nothing] and [kotlin.Nothing].
  */
+@Deprecated(
+    message = "Please use `io.spine.server.event.NoReaction` instead",
+    replaceWith = ReplaceWith("NoReaction", "io.spine.server.event"),
+)
 public typealias NoReaction = Nothing
-

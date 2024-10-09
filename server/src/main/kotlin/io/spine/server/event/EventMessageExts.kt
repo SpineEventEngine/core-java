@@ -23,28 +23,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-syntax = "proto3";
 
-package spine.server.model;
+package io.spine.server.event
 
-import "spine/options.proto";
-
-option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.server.model";
-option java_outer_classname = "StandardEventsProto";
-option java_multiple_files = true;
-
-// An empty event.
-//
-// Use this event type when a message processing does not produce any output.
-//
-// This type is treated by the framework in a special way. A `Nothing` event is never posted
-// for processing after being emitted. Neither is it stored.
-//
-// An applier for a `Nothing` event is never called.
-
-// Deprecated: please use `spine.server.event.NoReaction` instead.
-//
-message Nothing {
-    option deprecated = true;
-}
