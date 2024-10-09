@@ -49,7 +49,7 @@ public class ModelTestsTestEnv {
 
         @Assign
         List<EventMessage> handle(TuRemoveProject cmd) {
-            return ImmutableList.of(nothing());
+            return ImmutableList.of(noReaction());
         }
     }
 
@@ -63,7 +63,7 @@ public class ModelTestsTestEnv {
          */
         @Assign
         List<EventMessage> handle(TuRemoveProject cmd) {
-            return ImmutableList.of(nothing());
+            return ImmutableList.of(noReaction());
         }
     }
 }
