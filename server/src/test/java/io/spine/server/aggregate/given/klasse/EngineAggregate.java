@@ -41,8 +41,8 @@ import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStarted;
 import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStopped;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
 import io.spine.server.command.Assign;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STARTED;
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
@@ -106,13 +106,13 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
      ****************************/
 
     @React
-    Nothing on(@External EmissionTestStarted event) {
-        return nothing();
+    NoReaction on(@External EmissionTestStarted event) {
+        return noReaction();
     }
 
     @React
-    Nothing on(@External EmissionTestStopped event) {
-        return nothing();
+    NoReaction on(@External EmissionTestStopped event) {
+        return noReaction();
     }
 
     /*
@@ -125,13 +125,13 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
      *********************************************************************/
 
     @React
-    Nothing on(Rejections.EngineAlreadyStarted rejection) {
-        return nothing();
+    NoReaction on(Rejections.EngineAlreadyStarted rejection) {
+        return noReaction();
     }
 
     @React
-    Nothing on(Rejections.EngineAlreadyStopped rejection) {
-        return nothing();
+    NoReaction on(Rejections.EngineAlreadyStopped rejection) {
+        return noReaction();
     }
 
     /*
@@ -139,8 +139,8 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, Engine.Builder>
      *************************************/
 
     @React
-    Nothing on(@External Rejections.CannotStartEmissionTest rejection) {
-        return nothing();
+    NoReaction on(@External Rejections.CannotStartEmissionTest rejection) {
+        return noReaction();
     }
 
     /*

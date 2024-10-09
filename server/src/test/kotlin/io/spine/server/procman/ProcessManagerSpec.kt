@@ -41,7 +41,7 @@ import io.spine.protobuf.AnyPacker
 import io.spine.protobuf.pack
 import io.spine.server.entity.given.Given
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived
-import io.spine.server.model.Nothing
+import io.spine.server.event.NoReaction
 import io.spine.server.procman.given.dispatch.PmDispatcher
 import io.spine.server.procman.given.pm.GivenMessages
 import io.spine.server.procman.given.pm.GivenMessages.addTask
@@ -436,7 +436,7 @@ internal class ProcessManagerSpec {
          *
          * As a reaction to [Question Answered][PmQuestionAnswered]
          * the process manager emits an [EitherOf3][io.spine.server.tuple.EitherOf3]
-         * containing [Nothing]. This is done because the answered
+         * containing [io.spine.server.event.NoReaction]. This is done because the answered
          * question is not part of a quiz.
          *
          * @see io.spine.server.procman.given.pm.QuizProcess
@@ -459,7 +459,7 @@ internal class ProcessManagerSpec {
                 it.receivesCommands(commands).assertEvents()
             }
 
-            assertEvents.withType(Nothing::class.java)
+            assertEvents.withType(NoReaction::class.java)
                 .isEmpty()
             assertEvents.withType(PmQuizStarted::class.java)
                 .hasSize(1)

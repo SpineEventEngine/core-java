@@ -45,7 +45,7 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.aggregate.given.repo.GivenAggregate;
 import io.spine.server.aggregate.given.repo.ProjectAggregateRepository;
-import io.spine.server.model.Nothing;
+import io.spine.server.event.NoReaction;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.IntegerProject;
@@ -471,7 +471,7 @@ public class AggregateStorageTest
             var context = ActorContext.newBuilder().buildPartial();
             var messageId = MessageId.newBuilder()
                     .setId(AnyPacker.pack(newEventId()))
-                    .setTypeUrl(TypeUrl.of(Nothing.class)
+                    .setTypeUrl(TypeUrl.of(NoReaction.class)
                                        .value())
                     .buildPartial();
             var origin = Origin.newBuilder()

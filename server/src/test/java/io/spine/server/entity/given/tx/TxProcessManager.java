@@ -31,8 +31,8 @@ import com.google.protobuf.Message;
 import io.spine.server.entity.given.tx.event.TxCreated;
 import io.spine.server.entity.given.tx.event.TxErrorRequested;
 import io.spine.server.entity.given.tx.event.TxStateErrorRequested;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 
 import java.util.List;
@@ -51,11 +51,11 @@ public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builde
     }
 
     @React
-    Nothing event(TxCreated e) {
+    NoReaction event(TxCreated e) {
         receivedEvents.add(e);
         builder().setId(id())
                  .setName(e.getName());
-        return nothing();
+        return noReaction();
     }
 
     /**
@@ -65,16 +65,16 @@ public class TxProcessManager extends ProcessManager<Id, PmState, PmState.Builde
      * @see io.spine.server.procman.PmTransactionTest#failingInHandler()
      */
     @React
-    Nothing event(TxErrorRequested e) {
+    NoReaction event(TxErrorRequested e) {
         throw new RuntimeException("that tests the tx behaviour for process manager");
     }
 
     @React
-    Nothing event(TxStateErrorRequested e) {
-        // By convention the first field of state is required.
+    NoReaction event(TxStateErrorRequested e) {
+        // By convention, the first field of state is required.
         // Clearing it should fail the validation when the transaction is committed.
         builder().clearId();
-        return nothing();
+        return noReaction();
     }
 
     public List<Message> receivedEvents() {

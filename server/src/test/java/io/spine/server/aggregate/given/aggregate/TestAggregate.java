@@ -35,8 +35,8 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.dispatch.AggregateMessageDispatcher;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -144,15 +144,15 @@ public class TestAggregate
     }
 
     @React
-    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
+    NoReaction on(StandardRejections.CannotModifyDeletedEntity rejection, AggAddTask command) {
         rejectionWithCmdHandled = true;
-        return nothing();
+        return noReaction();
     }
 
     @React
-    Nothing on(StandardRejections.CannotModifyDeletedEntity rejection) {
+    NoReaction on(StandardRejections.CannotModifyDeletedEntity rejection) {
         rejectionHandled = true;
-        return nothing();
+        return noReaction();
     }
 
     @VisibleForTesting

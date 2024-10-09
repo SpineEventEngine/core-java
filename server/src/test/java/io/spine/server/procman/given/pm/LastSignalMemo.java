@@ -34,8 +34,8 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ElephantProcess;
@@ -219,15 +219,15 @@ public class LastSignalMemo
      ************************/
 
     @React
-    Nothing on(PmProjectCreated event) {
+    NoReaction on(PmProjectCreated event) {
         remember(event);
-        return nothing();
+        return noReaction();
     }
 
     @React
-    Nothing on(PmTaskAdded event) {
+    NoReaction on(PmTaskAdded event) {
         remember(event);
-        return nothing();
+        return noReaction();
     }
 
     @React
@@ -246,8 +246,8 @@ public class LastSignalMemo
     }
 
     @React
-    Nothing on(@External PmQuestionAnswered event) {
-        return nothing();
+    NoReaction on(@External PmQuestionAnswered event) {
+        return noReaction();
     }
 
     /*
@@ -255,14 +255,14 @@ public class LastSignalMemo
      **************************/
 
     @React
-    Nothing on(StandardRejections.EntityAlreadyArchived rejection, PmAddTask command) {
+    NoReaction on(StandardRejections.EntityAlreadyArchived rejection, PmAddTask command) {
         remember(command); // We check the command in the test.
-        return nothing();
+        return noReaction();
     }
 
     @React
-    Nothing on(StandardRejections.EntityAlreadyArchived rejection) {
+    NoReaction on(StandardRejections.EntityAlreadyArchived rejection) {
         remember(rejection);
-        return nothing();
+        return noReaction();
     }
 }

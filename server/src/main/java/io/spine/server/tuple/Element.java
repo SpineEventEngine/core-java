@@ -30,6 +30,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
+import io.spine.server.event.NoReaction;
 import io.spine.server.model.Nothing;
 
 import java.io.IOException;
@@ -60,7 +61,10 @@ final class Element implements Serializable {
      * Creates a tuple element with a value which can be {@link GeneratedMessageV3},
      * {@link Optional}, or {@link Either}.
      */
-    @SuppressWarnings("ChainOfInstanceofChecks")
+    @SuppressWarnings({
+            "ChainOfInstanceofChecks",
+            "deprecation" /* Keep using `Nothing` for backward compatibility. */
+    })
     Element(Object value) {
         if (value instanceof Either) {
             this.type = Type.EITHER;
@@ -68,9 +72,9 @@ final class Element implements Serializable {
             this.type = Type.OPTIONAL;
         } else if (value instanceof GeneratedMessageV3) {
             var messageV3 = (GeneratedMessageV3) value;
-            // Treat `Nothing` as a special case, allowing its default instance
-            // so that `Just<Nothing>` is possible.
-            if (!(value instanceof Nothing)) {
+            // Treat `NoReaction` as a special case, allowing its default instance
+            // so that `Just<NoReaction>` is possible.
+            if (!(value instanceof Nothing || value instanceof NoReaction)) {
                 checkNotDefault(messageV3);
             }
             this.type = Type.MESSAGE;

@@ -29,8 +29,8 @@ package io.spine.server.trace.given.airport;
 import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.trace.Boarding;
 import io.spine.test.trace.BoardingCanceled;
@@ -73,10 +73,10 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
     }
 
     @React
-    Nothing to(BoardingStarted event) {
+    NoReaction to(BoardingStarted event) {
         builder().setWhenStarted(event.getWhen())
                  .setStatus(STARTED);
-        return nothing();
+        return noReaction();
     }
 
     @Assign
@@ -106,9 +106,9 @@ final class BoardingProcman extends ProcessManager<FlightId, Boarding, Boarding.
     }
 
     @React
-    Nothing on(BoardingCanceled event) {
+    NoReaction on(BoardingCanceled event) {
         builder().setWhenEnded(event.getWhen());
-        return nothing();
+        return noReaction();
     }
 
     private static ZonedDateTime now(CommandContext context) {

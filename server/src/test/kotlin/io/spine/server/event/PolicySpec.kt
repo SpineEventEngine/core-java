@@ -28,7 +28,6 @@ package io.spine.server.event
 
 import io.kotest.matchers.shouldBe
 import io.spine.core.External
-import io.spine.server.model.Nothing
 import io.spine.server.tuple.EitherOf2
 import io.spine.test.shared.event.SomethingHappened
 import org.junit.jupiter.api.DisplayName
@@ -49,28 +48,28 @@ internal class PolicySpec {
     fun `allow using 'Just' in return value`() {
         val policy = object : Policy<SomethingHappened>() {
             @React
-            public override fun whenever(event: SomethingHappened): Just<Nothing> {
-                return Just.nothing
+            public override fun whenever(event: SomethingHappened): Just<NoReaction> {
+                return Just.noReaction
             }
         }
-        policy.whenever(somethingHappened) shouldBe Just.nothing
+        policy.whenever(somethingHappened) shouldBe Just.noReaction
     }
 
     @Test
     fun `allow using 'Either' in return value`() {
         object : Policy<SomethingHappened>() {
             @React
-            public override fun whenever(event: SomethingHappened): EitherOf2<Nothing, Nothing> {
-                return EitherOf2.withA(nothing)
-            }
+            public override fun whenever(
+                event: SomethingHappened
+            ): EitherOf2<NoReaction, NoReaction> = noReaction().asA()
         }.let {
-            it.whenever(somethingHappened) shouldBe EitherOf2.withA(nothing)
+            it.whenever(somethingHappened) shouldBe EitherOf2.withA(noReaction)
         }
     }
 
     companion object {
-        val somethingHappened = SomethingHappened.getDefaultInstance()
-        val nothing = Nothing.getDefaultInstance()
+        val somethingHappened: SomethingHappened = SomethingHappened.getDefaultInstance()
+        val noReaction: NoReaction = NoReaction.getDefaultInstance()
     }
 }
 
@@ -78,13 +77,13 @@ internal class PolicySpec {
  * The policy which attempts to define a `@React` receptor to handle more than one
  * event type, as required by the `Policy` contract.
  */
-private class GreedyPolicy : Policy<Nothing>() {
+private class GreedyPolicy : Policy<NoReaction>() {
 
     @React
-    override fun whenever(@External event: Nothing): Just<Nothing> =
-        Just.nothing
+    override fun whenever(@External event: NoReaction): Just<NoReaction> =
+        Just.noReaction
 
     @React
-    fun on(@Suppress("UNUSED_PARAMETER") e: SomethingHappened): Just<Nothing> =
-        Just.nothing
+    fun on(@Suppress("UNUSED_PARAMETER") e: SomethingHappened): Just<NoReaction> =
+        Just.noReaction
 }
