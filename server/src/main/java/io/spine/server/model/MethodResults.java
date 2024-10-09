@@ -96,7 +96,7 @@ final class MethodResults {
      * Checks if the class is a concrete {@linkplain CommandMessage command} or
      * {@linkplain EventMessage event}.
      */
-    @SuppressWarnings("deprecation") // Handling of `Nothing` is kept for backwards compatibility.
+    @SuppressWarnings("deprecation") // Handling of `Nothing` is kept for backward compatibility.
     private static boolean isCommandOrEvent(Class<?> cls) {
         if (cls.isInterface()) {
             return false;
