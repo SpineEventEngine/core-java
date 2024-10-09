@@ -39,8 +39,8 @@ import io.spine.model.contexts.projects.event.SigTaskStarted;
 import io.spine.model.contexts.projects.event.SigTaskStopped;
 import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
 
@@ -110,9 +110,9 @@ public final class ValidReactor extends AbstractEventReactor {
     }
 
     @React
-    EitherOf3<SigTaskPaused, SigTaskStopped, Nothing>
+    EitherOf3<SigTaskPaused, SigTaskStopped, NoReaction>
     eitherOf3Result(SigTaskRemovedFromProject event) {
-        return EitherOf3.withC(nothing());
+        return EitherOf3.withC(noReaction());
     }
 
     @React

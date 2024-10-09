@@ -39,8 +39,8 @@ import io.spine.model.contexts.projects.event.SigTaskStarted;
 import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.event.AbstractEventReactor;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.model.given.SignatureTestEvent;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public final class InvalidReactor extends AbstractEventReactor {
     }
 
     @React
-    SigTaskStarted wrongThreeParams(SigTaskAddedToProject e, EventContext ctx, Nothing third) {
+    SigTaskStarted wrongThreeParams(SigTaskAddedToProject e, EventContext ctx, NoReaction third) {
         return taskStarted();
     }
 
@@ -87,7 +87,7 @@ public final class InvalidReactor extends AbstractEventReactor {
     }
 
     @React
-    SigTaskStarted wrongSecondParam(SigTaskAddedToProject event, Nothing message) {
+    SigTaskStarted wrongSecondParam(SigTaskAddedToProject event, NoReaction message) {
         return taskStarted();
     }
 

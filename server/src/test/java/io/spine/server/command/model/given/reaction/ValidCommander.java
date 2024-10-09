@@ -39,7 +39,7 @@ import io.spine.model.contexts.projects.event.SigTaskAddedToProject;
 import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
-import io.spine.server.model.DoNothing;
+import io.spine.server.command.DoNothing;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
 

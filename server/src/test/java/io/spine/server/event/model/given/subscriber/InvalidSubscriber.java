@@ -37,8 +37,8 @@ import io.spine.model.contexts.projects.event.SigTaskAddedToProject;
 import io.spine.model.contexts.projects.rejection.ProjectRejections;
 import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.model.given.SignatureTestEvent;
 
 import java.io.IOException;
@@ -71,7 +71,7 @@ public final class InvalidSubscriber extends AbstractEventSubscriber {
     }
 
     @Subscribe
-    void wrongThreeParams(SigTaskAddedToProject event, EventContext ctx, Nothing third) {
+    void wrongThreeParams(SigTaskAddedToProject event, EventContext ctx, NoReaction third) {
         // do nothing.
     }
 
@@ -84,7 +84,7 @@ public final class InvalidSubscriber extends AbstractEventSubscriber {
     }
 
     @Subscribe
-    void wrongSecondParam(SigTaskAddedToProject event, Nothing message) {
+    void wrongSecondParam(SigTaskAddedToProject event, NoReaction message) {
         // do nothing.
     }
 

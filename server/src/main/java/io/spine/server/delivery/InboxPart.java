@@ -30,7 +30,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Time;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.dispatch.DispatchOutcome;
-import io.spine.server.model.Nothing;
+import io.spine.server.event.NoReaction;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.type.TypeUrl;
@@ -130,12 +130,12 @@ abstract class InboxPart<I, M extends SignalEnvelope<?, ?, ?>> {
      * Notifies the message endpoint of the duplicate.
      */
     void notifyOfDuplicated(InboxMessage message) {
-        var call = new EndpointCall<Nothing>(message) {
+        var call = new EndpointCall<NoReaction>(message) {
 
             @Override
-            Nothing doInvoke(MessageEndpoint<I, M> endpoint, I targetId, M envelope) {
+            NoReaction doInvoke(MessageEndpoint<I, M> endpoint, I targetId, M envelope) {
                 endpoint.onDuplicate(targetId, envelope);
-                return Nothing.getDefaultInstance();
+                return NoReaction.getDefaultInstance();
             }
         };
         call.invoke();
