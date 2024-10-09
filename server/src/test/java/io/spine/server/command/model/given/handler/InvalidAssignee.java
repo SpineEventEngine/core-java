@@ -38,8 +38,8 @@ import io.spine.model.contexts.projects.event.SigTaskAssigned;
 import io.spine.model.contexts.projects.event.SigTaskStarted;
 import io.spine.server.command.AbstractAssignee;
 import io.spine.server.command.Assign;
-import io.spine.server.model.DoNothing;
-import io.spine.server.model.Nothing;
+import io.spine.server.event.NoReaction;
+import io.spine.server.command.DoNothing;
 import io.spine.server.model.given.SignatureTestCommand;
 import io.spine.server.tuple.EitherOf3;
 
@@ -62,7 +62,7 @@ public final class InvalidAssignee extends AbstractAssignee {
     }
 
     @Assign
-    SigTaskStarted nonCommandMessageParam(Nothing command) {
+    SigTaskStarted nonCommandMessageParam(NoReaction command) {
         return EventMessages.taskStarted();
     }
 
@@ -82,12 +82,12 @@ public final class InvalidAssignee extends AbstractAssignee {
     }
 
     @Assign
-    SigTaskStarted wrongFirstParam(Nothing command, MessageContext msg) {
+    SigTaskStarted wrongFirstParam(NoReaction command, MessageContext msg) {
         return EventMessages.taskStarted();
     }
 
     @Assign
-    SigTaskStarted wrongSecondParam(SigAssignTask command, Nothing message) {
+    SigTaskStarted wrongSecondParam(SigAssignTask command, NoReaction message) {
         return EventMessages.taskStarted();
     }
 
@@ -122,9 +122,9 @@ public final class InvalidAssignee extends AbstractAssignee {
     }
 
     @Assign
-    EitherOf3<SigTaskAssigned, SigTaskStarted, Nothing>
+    EitherOf3<SigTaskAssigned, SigTaskStarted, NoReaction>
     eitherWithNothing(SigAddTaskToProject command) {
-        return EitherOf3.withC(nothing());
+        return EitherOf3.withC(noReaction());
     }
 
     @Assign
@@ -134,7 +134,6 @@ public final class InvalidAssignee extends AbstractAssignee {
 
     @Assign
     SigSetProjectOwner wrongThrowable(SigCreateProject command) throws RuntimeException {
-        throw newIllegalStateException("Command assignee " +
-                                               "has declared an illegal exception.");
+        throw newIllegalStateException("Command assignee has declared an illegal exception.");
     }
 }

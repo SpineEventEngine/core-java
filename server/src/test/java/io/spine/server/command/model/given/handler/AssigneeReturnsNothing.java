@@ -34,12 +34,12 @@ import io.spine.test.reflect.command.RefCreateProject;
 import java.util.List;
 
 /**
- * Provides a handler method that returns {@link io.spine.server.model.Nothing}.
+ * Provides a handler method that returns {@link io.spine.server.event.NoReaction}.
  */
 public class AssigneeReturnsNothing extends TestCommandAssignee {
 
     @Assign
     List<EventMessage> handleTest(RefCreateProject cmd) {
-        return ImmutableList.of(nothing());
+        return ImmutableList.of(noReaction());
     }
 }
