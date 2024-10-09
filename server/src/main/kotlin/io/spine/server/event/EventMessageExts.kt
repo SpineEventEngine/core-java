@@ -26,3 +26,15 @@
 
 package io.spine.server.event
 
+import io.spine.base.EventMessage
+import io.spine.server.tuple.EitherOf2
+
+/**
+ * Converts this [EventMessage] into [EitherOf2], placing it into the slot of the type `A`.
+ */
+public fun <E : EventMessage, B : EventMessage> E.asA(): EitherOf2<E, B> = EitherOf2.withA(this)
+
+/**
+ * Converts this [EventMessage] into [EitherOf2], placing it into the slot of the type `B`.
+ */
+public fun <E : EventMessage, A : EventMessage> E.asB(): EitherOf2<A, E> = EitherOf2.withB(this)

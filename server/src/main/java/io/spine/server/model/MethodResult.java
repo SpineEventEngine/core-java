@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.RejectionMessage;
+import io.spine.server.event.NoReaction;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -59,7 +60,9 @@ final class MethodResult {
      */
     private static final ImmutableSet<? extends Message> IGNORED_MESSAGES = ImmutableSet.of(
             Nothing.getDefaultInstance(),
+            NoReaction.getDefaultInstance(),
             DoNothing.getDefaultInstance(),
+            io.spine.server.command.DoNothing.getDefaultInstance(),
             Empty.getDefaultInstance()
     );
 

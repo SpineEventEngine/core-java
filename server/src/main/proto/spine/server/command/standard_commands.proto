@@ -47,5 +47,4 @@ option java_multiple_files = true;
 // Deprecated: please use `spine.server.command.DoNothing` instead.
 //
 message DoNothing {
-    option deprecated = true;
 }

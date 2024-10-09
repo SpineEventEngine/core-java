@@ -24,6 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("DEPRECATION") /* We do not want the deprecation warning in Kotlin because of
+    our `Nothing` type deprecated in Java. We want deprecation warnings in Kotlin code
+    that are caused by deprecations in this file. */
+
 package io.spine.server.model
 
 /**

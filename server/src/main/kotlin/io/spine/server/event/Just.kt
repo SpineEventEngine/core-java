@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,6 @@
 package io.spine.server.event
 
 import io.spine.base.EventMessage
-import io.spine.server.model.Nothing
 import io.spine.server.tuple.Tuple
 
 /**
@@ -36,7 +35,7 @@ import io.spine.server.tuple.Tuple
  * Used when returning an `Iterable` from a handler method for better readability over
  * `Iterable<E>` or `List<E>`.
  *
- * @param E the type of the event.
+ * @param E The type of the event.
  */
 public class Just<E : EventMessage>(event: E) : Tuple(event) {
 
@@ -46,10 +45,22 @@ public class Just<E : EventMessage>(event: E) : Tuple(event) {
         private const val serialVersionUID: Long = 0L
 
         /**
+         * The instance of `Just<NoReaction>`.
+         */
+        public val noReaction: Just<NoReaction> by lazy {
+            Just(NoReaction.getDefaultInstance())
+        }
+
+        /**
          * The instance of `Just<Nothing>`.
          */
-        public val nothing: Just<Nothing> by lazy {
-            Just(Nothing.getDefaultInstance())
+        @Deprecated(
+            message = "Please use `noReaction` instead.",
+            replaceWith = ReplaceWith("noReaction")
+        )
+        @Suppress("DEPRECATION") // propagating it by the annotation above.
+        public val nothing: Just<io.spine.server.model.Nothing> by lazy {
+            Just(io.spine.server.model.Nothing.getDefaultInstance())
         }
 
         /**
@@ -63,11 +74,24 @@ public class Just<E : EventMessage>(event: E) : Tuple(event) {
         public fun <E : EventMessage> just(event: E): Just<E> = Just(event)
 
         /**
+         * Obtains the instance of `Just<NoReaction>` for Java code.
+         *
+         * Prefer the [noReaction] property of the companion object in Kotlin.
+         */
+        @JvmStatic
+        public fun noReaction(): Just<NoReaction> = noReaction
+
+        /**
          * Obtains the instance of `Just<Noting>` for Java code.
          *
          * Prefer the [nothing] property of the companion object in Kotlin.
          */
         @JvmStatic
-        public fun nothing(): Just<Nothing> = nothing
+        @Deprecated(
+            message = "Please use `noReaction()` instead.",
+            replaceWith = ReplaceWith("noReaction()")
+        )
+        @Suppress("DEPRECATION") // propagating it by the annotation above.
+        public fun nothing(): Just<io.spine.server.model.Nothing> = nothing
     }
 }
