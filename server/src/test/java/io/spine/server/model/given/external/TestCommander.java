@@ -29,7 +29,7 @@ package io.spine.server.model.given.external;
 import io.spine.core.External;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
-import io.spine.server.model.DoNothing;
+import io.spine.server.command.DoNothing;
 import io.spine.test.model.external.ExtProjectCreated;
 
 public final class TestCommander extends AbstractCommander {

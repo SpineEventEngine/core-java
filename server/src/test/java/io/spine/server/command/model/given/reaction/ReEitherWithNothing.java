@@ -27,7 +27,7 @@
 package io.spine.server.command.model.given.reaction;
 
 import io.spine.server.command.Command;
-import io.spine.server.model.DoNothing;
+import io.spine.server.command.DoNothing;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdStartTask;

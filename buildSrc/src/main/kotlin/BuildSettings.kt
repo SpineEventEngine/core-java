@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,10 +27,11 @@
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 /**
- * This object provides high-level constants, like version of JVM, to be used
+ * This object provides high-level constants, like the version of JVM, to be used
  * throughout the project.
  */
 object BuildSettings {
     private const val JVM_VERSION = 11
     val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(JVM_VERSION)
+    const val REMOTE_DEBUG_PORT = 5566
 }

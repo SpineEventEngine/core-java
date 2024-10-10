@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,22 +30,18 @@ import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.GradleDoctor
 import io.spine.internal.dependency.Kotest
 import io.spine.internal.dependency.Kover
+import io.spine.internal.dependency.Ksp
+import io.spine.internal.dependency.McJava
 import io.spine.internal.dependency.ProtoData
+import io.spine.internal.dependency.ProtoTap
 import io.spine.internal.dependency.Protobuf
-import io.spine.internal.dependency.Spine
 import io.spine.internal.gradle.standardToSpineSdk
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.JavaExec
 import org.gradle.kotlin.dsl.ScriptHandlerScope
 import org.gradle.plugin.use.PluginDependenciesSpec
 import org.gradle.plugin.use.PluginDependencySpec
-
-/**
- * Applies [standard][standardToSpineSdk] repositories to this `buildscript`.
- */
-fun ScriptHandlerScope.standardSpineSdkRepositories() {
-    repositories.standardToSpineSdk()
-}
 
 /**
  * Provides shortcuts to reference our dependency objects.
@@ -61,28 +57,48 @@ fun ScriptHandlerScope.standardSpineSdkRepositories() {
  *     get() = id(GradleDoctor.pluginId).version(GradleDoctor.version)
  * ```
  *
- * But for some plugins, it's impossible to apply them directly to a project.
+ * But for some plugins, it is impossible to apply them directly to a project.
  * For example, when a plugin is not published to Gradle Portal, it can only be
- * applied with buildscript's classpath. Thus, it's needed to leave some freedom
+ * applied with the buildscript's classpath. Thus, it is necessary to leave some freedom
  * upon how to apply them. In such cases, just a shortcut to a dependency object
- * can be declared, without applying of the plugin in-place.
+ * can be declared without applying the plugin in-place.
  */
 private const val ABOUT_DEPENDENCY_EXTENSIONS = ""
 
 /**
- * Shortcut to [Spine.McJava] dependency object.
+ * Applies [standard][standardToSpineSdk] repositories to this `buildscript`.
+ */
+fun ScriptHandlerScope.standardSpineSdkRepositories() {
+    repositories.standardToSpineSdk()
+}
+
+/**
+ * Shortcut to [McJava] dependency object for using under `buildScript`.
+ */
+val ScriptHandlerScope.mcJava: McJava
+    get() = McJava
+
+/**
+ * Shortcut to [McJava] dependency object.
  *
  * This plugin is not published to Gradle Portal and cannot be applied directly to a project.
  * Firstly, it should be put to buildscript's classpath and then applied by ID only.
  */
-val PluginDependenciesSpec.mcJava: Spine.McJava
-    get() = Spine.McJava
+val PluginDependenciesSpec.mcJava: McJava
+    get() = McJava
+
+/**
+ * Shortcut to [ProtoData] dependency object for using under `buildscript`.
+ */
+val ScriptHandlerScope.protoData: ProtoData
+    get() = ProtoData
 
 /**
  * Shortcut to [ProtoData] dependency object.
  *
- * This plugin is in Gradle Portal. But when used in pair with [mcJava], it cannot be applied
- * directly to a project. It is so, because [mcJava] uses [protoData] as its dependency.
+ * This plugin is published at Gradle Plugin Portal.
+ * But when used in a pair with [mcJava], it cannot be applied directly to a project.
+ * It is so, because [mcJava] uses [protoData] as its dependency.
  * And buildscript's classpath ends up with both of them.
  */
 val PluginDependenciesSpec.protoData: ProtoData
@@ -95,8 +111,8 @@ val PluginDependenciesSpec.protoData: ProtoData
  * declared in auto-generated `org.gradle.kotlin.dsl.PluginAccessors.kt` file.
  * It conflicts with our own declarations.
  *
- * Declaring of top-level shortcuts eliminates need in applying plugins
- * using fully-qualified name of dependency objects.
+ * Declaring of top-level shortcuts eliminates the need in applying plugins
+ * using fully qualified name of dependency objects.
  *
  * It is still possible to apply a plugin with a custom version, if needed.
  * Just declare a version again on the returned [PluginDependencySpec].
@@ -117,6 +133,9 @@ val PluginDependenciesSpec.errorprone: PluginDependencySpec
 val PluginDependenciesSpec.protobuf: PluginDependencySpec
     get() = id(Protobuf.GradlePlugin.id)
 
+val PluginDependenciesSpec.prototap: PluginDependencySpec
+    get() = id(ProtoTap.gradlePluginId).version(ProtoTap.version)
+
 val PluginDependenciesSpec.`gradle-doctor`: PluginDependencySpec
     get() = id(GradleDoctor.pluginId).version(GradleDoctor.version)
 
@@ -128,13 +147,16 @@ val PluginDependenciesSpec.kotest: PluginDependencySpec
 val PluginDependenciesSpec.kover: PluginDependencySpec
     get() = id(Kover.id).version(Kover.version)
 
+val PluginDependenciesSpec.ksp: PluginDependencySpec
+    get() = id(Ksp.id).version(Ksp.version)
+
 /**
  * Configures the dependencies between third-party Gradle tasks
  * and those defined via ProtoData and Spine Model Compiler.
  *
- * It is required in order to avoid warnings in build logs, detecting the undeclared
+ * It is required to avoid warnings in build logs, detecting the undeclared
  * usage of Spine-specific task output by other tasks,
- * e.g. the output of `launchProtoData` is used by `compileKotlin`.
+ * e.g., the output of `launchProtoData` is used by `compileKotlin`.
  */
 @Suppress("unused")
 fun Project.configureTaskDependencies() {
@@ -175,4 +197,51 @@ fun Project.configureTaskDependencies() {
         "dokkaJavadoc".dependOn(launchProtoData)
         "publishPluginJar".dependOn(createVersionFile)
     }
+}
+
+/**
+ * Obtains all modules names of which do not have `"-tests"` as the suffix.
+ *
+ * By convention, such modules are for integration tests and should be treated differently.
+ */
+val Project.productionModules: Iterable<Project>
+    get() = rootProject.subprojects.filter { !it.name.contains("-tests") }
+
+
+/**
+ * Sets the remote debug option for this task.
+ *
+ * The port number is [5566][BuildSettings.REMOTE_DEBUG_PORT].
+ *
+ * @param enabled If `true` the task will be suspended.
+ */
+fun Task.remoteDebug(enabled: Boolean = true) { this as JavaExec
+    debugOptions {
+        this@debugOptions.enabled.set(enabled)
+        port.set(BuildSettings.REMOTE_DEBUG_PORT)
+        server.set(true)
+        suspend.set(true)
+    }
+}
+
+/**
+ * Sets remote debug options for the `launchProtoData` task.
+ *
+ * @param enabled if `true` the task will be suspended.
+ *
+ * @see remoteDebug
+ */
+fun Project.protoDataRemoteDebug(enabled: Boolean = true) {
+    tasks.findByName("launchProtoData")?.remoteDebug(enabled)
+}
+
+/**
+ * Sets remote debug options for the `launchTestProtoData` task.
+ *
+ * @param enabled if `true` the task will be suspended.
+ *
+ * @see remoteDebug
+ */
+fun Project.testProtoDataRemoteDebug(enabled: Boolean = true) {
+    tasks.findByName("launchTestProtoData")?.remoteDebug(enabled)
 }

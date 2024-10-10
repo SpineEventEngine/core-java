@@ -27,6 +27,7 @@
 package io.spine.internal.gradle
 
 import io.spine.internal.gradle.publish.SpinePublishing
+import java.io.File
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -91,3 +92,9 @@ val Project.artifactId: String
         val artifactId = spinePublishing?.artifactId(this)
         return artifactId ?: name
     }
+
+/**
+ * Returns project's build directory as [File].
+ */
+val Project.buildDirectory: File
+    get() = layout.buildDirectory.get().asFile

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,8 @@ private fun GenerateProtoTask.setupDescriptorSetFileCreation() {
     // The name of the generated file reflects project's Maven coordinates.
     val ssn = sourceSet.name
     generateDescriptorSet = true
-    val descriptorsDir = "${project.buildDir}/descriptors/${ssn}"
+    val buildDir = project.layout.buildDirectory.asFile.get().path
+    val descriptorsDir = "$buildDir/descriptors/${ssn}"
     val descriptorName = project.descriptorSetName(sourceSet)
     with(descriptorSetOptions) {
         path = "$descriptorsDir/$descriptorName"

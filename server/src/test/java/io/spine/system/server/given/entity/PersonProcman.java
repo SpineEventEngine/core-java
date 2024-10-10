@@ -27,8 +27,8 @@
 package io.spine.system.server.given.entity;
 
 import io.spine.server.command.Assign;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.system.server.CompletePersonCreation;
 import io.spine.system.server.PersonCreation;
@@ -71,9 +71,9 @@ public final class PersonProcman
     }
 
     @React
-    Nothing reactOn(PersonNameCreated event) {
+    NoReaction reactOn(PersonNameCreated event) {
         builder().setId(event.getId())
                  .setCreated(true);
-        return nothing();
+        return noReaction();
     }
 }

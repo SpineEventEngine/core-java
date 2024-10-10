@@ -24,17 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+@file:Suppress("DEPRECATION") /* We do not want the deprecation warning in Kotlin because of
+    our `Nothing` type deprecated in Java. We want deprecation warnings in Kotlin code
+    that are caused by deprecations in this file. */
+
 package io.spine.server.model
 
 /**
  * The alias for cases of naming collisions between
  * [io.spine.server.model.Nothing] and [kotlin.Nothing].
  */
+@Deprecated(message = "Please use `NoReaction` instead", replaceWith = ReplaceWith("NoReaction"))
 public typealias NothingHappened = Nothing
 
 /**
  * The alias for cases of naming collisions between
  * [io.spine.server.model.Nothing] and [kotlin.Nothing].
  */
+@Deprecated(
+    message = "Please use `io.spine.server.event.NoReaction` instead",
+    replaceWith = ReplaceWith("NoReaction", "io.spine.server.event"),
+)
 public typealias NoReaction = Nothing
-

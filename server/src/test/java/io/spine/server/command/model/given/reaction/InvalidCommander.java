@@ -36,8 +36,8 @@ import io.spine.model.contexts.projects.event.SigTaskStarted;
 import io.spine.model.contexts.projects.rejection.SigCannotCreateProject;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.model.given.SignatureTestEvent;
 
 import java.io.IOException;
@@ -67,12 +67,12 @@ public final class InvalidCommander extends AbstractCommander {
     }
 
     @Command
-    SigStartTask threeParams(SigTaskAddedToProject event, EventContext ctx, Nothing third) {
+    SigStartTask threeParams(SigTaskAddedToProject event, EventContext ctx, NoReaction third) {
         return EventMessages.startTask();
     }
 
     @Command
-    SigStartTask wrongSecondParam(SigTaskAddedToProject event, Nothing message) {
+    SigStartTask wrongSecondParam(SigTaskAddedToProject event, NoReaction message) {
         return EventMessages.startTask();
     }
 

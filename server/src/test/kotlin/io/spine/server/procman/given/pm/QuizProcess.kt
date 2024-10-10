@@ -28,8 +28,10 @@ package io.spine.server.procman.given.pm
 import io.spine.core.Subscribe
 import io.spine.server.command.Assign
 import io.spine.server.entity.alter
+import io.spine.server.event.NoReaction
 import io.spine.server.event.React
-import io.spine.server.model.Nothing
+import io.spine.server.event.asA
+import io.spine.server.event.asB
 import io.spine.server.procman.ProcessManager
 import io.spine.server.projection.Projection
 import io.spine.server.tuple.EitherOf2
@@ -77,17 +79,17 @@ internal class QuizProcess(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQu
         }
 
     @React
-    fun on(event: PmQuizStarted): Nothing {
+    fun on(event: PmQuizStarted): NoReaction {
         alter { id = event.quiz }
-        return nothing()
+        return noReaction()
     }
 
     @React
-    fun on(event: PmQuestionAnswered): EitherOf3<PmQuestionSolved, PmQuestionFailed, Nothing> {
+    fun on(event: PmQuestionAnswered): EitherOf3<PmQuestionSolved, PmQuestionFailed, NoReaction> {
         val answer = event.answer
         val question = answer.question
         if (question.isClosed()) {
-            return EitherOf3.withC(nothing())
+            return EitherOf3.withC(noReaction())
         }
         return if (answer.correct) {
             EitherOf3.withA(pmQuestionSolved {
@@ -109,7 +111,7 @@ internal class QuizProcess(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQu
     }
 
     @React
-    fun on(event: PmQuestionSolved): EitherOf2<Nothing, PmQuizFinished> {
+    fun on(event: PmQuestionSolved): EitherOf2<NoReaction, PmQuizFinished> {
         val question = event.question
         alter {
             removeOpenQuestion(question)
@@ -119,7 +121,7 @@ internal class QuizProcess(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQu
     }
 
     @React
-    fun on(event: PmQuestionFailed): EitherOf2<Nothing, PmQuizFinished> {
+    fun on(event: PmQuestionFailed): EitherOf2<NoReaction, PmQuizFinished> {
         val question = event.question
         alter {
             removeOpenQuestion(question)
@@ -134,17 +136,17 @@ internal class QuizProcess(id: PmQuizId) : ProcessManager<PmQuizId, PmQuiz, PmQu
         removeOpenQuestion(index)
     }
 
-    private fun onAnsweredQuestion(): EitherOf2<Nothing, PmQuizFinished> {
+    private fun onAnsweredQuestion(): EitherOf2<NoReaction, PmQuizFinished> {
         return if (builder().openQuestionList.isEmpty()) {
             val loaded = select(PmQuizStats::class.java).findById(id())
-            EitherOf2.withB(pmQuizFinished {
+            pmQuizFinished {
                 quiz = id()
                 loaded?.let {
                     stats = it
                 }
-            })
+            }.asB()
         } else {
-            EitherOf2.withA(nothing())
+            noReaction().asA()
         }
     }
 }

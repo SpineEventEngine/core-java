@@ -27,8 +27,8 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.server.command.Assign;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.server.blackbox.BbProjectFailer;
 import io.spine.testing.server.blackbox.BbProjectId;
@@ -51,7 +51,7 @@ public final class BbProjectFailerProcess
 
     @React
     @SuppressWarnings("DoNotCallSuggester") // Does not apply to this test env. case.
-    Nothing on(BbProjectFailed e) {
+    NoReaction on(BbProjectFailed e) {
         throw new RuntimeException("Reaction on the event failed unexpectedly.");
     }
 }

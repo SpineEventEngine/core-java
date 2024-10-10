@@ -31,7 +31,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.EventMessage;
 import io.spine.base.RejectionMessage;
-import io.spine.server.model.Nothing;
+import io.spine.server.event.NoReaction;
 import io.spine.server.tuple.EitherOf2;
 import io.spine.server.tuple.EitherOf3;
 import io.spine.server.tuple.Pair;
@@ -100,8 +100,8 @@ public final class HandlerReturnTypeTestEnv {
         public void returnVoid() {
         }
 
-        public Nothing returnNothing() {
-            return Nothing.getDefaultInstance();
+        public NoReaction returnNothing() {
+            return NoReaction.getDefaultInstance();
         }
 
         public Empty returnEmpty() {

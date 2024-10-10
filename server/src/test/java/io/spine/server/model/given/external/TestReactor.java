@@ -29,13 +29,13 @@ package io.spine.server.model.given.external;
 import io.spine.core.External;
 import io.spine.server.event.AbstractEventReactor;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
+import io.spine.server.event.NoReaction;
 import io.spine.test.model.external.ExtProjectCreated;
 
 public final class TestReactor extends AbstractEventReactor {
 
     @React
-    Nothing on(@External ExtProjectCreated event) {
-        return nothing();
+    NoReaction on(@External ExtProjectCreated event) {
+        return noReaction();
     }
 }

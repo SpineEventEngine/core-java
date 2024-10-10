@@ -36,8 +36,8 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
@@ -186,39 +186,39 @@ public class TestProcessManager
     }
 
     @React
-    Nothing on(StandardRejections.EntityAlreadyArchived rejection) {
+    NoReaction on(StandardRejections.EntityAlreadyArchived rejection) {
         keep(rejection);
-        return nothing();
+        return noReaction();
     }
 
     @React
-    Nothing on(StandardRejections.EntityAlreadyDeleted rejection) {
-        return nothing();
+    NoReaction on(StandardRejections.EntityAlreadyDeleted rejection) {
+        return noReaction();
     }
 
     @React
-    Nothing on(PmTaskAdded event) {
+    NoReaction on(PmTaskAdded event) {
         keep(event);
 
         var task = event.getTask();
         handleTaskAdded(task);
-        return nothing();
+        return noReaction();
     }
 
     @React
-    Nothing on(PmProjectStarted event) {
+    NoReaction on(PmProjectStarted event) {
         keep(event);
 
         handleProjectStarted();
-        return nothing();
+        return noReaction();
     }
 
     @React
-    Nothing on(PmProjectCreated event, EventContext ignored) {
+    NoReaction on(PmProjectCreated event, EventContext ignored) {
         keep(event);
 
         handleProjectCreated(event.getProjectId());
-        return nothing();
+        return noReaction();
     }
 
     @Override

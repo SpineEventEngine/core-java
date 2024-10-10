@@ -32,6 +32,7 @@ import com.google.common.reflect.TypeToken;
 import io.spine.base.CommandMessage;
 import io.spine.base.EventMessage;
 import io.spine.reflect.Types;
+import io.spine.server.event.NoReaction;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.type.MessageClass;
@@ -95,11 +96,12 @@ final class MethodResults {
      * Checks if the class is a concrete {@linkplain CommandMessage command} or
      * {@linkplain EventMessage event}.
      */
+    @SuppressWarnings("deprecation") // Handling of `Nothing` is kept for backward compatibility.
     private static boolean isCommandOrEvent(Class<?> cls) {
         if (cls.isInterface()) {
             return false;
         }
-        if (Nothing.class.equals(cls)) {
+        if (Nothing.class.equals(cls) || NoReaction.class.equals(cls)) {
             return false;
         }
         var isCommandOrEvent = CommandMessage.class.isAssignableFrom(cls)

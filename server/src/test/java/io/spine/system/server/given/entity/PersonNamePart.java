@@ -29,8 +29,8 @@ package io.spine.system.server.given.entity;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.NoReaction;
 import io.spine.server.event.React;
-import io.spine.server.model.Nothing;
 import io.spine.system.server.CreatePersonName;
 import io.spine.system.server.PersonFirstName;
 import io.spine.system.server.PersonId;
@@ -51,8 +51,8 @@ public class PersonNamePart
     }
 
     @React
-    Nothing reactOn(PersonRenamed event) {
-        return nothing();
+    NoReaction reactOn(PersonRenamed event) {
+        return noReaction();
     }
 
     @Assign

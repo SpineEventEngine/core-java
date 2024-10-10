@@ -65,14 +65,13 @@ buildscript {
                 val spine = io.spine.internal.dependency.Spine
                 @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
+                    io.spine.internal.dependency.Grpc.api,
                     io.spine.internal.dependency.Kotlin.stdLibJdk7,
                     spine.base,
                     spine.toolBase,
                     spine.server,
                     spine.reflect,
                     io.spine.internal.dependency.Spine.Logging.lib,
-                    io.spine.internal.dependency.Spine.Logging.middleware,
-                    io.spine.internal.dependency.Spine.Logging.floggerApi,
                     io.spine.internal.dependency.Validation.runtime,
                 )
             }
@@ -80,7 +79,7 @@ buildscript {
     }
 
     dependencies {
-        classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
+        classpath(mcJava.pluginLib)
     }
 }
 
@@ -111,7 +110,6 @@ spinePublishing {
 
     destinations = with(PublishingRepos) {
         setOf(
-            cloudRepo,
             gitHub("core-java"),
             cloudArtifactRegistry
         )
@@ -349,8 +347,6 @@ fun Subproject.forceConfigurations() {
                     Validation.runtime,
                     Spine.time,
                     Spine.Logging.lib,
-                    Spine.Logging.middleware,
-                    Spine.Logging.floggerApi,
                     Spine.baseTypes,
                     Spine.change,
                     Spine.reflect,

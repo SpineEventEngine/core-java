@@ -29,7 +29,6 @@ package io.spine.server.command.model.given.handler;
 import com.google.common.collect.ImmutableList;
 import io.spine.base.EventMessage;
 import io.spine.server.command.Assign;
-import io.spine.server.model.Nothing;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.test.shared.EmptyProcess;
 import io.spine.test.reflect.command.RefCreateProject;
@@ -37,7 +36,8 @@ import io.spine.test.reflect.command.RefCreateProject;
 import java.util.List;
 
 /**
- * A simple process manager that accepts a command and always returns {@link Nothing}.
+ * A simple process manager that accepts a command and always
+ * returns {@link io.spine.server.event.NoReaction}.
  *
  * <p>The process manager does not modify its state when “handling” the passed command.
  */
@@ -50,6 +50,6 @@ public class ProcessManagerDoingNothing
 
     @Assign
     List<EventMessage> handle(RefCreateProject cmd) {
-        return ImmutableList.of(nothing());
+        return ImmutableList.of(noReaction());
     }
 }

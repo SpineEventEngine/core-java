@@ -36,8 +36,8 @@ import io.spine.model.contexts.projects.command.SigSetProjectOwner;
 import io.spine.model.contexts.projects.command.SigStartTask;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Command;
-import io.spine.server.model.DoNothing;
-import io.spine.server.model.Nothing;
+import io.spine.server.command.DoNothing;
+import io.spine.server.event.NoReaction;
 import io.spine.server.model.given.SignatureTestCommand;
 import io.spine.server.tuple.EitherOf3;
 
@@ -60,7 +60,7 @@ public final class InvalidCommander extends AbstractCommander {
     }
 
     @Command
-    SigStartTask nonCommandMessageParam(Nothing command) {
+    SigStartTask nonCommandMessageParam(NoReaction command) {
         return TestCommandMessage.startTask();
     }
 
@@ -80,7 +80,7 @@ public final class InvalidCommander extends AbstractCommander {
     }
 
     @Command
-    SigStartTask wrongSecondParam(SigAssignTask command, Nothing message) {
+    SigStartTask wrongSecondParam(SigAssignTask command, NoReaction message) {
         return TestCommandMessage.startTask();
     }
 
@@ -95,8 +95,8 @@ public final class InvalidCommander extends AbstractCommander {
     }
 
     @Command
-    Nothing eventResult(SigAssignTask command) {
-        return nothing();
+    NoReaction eventResult(SigAssignTask command) {
+        return noReaction();
     }
 
     @Command
@@ -121,7 +121,7 @@ public final class InvalidCommander extends AbstractCommander {
     }
 
     @Command
-    Iterable<Nothing> wrongIterable(SigAddTaskToProject command) {
+    Iterable<NoReaction> wrongIterable(SigAddTaskToProject command) {
         return ImmutableList.of();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,36 +37,39 @@ import org.gradle.api.artifacts.Dependency
  * the dependency comes.
  */
 internal class ModuleDependency(
-    val module: Project,
+    val project: Project,
     val configuration: Configuration,
     private val dependency: Dependency,
+    private val factualVersion: String = dependency.version!!
 
 ) : Dependency by dependency, Comparable<ModuleDependency> {
 
     companion object {
-        private val COMPARATOR = compareBy<ModuleDependency> { it.module }
+        private val COMPARATOR = compareBy<ModuleDependency> { it.project }
             .thenBy { it.configuration.name }
             .thenBy { it.group }
             .thenBy { it.name }
-            .thenBy { it.version }
+            .thenBy { it.factualVersion }
     }
+
+    override fun getVersion(): String = factualVersion
 
     /**
      * A project dependency with its [scope][DependencyScope].
      *
      * Doesn't contain any info about an origin module and configuration.
      */
-    val scoped = ScopedDependency.of(dependency, configuration)
+    val scoped = ScopedDependency.of(this, configuration)
 
     /**
      * GAV coordinates of this dependency.
      *
      * Gradle's [Dependency] is a mutable object. Its properties can change their
-     * values with time. In parcticular, the version can be changed as more
+     * values with time. In particular, the version can be changed as more
      * configurations are getting resolved. This is why this property is calculated.
      */
     val gav: String
-        get() = "$group:$name:$version"
+        get() = "$group:$name:$factualVersion"
 
     override fun compareTo(other: ModuleDependency): Int = COMPARATOR.compare(this, other)
 
@@ -76,17 +79,17 @@ internal class ModuleDependency(
 
         other as ModuleDependency
 
-        if (module != other.module) return false
+        if (project != other.project) return false
         if (configuration != other.configuration) return false
-        if (dependency != other.dependency) return false
+        if (gav != other.gav) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = module.hashCode()
+        var result = project.hashCode()
         result = 31 * result + configuration.hashCode()
-        result = 31 * result + dependency.hashCode()
+        result = 31 * result + gav.hashCode()
         return result
     }
 }
