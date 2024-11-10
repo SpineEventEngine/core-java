@@ -45,22 +45,22 @@ object Spine {
          *
          * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
          */
-        const val base = "2.0.0-SNAPSHOT.215"
-        const val baseForBuildScript = "2.0.0-SNAPSHOT.215"
+        const val base = "2.0.0-SNAPSHOT.217"
+        const val baseForBuildScript = "2.0.0-SNAPSHOT.217"
 
         /**
          * The version of [Spine.reflect].
          *
          * @see <a href="https://github.com/SpineEventEngine/reflect">spine-reflect</a>
          */
-        const val reflect = "2.0.0-SNAPSHOT.188"
+        const val reflect = "2.0.0-SNAPSHOT.191"
 
         /**
          * The version of [Spine.Logging].
          *
          * @see <a href="https://github.com/SpineEventEngine/logging">spine-logging</a>
          */
-        const val logging = "2.0.0-SNAPSHOT.240"
+        const val logging = "2.0.0-SNAPSHOT.242"
 
         /**
          * The version of [Spine.testlib].
