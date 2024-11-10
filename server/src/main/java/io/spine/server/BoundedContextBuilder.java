@@ -73,7 +73,7 @@ import static java.lang.String.format;
 /**
  * A builder for producing {@code BoundedContext} instances.
  */
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
 public final class BoundedContextBuilder implements WithLogging {
 
     private final ContextSpec spec;
@@ -369,7 +369,7 @@ public final class BoundedContextBuilder implements WithLogging {
     }
 
     /**
-     * Adds the passed repository to the registration list which will be processed after
+     * Adds the passed repository to the registration list, which will be processed after
      * the Bounded Context is created.
      */
     @CanIgnoreReturnValue
