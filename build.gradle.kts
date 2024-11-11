@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -63,6 +63,7 @@ buildscript {
             exclude(group = "io.spine", module = "spine-logging-backend")
             resolutionStrategy {
                 val spine = io.spine.internal.dependency.Spine
+                val logging = io.spine.internal.dependency.Spine.Logging
                 @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
                     io.spine.internal.dependency.Grpc.api,
@@ -71,7 +72,9 @@ buildscript {
                     spine.toolBase,
                     spine.server,
                     spine.reflect,
-                    io.spine.internal.dependency.Spine.Logging.lib,
+                    logging.lib,
+                    logging.libJvm,
+                    logging.middleware,
                     io.spine.internal.dependency.Validation.runtime,
                 )
             }
@@ -347,6 +350,8 @@ fun Subproject.forceConfigurations() {
                     Validation.runtime,
                     Spine.time,
                     Spine.Logging.lib,
+                    Spine.Logging.libJvm,
+                    Spine.Logging.middleware,
                     Spine.baseTypes,
                     Spine.change,
                     Spine.reflect,
