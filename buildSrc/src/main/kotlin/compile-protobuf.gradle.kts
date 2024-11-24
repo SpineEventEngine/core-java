@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Protobuf
-import io.spine.internal.gradle.protobuf.setup
+import io.spine.dependency.lib.Protobuf
+import io.spine.gradle.protobuf.setup
 
 plugins {
     id("java-library")

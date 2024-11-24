@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.buildDirectory
+import io.spine.gradle.buildDirectory
 
 plugins {
     jacoco
