@@ -69,6 +69,7 @@ buildscript {
                 force(
                     io.spine.dependency.lib.Grpc.api,
                     io.spine.dependency.lib.Kotlin.stdLibJdk7,
+                    "${protoData.module}:${protoData.dogfoodingVersion}",
                     spine.base,
                     spine.toolBase,
                     spine.server,
@@ -247,8 +248,6 @@ fun Subproject.defineDependencies() {
         ErrorProne.apply {
             errorprone(core)
         }
-        // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
-        add("protoData", Validation.java)
         implementation(Validation.runtime)
 
         testImplementation(JUnit.runner)
