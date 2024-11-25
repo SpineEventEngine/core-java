@@ -37,8 +37,8 @@ object ArtifactVersion {
      *
      * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
      */
-    const val base = "2.0.0-SNAPSHOT.219"
-    const val baseForBuildScript = "2.0.0-SNAPSHOT.219"
+    const val base = "2.0.0-SNAPSHOT.220"
+    const val baseForBuildScript = "2.0.0-SNAPSHOT.220"
 
     /**
      * The version of [Spine.reflect].
