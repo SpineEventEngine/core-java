@@ -105,6 +105,7 @@ class GrpcContainerTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("configure underlying gRPC server")
     void configureUnderlyingGrpcServer() {
         var port = 1654;

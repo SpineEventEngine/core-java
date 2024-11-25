@@ -93,6 +93,7 @@ class QueryServiceTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("allow to create an instance serving no types")
     void notCreateWithNoBc() {
         assertDoesNotThrow(

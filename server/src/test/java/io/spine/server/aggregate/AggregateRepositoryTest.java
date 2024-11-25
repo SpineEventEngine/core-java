@@ -660,6 +660,7 @@ class AggregateRepositoryTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("not pass command rejection to `onError`")
     void notPassCommandRejectionToOnError() {
         var repository = new FailingAggregateRepository();

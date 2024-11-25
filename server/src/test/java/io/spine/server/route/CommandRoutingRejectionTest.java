@@ -83,7 +83,7 @@ class CommandRoutingRejectionTest {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         context.close();
     }
 

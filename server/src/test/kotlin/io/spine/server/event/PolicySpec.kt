@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,6 +30,7 @@ import io.kotest.matchers.shouldBe
 import io.spine.core.External
 import io.spine.server.tuple.EitherOf2
 import io.spine.test.shared.event.SomethingHappened
+import io.spine.testing.logging.mute.MuteLogging
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -45,6 +46,7 @@ internal class PolicySpec {
     }
 
     @Test
+    @MuteLogging(WHY_MUTE)
     fun `allow using 'Just' in return value`() {
         val policy = object : Policy<SomethingHappened>() {
             @React
@@ -56,6 +58,7 @@ internal class PolicySpec {
     }
 
     @Test
+    @MuteLogging(WHY_MUTE)
     fun `allow using 'Either' in return value`() {
         object : Policy<SomethingHappened>() {
             @React
@@ -68,6 +71,10 @@ internal class PolicySpec {
     }
 
     companion object {
+        const val WHY_MUTE = """
+            We make the method `whenever()` `public` to be able to call it from outside a policy.
+            A `public` reacting method causes a warning because of unnecessary exposure.
+        """
         val somethingHappened: SomethingHappened = SomethingHappened.getDefaultInstance()
         val noReaction: NoReaction = NoReaction.getDefaultInstance()
     }
