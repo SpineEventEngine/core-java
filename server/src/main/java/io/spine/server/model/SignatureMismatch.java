@@ -112,7 +112,7 @@ public final class SignatureMismatch {
 
         /**
          * The mismatch of {@code WARN} level means that the recommended criterion was not met,
-         * however the application execution may proceed.
+         * however, the application execution may proceed.
          */
         WARN
     }
