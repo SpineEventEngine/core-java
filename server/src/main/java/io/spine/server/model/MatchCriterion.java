@@ -184,8 +184,7 @@ public enum MatchCriterion {
     }
 
     private static String methodAsString(Method method) {
-        var declaringClassName = method.getDeclaringClass()
-                                       .getCanonicalName();
+        var declaringClassName = method.getDeclaringClass().getName();
         var paramTypes = Arrays.stream(method.getParameterTypes())
                 .map(Class::getSimpleName)
                 .collect(Collectors.<String>toUnmodifiableList());
