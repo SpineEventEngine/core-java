@@ -61,7 +61,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.check;
-import static io.spine.validate.Validate.validateChange;
 import static io.spine.validate.Validate.violationsOf;
 
 /**
@@ -330,7 +329,6 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         checkNotNull(newState);
         ImmutableList.Builder<ConstraintViolation> violations = ImmutableList.builder();
         violations.addAll(violationsOf(newState));
-        violations.addAll(validateChange(state(), newState));
         return violations.build();
     }
 
