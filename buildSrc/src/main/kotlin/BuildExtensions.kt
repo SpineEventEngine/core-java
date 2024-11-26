@@ -26,16 +26,16 @@
 
 @file:Suppress("UnusedReceiverParameter", "unused", "TopLevelPropertyNaming", "ObjectPropertyName")
 
-import io.spine.internal.dependency.ErrorProne
-import io.spine.internal.dependency.GradleDoctor
-import io.spine.internal.dependency.Kotest
-import io.spine.internal.dependency.Kover
-import io.spine.internal.dependency.Ksp
-import io.spine.internal.dependency.McJava
-import io.spine.internal.dependency.ProtoData
-import io.spine.internal.dependency.ProtoTap
-import io.spine.internal.dependency.Protobuf
-import io.spine.internal.gradle.standardToSpineSdk
+import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.build.GradleDoctor
+import io.spine.dependency.build.Ksp
+import io.spine.dependency.lib.Protobuf
+import io.spine.dependency.local.McJava
+import io.spine.dependency.local.ProtoData
+import io.spine.dependency.local.ProtoTap
+import io.spine.dependency.test.Kotest
+import io.spine.dependency.test.Kover
+import io.spine.gradle.standardToSpineSdk
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.JavaExec

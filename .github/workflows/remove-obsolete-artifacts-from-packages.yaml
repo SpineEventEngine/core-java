@@ -48,8 +48,8 @@ jobs:
         shell: bash
         run: |
           repoName=$(echo ${{ github.repository }} | cut -d '/' -f2)
-          chmod +x ./scripts/request-package-names.sh
-          ./scripts/request-package-names.sh ${{ github.token }} \
+          chmod +x ./config/scripts/request-package-names.sh
+          ./config/scripts/request-package-names.sh ${{ github.token }} \
                 $repoName ${{ github.repository_owner }} ./package-names.json
           echo "package-names=$(<./package-names.json)" >> $GITHUB_OUTPUT
 

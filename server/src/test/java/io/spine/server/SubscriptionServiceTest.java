@@ -196,6 +196,7 @@ class SubscriptionServiceTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("allow a service instance serving no types")
     void notInitFromEmptyBuilder() {
         assertDoesNotThrow(

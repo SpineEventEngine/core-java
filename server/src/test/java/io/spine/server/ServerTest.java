@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,12 +27,10 @@
 package io.spine.server;
 
 import com.google.protobuf.Empty;
-import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.spine.server.given.service.StatusCheckService;
-import io.spine.test.server.Status;
 import io.spine.test.server.StatusCheckGrpc;
-import io.spine.test.server.StatusCheckGrpc.StatusCheckBlockingStub;
+import io.spine.testing.logging.mute.MuteLogging;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,19 +49,20 @@ class ServerTest {
     private static final int PORT = 4242;
 
     @Test
+    @MuteLogging
     @DisplayName("allow registering custom gRPC services")
     void customServices() throws IOException {
-        Server server = Server.atPort(PORT)
-                              .add(users())
-                              .add(tasks())
-                              .include(new StatusCheckService())
-                              .build();
+        var server = Server.atPort(PORT)
+                           .add(users())
+                           .add(tasks())
+                           .include(new StatusCheckService())
+                           .build();
         server.start();
-        ManagedChannel ch = ManagedChannelBuilder.forAddress(ADDRESS, PORT)
-                                                 .usePlaintext()
-                                                 .build();
-        StatusCheckBlockingStub client = StatusCheckGrpc.newBlockingStub(ch);
-        Status response = client.check(Empty.getDefaultInstance());
+        var ch = ManagedChannelBuilder.forAddress(ADDRESS, PORT)
+                                      .usePlaintext()
+                                      .build();
+        var client = StatusCheckGrpc.newBlockingStub(ch);
+        var response = client.check(Empty.getDefaultInstance());
         assertThat(response)
                 .isNotEqualToDefaultInstance();
         server.shutdown();
@@ -73,10 +72,10 @@ class ServerTest {
     @Test
     @DisplayName("provide `CommandService`, `QueryService`, and `SubscriptionService`")
     void cAndQ() {
-        Server server = Server.atPort(PORT)
-                              .add(users())
-                              .add(tasks())
-                              .build();
+        var server = Server.atPort(PORT)
+                           .add(users())
+                           .add(tasks())
+                           .build();
         assertThat(server.subscriptionService()).isNotNull();
         assertThat(server.queryService()).isNotNull();
         assertThat(server.commandService()).isNotNull();

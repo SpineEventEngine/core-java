@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,9 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Validation
-import io.spine.internal.gradle.testing.exposeTestConfiguration
+import io.spine.dependency.local.Logging
+import io.spine.dependency.local.Spine
+import io.spine.dependency.local.Validation
+import io.spine.gradle.testing.exposeTestConfiguration
 
 plugins {
     `detekt-code-analysis`
@@ -38,7 +39,7 @@ dependencies {
     api(Spine.baseTypes)
     api(Spine.change)
     api(Validation.runtime)
-    api(Spine.Logging.lib)
+    api(Logging.lib)
 
     testImplementation(project(":testutil-core"))
     testImplementation(Spine.testUtilTime)

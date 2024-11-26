@@ -261,6 +261,7 @@ class AssigneeReceptorTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("throw `ModelError` when dispatching command without an assignee")
     void notDispatchNonHandledCmd() {
         var assignee = new ValidAssigneeOneParam();

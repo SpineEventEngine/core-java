@@ -61,6 +61,7 @@ class GrpcContainerTest {
 
     @SuppressWarnings("MagicNumber")
     @Test
+    @MuteLogging
     @DisplayName("add and remove parameters from builder")
     void setParamsInBuilder() {
         var port = 60;
@@ -105,6 +106,7 @@ class GrpcContainerTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("configure underlying gRPC server")
     void configureUnderlyingGrpcServer() {
         var port = 1654;

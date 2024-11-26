@@ -1,6 +1,6 @@
 
 
-# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.181`
+# Dependencies of `io.spine:spine-client:2.0.0-SNAPSHOT.182`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -21,6 +21,10 @@
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_annotations. **Version** : 2.23.0.
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
+     * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.23.0.
+     * **Project URL:** [https://errorprone.info/error_prone_type_annotations](https://errorprone.info/error_prone_type_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : failureaccess. **Version** : 1.0.1.
@@ -84,6 +88,10 @@
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
+     * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 3.40.0.
      * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
@@ -155,11 +163,6 @@
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-yaml. **Version** : 2.15.3.
-     * **Project URL:** [https://github.com/FasterXML/jackson-dataformats-text](https://github.com/FasterXML/jackson-dataformats-text)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -171,10 +174,6 @@
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.0.5.
-     * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.1.8.
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -295,10 +294,6 @@
 1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.12.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
-1.  **Group** : com.sksamuel.aedile. **Name** : aedile-core. **Version** : 1.3.1.
-     * **Project URL:** [http://www.github.com/sksamuel/aedile](http://www.github.com/sksamuel/aedile)
-     * **License:** [The Apache 2.0 License](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 4.0.10.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
@@ -652,7 +647,15 @@
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.jetbrains.dokka. **Name** : gfm-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.jetbrains.dokka. **Name** : javadoc-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.jetbrains.dokka. **Name** : jekyll-plugin. **Version** : 1.9.20.
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -760,10 +763,6 @@
      * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-coroutines-jdk8. **Version** : 1.7.3.
-     * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-html-jvm. **Version** : 0.8.1.
      * **Project URL:** [https://github.com/Kotlin/kotlinx.html](https://github.com/Kotlin/kotlinx.html)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -852,19 +851,15 @@
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
      * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : org.yaml. **Name** : snakeyaml. **Version** : 2.1.
-     * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 25 20:35:11 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.181`
+# Dependencies of `io.spine:spine-core:2.0.0-SNAPSHOT.182`
 
 ## Runtime
 1.  **Group** : com.google.code.findbugs. **Name** : jsr305. **Version** : 3.0.2.
@@ -877,6 +872,10 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_annotations. **Version** : 2.23.0.
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
+     * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.23.0.
+     * **Project URL:** [https://errorprone.info/error_prone_type_annotations](https://errorprone.info/error_prone_type_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : failureaccess. **Version** : 1.0.1.
@@ -904,6 +903,10 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
 
 1.  **Group** : com.google.protobuf. **Name** : protobuf-kotlin. **Version** : 3.25.1.
      * **License:** [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause)
+
+1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
+     * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 3.40.0.
      * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
@@ -971,11 +974,6 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-yaml. **Version** : 2.15.3.
-     * **Project URL:** [https://github.com/FasterXML/jackson-dataformats-text](https://github.com/FasterXML/jackson-dataformats-text)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -987,10 +985,6 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.0.5.
-     * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.1.8.
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1111,10 +1105,6 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
 1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.12.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
-1.  **Group** : com.sksamuel.aedile. **Name** : aedile-core. **Version** : 1.3.1.
-     * **Project URL:** [http://www.github.com/sksamuel/aedile](http://www.github.com/sksamuel/aedile)
-     * **License:** [The Apache 2.0 License](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 4.0.10.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
@@ -1468,7 +1458,15 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.jetbrains.dokka. **Name** : gfm-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.jetbrains.dokka. **Name** : javadoc-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.jetbrains.dokka. **Name** : jekyll-plugin. **Version** : 1.9.20.
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1576,10 +1574,6 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-coroutines-jdk8. **Version** : 1.7.3.
-     * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-html-jvm. **Version** : 0.8.1.
      * **Project URL:** [https://github.com/Kotlin/kotlinx.html](https://github.com/Kotlin/kotlinx.html)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1668,19 +1662,15 @@ This report was generated on **Mon Nov 18 12:45:27 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
      * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : org.yaml. **Name** : snakeyaml. **Version** : 2.1.
-     * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 25 20:35:11 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.181`
+# Dependencies of `io.spine:spine-server:2.0.0-SNAPSHOT.182`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -1701,6 +1691,10 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_annotations. **Version** : 2.23.0.
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
+     * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.23.0.
+     * **Project URL:** [https://errorprone.info/error_prone_type_annotations](https://errorprone.info/error_prone_type_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.guava. **Name** : failureaccess. **Version** : 1.0.1.
@@ -1764,6 +1758,10 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
+     * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1.  **Group** : org.checkerframework. **Name** : checker-qual. **Version** : 3.40.0.
      * **Project URL:** [https://checkerframework.org/](https://checkerframework.org/)
@@ -1835,11 +1833,6 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-yaml. **Version** : 2.15.3.
-     * **Project URL:** [https://github.com/FasterXML/jackson-dataformats-text](https://github.com/FasterXML/jackson-dataformats-text)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -1851,10 +1844,6 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.0.5.
-     * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.1.8.
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -1979,10 +1968,6 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
 1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.12.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
-1.  **Group** : com.sksamuel.aedile. **Name** : aedile-core. **Version** : 1.3.1.
-     * **Project URL:** [http://www.github.com/sksamuel/aedile](http://www.github.com/sksamuel/aedile)
-     * **License:** [The Apache 2.0 License](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 4.0.10.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
@@ -2340,7 +2325,15 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.jetbrains.dokka. **Name** : gfm-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.jetbrains.dokka. **Name** : javadoc-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.jetbrains.dokka. **Name** : jekyll-plugin. **Version** : 1.9.20.
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2448,10 +2441,6 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-coroutines-jdk8. **Version** : 1.7.3.
-     * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-html-jvm. **Version** : 0.8.1.
      * **Project URL:** [https://github.com/Kotlin/kotlinx.html](https://github.com/Kotlin/kotlinx.html)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2540,19 +2529,15 @@ This report was generated on **Mon Nov 18 12:45:29 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
      * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : org.yaml. **Name** : snakeyaml. **Version** : 2.1.
-     * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 25 20:35:12 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.181`
+# Dependencies of `io.spine.tools:spine-testutil-client:2.0.0-SNAPSHOT.182`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -2577,6 +2562,10 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_annotations. **Version** : 2.23.0.
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
+     * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.23.0.
+     * **Project URL:** [https://errorprone.info/error_prone_type_annotations](https://errorprone.info/error_prone_type_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.7.4.
@@ -2698,6 +2687,10 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
+     * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1.  **Group** : junit. **Name** : junit. **Version** : 4.13.1.
      * **Project URL:** [http://junit.org](http://junit.org)
@@ -2830,11 +2823,6 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-yaml. **Version** : 2.15.3.
-     * **Project URL:** [https://github.com/FasterXML/jackson-dataformats-text](https://github.com/FasterXML/jackson-dataformats-text)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -2846,10 +2834,6 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.0.5.
-     * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.1.8.
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -2970,10 +2954,6 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
 1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.12.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
-1.  **Group** : com.sksamuel.aedile. **Name** : aedile-core. **Version** : 1.3.1.
-     * **Project URL:** [http://www.github.com/sksamuel/aedile](http://www.github.com/sksamuel/aedile)
-     * **License:** [The Apache 2.0 License](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 4.0.10.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
@@ -3327,7 +3307,15 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.jetbrains.dokka. **Name** : gfm-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.jetbrains.dokka. **Name** : javadoc-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.jetbrains.dokka. **Name** : jekyll-plugin. **Version** : 1.9.20.
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3435,10 +3423,6 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-coroutines-jdk8. **Version** : 1.7.3.
-     * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-html-jvm. **Version** : 0.8.1.
      * **Project URL:** [https://github.com/Kotlin/kotlinx.html](https://github.com/Kotlin/kotlinx.html)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3527,19 +3511,15 @@ This report was generated on **Mon Nov 18 12:45:30 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
      * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : org.yaml. **Name** : snakeyaml. **Version** : 2.1.
-     * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 25 20:35:12 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.181`
+# Dependencies of `io.spine.tools:spine-testutil-core:2.0.0-SNAPSHOT.182`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -3564,6 +3544,10 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_annotations. **Version** : 2.23.0.
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
+     * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.23.0.
+     * **Project URL:** [https://errorprone.info/error_prone_type_annotations](https://errorprone.info/error_prone_type_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.7.4.
@@ -3685,6 +3669,10 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
+     * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1.  **Group** : junit. **Name** : junit. **Version** : 4.13.1.
      * **Project URL:** [http://junit.org](http://junit.org)
@@ -3817,11 +3805,6 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-yaml. **Version** : 2.15.3.
-     * **Project URL:** [https://github.com/FasterXML/jackson-dataformats-text](https://github.com/FasterXML/jackson-dataformats-text)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -3833,10 +3816,6 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.0.5.
-     * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.1.8.
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -3957,10 +3936,6 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
 1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.12.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
-1.  **Group** : com.sksamuel.aedile. **Name** : aedile-core. **Version** : 1.3.1.
-     * **Project URL:** [http://www.github.com/sksamuel/aedile](http://www.github.com/sksamuel/aedile)
-     * **License:** [The Apache 2.0 License](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 4.0.10.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
@@ -4314,7 +4289,15 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.jetbrains.dokka. **Name** : gfm-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.jetbrains.dokka. **Name** : javadoc-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.jetbrains.dokka. **Name** : jekyll-plugin. **Version** : 1.9.20.
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4422,10 +4405,6 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-coroutines-jdk8. **Version** : 1.7.3.
-     * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-html-jvm. **Version** : 0.8.1.
      * **Project URL:** [https://github.com/Kotlin/kotlinx.html](https://github.com/Kotlin/kotlinx.html)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -4514,19 +4493,15 @@ This report was generated on **Mon Nov 18 12:45:31 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
      * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : org.yaml. **Name** : snakeyaml. **Version** : 2.1.
-     * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 25 20:35:12 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
 
 
 
 
-# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.181`
+# Dependencies of `io.spine.tools:spine-testutil-server:2.0.0-SNAPSHOT.182`
 
 ## Runtime
 1.  **Group** : com.google.android. **Name** : annotations. **Version** : 4.1.1.4.
@@ -4551,6 +4526,10 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
 
 1.  **Group** : com.google.errorprone. **Name** : error_prone_annotations. **Version** : 2.23.0.
      * **Project URL:** [https://errorprone.info/error_prone_annotations](https://errorprone.info/error_prone_annotations)
+     * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : com.google.errorprone. **Name** : error_prone_type_annotations. **Version** : 2.23.0.
+     * **Project URL:** [https://errorprone.info/error_prone_type_annotations](https://errorprone.info/error_prone_type_annotations)
      * **License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.google.flogger. **Name** : flogger. **Version** : 0.7.4.
@@ -4672,6 +4651,10 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
 1.  **Group** : io.perfmark. **Name** : perfmark-api. **Version** : 0.26.0.
      * **Project URL:** [https://github.com/perfmark/perfmark](https://github.com/perfmark/perfmark)
      * **License:** [Apache 2.0](https://opensource.org/licenses/Apache-2.0)
+
+1.  **Group** : javax.annotation. **Name** : javax.annotation-api. **Version** : 1.3.2.
+     * **Project URL:** [http://jcp.org/en/jsr/detail?id=250](http://jcp.org/en/jsr/detail?id=250)
+     * **License:** [CDDL + GPLv2 with classpath exception](https://github.com/javaee/javax.annotation/blob/master/LICENSE)
 
 1.  **Group** : junit. **Name** : junit. **Version** : 4.13.1.
      * **Project URL:** [http://junit.org](http://junit.org)
@@ -4804,11 +4787,6 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : com.fasterxml.jackson.dataformat. **Name** : jackson-dataformat-yaml. **Version** : 2.15.3.
-     * **Project URL:** [https://github.com/FasterXML/jackson-dataformats-text](https://github.com/FasterXML/jackson-dataformats-text)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : com.fasterxml.jackson.module. **Name** : jackson-module-kotlin. **Version** : 2.15.3.
      * **Project URL:** [https://github.com/FasterXML/jackson-module-kotlin](https://github.com/FasterXML/jackson-module-kotlin)
      * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -4820,10 +4798,6 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
      * **License:** [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.0.5.
-     * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
-     * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
-1.  **Group** : com.github.ben-manes.caffeine. **Name** : caffeine. **Version** : 3.1.8.
      * **Project URL:** [https://github.com/ben-manes/caffeine](https://github.com/ben-manes/caffeine)
      * **License:** [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -4944,10 +4918,6 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
 1.  **Group** : com.puppycrawl.tools. **Name** : checkstyle. **Version** : 10.12.1.
      * **Project URL:** [https://checkstyle.org/](https://checkstyle.org/)
      * **License:** [LGPL-2.1+](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt)
-
-1.  **Group** : com.sksamuel.aedile. **Name** : aedile-core. **Version** : 1.3.1.
-     * **Project URL:** [http://www.github.com/sksamuel/aedile](http://www.github.com/sksamuel/aedile)
-     * **License:** [The Apache 2.0 License](https://opensource.org/licenses/Apache-2.0)
 
 1.  **Group** : com.soywiz.korlibs.korte. **Name** : korte-jvm. **Version** : 4.0.10.
      * **Project URL:** [https://github.com/korlibs/korge-next](https://github.com/korlibs/korge-next)
@@ -5349,7 +5319,15 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
+1.  **Group** : org.jetbrains.dokka. **Name** : gfm-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
 1.  **Group** : org.jetbrains.dokka. **Name** : javadoc-plugin. **Version** : 1.9.20.
+     * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
+     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
+
+1.  **Group** : org.jetbrains.dokka. **Name** : jekyll-plugin. **Version** : 1.9.20.
      * **Project URL:** [https://github.com/Kotlin/dokka](https://github.com/Kotlin/dokka)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -5457,10 +5435,6 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
      * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-coroutines-jdk8. **Version** : 1.7.3.
-     * **Project URL:** [https://github.com/Kotlin/kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines)
-     * **License:** [The Apache Software License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
-
 1.  **Group** : org.jetbrains.kotlinx. **Name** : kotlinx-html-jvm. **Version** : 0.8.1.
      * **Project URL:** [https://github.com/Kotlin/kotlinx.html](https://github.com/Kotlin/kotlinx.html)
      * **License:** [The Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
@@ -5549,11 +5523,7 @@ This report was generated on **Mon Nov 18 12:45:32 EET 2024** using [Gradle-Lice
      * **Project URL:** [https://github.com/xmlresolver/xmlresolver](https://github.com/xmlresolver/xmlresolver)
      * **License:** [Apache License version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
-1.  **Group** : org.yaml. **Name** : snakeyaml. **Version** : 2.1.
-     * **Project URL:** [https://bitbucket.org/snakeyaml/snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml)
-     * **License:** [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
 
 The dependencies distributed under several licenses, are used according their commercial-use-friendly license.
 
-This report was generated on **Mon Nov 18 12:45:34 EET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).
+This report was generated on **Mon Nov 25 20:35:12 WET 2024** using [Gradle-License-Report plugin](https://github.com/jk1/Gradle-License-Report) by Evgeny Naumenko, licensed under [Apache 2.0 License](https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE).

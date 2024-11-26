@@ -69,7 +69,7 @@ class QueryServiceTest {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         for (var c : boundedContexts) {
             c.close();
         }
@@ -93,6 +93,7 @@ class QueryServiceTest {
     }
 
     @Test
+    @MuteLogging
     @DisplayName("allow to create an instance serving no types")
     void notCreateWithNoBc() {
         assertDoesNotThrow(

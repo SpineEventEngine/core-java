@@ -24,9 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.ConfigTester
-import io.spine.internal.gradle.SpineRepos
-import io.spine.internal.gradle.cleanFolder
+import io.spine.gradle.ConfigTester
+import io.spine.gradle.SpineRepos
+import io.spine.gradle.cleanFolder
 import java.nio.file.Path
 import java.nio.file.Paths
 

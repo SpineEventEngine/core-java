@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.gradle.publish.SpinePublishing
+import io.spine.gradle.publish.SpinePublishing
 import java.nio.file.Files.createDirectories
 import java.nio.file.Files.createFile
 import java.text.SimpleDateFormat

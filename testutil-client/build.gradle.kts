@@ -24,9 +24,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Spine
-import io.spine.internal.gradle.testing.exposeTestConfiguration
+import io.spine.dependency.lib.Grpc
+import io.spine.dependency.local.Spine
+import io.spine.gradle.testing.exposeTestConfiguration
 
 group = "io.spine.tools"
 

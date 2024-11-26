@@ -185,7 +185,7 @@ public class AggregateTest {
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         context.close();
     }
 
@@ -354,6 +354,7 @@ public class AggregateTest {
     class ThrowOnMissing {
 
         @Test
+        @MuteLogging
         @DisplayName("command assignee")
         void commandHandler() {
             ModelTests.dropAllModels();
@@ -365,6 +366,7 @@ public class AggregateTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("event applier for the event emitted in a result of command handling")
         void eventApplier() {
             ModelTests.dropAllModels();
@@ -594,6 +596,7 @@ public class AggregateTest {
     class Prohibit {
 
         @Test
+        @MuteLogging
         @DisplayName("to call `state()` from within applier")
         void callStateFromApplier() {
             ModelTests.dropAllModels();
@@ -619,6 +622,7 @@ public class AggregateTest {
     class CatchHandlerFailures {
 
         @Test
+        @MuteLogging
         @DisplayName("handlers")
         void whenHandlerThrows() {
             ModelTests.dropAllModels();
@@ -638,6 +642,7 @@ public class AggregateTest {
         }
 
         @Test
+        @MuteLogging
         @DisplayName("appliers")
         void whenApplierThrows() {
             ModelTests.dropAllModels();

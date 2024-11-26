@@ -27,30 +27,31 @@
 @file:Suppress("RemoveRedundantQualifierName")
 
 import Build_gradle.Subproject
-import io.spine.internal.dependency.ErrorProne
-import io.spine.internal.dependency.Grpc
-import io.spine.internal.dependency.Guava
-import io.spine.internal.dependency.JUnit
-import io.spine.internal.dependency.Kotlin
-import io.spine.internal.dependency.Spine
-import io.spine.internal.dependency.Validation
-import io.spine.internal.gradle.VersionWriter
-import io.spine.internal.gradle.checkstyle.CheckStyleConfig
-import io.spine.internal.gradle.github.pages.updateGitHubPages
-import io.spine.internal.gradle.javac.configureErrorProne
-import io.spine.internal.gradle.javac.configureJavac
-import io.spine.internal.gradle.javadoc.JavadocConfig
-import io.spine.internal.gradle.kotlin.applyJvmToolchain
-import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
-import io.spine.internal.gradle.publish.IncrementGuard
-import io.spine.internal.gradle.publish.PublishingRepos
-import io.spine.internal.gradle.publish.spinePublishing
-import io.spine.internal.gradle.report.coverage.JacocoConfig
-import io.spine.internal.gradle.report.license.LicenseReporter
-import io.spine.internal.gradle.report.pom.PomGenerator
-import io.spine.internal.gradle.standardToSpineSdk
-import io.spine.internal.gradle.testing.configureLogging
-import io.spine.internal.gradle.testing.registerTestTasks
+import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.lib.Grpc
+import io.spine.dependency.lib.Guava
+import io.spine.dependency.test.JUnit
+import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.local.Spine
+import io.spine.dependency.local.Logging
+import io.spine.dependency.local.Validation
+import io.spine.gradle.VersionWriter
+import io.spine.gradle.checkstyle.CheckStyleConfig
+import io.spine.gradle.github.pages.updateGitHubPages
+import io.spine.gradle.javac.configureErrorProne
+import io.spine.gradle.javac.configureJavac
+import io.spine.gradle.javadoc.JavadocConfig
+import io.spine.gradle.kotlin.applyJvmToolchain
+import io.spine.gradle.kotlin.setFreeCompilerArgs
+import io.spine.gradle.publish.IncrementGuard
+import io.spine.gradle.publish.PublishingRepos
+import io.spine.gradle.publish.spinePublishing
+import io.spine.gradle.report.coverage.JacocoConfig
+import io.spine.gradle.report.license.LicenseReporter
+import io.spine.gradle.report.pom.PomGenerator
+import io.spine.gradle.standardToSpineSdk
+import io.spine.gradle.testing.configureLogging
+import io.spine.gradle.testing.registerTestTasks
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -62,12 +63,13 @@ buildscript {
             exclude(group = "io.spine", module = "spine-flogger-api")
             exclude(group = "io.spine", module = "spine-logging-backend")
             resolutionStrategy {
-                val spine = io.spine.internal.dependency.Spine
-                val logging = io.spine.internal.dependency.Spine.Logging
+                val spine = io.spine.dependency.local.Spine
+                val logging = io.spine.dependency.local.Logging
                 @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
-                    io.spine.internal.dependency.Grpc.api,
-                    io.spine.internal.dependency.Kotlin.stdLibJdk7,
+                    io.spine.dependency.lib.Grpc.api,
+                    io.spine.dependency.lib.Kotlin.stdLibJdk7,
+                    "${protoData.module}:${protoData.dogfoodingVersion}",
                     spine.base,
                     spine.toolBase,
                     spine.server,
@@ -75,7 +77,7 @@ buildscript {
                     logging.lib,
                     logging.libJvm,
                     logging.middleware,
-                    io.spine.internal.dependency.Validation.runtime,
+                    io.spine.dependency.local.Validation.runtime,
                 )
             }
         }
@@ -246,8 +248,6 @@ fun Subproject.defineDependencies() {
         ErrorProne.apply {
             errorprone(core)
         }
-        // Strangely, Gradle does not see `protoData` via DSL here, so we add using the string.
-        add("protoData", Validation.java)
         implementation(Validation.runtime)
 
         testImplementation(JUnit.runner)
@@ -349,9 +349,9 @@ fun Subproject.forceConfigurations() {
                     Spine.base,
                     Validation.runtime,
                     Spine.time,
-                    Spine.Logging.lib,
-                    Spine.Logging.libJvm,
-                    Spine.Logging.middleware,
+                    Logging.lib,
+                    Logging.libJvm,
+                    Logging.middleware,
                     Spine.baseTypes,
                     Spine.change,
                     Spine.reflect,
