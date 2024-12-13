@@ -24,21 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.lib
+package io.spine.dependency.local
 
 /**
- * The dependencies for Guava.
+ * Spine Base module.
  *
- * When changing the version, also change the version used in the `build.gradle.kts`. We need
- * to synchronize the version used in `buildSrc` and in Spine modules. Otherwise, when testing
- * Gradle plugins, errors may occur due to version clashes.
- *
- * @see <a href="https://github.com/google/guava">Guava at GitHub</a>.
+ * @see <a href="https://github.com/SpineEventEngine/base-types">spine-base-types</a>
  */
-@Suppress("unused", "ConstPropertyName")
-object Guava {
-    private const val version = "32.1.3-jre"
-    const val group = "com.google.guava"
-    const val lib     = "$group:guava:$version"
-    const val testLib = "$group:guava-testlib:$version"
+@Suppress("ConstPropertyName")
+object BaseTypes {
+    const val version = "2.0.0-SNAPSHOT.126"
+    const val group = Spine.group
+    const val artifact = "spine-base-types"
+    const val lib = "$group:$artifact:$version"
 }

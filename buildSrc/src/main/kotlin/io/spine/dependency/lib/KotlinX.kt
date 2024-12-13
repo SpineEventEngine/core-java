@@ -34,8 +34,9 @@ object KotlinX {
     object Coroutines {
 
         // https://github.com/Kotlin/kotlinx.coroutines
-        const val version = "1.7.3"
+        const val version = "1.9.0"
         const val core = "$group:kotlinx-coroutines-core:$version"
         const val jdk8 = "$group:kotlinx-coroutines-jdk8:$version"
+        const val test = "$group:kotlinx-coroutines-test:$version"
     }
 }

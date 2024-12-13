@@ -39,6 +39,7 @@ object Roaster {
      */
     private const val version = "2.28.0.Final"
 
-    const val api = "org.jboss.forge.roaster:roaster-api:$version"
-    const val jdt = "org.jboss.forge.roaster:roaster-jdt:$version"
+    const val group = "org.jboss.forge.roaster"
+    const val api = "$group:roaster-api:$version"
+    const val jdt = "$group:roaster-jdt:$version"
 }

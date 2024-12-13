@@ -37,15 +37,23 @@ object ArtifactVersion {
      *
      * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
      */
-    const val base = "2.0.0-SNAPSHOT.220"
-    const val baseForBuildScript = "2.0.0-SNAPSHOT.220"
+    @Deprecated(message = "Please use `Base.version`.", ReplaceWith("Base.version"))
+    const val base = Base.version
+
+    @Suppress("unused")
+    @Deprecated(
+        message = "Please use `Base.versionForBuildScript`.",
+        ReplaceWith("Base.versionForBuildScript")
+    )
+    const val baseForBuildScript = Base.versionForBuildScript
 
     /**
      * The version of [Spine.reflect].
      *
      * @see <a href="https://github.com/SpineEventEngine/reflect">spine-reflect</a>
      */
-    const val reflect = "2.0.0-SNAPSHOT.190"
+    @Deprecated(message = "Please use `Reflect.version`.", ReplaceWith("Reflect.version"))
+    const val reflect = Reflect.version
 
     /**
      * The version of [Logging].
@@ -58,7 +66,8 @@ object ArtifactVersion {
      *
      * @see <a href="https://github.com/SpineEventEngine/testlib">spine-testlib</a>
      */
-    const val testlib = "2.0.0-SNAPSHOT.184"
+    @Deprecated(message = "Please use `TestLib.version`.", ReplaceWith("TestLib.version"))
+    const val testlib = TestLib.version
 
     /**
      * The version of `core-java`.
@@ -71,41 +80,51 @@ object ArtifactVersion {
      *
      * @see <a href="https://github.com/SpineEventEngine/model-compiler">spine-model-compiler</a>
      */
-    const val mc = "2.0.0-SNAPSHOT.133"
+    @Deprecated(
+        message = "Please use `ModelCompiler.version` instead.",
+        ReplaceWith("ModelCompiler.version")
+    )
+    const val mc = ModelCompiler.version
 
     /**
      * The version of [Spine.baseTypes].
      *
      * @see <a href="https://github.com/SpineEventEngine/base-types">spine-base-types</a>
      */
-    const val baseTypes = "2.0.0-SNAPSHOT.126"
+    @Deprecated(message = "Please use `BaseTypes.version`.", ReplaceWith("BaseTypes.version"))
+    const val baseTypes = BaseTypes.version
 
     /**
      * The version of [Spine.time].
      *
      * @see <a href="https://github.com/SpineEventEngine/time">spine-time</a>
      */
-    const val time = "2.0.0-SNAPSHOT.135"
+    @Deprecated(message = "Please use `Time.version`.", ReplaceWith("Time.version"))
+    const val time = Time.version
 
     /**
      * The version of [Spine.change].
      *
      * @see <a href="https://github.com/SpineEventEngine/change">spine-change</a>
      */
-    const val change = "2.0.0-SNAPSHOT.118"
+    @Deprecated(message = "Please use `Change.version`.", ReplaceWith("Change.version"))
+    const val change = Change.version
 
     /**
      * The version of [Spine.text].
      *
      * @see <a href="https://github.com/SpineEventEngine/text">spine-text</a>
      */
-    const val text = "2.0.0-SNAPSHOT.6"
+    @Deprecated(message = "Please use `Text.version`.", ReplaceWith("Text.version"))
+    const val text = Text.version
 
     /**
      * The version of [Spine.toolBase].
      *
      * @see <a href="https://github.com/SpineEventEngine/tool-base">spine-tool-base</a>
      */
+    @Suppress("unused")
+    @Deprecated(message = "Please use `ToolBase.version`.", ReplaceWith("ToolBase.version"))
     const val toolBase = ToolBase.version
 
     /**

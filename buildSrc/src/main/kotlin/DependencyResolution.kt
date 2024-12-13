@@ -46,6 +46,7 @@ import io.spine.dependency.lib.Okio
 import io.spine.dependency.lib.Plexus
 import io.spine.dependency.lib.Protobuf
 import io.spine.dependency.lib.Slf4J
+import io.spine.dependency.local.Base
 import io.spine.dependency.local.Spine
 import io.spine.dependency.test.Hamcrest
 import io.spine.dependency.test.JUnit
@@ -186,7 +187,7 @@ fun ModuleDependency.excludeSpineBase() {
 fun Project.forceSpineBase() {
     configurations.all {
         resolutionStrategy {
-            force(Spine.base)
+            force(Base.lib)
         }
     }
 }
@@ -200,7 +201,7 @@ fun Project.forceBaseInProtoTasks() {
     configurations.configureEach {
         if (name.lowercased().contains("proto")) {
             resolutionStrategy {
-                force(Spine.baseForBuildScript)
+                force(Base.libForBuildScript)
             }
         }
     }

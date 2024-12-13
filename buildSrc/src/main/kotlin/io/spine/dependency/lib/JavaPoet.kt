@@ -30,5 +30,8 @@ package io.spine.dependency.lib
 @Suppress("unused", "ConstPropertyName")
 object JavaPoet {
     private const val version = "1.13.0"
-    const val lib = "com.squareup:javapoet:$version"
+    const val group = "com.squareup"
+    const val artifact = "javapoet"
+    const val module = "$group:$artifact"
+    const val lib = "$module:$version"
 }

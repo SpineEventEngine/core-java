@@ -31,21 +31,24 @@ package io.spine.dependency.local
  *
  * See [`SpineEventEngine/validation`](https://github.com/SpineEventEngine/validation/).
  */
-@Suppress("unused", "ConstPropertyName")
+@Suppress("ConstPropertyName")
 object Validation {
     /**
      * The version of the Validation library artifacts.
      */
-    const val version = "2.0.0-SNAPSHOT.172"
+    const val version = "2.0.0-SNAPSHOT.178"
 
     const val group = "io.spine.validation"
     private const val prefix = "spine-validation"
 
-    const val runtime = "$group:$prefix-java-runtime:$version"
+    const val runtimeModule = "$group:$prefix-java-runtime"
+    const val runtime = "$runtimeModule:$version"
     const val java = "$group:$prefix-java:$version"
 
+    const val javaBundleModule = "$group:$prefix-java-bundle"
+
     /** Obtains the artifact for the `java-bundle` artifact of the given version. */
-    fun javaBundle(version: String) = "$group:$prefix-java-bundle:$version"
+    fun javaBundle(version: String) = "$javaBundleModule:$version"
 
     val javaBundle = javaBundle(version)
 

@@ -32,7 +32,7 @@ package io.spine.dependency.lib
     "ConstPropertyName" /* https://bit.ly/kotlin-prop-names */
 )
 object Protobuf {
-    private const val group = "com.google.protobuf"
+    const val group = "com.google.protobuf"
     const val version       = "3.25.1"
 
     /**
