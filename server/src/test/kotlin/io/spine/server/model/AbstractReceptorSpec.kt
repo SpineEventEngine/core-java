@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,193 +24,238 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.model
 
-import io.spine.core.Event;
-import io.spine.server.model.given.method.OneParamMethod;
-import io.spine.server.model.given.method.OneParamSignature;
-import io.spine.server.model.given.method.OneParamSpec;
-import io.spine.server.model.given.method.StubHandler;
-import io.spine.server.model.given.method.TwoParamMethod;
-import io.spine.server.model.given.method.TwoParamSpec;
-import io.spine.server.type.EventEnvelope;
-import io.spine.server.type.given.GivenEvent;
-import io.spine.test.model.ModProjectCreated;
-import io.spine.test.model.ModProjectStarted;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.model.AbstractReceptor.firstParamType;
-import static io.spine.server.model.given.method.StubHandler.getMethodWithCheckedException;
-import static io.spine.server.model.given.method.StubHandler.getMethodWithRuntimeException;
-import static io.spine.testing.TestValues.nullRef;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.google.protobuf.Message
+import io.kotest.matchers.optional.shouldBePresent
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.spine.base.EventMessage
+import io.spine.base.Identifier
+import io.spine.core.Event
+import io.spine.core.Subscribe
+import io.spine.protobuf.AnyPacker
+import io.spine.server.event.EventSubscriber
+import io.spine.server.event.model.SubscriberSignature
+import io.spine.server.model.AbstractReceptor.firstParamType
+import io.spine.server.model.given.method.OneParamMethod
+import io.spine.server.model.given.method.OneParamSignature
+import io.spine.server.model.given.method.OneParamSpec
+import io.spine.server.model.given.method.StubHandler
+import io.spine.server.model.given.method.TwoParamMethod
+import io.spine.server.model.given.method.TwoParamSpec
+import io.spine.server.type.EventEnvelope
+import io.spine.server.type.given.GivenEvent
+import io.spine.test.model.ModProjectCreated
+import io.spine.test.model.ModProjectStarted
+import io.spine.test.reflect.event.RefProjectCreated
+import io.spine.test.reflect.event.refProjectCreated
+import io.spine.test.reflect.projectId
+import io.spine.testing.TestValues
+import io.spine.testing.server.TestEventFactory
+import io.spine.testing.server.model.ModelTests
+import java.lang.reflect.Method
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @DisplayName("`AbstractReceptor` should")
-@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-class AbstractReceptorSpec {
+internal class AbstractReceptorSpec {
 
-    private final OneParamSignature signature = new OneParamSignature();
+    private val signature = OneParamSignature()
 
-    private TwoParamMethod twoParamMethod;
-    private OneParamMethod oneParamMethod;
-
-    private Object target;
+    private lateinit var target: Any
+    private lateinit var twoParamMethod: TwoParamMethod
+    private lateinit var oneParamMethod: OneParamMethod
 
     @BeforeEach
-    void setUp() {
-        target = new StubHandler();
-        twoParamMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod(),
-                                            TwoParamSpec.INSTANCE);
-        oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod(),
-                                            OneParamSpec.INSTANCE);
+    fun setUp() {
+        target = StubHandler()
+        twoParamMethod = TwoParamMethod(
+            StubHandler.getTwoParameterMethod(),
+            TwoParamSpec.INSTANCE
+        )
+        oneParamMethod = OneParamMethod(
+            StubHandler.getOneParameterMethod(),
+            OneParamSpec.INSTANCE
+        )
     }
 
     @Test
-    @DisplayName("not accept `null` method")
-    void notAcceptNullMethod() {
-        assertThrows(NullPointerException.class, () -> new TwoParamMethod(nullRef(),
-                                                                          TwoParamSpec.INSTANCE));
+    fun `not accept 'null' method`() {
+        assertThrows<NullPointerException> {
+            TwoParamMethod(
+                TestValues.nullRef(),
+                TwoParamSpec.INSTANCE
+            )
+        }
     }
 
     @Test
-    @DisplayName("return method")
-    void returnMethod() {
-        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.rawMethod());
+    fun `return method`() {
+        twoParamMethod.rawMethod() shouldBe StubHandler.getTwoParameterMethod()
     }
 
-    @Nested
-    @DisplayName("check if method access is")
-    class CheckAccess {
+    @Nested internal inner class
+    `check if method access is` {
 
         @Test
         @DisplayName(AccessModifier.MODIFIER_PUBLIC)
-        void isPublic() {
-            assertTrue(twoParamMethod.isPublic());
+        fun isPublic() {
+            twoParamMethod.isPublic shouldBe true
         }
 
         @Test
         @DisplayName(AccessModifier.MODIFIER_PRIVATE)
-        void isPrivate() {
-            assertTrue(oneParamMethod.isPrivate());
+        fun isPrivate() {
+            oneParamMethod.isPrivate shouldBe true
         }
     }
 
     @Test
-    @DisplayName("obtain first parameter type of method")
-    void returnFirstParamType() {
-        assertEquals(ModProjectStarted.class, firstParamType(oneParamMethod.rawMethod()));
+    fun `obtain first parameter type of method`() {
+        firstParamType<Message>(oneParamMethod.rawMethod()) shouldBe
+                ModProjectStarted::class.java
     }
 
-    @Nested
-    @DisplayName("invoke method")
-    class InvokeMethod {
+    @Nested internal inner class
+    `invoke method` {
 
-        @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
+        // can ignore the result in this test
         @Test
-        @DisplayName("with one parameter")
-        void withOneParam() {
-            var eventMessage = ModProjectStarted.newBuilder()
-                    .setId(newUuid())
-                    .build();
-            var event = Event.newBuilder()
-                    .setId(GivenEvent.someId())
-                    .setMessage(pack(eventMessage))
-                    .setContext(GivenEvent.context())
-                    .build();
-            var envelope = EventEnvelope.of(event);
-            oneParamMethod.invoke(target, envelope);
+        fun `with one parameter`() {
+            val eventMessage = ModProjectStarted.newBuilder()
+                .setId(Identifier.newUuid())
+                .build()
+            val event = Event.newBuilder()
+                .setId(GivenEvent.someId())
+                .setMessage(AnyPacker.pack(eventMessage))
+                .setContext(GivenEvent.context())
+                .build()
+            val envelope = EventEnvelope.of(event)
 
-            assertTrue(((StubHandler) target).wasHandleInvoked());
+            oneParamMethod.invoke(target, envelope)
+
+            (target as StubHandler).wasHandleInvoked() shouldBe true
         }
 
         @Test
-        @DisplayName("with two parameters")
-        @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
-        void withTwoParams() {
-            var eventMessage = ModProjectCreated.newBuilder()
-                    .setId(newUuid())
-                    .build();
-            var event = Event.newBuilder()
-                    .setId(GivenEvent.someId())
-                    .setMessage(pack(eventMessage))
-                    .setContext(GivenEvent.context())
-                    .build();
-            var envelope = EventEnvelope.of(event);
-            twoParamMethod.invoke(target, envelope);
+        fun `with two parameters`() {
+            val eventMessage = ModProjectCreated.newBuilder()
+                .setId(Identifier.newUuid())
+                .build()
+            val event = Event.newBuilder()
+                .setId(GivenEvent.someId())
+                .setMessage(AnyPacker.pack(eventMessage))
+                .setContext(GivenEvent.context())
+                .build()
+            val envelope = EventEnvelope.of(event)
+            twoParamMethod.invoke(target, envelope)
 
-            assertTrue(((StubHandler) target).wasOnInvoked());
+            (target as StubHandler).wasOnInvoked() shouldBe true
         }
     }
 
     @Test
-    @DisplayName("return full name in `toString`")
-    void provideToString() {
-        assertEquals(twoParamMethod.getFullName(), twoParamMethod.toString());
+    fun `return full name in in string form`() {
+        twoParamMethod.toString() shouldBe twoParamMethod.fullName
     }
 
-    @Nested
-    @DisplayName("provide `equals` method such that")
-    class ProvideEqualsSuchThat {
+    @Nested internal inner class
+    `provide equality such that` {
 
         @Test
-        @DisplayName("instance equals to itself")
-        void equalsToItself() {
-            assertEquals(twoParamMethod, twoParamMethod);
+        fun `it equals to itself`() {
+            twoParamMethod.equals(twoParamMethod) shouldBe true
         }
 
         @Test
-        @DisplayName("instance is not equal to `null`")
-        void notEqualsToNull() {
-            assertNotEquals(null, oneParamMethod);
+        @Suppress("EqualsNullCall") // for the test.
+        fun `it is not equal to 'null'`() {
+            oneParamMethod.equals(null) shouldBe false
         }
 
         @Test
-        @DisplayName("instance is not equal to another class")
-        void notEqualsToOtherClass() {
-            assertNotEquals(twoParamMethod, oneParamMethod);
+        @DisplayName("it is not equal to one of another class")
+        fun `it is not equal to one of another class`() {
+            oneParamMethod.equals(twoParamMethod) shouldBe false
         }
 
         @Test
-        @DisplayName("all fields are compared")
-        void allFieldsAreCompared() {
-            AbstractReceptor<?, ?, ?, ?, ?> anotherMethod =
-                    new TwoParamMethod(StubHandler.getTwoParameterMethod(),
-                                       TwoParamSpec.INSTANCE);
-            assertEquals(twoParamMethod, anotherMethod);
+        fun `all fields are compared`() {
+            val anotherMethod: AbstractReceptor<*, *, *, *, *> =
+                TwoParamMethod(
+                    StubHandler.getTwoParameterMethod(),
+                    TwoParamSpec.INSTANCE
+                )
+            anotherMethod.equals(twoParamMethod) shouldBe true
         }
     }
 
     @Test
-    @DisplayName("have `hashCode`")
-    void haveHashCode() {
-        assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
+    fun `provide hash code`() {
+        twoParamMethod.hashCode() shouldNotBe System.identityHashCode(twoParamMethod)
     }
 
-    @Nested
-    @DisplayName("not be created from method throwing")
-    class RejectMethodThrowing {
+    @Nested internal inner class
+    `not be created from method throwing` {
 
         @Test
-        @DisplayName("checked exception")
-        void checkedException() {
-            var method = signature.classify(getMethodWithCheckedException());
-            assertFalse(method.isPresent());
+        fun `checked exception`() {
+            val method = signature.classify(StubHandler.getMethodWithCheckedException())
+            method.isPresent shouldBe false
         }
 
         @Test
-        @DisplayName("runtime exception")
-        void runtimeException() {
-            var method = signature.classify(getMethodWithRuntimeException());
-            assertFalse(method.isPresent());
+        fun `runtime exception`() {
+            val method = signature.classify(StubHandler.getMethodWithRuntimeException())
+            method.isPresent shouldBe false
         }
     }
+
+    @Nested inner class
+    `propagate instances of 'Error'` {
+
+        private val signature = SubscriberSignature();
+
+        @Test
+        fun `if a target throws 'java_lang_Error'`() {
+            val receptor = signature.classify(ErrorThrowingHandler.method("throwingError"))
+            receptor.shouldBePresent()
+            val envelope = envelope(projectCreated())
+            assertThrows<Error> {
+                receptor.get().invoke(ErrorThrowingHandler(), envelope)
+            }
+        }
+
+        private fun projectCreated(): RefProjectCreated =
+            refProjectCreated { this.projectId = projectId { id = Identifier.newUuid() } }
+    }
+}
+
+/**
+ * A subscriber which throws [java.lang.Error] and [kotlin.Error] in the receptors.
+ */
+private class ErrorThrowingHandler : EventSubscriber {
+
+    companion object {
+        fun method(name: String): Method {
+            return ModelTests.getMethod(ErrorThrowingHandler::class.java, name)
+        }
+    }
+
+    @Subscribe
+    @Suppress("TooGenericExceptionThrown")
+    fun throwingError(ignored: RefProjectCreated) {
+        throw Error("Throwing `java.lang.Error`.")
+    }
+}
+
+private fun envelope(eventMessage: EventMessage): EventEnvelope {
+    val factory = TestEventFactory.newInstance(AbstractReceptorSpec::class.java)
+    val event = factory.createEvent(eventMessage)
+    val envelope = EventEnvelope.of(event)
+    return envelope
 }

@@ -201,8 +201,7 @@ final class VisibilityGuard {
         }
 
         private TypeName stateTypeName() {
-            return repository.entityStateType()
-                             .toTypeName();
+            return repository.entityStateType().typeName();
         }
 
         @Override

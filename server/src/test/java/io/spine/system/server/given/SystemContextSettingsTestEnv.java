@@ -65,7 +65,8 @@ public class SystemContextSettingsTestEnv {
         systemBus.post(event);
         var filter = EventFilter.newBuilder()
                 .setEventType(event.enclosedTypeUrl()
-                                   .toTypeName().value())
+                                   .typeName()
+                                   .value())
                 .build();
         var query = EventStreamQuery.newBuilder()
                 .addFilter(filter)

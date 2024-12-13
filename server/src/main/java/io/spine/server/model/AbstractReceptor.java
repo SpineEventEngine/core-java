@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
@@ -207,14 +208,13 @@ class AbstractReceptor<T,
      * a class implementing {@link Message}.
      *
      * @param receptor
-     *         the method to take first parameter type from
-     * @return the class of the first method parameter
+     *         the method to take the first parameter type from
+     *         the class of the first method parameter
      * @throws ClassCastException
      *         if the first parameter is not a class implementing {@link Message}
      */
     protected static <M extends Message> Class<M> firstParamType(Method receptor) {
-        @SuppressWarnings("unchecked")
-            // We always expect first param as a Message of required type.
+        @SuppressWarnings("unchecked" /* See Javadoc for the `receptor` parameter. */)
         var result = (Class<M>) receptor.getParameterTypes()[0];
         return result;
     }
@@ -272,11 +272,22 @@ class AbstractReceptor<T,
     /**
      * Feeds the given {@code envelope} to the given {@code target} and returns the outcome.
      *
-     * @implNote The outcome of this method is not validated, as its fields in fact consist
+     * <p>If the target method throws {@link java.lang.Error} dispatching terminates with
+     * rethrowing the error.
+     *
+     * <p>Other types of exceptions are converted to {@link io.spine.base.Error} and returned
+     * {@link DispatchOutcome.Builder#setError inside} the {@link DispatchOutcome}.
+     *
+     * @implNote The result of this method is not validated, as its fields in fact consist
      *         of the parts, such as wrapped {@code Command}s and {@code Event}s that are validated
-     *         upon their creation. Such an approach allows to improve the overall performance of
+     *         upon their creation. Such an approach allows improving the overall performance of
      *         the signal propagation.
      */
+    @SuppressWarnings({
+            "ChainOfInstanceofChecks" /* We need to separate exceptions. */,
+            "ThrowInsideCatchBlockWhichIgnoresCaughtException", "ProhibitedExceptionThrown"
+            /* Rethrowing `Error`. See Javadoc. */
+    })
     @Override
     public DispatchOutcome invoke(T target, E envelope) {
         checkNotNull(target);
@@ -301,7 +312,9 @@ class AbstractReceptor<T,
         } catch (InvocationTargetException e) {
             var cause = e.getCause();
             checkNotNull(cause);
-            if (cause instanceof RejectionThrowable) {
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            } else if (cause instanceof RejectionThrowable) {
                 var success = asRejection(target, envelope, (RejectionThrowable) cause);
                 outcome.setSuccess(success);
             } else {
@@ -340,10 +353,10 @@ class AbstractReceptor<T,
     }
 
     /**
-     * Allows to make sure that the passed envelope matches the annotation attributes of a method.
+     * A callback to check the passed envelope matches the annotation attributes of the method.
      *
-     * <p>Default implementation does nothing. Descending classes may override for checking
-     * the match.
+     * <p>The default implementation does nothing.
+     * Descending classes may override for checking the match.
      *
      * @throws IllegalArgumentException
      *         the default implementation does not throw ever. Descending classes would throw
