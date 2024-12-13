@@ -247,8 +247,8 @@ private class ErrorThrowingHandler : EventSubscriber {
     }
 
     @Subscribe
-    @Suppress("TooGenericExceptionThrown")
-    fun throwingError(ignored: RefProjectCreated) {
+    @Suppress("TooGenericExceptionThrown", "UNUSED_PARAMETER")
+    fun throwingError(e: RefProjectCreated) {
         throw Error("Throwing `java.lang.Error`.")
     }
 }
