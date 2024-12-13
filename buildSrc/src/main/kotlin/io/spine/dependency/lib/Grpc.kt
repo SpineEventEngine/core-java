@@ -31,20 +31,21 @@ package io.spine.dependency.lib
 object Grpc {
     @Suppress("MemberVisibilityCanBePrivate")
     const val version        = "1.59.0"
-    const val api            = "io.grpc:grpc-api:$version"
-    const val auth           = "io.grpc:grpc-auth:$version"
-    const val core           = "io.grpc:grpc-core:$version"
-    const val context        = "io.grpc:grpc-context:$version"
-    const val inProcess      = "io.grpc:grpc-inprocess:$version"
-    const val stub           = "io.grpc:grpc-stub:$version"
-    const val okHttp         = "io.grpc:grpc-okhttp:$version"
-    const val protobuf       = "io.grpc:grpc-protobuf:$version"
-    const val protobufLite   = "io.grpc:grpc-protobuf-lite:$version"
-    const val netty          = "io.grpc:grpc-netty:$version"
-    const val nettyShaded    = "io.grpc:grpc-netty-shaded:$version"
+    const val group          = "io.grpc"
+    const val api            = "$group:grpc-api:$version"
+    const val auth           = "$group:grpc-auth:$version"
+    const val core           = "$group:grpc-core:$version"
+    const val context        = "$group:grpc-context:$version"
+    const val inProcess      = "$group:grpc-inprocess:$version"
+    const val stub           = "$group:grpc-stub:$version"
+    const val okHttp         = "$group:grpc-okhttp:$version"
+    const val protobuf       = "$group:grpc-protobuf:$version"
+    const val protobufLite   = "$group:grpc-protobuf-lite:$version"
+    const val netty          = "$group:grpc-netty:$version"
+    const val nettyShaded    = "$group:grpc-netty-shaded:$version"
 
     object ProtocPlugin {
         const val id = "grpc"
-        const val artifact = "io.grpc:protoc-gen-grpc-java:$version"
+        const val artifact = "$group:protoc-gen-grpc-java:$version"
     }
 }

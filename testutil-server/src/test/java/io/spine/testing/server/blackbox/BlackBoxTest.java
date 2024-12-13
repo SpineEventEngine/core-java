@@ -599,8 +599,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
          */
         private Set<TypeName> toTypes(Iterable<Repository<?, ?>> repos) {
             ImmutableSet.Builder<TypeName> builder = ImmutableSet.builder();
-            repos.forEach(repository -> builder.add(repository.entityStateType()
-                                                              .toTypeName()));
+            repos.forEach(repository -> builder.add(repository.entityStateType().typeName()));
             return builder.build();
         }
     }

@@ -143,7 +143,7 @@ abstract class ServiceDelegate<T, R> implements WithLogging {
      */
     protected void handleInternal(T request, StreamObserver<R> observer) {
         var targetType = enclosedMessageType(request);
-        var unpublishedLanguage = new UnpublishedLanguageException(targetType.toTypeName());
+        var unpublishedLanguage = new UnpublishedLanguageException(targetType.typeName());
         logger().atError().withCause(unpublishedLanguage).log(() -> format(
                 "Unpublished type (`%s`) posted to `%s`.", targetType, serviceName()));
         observer.onError(unpublishedLanguage);
