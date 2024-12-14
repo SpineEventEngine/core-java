@@ -348,12 +348,20 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      *
      * <p>This method assumes that the given message has passed the filtering.
      *
-     * @see #post(Signal, StreamObserver) for the public API
+     * @see #post(Signal, StreamObserver) the public API for posting
      */
     protected abstract void dispatch(E envelope);
 
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
+     *
+     * <p>If {@link #dispatch(SignalEnvelope) dispatching} throws an {@link Error} it is rethrown.
+     * Other types of exceptions are logged and then rethrown.
+     *
+     * <p>We treat {@link Error}s differently and want to void much of console output
+     * for this special case of exceptions.
+     * Please see {@link io.spine.server.model.AbstractReceptor#invoke(Object, MessageEnvelope)}
+     * for more details on special treatment of {@link Error} during dispatching.
      *
      * @param envelopes
      *         the envelopes to post
@@ -370,7 +378,10 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
             onDispatchingStarted(signalId);
             try {
                 dispatch(envelope);
-            } catch (Throwable t) {
+            } catch (Error e) {
+                throw e;
+            }
+            catch (Throwable t) {
                 logger().atError().withCause(t).log(() -> format(
                         "Unable to dispatch `%s` with ID `%s`.",
                         envelope.messageClass(),
