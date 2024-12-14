@@ -226,7 +226,7 @@ internal class AbstractReceptorSpec {
             val receptor = signature.classify(MistakenHandler.method("throwingMistake"))
             receptor.shouldBePresent()
             val envelope = envelope(projectCreated())
-            assertThrows<Error> {
+            assertThrows<Mistake> {
                 receptor.get().invoke(MistakenHandler(), envelope)
             }
         }
