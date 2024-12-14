@@ -219,7 +219,7 @@ internal class AbstractReceptorSpec {
     @Nested inner class
     `propagate instances of 'Mistake'` {
 
-        private val signature = SubscriberSignature();
+        private val signature = SubscriberSignature()
 
         @Test
         fun `if a target throws 'Mistake'`() {
