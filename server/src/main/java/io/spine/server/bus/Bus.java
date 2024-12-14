@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2024, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,6 +32,7 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.Mistake;
 import io.spine.core.Ack;
 import io.spine.core.Signal;
 import io.spine.core.SignalId;
@@ -355,7 +356,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
      *
-     * <p>If {@link #dispatch(SignalEnvelope) dispatching} throws an {@link Error} it is rethrown.
+     * <p>If {@link #dispatch(SignalEnvelope) dispatching} throws a {@link Mistake} it is rethrown.
      * Other types of exceptions are logged and then rethrown.
      *
      * <p>We treat {@link Error}s differently and want to void much of console output
@@ -378,8 +379,8 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
             onDispatchingStarted(signalId);
             try {
                 dispatch(envelope);
-            } catch (Error e) {
-                throw e;
+            } catch (Mistake m) {
+                throw m;
             } catch (Throwable t) {
                 logger().atError().withCause(t).log(() -> format(
                         "Unable to dispatch `%s` with ID `%s`.",
