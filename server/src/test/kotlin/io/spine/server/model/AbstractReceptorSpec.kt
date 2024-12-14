@@ -32,6 +32,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.spine.base.EventMessage
 import io.spine.base.Identifier
+import io.spine.base.Mistake
 import io.spine.core.Event
 import io.spine.core.Subscribe
 import io.spine.protobuf.AnyPacker
@@ -216,17 +217,17 @@ internal class AbstractReceptorSpec {
     }
 
     @Nested inner class
-    `propagate instances of 'Error'` {
+    `propagate instances of 'Mistake'` {
 
         private val signature = SubscriberSignature();
 
         @Test
-        fun `if a target throws 'java_lang_Error'`() {
-            val receptor = signature.classify(ErrorThrowingHandler.method("throwingError"))
+        fun `if a target throws 'Mistake'`() {
+            val receptor = signature.classify(MistakenHandler.method("throwingMistake"))
             receptor.shouldBePresent()
             val envelope = envelope(projectCreated())
             assertThrows<Error> {
-                receptor.get().invoke(ErrorThrowingHandler(), envelope)
+                receptor.get().invoke(MistakenHandler(), envelope)
             }
         }
 
@@ -238,20 +239,23 @@ internal class AbstractReceptorSpec {
 /**
  * A subscriber which throws [java.lang.Error] and [kotlin.Error] in the receptors.
  */
-private class ErrorThrowingHandler : EventSubscriber {
+private class MistakenHandler : EventSubscriber {
 
     companion object {
         fun method(name: String): Method {
-            return ModelTests.getMethod(ErrorThrowingHandler::class.java, name)
+            return ModelTests.getMethod(MistakenHandler::class.java, name)
         }
     }
 
     @Subscribe
     @Suppress("TooGenericExceptionThrown", "UNUSED_PARAMETER")
-    fun throwingError(e: RefProjectCreated) {
-        throw Error("Throwing `java.lang.Error`.")
+    fun throwingMistake(e: RefProjectCreated) {
+        throw StubMistake()
     }
 }
+
+@Suppress("serial") // No need for the tests.
+private class StubMistake: Mistake()
 
 private fun envelope(eventMessage: EventMessage): EventEnvelope {
     val factory = TestEventFactory.newInstance(AbstractReceptorSpec::class.java)
