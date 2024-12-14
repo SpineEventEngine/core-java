@@ -380,8 +380,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
                 dispatch(envelope);
             } catch (Error e) {
                 throw e;
-            }
-            catch (Throwable t) {
+            } catch (Throwable t) {
                 logger().atError().withCause(t).log(() -> format(
                         "Unable to dispatch `%s` with ID `%s`.",
                         envelope.messageClass(),
