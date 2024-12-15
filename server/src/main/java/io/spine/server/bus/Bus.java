@@ -359,7 +359,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      * <p>If {@link #dispatch(SignalEnvelope) dispatching} throws a {@link Mistake} it is rethrown.
      * Other types of exceptions are logged and then rethrown.
      *
-     * <p>We treat {@link Error}s differently and want to void much of console output
+     * <p>We treat {@link Mistake}s differently and want to void much of console output
      * for this special case of exceptions.
      * Please see {@link io.spine.server.model.AbstractReceptor#invoke(Object, MessageEnvelope)}
      * for more details on special treatment of {@link Error} during dispatching.
