@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.base.Mistake;
 import io.spine.base.RejectionThrowable;
 import io.spine.core.Signal;
 import io.spine.server.dispatch.DispatchOutcome;
@@ -272,8 +273,8 @@ class AbstractReceptor<T,
     /**
      * Feeds the given {@code envelope} to the given {@code target} and returns the outcome.
      *
-     * <p>If the target method throws {@link java.lang.Error} dispatching terminates with
-     * rethrowing the error.
+     * <p>If the target method throws {@link Mistake}, dispatching terminates with
+     * rethrowing it.
      *
      * <p>Other types of exceptions are converted to {@link io.spine.base.Error} and returned
      * {@link DispatchOutcome.Builder#setError inside} the {@link DispatchOutcome}.
@@ -285,8 +286,8 @@ class AbstractReceptor<T,
      */
     @SuppressWarnings({
             "ChainOfInstanceofChecks" /* We need to separate exceptions. */,
-            "ThrowInsideCatchBlockWhichIgnoresCaughtException", "ProhibitedExceptionThrown"
-            /* Rethrowing `Error`. See Javadoc. */
+            "ThrowInsideCatchBlockWhichIgnoresCaughtException",
+            /* Rethrowing `Mistake`. See Javadoc. */
     })
     @Override
     public DispatchOutcome invoke(T target, E envelope) {
@@ -312,8 +313,8 @@ class AbstractReceptor<T,
         } catch (InvocationTargetException e) {
             var cause = e.getCause();
             checkNotNull(cause);
-            if (cause instanceof Error) {
-                throw (Error) cause;
+            if (cause instanceof Mistake) {
+                throw (Mistake) cause;
             } else if (cause instanceof RejectionThrowable) {
                 var success = asRejection(target, envelope, (RejectionThrowable) cause);
                 outcome.setSuccess(success);

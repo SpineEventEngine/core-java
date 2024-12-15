@@ -30,11 +30,12 @@ import Build_gradle.Subproject
 import io.spine.dependency.build.ErrorProne
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Guava
-import io.spine.dependency.test.JUnit
 import io.spine.dependency.lib.Kotlin
-import io.spine.dependency.local.Spine
 import io.spine.dependency.local.Logging
+import io.spine.dependency.local.Spine
+import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Validation
+import io.spine.dependency.test.JUnit
 import io.spine.gradle.VersionWriter
 import io.spine.gradle.checkstyle.CheckStyleConfig
 import io.spine.gradle.github.pages.updateGitHubPages
@@ -251,7 +252,7 @@ fun Subproject.defineDependencies() {
         implementation(Validation.runtime)
 
         testImplementation(JUnit.runner)
-        testImplementation(Spine.testlib)
+        testImplementation(TestLib.lib)
     }
 }
 
