@@ -362,7 +362,7 @@ public abstract class Bus<T extends Signal<?, ?, ?>,
      * <p>We treat {@link Mistake}s differently and want to void much of console output
      * for this special case of exceptions.
      * Please see {@link io.spine.server.model.AbstractReceptor#invoke(Object, MessageEnvelope)}
-     * for more details on special treatment of {@link Message} during dispatching.
+     * for more details on special treatment of {@link Mistake} during dispatching.
      *
      * @param envelopes
      *         the envelopes to post
