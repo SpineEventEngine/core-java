@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ package io.spine.dependency.local
  *
  * See [`SpineEventEngine/validation`](https://github.com/SpineEventEngine/validation/).
  */
-@Suppress("ConstPropertyName")
+@Suppress("ConstPropertyName", "unused")
 object Validation {
     /**
      * The version of the Validation library artifacts.
      */
-    const val version = "2.0.0-SNAPSHOT.178"
+    const val version = "2.0.0-SNAPSHOT.183"
 
     const val group = "io.spine.validation"
     private const val prefix = "spine-validation"
