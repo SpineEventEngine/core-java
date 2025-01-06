@@ -52,9 +52,9 @@ message MRPhoto {
 
     string alt_text = 4 [(column) = true];
 
-    int32 width = 5 [(required) = true, (min).value = "0", (column) = true];
+    int32 width = 5 [(min).value = "0", (column) = true];
 
-    int32 height = 6 [(required) = true, (min).value = "0", (column) = true];
+    int32 height = 6 [(min).value = "0", (column) = true];
 
     MRPhotoType source_type = 7 [(required) = true, (column) = true];
 }

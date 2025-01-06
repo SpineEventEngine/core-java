@@ -50,7 +50,7 @@ message Parcel {
     ParcelId id = 1 [(required) = true];
     RecipientId recipient = 2 [(required) = true, (column) = true];
     SenderId sender = 3;
-    bool delivered = 4 [(required) = true, (column) = true];
+    bool delivered = 4 [(column) = true];
 }
 
 message Vehicle {
