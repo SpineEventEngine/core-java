@@ -41,7 +41,7 @@ import java.util.function.BiFunction
  * a custom route set for the type of the event. If not found, the default route will be
  * [applied][EventRoute.apply].
  *
- * @param I the type of the entity IDs to which events are routed.
+ * @param I The type of the entity IDs to which events are routed.
  */
 @Suppress("TooManyFunctions") // We want both inline and Java versions of the methods.
 public class EventRouting<I: Any>
@@ -98,13 +98,11 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
      * If there is no specific route for an event type, the [default route][defaultRoute]
      * will be used.
      *
-     * @param via
-     *         the instance of the route to be used.
-     * @param E the type of the event message.
+     * @param via The instance of the route to be used.
+     * @param E The type of the event message.
      * @return `this` to allow chained calls when configuring the routing.
-     * @throws IllegalStateException
-     *          if the route for this event type is already set either directly or
-     *          via a super-interface.
+     * @throws IllegalStateException if the route for this event type is already set either
+     *   directly or via a super-interface.
      */
     public inline fun <reified E : EventMessage> route(via: EventRoute<I, in E>): EventRouting<I> =
         route(E::class.java, via)
@@ -114,15 +112,12 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
      *
      * This is a Java version of `public inline fun` [route].
      *
-     * @param eventType
-     *         the type of events to route.
-     * @param via
-     *         the instance of the route to be used.
-     * @param E the type of the event message.
+     * @param eventType The type of events to route.
+     * @param via The instance of the route to be used.
+     * @param E The type of the event message.
      * @return `this` to allow chained calls when configuring the routing.
-     * @throws IllegalStateException
-     *          if the route for this event type is already set either directly or
-     *          via a super-interface.
+     * @throws IllegalStateException if the route for this event type is already set either
+     *   directly or via a super-interface.
      */
     @CanIgnoreReturnValue
     public fun <E : EventMessage> route(
@@ -144,9 +139,8 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
      * would be passing a method reference for an accessor of a field of the event message
      * which contains the ID of interest.
      *
-     * @param via
-     *         the function for obtaining the target entity ID.
-     * @param E the type of the event message.
+     * @param via The function for obtaining the target entity ID.
+     * @param E The type of the event message.
      * @return `this` to allow chained calls when configuring routing
      *
      * @see route
@@ -161,11 +155,9 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
      *
      * This is a Java version of `public inline fun` [unicast].
      *
-     * @param eventType
-     *         the type of the event to route.
-     * @param via
-     *         the function for obtaining the target entity ID.
-     * @param E the type of the event message.
+     * @param eventType The type of the event to route.
+     * @param via The function for obtaining the target entity ID.
+     * @param E The type of the event message.
      * @return `this` to allow chained calls when configuring routing.
      *
      * @see route
@@ -185,9 +177,8 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
      * This is a convenience method for configuring routing when an event is to be delivered
      * to only one entity which ID is calculated from the event message and its context.
      *
-     * @param via
-     *         the supplier of the target entity ID.
-     * @param E the type of the event message.
+     * @param via The supplier of the target entity ID.
+     * @param E The type of the event message.
      * @return `this` to allow chained calls when configuring routing.
      *
      * @see route
@@ -202,11 +193,9 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
      *
      * This is a Java version of `public inline fun` [unicast].
      *
-     * @param eventType
-     *         the type of the event to route.
-     * @param via
-     *         the supplier of the target entity ID.
-     * @param E the type of the event message.
+     * @param eventType The type of the event to route.
+     * @param via The supplier of the target entity ID.
+     * @param E The type of the event message.
      * @return `this` to allow chained calls when configuring routing.
      *
      * @see route
@@ -221,11 +210,9 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
     /**
      * Sets a custom routing schema for entity state updates.
      *
-     * @param routing
-     *         the routing schema for entity state updates.
+     * @param routing The routing schema for entity state updates.
      * @return `this` to allow chained calls when configuring the routing.
-     * @throws IllegalStateException
-     *          if a route for [EntityStateChanged] is already set.
+     * @throws IllegalStateException if a route for [EntityStateChanged] is already set.
      */
     @CanIgnoreReturnValue
     public fun routeStateUpdates(routing: StateUpdateRouting<I>): EventRouting<I> =
@@ -234,7 +221,7 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
     /**
      * Obtains a route for the passed event class.
      *
-     * @param E the type of the event message.
+     * @param E The type of the event message.
      * @return optionally available route.
      */
     public inline fun <reified E: EventMessage> find(): EventRoute<I, E>? =
@@ -243,9 +230,8 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
     /**
      * Obtains a route for the passed event class.
      *
-     * @param eventClass
-     *         the class of the event messages.
-     * @param E the type of the event message.
+     * @param eventClass The class of the event messages.
+     * @param E The type of the event message.
      * @return optionally available route.
      */
     public fun <E : EventMessage> find(eventClass: Class<E>): EventRoute<I, E>? {
@@ -268,8 +254,8 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
     /**
      * Removes a route for the given event message class.
      *
-     * @throws IllegalStateException
-     *          if a custom route for this message class was not previously set, or already removed.
+     * @throws IllegalStateException if a custom route for this message class was not
+     *   previously set, or already removed.
      */
     public inline fun <reified E : EventMessage> remove(): Unit =
         remove(E::class.java)
@@ -281,9 +267,8 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
         /**
          * Creates a new event routing with the passed default route.
          *
-         * @param defaultRoute
-         *         the default route.
-         * @param I the type of entity identifiers returned by new routing.
+         * @param defaultRoute The default route.
+         * @param I The type of entity identifiers returned by new routing.
          * @return new routing instance.
          */
         @JvmStatic
