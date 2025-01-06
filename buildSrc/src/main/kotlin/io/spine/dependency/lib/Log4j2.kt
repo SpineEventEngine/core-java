@@ -29,7 +29,7 @@ package io.spine.dependency.lib
 /**
  * An open-source logging framework.
  *
- * Spine uses its own [logging library][Spine.Logging], but also
+ * Spine uses its own [logging library][io.spine.dependency.local.Logging], but also
  * provides a backend implementation for [Log4j2]. This is why
  * this dependency is needed.
  *

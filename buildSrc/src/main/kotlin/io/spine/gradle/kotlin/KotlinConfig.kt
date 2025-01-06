@@ -53,10 +53,12 @@ fun KotlinJvmProjectExtension.applyJvmToolchain(version: String) =
  */
 @Suppress("unused", "MagicNumber" /* Kotlin Compiler version. */)
 fun KotlinCompile.setFreeCompilerArgs() {
-    // Avoid the "unsupported flag warning" for Kotlin compilers pre 1.9.20.
+    // Avoid the "unsupported flag warning" for Kotlin compilers pre 1.9.20 and after 2.0.0.
     // See: https://youtrack.jetbrains.com/issue/KT-61573
-    val expectActualClasses =
-        if (KotlinVersion.CURRENT.isAtLeast(1, 9, 20)) "-Xexpect-actual-classes" else ""
+    val expectActualClasses = KotlinVersion.CURRENT.run {
+        if (isAtLeast(1, 9, 20) && major < 2) "-Xexpect-actual-classes"
+        else ""
+    }
     kotlinOptions {
         freeCompilerArgs = listOf(
             "-Xskip-prerelease-check",
