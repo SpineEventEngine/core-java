@@ -88,7 +88,7 @@ private class FigureGenerator: SingleCommandAssignee<GenerateFigures>() {
  * A singleton accumulating figures in buckets corresponding to their kinds
  * in response to [FigureGenerated] event.
  */
-private class SorterView: Projection<Empty, Sorter, Sorter.Builder>() {
+private class SorterView: Projection<String, Sorter, Sorter.Builder>() {
 
     @Subscribe
     fun whenever(event: FigureGenerated) = alter {
@@ -110,8 +110,7 @@ private class SorterView: Projection<Empty, Sorter, Sorter.Builder>() {
     companion object {
         @Route
         @JvmStatic
-        fun toSingleton(@Suppress("UNUSED_PARAMETER") e: EventMessage): Empty =
-            Empty.getDefaultInstance()
+        fun toSingleton(@Suppress("UNUSED_PARAMETER") e: EventMessage): String = "SINGLETON"
     }
 }
 

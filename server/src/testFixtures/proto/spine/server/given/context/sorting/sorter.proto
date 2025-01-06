@@ -43,7 +43,12 @@ message Sorter {
     option (entity).kind = VIEW;
 
     // The sorter is a singleton.
-    google.protobuf.Empty id = 1;
+    //
+    // The routing function should always return the same value for this property.
+    // We cannot have a default message of any kind because it won't pass the validation
+    // constraint for entity state ID fields.
+    //
+    string id = 1;
 
     // Use `repeated` wince we cannot have have a map key of type [Figure].
     repeated Bucket bucket = 2;
