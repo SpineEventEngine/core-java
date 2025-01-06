@@ -332,7 +332,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Ensures that the storage is not null.
      *
-     * @return passed value if it's not not null
+     * @return passed value if it is not null
      * @throws IllegalStateException if the passed instance is null
      */
     protected static <S extends AutoCloseable> @NonNull S checkStorage(@Nullable S storage) {
