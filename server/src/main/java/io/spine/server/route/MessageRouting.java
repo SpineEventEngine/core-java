@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -62,9 +62,9 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
      * @implNote This collection is made {@code synchronized}, since in some cases it is
      *         being simultaneously read and modified in different threads.
      *         In particular, the modification at run-time is performed when storing
-     *         the routes discovered on per-interface basis. Therefore, if this collection
-     *         is not {@code synchronized}, a {@code ConcurrentModificationException}
-     *         is sometimes thrown.
+     *         the routes discovered on a per-interface basis.
+     *         Therefore, if this collection is not {@code synchronized},
+     *         a {@code ConcurrentModificationException} is sometimes thrown.
      */
     private final Map<Class<? extends M>, RouteFn<M, C, R>> routes =
             synchronizedMap(new LinkedHashMap<>());
@@ -84,7 +84,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
     }
 
     /**
-     * Sets new default route in the schema.
+     * Sets a new default route in the schema.
      *
      * @param newDefault the new route to be used as default
      */
@@ -213,8 +213,8 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
      *
      * <p>If there is no function for the passed message applies the default function.
      *
-     * @param  message the message
-     * @param  context the message context
+     * @param message the message
+     * @param context the message context
      * @return the set of entity IDs to which the message should be delivered
      */
     @Override

@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -36,6 +36,7 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.route.EventRouting;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -55,8 +56,6 @@ import static com.google.common.collect.Sets.union;
 public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
         extends AssigneeEntityClass<P>
         implements ReactingClass, CommandingClass {
-
-    private static final long serialVersionUID = 0L;
 
     private final ReactorClassDelegate<P> reactorDelegate;
     private final CommanderClass<P> commanderDelegate;
@@ -102,6 +101,11 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
     public ImmutableSet<EventClass> externalEvents() {
         var result = union(reactorDelegate.externalEvents(), commanderDelegate.externalEvents());
         return result.immutableCopy();
+    }
+
+    @Override
+    public EventRouting<?> eventRouting() {
+        return reactorDelegate.eventRouting();
     }
 
     /**

@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,13 +27,13 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
 import io.spine.server.entity.model.StateClass;
 import io.spine.server.event.EventReceiver;
-import io.spine.server.model.ReceptorMap;
-import io.spine.server.model.Receptor;
-import io.spine.server.model.ReceptorSignature;
 import io.spine.server.model.ModelClass;
+import io.spine.server.model.Receptor;
+import io.spine.server.model.ReceptorMap;
+import io.spine.server.model.ReceptorSignature;
+import io.spine.server.route.EventRouting;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
@@ -51,13 +51,11 @@ import java.util.Optional;
  * @param <R>
  *         the type of the receptors
  */
-@Immutable(containerOf = "R")
 public class EventReceivingClassDelegate<T extends EventReceiver,
                                          P extends MessageClass<?>,
                                          R extends Receptor<?, EventClass, ?, P>>
         extends ModelClass<T> {
 
-    private static final long serialVersionUID = 0L;
     private final ReceptorMap<EventClass, P, R> receptors;
     private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> domesticEvents;
@@ -65,8 +63,10 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     private final ImmutableSet<StateClass<?>> domesticStates;
     private final ImmutableSet<StateClass<?>> externalStates;
 
+    private final EventRouting<?> eventRouting;
+
     /**
-     * Creates new instance for the passed raw class with methods obtained
+     * Creates a new instance for the passed raw class with methods obtained
      * through the passed factory.
      */
     public EventReceivingClassDelegate(Class<T> delegatingClass, ReceptorSignature<R, ?> signature) {
@@ -77,6 +77,9 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         this.externalEvents = receptors.messageClasses(Receptor::isExternal);
         this.domesticStates = extractStates(false);
         this.externalStates = extractStates(true);
+
+        //TODO:2025-01-06:alexander.yevsyukov: Create by scanning `delegatingClass`.
+        this.eventRouting = EventRouting.withDefaultByProducerId();
     }
 
     public boolean contains(EventClass eventClass) {
@@ -123,6 +126,10 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      */
     public ImmutableSet<P> producedTypes() {
         return receptors.producedTypes();
+    }
+
+    public EventRouting<?> eventRouting() {
+        return eventRouting;
     }
 
     /**

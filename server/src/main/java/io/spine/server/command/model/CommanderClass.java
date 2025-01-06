@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,6 +33,7 @@ import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.Receptor;
+import io.spine.server.route.EventRouting;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -53,7 +54,6 @@ public final class CommanderClass<C extends Commander>
         extends AbstractCommandHandlingClass<C, CommandClass, CommandSubstituter>
         implements EventReceiverClass, CommandingClass {
 
-    private static final long serialVersionUID = 0L;
     private final EventReceivingClassDelegate<C, CommandClass, CommandingReaction> delegate;
 
     private CommanderClass(Class<C> cls) {
@@ -90,6 +90,11 @@ public final class CommanderClass<C extends Commander>
     @Override
     public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
+    }
+
+    @Override
+    public EventRouting<?> eventRouting() {
+        return delegate.eventRouting();
     }
 
     /**
