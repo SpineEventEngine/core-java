@@ -240,7 +240,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Returns the value of the lifecycle flags, as of current state within this transaction.
+     * Returns the value of the lifecycle flags, as of the current state within this transaction.
      */
     protected LifecycleFlags lifecycleFlags() {
         return lifecycleFlags;
