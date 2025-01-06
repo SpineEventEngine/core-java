@@ -69,7 +69,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
 
     /** The default state of entities of this class. */
     @LazyInit
-    private transient volatile @MonotonicNonNull EntityState<?> defaultState;
+    private volatile @MonotonicNonNull EntityState<?> defaultState;
 
     @LazyInit
     @SuppressWarnings("Immutable") // effectively
