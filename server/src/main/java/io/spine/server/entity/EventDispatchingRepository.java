@@ -29,7 +29,6 @@ package io.spine.server.entity;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.EntityState;
-import io.spine.core.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
@@ -92,7 +91,7 @@ public abstract class EventDispatchingRepository<I,
      * <p>Default routing returns the ID of the entity which
      * {@linkplain io.spine.core.EventContext#getProducerId() produced} the event.
      * This allows to “link” different kinds of entities by having the same class of IDs.
-     * More complex scenarios (e.g. one-to-many relationships) may require custom routing schemas.
+     * More complex scenarios (e.g., one-to-many relationships) may require custom routing schemas.
      *
      * @param routing
      *         the routing schema to customize
