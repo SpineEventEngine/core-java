@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Abstract base for classes providing additional information on a Java class
+ * Abstract base for classes providing additional information on a Java class,
  * such as classes of messages being handled by the methods exposed by the class.
  *
  * @param <T> the type of objects
@@ -45,6 +45,9 @@ public abstract class ModelClass<T> {
         this.rawClass = checkNotNull(rawClass);
     }
 
+    /**
+     * Obtains the Java class for which this model class provides extended information.
+     */
     public Class<?> rawClass() {
         return rawClass;
     }

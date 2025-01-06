@@ -72,8 +72,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     private volatile @MonotonicNonNull EntityState<?> defaultState;
 
     @LazyInit
-    @SuppressWarnings("Immutable") // effectively
-    private transient volatile @MonotonicNonNull EntityFactory<E> factory;
+    private volatile @MonotonicNonNull EntityFactory<E> factory;
 
     /** Creates a new instance of the model class for the passed class of entities. */
     protected EntityClass(Class<E> cls) {
