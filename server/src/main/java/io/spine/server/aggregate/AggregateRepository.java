@@ -100,7 +100,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         implements CommandDispatcher, EventProducingRepository,
                    EventDispatcherDelegate, QueryableRepository<I, S> {
 
-    /** The default number of events to be stored before a next snapshot is made. */
+    /** The default number of events to be stored before a new snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
     /** The routing schema for commands handled by the aggregates. */
