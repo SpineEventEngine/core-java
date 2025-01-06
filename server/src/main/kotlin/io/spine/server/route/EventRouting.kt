@@ -276,7 +276,6 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
 
     public companion object {
 
-        @Suppress("ConstPropertyName")
         private const val serialVersionUID = 0L
 
         /**
