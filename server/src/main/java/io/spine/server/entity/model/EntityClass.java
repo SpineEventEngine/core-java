@@ -77,7 +77,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     @SuppressWarnings("Immutable") // effectively
     private transient volatile @MonotonicNonNull EntityFactory<E> factory;
 
-    /** Creates new instance of the model class for the passed class of entities. */
+    /** Creates a new instance of the model class for the passed class of entities. */
     protected EntityClass(Class<E> cls) {
         super(cls);
         this.idClass = idClass(cls);
@@ -106,7 +106,7 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     /**
      * Obtains an entity class for the passed parameterized class.
      *
-     * <p>Use this method when a more precise type bounds are required.
+     * <p>Use this method when more precise type bounds are required.
      */
     public static <I, S extends EntityState<I>, E extends Entity<I, S>>
     EntityClass<E> asParameterizedEntityClass(Class<E> cls) {
