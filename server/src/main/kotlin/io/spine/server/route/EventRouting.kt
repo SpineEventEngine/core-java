@@ -255,7 +255,7 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
      * Removes a route for the given event message class.
      *
      * @throws IllegalStateException if a custom route for this message class was not
-     *   previously set, or already removed.
+     *   previously set or already removed.
      */
     public inline fun <reified E : EventMessage> remove(): Unit =
         remove(E::class.java)
