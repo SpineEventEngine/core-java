@@ -104,19 +104,6 @@ public class EntityClass<E extends Entity<?, ?>> extends ModelClass<E> {
     }
 
     /**
-     * Obtains an entity class for the passed parameterized class.
-     *
-     * <p>Use this method when more precise type bounds are required.
-     */
-    public static <I, S extends EntityState<I>, E extends Entity<I, S>>
-    EntityClass<E> asParameterizedEntityClass(Class<E> cls) {
-        checkNotNull(cls);
-        @SuppressWarnings("unchecked")
-        var result = (EntityClass<E>) get(cls, EntityClass.class, () -> new EntityClass<>(cls));
-        return result;
-    }
-
-    /**
      * Creates new entity.
      */
     public E create(Object constructionArgument) {
