@@ -41,11 +41,12 @@ import io.spine.core.CommandContext
  * will be [applied][CommandRoute.apply].
  *
  * @param I The type of the entity IDs used by this command routing.
+ * @param defaultRoute The route to use if a custom one is not [set][route].
  */
-public class CommandRouting<I: Any>
-private constructor(defaultRoute: CommandRoute<I, CommandMessage>) :
-    MessageRouting<CommandMessage, CommandContext, I>(defaultRoute)
-{
+public class CommandRouting<I : Any> private constructor(
+    defaultRoute: CommandRoute<I, CommandMessage>
+) : MessageRouting<CommandMessage, CommandContext, I>(defaultRoute) {
+
     public override fun defaultRoute(): CommandRoute<I, CommandMessage> {
         return super.defaultRoute() as CommandRoute<I, CommandMessage>
     }

@@ -41,17 +41,12 @@ import java.util.function.BiFunction
  * [applied][EventRoute.apply].
  *
  * @param I The type of the entity IDs to which events are routed.
+ * @param defaultRoute The route to use if a custom one is not [set][route].
  */
 @Suppress("TooManyFunctions") // We want both inline and Java versions of the methods.
-public class EventRouting<I: Any>
-/**
- * Creates a new instance with the passed default route.
- *
- * @param defaultRoute
- *         the route to use if a custom one is not [set][.route].
- */
-private constructor(defaultRoute: EventRoute<I, EventMessage>) :
-    MessageRouting<EventMessage, EventContext, Set<I>>(defaultRoute),
+public class EventRouting<I : Any> private constructor(
+    defaultRoute: EventRoute<I, EventMessage>
+) : MessageRouting<EventMessage, EventContext, Set<I>>(defaultRoute),
     EventRoute<I, EventMessage> {
 
     /**
