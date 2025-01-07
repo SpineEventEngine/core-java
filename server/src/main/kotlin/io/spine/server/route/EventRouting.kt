@@ -30,7 +30,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.EventMessage
 import io.spine.core.EventContext
 import io.spine.system.server.event.EntityStateChanged
-import java.util.*
 import java.util.function.BiFunction
 
 /**
@@ -243,13 +242,6 @@ private constructor(defaultRoute: EventRoute<I, EventMessage>) :
             null
         }
     }
-
-    /**
-     * Obtains a route for the passed event class.
-     */
-    @Deprecated("Use `find` instead.", ReplaceWith("find(eventClass)"))
-    public fun <E : EventMessage> get(eventClass: Class<E>): Optional<EventRoute<I, E>> =
-        Optional.ofNullable(find(eventClass))
 
     /**
      * Removes a route for the given event message class.

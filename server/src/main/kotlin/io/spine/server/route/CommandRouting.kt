@@ -30,7 +30,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.CommandMessage
 import io.spine.base.RejectionThrowable
 import io.spine.core.CommandContext
-import java.util.*
 
 /**
  * A routing schema used by a [CommandDispatcher][io.spine.server.commandbus.CommandDispatcher]
@@ -143,13 +142,6 @@ private constructor(defaultRoute: CommandRoute<I, CommandMessage>) :
             null
         }
     }
-
-    /**
-     * Obtains a route for the passed command class.
-     */
-    @Deprecated("Use `find` instead.", ReplaceWith("find(commandClass)"))
-    public fun <C : CommandMessage> get(commandClass: Class<C>): Optional<CommandRoute<I, C>> =
-        Optional.ofNullable(find(commandClass))
 
     /**
      * Removes a route for the passed command class.
