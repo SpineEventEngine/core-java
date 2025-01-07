@@ -120,7 +120,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
      * Checks whether the passed {@code method} matches the constraints set by this instance.
      *
      * <p>{@link SignatureMismatch.Severity#WARN WARN}-level mismatches are silently ignored
-     * by this method. To obtain a detailed information callees should use {@link #match(Method)}.
+     * by this method. To obtain detailed information callees should use {@link #match(Method)}.
      *
      * @param method
      *         the method to check
