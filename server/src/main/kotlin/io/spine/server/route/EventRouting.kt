@@ -60,8 +60,8 @@ public class EventRouting<I : Any> private constructor(
     /**
      * Sets a new default route in the schema.
      *
-     * @param newDefault the new route to be used as default
-     * @return `this` to allow chained calls when configuring the routing
+     * @param newDefault The new route to be used as default.
+     * @return `this` to allow chained calls when configuring the routing.
      */
     @CanIgnoreReturnValue
     public fun replaceDefault(newDefault: EventRoute<I, EventMessage>): EventRouting<I> {
@@ -183,7 +183,7 @@ public class EventRouting<I : Any> private constructor(
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity
-     * ID from the passed function over event message and its context.
+     * ID from the passed function over an event message and its context.
      *
      * This is a Java version of `public inline fun` [unicast].
      *
