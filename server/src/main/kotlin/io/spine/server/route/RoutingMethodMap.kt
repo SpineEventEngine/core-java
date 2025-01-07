@@ -26,9 +26,14 @@
 
 package io.spine.server.route
 
+import io.spine.base.CommandMessage
+import io.spine.base.EventMessage
 import io.spine.base.MessageContext
 import io.spine.base.SignalMessage
+import io.spine.core.CommandContext
+import io.spine.core.EventContext
 import io.spine.logging.WithLogging
+import io.spine.reflect.GenericTypeIndex
 import io.spine.server.entity.Entity
 import io.spine.string.simply
 import java.lang.reflect.Method
@@ -39,6 +44,9 @@ public sealed class RoutingMethodMap<I: Any>(
     protected val messageType: Class<out SignalMessage>,
     protected val contextType: Class<out MessageContext>
 ) : WithLogging {
+
+    protected val idClass: Class<*> = GenericParameter.ID.argumentIn(this::class.java)
+
     internal val methods: Map<Class<out SignalMessage>, RoutingMethod<I, *, *, *>>
     
     init {
@@ -93,5 +101,42 @@ public sealed class RoutingMethodMap<I: Any>(
     protected abstract fun acceptReturnType(method: Method): Boolean
 
     protected abstract fun createMethod(method: Method): RoutingMethod<I, *, *, *>
+
+    private enum class GenericParameter(
+        private val index: Int
+    ) : GenericTypeIndex<RoutingMethodMap<*>> {
+
+        ID(0);
+
+        override fun index(): Int = index
+    }
 }
 
+public class CommandRoutingMethodMap<I: Any>(
+    entityClass: Class<out Entity<I, *>>
+) : RoutingMethodMap<I>(entityClass, CommandMessage::class.java, CommandContext::class.java) {
+
+    override fun acceptReturnType(method: Method): Boolean {
+        val returnType = method.returnType
+        val returnsSingleId = idClass.isAssignableFrom(returnType)
+        return returnsSingleId
+    }
+
+    override fun createMethod(method: Method): RoutingMethod<I, *, *, *> =
+        CommandRoutingMethod(method)
+}
+
+public class EventRoutingMethodMap<I: Any>(
+    entityClass: Class<out Entity<I, *>>
+) : RoutingMethodMap<I>(entityClass, EventMessage::class.java, EventContext::class.java) {
+
+    override fun acceptReturnType(method: Method): Boolean {
+        val returnType = method.returnType
+        val returnsSet = Set::class.java.isAssignableFrom(returnType)
+        val returnsSingleId =  idClass.isAssignableFrom(returnType)
+        return returnsSingleId || returnsSet
+    }
+
+    override fun createMethod(method: Method): RoutingMethod<I, *, *, *> =
+        EventRoutingMethod(method)
+}
