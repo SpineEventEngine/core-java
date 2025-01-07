@@ -252,7 +252,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
 
     /**
      * Determines if a method with this signature may return an
-     * {@linkplain MethodResult#isIgnored(Class)} ignored} result.
+     * {@linkplain MethodResult#isIgnored(Class) ignored} result.
      */
     public abstract boolean mayReturnIgnored();
 }
