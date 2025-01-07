@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -57,8 +57,8 @@ import static java.util.stream.Collectors.toList;
  *     <li>{@linkplain #returnTypes() the set of valid return types},
  *     <li>{@linkplain #allowedThrowable() the set of allowed exceptions}, that the method
  *          declares to throw (empty by default),
- *     <li>whether an {@linkplain #mayReturnIgnored() ignored result}, such as {@link Nothing},
- *          may be returned.
+ *     <li>whether an {@linkplain #mayReturnIgnored() ignored result},
+ *         such as {@link io.spine.server.event.NoReaction NoReaction}, may be returned.
  * </ul>
  *
  * @param <R>
@@ -74,7 +74,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
 
     /**
      * Creates an instance of signature, defining the required annotation to be present
-     * in the methods, that are matched against this signature.
+     * in the methods that are matched against this signature.
      */
     protected ReceptorSignature(Class<? extends Annotation> annotation) {
         this.annotation = checkNotNull(annotation);
