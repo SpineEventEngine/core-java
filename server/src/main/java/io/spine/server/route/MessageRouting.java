@@ -240,7 +240,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
 
         private final Class<? extends M> requestedClass;
         private final @Nullable RouteFn<M, C, R> route;
-        private final @Nullable Class<? extends M> entryClass;
+        private final @Nullable Class<? extends M> entryType;
 
         /**
          * Creates new instance.
@@ -261,7 +261,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
                       @Nullable RouteFn<M, C, R> route) {
             this.requestedClass = requestedClass;
             this.route = route;
-            this.entryClass = entryType;
+            this.entryType = entryType;
         }
 
         boolean found() {
@@ -272,12 +272,12 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
          * Returns {@code true} if the routing was defined directly for the requested class,
          * otherwise {@code false}.
          */
-        boolean direct() {
-            return requestedClass.equals(entryClass);
+        private boolean direct() {
+            return requestedClass.equals(entryType);
         }
 
         Class<? extends M> entryClass() {
-            return requireNonNull(entryClass);
+            return requireNonNull(entryType);
         }
 
         RouteFn<M, C, R> route() {
