@@ -254,7 +254,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
          *         Is {@code null} if there is no routing found for the {@code requestedClass}.
          * @param route
          *         the routing function or {@code null} if there is no route defined neither
-         *         for the class or a super-interface of the class
+         *         for the class nor a super-interface of the class
          */
         private Match(Class<? extends M> requestedClass,
                       @Nullable Class<? extends M> entryType,
