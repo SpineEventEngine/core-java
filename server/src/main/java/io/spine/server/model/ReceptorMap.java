@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -137,7 +137,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
     /**
      * Obtains methods for handling messages of the given class and with the given origin.
      *
-     * <p>If there is no receptor matching both the message and origin class, receptor will be
+     * <p>If there is no receptor matching both the message and origin class, a receptor will be
      * searched by the message class only.
      *
      * <p>If no receptor for a specified criteria is found, returns an empty set.
@@ -145,7 +145,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
      * @param messageClass
      *         the class of the accepted messages
      * @param originClass
-     *         the class of the message, from which the accepted message originates
+     *         the class of the message from which the accepted message originates
      */
     private ImmutableSet<R> receptorsOf(M messageClass, MessageClass<?> originClass) {
         var cls = messageClass.value();
@@ -153,7 +153,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
                 originClass.equals(EmptyClass.instance())
                 ? new DispatchKey(cls, null)
                 : new DispatchKey(cls, originClass.value());
-        // If we have a receptor with origin type, use the key.
+        // If we have a receptor with the origin type, use the key.
         // Otherwise, find receptors only by the first parameter.
         var presentKey = map.containsKey(key)
                          ? key
