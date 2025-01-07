@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ class AbstractReceptor<T,
     private final ParameterSpec<E> parameterSpec;
 
     /**
-     * Contains classes of messages returned by the handler.
+     * Contains classes of messages returned by the receptor.
      *
      * <p>Does <em>not</em> contain interfaces.
      */
