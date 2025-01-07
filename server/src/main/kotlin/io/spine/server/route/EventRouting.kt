@@ -166,7 +166,7 @@ public class EventRouting<I : Any> private constructor(
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity
-     * ID from the passed function over event message and its context.
+     * ID from the passed function over an event message and its context.
      *
      * This is a convenience method for configuring routing when an event is to be delivered
      * to only one entity which ID is calculated from the event message and its context.
