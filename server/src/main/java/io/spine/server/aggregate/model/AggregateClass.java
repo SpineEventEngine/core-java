@@ -32,9 +32,8 @@ import io.spine.server.entity.model.AssigneeEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
-import io.spine.server.model.ReceptorMap;
 import io.spine.server.model.ModelError;
-import io.spine.server.route.EventRouting;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -87,11 +86,6 @@ public class AggregateClass<A extends Aggregate<?, ?, ?>>
     @Override
     public final ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
-    }
-
-    @Override
-    public EventRouting<?> eventRouting() {
-        return delegate.eventRouting();
     }
 
     /**

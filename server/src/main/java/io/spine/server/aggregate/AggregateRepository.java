@@ -52,6 +52,7 @@ import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
+import io.spine.server.route.CommandRoutingMethodMap;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RouteFn;
 import io.spine.server.type.CommandClass;
@@ -154,13 +155,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     @OverridingMethodsMustInvokeSuper
     public void registerWith(BoundedContext context) {
         checkNotVoid();
-
         super.registerWith(context);
-
-        setupCommandRouting(commandRouting.get());
-        setupEventRouting(eventRouting);
-        setupImportRouting(eventImportRouting);
-
+        setupRouting();
         context.internalAccess()
                .registerCommandDispatcher(this);
         if (aggregateClass().importsEvents()) {
@@ -170,6 +166,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         initCache(context.isMultitenant());
         initInbox();
         configureQuerying();
+    }
+
+    private void setupRouting() {
+        var classRouting = new CommandRoutingMethodMap<I>(entityClass());
+        classRouting.addTo(commandRouting());
+        setupCommandRouting(commandRouting());
+
+        setupEventRouting(eventRouting);
+        setupImportRouting(eventImportRouting);
     }
 
     @Override

@@ -124,6 +124,15 @@ public class CommandRoutingMethodMap<I: Any>(
 
     override fun createMethod(method: Method): RoutingMethod<I, *, *, *> =
         CommandRoutingMethod(method)
+
+    @Suppress("UNCHECKED_CAST")
+    public fun addTo(routing: CommandRouting<I>) {
+        methods.forEach { (messageClass, method) ->
+            val commandClass = messageClass as Class<CommandMessage>
+            val fn = method as CommandRoute<I, CommandMessage>
+            routing.route(commandClass, fn)
+        }
+    }
 }
 
 public class EventRoutingMethodMap<I: Any>(
@@ -139,4 +148,13 @@ public class EventRoutingMethodMap<I: Any>(
 
     override fun createMethod(method: Method): RoutingMethod<I, *, *, *> =
         EventRoutingMethod(method)
+
+    @Suppress("UNCHECKED_CAST")
+    public fun addTo(routing: EventRouting<I>) {
+        methods.forEach { (messageClass, method) ->
+            val eventClass = messageClass as Class<EventMessage>
+            val fn = method as EventRoute<I, EventMessage>
+            routing.route(eventClass, fn)
+        }
+    }
 }

@@ -61,6 +61,4 @@ public interface EventReceiverClass {
      * to which this class belongs from outside.
      */
     ImmutableSet<EventClass> externalEvents();
-
-    EventRouting<?> eventRouting();
 }

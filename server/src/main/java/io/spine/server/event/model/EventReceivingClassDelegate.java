@@ -33,7 +33,6 @@ import io.spine.server.model.ModelClass;
 import io.spine.server.model.Receptor;
 import io.spine.server.model.ReceptorMap;
 import io.spine.server.model.ReceptorSignature;
-import io.spine.server.route.EventRouting;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.MessageClass;
@@ -63,8 +62,6 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     private final ImmutableSet<StateClass<?>> domesticStates;
     private final ImmutableSet<StateClass<?>> externalStates;
 
-    private final EventRouting<?> eventRouting;
-
     /**
      * Creates a new instance for the passed raw class with methods obtained
      * through the passed factory.
@@ -77,9 +74,6 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
         this.externalEvents = receptors.messageClasses(Receptor::isExternal);
         this.domesticStates = extractStates(false);
         this.externalStates = extractStates(true);
-
-        //TODO:2025-01-06:alexander.yevsyukov: Create by scanning `delegatingClass`.
-        this.eventRouting = EventRouting.withDefaultByProducerId();
     }
 
     public boolean contains(EventClass eventClass) {
@@ -126,10 +120,6 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      */
     public ImmutableSet<P> producedTypes() {
         return receptors.producedTypes();
-    }
-
-    public EventRouting<?> eventRouting() {
-        return eventRouting;
     }
 
     /**

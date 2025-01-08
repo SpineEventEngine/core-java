@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,6 +33,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.route.EventRouting;
+import io.spine.server.route.EventRoutingMethodMap;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
@@ -82,6 +83,9 @@ public abstract class EventDispatchingRepository<I,
         super.registerWith(context);
         context.internalAccess()
                .registerEventDispatcher(this);
+
+        var classRouting = new EventRoutingMethodMap<>(entityClass());
+        classRouting.addTo(eventRouting());
         setupEventRouting(eventRouting());
     }
 
@@ -117,8 +121,8 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Dispatches the given event to entities with the given identifiers,
-     * and returns the dispatch outcome.
+     * Dispatches the given event to entities with the given identifiers and
+     * returns the dispatch outcome.
      *
      * @param ids
      *         the identifiers of the target entities

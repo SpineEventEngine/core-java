@@ -29,7 +29,6 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.ModelClass;
-import io.spine.server.route.EventRouting;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -79,11 +78,6 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     @Override
     public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
-    }
-
-    @Override
-    public EventRouting<?> eventRouting() {
-        return delegate.eventRouting();
     }
 
     @Override

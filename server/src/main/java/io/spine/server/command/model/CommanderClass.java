@@ -33,7 +33,6 @@ import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.model.ExternalCommandReceiverMethodError;
 import io.spine.server.model.Receptor;
-import io.spine.server.route.EventRouting;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -90,11 +89,6 @@ public final class CommanderClass<C extends Commander>
     @Override
     public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
-    }
-
-    @Override
-    public EventRouting<?> eventRouting() {
-        return delegate.eventRouting();
     }
 
     /**

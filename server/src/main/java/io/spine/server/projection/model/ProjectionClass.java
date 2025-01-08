@@ -36,7 +36,6 @@ import io.spine.server.event.model.SubscriberMethod;
 import io.spine.server.event.model.SubscriberSignature;
 import io.spine.server.event.model.SubscribingClass;
 import io.spine.server.projection.Projection;
-import io.spine.server.route.EventRouting;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -87,11 +86,6 @@ public final class ProjectionClass<P extends Projection<?, ?, ?>>
     @Override
     public ImmutableSet<EventClass> externalEvents() {
         return delegate.externalEvents();
-    }
-
-    @Override
-    public EventRouting<?> eventRouting() {
-        return delegate.eventRouting();
     }
 
     @Override

@@ -27,16 +27,15 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.command.model.CommandingReaction;
 import io.spine.server.command.model.CommandSubstituter;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.command.model.CommandingClass;
+import io.spine.server.command.model.CommandingReaction;
 import io.spine.server.entity.model.AssigneeEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.route.EventRouting;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -101,11 +100,6 @@ public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
     public ImmutableSet<EventClass> externalEvents() {
         var result = union(reactorDelegate.externalEvents(), commanderDelegate.externalEvents());
         return result.immutableCopy();
-    }
-
-    @Override
-    public EventRouting<?> eventRouting() {
-        return reactorDelegate.eventRouting();
     }
 
     /**

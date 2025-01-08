@@ -28,10 +28,9 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventReactor;
-import io.spine.server.model.ReceptorMap;
-import io.spine.server.model.Receptor;
 import io.spine.server.model.ModelClass;
-import io.spine.server.route.EventRouting;
+import io.spine.server.model.Receptor;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
@@ -53,17 +52,12 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
     private final ImmutableSet<EventClass> domesticEvents;
     private final ImmutableSet<EventClass> externalEvents;
 
-    private final EventRouting<?> eventRouting;
-
     private EventReactorClass(Class<? extends S> cls) {
         super(cls);
         this.reactors = ReceptorMap.create(cls, new EventReactorSignature());
         this.events = reactors.messageClasses();
         this.domesticEvents = reactors.messageClasses((h) -> !h.isExternal());
         this.externalEvents = reactors.messageClasses(Receptor::isExternal);
-
-        //TODO:2025-01-06:alexander.yevsyukov: Create by scanning `delegatingClass`.
-        this.eventRouting = EventRouting.withDefaultByProducerId();
     }
 
     /** Creates a new instance for the given raw class. */
@@ -94,11 +88,6 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
     @Override
     public ImmutableSet<EventClass> externalEvents() {
         return externalEvents;
-    }
-
-    @Override
-    public EventRouting<?> eventRouting() {
-        return eventRouting;
     }
 
     @Override

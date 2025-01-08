@@ -76,3 +76,4 @@ public class EventRoutingMethod<I: Any>(
         }
     }
 }
+
