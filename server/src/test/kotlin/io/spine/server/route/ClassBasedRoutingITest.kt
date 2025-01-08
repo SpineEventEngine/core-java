@@ -44,6 +44,17 @@ import org.junit.jupiter.api.Test
 @DisplayName("Class-based routing should")
 internal class ClassBasedRoutingITest {
 
+    /**
+     * This test verifies that events are routed via static methods defined in
+     * [SorterView] and [FigureStatsView] entity classes.
+     *
+     * The test fires the
+     * [io.spine.server.given.context.sorting.command.GenerateFigures] command and then
+     * verifies that corresponding views have the expected state, which means that
+     * expected events were successfully delivered.
+     *
+     * @see createSortingContext
+     */
     @Test
     fun `route an event via a static method of an entity class`() {
         // The list of figures to generate.
