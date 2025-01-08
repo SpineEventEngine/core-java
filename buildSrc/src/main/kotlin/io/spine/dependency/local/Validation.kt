@@ -36,7 +36,7 @@ object Validation {
     /**
      * The version of the Validation library artifacts.
      */
-    const val version = "2.0.0-SNAPSHOT.183"
+    const val version = "2.0.0-SNAPSHOT.186"
 
     const val group = "io.spine.validation"
     private const val prefix = "spine-validation"
