@@ -115,7 +115,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 @DisplayName("`Stand` should")  // It's OK for this test.
 class StandTest extends TenantAwareTest {
 
