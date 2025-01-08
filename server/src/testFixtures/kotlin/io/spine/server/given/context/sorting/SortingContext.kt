@@ -26,7 +26,9 @@
 
 package io.spine.server.given.context.sorting
 
+import com.google.common.annotations.VisibleForTesting
 import io.spine.base.EventMessage
+import io.spine.core.EventContext
 import io.spine.core.Subscribe
 import io.spine.server.BoundedContext
 import io.spine.server.BoundedContext.singleTenant
@@ -39,7 +41,6 @@ import io.spine.server.given.context.sorting.event.FigureGenerated
 import io.spine.server.given.context.sorting.event.figureGenerated
 import io.spine.server.projection.Projection
 import io.spine.server.route.Route
-import io.spine.testing.TestValues.random
 
 /**
  * This context generates geometric figures in response to the [GenerateFigures] command.
@@ -52,13 +53,13 @@ import io.spine.testing.TestValues.random
  * The implementation of this context is deliberately naïve in terms of event generation
  * and propagation. It generates an event for each generated figure.
  *
- * If a number of events is big, it leads to increase of a load to a data storage because we need to
+ * If a number of events is big, it leads to an increased load to a data storage because we need to
  * load and store corresponding entity states. It is not noticeable for this test fixture
  * arrangement because in-memory storage is used.
  *
- * A production implementation of similar cases should prefer bigger event containing
+ * A production implementation of similar cases should prefer a bigger event containing
  * all information (provided [size limit](https://stackoverflow.com/a/34186672) is met),
- * or series of events containing chunks of information.
+ * or a series of events containing chunks of information.
  */
 @Suppress("unused") // is declared for documentation purposes.
 private const val ABOUT = ""
@@ -70,15 +71,17 @@ private class FigureGenerator: SingleCommandAssignee<GenerateFigures>() {
 
     @Assign
     override fun handle(command: GenerateFigures): Iterable<FigureGenerated> {
-        val events = generateSequence {
-            val figures = command.figureList
-            val index = random(figures.size - 1)
-            figures[index]
-        }.map { selected ->
-            figureGenerated {
-                figure = selected
+        val events = sequence<Figure> {
+            command.figureList.forEach { figure ->
+                repeat(command.count) {
+                    yield(figure)
+                }
             }
-        }.take(command.count).toList()
+        }.map {
+            figureGenerated {
+                figure = it
+            }
+        }.toList()
         return events
     }
 }
@@ -87,54 +90,67 @@ private class FigureGenerator: SingleCommandAssignee<GenerateFigures>() {
  * A singleton accumulating figures in buckets corresponding to their kinds
  * in response to [FigureGenerated] event.
  */
-private class SorterView: Projection<String, Sorter, Sorter.Builder>() {
+@VisibleForTesting
+class SorterView: Projection<String, Sorter, Sorter.Builder>() {
 
     @Subscribe
-    fun whenever(event: FigureGenerated) = alter {
+    internal fun whenever(event: FigureGenerated) = alter {
         val figure = event.figure
-        fun newBucket() = bucket { this@bucket.figure.add(figure) }.toBuilder()
+        fun newBucket() = bucket { this@bucket.figure.add(figure) }
 
         // Find a bucket with the same kind of figures.
-        val bucket = bucketBuilderList.find { bucket ->
+        val existingBucket = bucketBuilderList.find { bucket ->
             bucket.figureList.first().kindCase == figure.kindCase
         }
-        if (bucket == null) {
-            bucketBuilderList.add(newBucket())
+        if (existingBucket == null) {
+            addBucket(newBucket())
             return@alter
         } else {
-            bucket.addFigure(figure)
+            existingBucket.addFigure(figure)
         }
     }
 
     companion object {
+
+        const val SINGLETON_ID = "sorter"
+
+        /**
+         * The routing function accepting only one parameter.
+         *
+         * It also accepts an interface, rather than an event message class.
+         */
         @Route
         @JvmStatic
-        fun toSingleton(@Suppress("UNUSED_PARAMETER") e: EventMessage): String = "SINGLETON"
+        fun toSingleton(@Suppress("UNUSED_PARAMETER") e: EventMessage): String = SINGLETON_ID
     }
 }
 
 /**
  * Counts a number of times a figure was generated.
  */
-private class FigureStatsView: Projection<Figure, FigureStats, FigureStats.Builder>() {
+@VisibleForTesting
+class FigureStatsView: Projection<Figure, FigureStats, FigureStats.Builder>() {
 
     @Subscribe
-    fun whenever(event: FigureGenerated) = alter {
+    internal fun whenever(event: FigureGenerated) = alter {
         figure = event.figure
         count = count.inc()
     }
 
     companion object {
+
+        /**
+         * The routing function with the second parameter.
+         */
         @Route
         @JvmStatic
-        fun byFigure(e: FigureGenerated): Figure = e.figure
+        fun byFigure(e: FigureGenerated, ctx: EventContext): Figure = e.figure
     }
 }
 
 /**
  * Creates Sorting bounded context.
  */
-@Suppress("unused")
 fun createSortingContext(): BoundedContext = singleTenant("Sorting").apply {
     addAssignee(FigureGenerator())
     add(SorterView::class.java)

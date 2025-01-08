@@ -35,11 +35,12 @@ import java.lang.reflect.Method
 
 public sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
     protected val rawMethod: Method
-) : RouteFn<M, C, R> {
+) {
 
     private val acceptsContext: Boolean = rawMethod.parameterTypes.size == 2
 
     protected fun invoke(message: M, context: C): Any? {
+        rawMethod.setAccessible(true)
         val result = if (acceptsContext) {
             rawMethod.invoke(null, message, context)
         } else {
@@ -51,7 +52,8 @@ public sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
 
 public class CommandRoutingMethod<I : Any>(
     rawMethod: Method
-) : RoutingMethod<I, CommandMessage, CommandContext, I>(rawMethod) {
+) : RoutingMethod<I, CommandMessage, CommandContext, I>(rawMethod),
+    CommandRoute<I, CommandMessage> {
 
     public override fun apply(message: CommandMessage, context: CommandContext): I {
         val result = invoke(message, context)
@@ -62,7 +64,7 @@ public class CommandRoutingMethod<I : Any>(
 
 public class EventRoutingMethod<I: Any>(
     rawMethod: Method
-) : RoutingMethod<I, EventMessage, EventContext, Set<I>>(rawMethod) {
+) : RoutingMethod<I, EventMessage, EventContext, Set<I>>(rawMethod), EventRoute<I, EventMessage> {
 
     private val returnsSet: Boolean = rawMethod.returnType == Set::class.java
 
