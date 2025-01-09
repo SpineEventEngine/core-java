@@ -40,9 +40,9 @@ import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 public sealed class RoutingMethodMap<I: Any>(
-    protected val entityClass: Class<out Entity<I, *>>,
-    protected val messageType: Class<out SignalMessage>,
-    protected val contextType: Class<out MessageContext>,
+    entityClass: Class<out Entity<I, *>>,
+    private val messageType: Class<out SignalMessage>,
+    private val contextType: Class<out MessageContext>,
 ) : WithLogging {
 
     protected val idClass: Class<*> = GenericParameter.ID.argumentIn(this::class.java)
