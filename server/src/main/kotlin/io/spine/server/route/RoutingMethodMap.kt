@@ -38,6 +38,7 @@ import io.spine.server.entity.Entity
 import io.spine.string.simply
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.util.SortedMap
 
 /**
  * The abstract base for classes for scanning routing methods defined in an entity class.
@@ -60,7 +61,7 @@ public sealed class RoutingMethodMap<I: Any>(
 
     protected val idClass: Class<*> = GenericParameter.ID.argumentIn(this::class.java)
 
-    internal val methods: Map<Class<out SignalMessage>, RoutingMethod<I, *, *, *>>
+    internal val methods: SortedMap<Class<out SignalMessage>, RoutingMethod<I, *, *, *>>
     
     init {
         val collecting = mutableMapOf<Class<out SignalMessage>, RoutingMethod<I, *, *, *>>()
@@ -74,8 +75,7 @@ public sealed class RoutingMethodMap<I: Any>(
                 val firstParam = method.parameters[0].type as Class<out SignalMessage>
                 collecting[firstParam] = createMethod(method)
             }
-        //TODO:2025-01-09:alexander.yevsyukov: Add sorting by interfaces.
-        methods = collecting.toMap()
+        methods = collecting.toSortedMap(SignalClassComparator())
     }
 
     @Suppress("ReturnCount")
@@ -120,6 +120,36 @@ public sealed class RoutingMethodMap<I: Any>(
         ID(0);
 
         override fun index(): Int = index
+    }
+}
+
+/**
+ * Sorts classes of signal messages putting more abstract types further.
+ */
+private class SignalClassComparator : Comparator<Class<out SignalMessage>> {
+
+    @Suppress("ReturnCount")
+    override fun compare(o1: Class<out SignalMessage>, o2: Class<out SignalMessage>): Int {
+        if (o1 == o2) {
+            return 0
+        }
+        // An interface should come after a class in the sorting.
+        if (o1.isInterface && !o2.isInterface) {
+            return 1
+        }
+        if (!o1.isInterface && o2.isInterface) {
+            return -1
+        }
+        // Both are either classes or interfaces.
+        // The one that is more abstract further in sorting.
+        if (o1.isAssignableFrom(o2)) {
+            return 1
+        }
+        if (o2.isAssignableFrom(o1)) {
+            return -1
+        }
+        // Sort alphabetically then.
+        return o1.canonicalName.compareTo(o2.canonicalName)
     }
 }
 
