@@ -43,7 +43,8 @@ import io.spine.server.projection.Projection
 import io.spine.server.route.Route
 
 /**
- * This context generates geometric figures in response to the [GenerateFigures] command.
+ * Creates a toy context which generates geometric figures in response to
+ * the [GenerateFigures] command.
  *
  * Figures are accumulated by buckets by the [SorterView] projection.
  * Statistics for figures are handled by [FigureStatsView].
@@ -53,16 +54,21 @@ import io.spine.server.route.Route
  * The implementation of this context is deliberately naïve in terms of event generation
  * and propagation. It generates an event for each generated figure.
  *
- * If a number of events is big, it leads to an increased load to a data storage because we need to
- * load and store corresponding entity states. It is not noticeable for this test fixture
- * arrangement because in-memory storage is used.
+ * If a number of events is big, it leads to an increased load to a data storage because
+ * we need to load and store corresponding entity states.
+ * It is not noticeable for this test fixture arrangement because in-memory storage is used.
  *
  * A production implementation of similar cases should prefer a bigger event containing
  * all information (provided [size limit](https://stackoverflow.com/a/34186672) is met),
  * or a series of events containing chunks of information.
+ *
+ * @see io.spine.server.given.context.fizzbuzz.createFizzBuzzContext
  */
-@Suppress("unused") // is declared for documentation purposes.
-private const val ABOUT = ""
+fun createSortingContext(): BoundedContext = singleTenant("Sorting").apply {
+    addAssignee(FigureGenerator())
+    add(SorterView::class.java)
+    add(FigureStatsView::class.java)
+}.build()
 
 /**
  * Generates geometric figures taking the parameters from the [GenerateFigures] command.
@@ -148,11 +154,3 @@ class FigureStatsView: Projection<Figure, FigureStats, FigureStats.Builder>() {
     }
 }
 
-/**
- * Creates Sorting bounded context.
- */
-fun createSortingContext(): BoundedContext = singleTenant("Sorting").apply {
-    addAssignee(FigureGenerator())
-    add(SorterView::class.java)
-    add(FigureStatsView::class.java)
-}.build()

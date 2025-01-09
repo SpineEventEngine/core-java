@@ -49,21 +49,28 @@ import io.spine.server.route.Route
  *
  * The purpose of the context is to test the command rounting based on a static method
  * of the [NumberQualification] process manager.
+ *
+ * @see io.spine.server.given.context.sorting.createSortingContext
  */
 fun createFizzBuzzContext(): BoundedContext = singleTenant("FizzBuzz").apply {
     add(NumberQualification::class.java)
 }.build()
 
 /**
- * The ID of this process manager is of the type `String` because Spine does not support
- * enum-based IDs at the time of writing.
+ * This process manager handles the [QualifyNumber] command and the [NumberQualified] event
+ * which it produces in response to the command.
  *
- * The possible IDs are the names of the [Qualifier] enum.
+ * Even though qualifying the numbers is based on the [Qualifier] enum type, the ID of
+ * this process manager is of the type `String` because Spine does not support
+ * enum-based IDs at the time of writing. So, we use the names of the enum items as IDs.
+ *
  * The routing function [qualify] calculates the ID in for the [QualifyNumber] command
  * using the rules of the [Fizz Buzz](https://en.wikipedia.org/wiki/Fizz_buzz) game.
  *
- * The receptor for the command generates the [NumberQualified], which in turn is
- * routed by the [routeEvent] static method.
+ * The [NumberQualified] event is routed by the [routeEvent] static method.
+ *
+ * The process manager remembers the number in its state so that the tests can check it
+ * assuming successful dispatching of commands and events.
  */
 @VisibleForTesting
 class NumberQualification :
