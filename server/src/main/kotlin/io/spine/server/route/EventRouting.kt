@@ -249,8 +249,6 @@ public class EventRouting<I : Any> private constructor(
 
     public companion object {
 
-        private const val serialVersionUID = 0L
-
         /**
          * Creates a new event routing with the passed default route.
          *
