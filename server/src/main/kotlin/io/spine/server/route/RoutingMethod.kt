@@ -33,12 +33,29 @@ import io.spine.core.CommandContext
 import io.spine.core.EventContext
 import java.lang.reflect.Method
 
-public sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
+/**
+ * Abstract base for signal routing methods scanned by a [RoutingMethodMap].
+ *
+ * @param I The type of the entity identifiers.
+ * @param M The type of the signals routed by the method.
+ * @param C The type of the signal context routed by the method.
+ *
+ * @property rawMethod The routing method declared by an entity class.
+ *
+ * @see Route
+ * @see RoutingMethodMap
+ */
+internal sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
     protected val rawMethod: Method
 ) {
-
+    /**
+     * Tells if the [rawMethod] accepts a parameter for a signal context.
+     */
     private val acceptsContext: Boolean = rawMethod.parameterTypes.size == 2
 
+    /**
+     * Invokes the [rawMethod] with the given parameters.
+     */
     protected fun invoke(message: M, context: C): Any? {
         rawMethod.setAccessible(true)
         val result = if (acceptsContext) {
@@ -50,25 +67,38 @@ public sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
     }
 }
 
-public class CommandRoutingMethod<I : Any>(
+/**
+ * The routing method for command messages.
+ */
+internal class CommandRoutingMethod<I : Any>(
     rawMethod: Method
 ) : RoutingMethod<I, CommandMessage, CommandContext, I>(rawMethod),
     CommandRoute<I, CommandMessage> {
 
-    public override fun apply(message: CommandMessage, context: CommandContext): I {
+    override fun apply(message: CommandMessage, context: CommandContext): I {
         val result = invoke(message, context)
-        @Suppress("UNCHECKED_CAST") // protected by the scanning.
+        @Suppress("UNCHECKED_CAST") /* The cast is protected by the return type check when
+          the entity class methods are analyzed. */
         return result as I
     }
 }
 
-public class EventRoutingMethod<I: Any>(
+/**
+ * The routing method for event messages.
+ */
+internal class EventRoutingMethod<I: Any>(
     rawMethod: Method
 ) : RoutingMethod<I, EventMessage, EventContext, Set<I>>(rawMethod), EventRoute<I, EventMessage> {
 
+    /**
+     * Is `true` if the method returns `Set<I>`. Otherwise, the method returns `I`.
+     */
     private val returnsSet: Boolean = rawMethod.returnType == Set::class.java
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST") /* The casts are protected by:
+        1) the return type check when the entity class methods are analyzed.
+        2) the `returnsSet` property.
+    */
     override fun apply(message: EventMessage, context: EventContext): Set<I> {
         val result = invoke(message, context)
         return if (returnsSet) {

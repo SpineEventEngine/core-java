@@ -39,6 +39,19 @@ import io.spine.string.simply
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
+/**
+ * The abstract base for classes for scanning routing methods defined in an entity class.
+ *
+ * An entity class can declare static methods annotated with the [Route] annotation for
+ * calculating IDs of the entities for which a signal should be dispatched.
+ *
+ * @param entityClass The class of the entity which may declare routing methods.
+ * @param messageType The super interface for the routed signal messages, such as
+ *   [CommandMessage] or [EventMessage].
+ * @param contextType The super interface for the signal context messages, such as
+ *   [CommandContext] or [EventContext].
+ * @see Route
+ */
 public sealed class RoutingMethodMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
     private val messageType: Class<out SignalMessage>,
@@ -61,6 +74,7 @@ public sealed class RoutingMethodMap<I: Any>(
                 val firstParam = method.parameters[0].type as Class<out SignalMessage>
                 collecting[firstParam] = createMethod(method)
             }
+        //TODO:2025-01-09:alexander.yevsyukov: Add sorting by interfaces.
         methods = collecting.toMap()
     }
 
@@ -73,8 +87,7 @@ public sealed class RoutingMethodMap<I: Any>(
         val parameterTypes = method.parameterTypes
         if (parameterTypes.isEmpty() || parameterTypes.size > 2) {
             logger.atError().log {
-                "$errorProlog${nl}" +
-                        "none or two parameters.%nEncountered: `$method`."
+                "$errorProlog one or two parameters.${nl}Encountered: `$method`."
             }
             return false
         }
@@ -90,9 +103,15 @@ public sealed class RoutingMethodMap<I: Any>(
         return true
     }
 
+    /**
+     * The filter for a raw method for checking
+     */
     protected abstract fun acceptReturnType(method: Method): Boolean
 
-    protected abstract fun createMethod(method: Method): RoutingMethod<I, *, *, *>
+    /**
+     * The factory method for creating an instance of [RoutingMethod] for the given raw method.
+     */
+    internal abstract fun createMethod(method: Method): RoutingMethod<I, *, *, *>
 
     private enum class GenericParameter(
         private val index: Int
@@ -104,6 +123,9 @@ public sealed class RoutingMethodMap<I: Any>(
     }
 }
 
+/**
+ * Collects routing methods for commands.
+ */
 public class CommandRoutingMethodMap<I : Any>(
     entityClass: Class<out Entity<I, *>>,
 ) : RoutingMethodMap<I>(
@@ -120,7 +142,13 @@ public class CommandRoutingMethodMap<I : Any>(
     override fun createMethod(method: Method): RoutingMethod<I, *, *, *> =
         CommandRoutingMethod(method)
 
-    @Suppress("UNCHECKED_CAST")
+    /**
+     * Adds the collected methods as entries to the given command routing.
+     */
+    @Suppress("UNCHECKED_CAST") /* The casts are ensured by:
+      1) The value of the `messageType` parameter passed to the `super` constructor.
+      2) The result type of the `createMethod()`.
+    */
     public fun addTo(routing: CommandRouting<I>) {
         methods.forEach { (messageClass, method) ->
             val commandClass = messageClass as Class<CommandMessage>
@@ -130,6 +158,9 @@ public class CommandRoutingMethodMap<I : Any>(
     }
 }
 
+/**
+ * Collects routing method for events.
+ */
 public class EventRoutingMethodMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
 ) : RoutingMethodMap<I>(
@@ -137,7 +168,6 @@ public class EventRoutingMethodMap<I: Any>(
     EventMessage::class.java,
     EventContext::class.java,
 ) {
-
     override fun acceptReturnType(method: Method): Boolean {
         val returnType = method.returnType
         val returnsSet = Set::class.java.isAssignableFrom(returnType)
@@ -148,7 +178,13 @@ public class EventRoutingMethodMap<I: Any>(
     override fun createMethod(method: Method): RoutingMethod<I, *, *, *> =
         EventRoutingMethod(method)
 
-    @Suppress("UNCHECKED_CAST")
+    /**
+     * Adds the collected methods as entries to the given event routing.
+     */
+    @Suppress("UNCHECKED_CAST") /* The casts are ensured by:
+      1) The value of the `messageType` parameter passed to the `super` constructor.
+      2) The result type of the `createMethod()`.
+    */
     public fun addTo(routing: EventRouting<I>) {
         methods.forEach { (messageClass, method) ->
             val eventClass = messageClass as Class<EventMessage>
