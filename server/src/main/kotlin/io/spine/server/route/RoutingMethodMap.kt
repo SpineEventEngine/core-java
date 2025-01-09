@@ -42,7 +42,7 @@ import java.lang.reflect.Modifier
 public sealed class RoutingMethodMap<I: Any>(
     protected val entityClass: Class<out Entity<I, *>>,
     protected val messageType: Class<out SignalMessage>,
-    protected val contextType: Class<out MessageContext>
+    protected val contextType: Class<out MessageContext>,
 ) : WithLogging {
 
     protected val idClass: Class<*> = GenericParameter.ID.argumentIn(this::class.java)
@@ -67,32 +67,24 @@ public sealed class RoutingMethodMap<I: Any>(
     @Suppress("ReturnCount")
     private fun parameterTypesMatch(method: Method): Boolean {
         val methodName = "${method.declaringClass.canonicalName}.${method.name}"
-        val errorProlog = "The method `$methodName` annotated with ${simply<Route>()} must accept"
-
+        val errorProlog =
+            "The method `$methodName` annotated with `@${simply<Route>()}` must accept"
+        val nl = System.lineSeparator()
         val parameterTypes = method.parameterTypes
         if (parameterTypes.isEmpty() || parameterTypes.size > 2) {
             logger.atError().log {
-                "$errorProlog one or two parameters. Encountered: `$method`."
+                "$errorProlog${nl}" +
+                        "none or two parameters.%nEncountered: `$method`."
             }
             return false
         }
         val firstParamType = parameterTypes[0]
         if (!messageType.isAssignableFrom(firstParamType)) {
-            logger.atError().log {
-                "$errorProlog a parameter implementing `${messageType.canonicalName}`." +
-                        " Encountered: `${firstParamType.canonicalName}`."
-            }
             return false
         }
         if (parameterTypes.size == 2) {
             val secondParamType = parameterTypes[1]
             val match = contextType.isAssignableFrom(secondParamType)
-            if (!match) {
-                logger.atError().log {
-                    "$errorProlog a second parameter implementing `${contextType.canonicalName}`." +
-                            " Encountered: `${firstParamType.canonicalName}`."
-                }
-            }
             return match
         }
         return true
@@ -112,10 +104,13 @@ public sealed class RoutingMethodMap<I: Any>(
     }
 }
 
-public class CommandRoutingMethodMap<I: Any>(
-    entityClass: Class<out Entity<I, *>>
-) : RoutingMethodMap<I>(entityClass, CommandMessage::class.java, CommandContext::class.java) {
-
+public class CommandRoutingMethodMap<I : Any>(
+    entityClass: Class<out Entity<I, *>>,
+) : RoutingMethodMap<I>(
+    entityClass,
+    CommandMessage::class.java,
+    CommandContext::class.java,
+) {
     override fun acceptReturnType(method: Method): Boolean {
         val returnType = method.returnType
         val returnsSingleId = idClass.isAssignableFrom(returnType)
@@ -136,8 +131,12 @@ public class CommandRoutingMethodMap<I: Any>(
 }
 
 public class EventRoutingMethodMap<I: Any>(
-    entityClass: Class<out Entity<I, *>>
-) : RoutingMethodMap<I>(entityClass, EventMessage::class.java, EventContext::class.java) {
+    entityClass: Class<out Entity<I, *>>,
+) : RoutingMethodMap<I>(
+    entityClass,
+    EventMessage::class.java,
+    EventContext::class.java,
+) {
 
     override fun acceptReturnType(method: Method): Boolean {
         val returnType = method.returnType
