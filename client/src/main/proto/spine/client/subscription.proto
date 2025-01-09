@@ -190,7 +190,7 @@ message Subscription {
     SubscriptionId id = 1 [(required) = true];
 
     // Represents the original topic for this subscription.
-    Topic topic = 2 [(required) = true, (validate) = true, (if_invalid).msg_format = "Invalid topic"];
+    Topic topic = 2 [(required) = true, (validate) = true];
 }
 
 // Enumeration of possible technical error reasons occurred in topic validation.
