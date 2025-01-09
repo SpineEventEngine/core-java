@@ -41,8 +41,8 @@ import io.spine.testing.server.blackbox.BlackBox
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@DisplayName("Class-based routing should")
-internal class ClassBasedRoutingITest {
+@DisplayName("Class-based event routing should")
+internal class ClassBasedEventRoutingITest {
 
     /**
      * This test verifies that events are routed via static methods defined in
