@@ -51,6 +51,7 @@ import io.spine.testing.server.blackbox.BlackBox;
 import io.spine.time.LocalDates;
 import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -190,6 +191,7 @@ class EntityTest {
     @MuteLogging
     @Test
     @DisplayName("check `(set_once)` on state update")
+    @Disabled("Until Validation fixes the issue")
     void setOnce() {
         var context = BoundedContextBuilder
                 .assumingTests()
