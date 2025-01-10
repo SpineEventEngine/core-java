@@ -150,7 +150,8 @@ class FigureStatsView: Projection<Figure, FigureStats, FigureStats.Builder>() {
          */
         @Route
         @JvmStatic
-        fun byFigure(e: FigureGenerated, @Suppress("unused") ctx: EventContext): Figure = e.figure
+        @Suppress("UNUSED_PARAMETER")
+        fun byFigure(e: FigureGenerated, ctx: EventContext): Figure = e.figure
     }
 }
 
