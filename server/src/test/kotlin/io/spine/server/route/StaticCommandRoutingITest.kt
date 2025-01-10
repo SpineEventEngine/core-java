@@ -41,8 +41,8 @@ import io.spine.testing.server.blackbox.assertEntity
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@DisplayName("Class-based command routing should")
-internal class ClassBasedCommandRoutingITest {
+@DisplayName("Static command routing should")
+internal class StaticCommandRoutingITest {
 
     @Test
     fun `route a command via a static method of an entity class`() {
