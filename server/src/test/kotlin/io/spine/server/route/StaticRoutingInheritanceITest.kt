@@ -63,12 +63,10 @@ import org.junit.jupiter.api.Test
 internal class StaticRoutingInheritanceITest {
 
     @Test
-    @Suppress("UnusedPrivateProperty")
     fun `put more specific interfaces earlier`() {
         val p1 = point { x = 10; y = 10 }
         val p2 = point { x = 20; y = 20 }
         val p3 = point { x = 30; y = 30 }
-        val p4 = point { x = 40; y = 40 }
         val black = color { red = 0; green = 0; blue = 0 }
         val blue = color { red = 0; green = 0; blue = 255 }
         val pen1 = pen { color = black; width = 5.0f }
