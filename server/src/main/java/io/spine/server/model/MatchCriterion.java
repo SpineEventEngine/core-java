@@ -29,15 +29,12 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.string.Diags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static io.spine.server.model.MethodExceptionCheck.check;
 import static io.spine.server.model.SignatureMismatch.Severity.ERROR;
@@ -50,7 +47,7 @@ import static java.lang.String.format;
  * set of requirements}, applied to the receptors.
  *
  * <p>Each criterion defines the {@linkplain #severity() severity} of its violation.
- * Depending on it, the callees may refuse working with the tested methods.
+ * Depending on it, the callees may refuse to work with the tested methods.
  *
  * <p>Additionally, upon testing the criteria provide a number of {@linkplain SignatureMismatch
  * signature mismatches}, that may later be used for diagnostic purposes.
@@ -63,14 +60,13 @@ public enum MatchCriterion {
      * {@linkplain ReceptorSignature#returnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
-                "The return type of `%s` method does not match the constraints"
-                        + " set for `%s`-annotated method.") {
+                "The return type does not match the constraints set for `%s`-annotated method.") {
         @Override
         Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             if (signature.returnTypeMatches(method)) {
                 return Optional.empty();
             }
-            return createMismatch(method, signature.annotation());
+            return createMismatch(signature.annotation());
         }
     },
     /**
@@ -79,15 +75,15 @@ public enum MatchCriterion {
      *
      * @see AllowedParams#findMatching(Method)
      */
-    PARAMETERS(ERROR, "The method `%s` has invalid parameters.%n"
-             + "       Please refer to the documentation of `@%s` for allowed parameter types.") {
+    PARAMETERS(ERROR, "Invalid parameter types."
+             + " Please refer to the documentation of `@%s` for allowed types of parameters.") {
         @Override
         Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             var matching = signature.params().findMatching(method);
             if (matching.isPresent()) {
                 return Optional.empty();
             }
-            return createMismatch(method, signature.annotation());
+            return createMismatch(signature.annotation());
         }
     },
 
@@ -95,9 +91,9 @@ public enum MatchCriterion {
      * The criterion, which ensures that the method access modifier is among the
      * {@linkplain ReceptorSignature#modifier() expected}.
      */
-    ACCESS_MODIFIER(WARN, "The access modifier of `%s` method is `%s`.%n"
-               + "         We recommend it to be one of: %s.%n"
-               + "         Please refer to the `%s` annotation docs for details.") {
+    ACCESS_MODIFIER(WARN, "The access modifier is `%s`."
+               + " We recommend it to be one of: %s."
+               + " Please refer to the `%s` annotation docs for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             var recommended = signature.modifier();
@@ -112,11 +108,10 @@ public enum MatchCriterion {
         createMismatch(Method method,
                        ReceptorSignature<?, ?> signature,
                        ImmutableSet<AccessModifier> recommended) {
-            var methodReference = methodAsString(method);
             var annotationName = signature.annotation().getSimpleName();
             var currentModifier = AccessModifier.fromMethod(method);
             return SignatureMismatch.create(
-                    this, methodReference, currentModifier, recommended, annotationName);
+                    this, currentModifier, recommended, annotationName);
         }
     },
 
@@ -135,7 +130,7 @@ public enum MatchCriterion {
             if (prohibited.isEmpty()) {
                 return Optional.empty();
             }
-            var errorMessage = new ProhibitedExceptionMessage(method, prohibited, allowed);
+            var errorMessage = new ProhibitedExceptionMessage(prohibited, allowed);
             return SignatureMismatch.create(this, errorMessage);
         }
     };
@@ -164,7 +159,7 @@ public enum MatchCriterion {
      */
     abstract Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature);
 
-    protected final SignatureMismatch.Severity severity() {
+    final SignatureMismatch.Severity severity() {
         return severity;
     }
 
@@ -177,20 +172,9 @@ public enum MatchCriterion {
      * Creates a mismatch with the passed method and the name as parameters.
      */
     protected final Optional<SignatureMismatch>
-    createMismatch(Method method, Class<? extends Annotation> annotation) {
-        var methodReference = methodAsString(method);
+    createMismatch(Class<? extends Annotation> annotation) {
         var annotationName = annotation.getSimpleName();
-        return SignatureMismatch.create(this, methodReference, annotationName);
-    }
-
-    private static String methodAsString(Method method) {
-        var declaringClassName = method.getDeclaringClass().getName();
-        var paramTypes = Arrays.stream(method.getParameterTypes())
-                .map(Class::getSimpleName)
-                .collect(Collectors.<String>toUnmodifiableList());
-        var parameterTypes = Diags.join(paramTypes);
-        var result = format("%s.%s(%s)", declaringClassName, method.getName(), parameterTypes);
-        return result;
+        return SignatureMismatch.create(this, annotationName);
     }
 
     /**
@@ -198,16 +182,13 @@ public enum MatchCriterion {
      */
     static final class ProhibitedExceptionMessage {
 
-        private static final String METHOD_THROWS = "The method `%s.%s` throws `%s`.%n";
+        private static final String METHOD_THROWS = "The method throws `%s`. ";
 
-        private final Method method;
         private final ImmutableList<Class<? extends Throwable>> declared;
         private final @Nullable Class<? extends Throwable> allowed;
 
-        ProhibitedExceptionMessage(Method method,
-                                   ImmutableList<Class<? extends Throwable>> declared,
+        ProhibitedExceptionMessage(ImmutableList<Class<? extends Throwable>> declared,
                                    @Nullable Class<? extends Throwable> allowed) {
-            this.method = method;
             this.declared = declared;
             this.allowed = allowed;
         }
@@ -217,15 +198,11 @@ public enum MatchCriterion {
             if (allowed == null) {
                 return format(
                         METHOD_THROWS + "Throwing is not allowed for this kind of methods.",
-                        method.getDeclaringClass().getCanonicalName(),
-                        method.getName(),
                         enumerateThrown()
                 );
             }
             return format(
                     METHOD_THROWS + "Only `%s` is allowed for this kind of methods.",
-                    method.getDeclaringClass().getCanonicalName(),
-                    method.getName(),
                     enumerateThrown(),
                     allowed.getName()
             );

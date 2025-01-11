@@ -143,7 +143,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
         var hasErrors = mismatches.stream()
                 .anyMatch(SignatureMismatch::isError);
         if (hasErrors) {
-            throw new SignatureMismatchException(mismatches);
+            throw new SignatureMismatchException(method, mismatches);
         }
         var warnings = mismatches.stream()
                 .filter(SignatureMismatch::isWarning)
@@ -167,8 +167,8 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
     /**
      * Determines, if the given raw {@code method} should be skipped as non-matching.
      *
-     * <p>Such an approach allows to improve performance by skipping the methods, that a priori
-     * cannot be qualified as receptors matching this signature because they lack
+     * <p>Such an approach allows improving the performance by skipping the methods that
+     * a priori cannot be qualified as receptors matching this signature because they lack
      * the {@linkplain #annotation() required annotation}.
      *
      * @param method
