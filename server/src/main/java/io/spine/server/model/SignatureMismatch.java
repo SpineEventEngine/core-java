@@ -90,7 +90,7 @@ public final class SignatureMismatch {
      * @param criterion
      *         the criterion
      * @param values
-     *         the values, which did not met the criterion requirements
+     *         the values, which did not meet the criterion requirements
      * @return a new {@code SignatureMismatch} instance wrapped in {@code Optional}
      *         which is guaranteed to be non-empty
      */

@@ -157,7 +157,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
     }
 
     /**
-     * Verifies if the passed return type conforms this method signature.
+     * Verifies if the passed return type conforms to this method signature.
      */
     final boolean returnTypeMatches(Method method) {
         var conforms = returnTypes().matches(method, mayReturnIgnored());
