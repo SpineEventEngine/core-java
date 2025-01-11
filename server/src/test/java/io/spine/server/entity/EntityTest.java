@@ -216,12 +216,15 @@ class EntityTest {
                 .receivesCommand(chooseInitial)
                 .tolerateFailures();
         bbc.receivesCommand(chooseAgain);
+
+        var expected = User.newBuilder()
+                .setDateOfBirth(chooseInitial.getDayOfBirth())
+                .buildPartial();
+
         bbc.assertEntity(id, UserAggregate.class)
            .hasStateThat()
            .comparingExpectedFieldsOnly()
-           .isEqualTo(User.newBuilder()
-                          .setDateOfBirth(chooseInitial.getDayOfBirth())
-                          .buildPartial());
+           .isEqualTo(expected);
     }
 
     @Test
