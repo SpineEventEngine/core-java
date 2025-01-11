@@ -53,7 +53,7 @@ import java.util.SortedMap
  *   [CommandContext] or [EventContext].
  * @see Route
  */
-public sealed class RoutingMethodMap<I: Any>(
+public sealed class RoutingMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
     private val messageType: Class<out SignalMessage>,
     private val contextType: Class<out MessageContext>,
@@ -115,7 +115,7 @@ public sealed class RoutingMethodMap<I: Any>(
 
     private enum class GenericParameter(
         private val index: Int
-    ) : GenericTypeIndex<RoutingMethodMap<*>> {
+    ) : GenericTypeIndex<RoutingMap<*>> {
 
         ID(0);
 
@@ -158,7 +158,7 @@ private class SignalClassComparator : Comparator<Class<out SignalMessage>> {
  */
 public class CommandRoutingMethodMap<I : Any>(
     entityClass: Class<out Entity<I, *>>,
-) : RoutingMethodMap<I>(
+) : RoutingMap<I>(
     entityClass,
     CommandMessage::class.java,
     CommandContext::class.java,
@@ -193,7 +193,7 @@ public class CommandRoutingMethodMap<I : Any>(
  */
 public class EventRoutingMethodMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
-) : RoutingMethodMap<I>(
+) : RoutingMap<I>(
     entityClass,
     EventMessage::class.java,
     EventContext::class.java,

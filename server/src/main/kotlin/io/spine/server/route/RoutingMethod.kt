@@ -34,7 +34,7 @@ import io.spine.core.EventContext
 import java.lang.reflect.Method
 
 /**
- * Abstract base for signal routing methods scanned by a [RoutingMethodMap].
+ * Abstract base for signal routing methods scanned by a [RoutingMap].
  *
  * @param I The type of the entity identifiers.
  * @param M The type of the signals routed by the method.
@@ -43,7 +43,7 @@ import java.lang.reflect.Method
  * @property rawMethod The routing method declared by an entity class.
  *
  * @see Route
- * @see RoutingMethodMap
+ * @see RoutingMap
  */
 internal sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
     protected val rawMethod: Method
