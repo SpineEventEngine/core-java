@@ -54,8 +54,6 @@ fun drawingContext(): BoundedContext = BoundedContext.singleTenant("Drawing")
 
 class DrawingEvents : Projection<String, Log, Log.Builder>() {
 
-    //@Subscribe internal fun on(e: LineEvent) = add(e)
-
     @Subscribe internal fun on(e: LineAdded) = add(e)
     @Subscribe internal fun on(e: LineRemoved) = add(e)
     @Subscribe internal fun on(e: LineMoved) = add(e)

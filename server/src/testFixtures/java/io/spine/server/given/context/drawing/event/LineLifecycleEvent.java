@@ -30,5 +30,4 @@ package io.spine.server.given.context.drawing.event;
  * Events related to the creation and deletion of lines.
  */
 public interface LineLifecycleEvent extends LineEvent {
-
 }
