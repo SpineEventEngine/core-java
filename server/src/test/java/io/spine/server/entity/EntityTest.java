@@ -188,10 +188,17 @@ class EntityTest {
         assertEquals(state, entityNew.state());
     }
 
+    /**
+     * Tests that an entity state transition honors the {@code (set_once)}
+     * validation constraint.
+     *
+     * @see <a href="https://github.com/SpineEventEngine/core-java/issues/1566">
+     *     The issue on the disabled status</a>
+     */
     @MuteLogging
     @Test
     @DisplayName("check `(set_once)` on state update")
-    @Disabled("Until Validation fixes the issue")
+    @Disabled("Until Validation completes the transition to error message placeholders")
     void setOnce() {
         var context = BoundedContextBuilder
                 .assumingTests()
