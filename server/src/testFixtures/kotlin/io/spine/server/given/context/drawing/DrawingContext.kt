@@ -48,6 +48,25 @@ import io.spine.server.given.context.drawing.event.LineUnselected
 import io.spine.server.projection.Projection
 import io.spine.server.route.Route
 
+/**
+ * This context declares several events on a very simple drawing scenario for lines.
+ *
+ * The events are grouped by interfaces:
+ *  * The [LineEvent] interface is implemented by all the events.
+ *  * Events related to a creation or removal of a line implement [LineLifecycleEvent].
+ *  * The [LineLocationEvent] interface covers the movement events.
+ *
+ * The [LineInitEvent] interface serves for mixing [LineLifecycleEvent] and [LineLocationEvent]
+ * interface for the [LineAdded] event.
+ *
+ * The [DrawingEvents] projection simply accumulates the received events in its state.
+ *
+ * It's the routing method declared by the [DrawingEvents] class that serve the purpose of
+ * test demonstrating the routing by interfaces.
+ *
+ * The routing methods "classify" the events by returning the name of the [Classifier] enum
+ * item as the target entity ID(s).
+ */
 fun drawingContext(): BoundedContext = BoundedContext.singleTenant("Drawing")
     .add(DrawingEvents::class.java)
     .build()
