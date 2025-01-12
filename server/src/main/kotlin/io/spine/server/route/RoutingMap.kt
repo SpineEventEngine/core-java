@@ -72,7 +72,7 @@ internal sealed class RoutingMap<I: Any>(
             .filter { Modifier.isStatic(it.modifiers) }
             .filter { it.isAnnotationPresent(Route::class.java) }
             .filter { parameterTypesMatch(it) }
-            .filter { acceptReturnType(it) }
+            .filter { returnTypeMatched(it) }
             .forEach { method ->
                 @Suppress("UNCHECKED_CAST") // protected by checking parameters before.
                 val firstParam = method.parameters[0].type as Class<out SignalMessage>
@@ -109,7 +109,7 @@ internal sealed class RoutingMap<I: Any>(
     /**
      * The filter for a raw method for checking
      */
-    protected abstract fun acceptReturnType(method: Method): Boolean
+    protected abstract fun returnTypeMatched(method: Method): Boolean
 
     /**
      * The factory method for creating an instance of [RoutingMethod] for the given raw method.
@@ -166,7 +166,7 @@ internal class CommandRoutingMap<I : Any>(
     CommandMessage::class.java,
     CommandContext::class.java,
 ) {
-    override fun acceptReturnType(method: Method): Boolean {
+    override fun returnTypeMatched(method: Method): Boolean {
         val returnType = method.returnType
         val returnsSingleId = idClass.isAssignableFrom(returnType)
         return returnsSingleId
@@ -201,7 +201,7 @@ internal class EventRoutingMap<I: Any>(
     EventMessage::class.java,
     EventContext::class.java,
 ) {
-    override fun acceptReturnType(method: Method): Boolean {
+    override fun returnTypeMatched(method: Method): Boolean {
         val returnType = method.returnType
         val returnsSet = Set::class.java.isAssignableFrom(returnType)
         val returnsSingleId =  idClass.isAssignableFrom(returnType)
