@@ -54,7 +54,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     }
 
     /**
-     * Creates s new instance for the passed raw class.
+     * Creates a new instance for the passed raw class.
      */
     public static <S extends EventSubscriber>
     EventSubscriberClass<S> asEventSubscriberClass(Class<S> cls) {
