@@ -52,7 +52,7 @@ import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.CommandRoutingMethodMap;
+import io.spine.server.route.CommandRoutingMap;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RouteFn;
 import io.spine.server.type.CommandClass;
@@ -169,7 +169,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     }
 
     private void setupRouting() {
-        var classRouting = new CommandRoutingMethodMap<I>(entityClass());
+        var classRouting = new CommandRoutingMap<>(entityClass());
         classRouting.addTo(commandRouting());
         setupCommandRouting(commandRouting());
 
