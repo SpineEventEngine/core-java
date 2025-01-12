@@ -42,5 +42,8 @@ message User {
 
     core.UserId id = 1;
 
-    time.LocalDate date_of_birth = 2 [(set_once) = true];
+    time.LocalDate date_of_birth = 2 [
+        (set_once) = true,
+        (if_set_again).error_msg = "The birth date cannot be changed."
+    ];
 }
