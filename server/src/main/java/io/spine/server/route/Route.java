@@ -43,14 +43,15 @@ import java.lang.annotation.Target;
  * dispatching, and <em>may</em> return an {@code Iterable<I>}, if this message can be dispatched
  * via {@linkplain Multicast multicast}.
  *
- * <p>The method <strong>must</strong> be either package-private or {@code protected} for
- * being accessible from the generated code in the same package.
- *
+ * <p>When used in Java, the method <strong>must</strong> be either package-private or
+ * {@code protected} for being accessible from the generated code in the same package.
  * <p>The {@code protected} modifier should be used <em>only</em> in the very rare cases of
  * dealing with {@linkplain io.spine.core.ContractFor entity class hierarchies}.
  *
- * <p>When used in Kotlin, the annotation of a companion object method should be followed
- * by {@code @JvmStatic} annotation so that the method is visible as static method to Java runtime.
+ * <p>When used in Kotlin, the methods <strong>must</strong> be {@code internal},
+ * with {@code @Route} the annotation of a companion object method,
+ * followed by the {@code @JvmStatic} annotation.
+ * This is to make the method visible as static to the Java runtime.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

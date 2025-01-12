@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,9 +27,8 @@
 package io.spine.server.command.model;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
-import io.spine.server.model.ReceptorMap;
 import io.spine.server.model.ModelClass;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -47,14 +46,11 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
  * @param <R>
  *         the type of the command receptors
  */
-@Immutable(containerOf = "R")
 public abstract class AbstractCommandHandlingClass<C,
                                                    P extends MessageClass<?>,
                                                    R extends CommandReceptor<?, P>>
         extends ModelClass<C>
         implements CommandHandlingClass<P, R> {
-
-    private static final long serialVersionUID = 0L;
 
     private final ReceptorMap<CommandClass, P, R> commands;
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,7 +27,8 @@
 import io.spine.dependency.lib.AutoService
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Kotlin
-import io.spine.dependency.local.Spine
+import io.spine.dependency.local.BaseTypes
+import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Validation
 
 plugins {
@@ -56,10 +57,10 @@ dependencies {
     }
     testImplementation(Grpc.nettyShaded)
 
-    testImplementation(Spine.testlib)
-    testImplementation(Spine.baseTypes)
+    testImplementation(TestLib.lib)
+    testImplementation(BaseTypes.lib)
 
-    testFixturesImplementation(Spine.testlib)
+    testFixturesImplementation(TestLib.lib)
 
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
@@ -76,3 +77,5 @@ tasks.javadoc {
         }
     }
 }
+
+testProtoDataRemoteDebug(false)

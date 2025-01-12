@@ -43,5 +43,5 @@ option java_multiple_files = true;
 //
 message MirrorsMigrated {
 
-    int32 value = 1 [(required) = true, (min).value = "0"];
+    int32 value = 1 [(min).value = "0"];
 }

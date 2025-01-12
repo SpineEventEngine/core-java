@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,26 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
-
-import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
-
-import java.util.Set;
+package io.spine.server.given.context.drawing.event;
 
 /**
- * Obtains an event producer ID from the context of the event.
- *
- * @param <I>
- *         the type of obtained IDs
+ * The interface which combines {@link LineLifecycleEvent} and {@link LineLocationEvent} for
+ * the purpose of routing.
  */
-final class ByContext<I> implements EventRoute<I, EventMessage> {
-
-    private static final long serialVersionUID = 0L;
-
-    @Override
-    public Set<I> apply(EventMessage message, EventContext context) {
-        @SuppressWarnings("unchecked") var id = (I) context.producer();
-        return EventRoute.withId(id);
-    }
+public interface LineInitEvent extends LineLifecycleEvent, LineLocationEvent {
 }

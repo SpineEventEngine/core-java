@@ -69,5 +69,5 @@ message Task {
     TaskId task_id = 1;
     string title = 2;
     string description = 3;
-    bool done = 4 [(required) = true];
+    bool done = 4;
 }

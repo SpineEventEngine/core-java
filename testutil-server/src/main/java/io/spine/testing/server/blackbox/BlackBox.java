@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -129,7 +129,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     private final Set<Event> postedEvents;
 
     /**
-     * Creates new instance obtaining configuration parameters from the given context instance.
+     * Creates a new instance obtaining configuration parameters from the given context instance.
      */
     public static BlackBox from(BoundedContext context) {
         var box = context.isMultitenant()
@@ -139,7 +139,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     }
 
     /**
-     * Creates new instance obtaining configuration parameters from the passed builder.
+     * Creates a new instance obtaining configuration parameters from the passed builder.
      */
     public static BlackBox from(BoundedContextBuilder builder) {
         var context = builder.build();

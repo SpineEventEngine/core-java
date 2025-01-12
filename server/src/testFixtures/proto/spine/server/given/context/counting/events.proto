@@ -31,7 +31,7 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.server.given.context.counting.event";
-option java_outer_classname = "CountingEventsProto";
+option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine/server/given/context/counting/range.proto";

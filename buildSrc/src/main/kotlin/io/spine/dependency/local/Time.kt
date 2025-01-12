@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,10 @@ package io.spine.dependency.local
  */
 @Suppress("ConstPropertyName")
 object Time {
-    const val version = "2.0.0-SNAPSHOT.135"
+    const val version = "2.0.0-SNAPSHOT.136"
     const val group = Spine.group
     const val artifact = "spine-time"
     const val lib = "$group:$artifact:$version"
 
-    //TODO:2024-11-29:alexander.yevsyukov: Change the artifact name to `spine-time-testlib`.
-    const val testLib = "${Spine.toolsGroup}:spine-testutil-time:$version"
+    const val testLib = "${Spine.toolsGroup}:spine-time-testlib:$version"
 }

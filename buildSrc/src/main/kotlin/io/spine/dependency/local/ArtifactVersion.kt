@@ -80,6 +80,7 @@ object ArtifactVersion {
      *
      * @see <a href="https://github.com/SpineEventEngine/model-compiler">spine-model-compiler</a>
      */
+    @Suppress("unused")
     @Deprecated(
         message = "Please use `ModelCompiler.version` instead.",
         ReplaceWith("ModelCompiler.version")

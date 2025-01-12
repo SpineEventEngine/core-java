@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -50,6 +50,7 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
+import io.spine.server.route.CommandRoutingMap;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.type.CommandClass;
@@ -153,7 +154,11 @@ public abstract class ProcessManagerRepository<I,
     @OverridingMethodsMustInvokeSuper
     public void registerWith(BoundedContext context) {
         super.registerWith(context);
+
+        var classRouting = new CommandRoutingMap<>(entityClass());
+        classRouting.addTo(commandRouting());
         setupCommandRouting(commandRouting());
+
         checkNotDeaf();
         initCache(context.isMultitenant());
         initInbox();
@@ -199,7 +204,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Replaces default routing with the one which takes the target ID from the first field
+     * Replaces default routing with the one that takes the target ID from the first field
      * of an event message.
      *
      * @param routing

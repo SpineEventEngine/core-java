@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,8 +32,8 @@ import io.spine.server.entity.model.AssigneeEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
-import io.spine.server.model.ReceptorMap;
 import io.spine.server.model.ModelError;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.type.EmptyClass;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
@@ -51,8 +51,6 @@ import static com.google.common.collect.Sets.union;
 public class AggregateClass<A extends Aggregate<?, ?, ?>>
         extends AssigneeEntityClass<A>
         implements ReactingClass {
-
-    private static final long serialVersionUID = 0L;
 
     private final ReceptorMap<EventClass, EmptyClass, Applier> stateEvents;
     private final ImmutableSet<EventClass> importableEvents;

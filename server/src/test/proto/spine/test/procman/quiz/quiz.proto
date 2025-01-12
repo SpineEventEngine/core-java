@@ -53,7 +53,7 @@ message PmQuestionId {
 
 message PmAnswer {
     PmQuestionId question = 1 [(required) = true];
-    bool correct = 2 [(required) = true];
+    bool correct = 2;
 }
 
 message PmQuizStats {

@@ -240,7 +240,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Returns the value of the lifecycle flags, as of current state within this transaction.
+     * Returns the value of the lifecycle flags, as of the current state within this transaction.
      */
     protected LifecycleFlags lifecycleFlags() {
         return lifecycleFlags;
@@ -324,7 +324,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Advances the state and the version of the entity being build by the transaction after
+     * Advances the state and the version of the entity being built by the transaction after
      * the message was successfully dispatched.
      *
      * <p>This is needed for the cases of dispatching more than one message during a transaction.

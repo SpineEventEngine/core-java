@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -57,8 +57,8 @@ import static java.util.stream.Collectors.toList;
  *     <li>{@linkplain #returnTypes() the set of valid return types},
  *     <li>{@linkplain #allowedThrowable() the set of allowed exceptions}, that the method
  *          declares to throw (empty by default),
- *     <li>whether an {@linkplain #mayReturnIgnored() ignored result}, such as {@link Nothing},
- *          may be returned.
+ *     <li>whether an {@linkplain #mayReturnIgnored() ignored result},
+ *         such as {@link io.spine.server.event.NoReaction NoReaction}, may be returned.
  * </ul>
  *
  * @param <R>
@@ -74,7 +74,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
 
     /**
      * Creates an instance of signature, defining the required annotation to be present
-     * in the methods, that are matched against this signature.
+     * in the methods that are matched against this signature.
      */
     protected ReceptorSignature(Class<? extends Annotation> annotation) {
         this.annotation = checkNotNull(annotation);
@@ -120,7 +120,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
      * Checks whether the passed {@code method} matches the constraints set by this instance.
      *
      * <p>{@link SignatureMismatch.Severity#WARN WARN}-level mismatches are silently ignored
-     * by this method. To obtain a detailed information callees should use {@link #match(Method)}.
+     * by this method. To obtain detailed information callees should use {@link #match(Method)}.
      *
      * @param method
      *         the method to check
@@ -143,7 +143,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
         var hasErrors = mismatches.stream()
                 .anyMatch(SignatureMismatch::isError);
         if (hasErrors) {
-            throw new SignatureMismatchException(mismatches);
+            throw new SignatureMismatchException(method, mismatches);
         }
         var warnings = mismatches.stream()
                 .filter(SignatureMismatch::isWarning)
@@ -157,7 +157,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
     }
 
     /**
-     * Verifies if the passed return type conforms this method signature.
+     * Verifies if the passed return type conforms to this method signature.
      */
     final boolean returnTypeMatches(Method method) {
         var conforms = returnTypes().matches(method, mayReturnIgnored());
@@ -167,8 +167,8 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
     /**
      * Determines, if the given raw {@code method} should be skipped as non-matching.
      *
-     * <p>Such an approach allows to improve performance by skipping the methods, that a priori
-     * cannot be qualified as receptors matching this signature because they lack
+     * <p>Such an approach allows improving the performance by skipping the methods that
+     * a priori cannot be qualified as receptors matching this signature because they lack
      * the {@linkplain #annotation() required annotation}.
      *
      * @param method
@@ -252,7 +252,7 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
 
     /**
      * Determines if a method with this signature may return an
-     * {@linkplain MethodResult#isIgnored(Class)} ignored} result.
+     * {@linkplain MethodResult#isIgnored(Class) ignored} result.
      */
     public abstract boolean mayReturnIgnored();
 }

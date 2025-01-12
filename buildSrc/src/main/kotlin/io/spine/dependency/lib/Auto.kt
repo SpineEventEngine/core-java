@@ -53,7 +53,7 @@ object AutoServiceKsp {
     /**
      * The latest version compatible with Kotlin 1.8.22.
      *
-     * @see Ksp.version
+     * @see io.spine.dependency.build.Ksp.version
      */
     private const val version = "1.1.0"
     const val processor = "dev.zacsweers.autoservice:auto-service-ksp:$version"

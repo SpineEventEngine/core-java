@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -184,7 +184,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     /** Returns the class of entities managed by this repository. */
     public final Class<E> entityClass() {
-        return entityModelClass().value();
+        return entityModelClass().rawClass();
     }
 
     /**
@@ -332,7 +332,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Ensures that the storage is not null.
      *
-     * @return passed value if it's not not null
+     * @return passed value if it is not null
      * @throws IllegalStateException if the passed instance is null
      */
     protected static <S extends AutoCloseable> @NonNull S checkStorage(@Nullable S storage) {

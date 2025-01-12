@@ -187,6 +187,10 @@ class EntityTest {
         assertEquals(state, entityNew.state());
     }
 
+    /**
+     * Tests that an entity state transition honors the {@code (set_once)}
+     * validation constraint.
+     */
     @MuteLogging
     @Test
     @DisplayName("check `(set_once)` on state update")
@@ -214,12 +218,15 @@ class EntityTest {
                 .receivesCommand(chooseInitial)
                 .tolerateFailures();
         bbc.receivesCommand(chooseAgain);
+
+        var expected = User.newBuilder()
+                .setDateOfBirth(chooseInitial.getDayOfBirth())
+                .buildPartial();
+
         bbc.assertEntity(id, UserAggregate.class)
            .hasStateThat()
            .comparingExpectedFieldsOnly()
-           .isEqualTo(User.newBuilder()
-                          .setDateOfBirth(chooseInitial.getDayOfBirth())
-                          .buildPartial());
+           .isEqualTo(expected);
     }
 
     @Test
@@ -295,6 +302,8 @@ class EntityTest {
 
         @Test
         @DisplayName("entity is equal to itself")
+        @SuppressWarnings("EqualsWithItself") /* is the purpose of the test.
+            We should probably rewrite these tests using `EqualsTester` from Guava. */
         void equalToItself() {
             assertEquals(entityWithState, entityWithState);
         }

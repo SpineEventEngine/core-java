@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,9 +28,9 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.event.EventReactor;
-import io.spine.server.model.ReceptorMap;
-import io.spine.server.model.Receptor;
 import io.spine.server.model.ModelClass;
+import io.spine.server.model.Receptor;
+import io.spine.server.model.ReceptorMap;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 
@@ -47,8 +47,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EventReactorClass<S extends EventReactor> extends ModelClass<S>
         implements ReactingClass {
 
-    private static final long serialVersionUID = 0L;
-
     private final ReceptorMap<EventClass, EventClass, EventReactorMethod> reactors;
     private final ImmutableSet<EventClass> events;
     private final ImmutableSet<EventClass> domesticEvents;
@@ -62,7 +60,7 @@ public final class EventReactorClass<S extends EventReactor> extends ModelClass<
         this.externalEvents = reactors.messageClasses(Receptor::isExternal);
     }
 
-    /** Creates new instance for the given raw class. */
+    /** Creates a new instance for the given raw class. */
     public static <S extends EventReactor> EventReactorClass<S>
     asReactorClass(Class<S> cls) {
         checkNotNull(cls);

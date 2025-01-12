@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -54,13 +54,13 @@ import io.spine.testing.TestValues.random
  * The implementation of this context is deliberately naïve in terms of event generation
  * and propagation. It generates many small events for each generated figure.
  *
- * If a number of events is big, it leads to increase of a load to a data storage because we need to
+ * If a number of events is big, it leads to an increased load to a data storage because we need to
  * load and store corresponding entity states. It is not noticeable for this test fixture
  * arrangement because in-memory storage is used.
  *
- * A production implementation of similar cases should prefer bigger event containing
+ * A production implementation of similar cases should prefer a bigger event containing
  * all information (provided [size limit](https://stackoverflow.com/a/34186672) is met),
- * or series of events containing chunks of information.
+ * or the series of events containing chunks of information.
  */
 @Suppress("unused") // is declared for documentation purposes.
 private const val ABOUT = ""

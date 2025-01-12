@@ -46,6 +46,8 @@ object Logging {
     const val grpcContext = "$group:spine-logging-grpc-context:$version"
     const val smokeTest = "$group:spine-logging-smoke-test:$version"
 
+    const val testLib = "${Spine.toolsGroup}:spine-logging-testlib:$version"
+
     // Transitive dependencies.
     // Make `public` and use them to force a version in a particular repository, if needed.
     internal const val julBackend = "$group:spine-logging-jul-backend:$version"

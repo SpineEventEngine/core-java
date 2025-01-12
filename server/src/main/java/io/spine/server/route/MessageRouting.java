@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -62,9 +62,9 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
      * @implNote This collection is made {@code synchronized}, since in some cases it is
      *         being simultaneously read and modified in different threads.
      *         In particular, the modification at run-time is performed when storing
-     *         the routes discovered on per-interface basis. Therefore, if this collection
-     *         is not {@code synchronized}, a {@code ConcurrentModificationException}
-     *         is sometimes thrown.
+     *         the routes discovered on a per-interface basis.
+     *         Therefore, if this collection is not {@code synchronized},
+     *         a {@code ConcurrentModificationException} is sometimes thrown.
      */
     private final Map<Class<? extends M>, RouteFn<M, C, R>> routes =
             synchronizedMap(new LinkedHashMap<>());
@@ -84,7 +84,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
     }
 
     /**
-     * Sets new default route in the schema.
+     * Sets a new default route in the schema.
      *
      * @param newDefault the new route to be used as default
      */
@@ -213,8 +213,8 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
      *
      * <p>If there is no function for the passed message applies the default function.
      *
-     * @param  message the message
-     * @param  context the message context
+     * @param message the message
+     * @param context the message context
      * @return the set of entity IDs to which the message should be delivered
      */
     @Override
@@ -240,7 +240,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
 
         private final Class<? extends M> requestedClass;
         private final @Nullable RouteFn<M, C, R> route;
-        private final @Nullable Class<? extends M> entryClass;
+        private final @Nullable Class<? extends M> entryType;
 
         /**
          * Creates new instance.
@@ -254,14 +254,14 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
          *         Is {@code null} if there is no routing found for the {@code requestedClass}.
          * @param route
          *         the routing function or {@code null} if there is no route defined neither
-         *         for the class or a super-interface of the class
+         *         for the class nor a super-interface of the class
          */
         private Match(Class<? extends M> requestedClass,
                       @Nullable Class<? extends M> entryType,
                       @Nullable RouteFn<M, C, R> route) {
             this.requestedClass = requestedClass;
             this.route = route;
-            this.entryClass = entryType;
+            this.entryType = entryType;
         }
 
         boolean found() {
@@ -272,12 +272,12 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
          * Returns {@code true} if the routing was defined directly for the requested class,
          * otherwise {@code false}.
          */
-        boolean direct() {
-            return requestedClass.equals(entryClass);
+        private boolean direct() {
+            return requestedClass.equals(entryType);
         }
 
         Class<? extends M> entryClass() {
-            return requireNonNull(entryClass);
+            return requireNonNull(entryType);
         }
 
         RouteFn<M, C, R> route() {

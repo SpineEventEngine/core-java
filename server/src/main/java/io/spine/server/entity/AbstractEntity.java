@@ -351,10 +351,10 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
     /**
      * Obtains ID of the entity in the {@linkplain Stringifiers#toString(Object) string form}.
      *
-     * <p>Subsequent calls to the method returns a cached instance of the string, which minimizes
+     * <p>Subsequent calls to the method return a cached instance of the string, which minimizes
      * the performance impact of repeated calls.
      *
-     * @return string form of the entity ID
+     * @return the string form of the entity ID
      */
     @Override
     public String idAsString() {

@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,10 +27,10 @@
 package io.spine.server.procman.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.command.model.CommandingReaction;
 import io.spine.server.command.model.CommandSubstituter;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.command.model.CommandingClass;
+import io.spine.server.command.model.CommandingReaction;
 import io.spine.server.entity.model.AssigneeEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
@@ -55,8 +55,6 @@ import static com.google.common.collect.Sets.union;
 public final class ProcessManagerClass<P extends ProcessManager<?, ?, ?>>
         extends AssigneeEntityClass<P>
         implements ReactingClass, CommandingClass {
-
-    private static final long serialVersionUID = 0L;
 
     private final ReactorClassDelegate<P> reactorDelegate;
     private final CommanderClass<P> commanderDelegate;

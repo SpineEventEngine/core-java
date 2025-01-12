@@ -81,7 +81,7 @@ public final class TxProjection
 
     @Subscribe
     void event(TxStateErrorRequested e) {
-        // By convention the first field of state is required.
+        // By convention, the first field of the state is required.
         // Clearing it should fail the validation when the transaction is committed.
         builder().clearId();
     }

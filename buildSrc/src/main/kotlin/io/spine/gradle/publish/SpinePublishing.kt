@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,6 +137,14 @@ fun Project.spinePublishing(block: SpinePublishing.() -> Unit) {
  */
 open class SpinePublishing(private val project: Project) {
 
+    companion object {
+
+        /**
+         * The default prefix added before a module name when publishing artifacts.
+         */
+        const val DEFAULT_PREFIX = "spine-"
+    }
+
     private val protoJar = ProtoJar()
     private val testJar = TestJar()
     private val dokkaJar = DokkaJar()
@@ -197,10 +205,8 @@ open class SpinePublishing(private val project: Project) {
 
     /**
      * A prefix to be added before the name of each artifact.
-     *
-     * The default value is "spine-".
      */
-    var artifactPrefix: String = "spine-"
+    var artifactPrefix: String = DEFAULT_PREFIX
 
     /**
      * Allows disabling publishing of [protoJar] artifact, containing all Proto sources

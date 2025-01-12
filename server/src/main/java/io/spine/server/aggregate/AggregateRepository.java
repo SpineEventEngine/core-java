@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -52,6 +52,7 @@ import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
+import io.spine.server.route.CommandRoutingMap;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RouteFn;
 import io.spine.server.type.CommandClass;
@@ -100,7 +101,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         implements CommandDispatcher, EventProducingRepository,
                    EventDispatcherDelegate, QueryableRepository<I, S> {
 
-    /** The default number of events to be stored before a next snapshot is made. */
+    /** The default number of events to be stored before a new snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
     /** The routing schema for commands handled by the aggregates. */
@@ -154,13 +155,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     @OverridingMethodsMustInvokeSuper
     public void registerWith(BoundedContext context) {
         checkNotVoid();
-
         super.registerWith(context);
-
-        setupCommandRouting(commandRouting.get());
-        setupEventRouting(eventRouting);
-        setupImportRouting(eventImportRouting);
-
+        setupRouting();
         context.internalAccess()
                .registerCommandDispatcher(this);
         if (aggregateClass().importsEvents()) {
@@ -170,6 +166,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         initCache(context.isMultitenant());
         initInbox();
         configureQuerying();
+    }
+
+    private void setupRouting() {
+        var classRouting = new CommandRoutingMap<>(entityClass());
+        classRouting.addTo(commandRouting());
+        setupCommandRouting(commandRouting());
+
+        setupEventRouting(eventRouting);
+        setupImportRouting(eventImportRouting);
     }
 
     @Override
@@ -649,7 +654,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
         if (!success) {
             lifecycleOf(id).onCorruptedState(outcome);
             var outcomeDetails = toJson(outcome);
-            var aggClass = aggregateClass().value()
+            var aggClass = aggregateClass().rawClass()
                                            .getName();
             throw newIllegalStateException("Aggregate `%s` (ID: %s) cannot be loaded.%n" +
                                                    "Erroneous dispatch outcome: `%s`.",
