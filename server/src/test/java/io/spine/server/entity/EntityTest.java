@@ -302,6 +302,8 @@ class EntityTest {
 
         @Test
         @DisplayName("entity is equal to itself")
+        @SuppressWarnings("EqualsWithItself") /* is the purpose of the test.
+            We should probably rewrite these tests using `EqualsTester` from Guava. */
         void equalToItself() {
             assertEquals(entityWithState, entityWithState);
         }
