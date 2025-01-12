@@ -53,7 +53,7 @@ import java.util.SortedMap
  *   [CommandContext] or [EventContext].
  * @see Route
  */
-public sealed class RoutingMap<I: Any>(
+internal sealed class RoutingMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
     private val messageType: Class<out SignalMessage>,
     private val contextType: Class<out MessageContext>,
@@ -156,7 +156,7 @@ private class SignalClassComparator : Comparator<Class<out SignalMessage>> {
 /**
  * Collects routing methods for commands.
  */
-public class CommandRoutingMethodMap<I : Any>(
+internal class CommandRoutingMap<I : Any>(
     entityClass: Class<out Entity<I, *>>,
 ) : RoutingMap<I>(
     entityClass,
@@ -179,7 +179,7 @@ public class CommandRoutingMethodMap<I : Any>(
       1) The value of the `messageType` parameter passed to the `super` constructor.
       2) The result type of the `createMethod()`.
     */
-    public fun addTo(routing: CommandRouting<I>) {
+    fun addTo(routing: CommandRouting<I>) {
         methods.forEach { (messageClass, method) ->
             val commandClass = messageClass as Class<CommandMessage>
             val fn = method as CommandRoute<I, CommandMessage>
@@ -191,7 +191,7 @@ public class CommandRoutingMethodMap<I : Any>(
 /**
  * Collects routing method for events.
  */
-public class EventRoutingMethodMap<I: Any>(
+internal class EventRoutingMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
 ) : RoutingMap<I>(
     entityClass,
@@ -215,7 +215,7 @@ public class EventRoutingMethodMap<I: Any>(
       1) The value of the `messageType` parameter passed to the `super` constructor.
       2) The result type of the `createMethod()`.
     */
-    public fun addTo(routing: EventRouting<I>) {
+    fun addTo(routing: EventRouting<I>) {
         methods.forEach { (messageClass, method) ->
             val eventClass = messageClass as Class<EventMessage>
             val fn = method as EventRoute<I, EventMessage>
