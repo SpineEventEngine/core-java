@@ -192,7 +192,7 @@ internal class CommandRoutingMap<I : Any>(
 }
 
 /**
- * Collects routing method for events.
+ * Collects routing methods for events.
  */
 internal class EventRoutingMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
