@@ -108,4 +108,3 @@ internal class EventRoutingMethod<I: Any>(
         }
     }
 }
-
