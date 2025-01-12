@@ -46,6 +46,9 @@ import java.util.SortedMap
  * An entity class can declare static methods annotated with the [Route] annotation for
  * calculating IDs of the entities for which a signal should be dispatched.
  *
+ * The map scans only the given entity class. If the class extends another entity class,
+ * its static methods are ignored.
+ *
  * @param entityClass The class of the entity which may declare routing methods.
  * @param messageType The super interface for the routed signal messages, such as
  *   [CommandMessage] or [EventMessage].
