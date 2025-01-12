@@ -127,7 +127,7 @@ internal sealed class RoutingMap<I: Any>(
 }
 
 /**
- * Sorts classes of signal messages putting more abstract types further.
+ * Sorts classes of signal messages putting more abstract types farther.
  */
 private class SignalClassComparator : Comparator<Class<out SignalMessage>> {
 
