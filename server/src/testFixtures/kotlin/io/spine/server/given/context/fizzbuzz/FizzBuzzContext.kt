@@ -114,4 +114,3 @@ class NumberQualification :
         fun routeEvent(event: NumberQualified): String = event.qualifier.name
     }
 }
-
