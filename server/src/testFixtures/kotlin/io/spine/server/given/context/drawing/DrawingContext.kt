@@ -61,7 +61,7 @@ import io.spine.server.route.Route
  *
  * The [DrawingEvents] projection simply accumulates the received events in its state.
  *
- * It's the routing method declared by the [DrawingEvents] class that serve the purpose of
+ * It's the routing methods declared by the [DrawingEvents] class that serve the purpose of
  * test demonstrating the routing by interfaces.
  *
  * The routing methods "classify" the events by returning the name of the [Classifier] enum
