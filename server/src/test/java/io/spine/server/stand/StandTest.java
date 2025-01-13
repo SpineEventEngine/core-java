@@ -534,7 +534,7 @@ class StandTest extends TenantAwareTest {
         var nonExistingSubscription = Subscription.newBuilder()
                 .setId(Subscriptions.generateId())
                 .setTopic(Topic.newBuilder().setId(topicId).buildPartial())
-                .build();
+                .buildPartial();
         assertThrows(InvalidSubscriptionException.class,
                      () -> stand.cancel(nonExistingSubscription, noOpObserver()));
     }
