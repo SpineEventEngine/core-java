@@ -54,8 +54,6 @@ import static java.util.Objects.requireNonNull;
 public abstract class MessageRouting<M extends Message, C extends MessageContext, R>
         implements RouteFn<M, C, R> {
 
-    private static final long serialVersionUID = 0L;
-
     /**
      * Map of currently known routes.
      *
