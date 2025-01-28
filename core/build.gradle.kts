@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.dependency.local.Base
+import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Logging
-import io.spine.dependency.local.Spine
+import io.spine.dependency.local.Time
 import io.spine.dependency.local.Validation
 import io.spine.gradle.testing.exposeTestConfiguration
 
@@ -34,15 +36,15 @@ plugins {
 }
 
 dependencies {
-    api(Spine.base)
-    api(Spine.time)
-    api(Spine.baseTypes)
-    api(Spine.change)
+    api(Base.lib)
+    api(Time.lib)
+    api(BaseTypes.lib)
+    api(Time.lib)
     api(Validation.runtime)
     api(Logging.lib)
 
     testImplementation(project(":testutil-core"))
-    testImplementation(Spine.testUtilTime)
+    testImplementation(Time.testLib)
 }
 
 modelCompiler {
