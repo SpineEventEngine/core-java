@@ -69,22 +69,22 @@ public class EventRouting<I : Any> private constructor(
     }
 
     /**
-     * Sets a custom route for the passed event type.
+     * Sets a custom route for the given event type [E].
      *
      * Such mapping may be required for the following cases:
      *
      *  * An event message should be matched to more than one entity, for example, several
-     * projections updated in response to one event.
+     *    projections updated in response to one event.
      *  * The type of event producer ID (stored in the event context) differs from the type
-     * of entity identifiers (`<I>`.
+     *    of entity identifiers (`<I>`.
      *
      * The type of the event can be a class or an interface. If a routing schema needs to contain
      * entries for specific classes and an interface that these classes implement, routes for
      * interfaces should be defined *after* entries for the classes:
      *
      * ```kotlin
-     * customRouting.route<MyEventClass> { event, context -> ... }
-     *              .route<MyEventInterface> { event, context -> ... }
+     * routing.route<MyEventClass> { event, context -> ... }
+     *        .route<MyEventInterface> { event, context -> ... }
      * ```
      * Defining an entry for an interface and then for the class which implements the interface will
      * result in `IllegalStateException`.
@@ -92,14 +92,25 @@ public class EventRouting<I : Any> private constructor(
      * If there is no specific route for an event type, the [default route][defaultRoute]
      * will be used.
      *
-     * @param via The instance of the route to be used.
      * @param E The type of the event message.
+     * @param via The route function to use.
      * @return `this` to allow chained calls when configuring the routing.
      * @throws IllegalStateException if the route for this event type is already set either
      *   directly or via a super-interface.
      */
-    public inline fun <reified E : EventMessage> route(via: EventRoute<I, in E>): EventRouting<I> =
-        route(E::class.java, via)
+    public inline fun <reified E : EventMessage> route(
+        via: EventRoute<I, in E>
+    ): EventRouting<I> = route(E::class.java, via)
+
+    /**
+     * Sets a custom route for the given event type [E].
+     *
+     * This function is similar to the [route] function accepting [EventRoute] parameter, but
+     * the route function parameter [via] accepts only the event message without its context.
+     */
+    public inline fun <reified E : EventMessage> route(
+        noinline via: (E) -> Set<I>
+    ): EventRouting<I> = route(E::class.java) { e, _ -> via(e) }
 
     /**
      * Sets a custom route for the passed event type.
@@ -107,7 +118,7 @@ public class EventRouting<I : Any> private constructor(
      * This is a Java version of `public inline fun` [route].
      *
      * @param eventType The type of events to route.
-     * @param via The instance of the route to be used.
+     * @param via The route function to use.
      * @param E The type of the event message.
      * @return `this` to allow chained calls when configuring the routing.
      * @throws IllegalStateException if the route for this event type is already set either
