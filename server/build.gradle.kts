@@ -28,6 +28,7 @@ import io.spine.dependency.lib.AutoService
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Kotlin
 import io.spine.dependency.local.BaseTypes
+import io.spine.dependency.local.Change
 import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Validation
 
@@ -44,10 +45,12 @@ dependencies {
     api(project(":client"))
 
     /*
-     * Expose Validation API at the server side. E.g. for tuning custom validation for
-     * anti-corruption layer.
+     * Expose Validation API on the server side.
+     *  E.g., for tuning custom validation for anti-corruption layer.
      */
     api(Validation.runtime)
+
+    api(Change.lib)
 
     implementation(Grpc.inProcess)
 
