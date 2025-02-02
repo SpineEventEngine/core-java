@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,11 +27,15 @@
 package io.spine.server.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import io.spine.annotation.Internal;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * The mismatch of a signature.
@@ -64,6 +68,36 @@ public final class SignatureMismatch {
         this.unmetCriterion = criterion;
         this.severity = criterion.severity();
         this.message = criterion.formatMsg(values);
+    }
+
+    static String formatMsg(Method method, Iterable<SignatureMismatch> mismatches) {
+        var list = ImmutableList.copyOf(mismatches);
+        var singularOrPlural = list.size() > 1 ? "issues" : "an issue";
+        var methodRef = Methods.reference(method);
+        var prolog = format(
+                "The method `%s` is declared with %s:%n",
+                methodRef,
+                singularOrPlural
+        );
+        var issues = buildList(list);
+        return prolog + issues;
+    }
+
+    private static @NonNull StringBuilder buildList(ImmutableList<SignatureMismatch> list) {
+        var stringBuilder = new StringBuilder(100);
+        var lastMismatch = list.get(list.size() - 1);
+        var newLine = System.lineSeparator();
+        list.forEach(mismatch -> {
+            var kind = mismatch.isError() ? "Error: " : "Warning: ";
+            stringBuilder.append(" - ")
+                         .append(kind)
+                         .append(mismatch);
+            var isLast = mismatch.equals(lastMismatch);
+            if (!isLast) {
+                stringBuilder.append(newLine);
+            }
+        });
+        return stringBuilder;
     }
 
     /** Returns whether this mismatch is of {@code ERROR} severity. */

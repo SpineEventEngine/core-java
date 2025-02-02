@@ -149,9 +149,8 @@ public abstract class ReceptorSignature<R extends Receptor<?, ?, E, ?>,
                 .filter(SignatureMismatch::isWarning)
                 .collect(toList());
         if (!warnings.isEmpty()) {
-            warnings.stream()
-                    .map(SignatureMismatch::toString)
-                    .forEach(msg -> this.logger().atWarning().log(() -> msg));
+            var msg = SignatureMismatch.formatMsg(method, mismatches);
+            logger().atWarning().log(() -> msg);
         }
         return true;
     }
