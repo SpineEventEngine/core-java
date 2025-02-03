@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,11 +50,6 @@ object AutoValue {
 
 // https://github.com/ZacSweers/auto-service-ksp
 object AutoServiceKsp {
-    /**
-     * The latest version compatible with Kotlin 1.8.22.
-     *
-     * @see io.spine.dependency.build.Ksp.version
-     */
-    private const val version = "1.1.0"
+    private const val version = "1.2.0"
     const val processor = "dev.zacsweers.autoservice:auto-service-ksp:$version"
 }
