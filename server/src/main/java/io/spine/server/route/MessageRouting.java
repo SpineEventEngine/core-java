@@ -134,7 +134,7 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
             if (match.direct()) {
                 throw newIllegalStateException(
                         "The route for the message class `%s` already set. " +
-                                "Please remove the route (`%s`) before setting new route.",
+                                "Please remove the route (`%s`) before setting a new one.",
                         requestedClass, entryClass);
             } else {
                 throw newIllegalStateException(
