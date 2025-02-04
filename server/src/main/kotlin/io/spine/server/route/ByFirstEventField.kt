@@ -35,15 +35,15 @@ import io.spine.server.route.EventRoute.Companion.withId
  *
  * @param I The type of obtained IDs.
  */
-internal class ByFirstMessageField<I : Any, E : EventMessage>(
-    val idClass: Class<I>,
+internal class ByFirstEventField<I : Any, E : EventMessage>(
+    idClass: Class<I>,
     val eventClass: Class<E>
 ) : EventRoute<I, E> {
 
-    private val field = FirstField<I, E, EventContext>(idClass)
+    private val route = ByFirstField<I, E, EventContext>(idClass)
 
     override fun apply(message: E, context: EventContext): Set<I> {
-        val id = field.apply(message, context)
+        val id = route.apply(message, context)
         return withId(id)
     }
 }

@@ -35,22 +35,16 @@ import java.util.function.BiFunction
  * the type of messages to get IDs from
  * @param <C>
  * the type of message context
- * @param <R>
- * the type of the route function result
+ * @param R The type of the route function result. Could be one ID type or a set of IDs.
  */
 @FunctionalInterface
 public fun interface RouteFn<M : Message, C : Message, R : Any> : BiFunction<M, C, R> {
     /**
      * Obtains entity ID(s) from the passed message and its context.
      *
-     * @param message
-     * the event or a command message
-     * @param context
-     * the context of the message
-     * @return the set of entity identifiers
-     * @apiNote This method overrides the one from `BiFunction` for more clarity in
-     * Javadoc references. Without overriding it will be `#apply(Object, Object)`
-     * which may be confusing in the context of event routing.
+     * @param message The message to route.
+     * @param context The context of the message.
+     * @return identifier(s) of the target entities.
      */
     override fun apply(message: M, context: C): R
 }

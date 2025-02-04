@@ -66,7 +66,7 @@ public fun interface EventRoute<I : Any, M : EventMessage> : Multicast<I, M, Eve
         @JvmStatic
         public fun <I : Any, E : EventMessage> byFirstMessageField(
             idClass: Class<I>, eventClass: Class<E>
-        ): EventRoute<I, E> = ByFirstMessageField(idClass, eventClass)
+        ): EventRoute<I, E> = ByFirstEventField(idClass, eventClass)
 
         @JvmStatic
         public fun <I : Any> byFirstMessageField(

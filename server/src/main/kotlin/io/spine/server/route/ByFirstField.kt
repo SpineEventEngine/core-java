@@ -44,8 +44,9 @@ import io.spine.util.Exceptions.newIllegalStateException
  * @param <C>
  * the type of contexts of the messages
  */
-internal class FirstField<I : Any, M : Message, C : Message>(private val idClass: Class<I>) :
-    Unicast<I, M, C> {
+internal class ByFirstField<I : Any, M : Message, C : Message>(
+    private val idClass: Class<I>
+) : Unicast<I, M, C> {
 
     override fun apply(message: M, context: C): I {
         val field = fieldIn(message)

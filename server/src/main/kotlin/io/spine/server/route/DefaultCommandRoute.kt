@@ -37,7 +37,7 @@ import io.spine.core.CommandContext
 public class DefaultCommandRoute<I : Any> private constructor(cls: Class<I>) :
     CommandRoute<I, CommandMessage> {
 
-    private val field = FirstField<I, CommandMessage, CommandContext>(cls)
+    private val field = ByFirstField<I, CommandMessage, CommandContext>(cls)
 
 
     override fun apply(message: CommandMessage, context: CommandContext): I {
