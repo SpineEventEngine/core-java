@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -57,13 +57,46 @@ internal class EventRoutingSpec {
     private val defaultRoute =
         EventRoute { _: EventMessage, _: EventContext -> DEFAULT_ROUTE }
 
-    /** A custom route.  */
-    private val customRoute =
-        EventRoute { _: UserEvent, _: EventContext -> CUSTOM_ROUTE }
+    /** The route for all user events. */
+    private val userEventRoute =
+        EventRoute { _: UserEvent, _: EventContext ->
+            ImmutableSet.of(
+                -5L,
+                -6L,
+                -7L
+            )
+        }
+
+    /** The route for all user account events. */
+    private val userAccountEventRoute =
+        EventRoute { _: UserAccountEvent, _: EventContext ->
+            ImmutableSet.of(
+                0L,
+                -3L,
+                -10L
+            )
+        }
+
+    /** A type-specific route.  */
+    private val userRegisteredRoute =
+        EventRoute { _: UserRegistered, _: EventContext -> USER_REGISTERED_ROUTE }
+
+    /** Another type-specific route. */
+    private val accountSuspendedRoute =
+        EventRoute { _: AccountSuspended, _: EventContext ->
+            ImmutableSet.of(
+                100L,
+                200L
+            )
+        }
+
+    /** An interface-based route. */
+    private val loginEventRoute =
+        EventRoute { _: LoginEvent, _: EventContext -> LOGIN_EVENT_ROUTE }
 
     /** Another custom route.  */
-    private val alternativeRoute =
-        EventRoute { _: UserEvent, _: EventContext -> ALT_ROUTE }
+    private val userLoggedOutRoute =
+        EventRoute { _: UserLoggedOut, _: EventContext -> LOGGED_OUT_ROUTE }
 
     @BeforeEach
     fun setUp() {
@@ -78,7 +111,12 @@ internal class EventRoutingSpec {
     @Test
     fun `allow replacing default route`() {
         val newDefault =
-            EventRoute { _: EventMessage, _: EventContext -> ImmutableSet.of(10L, 20L) }
+            EventRoute { _: EventMessage, _: EventContext ->
+                ImmutableSet.of(
+                    10L,
+                    20L
+                )
+            }
 
         eventRouting.replaceDefault(newDefault) shouldBeSameInstanceAs eventRouting
         eventRouting.defaultRoute() shouldBeSameInstanceAs newDefault
@@ -86,28 +124,28 @@ internal class EventRoutingSpec {
 
     @Test
     fun `set custom route`() {
-        eventRouting.route<UserRegistered>(customRoute) shouldBeSameInstanceAs eventRouting
+        eventRouting.route<UserRegistered>(userRegisteredRoute) shouldBeSameInstanceAs eventRouting
 
         val route = eventRouting.find<UserRegistered>()
 
-        route shouldBe customRoute
+        route shouldBe userRegisteredRoute
     }
 
     @Test
     fun `not allow overwriting set route`() {
-        eventRouting.route<UserRegistered>(customRoute)
+        eventRouting.route<UserRegistered>(userRegisteredRoute)
         assertThrows<IllegalStateException>{
-            eventRouting.route<UserRegistered>(customRoute)
+            eventRouting.route<UserRegistered>(userRegisteredRoute)
         }
     }
 
     @Test
     fun `remove previously set route`() {
-        eventRouting.route<UserRegistered>(customRoute)
+        eventRouting.route<UserRegistered>(userRegisteredRoute)
         eventRouting.remove<UserRegistered>()
 
         eventRouting.routeFor(UserLoggedIn::class.java)
-            .found() shouldBe false
+            .found shouldBe false
     }
 
     @Test
@@ -119,8 +157,8 @@ internal class EventRoutingSpec {
 
     @Test
     fun `apply default route`() {
-        // Have custom route too.
-        eventRouting.route(UserRegistered::class.java, customRoute)
+        // Have a custom route too.
+        eventRouting.route(UserRegistered::class.java, userRegisteredRoute)
 
         val event = GivenEvent.arbitrary()
         val ids = eventRouting.apply(event.enclosedMessage(), event.context())
@@ -130,7 +168,7 @@ internal class EventRoutingSpec {
 
     @Test
     fun `apply custom route`() {
-        eventRouting.route(UserRegistered::class.java, customRoute)
+        eventRouting.route(UserRegistered::class.java, userRegisteredRoute)
 
         val eventMessage = UserRegistered.newBuilder()
             .setId(TestValues.random(1, 100).toLong())
@@ -139,54 +177,57 @@ internal class EventRoutingSpec {
 
         val ids = eventRouting.apply(event.message(), event.context())
 
-        ids shouldBe CUSTOM_ROUTE
+        ids shouldBe USER_REGISTERED_ROUTE
     }
 
     @Test
     fun `allow routing via interface`() {
-        eventRouting.route(UserLoggedOut::class.java, alternativeRoute)
-            .route(LoginEvent::class.java, customRoute)
+        eventRouting.route(UserLoggedOut::class.java, userLoggedOutRoute)
+            .route(LoginEvent::class.java, loginEventRoute)
 
         val ctx = EventContext.getDefaultInstance()
 
         // Check routing via common interface `LoginEvent`.
-        eventRouting.apply(UserLoggedIn.getDefaultInstance(), ctx) shouldBe CUSTOM_ROUTE
+        eventRouting.apply(UserLoggedIn.getDefaultInstance(), ctx) shouldBe LOGIN_EVENT_ROUTE
 
-        // Check routing via specific type.
-        eventRouting.apply(UserLoggedOut.getDefaultInstance(), ctx) shouldBe ALT_ROUTE
+        // Check routing via a specific type.
+        eventRouting.apply(UserLoggedOut.getDefaultInstance(), ctx) shouldBe LOGGED_OUT_ROUTE
     }
 
     @Test
-    fun `prohibit adding specific type after interface routing`() {
+    fun `prohibit adding specific type after interface-based route`() {
         assertThrows<IllegalStateException> {
-            eventRouting.route<UserAccountEvent>(alternativeRoute)
-                        .route<AccountSuspended>(customRoute)
+            eventRouting.route<UserEvent>(userEventRoute)
+                        .route<AccountSuspended>(accountSuspendedRoute)
         }
     }
 
     @Test
     fun `cache routing defined via interface`() {
-        eventRouting.route<LoginEvent>(customRoute)
+        eventRouting.route<LoginEvent>(loginEventRoute)
 
+        // This is the first time we try to find the route.
         val firstMatch = eventRouting.routeFor(UserLoggedIn::class.java)
 
-        firstMatch.found() shouldBe true
-        firstMatch.entryClass() shouldBe LoginEvent::class.java
+        // It should be matched to the interface type defined in `eventRouting` above.
+        firstMatch.found shouldBe true
+        firstMatch.entryClass shouldBe LoginEvent::class.java
 
+        // On the second attempt, we should see the entry for the exact class.
         val secondMatch = eventRouting.routeFor(UserLoggedIn::class.java)
 
-        secondMatch.found() shouldBe true
-        secondMatch.entryClass() shouldBe UserLoggedIn::class.java
+        secondMatch.found shouldBe true
+        secondMatch.entryClass shouldBe UserLoggedIn::class.java
     }
 
     @Test
     fun `use default route when neither direct nor interface routing is defined`() {
-        eventRouting.route(UserAccountEvent::class.java, alternativeRoute)
+        eventRouting.route(UserAccountEvent::class.java, userAccountEventRoute)
 
         // Obtain a match for the type from another “branch” of events.
         val match = eventRouting.routeFor(UserLoggedIn::class.java)
 
-        match.found() shouldBe false
+        match.found shouldBe false
 
         val route = eventRouting.apply(
             UserLoggedIn.getDefaultInstance(),
@@ -196,13 +237,16 @@ internal class EventRoutingSpec {
     }
 
     companion object {
-        /** The set of IDs returned by the [.defaultRoute].  */
+        /** The set of IDs returned by [defaultRoute].  */
         private val DEFAULT_ROUTE: ImmutableSet<Long> = ImmutableSet.of(0L, 1L)
 
-        /** The set of IDs returned by the [.customRoute].  */
-        private val CUSTOM_ROUTE: ImmutableSet<Long> = ImmutableSet.of(5L, 6L, 7L)
+        /** The set of IDs returned by [loginEventRoute].  */
+        private val LOGIN_EVENT_ROUTE: ImmutableSet<Long> = ImmutableSet.of(-1L, -2L, -3L)
 
-        /** The set of IDs returned by the [.alternativeRoute].  */
-        private val ALT_ROUTE: ImmutableSet<Long> = ImmutableSet.of(100L, 200L, 300L, 400L)
+        /** The set of IDs returned by [customRoute].  */
+        private val USER_REGISTERED_ROUTE: ImmutableSet<Long> = ImmutableSet.of(5L, 6L, 7L)
+
+        /** The set of IDs returned by the [userLoggedOutRoute].  */
+        private val LOGGED_OUT_ROUTE: ImmutableSet<Long> = ImmutableSet.of(100L, 200L, 300L, 400L)
     }
 }

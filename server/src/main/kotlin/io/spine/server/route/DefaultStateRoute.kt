@@ -23,107 +23,97 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.route
 
-package io.spine.server.route;
-
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
-import io.spine.base.EntityState;
-import io.spine.core.EventContext;
-import io.spine.protobuf.Messages;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.findField;
-import static io.spine.server.route.EventRoute.withId;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import com.google.protobuf.Descriptors.FieldDescriptor
+import com.google.protobuf.Message
+import io.spine.base.EntityState
+import io.spine.base.Identifier
+import io.spine.core.EventContext
+import io.spine.protobuf.defaultInstance
+import io.spine.util.Exceptions
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Obtains the route as a value of the first field matching the type of the identifiers.
  *
- * <p>Descriptors of discovered fields are cached.
+ * Descriptors of discovered fields are cached.
  *
- * <p>If a passed message does not have a field of the required ID type
- * {@code IllegalStateException} will be thrown.
+ * If a passed message does not have a field of the required ID type
+ * `IllegalStateException` will be thrown.
  *
  * @param <I>
- *         the type of the identifiers
- */
-final class DefaultStateRoute<I> implements StateUpdateRoute<I, EntityState<?>> {
-
-    private final Class<I> idClass;
+ * the type of the identifiers
+</I> */
+internal class DefaultStateRoute<I : Any>
+private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityState<*>> {
 
     /**
      * Descriptors of fields matching the ID class by message type.
      */
-    private final Map<Class<? extends Message>, FieldDescriptor> fields = new ConcurrentHashMap<>();
+    private val fields: MutableMap<Class<out Message?>, FieldDescriptor> =
+        ConcurrentHashMap()
 
-    private DefaultStateRoute(Class<I> idClass) {
-        this.idClass = idClass;
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param idClass
-     *         the class of identifiers used for the routing
-     */
-    public static <I> DefaultStateRoute<I> newInstance(Class<I> idClass) {
-        checkNotNull(idClass);
-        return new DefaultStateRoute<>(idClass);
-    }
-
-    boolean supports(Class<? extends EntityState<?>> stateType) {
-        var type = Messages.getDefaultInstance(stateType)
-                           .getDescriptorForType();
-        var idField = findField(idClass, type);
-        return idField.isPresent();
+    fun supports(stateType: Class<out EntityState<*>>): Boolean {
+        val type = stateType.defaultInstance.descriptorForType
+        val idField = Identifier.findField(idClass, type)
+        return idField.isPresent
     }
 
     /**
      * Obtains the ID from the first field of the passed message that matches the type
      * of identifiers used by this route.
      *
-     * <p>If the such a field is discovered, its descriptor is remembered and associated
+     *
+     * If the such a field is discovered, its descriptor is remembered and associated
      * with the class of the state so that subsequent calls are faster.
      *
-     * <p>If a field matching the ID type is not found, the method
-     * throws {@code IllegalStateException}.
      *
-     * @param state
-     *         the entity state message
-     * @param ignored
-     *         the context of the update event, not used
+     * If a field matching the ID type is not found, the method
+     * throws `IllegalStateException`.
+     *
+     * @param message
+     * the entity state message
+     * @param context
+     * the context of the update event, not used
      * @return a one-element set with the ID
      * @throws IllegalStateException
-     *          if the passed state instance does not have a field of the required ID type
+     * if the passed state instance does not have a field of the required ID type
      */
-    @Override
-    public Set<I> apply(EntityState<?> state, EventContext ignored) {
-        checkNotNull(state);
-        checkNotNull(ignored);
-        var messageClass = state.getClass();
-        var field = fields.get(messageClass);
+    override fun apply(message: EntityState<*>, context: EventContext): Set<I> {
+        val messageClass: Class<out EntityState<*>> = message.javaClass
+        val field = fields[messageClass]
         if (field != null) {
-            return fieldToSet(field, state);
+            return fieldToSet(field, message)
         }
 
-        var fd = findField(idClass, state.getDescriptorForType())
-                .orElseThrow(() -> newIllegalStateException(
-                        "Unable to find a field matching the type `%s`" +
-                                " in the message of the type `%s`.",
-                        idClass, messageClass.getCanonicalName()));
-        fields.put(messageClass, fd);
-        var result = fieldToSet(fd, state);
-        return result;
+        val fd = Identifier.findField(idClass, message.descriptorForType)
+            .orElseThrow {
+                Exceptions.newIllegalStateException(
+                    "Unable to find a field matching the type `%s`" +
+                            " in the message of the type `%s`.",
+                    idClass, messageClass.canonicalName
+                )
+            }
+        fields[messageClass] = fd
+        val result = fieldToSet(fd, message)
+        return result
     }
 
-    private Set<I> fieldToSet(FieldDescriptor field, EntityState<?> state) {
-        var fieldValue = state.getField(field);
-        var id = idClass.cast(fieldValue);
-        return withId(id);
+    private fun fieldToSet(field: FieldDescriptor, state: EntityState<*>): Set<I> {
+        val fieldValue = state.getField(field)
+        val id = idClass.cast(fieldValue)
+        return EventRoute.withId(id)
+    }
+
+    companion object {
+        /**
+         * Creates a new instance.
+         *
+         * @param idClass
+         * the class of identifiers used for the routing
+         */
+        fun <I : Any> newInstance(idClass: Class<I>): DefaultStateRoute<I> =
+            DefaultStateRoute(idClass)
     }
 }

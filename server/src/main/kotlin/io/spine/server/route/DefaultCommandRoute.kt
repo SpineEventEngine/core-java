@@ -24,53 +24,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import io.spine.base.CommandMessage;
-import io.spine.core.CommandContext;
-import io.spine.protobuf.MessageFieldException;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.base.CommandMessage
+import io.spine.core.CommandContext
 
 /**
  * Obtains an ID of a command target entity from the first field of the command message.
  *
  * @param <I> the type of target entity IDs
  */
-public final class DefaultCommandRoute<I> implements CommandRoute<I, CommandMessage> {
+public class DefaultCommandRoute<I : Any> private constructor(cls: Class<I>) :
+    CommandRoute<I, CommandMessage> {
 
-    private final FirstField<I, CommandMessage, CommandContext> field;
+    private val field = FirstField<I, CommandMessage, CommandContext>(cls)
 
-    private DefaultCommandRoute(Class<I> cls) {
-        this.field = new FirstField<>(cls);
+
+    override fun apply(message: CommandMessage, context: CommandContext): I {
+        val result = field.apply(message, context)
+        return result
     }
 
-    /**
-     * Creates a new instance.
-     *
-     * @param idClass
-     *         the class of identifiers used for the routing
-     */
-    public static <I> DefaultCommandRoute<I> newInstance(Class<I> idClass) {
-        checkNotNull(idClass);
-        return new DefaultCommandRoute<>(idClass);
-    }
+    public companion object {
+        /**
+         * Creates a new instance.
+         *
+         * @param idClass
+         * the class of identifiers used for the routing
+         */
+        @JvmStatic
+        public fun <I : Any> newInstance(idClass: Class<I>): DefaultCommandRoute<I> {
+            return DefaultCommandRoute(idClass)
+        }
 
-    @Override
-    public I apply(CommandMessage message, CommandContext ignored) throws MessageFieldException {
-        checkNotNull(message);
-        var result = field.apply(message, ignored);
-        return result;
-    }
-
-    /**
-     * Verifies of the passed command message potentially has a field with an entity ID.
-     */
-    public static boolean exists(CommandMessage commandMessage) {
-        var hasAtLeastOneField =
-                !commandMessage.getDescriptorForType()
-                               .getFields()
-                               .isEmpty();
-        return hasAtLeastOneField;
+        /**
+         * Verifies of the passed command message potentially has a field with an entity ID.
+         */
+        @JvmStatic
+        public fun exists(commandMessage: CommandMessage): Boolean {
+            val hasAtLeastOneField =
+                !commandMessage.descriptorForType
+                    .fields
+                    .isEmpty()
+            return hasAtLeastOneField
+        }
     }
 }

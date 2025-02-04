@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,32 +24,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
+import com.google.protobuf.Message
+import io.spine.base.MessageContext
+import java.util.function.BiFunction
 
-import java.util.Set;
+public abstract class MulticastRouting<
+        I : Any,
+        M : Message,
+        C : MessageContext,
+        R : Set<I>,
+        S : MulticastRouting<I, M, C, R, S>>(
+    defaultRoute: RouteFn<M, C, R>
+) : MessageRouting<I, M, C, R, S>(defaultRoute) {
 
-/**
- * The route that obtains a producer ID from the first field of the event message.
- *
- * @param <I>
- *         the type of obtained IDs
- */
-final class ByFirstMessageField<I> implements EventRoute<I, EventMessage> {
+    public fun <N : M> unicast(
+        msgType: Class<N>,
+        via: BiFunction<N, C, I>
+    ): S = route(msgType, createRoute(via))
 
-    private static final long serialVersionUID = 0L;
+    public inline fun <reified N : M> unicast(
+        noinline via: (N) -> I
+    ): S = unicast(N::class.java, via)
 
-    private final FirstField<I, EventMessage, EventContext> field;
+    public inline fun <reified N : M> unicast(
+        noinline via: (N, C) -> I
+    ): S = unicast(N::class.java, via)
 
-    ByFirstMessageField(Class<I> idClass) {
-        this.field = new FirstField<>(idClass);
-    }
-
-    @Override
-    public Set<I> apply(EventMessage message, EventContext context) {
-        var id = field.apply(message, context);
-        return EventRoute.withId(id);
-    }
 }

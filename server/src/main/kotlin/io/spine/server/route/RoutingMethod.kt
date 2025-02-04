@@ -88,7 +88,8 @@ internal class CommandRoutingMethod<I : Any>(
  */
 internal class EventRoutingMethod<I: Any>(
     rawMethod: Method
-) : RoutingMethod<I, EventMessage, EventContext, Set<I>>(rawMethod), EventRoute<I, EventMessage> {
+) : RoutingMethod<I, EventMessage, EventContext, Set<I>>(rawMethod),
+    EventRoute<I, EventMessage> {
 
     /**
      * Is `true` if the method returns `Set<I>`. Otherwise, the method returns `I`.

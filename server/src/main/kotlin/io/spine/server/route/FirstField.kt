@@ -23,93 +23,93 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.route
 
-package io.spine.server.route;
-
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.Message;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import com.google.protobuf.Descriptors.FieldDescriptor
+import com.google.protobuf.Message
+import io.spine.util.Exceptions
+import io.spine.util.Exceptions.newIllegalStateException
 
 /**
  * Routes messages to a single target, which ID is the same as the first field of
  * the routed message.
  *
- * <p>It is expected that the types of the first field and the identifier are the same.
+ *
+ * It is expected that the types of the first field and the identifier are the same.
  *
  * @param <I>
- *          the type of the identifiers
+ * the type of the identifiers
  * @param <M>
- *          the common supertype for messages
+ * the common supertype for messages
  * @param <C>
- *          the type of contexts of the messages
+ * the type of contexts of the messages
  */
-final class FirstField<I, M extends Message, C extends Message> implements Unicast<I, M, C> {
+internal class FirstField<I : Any, M : Message, C : Message>(private val idClass: Class<I>) :
+    Unicast<I, M, C> {
 
-    private final Class<I> idClass;
-
-    FirstField(Class<I> idClass) {
-        this.idClass = checkNotNull(idClass);
-    }
-
-    @Override
-    public I apply(M message, C context) {
-        checkNotNull(message);
-        var field = fieldIn(message);
-        var result = getValue(field, message);
-        return result;
+    override fun apply(message: M, context: C): I {
+        val field = fieldIn(message)
+        val result = getValue(field, message)
+        return result
     }
 
     /**
      * Obtains a descriptor of the first field of the passed.
      *
      * @throws IllegalStateException
-     *          if the passed message does not declare fields, or
-     *          the field is a repeated field or a map
+     * if the passed message does not declare fields, or
+     * the field is a repeated field or a map
      */
-    private FieldDescriptor fieldIn(M message) {
-        var type = message.getDescriptorForType();
-        var fields = type.getFields();
+    @Suppress("ThrowsCount")
+    private fun fieldIn(message: M): FieldDescriptor {
+        val type = message.descriptorForType
+        val fields = type.fields
         if (fields.isEmpty()) {
-            throw error("Cannot use the type `%s` for routing: it does not declare any field.",
-                        type.getFullName());
+            error(
+                "Cannot use the type `%s` for routing: it does not declare any field.",
+                type.fullName
+            )
         }
-        var field = fields.get(0);
-        if (field.isMapField()) {
-            throw error("The field `%s` is a map and cannot be used for routing.",
-                        field.getFullName());
+        val field = fields[0]
+        if (field.isMapField) {
+            error(
+                "The field `%s` is a map and cannot be used for routing.",
+                field.fullName
+            )
         }
-        if (field.isRepeated()) {
-            throw error("The field `%s` is repeated and cannot be used for routing.",
-                    field.getFullName());
+        if (field.isRepeated) {
+            error(
+                "The field `%s` is repeated and cannot be used for routing.",
+                field.fullName
+            )
         }
-        return field;
+        return field
     }
 
-    private IllegalStateException error(String messageFormat, String firstArg) {
-        throw newIllegalStateException(
-                messageFormat + " Please declare a field with the type `%s`.",
-                firstArg,
-                idClass.getCanonicalName());
+    private fun error(messageFormat: String, firstArg: String): IllegalStateException {
+        throw Exceptions.newIllegalStateException(
+            "$messageFormat Please declare a field with the type `%s`.",
+            firstArg,
+            idClass.canonicalName
+        )
     }
 
     /**
      * Obtains the value of first field making sure the value is of the expected type.
      */
-    private I getValue(FieldDescriptor field, M message) {
-        var value = message.getField(field);
-        var valueClass = value.getClass();
+    private fun getValue(field: FieldDescriptor, message: M): I {
+        val value = message.getField(field)
+        val valueClass: Class<*> = value.javaClass
         if (!idClass.isAssignableFrom(valueClass)) {
             throw newIllegalStateException(
-                    "The field `%s` has the type `%s` which is not assignable" +
-                    " from the expected ID type `%s`.",
-                    field.getFullName(),
-                    valueClass.getName(),
-                    idClass.getName()
-            );
+                "The field `%s` has the type `%s` which is not assignable" +
+                        " from the expected ID type `%s`.",
+                field.fullName,
+                valueClass.name,
+                idClass.name
+            )
         }
-        var result = idClass.cast(value);
-        return result;
+        val result = idClass.cast(value)
+        return result
     }
 }

@@ -30,7 +30,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.CommandMessage
 import io.spine.base.RejectionThrowable
 import io.spine.core.CommandContext
-
+import java.util.function.BiFunction
 /**
  * A routing schema used by a [CommandDispatcher][io.spine.server.commandbus.CommandDispatcher]
  * for delivering a command to its [receptor][io.spine.server.model.Receptor].
@@ -45,11 +45,26 @@ import io.spine.core.CommandContext
  */
 public class CommandRouting<I : Any> private constructor(
     defaultRoute: CommandRoute<I, CommandMessage>
-) : MessageRouting<CommandMessage, CommandContext, I>(defaultRoute) {
+) : MessageRouting<
+        I,
+        CommandMessage,
+        CommandContext,
+        I,
+        CommandRouting<I>
+        >(defaultRoute) {
+
+    override fun self(): CommandRouting<I> = this
 
     public override fun defaultRoute(): CommandRoute<I, CommandMessage> {
         return super.defaultRoute() as CommandRoute<I, CommandMessage>
     }
+
+    override fun <C : CommandMessage> createRoute(
+        via: BiFunction<C, CommandContext, I>
+    ): CommandRoute<I, C> = CommandRoute { command, context -> via.apply(command, context) }
+
+    override fun <N : CommandMessage> createRoute(via: (N) -> I): CommandRoute<I, N> =
+        CommandRoute { c, _ -> via(c) }
 
     /**
      * Sets a new default route in the schema.
@@ -57,10 +72,10 @@ public class CommandRouting<I : Any> private constructor(
      * @param newDefault The new route to be used as default.
      * @return `this` to allow chained calls when configuring the routing.
      */
-    @CanIgnoreReturnValue
-    public fun replaceDefault(newDefault: CommandRoute<I, CommandMessage>): CommandRouting<I> {
-        return super.replaceDefault(newDefault) as CommandRouting<I>
-    }
+//    @CanIgnoreReturnValue
+//    public fun replaceDefault(newDefault: CommandRoute<I, CommandMessage>): CommandRouting<I> {
+//        return super.replaceDefault(newDefault)
+//    }
 
     /**
      * Sets a custom route for the given command type [C].
@@ -90,9 +105,9 @@ public class CommandRouting<I : Any> private constructor(
      * @throws IllegalStateException if the route for this command class is already set either
      *   directly or via a super-interface.
      */
-    public inline fun <reified C : CommandMessage> route(
-        via: CommandRoute<I, C>
-    ): CommandRouting<I> = route(C::class.java, via)
+//    public inline fun <reified C : CommandMessage> route(
+//        via: CommandRoute<I, C>
+//    ): CommandRouting<I> = route(C::class.java, via)
 
     /**
      * Sets a custom route for the given command type [C].
@@ -107,16 +122,14 @@ public class CommandRouting<I : Any> private constructor(
      *   directly or via a super-interface.
      * @see route
      */
-    @CanIgnoreReturnValue
-    public fun <C : CommandMessage> route(
-        commandType: Class<C>,
-        via: CommandRoute<I, C>
-    ): CommandRouting<I> {
-        @Suppress("UNCHECKED_CAST") // The cast is required to adapt the type to internal API.
-        val casted = via as RouteFn<CommandMessage, CommandContext, I>
-        addRoute(commandType, casted)
-        return this
-    }
+//    @CanIgnoreReturnValue
+//    public fun <C : CommandMessage> route(
+//        commandType: Class<C>,
+//        via: CommandRoute<I, C>
+//    ): CommandRouting<I> {
+//        addRoute(commandType, via)
+//        return this
+//    }
 
     /**
      * Obtains a route for the passed command class.
@@ -135,10 +148,10 @@ public class CommandRouting<I : Any> private constructor(
      * @return optionally available route for [C].
      */
     public fun <C : CommandMessage> find(commandClass: Class<C>): CommandRoute<I, C>? {
-        val match: Match = routeFor(commandClass)
-        return if (match.found()) {
-            @Suppress("UNCHECKED_CAST") // protected by generic params of this class
-            match.route() as CommandRoute<I, C>
+        val match = routeFor(commandClass)
+        return if (match.found) {
+            @Suppress("UNCHECKED_CAST") // protected by generic params of this class.
+            match.route as CommandRoute<I, C>
         } else {
             null
         }
@@ -151,12 +164,9 @@ public class CommandRouting<I : Any> private constructor(
      * @throws IllegalStateException if a custom route for this message class was
      *   not previously set.
      */
-    public inline fun <reified C : CommandMessage> remove(): Unit =
-        remove(C::class.java)
+    public inline fun <reified C : CommandMessage> remove(): Unit = remove(C::class.java)
 
     public companion object {
-
-        private const val serialVersionUID: Long = 0L
 
         /**
          * Creates a new command routing.
@@ -187,3 +197,4 @@ public class CommandRouting<I : Any> private constructor(
         }
     }
 }
+

@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,50 +23,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.route
 
-package io.spine.server.route;
-
-import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
-
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Preconditions
+import io.spine.base.EventMessage
+import io.spine.core.EventContext
+import io.spine.server.route.EventRoute.Companion.withId
+import java.util.function.BiFunction
+import java.util.function.Function
 
 /**
  * An event route with one target entity ID of which is obtained as a function
- * on an event message or {@code BiFunction} on an event message and its context.
+ * on an event message or `BiFunction` on an event message and its context.
  *
  * @param <I>
- *         the type of the target entity ID
+ * the type of the target entity ID
  * @param <E>
- *         the type of the event message
+ * the type of the event message
  */
-final class EventFnRoute<I, E extends EventMessage> implements EventRoute<I, E> {
-
-    private static final long serialVersionUID = 0L;
-    private final BiFunction<E, EventContext, I> fn;
+internal class EventFnRoute<I : Any, E : EventMessage>(
+    private val fn: BiFunction<E, EventContext, I>
+) : EventRoute<I, E> {
 
     /**
      * Creates a new event route which obtains target entity ID from an event message.
      */
-    EventFnRoute(Function<E, I> fn) {
-        this((e, ctx) -> fn.apply(e));
-    }
+    constructor(fn: Function<E, I>) : this(BiFunction<E, EventContext, I> { e, _ ->
+        fn.apply(e)
+    })
 
-    /**
-     * Creates an event route which obtains target entity ID from an event message and
-     * its context.
-     */
-    EventFnRoute(BiFunction<E, EventContext, I> fn) {
-        this.fn = checkNotNull(fn);
-    }
-
-    @Override
-    public Set<I> apply(E message, EventContext context) {
-        var id = fn.apply(message, context);
-        return EventRoute.withId(id);
+    override fun apply(message: E, context: EventContext): Set<I> {
+        val id = fn.apply(message, context)
+        return withId(id)
     }
 }

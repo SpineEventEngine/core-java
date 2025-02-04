@@ -24,128 +24,138 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
-import io.spine.base.MessageContext;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.util.Collections.synchronizedMap;
-import static java.util.Objects.requireNonNull;
+import com.google.common.annotations.VisibleForTesting
+import com.google.errorprone.annotations.CanIgnoreReturnValue
+import com.google.protobuf.Message
+import io.spine.base.MessageContext
+import java.util.Collections.synchronizedMap
+import java.util.function.BiFunction
 
 /**
  * A routing schema for a kind of messages such as commands, events, rejections, or documents.
  *
- * <p>A routing schema consists of a default route and custom routes per message class.
+ * A routing schema consists of a default route and custom routes per message class.
  *
- * @param <M>
- *         the type of the message to route
- * @param <C>
- *         the type of message context objects
- * @param <R>
- *         the type returned by the {@linkplain RouteFn#apply(Message, Message) routing function}
+ * @param I The type of identifiers used in the routing.
+ * @param M The common supertype of messages to route.
+ * @param C The type of message context.
+ * @param R The type returned by the [routing function][RouteFn.apply].
+ * @param S The type of message routing for covariance in return types.
+ * @property defaultRoute The route to be used if there is no matching entry set in [routes].
  */
-public abstract class MessageRouting<M extends Message, C extends MessageContext, R>
-        implements RouteFn<M, C, R> {
+@Suppress("TooManyFunctions")
+public sealed class MessageRouting<
+        I,
+        M : Message,
+        C : MessageContext,
+        R : Any,
+        S : MessageRouting<I, M, C, R, S>
+        >(private var defaultRoute: RouteFn<M, C, R>) : RouteFn<M, C, R> {
+
+    protected abstract fun self(): S
 
     /**
-     * Map of currently known routes.
+     * Maps a message class to the function for calculating identifier(s) of
+     * entities to deliver a message of this class.
      *
-     * @implNote This collection is made {@code synchronized}, since in some cases it is
-     *         being simultaneously read and modified in different threads.
-     *         In particular, the modification at run-time is performed when storing
-     *         the routes discovered on a per-interface basis.
-     *         Therefore, if this collection is not {@code synchronized},
-     *         a {@code ConcurrentModificationException} is sometimes thrown.
+     * ### Implementation note
+     *
+     * This collection is made `synchronized`, since in some cases it is
+     * being simultaneously read and modified in different threads.
+     * In particular, the modification at run-time is performed when storing
+     * the routes discovered on a per-interface basis.
+     * Therefore, if this collection is not `synchronized`,
+     * a `ConcurrentModificationException` is sometimes thrown.
      */
-    private final Map<Class<? extends M>, RouteFn<M, C, R>> routes =
-            synchronizedMap(new LinkedHashMap<>());
-
-    /** The default route to be used if there is no matching entry set in {@link #routes}. */
-    private RouteFn<M, C, R> defaultRoute;
-
-    MessageRouting(RouteFn<M, C, R> defaultRoute) {
-        this.defaultRoute = checkNotNull(defaultRoute);
-    }
+    private val routes: MutableMap<Class<M>, RouteFn<M, C, R>> =
+        synchronizedMap(LinkedHashMap())
 
     /**
      * Obtains the default route used by the schema.
      */
-    protected RouteFn<M, C, R> defaultRoute() {
-        return defaultRoute;
-    }
+    @VisibleForTesting
+    public open fun defaultRoute(): RouteFn<M, C, R> = defaultRoute
 
     /**
      * Sets a new default route in the schema.
      *
-     * @param newDefault the new route to be used as default
+     * @param newDefault The new route to be used as default.
      */
     @CanIgnoreReturnValue
-    MessageRouting<M, C, R> replaceDefault(RouteFn<M, C, R> newDefault) {
-        checkNotNull(newDefault);
-        defaultRoute = newDefault;
-        return this;
+    public fun replaceDefault(newDefault: RouteFn<M, C, out R>): S {
+        @Suppress("UNCHECKED_CAST")
+        defaultRoute = newDefault as RouteFn<M, C, R>
+        return self()
     }
+
+    @CanIgnoreReturnValue
+    public fun <N: M> route(msgClass: Class<N>, via: RouteFn<N, C, R>): S {
+        addRoute(msgClass, via)
+        return self()
+    }
+
+    public inline fun <reified N: M> route(via: RouteFn<N, C, R>): S =
+        route(N::class.java, via)
+
+    public fun <N : M> unicast(
+        msgType: Class<N>,
+        via: (N) -> I
+    ): S = route(msgType, createRoute(via))
+
+    protected abstract fun <N : M> createRoute(via: (N) -> I): RouteFn<N, C, R>
+
+    protected abstract fun <N : M> createRoute(via: BiFunction<N, C, I>): RouteFn<N, C, R>
 
     /**
      * Checks if the passed message type is supported by this instance of routing.
      */
-    public boolean supports(Class<? extends M> messageType) {
-        checkNotNull(messageType);
-        var match = routeFor(messageType);
-        var result = match.found();
-        return result;
+    public open fun supports(messageType: Class<out M>): Boolean {
+        val match = routeFor(messageType)
+        val result = match.found
+        return result
     }
 
     /**
      * Sets a custom route for the passed message type.
      *
-     * <p>The type can be either a class or interface. If the routing schema already contains an
+     * The type can be either a class or interface. If the routing schema already contains an
      * entry with the same type or a super-interface of the passed type
-     * an {@link IllegalStateException} will be thrown.
+     * an [IllegalStateException] will be thrown.
      *
-     * <p>In order to provide a mapping for a specific class <em>and</em> an interface common
-     * to this and other message classes, please add the routing for the class <em>before</em>
+     * In order to provide a mapping for a specific class *and* an interface common
+     * to this and other message classes, please add the routing for the class *before*
      * the interface.
      *
-     * @param messageType
-     *         the type of messages to route
-     * @param via
-     *         the instance of the route to be used
-     * @throws IllegalStateException
-     *         if the route for this message class is already set either directly or
-     *         via a super-interface
+     * @param N The type derived from common type M served by this routing.
+     *   Could be a sub-interface or a class.
+     * @param messageType The type of messages to route.
+     * @param via The route function to be used for this type.
+     * @throws IllegalStateException If the route for this message class is already set either
+     *   directly or via a super-interface.
      */
-    void addRoute(Class<? extends M> messageType, RouteFn<M, C, R> via)
-            throws IllegalStateException {
-        checkNotNull(messageType);
-        checkNotNull(via);
-        var match = routeFor(messageType);
-        if (match.found()) {
-            var requestedClass = messageType.getName();
-            var entryClass = match.entryClass()
-                                  .getName();
-            if (match.direct()) {
-                throw newIllegalStateException(
-                        "The route for the message class `%s` already set. " +
-                                "Please remove the route (`%s`) before setting a new one.",
-                        requestedClass, entryClass);
+    public fun <N : M> addRoute(messageType: Class<N>, via: RouteFn<N, C, R>) {
+        val match = routeFor(messageType)
+        if (match.found) {
+            val requestedClass = messageType.name
+            val entryClass: String = match.entryClass!!.name
+            if (match.isDirect) {
+                error(
+                    "The route for the message class $requestedClass` already set." +
+                            " Please remove the route (`$entryClass`) before setting a new one."
+                )
             } else {
-                throw newIllegalStateException(
-                        "The route for the message class `%s` already defined via " +
-                                "the interface `%s`. If you want to have specific routing for " +
-                                "the class `%s`, please put it before the routing for " +
-                                "the super-interface.",
-                        requestedClass, entryClass, requestedClass);
+                error(
+                    "The route for the message class `$requestedClass` already defined via" +
+                            " the interface `$entryClass`. If you want to have specific" +
+                            " routing for the class `$requestedClass`," +
+                            " please put it before the routing for the super-interface.",
+                )
             }
         }
-        routes.put(messageType, via);
+        @Suppress("UNCHECKED_CAST")
+        routes[messageType as Class<M>] = via as RouteFn<M, C, R>
     }
 
     /**
@@ -154,132 +164,101 @@ public abstract class MessageRouting<M extends Message, C extends MessageContext
      * @param msgCls the class of the messages
      * @return optionally available route
      */
-    Match routeFor(Class<? extends M> msgCls) {
-        checkNotNull(msgCls);
-        var direct = findDirect(msgCls);
-        if (direct.found()) {
-            return direct;
+    internal fun routeFor(msgCls: Class<out M>): Match {
+        val direct = findDirect(msgCls)
+        if (direct.found) {
+            return direct
         }
-
-        var viaInterface = findViaInterface(msgCls);
-        if (viaInterface.found()) {
+        val viaInterface = findViaInterface(msgCls)
+        return if (viaInterface.found) {
             // Store the found route for later direct use.
-            routes.put(msgCls, viaInterface.route());
-            return viaInterface;
+            @Suppress("UNCHECKED_CAST")
+            routes[msgCls as Class<M>] = viaInterface.route!!
+            viaInterface
+        } else {
+            notFound(msgCls)
         }
-
-        return new Match(msgCls, null, null);
     }
 
-    private Match findDirect(Class<? extends M> msgCls) {
-        var route = routes.get(msgCls);
+    private fun findDirect(msgCls: Class<out M>): Match {
+        val route = routes[msgCls]
         if (route != null) {
-            return new Match(msgCls, msgCls, route);
+            return Match(msgCls, msgCls, route)
         }
-        return new Match(msgCls, null, null);
+        return notFound(msgCls)
     }
 
-    private Match findViaInterface(Class<? extends M> msgCls) {
-        var result = routes.keySet()
-                .stream()
-                .filter(Class::isInterface)
-                .filter(iface -> iface.isAssignableFrom(msgCls))
-                .findFirst()
-                .map(iface -> new Match(msgCls, iface, routes.get(iface)))
-                .orElse(new Match(msgCls, null, null));
-        return result;
+    private fun findViaInterface(msgCls: Class<out M>): Match {
+        val result = routes.keys
+            .filter { c -> c.isInterface }
+            .find { iface -> iface.isAssignableFrom(msgCls) }
+            ?.let { iface ->
+                Match(msgCls, iface, routes[iface])
+            }
+            ?: (notFound(msgCls))
+        return result
     }
 
     /**
      * Removes a route for the passed message class.
      *
-     * @throws IllegalStateException if a custom route for this message class was not previously set
+     * @throws IllegalStateException if a custom route for this class was not previously set.
      */
-    public void remove(Class<? extends M> messageClass) {
-        checkNotNull(messageClass);
+    public fun remove(messageClass: Class<out M>) {
         if (!routes.containsKey(messageClass)) {
-            throw newIllegalStateException(
-                    "Cannot remove the route for the message class (`%s`):" +
-                            " a custom route was not previously set.",
-                    messageClass.getName());
+            error(
+                "Cannot remove the route for the message class `${messageClass.name}`:" +
+                        " a custom route was not previously set.",
+            )
         }
-        routes.remove(messageClass);
+        routes.remove(messageClass)
     }
 
     /**
      * Obtains IDs of entities to which the passed message should be delivered.
      *
-     * <p>If there is no function for the passed message applies the default function.
+     * If there is no function for the passed message, applies the default function.
      *
-     * @param message the message
-     * @param context the message context
-     * @return the set of entity IDs to which the message should be delivered
+     * @param message The message to route.
+     * @param context The context of the message.
+     * @return the set of entity IDs to which the message should be delivered.
      */
-    @Override
-    public R apply(M message, C context) {
-        checkNotNull(message);
-        checkNotNull(context);
-        @SuppressWarnings("unchecked") var
-        cls = (Class<? extends M>) message.getClass();
-        var match = routeFor(cls);
-        if (match.found()) {
-            var func = match.route();
-            var result = func.apply(message, context);
-            return result;
+    override fun apply(message: M, context: C): R {
+        val cls = message.javaClass
+        val match = routeFor(cls)
+        if (match.found) {
+            val func = match.route!!
+            val result = func.apply(message, context)
+            return result
         }
-        var result = defaultRoute().apply(message, context);
-        return result;
+        val result = defaultRoute().apply(message, context)
+        return result
     }
 
     /**
-     * Provides information on routing availability.
+     * Provides the result of finding a route in the routing schema.
+     *
+     * @param requestedClass The class of the message which needs to be routed.
+     * @param entryClass The type through which the route is found.
+     *   Can be a class (for the [isDirect] match) or a super-interface
+     *   of the requested class.
+     *   Is `null` if there is no routing found for the [requestedClass].
+     * @param route The routing function or `null` if there is no route defined neither
+     *   for the class nor a super-interface of the class
      */
-    final class Match {
-
-        private final Class<? extends M> requestedClass;
-        private final @Nullable RouteFn<M, C, R> route;
-        private final @Nullable Class<? extends M> entryType;
-
-        /**
-         * Creates new instance.
-         *
-         * @param requestedClass
-         *         the class of the message which needs to be routed
-         * @param entryType
-         *         the type through which the route is found.
-         *         Can be a class (for the {@link #direct()} match) or a super-interface
-         *         of the requested class.
-         *         Is {@code null} if there is no routing found for the {@code requestedClass}.
-         * @param route
-         *         the routing function or {@code null} if there is no route defined neither
-         *         for the class nor a super-interface of the class
-         */
-        private Match(Class<? extends M> requestedClass,
-                      @Nullable Class<? extends M> entryType,
-                      @Nullable RouteFn<M, C, R> route) {
-            this.requestedClass = requestedClass;
-            this.route = route;
-            this.entryType = entryType;
-        }
-
-        boolean found() {
-            return route != null;
-        }
+    internal inner class Match(
+        private val requestedClass: Class<out M>,
+        val entryClass: Class<out M>?,
+        val route: RouteFn<M, C, R>?
+    ) {
+        val found: Boolean = route != null
 
         /**
-         * Returns {@code true} if the routing was defined directly for the requested class,
-         * otherwise {@code false}.
+         * Returns `true` if the routing was defined directly for the requested class,
+         * otherwise `false`.
          */
-        private boolean direct() {
-            return requestedClass.equals(entryType);
-        }
-
-        Class<? extends M> entryClass() {
-            return requireNonNull(entryType);
-        }
-
-        RouteFn<M, C, R> route() {
-            return requireNonNull(route);
-        }
+        val isDirect: Boolean = requestedClass == entryClass
     }
+
+    private fun notFound(requestedClass: Class<out M>): Match = Match(requestedClass, null, null)
 }

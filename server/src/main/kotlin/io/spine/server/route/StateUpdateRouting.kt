@@ -26,11 +26,11 @@
 
 package io.spine.server.route
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.EntityState
 import io.spine.core.EventContext
 import io.spine.protobuf.AnyPacker
 import io.spine.system.server.event.EntityStateChanged
+import java.util.function.BiFunction
 
 /**
  * A routing schema used to deliver entity state updates.
@@ -43,16 +43,37 @@ import io.spine.system.server.event.EntityStateChanged
  * @param I The type of the entity IDs to which the updates are routed.
  * @param idClass The class of entity identifiers to which entity states are routed.
  */
-public class StateUpdateRouting<I> private constructor(
+public class StateUpdateRouting<I : Any> private constructor(
     idClass: Class<I>
-) : MessageRouting<EntityState<*>, EventContext, Set<I>>(
+) : MessageRouting<
+        I,
+        EntityState<*>,
+        EventContext, Set<I>,
+        StateUpdateRouting<I>
+        >(
     DefaultStateRoute.newInstance(idClass)
 ) {
+
+    override fun self(): StateUpdateRouting<I> = this
+
+    override fun <E : EntityState<*>> createRoute(
+        via: BiFunction<E, EventContext, I>
+    ): StateUpdateRoute<I, E> = StateUpdateRoute { state, context ->
+        setOf(via.apply(state, context))
+    }
+
+    override fun <E : EntityState<*>> createRoute(
+        via: (E) -> I
+    ): StateUpdateRoute<I, E> = StateUpdateRoute { state, _ -> setOf(via(state)) }
+
     /**
      * Verifies if the passed state type can be routed by a custom route, or
      * the message has a field matching the type of identifiers served by this routing.
      */
-    override fun supports(stateType: Class<out EntityState<*>>): Boolean {
+    override fun supports(
+        @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // to highlight the nature of the class.
+        stateType: Class<out EntityState<*>>
+    ): Boolean {
         val customRouteSet = super.supports(stateType)
         @Suppress("UNCHECKED_CAST") // cast to the type used in ctor.
         val defaultRoute = defaultRoute() as DefaultStateRoute<I>
@@ -73,16 +94,14 @@ public class StateUpdateRouting<I> private constructor(
      * @return `this` to allow chained calls when configuring the routing.
      * @throws IllegalStateException if the route for this class is already set.
      */
-    @CanIgnoreReturnValue
-    public fun <S : EntityState<*>> route(
-        stateClass: Class<S>,
-        via: StateUpdateRoute<I, S>
-    ): StateUpdateRouting<I> {
-        @Suppress("UNCHECKED_CAST") // Logically valid.
-        val route = via as RouteFn<EntityState<*>, EventContext, Set<I>>
-        addRoute(stateClass, route)
-        return this
-    }
+//    @CanIgnoreReturnValue
+//    public fun <S : EntityState<*>> route(
+//        stateClass: Class<S>,
+//        via: StateUpdateRoute<I, S>
+//    ): StateUpdateRouting<I> {
+//        addRoute(stateClass, via)
+//        return this
+//    }
 
     /**
      * Creates an [EventRoute] for [EntityStateChanged] events based on this routing.
@@ -112,7 +131,7 @@ public class StateUpdateRouting<I> private constructor(
          * @return new `StateUpdateRouting`.
          */
         @JvmStatic
-        public fun <I> newInstance(idClass: Class<I>): StateUpdateRouting<I> =
+        public fun <I : Any> newInstance(idClass: Class<I>): StateUpdateRouting<I> =
             StateUpdateRouting(idClass)
     }
 }

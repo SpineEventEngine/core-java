@@ -24,26 +24,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
-
-import java.util.Set;
+import io.spine.base.EventMessage
+import io.spine.core.EventContext
 
 /**
  * Obtains an event producer ID from the context of the event.
  *
- * @param <I>
- *         the type of obtained IDs
+ * @param I The type of obtained IDs
  */
-final class ByProducerId<I> implements EventRoute<I, EventMessage> {
+internal class ByProducerId<I : Any> : EventRoute<I, EventMessage> {
 
-    private static final long serialVersionUID = 0L;
-
-    @Override
-    public Set<I> apply(EventMessage message, EventContext context) {
-        @SuppressWarnings("unchecked") var id = (I) context.producer();
-        return EventRoute.withId(id);
+    override fun apply(message: EventMessage, context: EventContext): Set<I> {
+        @Suppress("UNCHECKED_CAST")
+        val id = context.producer() as I
+        return EventRoute.withId(id)
     }
 }

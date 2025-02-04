@@ -26,16 +26,24 @@
 
 package io.spine.server.route
 
-import io.spine.base.EntityState
+import io.spine.base.EventMessage
 import io.spine.core.EventContext
+import io.spine.server.route.EventRoute.Companion.withId
 
 /**
- * Obtains a set of entity IDs for which to deliver an entity state update.
+ * The route that obtains a producer ID from the first field of the event message.
  *
- * @param <I>
- * the type of entity IDs
- * @param <M>
- * the type of entity states to get IDs from
+ * @param I The type of obtained IDs.
  */
-@FunctionalInterface
-public fun interface StateUpdateRoute<I : Any, M : EntityState<*>> : Multicast<I, M, EventContext>
+internal class ByFirstMessageField<I : Any, E : EventMessage>(
+    val idClass: Class<I>,
+    val eventClass: Class<E>
+) : EventRoute<I, E> {
+
+    private val field = FirstField<I, E, EventContext>(idClass)
+
+    override fun apply(message: E, context: EventContext): Set<I> {
+        val id = field.apply(message, context)
+        return withId(id)
+    }
+}

@@ -46,27 +46,28 @@ import java.util.function.BiFunction
 @Suppress("TooManyFunctions") // We want both inline and Java versions of the methods.
 public class EventRouting<I : Any> private constructor(
     defaultRoute: EventRoute<I, EventMessage>
-) : MessageRouting<EventMessage, EventContext, Set<I>>(defaultRoute),
-    EventRoute<I, EventMessage> {
+) : MulticastRouting<
+        I,
+        EventMessage,
+        EventContext,
+        Set<I>,
+        EventRouting<I>
+        >(defaultRoute), EventRoute<I, EventMessage> {
+
+    override fun self(): EventRouting<I> = this
 
     /**
      * Overrides for return type covariance.
      */
-    public override fun defaultRoute(): EventRoute<I, EventMessage> {
-        @Suppress("UNCHECKED_CAST")
-        return super.defaultRoute() as EventRoute<I, EventMessage>
-    }
+//    public override fun defaultRoute(): EventRoute<I, EventMessage> {
+//        @Suppress("UNCHECKED_CAST")
+//        return super.defaultRoute() as EventRoute<I, EventMessage>
+//    }
 
-    /**
-     * Sets a new default route in the schema.
-     *
-     * @param newDefault The new route to be used as default.
-     * @return `this` to allow chained calls when configuring the routing.
-     */
-    @CanIgnoreReturnValue
-    public fun replaceDefault(newDefault: EventRoute<I, EventMessage>): EventRouting<I> {
-        return super.replaceDefault(newDefault) as EventRouting<I>
-    }
+//    @CanIgnoreReturnValue
+//    public fun replaceDefault(newDefault: EventRoute<I, EventMessage>): EventRouting<I> {
+//        return super.replaceDefault(newDefault) as EventRouting<I>
+//    }
 
     /**
      * Sets a custom route for the given event type [E].
@@ -98,9 +99,9 @@ public class EventRouting<I : Any> private constructor(
      * @throws IllegalStateException if the route for this event type is already set either
      *   directly or via a super-interface.
      */
-    public inline fun <reified E : EventMessage> route(
-        via: EventRoute<I, in E>
-    ): EventRouting<I> = route(E::class.java, via)
+//    public inline fun <reified E : EventMessage> route(
+//        via: EventRoute<I, in E>
+//    ): EventRouting<I> = route(E::class.java, via)
 
     /**
      * Sets a custom route for the given event type [E].
@@ -108,9 +109,9 @@ public class EventRouting<I : Any> private constructor(
      * This function is similar to the [route] function accepting [EventRoute] parameter, but
      * the route function parameter [via] accepts only the event message without its context.
      */
-    public inline fun <reified E : EventMessage> route(
-        noinline via: (E) -> Set<I>
-    ): EventRouting<I> = route(E::class.java) { e, _ -> via(e) }
+//    public inline fun <reified E : EventMessage> route(
+//        noinline via: (E) -> Set<I>
+//    ): EventRouting<I> = route(E::class.java) { e, _ -> via(e as E) }
 
     /**
      * Sets a custom route for the passed event type.
@@ -125,15 +126,15 @@ public class EventRouting<I : Any> private constructor(
      *   directly or via a super-interface.
      */
     @CanIgnoreReturnValue
-    public fun <E : EventMessage> route(
-        eventType: Class<E>,
-        via: EventRoute<I, in E>
-    ): EventRouting<I> {
-        @Suppress("UNCHECKED_CAST") // The cast is required to adapt the type to internal API.
-        val casted = via as RouteFn<EventMessage, EventContext, Set<I>>
-        addRoute(eventType, casted)
-        return this
-    }
+//    public fun <E : EventMessage> route(
+//        eventType: Class<E>,
+//        via: EventRoute<I, in E>
+//    ): EventRouting<I> {
+//        @Suppress("UNCHECKED_CAST") // The cast is required to adapt the type to internal API.
+//        val casted = via as RouteFn<EventMessage, EventContext, Set<I>>
+//        addRoute(eventType, casted)
+//        return this
+//    }
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity
@@ -150,9 +151,9 @@ public class EventRouting<I : Any> private constructor(
      *
      * @see route
      */
-    public inline fun <reified E : EventMessage> unicast(
-        noinline via: (E) -> I
-    ): EventRouting<I> = unicast(E::class.java, via)
+//    public inline fun <reified E : EventMessage> unicast(
+//        noinline via: (E) -> I
+//    ): EventRouting<I> = unicast(E::class.java, via)
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity
@@ -168,11 +169,21 @@ public class EventRouting<I : Any> private constructor(
      * @see route
      * @see unicast
      */
-    @CanIgnoreReturnValue
-    public fun <E : EventMessage> unicast(
-        eventType: Class<E>,
+//    @CanIgnoreReturnValue
+//    public fun <E : EventMessage> unicast(
+//        eventType: Class<E>,
+//        via: (E) -> I
+//    ): EventRouting<I> = route(eventType, EventFnRoute(via))
+
+    override fun <E : EventMessage> createRoute(
         via: (E) -> I
-    ): EventRouting<I> = route(eventType, EventFnRoute(via))
+    ): EventRoute<I, E> =
+        EventFnRoute(via)
+
+    override fun <E : EventMessage> createRoute(
+        via: BiFunction<E, EventContext, I>
+    ): EventRoute<I, E> =
+        EventFnRoute(via)
 
 
     /**
@@ -188,9 +199,9 @@ public class EventRouting<I : Any> private constructor(
      *
      * @see route
      */
-    public inline fun <reified E : EventMessage> unicast(
-        noinline via: (E, EventContext) -> I
-    ): EventRouting<I> = unicast(E::class.java, via)
+//    public inline fun <reified E : EventMessage> unicast(
+//        noinline via: (E, EventContext) -> I
+//    ): EventRouting<I> = unicast(E::class.java, via)
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity
@@ -206,11 +217,11 @@ public class EventRouting<I : Any> private constructor(
      * @see route
      * @see unicast
      */
-    @CanIgnoreReturnValue
-    public fun <E : EventMessage> unicast(
-        eventType: Class<E>,
-        via: BiFunction<E, EventContext, I>
-    ): EventRouting<I> = route(eventType, EventFnRoute(via))
+//    @CanIgnoreReturnValue
+//    public fun <E : EventMessage> unicast(
+//        eventType: Class<E>,
+//        via: BiFunction<E, EventContext, I>
+//    ): EventRouting<I> = route(eventType, EventFnRoute(via))
 
     /**
      * Sets a custom routing schema for entity state updates.
@@ -229,7 +240,7 @@ public class EventRouting<I : Any> private constructor(
      * @param E The type of the event message.
      * @return optionally available route.
      */
-    public inline fun <reified E: EventMessage> find(): EventRoute<I, E>? =
+    public inline fun <reified E : EventMessage> find(): EventRoute<I, E>? =
         find(E::class.java)
 
     /**
@@ -241,9 +252,9 @@ public class EventRouting<I : Any> private constructor(
      */
     public fun <E : EventMessage> find(eventClass: Class<E>): EventRoute<I, E>? {
         val match: Match = routeFor(eventClass)
-        return if (match.found()) {
+        return if (match.found) {
             @Suppress("UNCHECKED_CAST") // protected by generic params of this class
-            return match.route() as EventRoute<I, E>
+            return match.route as EventRoute<I, E>
         } else {
             null
         }
@@ -280,7 +291,7 @@ public class EventRouting<I : Any> private constructor(
          * @see EventRoute.byProducerId
          */
         @JvmStatic
-        public fun <I: Any> withDefaultByProducerId(): EventRouting<I> =
+        public fun <I : Any> withDefaultByProducerId(): EventRouting<I> =
             withDefault(EventRoute.byProducerId())
     }
 }
