@@ -466,7 +466,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      *          if {@link #eventImportRouting} returns more than one ID
      */
     private I idForImported(EventMessage message, EventContext context) {
-        var ids = eventImportRouting.apply(message, context);
+        var ids = eventImportRouting.invoke(message, context);
         var numberOfTargets = ids.size();
         var messageType = message.getClass()
                                  .getName();

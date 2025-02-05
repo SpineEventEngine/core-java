@@ -33,7 +33,8 @@ import io.spine.core.SignalContext
 import java.util.Collections.synchronizedMap
 
 /**
- * A routing schema for a kind of messages such as commands, events, rejections, or entity states.
+ * A routing schema for [routable][Routable] messages such as commands, events,
+ * rejections, or entity states.
  *
  * A routing schema consists of a default route and custom routes per message class or
  * a grouping interface.
@@ -227,15 +228,15 @@ public sealed class MessageRouting<
      * @param context The context of the message.
      * @return the set of entity IDs to which the message should be delivered.
      */
-    override fun apply(message: M, context: C): R {
+    override fun invoke(message: M, context: C): R {
         val cls = message.javaClass
         val match = routeFor(cls)
         if (match.found) {
             val func = match.route!!
-            val result = func.apply(message, context)
+            val result = func.invoke(message, context)
             return result
         }
-        val result = defaultRoute().apply(message, context)
+        val result = defaultRoute().invoke(message, context)
         return result
     }
 

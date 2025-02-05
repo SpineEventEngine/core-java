@@ -36,7 +36,7 @@ import io.spine.core.EventContext
  */
 internal class ByProducerId<I : Any> : EventRoute<I, EventMessage> {
 
-    override fun apply(message: EventMessage, context: EventContext): Set<I> {
+    override fun invoke(message: EventMessage, context: EventContext): Set<I> {
         @Suppress("UNCHECKED_CAST")
         val id = context.producer() as I
         return EventRoute.withId(id)

@@ -42,8 +42,8 @@ internal class ByFirstEventField<I : Any, E : EventMessage>(
 
     private val route = ByFirstField<I, E, EventContext>(idClass)
 
-    override fun apply(message: E, context: EventContext): Set<I> {
-        val id = route.apply(message, context)
+    override fun invoke(message: E, context: EventContext): Set<I> {
+        val id = route(message, context)
         return withId(id)
     }
 }

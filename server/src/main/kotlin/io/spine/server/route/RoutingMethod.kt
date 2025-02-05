@@ -56,7 +56,7 @@ internal sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
     /**
      * Invokes the [rawMethod] with the given parameters.
      */
-    protected fun invoke(message: M, context: C): Any? {
+    protected open fun doInvoke(message: M, context: C): Any? {
         rawMethod.setAccessible(true)
         val result = if (acceptsContext) {
             rawMethod.invoke(null, message, context)
@@ -75,10 +75,9 @@ internal class CommandRoutingMethod<I : Any>(
 ) : RoutingMethod<I, CommandMessage, CommandContext, I>(rawMethod),
     CommandRoute<I, CommandMessage> {
 
-    override fun apply(message: CommandMessage, context: CommandContext): I {
-        val result = invoke(message, context)
-        @Suppress("UNCHECKED_CAST") /* The cast is protected by the return type check when
-          the entity class methods are analyzed. */
+    override fun invoke(message: CommandMessage, context: CommandContext): I {
+        val result = doInvoke(message, context)
+        @Suppress("UNCHECKED_CAST")
         return result as I
     }
 }
@@ -100,8 +99,8 @@ internal class EventRoutingMethod<I: Any>(
         1) the return type check when the entity class methods are analyzed.
         2) the `returnsSet` property.
     */
-    override fun apply(message: EventMessage, context: EventContext): Set<I> {
-        val result = invoke(message, context)
+    override fun invoke(message: EventMessage, context: EventContext): Set<I> {
+        val result = doInvoke(message, context)
         return if (returnsSet) {
             result as Set<I>
         } else {

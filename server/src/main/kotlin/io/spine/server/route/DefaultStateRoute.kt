@@ -80,7 +80,7 @@ private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityS
      * @throws IllegalStateException
      * if the passed state instance does not have a field of the required ID type
      */
-    override fun apply(message: EntityState<*>, context: EventContext): Set<I> {
+    override fun invoke(message: EntityState<*>, context: EventContext): Set<I> {
         val messageClass: Class<out EntityState<*>> = message.javaClass
         val field = fields[messageClass]
         if (field != null) {

@@ -107,7 +107,7 @@ public class StateUpdateRouting<I : Any> private constructor(
         return EventRoute { event: EntityStateChanged, context: EventContext ->
             @Suppress("UNCHECKED_CAST") // `EntityStateChanged` passes the `EntityState`s.
             val state = AnyPacker.unpack(event.newState) as EntityState<I>
-            apply(state, context)
+            invoke(state, context)
         }
     }
 

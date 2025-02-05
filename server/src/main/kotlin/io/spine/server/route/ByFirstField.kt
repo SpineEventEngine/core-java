@@ -46,7 +46,7 @@ internal class ByFirstField<I : Any, M : Routable, C : SignalContext>(
     private val idClass: Class<I>
 ) : Unicast<I, M, C> {
 
-    override fun apply(message: M, context: C): I {
+    override fun invoke(message: M, context: C): I {
         val field = fieldIn(message)
         val result = getValue(field, message)
         return result

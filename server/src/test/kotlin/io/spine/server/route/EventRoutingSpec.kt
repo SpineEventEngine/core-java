@@ -161,7 +161,7 @@ internal class EventRoutingSpec {
         eventRouting.route(UserRegistered::class.java, userRegisteredRoute)
 
         val event = GivenEvent.arbitrary()
-        val ids = eventRouting.apply(event.enclosedMessage(), event.context())
+        val ids = eventRouting(event.enclosedMessage(), event.context())
 
         ids shouldBe DEFAULT_ROUTE
     }
@@ -175,7 +175,7 @@ internal class EventRoutingSpec {
             .build()
         val event = EventEnvelope.of(GivenEvent.withMessage(eventMessage))
 
-        val ids = eventRouting.apply(event.message(), event.context())
+        val ids = eventRouting(event.message(), event.context())
 
         ids shouldBe USER_REGISTERED_ROUTE
     }
@@ -188,10 +188,10 @@ internal class EventRoutingSpec {
         val ctx = EventContext.getDefaultInstance()
 
         // Check routing via common interface `LoginEvent`.
-        eventRouting.apply(UserLoggedIn.getDefaultInstance(), ctx) shouldBe LOGIN_EVENT_ROUTE
+        eventRouting(UserLoggedIn.getDefaultInstance(), ctx) shouldBe LOGIN_EVENT_ROUTE
 
         // Check routing via a specific type.
-        eventRouting.apply(UserLoggedOut.getDefaultInstance(), ctx) shouldBe LOGGED_OUT_ROUTE
+        eventRouting(UserLoggedOut.getDefaultInstance(), ctx) shouldBe LOGGED_OUT_ROUTE
     }
 
     @Test
@@ -229,7 +229,7 @@ internal class EventRoutingSpec {
 
         match.found shouldBe false
 
-        val route = eventRouting.apply(
+        val route = eventRouting(
             UserLoggedIn.getDefaultInstance(),
             EventContext.getDefaultInstance()
         )

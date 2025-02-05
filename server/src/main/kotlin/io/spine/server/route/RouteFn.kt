@@ -28,17 +28,16 @@ package io.spine.server.route
 
 import io.spine.base.Routable
 import io.spine.core.SignalContext
-import java.util.function.BiFunction
 
 /**
  * Obtains one or more entity identifiers based on a message and its context.
  *
  * @param M The type of messages to get IDs from.
- * @param C The type of message context
+ * @param C The type of message context.
  * @param R The type of the route function result. Could be one ID type or a set of IDs.
  */
 @FunctionalInterface
-public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : BiFunction<M, C, R> {
+public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) -> R {
 
     /**
      * Obtains entity ID(s) from the passed message and its context.
@@ -47,5 +46,5 @@ public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : BiFunct
      * @param context The context of the message.
      * @return identifier(s) of the target entities.
      */
-    override fun apply(message: M, context: C): R
+    override fun invoke(message: M, context: C): R
 }

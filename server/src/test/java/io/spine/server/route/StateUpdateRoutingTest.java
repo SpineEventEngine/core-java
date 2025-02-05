@@ -68,7 +68,7 @@ class StateUpdateRoutingTest {
         var log = LogState.newBuilder()
                 .putCounters(counterKey, counter)
                 .build();
-        var targets = routing.apply(log, emptyContext);
+        var targets = routing.invoke(log, emptyContext);
         assertThat(targets).containsExactly(counter);
     }
 
@@ -93,7 +93,7 @@ class StateUpdateRoutingTest {
                 .setWhen(currentTime())
                 .build();
         var eventRoute = routing.eventRoute();
-        var targets = eventRoute.apply(event, emptyContext);
+        var targets = eventRoute.invoke(event, emptyContext);
         assertThat(targets).containsExactly(counter);
     }
 

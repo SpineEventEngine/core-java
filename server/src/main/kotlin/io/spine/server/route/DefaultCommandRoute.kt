@@ -39,9 +39,8 @@ public class DefaultCommandRoute<I : Any> private constructor(cls: Class<I>) :
 
     private val field = ByFirstField<I, CommandMessage, CommandContext>(cls)
 
-
-    override fun apply(message: CommandMessage, context: CommandContext): I {
-        val result = field.apply(message, context)
+    override fun invoke(message: CommandMessage, context: CommandContext): I {
+        val result = field(message, context)
         return result
     }
 

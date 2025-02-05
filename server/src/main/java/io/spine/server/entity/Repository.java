@@ -381,7 +381,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         try {
             @SuppressWarnings("unchecked")
             var message = (M) envelope.message();
-            var result = routing.apply(message, envelope.context());
+            var result = routing.invoke(message, envelope.context());
             checkMatchesIdType(result);
             return Optional.of(result);
         } catch (RuntimeException e) {
