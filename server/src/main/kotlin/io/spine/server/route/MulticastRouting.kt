@@ -26,14 +26,14 @@
 
 package io.spine.server.route
 
-import com.google.protobuf.Message
-import io.spine.base.MessageContext
+import io.spine.base.Routable
+import io.spine.core.SignalContext
 import java.util.function.BiFunction
 
 public abstract class MulticastRouting<
         I : Any,
-        M : Message,
-        C : MessageContext,
+        M : Routable,
+        C : SignalContext,
         R : Set<I>,
         S : MulticastRouting<I, M, C, R, S>>(
     defaultRoute: RouteFn<M, C, R>
@@ -45,11 +45,11 @@ public abstract class MulticastRouting<
     ): S = route(msgType, createRoute(via))
 
     public inline fun <reified N : M> unicast(
-        noinline via: (N) -> I
+        noinline via: (N, C) -> I
     ): S = unicast(N::class.java, via)
 
     public inline fun <reified N : M> unicast(
-        noinline via: (N, C) -> I
+        noinline via: (N) -> I
     ): S = unicast(N::class.java, via)
 
 }

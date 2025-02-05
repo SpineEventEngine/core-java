@@ -23,12 +23,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.route
 
 import com.google.protobuf.Descriptors.FieldDescriptor
-import com.google.protobuf.Message
-import io.spine.base.MessageContext
-import io.spine.util.Exceptions
+import io.spine.base.Routable
+import io.spine.core.SignalContext
 import io.spine.util.Exceptions.newIllegalStateException
 
 /**
@@ -38,14 +38,11 @@ import io.spine.util.Exceptions.newIllegalStateException
  *
  * It is expected that the types of the first field and the identifier are the same.
  *
- * @param <I>
- * the type of the identifiers
- * @param <M>
- * the common supertype for messages
- * @param <C>
- * the type of contexts of the messages
+ * @param I The type of the identifiers.
+ * @param M The common supertype for messages routable messages.
+ * @param C The type of the message contexts.
  */
-internal class ByFirstField<I : Any, M : Message, C : MessageContext>(
+internal class ByFirstField<I : Any, M : Routable, C : SignalContext>(
     private val idClass: Class<I>
 ) : Unicast<I, M, C> {
 
@@ -89,7 +86,7 @@ internal class ByFirstField<I : Any, M : Message, C : MessageContext>(
     }
 
     private fun error(messageFormat: String, firstArg: String): IllegalStateException {
-        throw Exceptions.newIllegalStateException(
+        throw newIllegalStateException(
             "$messageFormat Please declare a field with the type `%s`.",
             firstArg,
             idClass.canonicalName

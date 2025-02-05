@@ -29,7 +29,8 @@ package io.spine.server.route
 import com.google.common.annotations.VisibleForTesting
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import com.google.protobuf.Message
-import io.spine.base.MessageContext
+import io.spine.base.Routable
+import io.spine.core.SignalContext
 import java.util.Collections.synchronizedMap
 import java.util.function.BiFunction
 
@@ -41,15 +42,15 @@ import java.util.function.BiFunction
  * @param I The type of identifiers used in the routing.
  * @param M The common supertype of messages to route.
  * @param C The type of message context.
- * @param R The type returned by the [routing function][RouteFn.apply].
+ * @param R The type returned by a [routing function][RouteFn.apply].
  * @param S The type of message routing for covariance in return types.
  * @property defaultRoute The route to be used if there is no matching entry set in [routes].
  */
 @Suppress("TooManyFunctions")
 public sealed class MessageRouting<
         I,
-        M : Message,
-        C : MessageContext,
+        M : Routable,
+        C : SignalContext,
         R : Any,
         S : MessageRouting<I, M, C, R, S>
         >(private var defaultRoute: RouteFn<M, C, R>) : RouteFn<M, C, R> {

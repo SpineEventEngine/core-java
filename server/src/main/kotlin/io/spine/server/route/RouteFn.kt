@@ -23,10 +23,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.route
 
-import com.google.protobuf.Message
-import io.spine.base.MessageContext
+import io.spine.base.Routable
+import io.spine.core.SignalContext
 import java.util.function.BiFunction
 
 /**
@@ -37,7 +38,7 @@ import java.util.function.BiFunction
  * @param R The type of the route function result. Could be one ID type or a set of IDs.
  */
 @FunctionalInterface
-public fun interface RouteFn<M : Message, C : MessageContext, R : Any> : BiFunction<M, C, R> {
+public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : BiFunction<M, C, R> {
 
     /**
      * Obtains entity ID(s) from the passed message and its context.

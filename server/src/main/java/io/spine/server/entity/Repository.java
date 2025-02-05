@@ -29,11 +29,11 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
-import io.spine.base.MessageContext;
+import io.spine.base.Routable;
+import io.spine.core.SignalContext;
 import io.spine.logging.WithLogging;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
@@ -376,7 +376,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     @Internal
-    protected final <M extends Message, C extends MessageContext, R> Optional<R>
+    protected final <M extends Routable, C extends SignalContext, R> Optional<R>
     route(RouteFn<M, C, R> routing, SignalEnvelope<?, ?, C> envelope) {
         try {
             @SuppressWarnings("unchecked")
