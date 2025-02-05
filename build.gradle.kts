@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,18 @@
 
 @file:Suppress("RemoveRedundantQualifierName")
 
-import Build_gradle.Subproject
 import io.spine.dependency.build.ErrorProne
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Guava
 import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.local.Base
+import io.spine.dependency.local.BaseTypes
+import io.spine.dependency.local.Change
 import io.spine.dependency.local.Logging
-import io.spine.dependency.local.Spine
+import io.spine.dependency.local.Reflect
 import io.spine.dependency.local.TestLib
+import io.spine.dependency.local.Time
+import io.spine.dependency.local.ToolBase
 import io.spine.dependency.local.Validation
 import io.spine.dependency.test.JUnit
 import io.spine.gradle.VersionWriter
@@ -64,17 +68,15 @@ buildscript {
             exclude(group = "io.spine", module = "spine-flogger-api")
             exclude(group = "io.spine", module = "spine-logging-backend")
             resolutionStrategy {
-                val spine = io.spine.dependency.local.Spine
                 val logging = io.spine.dependency.local.Logging
-                @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
                     io.spine.dependency.lib.Grpc.api,
-                    io.spine.dependency.lib.Kotlin.stdLibJdk7,
+                    io.spine.dependency.lib.Kotlin.stdLib,
                     "${protoData.module}:${protoData.dogfoodingVersion}",
-                    spine.base,
-                    spine.toolBase,
-                    spine.server,
-                    spine.reflect,
+                    io.spine.dependency.local.Base.lib,
+                    io.spine.dependency.local.ToolBase.lib,
+                    io.spine.dependency.local.CoreJava.server,
+                    io.spine.dependency.local.Reflect.lib,
                     logging.lib,
                     logging.libJvm,
                     logging.middleware,
@@ -334,9 +336,8 @@ fun Subproject.forceConfigurations() {
 
             resolutionStrategy {
 
-                @Suppress("DEPRECATION") // To force `Kotlin.stdLibJdk7`.
                 force(
-                    Kotlin.stdLibJdk7,
+                    Kotlin.stdLib,
                     Guava.lib,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
@@ -347,18 +348,18 @@ fun Subproject.forceConfigurations() {
                     Grpc.api,
                     JUnit.runner,
 
-                    Spine.base,
+                    Base.lib,
                     Validation.runtime,
-                    Spine.time,
+                    Time.lib,
                     Logging.lib,
                     Logging.libJvm,
                     Logging.middleware,
-                    Spine.baseTypes,
-                    Spine.change,
-                    Spine.reflect,
-                    Spine.testlib,
-                    Spine.toolBase,
-                    Spine.pluginBase,
+                    BaseTypes.lib,
+                    Change.lib,
+                    Reflect.lib,
+                    TestLib.lib,
+                    ToolBase.lib,
+                    ToolBase.pluginBase,
 
                     Grpc.core,
                     Grpc.protobuf,
