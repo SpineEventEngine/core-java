@@ -26,19 +26,19 @@
 package io.spine.server.route
 
 import com.google.protobuf.Message
+import io.spine.base.MessageContext
 import java.util.function.BiFunction
 
 /**
  * Obtains one or more entity identifiers based on a message and its context.
  *
- * @param <M>
- * the type of messages to get IDs from
- * @param <C>
- * the type of message context
+ * @param M The type of messages to get IDs from.
+ * @param C The type of message context
  * @param R The type of the route function result. Could be one ID type or a set of IDs.
  */
 @FunctionalInterface
-public fun interface RouteFn<M : Message, C : Message, R : Any> : BiFunction<M, C, R> {
+public fun interface RouteFn<M : Message, C : MessageContext, R : Any> : BiFunction<M, C, R> {
+
     /**
      * Obtains entity ID(s) from the passed message and its context.
      *

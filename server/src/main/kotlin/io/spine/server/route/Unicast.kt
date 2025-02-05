@@ -23,19 +23,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.route
 
 import com.google.protobuf.Message
+import io.spine.base.MessageContext
 
 /**
  * A route for a message to be delivered to one entity.
  *
- * @param <I>
- * the type of entity ID
- * @param <M>
- * the type of messages to get IDs from
- * @param <C>
- * the type of message context
+ * @param I The type of entity ID.
+ * @param M The type of messages to get IDs from.
+ * @param C The type of message context.
  */
 @FunctionalInterface
-public fun interface Unicast<I : Any, M : Message, C : Message> : RouteFn<M, C, I>
+public fun interface Unicast<I : Any, M : Message, C : MessageContext> : RouteFn<M, C, I>

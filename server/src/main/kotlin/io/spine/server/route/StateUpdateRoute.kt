@@ -32,10 +32,8 @@ import io.spine.core.EventContext
 /**
  * Obtains a set of entity IDs for which to deliver an entity state update.
  *
- * @param <I>
- * the type of entity IDs
- * @param <M>
- * the type of entity states to get IDs from
+ * @param I The type of entity IDs.
+ * @param S The type of entity states to get IDs from
  */
 @FunctionalInterface
-public fun interface StateUpdateRoute<I : Any, M : EntityState<*>> : Multicast<I, M, EventContext>
+public fun interface StateUpdateRoute<I : Any, S : EntityState<*>> : Multicast<I, S, EventContext>

@@ -27,16 +27,14 @@
 package io.spine.server.route
 
 import com.google.protobuf.Message
+import io.spine.base.MessageContext
 
 /**
  * A route for a message to be delivered to several entities.
  *
- * @param <I>
- * the type of the entity IDs
- * @param <M>
- * the type of messages to get IDs from
- * @param <C>
- * the type of message context
+ * @param I The type of the entity IDs.
+ * @param M The type of messages to get IDs from.
+ * @param C The type of message context.
  */
 @FunctionalInterface
-public fun interface Multicast<I : Any, M : Message, C : Message> : RouteFn<M, C, Set<I>>
+public fun interface Multicast<I : Any, M : Message, C : MessageContext> : RouteFn<M, C, Set<I>>

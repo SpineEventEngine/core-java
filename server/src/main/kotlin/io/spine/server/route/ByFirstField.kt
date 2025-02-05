@@ -27,6 +27,7 @@ package io.spine.server.route
 
 import com.google.protobuf.Descriptors.FieldDescriptor
 import com.google.protobuf.Message
+import io.spine.base.MessageContext
 import io.spine.util.Exceptions
 import io.spine.util.Exceptions.newIllegalStateException
 
@@ -44,7 +45,7 @@ import io.spine.util.Exceptions.newIllegalStateException
  * @param <C>
  * the type of contexts of the messages
  */
-internal class ByFirstField<I : Any, M : Message, C : Message>(
+internal class ByFirstField<I : Any, M : Message, C : MessageContext>(
     private val idClass: Class<I>
 ) : Unicast<I, M, C> {
 

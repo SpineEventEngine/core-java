@@ -31,6 +31,7 @@ import io.spine.base.CommandMessage
 import io.spine.base.RejectionThrowable
 import io.spine.core.CommandContext
 import java.util.function.BiFunction
+
 /**
  * A routing schema used by a [CommandDispatcher][io.spine.server.commandbus.CommandDispatcher]
  * for delivering a command to its [receptor][io.spine.server.model.Receptor].
