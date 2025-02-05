@@ -45,7 +45,7 @@ import java.util.function.BiFunction
  */
 public class StateUpdateRouting<I : Any> private constructor(
     idClass: Class<I>
-) : MessageRouting<
+) : MulticastRouting<
         I,
         EntityState<*>,
         EventContext, Set<I>,
@@ -53,16 +53,13 @@ public class StateUpdateRouting<I : Any> private constructor(
         >(
     DefaultStateRoute.newInstance(idClass)
 ) {
-
     override fun self(): StateUpdateRouting<I> = this
 
-    override fun <E : EntityState<*>> createRoute(
-        via: BiFunction<E, EventContext, I>
-    ): StateUpdateRoute<I, E> = StateUpdateRoute { state, context ->
-        setOf(via.apply(state, context))
-    }
+    override fun <E : EntityState<*>> createUnicastRoute(
+        via: (E, EventContext) -> I
+    ): StateUpdateRoute<I, E> = StateUpdateRoute { state, context -> setOf(via(state, context)) }
 
-    override fun <E : EntityState<*>> createRoute(
+    override fun <E : EntityState<*>> createUnicastRoute(
         via: (E) -> I
     ): StateUpdateRoute<I, E> = StateUpdateRoute { state, _ -> setOf(via(state)) }
 
@@ -70,14 +67,10 @@ public class StateUpdateRouting<I : Any> private constructor(
      * Verifies if the passed state type can be routed by a custom route, or
      * the message has a field matching the type of identifiers served by this routing.
      */
-    override fun supports(
-        @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE") // to highlight the nature of the class.
-        stateType: Class<out EntityState<*>>
-    ): Boolean {
-        val customRouteSet = super.supports(stateType)
-        @Suppress("UNCHECKED_CAST") // cast to the type used in ctor.
+    override fun supports(messageType: Class<out EntityState<*>>): Boolean {
+        val customRouteSet = super.supports(messageType)
         val defaultRoute = defaultRoute() as DefaultStateRoute<I>
-        val defaultRouteAvailable = defaultRoute.supports(stateType)
+        val defaultRouteAvailable = defaultRoute.supports(messageType)
         return customRouteSet || defaultRouteAvailable
     }
 

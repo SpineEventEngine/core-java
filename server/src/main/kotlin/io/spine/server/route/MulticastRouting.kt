@@ -28,7 +28,6 @@ package io.spine.server.route
 
 import io.spine.base.Routable
 import io.spine.core.SignalContext
-import java.util.function.BiFunction
 
 public abstract class MulticastRouting<
         I : Any,
@@ -41,8 +40,8 @@ public abstract class MulticastRouting<
 
     public fun <N : M> unicast(
         msgType: Class<N>,
-        via: BiFunction<N, C, I>
-    ): S = route(msgType, createRoute(via))
+        via: (N, C) -> I
+    ): S = route(msgType, createUnicastRoute(via))
 
     public inline fun <reified N : M> unicast(
         noinline via: (N, C) -> I
@@ -51,5 +50,4 @@ public abstract class MulticastRouting<
     public inline fun <reified N : M> unicast(
         noinline via: (N) -> I
     ): S = unicast(N::class.java, via)
-
 }

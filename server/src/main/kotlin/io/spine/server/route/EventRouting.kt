@@ -29,8 +29,8 @@ package io.spine.server.route
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.EventMessage
 import io.spine.core.EventContext
+import io.spine.server.route.EventRoute.Companion.withId
 import io.spine.system.server.event.EntityStateChanged
-import java.util.function.BiFunction
 
 /**
  * A routing schema used to deliver events.
@@ -175,16 +175,13 @@ public class EventRouting<I : Any> private constructor(
 //        via: (E) -> I
 //    ): EventRouting<I> = route(eventType, EventFnRoute(via))
 
-    override fun <E : EventMessage> createRoute(
+    override fun <E : EventMessage> createUnicastRoute(
         via: (E) -> I
-    ): EventRoute<I, E> =
-        EventFnRoute(via)
+    ): EventRoute<I, E> = EventRoute { e, _ -> withId(via(e)) }
 
-    override fun <E : EventMessage> createRoute(
-        via: BiFunction<E, EventContext, I>
-    ): EventRoute<I, E> =
-        EventFnRoute(via)
-
+    override fun <E : EventMessage> createUnicastRoute(
+        via: (E, EventContext) -> I
+    ): EventRoute<I, E> = EventRoute { e, c -> withId(via(e, c)) }
 
     /**
      * Sets a custom route for the passed event type by obtaining the target entity

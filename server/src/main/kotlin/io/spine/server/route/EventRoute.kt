@@ -33,23 +33,21 @@ import io.spine.core.EventContext
 /**
  * Obtains a set of entity IDs for which to deliver an event.
  *
- * @param <I>
- * the type of entity IDs
- * @param <M>
- * the type of event messages to get IDs from
-</M></I> */
+ * @param I The type of entity IDs.
+ * @param M The type of event message from which to get the IDs.
+ */
 @FunctionalInterface
 public fun interface EventRoute<I : Any, M : EventMessage> : Multicast<I, M, EventContext> {
 
     public companion object {
+
         /**
-         * Creates an event route that obtains event producer ID from an `EventContext` and
-         * returns it as a sole element of the immutable set.
+         * Creates an event route that obtains the ID of the event producer from
+         * an [EventContext] and returns it as a sole element of the returned route.
          *
-         * @param <I>
-         * the type of the entity IDs to which the event would be routed
-         * @return new route instance
-        </I> */
+         * @param I The type of the entity IDs to which the event would be routed.
+         * @return new route.
+         */
         @JvmStatic
         public fun <I : Any> byProducerId(): EventRoute<I, EventMessage> = ByProducerId()
 
@@ -57,11 +55,9 @@ public fun interface EventRoute<I : Any, M : EventMessage> : Multicast<I, M, Eve
          * Creates an event route that obtains target entity ID from an event message and
          * returns it as a sole element of the immutable set.
          *
-         * @param <I>
-         * the type of the IDs of entities to which the event would be routed
-         * @param idClass
-         * the class of identifiers
-         * @return new route instance
+         * @param I The type of the IDs of entities to which the event would be routed.
+         * @param idClass The class of identifiers.
+         * @return new route.
          */
         @JvmStatic
         public fun <I : Any, E : EventMessage> byFirstMessageField(

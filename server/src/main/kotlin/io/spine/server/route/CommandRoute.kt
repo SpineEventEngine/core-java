@@ -30,12 +30,10 @@ import io.spine.base.CommandMessage
 import io.spine.core.CommandContext
 
 /**
- * Obtains an ID of an entity which handles the command.
+ * Obtains an ID of an entity which would the command.
  *
- * @param <I>
- * the type of the entity ID
- * @param <M>
- * the type of the handled command
+ * @param I The type of the entity ID.
+ * @param M The type of the command to handle.
  */
 @FunctionalInterface
 public fun interface CommandRoute<I : Any, M : CommandMessage> : Unicast<I, M, CommandContext>

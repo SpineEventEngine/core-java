@@ -28,32 +28,34 @@ package io.spine.server.route
 
 import com.google.common.annotations.VisibleForTesting
 import com.google.errorprone.annotations.CanIgnoreReturnValue
-import com.google.protobuf.Message
 import io.spine.base.Routable
 import io.spine.core.SignalContext
 import java.util.Collections.synchronizedMap
-import java.util.function.BiFunction
 
 /**
- * A routing schema for a kind of messages such as commands, events, rejections, or documents.
+ * A routing schema for a kind of messages such as commands, events, rejections, or entity states.
  *
- * A routing schema consists of a default route and custom routes per message class.
+ * A routing schema consists of a default route and custom routes per message class or
+ * a grouping interface.
  *
  * @param I The type of identifiers used in the routing.
  * @param M The common supertype of messages to route.
  * @param C The type of message context.
  * @param R The type returned by a [routing function][RouteFn.apply].
+ *   For unicast routing it would be the same as [I], and `Set<I>` for multicast routing.
  * @param S The type of message routing for covariance in return types.
  * @property defaultRoute The route to be used if there is no matching entry set in [routes].
  */
 @Suppress("TooManyFunctions")
 public sealed class MessageRouting<
-        I,
+        I : Any,
         M : Routable,
         C : SignalContext,
         R : Any,
         S : MessageRouting<I, M, C, R, S>
-        >(private var defaultRoute: RouteFn<M, C, R>) : RouteFn<M, C, R> {
+        >(
+    private var defaultRoute: RouteFn<M, C, R>
+) : RouteFn<M, C, R> {
 
     protected abstract fun self(): S
 
@@ -74,7 +76,8 @@ public sealed class MessageRouting<
         synchronizedMap(LinkedHashMap())
 
     /**
-     * Obtains the default route used by the schema.
+     * Obtains the default route to be used when none of the added entries match
+     * the argument passed to the [apply] function.
      */
     @VisibleForTesting
     public open fun defaultRoute(): RouteFn<M, C, R> = defaultRoute
@@ -103,11 +106,11 @@ public sealed class MessageRouting<
     public fun <N : M> unicast(
         msgType: Class<N>,
         via: (N) -> I
-    ): S = route(msgType, createRoute(via))
+    ): S = route(msgType, createUnicastRoute(via))
 
-    protected abstract fun <N : M> createRoute(via: (N) -> I): RouteFn<N, C, R>
+    protected abstract fun <N : M> createUnicastRoute(via: (N) -> I): RouteFn<N, C, R>
 
-    protected abstract fun <N : M> createRoute(via: BiFunction<N, C, I>): RouteFn<N, C, R>
+    protected abstract fun <N : M> createUnicastRoute(via: (N, C) -> I): RouteFn<N, C, R>
 
     /**
      * Checks if the passed message type is supported by this instance of routing.
@@ -162,8 +165,8 @@ public sealed class MessageRouting<
     /**
      * Obtains a route for the passed message class.
      *
-     * @param msgCls the class of the messages
-     * @return optionally available route
+     * @param msgCls the class of the messages.
+     * @return optionally available route.
      */
     internal fun routeFor(msgCls: Class<out M>): Match {
         val direct = findDirect(msgCls)
@@ -245,7 +248,7 @@ public sealed class MessageRouting<
      *   of the requested class.
      *   Is `null` if there is no routing found for the [requestedClass].
      * @param route The routing function or `null` if there is no route defined neither
-     *   for the class nor a super-interface of the class
+     *   for the class nor a super-interface of the class.
      */
     internal inner class Match(
         private val requestedClass: Class<out M>,

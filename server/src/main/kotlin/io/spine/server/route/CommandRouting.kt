@@ -60,11 +60,11 @@ public class CommandRouting<I : Any> private constructor(
         return super.defaultRoute() as CommandRoute<I, CommandMessage>
     }
 
-    override fun <C : CommandMessage> createRoute(
-        via: BiFunction<C, CommandContext, I>
-    ): CommandRoute<I, C> = CommandRoute { command, context -> via.apply(command, context) }
+    override fun <C : CommandMessage> createUnicastRoute(
+        via: (C, CommandContext) -> I
+    ): CommandRoute<I, C> = CommandRoute { command, context -> via(command, context) }
 
-    override fun <N : CommandMessage> createRoute(via: (N) -> I): CommandRoute<I, N> =
+    override fun <N : CommandMessage> createUnicastRoute(via: (N) -> I): CommandRoute<I, N> =
         CommandRoute { c, _ -> via(c) }
 
     /**
