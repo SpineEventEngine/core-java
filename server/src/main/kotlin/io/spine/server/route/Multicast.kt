@@ -35,6 +35,8 @@ import io.spine.core.SignalContext
  * @param I The type of the entity IDs.
  * @param M The type of messages to get IDs from.
  * @param C The type of message context.
+ *
+ * @see Unicast
  */
 @FunctionalInterface
 public fun interface Multicast<I : Any, M : Routable, C : SignalContext> : RouteFn<M, C, Set<I>>

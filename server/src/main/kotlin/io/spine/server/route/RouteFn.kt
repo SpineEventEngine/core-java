@@ -30,11 +30,19 @@ import io.spine.base.Routable
 import io.spine.core.SignalContext
 
 /**
- * Obtains one or more entity identifiers based on a message and its context.
+ * A common interface for routing functions for calculating identifiers of entities to which
+ * a message should be delivered taking the message and its context.
  *
- * @param M The type of messages to get IDs from.
+ * Routing functions serve as entries in a [MessageRouting] used by
+ * a [repository][io.spine.server.entity.Repository] for delivering the message to
+ * entities with the calculated identifiers.
+ *
+ * @param M The type of the routed messages.
  * @param C The type of message context.
  * @param R The type of the route function result. Could be one ID type or a set of IDs.
+ *
+ * @see Unicast
+ * @see Multicast
  */
 @FunctionalInterface
 public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) -> R {
