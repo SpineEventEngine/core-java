@@ -33,16 +33,46 @@ import io.spine.core.SignalContext
 import java.util.Collections.synchronizedMap
 
 /**
- * A routing schema for [routable][Routable] messages such as commands, events,
- * rejections, or entity states.
+ * An abstract base for classes implementing routing schemas for [routable][Routable] messages
+ * such as commands, events, rejections, or entity states.
  *
- * A routing schema consists of a default route and custom routes per message class or
- * a grouping interface.
+ * Routing schemas are used by [repositories][io.spine.server.entity.Repository] for delivering
+ * messages to entities. The identifiers of the target entities are calculated by these schemas.
+ *
+ * A routing schema consists of a [default route][defaultRoute] and custom routes per a message
+ * class or an interface. The default route is used when none of the routing functions
+ * added to the schema for a class or an interface matches the incoming message.
+ *
+ * ## Composing a routing schema
+ * A routing schema is composed using the [route] functions:
+ *
+ * ```kotlin
+ * routing.route<MyClass1> { message, context -> ... }
+ *        .route<MyClass2> { message ->  ... }
+ *        .route<MyInterface> { message, context ->  ... }
+ *        .route<MoreAbstractInterface> { message ->  ... }
+ * ```
+ * Entries for classes must come before those for interfaces.
+ * Entries for more specific interfaces must be added before entries for super-interfaces of
+ * the already added interface entries. There rules ensure correct routing of messages.
+ * If these rules are not followed, `IllegalStateException` will be thrown when calling
+ * a [route] function which attempts to add a violating entry.
+ *
+ * ## Optional `context` parameter
+ *
+ * A routing function may accept two parameters `message` and `context`, or only
+ * single `message` parameter, if the message context does not participate in the routing.
+ *
+ * ## Replacing the default route
+ *
+ * Repositories create [MessageRouting] instances for their needs providing default routes
+ * that match the nature of the dispatched messages. An alternative default route can be set
+ * using the [replaceDefault] function.
  *
  * @param I The type of identifiers used in the routing.
  * @param M The common supertype of messages to route.
  * @param C The type of message context.
- * @param R The type returned by a [routing function][RouteFn.apply].
+ * @param R The type returned by a [routing function][RouteFn.invoke].
  *   For unicast routing it would be the same as [I], and `Set<I>` for multicast routing.
  * @param S The type of message routing for covariance in return types.
  * @property defaultRoute The route to be used if there is no matching entry set in [routes].
@@ -58,6 +88,10 @@ public sealed class MessageRouting<
     private var defaultRoute: RouteFn<M, C, R>
 ) : RouteFn<M, C, R> {
 
+    /**
+     * Provides the type reference to `this` for covariance of the type returned
+     * by [route] functions.
+     */
     protected abstract fun self(): S
 
     /**
@@ -78,10 +112,10 @@ public sealed class MessageRouting<
 
     /**
      * Obtains the default route to be used when none of the added entries match
-     * the argument passed to the [apply] function.
+     * the argument passed to the [invoke] function.
      */
     @VisibleForTesting
-    public open fun defaultRoute(): RouteFn<M, C, R> = defaultRoute
+    public fun defaultRoute(): RouteFn<M, C, R> = defaultRoute
 
     /**
      * Sets a new default route in the schema.
@@ -95,26 +129,54 @@ public sealed class MessageRouting<
         return self()
     }
 
+    /**
+     * Adds a route for the given message type [N].
+     *
+     * @param N The type of the message which descends from the type
+     *   [M] served by this routing schema.
+     * @param via The route to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
+    @CanIgnoreReturnValue
+    public inline fun <reified N: M> route(via: RouteFn<N, C, R>): S =
+        route(N::class.java, via)
+
+    /**
+     * Adds a route for the messages with the given type [N].
+     *
+     * @param N The type of the message which descends from
+     *   the super-interface [M] served by this routing schema.
+     * @param via The route function to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
+    @CanIgnoreReturnValue
+    public inline fun <reified N: M> route(noinline via: (N) -> R): S =
+        route<N> { n, _ -> via(n) }
+
+    /**
+     * Adds a route for the given message type [N].
+     *
+     * This is the Java version of `public inline fun` [route].
+     *
+     * @param N The type of the message which descends from
+     *   the super-interface [M] served by this routing schema.
+     * @param via The route function to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
     @CanIgnoreReturnValue
     public fun <N: M> route(msgClass: Class<N>, via: RouteFn<N, C, R>): S {
         addRoute(msgClass, via)
         return self()
     }
 
-    public inline fun <reified N: M> route(via: RouteFn<N, C, R>): S =
-        route(N::class.java, via)
-
-    public fun <N : M> unicast(
-        msgType: Class<N>,
-        via: (N) -> I
-    ): S = route(msgType, createUnicastRoute(via))
-
-    protected abstract fun <N : M> createUnicastRoute(via: (N) -> I): RouteFn<N, C, R>
-
-    protected abstract fun <N : M> createUnicastRoute(via: (N, C) -> I): RouteFn<N, C, R>
-
     /**
-     * Checks if the passed message type is supported by this instance of routing.
+     * Checks if the passed message type is supported by this routing schema.
      */
     public open fun supports(messageType: Class<out M>): Boolean {
         val match = routeFor(messageType)
@@ -123,15 +185,7 @@ public sealed class MessageRouting<
     }
 
     /**
-     * Sets a custom route for the passed message type.
-     *
-     * The type can be either a class or interface. If the routing schema already contains an
-     * entry with the same type or a super-interface of the passed type
-     * an [IllegalStateException] will be thrown.
-     *
-     * In order to provide a mapping for a specific class *and* an interface common
-     * to this and other message classes, please add the routing for the class *before*
-     * the interface.
+     * Adds a custom route for the given message type.
      *
      * @param N The type derived from common type M served by this routing.
      *   Could be a sub-interface or a class.
@@ -140,7 +194,7 @@ public sealed class MessageRouting<
      * @throws IllegalStateException If the route for this message class is already set either
      *   directly or via a super-interface.
      */
-    public fun <N : M> addRoute(messageType: Class<N>, via: RouteFn<N, C, R>) {
+    private fun <N : M> addRoute(messageType: Class<N>, via: RouteFn<N, C, R>) {
         val match = routeFor(messageType)
         if (match.found) {
             val requestedClass = messageType.name
@@ -161,6 +215,20 @@ public sealed class MessageRouting<
         }
         @Suppress("UNCHECKED_CAST")
         routes[messageType as Class<M>] = via as RouteFn<M, C, R>
+    }
+
+    /**
+     * Obtains a routing function for the given class of messages, or `null`
+     * if the schema does not serve the class via non-default routes.
+     */
+    protected open fun <N : M> find(cls: Class<N>): RouteFn<N, C, R>? {
+        val match = routeFor(cls)
+        return if (match.found) {
+            @Suppress("UNCHECKED_CAST") // protected by generics when adding entries.
+            match.route as RouteFn<N, C, R>
+        } else {
+            null
+        }
     }
 
     /**
@@ -218,6 +286,16 @@ public sealed class MessageRouting<
         }
         routes.remove(messageClass)
     }
+
+    /**
+     * Removes a route for the given message class.
+     *
+     * @param N The message type of the routing function to remove.
+     * @throws IllegalStateException if a custom route for this message class was not
+     *   previously set or already removed.
+     */
+    public inline fun <reified N : M> remove(): Unit =
+        remove(N::class.java)
 
     /**
      * Obtains IDs of entities to which the passed message should be delivered.

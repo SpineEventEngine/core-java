@@ -35,7 +35,7 @@ import io.spine.core.SignalContext
  *
  * Routing functions serve as entries in a [MessageRouting] used by
  * a [repository][io.spine.server.entity.Repository] for delivering the message to
- * entities with the calculated identifiers.
+ * entities with the identifier(s) returned by the function.
  *
  * @param M The type of the routed messages.
  * @param C The type of message context.

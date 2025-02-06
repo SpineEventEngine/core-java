@@ -32,39 +32,35 @@ import io.spine.core.CommandContext
 /**
  * Obtains an ID of a command target entity from the first field of the command message.
  *
- * @param <I> the type of target entity IDs
+ * @param I The type of target entity IDs.
  */
 public class DefaultCommandRoute<I : Any> private constructor(cls: Class<I>) :
     CommandRoute<I, CommandMessage> {
 
-    private val field = ByFirstField<I, CommandMessage, CommandContext>(cls)
+    private val firstFieldOf = ByFirstField<I, CommandMessage, CommandContext>(cls)
 
     override fun invoke(message: CommandMessage, context: CommandContext): I {
-        val result = field(message, context)
+        val result = firstFieldOf(message, context)
         return result
     }
 
     public companion object {
+
         /**
          * Creates a new instance.
          *
-         * @param idClass
-         * the class of identifiers used for the routing
+         * @param idClass The class of identifiers used for the routing.
          */
         @JvmStatic
-        public fun <I : Any> newInstance(idClass: Class<I>): DefaultCommandRoute<I> {
-            return DefaultCommandRoute(idClass)
-        }
+        public fun <I : Any> newInstance(idClass: Class<I>): DefaultCommandRoute<I> =
+            DefaultCommandRoute(idClass)
 
         /**
          * Verifies of the passed command message potentially has a field with an entity ID.
          */
         @JvmStatic
         public fun exists(commandMessage: CommandMessage): Boolean {
-            val hasAtLeastOneField =
-                !commandMessage.descriptorForType
-                    .fields
-                    .isEmpty()
+            val hasAtLeastOneField = commandMessage.descriptorForType.fields.isNotEmpty()
             return hasAtLeastOneField
         }
     }

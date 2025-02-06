@@ -77,7 +77,7 @@ public class EventRouting<I : Any> private constructor(
      *  * An event message should be matched to more than one entity, for example, several
      *    projections updated in response to one event.
      *  * The type of event producer ID (stored in the event context) differs from the type
-     *    of entity identifiers (`<I>`.
+     *    of entity identifiers (`<I>`).
      *
      * The type of the event can be a class or an interface. If a routing schema needs to contain
      * entries for specific classes and an interface that these classes implement, routes for
@@ -243,28 +243,12 @@ public class EventRouting<I : Any> private constructor(
     /**
      * Obtains a route for the passed event class.
      *
-     * @param eventClass The class of the event messages.
+     * @param cls The class of the event messages.
      * @param E The type of the event message.
      * @return optionally available route.
      */
-    public fun <E : EventMessage> find(eventClass: Class<E>): EventRoute<I, E>? {
-        val match: Match = routeFor(eventClass)
-        return if (match.found) {
-            @Suppress("UNCHECKED_CAST") // protected by generic params of this class
-            return match.route as EventRoute<I, E>
-        } else {
-            null
-        }
-    }
-
-    /**
-     * Removes a route for the given event message class.
-     *
-     * @throws IllegalStateException if a custom route for this message class was not
-     *   previously set or already removed.
-     */
-    public inline fun <reified E : EventMessage> remove(): Unit =
-        remove(E::class.java)
+    public override fun <E : EventMessage> find(cls: Class<E>): EventRoute<I, E>? =
+        super.find(cls) as EventRoute<I, E>?
 
     public companion object {
 

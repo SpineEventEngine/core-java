@@ -30,7 +30,6 @@ import io.spine.base.EntityState
 import io.spine.core.EventContext
 import io.spine.protobuf.AnyPacker
 import io.spine.system.server.event.EntityStateChanged
-import java.util.function.BiFunction
 
 /**
  * A routing schema used to deliver entity state updates.

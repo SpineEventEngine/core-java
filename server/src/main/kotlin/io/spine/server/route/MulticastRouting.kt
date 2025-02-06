@@ -29,6 +29,28 @@ package io.spine.server.route
 import io.spine.base.Routable
 import io.spine.core.SignalContext
 
+/**
+ * An abstract base for routing schemas that route a message to potentially more than one entity.
+ *
+ * Some kinds of messages such as [EventMessage][io.spine.base.EventMessage]s or
+ * [EntityState][io.spine.base.EntityState] messages can be dispatched to several entities.
+ * This kind of routing is called [multicast][Multicast], and routing functions of such
+ * schemas return a set of identifiers of the type [I].
+ *
+ * ## Unicast routing
+ *
+ * In some cases a routing function returns only one identifier.
+ * This class provides convenience methods called [unicast] that allow to adapt
+ * function returning a single identifier to the general contract of the schema.
+ *
+ * ```kotlin
+ * routing.route<MyMessage> { message, context -> ... }
+ *        .unicast<AnotherMessage> { message, context -> ... }
+ *        .unicast<YetAnother> { message -> ... }
+ * ```
+ * The class provides overloads of the [unicast] functions that accept
+ * a message and its context, or only a message.
+ */
 public abstract class MulticastRouting<
         I : Any,
         M : Routable,
@@ -38,16 +60,77 @@ public abstract class MulticastRouting<
     defaultRoute: RouteFn<M, C, R>
 ) : MessageRouting<I, M, C, R, S>(defaultRoute) {
 
+    /**
+     * Adds a route for the messages with the given type [N].
+     *
+     * @param N The type of the message which descends from
+     *   the super-interface [M] served by this routing schema.
+     * @param via The route function to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
+    public inline fun <reified N : M> unicast(
+        noinline via: (N, C) -> I
+    ): S = unicast(N::class.java, via)
+
+    /**
+     * Adds a route for the messages with the given type [N].
+     *
+     * @param N The type of the message which descends from
+     *   the super-interface [M] served by this routing schema.
+     * @param via The route function to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
+    public inline fun <reified N : M> unicast(
+        noinline via: (N) -> I
+    ): S = unicast(N::class.java, via)
+
+    /**
+     * Adds a route for the messages with the given type [N].
+     *
+     * This is the Java version of `public inline fun` [unicast].
+     *
+     * @param N The type of the message which descends from
+     *   the super-interface [M] served by this routing schema.
+     * @param via The route function to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
     public fun <N : M> unicast(
         msgType: Class<N>,
         via: (N, C) -> I
     ): S = route(msgType, createUnicastRoute(via))
 
-    public inline fun <reified N : M> unicast(
-        noinline via: (N, C) -> I
-    ): S = unicast(N::class.java, via)
+    /**
+     * Adds a route for the messages with the given type [N].
+     *
+     * This is the Java version of `public inline fun` [unicast].
+     *
+     * @param N The type of the message which descends from
+     *   the super-interface [M] served by this routing schema.
+     * @param via The route function to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
+    public fun <N : M> unicast(
+        msgType: Class<N>,
+        via: (N) -> I
+    ): S = route(msgType, createUnicastRoute(via))
 
-    public inline fun <reified N : M> unicast(
-        noinline via: (N) -> I
-    ): S = unicast(N::class.java, via)
+    /**
+     * Adapt the single parameter function to [RouteFn] instance of the type
+     * used by the descendant of this class.
+     */
+    protected abstract fun <N : M> createUnicastRoute(via: (N) -> I): RouteFn<N, C, R>
+
+    /**
+     * Adapts the function with two parameters to [RouteFn] instance of
+     * the type used by the descendant of this class.
+     */
+    protected abstract fun <N : M> createUnicastRoute(via: (N, C) -> I): RouteFn<N, C, R>
 }
