@@ -31,35 +31,36 @@ import io.spine.base.RejectionThrowable
 import io.spine.core.CommandContext
 
 /**
- * A routing schema for commands.
+ * A [routing schema][MessageRouting] for commands.
  *
- * A command is always delivered to only one entity. This is called [unicast][Unicast] routing.
- * That is why the entries of this schema, having the [CommandRoute] type, return [I].
+ * Commands are always delivered to a single entity, following a routing
+ * strategy known as [unicast][Unicast].
+ * The `CommandRouting` schema contains entries that implement the [CommandRoute] interface.
+ * This interface is a functional type that returns an entity identifier of type [I].
  *
- * ## The default command route
+ * ## Default command route
  *
- * The default route used by `CommandRouting` takes the first field declared in
- * a command message type. This is handled by [DefaultCommandRoute] passed to the constructor
- * of `CommandRouting` when [newInstance] factory function is called.
+ * By default, `CommandRouting` uses the first field declared in a command message
+ * to determine the route. This behavior is defined by the [DefaultCommandRoute],
+ * which is passed to the constructor of `CommandRouting` when the [newInstance] factory
+ * function is called.
  *
- * If alternative default routing is needed for your repository, please call [replaceDefault]
- * in the `setupCommandRouting` method of the corresponding repository class.
+ * To customize the default routing for your repository, call [replaceDefault] in
+ * the `setupCommandRouting` method of the corresponding repository class.
  *
- * ## Setting a custom route for a command
+ * ## Adding custom routes
  *
- * Such a mapping may be required if the first field of the command message is
- * not of the same as the type of the entity ID which handles the command, as required by
- * the [default route][DefaultCommandRoute].
- *
- * Or, it could be the case when the target entity ID could be calculated by
+ * You may need to define a custom route if the first field of a command message
+ * does not match the type of the entity ID that handles the command, as required
+ * by the [DefaultCommandRoute].
+ * Alternatively, a custom route may be necessary if the entity ID must be derived from
  * both the command message and its context.
  *
  * ## Routing commands with a common interface
  *
- * The routing entry can accept a type of the command class or an interface.
- * If a routing schema needs to contain entries for command classes *and* an interface
- * that these commands implement, routes for interfaces should be defined *after* entries
- * for the classes:
+ * Routing entries can be defined for either specific command classes or interfaces.
+ * If you need to define routes for both command classes and an interface that these
+ * classes implement, interface routes should be declared *after* the entries for specific classes:
  *
  * ```kotlin
  * routing.route<MyCommandClass> { command, context -> ... }
@@ -67,12 +68,13 @@ import io.spine.core.CommandContext
  *        .route<MyInterface> { command, context ->  ... }
  *        .route<MySuperInterface> { command ->  ... }
  * ```
- * Also, adding entries for interfaces should start with more specific ones, followed by
- * those that are super-interfaces for already added entries.
- * If these rules are not followed, calling [route] will result in `IllegalStateException`.
  *
- * @param I The type of the entity IDs used by this command routing.
- * @param defaultRoute The route to use if a custom one is not [set][route].
+ * Additionally, define entries for interfaces in order of specificity, starting with
+ * more specific interfaces before their super-interfaces. Failure to follow these rules
+ * will result in an `IllegalStateException` when calling [route].
+ *
+ * @param I The type of entity IDs used by this routing schema.
+ * @param defaultRoute The fallback route to use when no custom route is [set][route].
  *
  * @see io.spine.server.procman.ProcessManagerRepository.setupCommandRouting
  * @see io.spine.server.aggregate.AggregateRepository.setupCommandRouting
