@@ -40,9 +40,10 @@ import io.spine.system.server.event.EntityStateChanged
  * The `EventRouting` schema contains entries that implement the [EventRoute] interface,
  * a functional type that returns a set of entity identifiers of type [I].
  *
- * Routing functions can also follow a [unicast][Unicast] strategy,
- * where the event is routed to a single entity.
+ * Routing functions for events can also follow a [unicast][Unicast] strategy,
+ * where an event is routed to a single entity.
  * Such routes can be added using [unicast] functions.
+ * These functions adapt their arguments to the [EventRoute] interface.
  *
  * ## Default event route
  *
@@ -63,9 +64,9 @@ import io.spine.system.server.event.EntityStateChanged
  *
  * ## Routing events with a common interface
  *
- * Routing entries can be defined for both specific event classes and interfaces. If you need
- * to route events for both classes and their implemented interfaces, define interface routes
- * *after* entries for specific classes:
+ * Routing entries can be defined for both specific event classes and interfaces.
+ * If you need to route events for both classes and their implemented interfaces,
+ * define interface routes *after* entries for specific classes:
  *
  * ```kotlin
  * routing.route<MyEventClass> { event, context -> ... }

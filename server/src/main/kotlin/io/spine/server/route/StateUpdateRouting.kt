@@ -32,12 +32,7 @@ import io.spine.protobuf.AnyPacker
 import io.spine.system.server.event.EntityStateChanged
 
 /**
- * A routing schema used to deliver entity state updates.
- *
- * A routing schema consists of a default route and custom routes per entity state class.
- * When calculating targets to be notified on the updated state, `StateUpdateRouting` would
- * see if there is a custom route set for the type of the entity state.
- * If not found, the default route will be [applied][MessageRouting.apply].
+ * A [routing schema][MessageRouting] used to deliver entity state updates.
  *
  * @param I The type of the entity IDs to which the updates are routed.
  * @param idClass The class of entity identifiers to which entity states are routed.
@@ -72,28 +67,6 @@ public class StateUpdateRouting<I : Any> private constructor(
         val defaultRouteAvailable = defaultRoute.supports(messageType)
         return customRouteSet || defaultRouteAvailable
     }
-
-    /**
-     * Sets a custom route for the passed entity state class.
-     *
-     * If there is no specific route for the class of the passed entity state,
-     * the routing will use the [defaultRoute].
-     *
-     * @param S The type of the entity state message
-     *
-     * @param stateClass The class of entity states to route.
-     * @param via The instance of the route to be used.
-     * @return `this` to allow chained calls when configuring the routing.
-     * @throws IllegalStateException if the route for this class is already set.
-     */
-//    @CanIgnoreReturnValue
-//    public fun <S : EntityState<*>> route(
-//        stateClass: Class<S>,
-//        via: StateUpdateRoute<I, S>
-//    ): StateUpdateRouting<I> {
-//        addRoute(stateClass, via)
-//        return this
-//    }
 
     /**
      * Creates an [EventRoute] for [EntityStateChanged] events based on this routing.
