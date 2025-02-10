@@ -31,28 +31,27 @@ import io.spine.base.EntityState
 import io.spine.base.Identifier
 import io.spine.core.EventContext
 import io.spine.protobuf.defaultInstance
-import io.spine.util.Exceptions
+import io.spine.util.Exceptions.newIllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Obtains the route as a value of the first field matching the type of the identifiers.
+ * Obtains the route as a value of the first field matching the type of
+ * the identifiers of the entities to which a state update is delivered.
  *
  * Descriptors of discovered fields are cached.
  *
- * If a passed message does not have a field of the required ID type
+ * If a passed message does not have a field of the required ID type,
  * `IllegalStateException` will be thrown.
  *
- * @param <I>
- * the type of the identifiers
-</I> */
+ * @param I The type of the entities to which deliver the updates.
+ */
 internal class DefaultStateRoute<I : Any>
 private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityState<*>> {
 
     /**
      * Descriptors of fields matching the ID class by message type.
      */
-    private val fields: MutableMap<Class<out Message?>, FieldDescriptor> =
-        ConcurrentHashMap()
+    private val fields: MutableMap<Class<out Message>, FieldDescriptor> = ConcurrentHashMap()
 
     fun supports(stateType: Class<out EntityState<*>>): Boolean {
         val type = stateType.defaultInstance.descriptorForType
@@ -64,21 +63,17 @@ private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityS
      * Obtains the ID from the first field of the passed message that matches the type
      * of identifiers used by this route.
      *
-     *
-     * If the such a field is discovered, its descriptor is remembered and associated
+     * If such a field is discovered, its descriptor is remembered and associated
      * with the class of the state so that subsequent calls are faster.
-     *
      *
      * If a field matching the ID type is not found, the method
      * throws `IllegalStateException`.
      *
-     * @param message
-     * the entity state message
-     * @param context
-     * the context of the update event, not used
-     * @return a one-element set with the ID
-     * @throws IllegalStateException
-     * if the passed state instance does not have a field of the required ID type
+     * @param message The entity state message.
+     * @param context The context of the update event, not used, in this default route.
+     * @return a one-element set with the ID.
+     * @throws IllegalStateException if the passed state instance does not have
+     *   a field of the required ID type.
      */
     override fun invoke(message: EntityState<*>, context: EventContext): Set<I> {
         val messageClass: Class<out EntityState<*>> = message.javaClass
@@ -89,10 +84,10 @@ private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityS
 
         val fd = Identifier.findField(idClass, message.descriptorForType)
             .orElseThrow {
-                Exceptions.newIllegalStateException(
+                newIllegalStateException(
                     "Unable to find a field matching the type `%s`" +
                             " in the message of the type `%s`.",
-                    idClass, messageClass.canonicalName
+                    idClass.canonicalName, messageClass.canonicalName
                 )
             }
         fields[messageClass] = fd
@@ -107,11 +102,11 @@ private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityS
     }
 
     companion object {
+
         /**
          * Creates a new instance.
          *
-         * @param idClass
-         * the class of identifiers used for the routing
+         * @param idClass The class of identifiers used for the routing.
          */
         fun <I : Any> newInstance(idClass: Class<I>): DefaultStateRoute<I> =
             DefaultStateRoute(idClass)
