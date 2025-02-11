@@ -24,6 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.dependency.lib.KotlinX
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Logging
@@ -42,6 +43,7 @@ dependencies {
     api(Time.lib)
     api(Validation.runtime)
     api(Logging.lib)
+    api(KotlinX.Coroutines.core)
 
     testImplementation(project(":testutil-core"))
     testImplementation(Time.testLib)

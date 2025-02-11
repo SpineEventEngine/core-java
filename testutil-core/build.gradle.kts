@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import io.spine.dependency.local.TestLib
 import io.spine.dependency.test.JUnit
-import io.spine.dependency.local.Spine
 import io.spine.dependency.test.Truth
 
 group = "io.spine.tools"
@@ -36,7 +36,7 @@ plugins {
 
 dependencies {
     api(project(":client"))
-    api(Spine.testlib)
+    api(TestLib.lib)
 
     JUnit.api.forEach {
         api(it)

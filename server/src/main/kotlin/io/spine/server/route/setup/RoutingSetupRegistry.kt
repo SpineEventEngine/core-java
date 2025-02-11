@@ -28,6 +28,11 @@ package io.spine.server.route.setup
 
 import io.spine.server.entity.Entity
 import java.util.ServiceLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 
 /**
  * The alias to avoid generic parameters in signatures in this file.
@@ -54,14 +59,22 @@ internal object RoutingSetupRegistry {
             EventRoutingSetup::class,
             StateRoutingSetup::class
         )
-        val allServices = setupInterfaces
-            .map { it.java }
-            .flatMap { ServiceLoader.load(it) }
-        val grouped = allServices.groupBy { it.entityClass() }
+        entries = runBlocking {
+            val allServices = coroutineScope {
+                setupInterfaces
+                    .map { setupInterface ->
+                        async(Dispatchers.IO) {
+                            ServiceLoader.load(setupInterface.java).toList()
+                        }
+                    }
+                    .awaitAll()
+                    .flatten()
+            }
 
-        entries = grouped.map { (cls, setups) -> Entry(cls, setups) }.toSet()
+            val grouped = allServices.groupBy { it.entityClass() }
+            grouped.map { (cls, setups) -> Entry(cls, setups) }.toSet()
+        }
     }
-
     /**
      * Obtains a routing setup for the given entity class, if any.
      */

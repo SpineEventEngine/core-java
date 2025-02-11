@@ -30,6 +30,7 @@ import io.spine.dependency.build.ErrorProne
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Guava
 import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.lib.KotlinX
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Change
@@ -347,6 +348,10 @@ fun Subproject.forceConfigurations() {
                     Grpc.ProtocPlugin.artifact,
                     Grpc.api,
                     JUnit.runner,
+
+                    KotlinX.Coroutines.core,
+                    KotlinX.Coroutines.bom,
+                    KotlinX.Coroutines.jdk8,
 
                     Base.lib,
                     Validation.runtime,
