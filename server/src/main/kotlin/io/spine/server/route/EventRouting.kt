@@ -59,7 +59,7 @@ import io.spine.system.server.event.EntityStateChanged
  * ## Adding custom routes
  *
  * Custom routes can be added using [route] functions that accept [EventRoute] implementations.
- * If an event should be routed to a single entity based on a property of the event message,
+ * If an event should be routed to a single entity taking the event message or its context,
  * use the [unicast] functions.
  *
  * ## Routing events with a common interface

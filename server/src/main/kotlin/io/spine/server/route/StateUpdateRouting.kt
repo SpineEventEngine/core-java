@@ -32,9 +32,33 @@ import io.spine.protobuf.AnyPacker
 import io.spine.system.server.event.EntityStateChanged
 
 /**
- * A [routing schema][MessageRouting] used to deliver entity state updates.
+ * A [routing schema][MessageRouting] designed for delivering entity state updates.
  *
- * @param I The type of the entity IDs to which the updates are routed.
+ * ## Purpose of routing entity states
+ *
+ * Entities sometimes require updates based on the state of other entities. For instance,
+ * a summary report might need to aggregate information from several detailed reports.
+ * While subscribing to the same events as those used for detailed reports is an option,
+ * it often results in duplicated or near-identical code.
+ *
+ * A more efficient approach is to [subscribe][io.spine.core.Subscribe] to messages
+ * that are subclasses of [EntityState].
+ *
+ * ## Default routing behavior
+ *
+ * By default, the entity state route selects the value of the first field whose type matches
+ * the type parameter [I] of the target entities. This behavior can be customized by using the
+ * [replaceDefault] function.
+ *
+ * ## Defining custom routes
+ *
+ * Like [EventRouting], entity state routes support [multicast][Multicast] delivery.
+ * Custom routes that deliver an entity state to multiple entities can be defined using the
+ * [route] functions, which accept implementations of the [StateUpdateRoute] functional interface.
+ *
+ * For cases where an entity state should be routed to a single target, use the [unicast] functions.
+ *
+ * @param I The type of entity IDs to which updates are routed.
  * @param idClass The class of entity identifiers to which entity states are routed.
  */
 public class StateUpdateRouting<I : Any> private constructor(
