@@ -31,11 +31,30 @@ import io.spine.core.CommandContext
 import io.spine.server.entity.Entity
 import io.spine.server.route.CommandRouting
 
+/**
+ * The base interface for generated classes that customize [CommandRouting] for
+ * a class of entities that handle commands.
+ *
+ * @param I The type of the entity identifiers.
+ */
 public interface CommandRoutingSetup<I : Any> :
     RoutingSetup<I, CommandMessage, CommandContext, I, CommandRouting<I>> {
 
     public companion object {
 
+        /**
+         * Configures the [CommandRouting] for a repository,
+         * if a corresponding routing setup class exists.
+         *
+         * The setup class, if available, is determined based
+         * on the entity class managed by the repository.
+         * Once found, its [setup] function is invoked to customize the routing.
+         *
+         * If no setup class is found, this function has no effect.
+         *
+         * @param cls The class of entities managed by the repository.
+         * @param routing The [CommandRouting] instance to be customized.
+         */
         public fun <I : Any> apply(cls: Class<out Entity<I, *>>, routing: CommandRouting<I>) {
             val found = RoutingSetupRegistry.find(cls, CommandRoutingSetup::class.java)
             found?.let {

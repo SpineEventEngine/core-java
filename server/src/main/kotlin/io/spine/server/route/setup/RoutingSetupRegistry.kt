@@ -27,7 +27,7 @@
 package io.spine.server.route.setup
 
 import io.spine.server.entity.Entity
-import java.util.*
+import java.util.ServiceLoader
 
 /**
  * The alias to avoid generic parameters in signatures in this file.
@@ -73,6 +73,12 @@ internal object RoutingSetupRegistry {
         return entry?.find(setupInterface)
     }
 
+    /**
+     * The entry of the set of loaded setup classes.
+     *
+     * @property entityClass The class of entities served by the loaded setup classes.
+     * @property setups The setup classes that serve routing schemas of the [entityClass].
+     */
     private data class Entry(
         val entityClass: Class<out Entity<*, *>>,
         private val setups: List<RSetup>

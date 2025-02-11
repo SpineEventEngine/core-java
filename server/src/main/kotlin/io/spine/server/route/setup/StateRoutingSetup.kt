@@ -29,13 +29,33 @@ package io.spine.server.route.setup
 import io.spine.base.EntityState
 import io.spine.core.EventContext
 import io.spine.server.entity.Entity
+import io.spine.server.route.CommandRouting
 import io.spine.server.route.StateUpdateRouting
 
+/**
+ * The base interface for generated classes that customize [CommandRouting] for
+ * a class of entities that handle commands.
+ *
+ * @param I The type of identifiers of the entities that receive updated states of other entities.
+ */
 public interface StateRoutingSetup<I : Any> :
     RoutingSetup<I, EntityState<*>, EventContext, Set<I>, StateUpdateRouting<I>> {
 
     public  companion object {
 
+        /**
+         * Configures the [StateUpdateRouting] for a repository,
+         * if a corresponding routing setup class exists.
+         *
+         * The setup class, if available, is determined based
+         * on the entity class managed by the repository.
+         * Once found, its [setup] function is invoked to customize the routing.
+         *
+         * If no setup class is found, this function has no effect.
+         *
+         * @param cls The class of entities managed by the repository.
+         * @param routing The [StateUpdateRouting] instance to be customized.
+         */
         public fun <I : Any> apply(cls: Class<out Entity<I, *>>, routing: StateUpdateRouting<I>) {
             val found = RoutingSetupRegistry.find(cls, StateRoutingSetup::class.java)
             found?.let {
