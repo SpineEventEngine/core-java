@@ -30,6 +30,7 @@ import io.spine.base.CommandMessage
 import io.spine.core.CommandContext
 import io.spine.server.entity.Entity
 import io.spine.server.route.CommandRouting
+import io.spine.server.route.CommandRoutingMap
 
 /**
  * The base interface for generated classes that customize [CommandRouting] for
@@ -54,12 +55,21 @@ public interface CommandRoutingSetup<I : Any> :
          *
          * @param cls The class of entities managed by the repository.
          * @param routing The [CommandRouting] instance to be customized.
+         * @return `true` if the generated setup class was found and applied, `false` otherwise.
          */
-        public fun <I : Any> apply(cls: Class<out Entity<I, *>>, routing: CommandRouting<I>) {
+        @JvmStatic
+        public fun <I : Any> apply(
+            cls: Class<out Entity<I, *>>,
+            routing: CommandRouting<I>
+        ) {
             val found = RoutingSetupRegistry.find(cls, CommandRoutingSetup::class.java)
             found?.let {
                 @Suppress("UNCHECKED_CAST")
                 (it as CommandRoutingSetup<I>).setup(routing)
+            } ?: run {
+                // Use reflection-based schema, if any.
+                val classRouting = CommandRoutingMap<I>(cls)
+                classRouting.addTo(routing)
             }
         }
     }

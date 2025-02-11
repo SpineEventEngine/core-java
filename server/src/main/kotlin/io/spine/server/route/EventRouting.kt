@@ -26,6 +26,7 @@
 
 package io.spine.server.route
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.EventMessage
 import io.spine.core.EventContext
@@ -145,7 +146,7 @@ public class EventRouting<I : Any> private constructor(
          */
         @JvmStatic
         @CanIgnoreReturnValue
-        @Deprecated(message = "Please use `EventRoute.replaceDefault()` instead.")
+        @VisibleForTesting
         public fun <I : Any> withDefault(
             defaultRoute: EventRoute<I, EventMessage>
         ): EventRouting<I> = EventRouting(defaultRoute)

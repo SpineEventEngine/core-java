@@ -29,8 +29,8 @@ package io.spine.server.route.setup
 import io.spine.base.EventMessage
 import io.spine.core.EventContext
 import io.spine.server.entity.Entity
-import io.spine.server.route.CommandRouting
 import io.spine.server.route.EventRouting
+import io.spine.server.route.EventRoutingMap
 
 /**
  * The base interface for generated classes that customize [EventRouting] for
@@ -56,11 +56,19 @@ public interface EventRoutingSetup<I : Any> :
          * @param cls The class of entities managed by the repository.
          * @param routing The [EventRouting] instance to be customized.
          */
-        public fun <I : Any> apply(cls: Class<out Entity<I, *>>, routing: EventRouting<I>) {
-            val fount = RoutingSetupRegistry.find(cls, EventRoutingSetup::class.java)
-            fount?.let {
+        @JvmStatic
+        public fun <I : Any> apply(
+            cls: Class<out Entity<I, *>>,
+            routing: EventRouting<I>
+        ) {
+            val found = RoutingSetupRegistry.find(cls, EventRoutingSetup::class.java)
+            found?.let {
                 @Suppress("UNCHECKED_CAST")
                 (it as EventRoutingSetup<I>).setup(routing)
+            } ?: run {
+                // Use reflection-based schema, if any.
+                val classRouting = EventRoutingMap(cls)
+                classRouting.addTo(routing)
             }
         }
     }

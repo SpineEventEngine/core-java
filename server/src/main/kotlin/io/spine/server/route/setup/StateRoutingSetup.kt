@@ -56,6 +56,7 @@ public interface StateRoutingSetup<I : Any> :
          * @param cls The class of entities managed by the repository.
          * @param routing The [StateUpdateRouting] instance to be customized.
          */
+        @JvmStatic
         public fun <I : Any> apply(cls: Class<out Entity<I, *>>, routing: StateUpdateRouting<I>) {
             val found = RoutingSetupRegistry.find(cls, StateRoutingSetup::class.java)
             found?.let {

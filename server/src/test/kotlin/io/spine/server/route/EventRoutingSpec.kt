@@ -243,7 +243,7 @@ internal class EventRoutingSpec {
         /** The set of IDs returned by [loginEventRoute].  */
         private val LOGIN_EVENT_ROUTE: ImmutableSet<Long> = ImmutableSet.of(-1L, -2L, -3L)
 
-        /** The set of IDs returned by [customRoute].  */
+        /** The set of IDs returned by [userRegisteredRoute].  */
         private val USER_REGISTERED_ROUTE: ImmutableSet<Long> = ImmutableSet.of(5L, 6L, 7L)
 
         /** The set of IDs returned by the [userLoggedOutRoute].  */

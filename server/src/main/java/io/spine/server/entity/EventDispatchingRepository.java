@@ -33,7 +33,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.route.EventRouting;
-import io.spine.server.route.EventRoutingMap;
+import io.spine.server.route.setup.EventRoutingSetup;
 import io.spine.server.type.EventEnvelope;
 
 import java.util.Set;
@@ -64,14 +64,6 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Obtains the {@link EventRouting} schema used by the repository for calculating identifiers
-     * of event targets.
-     */
-    private EventRouting<I> eventRouting() {
-        return eventRouting;
-    }
-
-    /**
      * Registers itself as an event dispatcher with the parent {@code BoundedContext}.
      *
      * @param context
@@ -84,9 +76,8 @@ public abstract class EventDispatchingRepository<I,
         context.internalAccess()
                .registerEventDispatcher(this);
 
-        var classRouting = new EventRoutingMap<>(entityClass());
-        classRouting.addTo(eventRouting());
-        setupEventRouting(eventRouting());
+        EventRoutingSetup.apply(entityClass(), eventRouting);
+        setupEventRouting(eventRouting);
     }
 
     /**
@@ -138,7 +129,7 @@ public abstract class EventDispatchingRepository<I,
      * @return a set of IDs of projections to dispatch the given event to
      */
     protected Set<I> route(EventEnvelope event) {
-        var targets = route(eventRouting(), event);
+        var targets = route(eventRouting, event);
         @SuppressWarnings("unchecked")
         var result = (Set<I>) targets.orElse(ImmutableSet.of());
         return result;
