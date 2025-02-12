@@ -68,13 +68,19 @@ object Spine {
     @Deprecated(message = "Please use `ToolBase.psiJava` instead`.")
     const val psiJava = "$toolsGroup:spine-psi-java:${ToolBase.version}"
 
-    @Deprecated(message = "Please use `ToolBase.psiJava` instead`.")
+    @Deprecated(
+        message = "Please use `ToolBase.psiJava` instead`.",
+        ReplaceWith("ToolBase.psiJava")
+    )
     const val psiJavaBundle = "$toolsGroup:spine-psi-java-bundle:${ToolBase.version}"
 
-    @Deprecated(message = "Please use `ToolBase.lib` instead`.")
+    @Deprecated(message = "Please use `ToolBase.lib` instead`.", ReplaceWith("ToolBase.lib"))
     const val toolBase = "$toolsGroup:spine-tool-base:${ToolBase.version}"
 
-    @Deprecated(message = "Please use `ToolBase.pluginBase` instead`.")
+    @Deprecated(
+        message = "Please use `ToolBase.pluginBase` instead`.",
+        ReplaceWith("ToolBase.pluginBase")
+    )
     const val pluginBase = "$toolsGroup:spine-plugin-base:${ToolBase.version}"
 
     @Deprecated(
