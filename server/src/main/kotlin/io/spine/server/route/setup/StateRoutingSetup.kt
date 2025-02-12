@@ -41,7 +41,7 @@ import io.spine.server.route.StateUpdateRouting
 public interface StateRoutingSetup<I : Any> :
     RoutingSetup<I, EntityState<*>, EventContext, Set<I>, StateUpdateRouting<I>> {
 
-    public  companion object {
+    public companion object {
 
         /**
          * Configures the [StateUpdateRouting] for a repository,
