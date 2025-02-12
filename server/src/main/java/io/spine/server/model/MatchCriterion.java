@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -60,7 +60,7 @@ public enum MatchCriterion {
      * {@linkplain ReceptorSignature#returnTypes() expected}.
      */
     RETURN_TYPE(ERROR,
-                "The return type does not match the constraints set for `%s`-annotated method.") {
+                "The return type does not match the constraints set for `@%s`-annotated method.") {
         @Override
         Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             if (signature.returnTypeMatches(method)) {
@@ -93,7 +93,7 @@ public enum MatchCriterion {
      */
     ACCESS_MODIFIER(WARN, "The access modifier is `%s`."
                + " We recommend it to be one of: %s."
-               + " Please refer to the `%s` annotation docs for details.") {
+               + " Please refer to the documentation of `@%s` for details.") {
         @Override
         Optional<SignatureMismatch> test(Method method, ReceptorSignature<?, ?> signature) {
             var recommended = signature.modifier();
@@ -163,7 +163,7 @@ public enum MatchCriterion {
         return severity;
     }
 
-    protected final String formatMsg(Object... args) {
+    final String formatMsg(Object... args) {
         var message = format(Locale.ROOT, format, args);
         return message;
     }
@@ -171,8 +171,7 @@ public enum MatchCriterion {
     /**
      * Creates a mismatch with the passed method and the name as parameters.
      */
-    protected final Optional<SignatureMismatch>
-    createMismatch(Class<? extends Annotation> annotation) {
+    final Optional<SignatureMismatch> createMismatch(Class<? extends Annotation> annotation) {
         var annotationName = annotation.getSimpleName();
         return SignatureMismatch.create(this, annotationName);
     }
@@ -180,7 +179,7 @@ public enum MatchCriterion {
     /**
      * Helper class for {@link #PROHIBITED_EXCEPTION} for composing an error message.
      */
-    static final class ProhibitedExceptionMessage {
+    private static final class ProhibitedExceptionMessage {
 
         private static final String METHOD_THROWS = "The method throws `%s`. ";
 

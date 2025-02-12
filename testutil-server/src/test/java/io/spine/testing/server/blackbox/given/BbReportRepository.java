@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -28,7 +28,6 @@ package io.spine.testing.server.blackbox.given;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BbReport;
@@ -42,8 +41,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * A Report repository routing the {@link BbTaskAdded Task Added} events to all reports containing
- * corresponding project.
+ * A Report repository routing the {@link BbTaskAdded Task Added} events to all
+ * reports containing for the corresponding project.
  */
 public final class BbReportRepository
         extends AggregateRepository<BbReportId, BbReportAggregate, BbReport> {
@@ -53,7 +52,7 @@ public final class BbReportRepository
     @Override
     protected void setupEventRouting(EventRouting<BbReportId> routing) {
         super.setupEventRouting(routing);
-        routing.route(BbTaskAdded.class, (EventRoute<BbReportId, BbTaskAdded>)
+        routing.route(BbTaskAdded.class,
                 (event, context) -> getReportsContainingProject(event.getProjectId()));
     }
 

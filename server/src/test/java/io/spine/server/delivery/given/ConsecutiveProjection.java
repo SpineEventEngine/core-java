@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,6 @@ import io.spine.core.Subscribe;
 import io.spine.logging.WithLogging;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.test.delivery.ConsecutiveNumberView;
 import io.spine.test.delivery.NegativeNumberEmitted;
@@ -126,7 +125,7 @@ public class ConsecutiveProjection
     /**
      * A repository of {@linkplain ConsecutiveProjection} instances.
      *
-     * <p>Allows to exclude some instances from the event routing.
+     * <p>Allows excluding some instances from the event routing.
      */
     public static final class Repo
             extends ProjectionRepository<String, ConsecutiveProjection, ConsecutiveNumberView> {
@@ -137,16 +136,17 @@ public class ConsecutiveProjection
         @Override
         protected void setupEventRouting(EventRouting<String> routing) {
             super.setupEventRouting(routing);
-            routing.route(PositiveNumberEmitted.class,
-                          (EventRoute<String, PositiveNumberEmitted>) (message, context) ->
-                                  mode == UsageMode.POSITIVES_ONLY
-                                  ? withoutExcluded(ImmutableSet.of(message.getId()))
-                                  : ImmutableSet.of())
-                   .route(NegativeNumberEmitted.class,
-                          (EventRoute<String, NegativeNumberEmitted>) (message, context) ->
-                                  mode == UsageMode.NEGATIVES_ONLY
-                                  ? withoutExcluded(ImmutableSet.of(message.getId()))
-                                  : ImmutableSet.of());
+
+            routing.route(PositiveNumberEmitted.class, (e, c) ->
+                    mode == UsageMode.POSITIVES_ONLY
+                    ? withoutExcluded(ImmutableSet.of(e.getId()))
+                    : ImmutableSet.of());
+
+            routing.route(NegativeNumberEmitted.class, (e, c) ->
+                    mode == UsageMode.NEGATIVES_ONLY
+                    ? withoutExcluded(ImmutableSet.of(e.getId()))
+                    : ImmutableSet.of()
+            );
         }
 
         private Set<String> withoutExcluded(Set<String> original) {

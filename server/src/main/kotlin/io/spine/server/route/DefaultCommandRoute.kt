@@ -24,26 +24,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import io.spine.base.EventMessage;
-import io.spine.core.EventContext;
-
-import java.util.Set;
+import io.spine.base.CommandMessage
+import io.spine.core.CommandContext
 
 /**
- * Obtains an event producer ID from the context of the event.
+ * Obtains an ID of a command target entity from the first field of the command message.
  *
- * @param <I>
- *         the type of obtained IDs
+ * @param I The type of target entity IDs.
  */
-final class ByProducerId<I> implements EventRoute<I, EventMessage> {
+public class DefaultCommandRoute<I : Any> private constructor(cls: Class<I>) :
+    CommandRoute<I, CommandMessage> {
 
-    private static final long serialVersionUID = 0L;
+    private val firstFieldOf = ByFirstField<I, CommandMessage, CommandContext>(cls)
 
-    @Override
-    public Set<I> apply(EventMessage message, EventContext context) {
-        @SuppressWarnings("unchecked") var id = (I) context.producer();
-        return EventRoute.withId(id);
+    override fun invoke(message: CommandMessage, context: CommandContext): I {
+        val result = firstFieldOf(message, context)
+        return result
+    }
+
+    public companion object {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param idClass The class of identifiers used for the routing.
+         */
+        @JvmStatic
+        public fun <I : Any> newInstance(idClass: Class<I>): DefaultCommandRoute<I> =
+            DefaultCommandRoute(idClass)
+
+        /**
+         * Verifies of the passed command message potentially has a field with an entity ID.
+         */
+        @JvmStatic
+        public fun exists(commandMessage: CommandMessage): Boolean {
+            val hasAtLeastOneField = commandMessage.descriptorForType.fields.isNotEmpty()
+            return hasAtLeastOneField
+        }
     }
 }

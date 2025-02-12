@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,20 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage
+import io.spine.core.CommandContext
 
 /**
- * A route for a message to be delivered to one entity.
+ * Obtains an ID of an entity which would handle the command.
  *
- * @param <I>
- *         the type of entity ID
- * @param <M>
- *         the type of messages to get IDs from
- * @param <C>
- *         the type of message context
+ * @param I The type of the entity ID.
+ * @param M The type of the command to handle.
  */
 @FunctionalInterface
-public interface Unicast<I, M extends Message, C extends Message> extends RouteFn<M, C, I> {
-}
+public fun interface CommandRoute<I : Any, M : CommandMessage> : Unicast<I, M, CommandContext>

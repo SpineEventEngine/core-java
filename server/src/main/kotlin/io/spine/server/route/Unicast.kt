@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,19 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import io.spine.base.CommandMessage;
-import io.spine.core.CommandContext;
+import io.spine.base.Routable
+import io.spine.core.SignalContext
 
 /**
- * Obtains an ID of an entity which handles the command.
+ * A route for a message to be delivered to one entity.
  *
- * @param <I>
- *         the type of the entity ID
- * @param <M>
- *         the type of the handled command
+ * @param I The type of entity ID.
+ * @param M The type of messages to get IDs from.
+ * @param C The type of message context.
+ *
+ * @see Multicast
  */
 @FunctionalInterface
-public interface CommandRoute<I, M extends CommandMessage> extends Unicast<I, M, CommandContext> {
-}
+public fun interface Unicast<I : Any, M : Routable, C : SignalContext> : RouteFn<M, C, I>

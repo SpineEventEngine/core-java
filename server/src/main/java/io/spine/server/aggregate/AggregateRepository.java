@@ -52,9 +52,10 @@ import io.spine.server.entity.RepositoryCache;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.CommandRoutingMap;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RouteFn;
+import io.spine.server.route.setup.CommandRoutingSetup;
+import io.spine.server.route.setup.EventRoutingSetup;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -169,12 +170,21 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
     }
 
     private void setupRouting() {
-        var classRouting = new CommandRoutingMap<>(entityClass());
-        classRouting.addTo(commandRouting());
-        setupCommandRouting(commandRouting());
-
-        setupEventRouting(eventRouting);
+        doSetupCommandRouting();
+        doSetupEventRouting();
         setupImportRouting(eventImportRouting);
+    }
+
+    private void doSetupCommandRouting() {
+        var cmdRouting = commandRouting();
+        var entityClass = entityClass();
+        CommandRoutingSetup.apply(entityClass, cmdRouting);
+        setupCommandRouting(cmdRouting);
+    }
+
+    private void doSetupEventRouting() {
+        EventRoutingSetup.apply(entityClass(), eventRouting);
+        setupEventRouting(eventRouting);
     }
 
     @Override
@@ -253,7 +263,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      * <p>Default routing returns the ID of the entity which
      * {@linkplain io.spine.core.EventContext#getProducerId() produced} the event.
      * This allows to “link” different kinds of entities by having the same class of IDs.
-     * More complex scenarios (e.g. one-to-many relationships) may require custom routing schemas.
+     * More complex scenarios (e.g., one-to-many relationships) may require custom routing schemas.
      *
      * @param routing
      *         the routing schema to customize
@@ -466,7 +476,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, S, ?>, S ext
      *          if {@link #eventImportRouting} returns more than one ID
      */
     private I idForImported(EventMessage message, EventContext context) {
-        var ids = eventImportRouting.apply(message, context);
+        var ids = eventImportRouting.invoke(message, context);
         var numberOfTargets = ids.size();
         var messageType = message.getClass()
                                  .getName();

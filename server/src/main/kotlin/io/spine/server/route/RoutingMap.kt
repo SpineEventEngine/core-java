@@ -49,16 +49,17 @@ import java.util.SortedMap
  * The map scans only the given entity class. If the class extends another entity class,
  * its static methods are ignored.
  *
+ * @param I The type of the entity identifiers served by this map.
  * @param entityClass The class of the entity which may declare routing methods.
- * @param messageType The super interface for the routed signal messages, such as
+ * @property signalType The super interface for the routed signal messages, such as
  *   [CommandMessage] or [EventMessage].
- * @param contextType The super interface for the signal context messages, such as
+ * @property contextType The super interface for the signal context messages, such as
  *   [CommandContext] or [EventContext].
  * @see Route
  */
 internal sealed class RoutingMap<I: Any>(
     entityClass: Class<out Entity<I, *>>,
-    private val messageType: Class<out SignalMessage>,
+    private val signalType: Class<out SignalMessage>,
     private val contextType: Class<out MessageContext>,
 ) : WithLogging {
 
@@ -95,7 +96,7 @@ internal sealed class RoutingMap<I: Any>(
             return false
         }
         val firstParamType = parameterTypes[0]
-        if (!messageType.isAssignableFrom(firstParamType)) {
+        if (!signalType.isAssignableFrom(firstParamType)) {
             return false
         }
         if (parameterTypes.size == 2) {

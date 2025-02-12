@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,14 +24,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.route
+
+import io.spine.base.EventMessage
+import io.spine.core.EventContext
+import io.spine.server.route.EventRoute.Companion.withId
+
 /**
- * This package contains classes and interfaces for working with field value changes.
+ * The route that obtains a producer ID from the first field of the event message.
+ *
+ * @param I The type of obtained IDs.
  */
+internal class ByFirstEventField<I : Any, E : EventMessage>(
+    idClass: Class<I>,
+    val eventClass: Class<E>
+) : EventRoute<I, E> {
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.change;
+    private val route = ByFirstField<I, E, EventContext>(idClass)
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    override fun invoke(message: E, context: EventContext): Set<I> {
+        val id = route(message, context)
+        return withId(id)
+    }
+}

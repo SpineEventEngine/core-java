@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,7 +32,7 @@ import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.test.commandbus.CmdBusCaffetteriaId;
 import io.spine.test.commandbus.CmdBusCaffetteriaStats;
-import io.spine.test.commandbus.command.CaffetteriaRejections;
+import io.spine.test.commandbus.command.CaffetteriaRejections.CmdBusEntryDenied;
 import io.spine.test.commandbus.event.CmdBusTableAllocated;
 
 import java.util.Collections;
@@ -46,9 +46,10 @@ public final class CaffetteriaStatsRepository
     @Override
     protected void setupEventRouting(EventRouting<CmdBusCaffetteriaId> routing) {
         super.setupEventRouting(routing);
-        routing.route(CmdBusTableAllocated.class,
-                      (message, context) -> Collections.singleton(message.getCaffetteria()));
-        routing.route(CaffetteriaRejections.CmdBusEntryDenied.class,
-                      EventRoute.byFirstMessageField(idClass()));
+        routing.route(CmdBusTableAllocated.class, (message, context) ->
+                Collections.singleton(message.getCaffetteria()));
+
+        var route = EventRoute.byFirstMessageField(idClass(), CmdBusEntryDenied.class);
+        routing.route(CmdBusEntryDenied.class, route);
     }
 }

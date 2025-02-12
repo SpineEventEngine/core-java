@@ -112,7 +112,7 @@ internal class CommandRoutingSpec {
         val cmd = CmdCreateProject.newBuilder().setId(Identifier.newUuid()).build()
         val command = CommandEnvelope.of(requestFactory.createCommand(cmd))
 
-        val id = commandRouting.apply(command.message(), command.context())
+        val id = commandRouting(command.message(), command.context())
 
         id shouldBe DEFAULT_ANSWER
     }
@@ -123,10 +123,10 @@ internal class CommandRoutingSpec {
         val command = CommandEnvelope.of(
             requestFactory.createCommand(cmd)
         )
-        // Have custom route.
+        // Have a custom route.
         commandRouting.route(RegisterUser::class.java, customRoute)
 
-        val id = commandRouting.apply(command.message(), command.context())
+        val id = commandRouting(command.message(), command.context())
 
         id shouldBe CUSTOM_ANSWER
     }

@@ -151,7 +151,7 @@ abstract class AggregateEndpoint<I,
      * @param commandOutcome
      *         the successful command outcome
      * @param eventDispatch
-     *         the result of event applying
+     *         the result of applying the event
      * @return the same command outcome but with the events of the correct versions
      * @implNote After the versions are corrected, the resulting message isn't validated
      *         again, as it comes in a valid state and the versions are all fine.

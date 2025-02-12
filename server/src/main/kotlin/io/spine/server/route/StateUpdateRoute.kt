@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,22 +24,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.route;
+package io.spine.server.route
 
-import com.google.protobuf.Message;
-
-import java.util.Set;
+import io.spine.base.EntityState
+import io.spine.core.EventContext
 
 /**
- * A route for a message to be delivered to several entities.
+ * Obtains a set of entity IDs for which to deliver an entity state update.
  *
- * @param <I>
- *         the type of the entity IDs
- * @param <M>
- *         the type of messages to get IDs from
- * @param <C>
- *         the type of message context
+ * @param I The type of entity IDs.
+ * @param S The type of entity states to get IDs from
  */
 @FunctionalInterface
-public interface Multicast<I, M extends Message, C extends Message> extends RouteFn<M, C, Set<I>> {
-}
+public fun interface StateUpdateRoute<I : Any, S : EntityState<*>> : Multicast<I, S, EventContext>

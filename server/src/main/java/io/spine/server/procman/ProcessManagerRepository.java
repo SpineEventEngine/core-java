@@ -50,9 +50,9 @@ import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
-import io.spine.server.route.CommandRoutingMap;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
+import io.spine.server.route.setup.CommandRoutingSetup;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventClass;
@@ -155,13 +155,18 @@ public abstract class ProcessManagerRepository<I,
     public void registerWith(BoundedContext context) {
         super.registerWith(context);
 
-        var classRouting = new CommandRoutingMap<>(entityClass());
-        classRouting.addTo(commandRouting());
-        setupCommandRouting(commandRouting());
+        doSetupCommandRouting();
 
         checkNotDeaf();
         initCache(context.isMultitenant());
         initInbox();
+    }
+
+    private void doSetupCommandRouting() {
+        var cmdRouting = commandRouting();
+        var entityClass = entityClass();
+        CommandRoutingSetup.apply(entityClass, cmdRouting);
+        setupCommandRouting(cmdRouting);
     }
 
     @Override

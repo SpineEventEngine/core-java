@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,6 +40,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.string.Diags.backtick;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.reflect.Modifier.isPrivate;
 import static java.lang.reflect.Modifier.isProtected;
@@ -62,16 +63,16 @@ public final class AccessModifier implements Predicate<Method> {
             onJavaMethod(Modifier::isPublic, MODIFIER_PUBLIC);
 
     public static final AccessModifier PROTECTED =
-            onJavaMethod(Modifier::isProtected, MODIFIER_PROTECTED);
+            onJavaMethod(Modifier::isProtected, backtick(MODIFIER_PROTECTED));
 
     public static final AccessModifier PACKAGE_PRIVATE =
             onJavaMethod(AccessModifier::isPackagePrivate, "package-private");
 
     public static final AccessModifier PRIVATE =
-            onJavaMethod(Modifier::isPrivate, MODIFIER_PRIVATE);
+            onJavaMethod(Modifier::isPrivate, backtick(MODIFIER_PRIVATE));
 
     public static final AccessModifier KOTLIN_INTERNAL =
-            new AccessModifier(AccessModifier::isInternal, MODIFIER_INTERNAL);
+            new AccessModifier(AccessModifier::isInternal, backtick(MODIFIER_INTERNAL));
 
     /**
      * A protected method which overrides a method from a superclass.
@@ -82,7 +83,7 @@ public final class AccessModifier implements Predicate<Method> {
      * {@linkplain ContractFor contract methods} without discouraging users with warning logs.
      */
     public static final AccessModifier PROTECTED_CONTRACT =
-            new AccessModifier(AccessModifier::protectedAndDerived, "protected with @Override");
+            new AccessModifier(AccessModifier::protectedAndDerived, "`protected` with `@Override`");
 
     /**
      * The predicate which determines if the method has a matching modifier or not.

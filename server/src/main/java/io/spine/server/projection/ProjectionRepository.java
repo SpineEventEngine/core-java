@@ -55,6 +55,7 @@ import io.spine.server.event.EventStore;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.StateUpdateRouting;
+import io.spine.server.route.setup.StateRoutingSetup;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.time.TimestampTemporal;
@@ -235,6 +236,7 @@ public abstract class ProjectionRepository<I,
      */
     private StateUpdateRouting<I> createStateRouting() {
         var routing = StateUpdateRouting.newInstance(idClass());
+        StateRoutingSetup.apply(entityClass(), routing);
         setupStateRouting(routing);
         validate(routing);
         return routing;

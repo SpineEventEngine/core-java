@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@
 
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.local.Logging
-import io.spine.dependency.local.Spine
+import io.spine.dependency.local.Reflect
+import io.spine.dependency.local.TestLib
 import io.spine.gradle.testing.exposeTestConfiguration
 
 plugins {
@@ -38,14 +39,14 @@ dependencies {
     api(Grpc.stub)
     api(Grpc.protobuf)
     api(project(":core"))
-    api(Spine.reflect)
+    api(Reflect.lib)
 
     implementation(Grpc.inProcess)
     // This dependency is needed for Logging contexts to work.
     // Since we depend on gRPC, we can use the implementation of the context based on gRPC.
     implementation(Logging.grpcContext)
 
-    testImplementation(Spine.testlib)
+    testImplementation(TestLib.lib)
     testImplementation(project(":testutil-client"))
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
 }
