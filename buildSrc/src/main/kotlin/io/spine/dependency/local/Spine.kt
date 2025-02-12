@@ -53,7 +53,7 @@ object Spine {
     @Deprecated(message = "Please use `Time.lib`.", ReplaceWith("Time.lib"))
     const val time = Time.lib
 
-    @Deprecated(message = "Please use `Chane.lib`.", ReplaceWith("Change.lib"))
+    @Deprecated(message = "Please use `Change.lib`.", ReplaceWith("Change.lib"))
     const val change = Change.lib
 
     @Deprecated(message = "Please use `Text.lib`.", ReplaceWith("Text.lib"))
