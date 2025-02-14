@@ -30,6 +30,11 @@ import io.spine.base.EventMessage
 import io.spine.server.tuple.EitherOf2
 
 /**
+ * Converts this [EventMessage] into [Just].
+ */
+public fun <E : EventMessage> E.just(): Just<E> = Just(this)
+
+/**
  * Converts this [EventMessage] into [EitherOf2], placing it into the slot of the type `A`.
  */
 public fun <E : EventMessage, B : EventMessage> E.asA(): EitherOf2<E, B> = EitherOf2.withA(this)
