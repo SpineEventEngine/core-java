@@ -61,7 +61,7 @@ public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) 
     /**
      * Obtains entity ID(s) from the passed message and its context.
      *
-     * This function is provided for compatibility with the previous version routing API.
+     * This function is provided for compatibility with the previous version of the routing API.
      *
      * @param message The message to route.
      * @param context The context of the message.
