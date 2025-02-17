@@ -28,6 +28,7 @@ package io.spine.server.route
 
 import io.spine.base.Routable
 import io.spine.core.SignalContext
+import java.util.function.BiFunction
 
 /**
  * A common interface for routing functions for calculating identifiers of entities to which
@@ -45,7 +46,8 @@ import io.spine.core.SignalContext
  * @see Multicast
  */
 @FunctionalInterface
-public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) -> R {
+public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) -> R,
+    BiFunction<M, C, R> {
 
     /**
      * Obtains entity ID(s) from the passed message and its context.
@@ -55,4 +57,15 @@ public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) 
      * @return identifier(s) of the target entities.
      */
     override fun invoke(message: M, context: C): R
+
+    /**
+     * Obtains entity ID(s) from the passed message and its context.
+     *
+     * This function is provided for compatibility with the previous version routing API.
+     *
+     * @param message The message to route.
+     * @param context The context of the message.
+     * @return identifier(s) of the target entities.
+     */
+    override fun apply(messagse: M, context: C): R = invoke(messagse, context)
 }
