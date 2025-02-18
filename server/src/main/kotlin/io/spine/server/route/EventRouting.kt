@@ -32,6 +32,7 @@ import io.spine.base.EventMessage
 import io.spine.core.EventContext
 import io.spine.server.route.EventRoute.Companion.withId
 import io.spine.system.server.event.EntityStateChanged
+import java.util.function.BiFunction
 
 /**
  * A [routing schema][MessageRouting] for events.
@@ -94,6 +95,25 @@ public class EventRouting<I : Any> private constructor(
         Set<I>,
         EventRouting<I>
         >(defaultRoute), EventRoute<I, EventMessage> {
+
+    /**
+     * Adds a route for the events with the given type [E].
+     *
+     * This function is for backward compatibility with the previous versions.
+     *
+     * @param E The type of the event message to route.
+     *
+     * @param cls The class of the routed events.
+     * @param via The route function for this type of event.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
+    @Deprecated(message = "Please use `unicast(Class<N>, via: (N, C) -> I)` function instead.")
+    public fun <E : EventMessage> unicast(
+        cls: Class<E>,
+        via: BiFunction<E, EventContext, I>
+    ): EventRouting<I> = unicast(cls, { m, c, -> via.apply(m, c) } )
 
     override fun self(): EventRouting<I> = this
 
