@@ -28,6 +28,7 @@ package io.spine.server.route
 
 import io.spine.base.Routable
 import io.spine.core.SignalContext
+import java.util.function.BiFunction
 
 /**
  * An abstract base for routing schemas that route a message to potentially more than one entity.
@@ -104,6 +105,24 @@ public abstract class MulticastRouting<
         msgType: Class<N>,
         via: (N, C) -> I
     ): S = route(msgType, createUnicastRoute(via))
+
+    /**
+     * Adds a route for the messages with the given type [N].
+     *
+     * This function is for backward compatibility with the previous versions.
+     *
+     * @param N The type of the message which descends from
+     *   the super-interface [M] served by this routing schema.
+     *
+     * @param cls The class of the routed messages.
+     * @param via The route function to be used for this type of messages.
+     * @return `this` to allow chained calls when configuring the routing.
+     * @throws IllegalStateException if the route for this message class is already set either
+     *   directly or via a super-interface.
+     */
+    @Deprecated(message = "Please use `unicast(Class<N>, via: (N, C) -> I)` function instead.")
+    public fun <N : M> unicast(cls: Class<N>, via: BiFunction<M, C, I>): S =
+        unicast(cls, { m, c, -> via.apply(m, c) } )
 
     /**
      * Adds a route for the messages with the given type [N].
