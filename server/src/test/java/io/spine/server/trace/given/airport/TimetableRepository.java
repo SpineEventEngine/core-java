@@ -27,7 +27,6 @@
 package io.spine.server.trace.given.airport;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.base.EventMessage;
 import io.spine.core.EventContext;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
@@ -48,10 +47,10 @@ public final class TimetableRepository
         super.setupEventRouting(routing);
         routing.unicast(FlightScheduled.class, (e) -> e.getFrom().getId())
                .unicast(FlightRescheduled.class,
-                        (BiFunction<EventMessage, EventContext, AirportId>) (e, ctx) -> ctx.get(
-                                AirportId.class))
+                        (BiFunction<FlightRescheduled, EventContext, AirportId>) (e, ctx) ->
+                                ctx.get(AirportId.class))
                .unicast(FlightCanceled.class,
-                        (BiFunction<EventMessage, EventContext, AirportId>) (e, ctx) -> ctx.get(
-                                AirportId.class));
+                        (BiFunction<FlightCanceled, EventContext, AirportId>) (e, ctx) ->
+                                ctx.get(AirportId.class));
     }
 }
