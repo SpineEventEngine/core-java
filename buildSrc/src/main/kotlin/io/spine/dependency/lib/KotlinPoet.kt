@@ -24,27 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This file provides extensions to `String` and `CharSequence` that wrap
- * analogues from standard Kotlin runtime.
- *
- * It helps in switching between versions of Gradle which have different versions of
- * the Kotlin runtime. Please see the bodies of the extension functions for details on
- * switching the implementations depending on the Kotlin version at hand.
- *
- * Once we migrate to newer Gradle, these wrappers should be inlined with
- * the subsequent removal of this source file.
- */
-@Suppress("unused")
-private const val ABOUT = ""
+package io.spine.dependency.lib
 
-/**
- * Makes the first character come in the title case.
- */
-fun String.titleCaseFirstChar(): String = replaceFirstChar { it.titlecase() }
-
-/**
- * Converts this string to lowercase.
- */
-@Deprecated(message = "Please use `lowercase()` instead.", replaceWith = ReplaceWith("lowercase"))
-fun String.lowercased(): String = lowercase()
+// https://github.com/square/kotlinpoet
+@Suppress("unused", "ConstPropertyName")
+object KotlinPoet {
+    private const val version = "2.0.0"
+    const val lib = "com.squareup:kotlinpoet:$version"
+    const val ksp = "com.squareup:kotlinpoet-ksp:$version"
+}

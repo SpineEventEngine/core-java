@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.gradle.process.CommandLineArgumentProvider
  */
 @Suppress("unused")
 fun JavaCompile.configureErrorProne() {
+    options.compilerArgs.add("--should-stop=ifError=FLOW")
     options.errorprone
         .errorproneArgumentProviders
         .add(ErrorProneConfig.ARGUMENTS)

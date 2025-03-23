@@ -24,27 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This file provides extensions to `String` and `CharSequence` that wrap
- * analogues from standard Kotlin runtime.
- *
- * It helps in switching between versions of Gradle which have different versions of
- * the Kotlin runtime. Please see the bodies of the extension functions for details on
- * switching the implementations depending on the Kotlin version at hand.
- *
- * Once we migrate to newer Gradle, these wrappers should be inlined with
- * the subsequent removal of this source file.
- */
-@Suppress("unused")
-private const val ABOUT = ""
+package io.spine.dependency.test
 
 /**
- * Makes the first character come in the title case.
+ * A library for in-process compilation of Kotlin and Java code compilation.
+ *
+ * @see <a href="https://github.com/zacsweers/kotlin-compile-testing">GitHub repo</a>
  */
-fun String.titleCaseFirstChar(): String = replaceFirstChar { it.titlecase() }
-
-/**
- * Converts this string to lowercase.
- */
-@Deprecated(message = "Please use `lowercase()` instead.", replaceWith = ReplaceWith("lowercase"))
-fun String.lowercased(): String = lowercase()
+@Suppress("unused", "ConstPropertyName")
+object KotlinCompileTesting {
+    private const val version = "0.7.0"
+    private const val group = "dev.zacsweers.kctfork"
+    const val libCore = "$group:core:$version"
+    const val libKsp = "$group:ksp:$version"
+}

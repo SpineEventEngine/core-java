@@ -182,8 +182,8 @@ private fun Project.deduplicate(dependencies: Set<ModuleDependency>): List<Modul
     logDuplicates(groups)
 
     val filtered = groups.map { group ->
-        group.value.maxByOrNull { dep -> dep.version }!!
-    }
+        group.value.maxByOrNull { dep -> dep.version ?: "" }
+    }.filterNotNull()
     return filtered
 }
 

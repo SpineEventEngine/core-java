@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.plugins.ide.idea.GenerateIdeaModule
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.plugins.ide.idea.model.IdeaModule
-import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import titleCaseFirstChar
 
 /**
@@ -245,7 +245,7 @@ fun GenerateProtoTask.excludeProtocOutput() {
  * Make sure Kotlin compilation explicitly depends on this `GenerateProtoTask` to avoid racing.
  */
 fun GenerateProtoTask.setupKotlinCompile() {
-    val kotlinCompile = project.kotlinCompileFor(sourceSet)
+    val kotlinCompile = project.kotlinCompilationTaskFor(sourceSet)
     kotlinCompile?.dependsOn(this)
 }
 
@@ -273,16 +273,9 @@ private fun processResourceTaskName(sourceSetName: String): String {
     return "process${infix}Resources"
 }
 
-/**
- * Attempts to obtain the Kotlin compilation Gradle task for the given source set.
- *
- * Typically, the task is named by a pattern: `compile<SourceSet name>Kotlin`, or just
- * `compileKotlin` if the source set name is `"main"`. If the task does not fit this described
- * pattern, this method will not find it.
- */
-private fun Project.kotlinCompileFor(sourceSet: SourceSet): KotlinCompile<*>? {
+private fun Project.kotlinCompilationTaskFor(sourceSet: SourceSet): KotlinCompilationTask<*>? {
     val taskName = sourceSet.getCompileTaskName("Kotlin")
-    return tasks.findByName(taskName) as KotlinCompile<*>?
+    return tasks.named(taskName, KotlinCompilationTask::class.java).orNull
 }
 
 private fun File.residesIn(directory: File): Boolean =

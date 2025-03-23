@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,20 +75,21 @@ object PomGenerator {
             plugin(BasePlugin::class.java)
         }
 
-        val task = project.tasks.create("generatePom")
-        task.doLast {
-            val pomFile = project.projectDir.resolve("pom.xml")
-            project.delete(pomFile)
+        val task = project.tasks.register("generatePom") {
+            doLast {
+                val pomFile = project.projectDir.resolve("pom.xml")
+                project.delete(pomFile)
 
-            val projectData = project.metadata()
-            val writer = PomXmlWriter(projectData)
-            writer.writeTo(pomFile)
+                val projectData = project.metadata()
+                val writer = PomXmlWriter(projectData)
+                writer.writeTo(pomFile)
+            }
+
+            val assembleTask = project.tasks.findByName("assemble")!!
+            dependsOn(assembleTask)
         }
 
         val buildTask = project.tasks.findByName("build")!!
         buildTask.finalizedBy(task)
-
-        val assembleTask = project.tasks.findByName("assemble")!!
-        task.dependsOn(assembleTask)
     }
 }
