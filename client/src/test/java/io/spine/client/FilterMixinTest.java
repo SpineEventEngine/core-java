@@ -27,10 +27,13 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import io.spine.test.client.ClProjectCreated;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityName;
+import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -46,9 +49,11 @@ class FilterMixinTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
+    @Disabled("Until https://github.com/SpineEventEngine/validation/issues/201 is fixed.")
     void passNullToleranceCheck() {
         var filter = Filters.eq("first_field", "column value");
         new NullPointerTester()
+                .setDefault(TypeName.class, TypeName.of(Any.class))
                 .testAllPublicInstanceMethods(filter);
     }
 
