@@ -37,6 +37,7 @@ import com.google.protobuf.Empty;
 import io.spine.core.Signal;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.SerializableMessage;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -166,7 +167,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      *
      * @return an immutable copy of the {@code actual} messages
      */
-    public ImmutableList<T> actual() {
+    public ImmutableList<@NonNull T> actual() {
         var messages = requireNonNull(actual);
         return ImmutableList.copyOf(messages);
     }
