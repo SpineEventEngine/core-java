@@ -76,7 +76,7 @@ tasks.javadoc {
     doLast {
         copy {
             from("src/main/docs")
-            into("$buildDir/docs/javadoc")
+            into(layout.buildDirectory.dir("/docs/javadoc"))
         }
     }
 }
