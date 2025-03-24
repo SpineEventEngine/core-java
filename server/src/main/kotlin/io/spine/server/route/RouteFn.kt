@@ -67,5 +67,5 @@ public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) 
      * @param context The context of the message.
      * @return identifier(s) of the target entities.
      */
-    override fun apply(messagse: M, context: C): R = invoke(messagse, context)
+    override fun apply(message: M, context: C): R = invoke(message, context)
 }
