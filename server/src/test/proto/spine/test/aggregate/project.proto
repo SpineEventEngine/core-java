@@ -78,7 +78,7 @@ message StringProject {
 message IntegerProject {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
-    int32 id = 1 [(required) = false];
+    int32 id = 1;
 
     string name = 2;
     repeated Task task = 3;
@@ -89,7 +89,7 @@ message IntegerProject {
 message LongProject {
     option (entity) = {kind: AGGREGATE visibility: FULL};
 
-    int64 id = 1 [(required) = false];
+    int64 id = 1;
 
     string name = 2;
     repeated Task task = 3;

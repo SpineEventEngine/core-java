@@ -41,5 +41,5 @@ dependencies {
 }
 
 java {
-    exposeTestConfiguration()
+    exposeTestConfiguration("io.spine:spine-testutil-server-test-artifacts:${project.version}")
 }

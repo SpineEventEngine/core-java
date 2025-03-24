@@ -65,7 +65,7 @@ public class StateUpdateRouting<I : Any> private constructor(
     idClass: Class<I>
 ) : MulticastRouting<
         I,
-        EntityState<*>,
+        EntityState<I>,
         EventContext, Set<I>,
         StateUpdateRouting<I>
         >(
@@ -73,11 +73,11 @@ public class StateUpdateRouting<I : Any> private constructor(
 ) {
     override fun self(): StateUpdateRouting<I> = this
 
-    override fun <E : EntityState<*>> createUnicastRoute(
+    override fun <E : EntityState<I>> createUnicastRoute(
         via: (E, EventContext) -> I
     ): StateUpdateRoute<I, E> = StateUpdateRoute { state, context -> setOf(via(state, context)) }
 
-    override fun <E : EntityState<*>> createUnicastRoute(
+    override fun <E : EntityState<I>> createUnicastRoute(
         via: (E) -> I
     ): StateUpdateRoute<I, E> = StateUpdateRoute { state, _ -> setOf(via(state)) }
 
@@ -85,7 +85,7 @@ public class StateUpdateRouting<I : Any> private constructor(
      * Verifies if the passed state type can be routed by a custom route, or
      * the message has a field matching the type of identifiers served by this routing.
      */
-    override fun supports(messageType: Class<out EntityState<*>>): Boolean {
+    override fun supports(messageType: Class<out EntityState<I>>): Boolean {
         val customRouteSet = super.supports(messageType)
         val defaultRoute = defaultRoute() as DefaultStateRoute<I>
         val defaultRouteAvailable = defaultRoute.supports(messageType)

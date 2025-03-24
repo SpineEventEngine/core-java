@@ -179,6 +179,7 @@ typealias Subproject = Project
 fun Subproject.applyPlugins() {
     apply {
         plugin("java-library")
+//        plugin("java-test-fixtures")
         plugin("jacoco")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")

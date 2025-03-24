@@ -46,7 +46,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @param I The type of the entities to which deliver the updates.
  */
 internal class DefaultStateRoute<I : Any>
-private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityState<*>> {
+private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityState<I>> {
 
     /**
      * Descriptors of fields matching the ID class by message type.
@@ -75,7 +75,7 @@ private constructor(private val idClass: Class<I>) : StateUpdateRoute<I, EntityS
      * @throws IllegalStateException if the passed state instance does not have
      *   a field of the required ID type.
      */
-    override fun invoke(message: EntityState<*>, context: EventContext): Set<I> {
+    override fun invoke(message: EntityState<I>, context: EventContext): Set<I> {
         val messageClass: Class<out EntityState<*>> = message.javaClass
         val field = fields[messageClass]
         if (field != null) {

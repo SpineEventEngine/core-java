@@ -38,5 +38,4 @@ import io.spine.core.SignalContext
  *
  * @see Unicast
  */
-@FunctionalInterface
 public fun interface Multicast<I : Any, M : Routable, C : SignalContext> : RouteFn<M, C, Set<I>>

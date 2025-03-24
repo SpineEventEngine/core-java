@@ -67,5 +67,5 @@ modelCompiler {
 }
 
 java {
-    exposeTestConfiguration()
+    exposeTestConfiguration("io.spine:spine-core-test-artifacts:${project.version}")
 }

@@ -64,10 +64,17 @@ dependencies {
     testImplementation(BaseTypes.lib)
 
     testFixturesImplementation(TestLib.lib)
+    testFixturesImplementation(AutoService.annotations)
 
     testImplementation(project(path = ":core", configuration = "testArtifacts"))
     testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
+}
+
+afterEvaluate {
+    tasks.named("kspTestFixturesKotlin") {
+        dependsOn("launchTestFixturesProtoData")
+    }
 }
 
 // Copies the documentation files to the Javadoc output folder.

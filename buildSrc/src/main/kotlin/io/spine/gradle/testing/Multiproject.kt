@@ -60,7 +60,7 @@ import org.gradle.api.Project
  * dedicated [testJar][io.spine.gradle.publish.SpinePublishing.testJar] artifact.
  */
 @Suppress("unused")
-fun Project.exposeTestConfiguration() {
+fun Project.exposeTestConfiguration(@Suppress("UNUSED_PARAMETER") capabilityNotation: String) {
 
     check(pluginManager.hasPlugin("java")) {
         "Can't expose the test configuration because `java` plugin has not been applied."
@@ -70,6 +70,7 @@ fun Project.exposeTestConfiguration() {
         extendsFrom(configurations.getByName("testRuntimeClasspath"))
         outgoing {
             artifact(testJar())
+//            capability(capabilityNotation)
         }
     }
 }
