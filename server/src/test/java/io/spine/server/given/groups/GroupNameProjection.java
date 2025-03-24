@@ -54,8 +54,9 @@ public final class GroupNameProjection
         protected void setupStateRouting(StateUpdateRouting<GroupId> routing) {
             routing.route(Organization.class, (org, ctx) -> withId(
                     GroupId.newBuilder()
-                           .setUuid(org.getId().getUuid())
-                           .build()));
+                            .setUuid(org.getId().getUuid())
+                            .build()
+            ));
         }
     }
 }

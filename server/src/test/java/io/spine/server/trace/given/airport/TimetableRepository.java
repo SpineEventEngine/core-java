@@ -27,7 +27,6 @@
 package io.spine.server.trace.given.airport;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import io.spine.core.EventContext;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRouting;
 import io.spine.test.trace.AirportId;
@@ -35,8 +34,6 @@ import io.spine.test.trace.FlightCanceled;
 import io.spine.test.trace.FlightRescheduled;
 import io.spine.test.trace.FlightScheduled;
 import io.spine.test.trace.Timetable;
-
-import java.util.function.BiFunction;
 
 public final class TimetableRepository
         extends ProjectionRepository<AirportId, TimetableProjection, Timetable> {
@@ -46,11 +43,9 @@ public final class TimetableRepository
     protected void setupEventRouting(EventRouting<AirportId> routing) {
         super.setupEventRouting(routing);
         routing.unicast(FlightScheduled.class, (e) -> e.getFrom().getId())
-               .unicast(FlightRescheduled.class,
-                        (BiFunction<FlightRescheduled, EventContext, AirportId>) (e, ctx) ->
+               .unicast(FlightRescheduled.class, (e, ctx) ->
                                 ctx.get(AirportId.class))
-               .unicast(FlightCanceled.class,
-                        (BiFunction<FlightCanceled, EventContext, AirportId>) (e, ctx) ->
+               .unicast(FlightCanceled.class, (e, ctx) ->
                                 ctx.get(AirportId.class));
     }
 }

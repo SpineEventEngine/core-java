@@ -96,7 +96,7 @@ public final class TestColumnMapping extends AbstractColumnMapping<String> {
     }
 
     @Override
-    public ColumnTypeMapping<@Nullable ?, ? extends String> ofNull() {
+    public ColumnTypeMapping<? extends @Nullable Object, ? extends String> ofNull() {
         return o -> NULL_VALUE;
     }
 

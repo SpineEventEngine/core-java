@@ -39,7 +39,7 @@ import io.spine.server.route.StateUpdateRouting
  * @param I The type of identifiers of the entities that receive updated states of other entities.
  */
 public interface StateRoutingSetup<I : Any> :
-    RoutingSetup<I, EntityState<I>, EventContext, Set<I>, StateUpdateRouting<I>> {
+    RoutingSetup<I, EntityState<*>, EventContext, Set<I>, StateUpdateRouting<I>> {
 
     public companion object {
 

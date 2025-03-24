@@ -167,7 +167,7 @@ public abstract class EmittedMessageSubject<S extends EmittedMessageSubject<S, T
      *
      * @return an immutable copy of the {@code actual} messages
      */
-    public ImmutableList<@NonNull T> actual() {
+    public @NonNull ImmutableList<@NonNull T> actual() {
         var messages = requireNonNull(actual);
         return ImmutableList.copyOf(messages);
     }

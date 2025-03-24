@@ -54,9 +54,9 @@ public final class GroupProjection extends Projection<GroupId, Group, Group.Buil
         protected void setupStateRouting(StateUpdateRouting<GroupId> routing) {
             routing.route(Organization.class, (org, eventContext) ->
                     withId(GroupId.newBuilder()
-                                  .setUuid(org.getHead()
-                                              .getValue())
-                                  .build()));
+                                   .setUuid(org.getHead().getValue())
+                                   .build())
+            );
         }
     }
 }

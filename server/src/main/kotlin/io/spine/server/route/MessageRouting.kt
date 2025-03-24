@@ -170,7 +170,7 @@ public sealed class MessageRouting<
      *   directly or via a super-interface.
      */
     @CanIgnoreReturnValue
-    public fun <N: M> route(msgClass: Class<N>, via: RouteFn<N, C, R>): S {
+    public fun <N : M> route(msgClass: Class<N>, via: RouteFn<N, C, R>): S {
         addRoute(msgClass, via)
         return self()
     }

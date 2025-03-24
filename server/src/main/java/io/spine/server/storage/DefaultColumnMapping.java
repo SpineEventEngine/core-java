@@ -94,9 +94,8 @@ public final class DefaultColumnMapping extends AbstractColumnMapping<Object> {
         return identity();
     }
 
-    @SuppressWarnings("ReturnOfNull")
     @Override
-    public ColumnTypeMapping<@Nullable ?, @Nullable ?> ofNull() {
+    public ColumnTypeMapping<? extends @Nullable Object, ? extends @Nullable Object> ofNull() {
         return o -> null;
     }
 }
