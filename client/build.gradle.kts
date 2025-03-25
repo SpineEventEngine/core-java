@@ -50,9 +50,4 @@ dependencies {
     testImplementation(TestLib.lib)
     testImplementation(Time.testLib)
     testImplementation(project(":testutil-client"))
-//    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-}
-
-java {
-    exposeTestConfiguration("io.spine:spine-client-test-artifacts:${project.version}")
 }

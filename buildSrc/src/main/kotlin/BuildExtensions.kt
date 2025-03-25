@@ -99,7 +99,7 @@ val ScriptHandlerScope.protoData: ProtoData
  * This plugin is published at Gradle Plugin Portal.
  * But when used in a pair with [mcJava], it cannot be applied directly to a project.
  * It is so, because [mcJava] uses [protoData] as its dependency.
- * And buildscript's classpath ends up with both of them.
+ * And the buildscript's classpath ends up with both of them.
  */
 val PluginDependenciesSpec.protoData: ProtoData
     get() = ProtoData
@@ -111,8 +111,8 @@ val PluginDependenciesSpec.protoData: ProtoData
  * declared in auto-generated `org.gradle.kotlin.dsl.PluginAccessors.kt` file.
  * It conflicts with our own declarations.
  *
- * Declaring of top-level shortcuts eliminates the need in applying plugins
- * using fully qualified name of dependency objects.
+ * Declaring of top-level shortcuts eliminates the need to apply plugins
+ * using a fully qualified name of dependency objects.
  *
  * It is still possible to apply a plugin with a custom version, if needed.
  * Just declare a version again on the returned [PluginDependencySpec].
@@ -185,7 +185,10 @@ fun Project.configureTaskDependencies() {
         val generateProto = "generateProto"
         val createVersionFile = "createVersionFile"
         val compileKotlin = "compileKotlin"
-        compileKotlin.dependOn(launchProtoData)
+        compileKotlin.run {
+            dependOn(generateProto)
+            dependOn(launchProtoData)
+        }
         val compileTestKotlin = "compileTestKotlin"
         compileTestKotlin.dependOn(launchTestProtoData)
         val sourcesJar = "sourcesJar"

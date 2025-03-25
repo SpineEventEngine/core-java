@@ -66,8 +66,6 @@ dependencies {
     testFixturesImplementation(TestLib.lib)
     testFixturesImplementation(AutoService.annotations)
 
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
     testImplementation(project(":testutil-server"))
 }
 
@@ -88,4 +86,7 @@ tasks.javadoc {
     }
 }
 
-testProtoDataRemoteDebug(false)
+afterEvaluate {
+    testProtoDataRemoteDebug(false)
+}
+

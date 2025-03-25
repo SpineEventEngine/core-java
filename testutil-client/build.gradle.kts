@@ -41,7 +41,3 @@ dependencies {
 
     implementation(Grpc.protobuf)
 }
-
-java {
-    exposeTestConfiguration("io.spine:spine-testutil-client-test-artifacts:${project.version}")
-}
