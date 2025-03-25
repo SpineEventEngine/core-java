@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,28 +26,27 @@
 
 package io.spine.system.server;
 
-import io.spine.server.BoundedContext;
-
-import static com.google.common.truth.Truth.assertThat;
+import com.google.protobuf.Message;
+import io.spine.core.TenantId;
 
 /**
- * A test utility for working with system {@link BoundedContext}s.
+ * A message passed to a system context.
  */
-public final class SystemBoundedContexts {
+public final class MemoizedSystemMessage {
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private SystemBoundedContexts() {
+    private final Message message;
+    private final TenantId tenantId;
+
+    MemoizedSystemMessage(Message message, TenantId id) {
+        this.message = message;
+        tenantId = id;
     }
 
-    /**
-     * Extracts the {@code System} bounded context from the given bounded context.
-     */
-    public static BoundedContext systemOf(BoundedContext context) {
-        var client = context.systemClient();
-        assertThat(client).isInstanceOf(DefaultSystemClient.class);
-        var defaultClient = (DefaultSystemClient) client;
-        return defaultClient.target();
+    public Message message() {
+        return message;
+    }
+
+    public TenantId tenant() {
+        return tenantId;
     }
 }
