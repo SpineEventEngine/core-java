@@ -38,8 +38,8 @@ import io.spine.core.Origin;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
-import io.spine.test.core.ProjectCreated;
-import io.spine.test.core.ProjectId;
+import io.spine.test.server.envelope.event.ProjectCreated;
+import io.spine.test.server.envelope.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 
 import static io.spine.base.Identifier.newUuid;
