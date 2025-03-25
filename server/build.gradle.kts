@@ -65,7 +65,9 @@ dependencies {
     testImplementation(BaseTypes.lib)
 
     testFixturesImplementation(TestLib.lib)
+    testFixturesImplementation(Time.testLib)
     testFixturesImplementation(AutoService.annotations)
+    testFixturesImplementation(project(":testutil-server"))
 
     testImplementation(Time.testLib)
     testImplementation(project(":testutil-server"))
