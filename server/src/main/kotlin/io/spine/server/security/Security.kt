@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,66 +24,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.security;
+package io.spine.server.security
 
-import io.spine.code.java.PackageName;
-import io.spine.server.Server;
-import io.spine.system.server.SystemContext;
-
-import static java.lang.String.format;
+import io.spine.code.java.PackageName
+import io.spine.security.CallerProvider.previousCallerClass
+import io.spine.server.Server
+import io.spine.system.server.SystemContext
 
 /**
  * Controls which class is allowed to call a method.
- *
- * @implNote The generic parameter of {@link Class} is of no importance for access restriction
- *         checking performed by this class.
  */
-@SuppressWarnings("rawtypes") // see @implNote
-public final class Security extends SecurityManager {
+public object Security {
 
-    private static final Security INSTANCE = new Security();
-
-    /** Prevents instantiation of this class from outside. */
-    private Security() {
-        super();
-    }
+    private const val TESTING_SERVER_PACKAGE = "io.spine.testing.server"
 
     /**
-     * Obtains the class preceding in call chain the class which calls the
-     * method from which this method is being called.
+     * Throws [SecurityException] of the calling class does not belong to
+     * the Spine Event Engine framework or its testing utilities.
      */
-    private Class previousCallerClass() {
-        Class[] context = getClassContext();
-        var result = context[3];
-        return result;
-    }
-
-    /**
-     * Throws {@link SecurityException} of the calling class does not belong to
-     * the Spine Event Engine framework or its tests.
-     */
-    public static void allowOnlyFrameworkServer() {
-        var callingClass = INSTANCE.previousCallerClass();
+    @JvmStatic
+    public fun allowOnlyFrameworkServer() {
+        val callingClass = previousCallerClass()
         if (!belongsToServer(callingClass)) {
-            throw nonAllowedCaller(callingClass);
+            throw nonAllowedCaller(callingClass)
         }
     }
 
-    private static boolean belongsToServer(Class callingClass) {
-        var serverPackage = PackageName.of(Server.class);
-        var systemServerPackage = PackageName.of(SystemContext.class);
-        var callingClassName = callingClass.getName();
-        var result =
-                callingClassName.startsWith(serverPackage.value())
-                || callingClassName.startsWith(systemServerPackage.value())
-                || callingClassName.startsWith("io.spine.testing.server");
-        return result;
+    /**
+     * Tells if the calling class belongs to the server packages for which a call is permitted.
+     *
+     * The allowed packages are:
+     *  1. [io.spine.server]
+     *  2. [io.spine.system.server]
+     *  3. [io.spine.testing.server][Security.TESTING_SERVER_PACKAGE]
+     *
+     * @param callingClass The class to check.
+     * @return `true` if the class is allowed to make a call, `false` otherwise.
+     */
+    private fun belongsToServer(callingClass: Class<*>): Boolean {
+        val serverPackage = PackageName.of(Server::class.java)
+        val systemServerPackage = PackageName.of(
+            SystemContext::class.java
+        )
+        val callingClassName = callingClass.name
+        val result =
+            callingClassName.startsWith(serverPackage.value())
+                    || callingClassName.startsWith(systemServerPackage.value())
+                    || callingClassName.startsWith(TESTING_SERVER_PACKAGE)
+        return result
     }
 
-    private static SecurityException nonAllowedCaller(Class callingClass) {
-        var msg = format(
-                "The class `%s` is not allowed to make this call.", callingClass.getName()
-        );
-        throw new SecurityException(msg);
+    private fun nonAllowedCaller(callingClass: Class<*>): SecurityException {
+        throw SecurityException(
+            "The class `${callingClass.name}` is not allowed to make this call."
+        )
     }
 }
