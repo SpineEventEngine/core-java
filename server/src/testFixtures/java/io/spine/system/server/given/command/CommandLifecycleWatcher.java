@@ -28,12 +28,11 @@ package io.spine.system.server.given.command;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.type.EventClass;
-import io.spine.system.server.CommandLog;
 import io.spine.system.server.ModelInfo;
 import io.spine.system.server.given.AbstractEventAccumulator;
 
 /**
- * Accumulates {@link CommandLog} events.
+ * Accumulates {@code CommandLog} events.
  */
 public class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
