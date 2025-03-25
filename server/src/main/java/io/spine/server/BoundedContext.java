@@ -88,7 +88,7 @@ import static java.lang.String.format;
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
  *         Martin Fowler on Bounded Contexts</a>
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "NotJavadoc"})
 public abstract class BoundedContext
         implements Comparable<BoundedContext>,
                    Closeable,
@@ -388,7 +388,7 @@ public abstract class BoundedContext
     /**
      * Verifies if this Bounded Context contains entities of the passed class.
      *
-     * <p>This method does not take into account visibility of entity states.
+     * <p>This method does not take into account the visibility of entity states.
      */
     public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
         var cls = EntityClass.asEntityClass(entityClass);
@@ -399,7 +399,7 @@ public abstract class BoundedContext
     /**
      * Verifies if this Bounded Context has entities with the state of the passed class.
      *
-     * <p>This method does not take into account visibility of entity states.
+     * <p>This method does not take into account the visibility of entity states.
      */
     public boolean hasEntitiesWithState(Class<? extends EntityState<?>> stateClass) {
         var result = guard.hasRepository(stateClass);
