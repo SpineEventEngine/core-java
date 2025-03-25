@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -63,6 +64,7 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.security.Security.allowOnlyFrameworkServer;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
@@ -286,7 +288,7 @@ public abstract class BoundedContext
      */
     protected void registerEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
-        Security.allowOnlyFrameworkServer();
+        allowOnlyFrameworkServer();
         registerIfAware(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             var eventBus = eventBus();
@@ -314,7 +316,7 @@ public abstract class BoundedContext
      */
     private void unregisterEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
-        Security.allowOnlyFrameworkServer();
+        allowOnlyFrameworkServer();
         unregisterIfAware(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             var eventBus = eventBus();
@@ -542,7 +544,7 @@ public abstract class BoundedContext
      */
     @Internal
     public final InternalAccess internalAccess() {
-        Security.allowOnlyFrameworkServer();
+        allowOnlyFrameworkServer();
         return internalAccess;
     }
 
