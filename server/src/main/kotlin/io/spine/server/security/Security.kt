@@ -27,9 +27,12 @@
 package io.spine.server.security
 
 import io.spine.code.java.PackageName
-import io.spine.security.CallerProvider.previousCallerClass
 import io.spine.server.Server
+import io.spine.server.security.CallerProvider.previousCallerClass
 import io.spine.system.server.SystemContext
+import java.lang.StackWalker.Option.RETAIN_CLASS_REFERENCE
+import java.lang.StackWalker.StackFrame
+import java.util.stream.Stream
 
 /**
  * Controls which class is allowed to call a method.
@@ -79,4 +82,41 @@ public object Security {
             "The class `${callingClass.name}` is not allowed to make this call."
         )
     }
+}
+
+/**
+ * Provides information about the class calling a method.
+ */
+private object CallerProvider {
+
+    private val stackWalker: StackWalker = StackWalker.getInstance(RETAIN_CLASS_REFERENCE)
+
+    /**
+     * Obtains the class of the object which calls the method from which
+     * this method is being called.
+     */
+    @Suppress("unused")
+    fun callerClass(): Class<*> {
+        return stackWalker.walk { frames ->
+            frames.findCallerClass(2)
+        }
+    }
+
+    /**
+     * Obtains the class preceding in the call chain the class which calls
+     * the method from which this method is being called.
+     */
+    fun previousCallerClass(): Class<*> {
+        return stackWalker.walk { frames ->
+            frames.findCallerClass(3)
+        }
+    }
+
+    private fun Stream<StackFrame>.findCallerClass(skipCount: Long) =
+        skip(skipCount)
+            .filter { frame -> frame.declaringClass != CallerProvider::class.java }
+            .filter { frame -> frame.toStackTraceElement().moduleName != "java.base" }
+            .findFirst()
+            .map { frame -> frame.declaringClass }
+            .get() // We're safe because the stacktrace will be deeper than 3.
 }
