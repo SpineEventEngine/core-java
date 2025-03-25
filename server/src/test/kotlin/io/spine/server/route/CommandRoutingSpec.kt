@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.route
 
 import io.kotest.matchers.shouldBe
@@ -33,7 +34,8 @@ import io.spine.base.Identifier
 import io.spine.core.CommandContext
 import io.spine.server.route.CommandRouting.Companion.newInstance
 import io.spine.server.type.CommandEnvelope
-import io.spine.test.commands.CmdCreateProject
+import io.spine.test.command.CmdCreateProject
+import io.spine.test.command.ProjectId
 import io.spine.test.route.RegisterUser
 import io.spine.testing.TestValues
 import io.spine.testing.client.TestActorRequestFactory
@@ -105,11 +107,12 @@ internal class CommandRoutingSpec {
 
     @Test
     fun `apply default route`() {
-        // Replace the default route since we have custom command message.
-        commandRouting.replaceDefault(customDefault) // Have custom route too.
+        // Replace the default route since we have a custom command message.
+        commandRouting.replaceDefault(customDefault) // Have a custom route too.
             .route<RegisterUser>(customRoute)
 
-        val cmd = CmdCreateProject.newBuilder().setId(Identifier.newUuid()).build()
+        val cmd = CmdCreateProject.newBuilder()
+            .setProjectId(ProjectId.newBuilder().setId(Identifier.newUuid()).build()).build()
         val command = CommandEnvelope.of(requestFactory.createCommand(cmd))
 
         val id = commandRouting(command.message(), command.context())
