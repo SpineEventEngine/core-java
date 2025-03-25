@@ -141,8 +141,6 @@ val koverVersion = "0.7.2"
  */
 val shadowVersion = "7.1.2"
 
-val coroutinesVersion = "1.10.0"
-
 configurations.all {
     resolutionStrategy {
         force(
@@ -152,7 +150,7 @@ configurations.all {
             // Force Kotlin lib versions avoiding using those bundled with Gradle.
             "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-            "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+            "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
         )
     }
 }
