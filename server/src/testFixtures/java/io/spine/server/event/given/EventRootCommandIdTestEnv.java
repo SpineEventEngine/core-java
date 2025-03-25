@@ -38,7 +38,6 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventRootMessageIdTest;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
@@ -78,7 +77,7 @@ public class EventRootCommandIdTestEnv {
     public static final TenantId TENANT_ID = tenantId();
 
     private static final TestActorRequestFactory requestFactory =
-            new TestActorRequestFactory(EventRootMessageIdTest.class, TENANT_ID);
+            new TestActorRequestFactory(EventRootCommandIdTestEnv.class, TENANT_ID);
 
     /** Prevents instantiation of this utility class. */
     private EventRootCommandIdTestEnv() {
