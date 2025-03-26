@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ package io.spine.gradle.checkstyle
 
 import io.spine.dependency.build.CheckStyle
 import org.gradle.api.Project
-import org.gradle.api.plugins.quality.Checkstyle
 import org.gradle.api.plugins.quality.CheckstyleExtension
 import org.gradle.api.plugins.quality.CheckstylePlugin
 import org.gradle.kotlin.dsl.the
@@ -65,9 +64,13 @@ object CheckStyleConfig {
         }
 
         project.afterEvaluate {
-            // Disables checking the test sources.
-            val checkstyleTest = project.tasks.findByName("checkstyleTest") as Checkstyle
-            checkstyleTest.enabled = false
+            // Disables checking the test sources and test fixtures.
+            arrayOf(
+                "checkstyleTest",
+                "checkstyleTestFixtures"
+            ).forEach {
+                task -> tasks.findByName(task)?.enabled = false
+            }
         }
     }
 }
