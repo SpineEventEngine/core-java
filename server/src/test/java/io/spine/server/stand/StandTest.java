@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -365,7 +365,6 @@ class StandTest extends TenantAwareTest {
 
         @Test
         @DisplayName("upon receiving the event of observed type, when event is produced by Entity")
-        @SuppressWarnings("OverlyCoupledMethod") // Huge end-to-end test.
         void uponEventFromEntity() {
             // Subscribe to Customer aggregate updates.
             var repository = new CustomerAggregateRepository();
@@ -534,7 +533,7 @@ class StandTest extends TenantAwareTest {
         var nonExistingSubscription = Subscription.newBuilder()
                 .setId(Subscriptions.generateId())
                 .setTopic(Topic.newBuilder().setId(topicId).buildPartial())
-                .build();
+                .buildPartial();
         assertThrows(InvalidSubscriptionException.class,
                      () -> stand.cancel(nonExistingSubscription, noOpObserver()));
     }
@@ -830,8 +829,8 @@ class StandTest extends TenantAwareTest {
             verifyInvalidSubscription(invalidSubscription, exception);
         }
 
-        private void verifyInvalidSubscription(Subscription invalidSubscription,
-                                               InvalidSubscriptionException exception) {
+        private static void verifyInvalidSubscription(Subscription invalidSubscription,
+                                                      InvalidSubscriptionException exception) {
             assertEquals(invalidSubscription, exception.getRequest());
 
             assertEquals(SubscriptionValidationError.INVALID_SUBSCRIPTION.getNumber(),
@@ -843,8 +842,8 @@ class StandTest extends TenantAwareTest {
             assertTrue(isNotDefault(validationError));
         }
 
-        private void verifyUnknownSubscription(Subscription subscription,
-                                               InvalidSubscriptionException exception) {
+        private static void verifyUnknownSubscription(Subscription subscription,
+                                                      InvalidSubscriptionException exception) {
             assertEquals(subscription, exception.getRequest());
 
             assertEquals(SubscriptionValidationError.UNKNOWN_SUBSCRIPTION.getNumber(),
