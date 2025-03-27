@@ -71,6 +71,7 @@ public abstract class MulticastRouting<
      * @throws IllegalStateException if the route for this message class is already set either
      *   directly or via a super-interface.
      */
+    @CanIgnoreReturnValue
     public inline fun <reified N : M> unicast(
         noinline via: (N, C) -> I
     ): S = unicast(N::class.java, via)
@@ -85,6 +86,7 @@ public abstract class MulticastRouting<
      * @throws IllegalStateException if the route for this message class is already set either
      *   directly or via a super-interface.
      */
+    @CanIgnoreReturnValue
     public inline fun <reified N : M> unicast(
         noinline via: (N) -> I
     ): S = unicast(N::class.java, via)
