@@ -43,7 +43,7 @@ dependencies {
     api(Time.lib)
     api(Validation.runtime)
     api(Logging.lib)
-    api(KotlinX.Coroutines.core)
+    api(Coroutines.core)
 
     testImplementation(project(":testutil-core"))
     testImplementation(Time.testLib)

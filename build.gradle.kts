@@ -27,10 +27,10 @@
 @file:Suppress("RemoveRedundantQualifierName")
 
 import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.lib.Coroutines
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Guava
 import io.spine.dependency.lib.Kotlin
-import io.spine.dependency.lib.KotlinX
 import io.spine.dependency.lib.KotlinPoet
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
@@ -74,10 +74,10 @@ buildscript {
                     io.spine.dependency.lib.Guava.lib,
                     io.spine.dependency.lib.Grpc.api,
                     io.spine.dependency.lib.Kotlin.stdLib,
-                    io.spine.dependency.lib.KotlinX.Coroutines.bom,
-                    io.spine.dependency.lib.KotlinX.Coroutines.core,
-                    io.spine.dependency.lib.KotlinX.Coroutines.coreJvm,
-                    io.spine.dependency.lib.KotlinX.Coroutines.jdk8,
+                    io.spine.dependency.lib.Coroutines.bom,
+                    io.spine.dependency.lib.Coroutines.core,
+                    io.spine.dependency.lib.Coroutines.coreJvm,
+                    io.spine.dependency.lib.Coroutines.jdk8,
                     "${protoData.module}:${protoData.dogfoodingVersion}",
                     io.spine.dependency.local.Base.lib,
                     io.spine.dependency.local.ToolBase.lib,
@@ -347,10 +347,10 @@ fun Subproject.forceConfigurations() {
                     Grpc.api,
                     JUnit.runner,
 
-                    KotlinX.Coroutines.core,
-                    KotlinX.Coroutines.coreJvm,
-                    KotlinX.Coroutines.bom,
-                    KotlinX.Coroutines.jdk8,
+                    Coroutines.core,
+                    Coroutines.coreJvm,
+                    Coroutines.bom,
+                    Coroutines.jdk8,
 
                     KotlinPoet.lib,
 

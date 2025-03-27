@@ -31,6 +31,10 @@ object KotlinX {
 
     const val group = "org.jetbrains.kotlinx"
 
+    @Deprecated(
+        message = "Pleaser use top level object `Coroutines` instead.",
+        ReplaceWith("Coroutines")
+    )
     object Coroutines {
 
         // https://github.com/Kotlin/kotlinx.coroutines
