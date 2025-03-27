@@ -25,13 +25,11 @@
  */
 
 import io.spine.dependency.lib.Coroutines
-import io.spine.dependency.lib.KotlinX
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Logging
 import io.spine.dependency.local.Time
 import io.spine.dependency.local.Validation
-import io.spine.gradle.testing.exposeTestConfiguration
 
 plugins {
     `detekt-code-analysis`
