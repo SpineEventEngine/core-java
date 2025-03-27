@@ -93,7 +93,7 @@ tasks.javadoc {
 afterEvaluate {
     testProtoDataRemoteDebug(false)
 
-    tasks.named("testJar").configure {this as Jar
+    tasks.named("testJar").configure { this as Jar
         from(sourceSets.testFixtures.get().output)
     }
 }
