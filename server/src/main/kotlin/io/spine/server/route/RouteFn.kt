@@ -44,7 +44,7 @@ import io.spine.core.SignalContext
  * @see Unicast
  * @see Multicast
  */
-public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) -> R {
+public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> {
 
     /**
      * Obtains entity ID(s) from the passed message and its context.
@@ -53,5 +53,5 @@ public fun interface RouteFn<M : Routable, C : SignalContext, R : Any> : (M, C) 
      * @param context The context of the message.
      * @return identifier(s) of the target entities.
      */
-    override fun invoke(message: M, context: C): R
+    public operator fun invoke(message: M, context: C): R
 }
