@@ -42,14 +42,14 @@ public object Security {
     private const val TESTING_SERVER_PACKAGE = "io.spine.testing.server"
 
     /**
-     * Throws [SecurityException] of the calling class does not belong to
+     * Throws [SecurityException] if the calling class does not belong to
      * the Spine Event Engine framework or its testing utilities.
      */
     @JvmStatic
     public fun allowOnlyFrameworkServer() {
         val callingClass = previousCallerClass()
         if (!belongsToServer(callingClass)) {
-            throw nonAllowedCaller(callingClass)
+            throw notAllowedCaller(callingClass)
         }
     }
 
@@ -77,11 +77,10 @@ public object Security {
         return result
     }
 
-    private fun nonAllowedCaller(callingClass: Class<*>): SecurityException {
+    private fun notAllowedCaller(callingClass: Class<*>): SecurityException =
         throw SecurityException(
             "The class `${callingClass.name}` is not allowed to make this call."
         )
-    }
 }
 
 /**

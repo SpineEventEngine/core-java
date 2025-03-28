@@ -73,7 +73,6 @@ public class StateUpdateRouting<I : Any> private constructor(
 ) {
     override fun self(): StateUpdateRouting<I> = this
 
-
     override fun <E : EntityState<*>> createUnicastRoute(
         via: (E, EventContext) -> I
     ): StateUpdateRoute<I, E> = StateUpdateRoute { state, context -> setOf(via(state, context)) }

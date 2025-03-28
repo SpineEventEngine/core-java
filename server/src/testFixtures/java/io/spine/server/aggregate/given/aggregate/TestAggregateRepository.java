@@ -30,7 +30,7 @@ import io.spine.test.aggregate.AggProject;
 import io.spine.test.aggregate.ProjectId;
 
 /**
- * Test environment repository for Aggregate tests}.
+ * Test environment repository for Aggregate tests.
  */
 public class TestAggregateRepository
         extends AbstractAggregateTestRepository<ProjectId, TestAggregate, AggProject> {

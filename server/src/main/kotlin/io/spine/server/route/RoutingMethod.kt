@@ -46,7 +46,7 @@ import java.lang.reflect.Method
  * @see Route
  * @see RoutingMap
  */
-internal sealed class RoutingMethod<I: Any, M: Routable, C: SignalContext, R: Any>(
+internal sealed class RoutingMethod<I : Any, M : Routable, C : SignalContext, R : Any>(
     protected val rawMethod: Method
 ) {
     /**

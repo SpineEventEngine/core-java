@@ -97,4 +97,3 @@ afterEvaluate {
         from(sourceSets.testFixtures.get().output)
     }
 }
-
