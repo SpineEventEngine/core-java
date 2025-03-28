@@ -55,9 +55,9 @@ import io.spine.server.event.EventBus;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.CommandSubject;
 import io.spine.testing.server.EventSubject;
+import io.spine.testing.server.blackbox.probe.BlackboxProbe;
 import io.spine.testing.server.blackbox.probe.CommandCollector;
 import io.spine.testing.server.blackbox.probe.EventCollector;
-import io.spine.testing.server.blackbox.probe.BlackboxProbe;
 import io.spine.testing.server.entity.EntitySubject;
 import io.spine.testing.server.query.QueryResultSubject;
 import io.spine.time.ZoneId;
@@ -617,7 +617,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
     /**
      * Performs data reading operation in a tenant context.
      */
-    protected <@Nullable D> D readOperation(Supplier<D> supplier) {
+    protected <D extends @Nullable Object> D readOperation(Supplier<D> supplier) {
         return supplier.get();
     }
 

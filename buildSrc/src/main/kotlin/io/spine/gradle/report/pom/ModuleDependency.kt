@@ -40,7 +40,7 @@ internal class ModuleDependency(
     val project: Project,
     val configuration: Configuration,
     private val dependency: Dependency,
-    private val factualVersion: String = dependency.version!!
+    private val factualVersion: String? = dependency.version
 
 ) : Dependency by dependency, Comparable<ModuleDependency> {
 
@@ -52,7 +52,7 @@ internal class ModuleDependency(
             .thenBy { it.factualVersion }
     }
 
-    override fun getVersion(): String = factualVersion
+    override fun getVersion(): String? = factualVersion
 
     /**
      * A project dependency with its [scope][DependencyScope].

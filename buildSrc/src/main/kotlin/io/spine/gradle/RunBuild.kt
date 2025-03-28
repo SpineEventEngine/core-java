@@ -32,6 +32,6 @@ package io.spine.gradle
 open class RunBuild : RunGradle() {
 
     init {
-        task("build")
+        task("clean", "build")
     }
 }

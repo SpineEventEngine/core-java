@@ -28,6 +28,7 @@ import io.spine.dependency.lib.Grpc
 import io.spine.dependency.local.Logging
 import io.spine.dependency.local.Reflect
 import io.spine.dependency.local.TestLib
+import io.spine.dependency.local.Time
 import io.spine.gradle.testing.exposeTestConfiguration
 
 plugins {
@@ -47,10 +48,6 @@ dependencies {
     implementation(Logging.grpcContext)
 
     testImplementation(TestLib.lib)
+    testImplementation(Time.testLib)
     testImplementation(project(":testutil-client"))
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-}
-
-java {
-    exposeTestConfiguration()
 }

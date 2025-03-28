@@ -26,6 +26,7 @@
 
 package io.spine.server.route
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue
 import io.spine.base.Routable
 import io.spine.core.SignalContext
 
@@ -70,6 +71,7 @@ public abstract class MulticastRouting<
      * @throws IllegalStateException if the route for this message class is already set either
      *   directly or via a super-interface.
      */
+    @CanIgnoreReturnValue
     public inline fun <reified N : M> unicast(
         noinline via: (N, C) -> I
     ): S = unicast(N::class.java, via)
@@ -84,6 +86,7 @@ public abstract class MulticastRouting<
      * @throws IllegalStateException if the route for this message class is already set either
      *   directly or via a super-interface.
      */
+    @CanIgnoreReturnValue
     public inline fun <reified N : M> unicast(
         noinline via: (N) -> I
     ): S = unicast(N::class.java, via)
@@ -100,6 +103,7 @@ public abstract class MulticastRouting<
      * @throws IllegalStateException if the route for this message class is already set either
      *   directly or via a super-interface.
      */
+    @CanIgnoreReturnValue
     public fun <N : M> unicast(
         msgType: Class<N>,
         via: (N, C) -> I
@@ -117,6 +121,7 @@ public abstract class MulticastRouting<
      * @throws IllegalStateException if the route for this message class is already set either
      *   directly or via a super-interface.
      */
+    @CanIgnoreReturnValue
     public fun <N : M> unicast(
         msgType: Class<N>,
         via: (N) -> I

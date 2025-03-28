@@ -25,7 +25,7 @@
  */
 
 import io.spine.dependency.lib.Grpc
-import io.spine.dependency.local.Spine
+import io.spine.dependency.local.Time
 import io.spine.gradle.testing.exposeTestConfiguration
 
 group = "io.spine.tools"
@@ -37,11 +37,7 @@ plugins {
 dependencies {
     api(project(":client"))
     api(project(":testutil-core"))
-    api(Spine.time)
+    api(Time.lib)
 
     implementation(Grpc.protobuf)
-}
-
-java {
-    exposeTestConfiguration()
 }

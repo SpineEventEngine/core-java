@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,15 @@ package io.spine.dependency.lib
  * 
  * @see <a href="https://github.com/Kotlin/kotlinx.coroutines">GitHub projecet</a>
  */
-@Suppress("unused")
+@Suppress("unused", "ConstPropertyName")
 object Coroutines {
-    const val version = "1.6.4"
-    const val jdk8 = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$version"
-    const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
-    const val bom = "org.jetbrains.kotlinx:kotlinx-coroutines-bom:$version"
-    const val coreJvm = "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$version"
+    const val group = "org.jetbrains.kotlinx"
+    const val version = "1.10.1"
+    const val bom = "$group:kotlinx-coroutines-bom:$version"
+    const val core = "$group:kotlinx-coroutines-core:$version"
+    const val coreJvm = "$group:kotlinx-coroutines-core-jvm:$version"
+    const val jdk8 = "$group:kotlinx-coroutines-jdk8:$version"
+    const val debug = "$group:kotlinx-coroutines-debug:$version"
+    const val test = "$group:kotlinx-coroutines-test:$version"
+    const val testJvm = "$group:kotlinx-coroutines-test-jvm:$version"
 }

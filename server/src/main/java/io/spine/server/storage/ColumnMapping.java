@@ -56,5 +56,5 @@ public interface ColumnMapping<R> {
     /**
      * Obtains the mapping rules of {@code null}.
      */
-    ColumnTypeMapping<@Nullable ?, @Nullable ? extends R> ofNull();
+    ColumnTypeMapping<? extends @Nullable Object, ? extends @Nullable R> ofNull();
 }

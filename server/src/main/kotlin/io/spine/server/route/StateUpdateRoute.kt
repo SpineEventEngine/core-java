@@ -32,8 +32,10 @@ import io.spine.core.EventContext
 /**
  * Obtains a set of entity IDs for which to deliver an entity state update.
  *
+ * A state update route can route any entity state.
+ * That's why the generic parameter [S] does not bind the [EntityState] generic parameter.
+ *
  * @param I The type of entity IDs.
- * @param S The type of entity states to get IDs from
+ * @param S The type of entity states to route.
  */
-@FunctionalInterface
 public fun interface StateUpdateRoute<I : Any, S : EntityState<*>> : Multicast<I, S, EventContext>

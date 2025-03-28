@@ -49,10 +49,17 @@ import java.lang.annotation.Target;
  * dealing with {@linkplain io.spine.core.ContractFor entity class hierarchies}.
  *
  * <p>When used in Kotlin, the methods <strong>must</strong> be {@code internal},
- * with {@code @Route} the annotation of a companion object method,
- * followed by the {@code @JvmStatic} annotation.
- * This is to make the method visible as static to the Java runtime.
+ * with the {@code @Route} annotation of a companion object function.
+ *
+ * <p>Using the annotated functions, Spine Compiler will generate classes implementing
+ * the {@link io.spine.server.route.setup.RoutingSetup RoutingSetup} interface.
+ * Repositories will use these classes for configuring their routing schemas.
+ *
+ * @see io.spine.server.route.setup.RoutingSetup
+ * @see io.spine.server.entity.EventDispatchingRepository#setupEventRouting(EventRouting)
+ * @see io.spine.server.aggregate.AggregateRepository#setupCommandRouting(CommandRouting)
  */
+@SuppressWarnings("JavadocReference") // We reference protected methods of repository classes.
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Route {

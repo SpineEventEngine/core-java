@@ -36,7 +36,6 @@ import io.spine.core.EventContext
  * @param I The type of entity IDs.
  * @param M The type of event message from which to get the IDs.
  */
-@FunctionalInterface
 public fun interface EventRoute<I : Any, M : EventMessage> : Multicast<I, M, EventContext> {
 
     public companion object {

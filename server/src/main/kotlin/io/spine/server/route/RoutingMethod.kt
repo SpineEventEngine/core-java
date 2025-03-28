@@ -26,11 +26,12 @@
 
 package io.spine.server.route
 
-import com.google.protobuf.Message
 import io.spine.base.CommandMessage
 import io.spine.base.EventMessage
+import io.spine.base.Routable
 import io.spine.core.CommandContext
 import io.spine.core.EventContext
+import io.spine.core.SignalContext
 import java.lang.reflect.Method
 
 /**
@@ -45,7 +46,7 @@ import java.lang.reflect.Method
  * @see Route
  * @see RoutingMap
  */
-internal sealed class RoutingMethod<I: Any, M: Message, C: Message, R: Any>(
+internal sealed class RoutingMethod<I : Any, M : Routable, C : SignalContext, R : Any>(
     protected val rawMethod: Method
 ) {
     /**

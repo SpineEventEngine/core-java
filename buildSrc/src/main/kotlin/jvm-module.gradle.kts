@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,9 @@ import io.spine.gradle.kotlin.setFreeCompilerArgs
 import io.spine.gradle.report.license.LicenseReporter
 import io.spine.gradle.testing.configureLogging
 import io.spine.gradle.testing.registerTestTasks
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
-    idea
     id("net.ltgt.errorprone")
     id("pmd-settings")
     id("project-report")
@@ -99,11 +97,8 @@ fun Module.configureKotlin(javaVersion: JavaLanguageVersion) {
     kotlin {
         applyJvmToolchain(javaVersion.asInt())
         explicitApi()
-    }
-
-    tasks {
-        withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion.toString()
+        compilerOptions {
+            jvmTarget.set(BuildSettings.jvmTarget)
             setFreeCompilerArgs()
         }
     }
@@ -195,7 +190,9 @@ fun Module.setTaskDependencies(generatedDir: String) {
             publish?.dependsOn("${project.path}:updateGitHubPages")
         }
     }
-    configureTaskDependencies()
+    afterEvaluate {
+        configureTaskDependencies()
+    }
 }
 
 fun Module.configureGitHubPages() {

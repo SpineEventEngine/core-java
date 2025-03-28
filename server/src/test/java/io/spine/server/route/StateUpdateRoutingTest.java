@@ -61,24 +61,26 @@ class StateUpdateRoutingTest {
     @DisplayName("route messages with defined routes")
     void routeMessagesByRoutes() {
         var counterKey = "sample_key";
-        var routing = StateUpdateRouting.newInstance(Integer.class)
+        var routing = StateUpdateRouting.newInstance(Long.class)
                 .route(LogState.class, (log, context) ->
-                        ImmutableSet.of(log.getCountersOrThrow(counterKey)));
+                        ImmutableSet.of((long) log.getCountersOrThrow(counterKey))
+                );
         var counter = 42;
         var log = LogState.newBuilder()
                 .putCounters(counterKey, counter)
                 .build();
         var targets = routing.invoke(log, emptyContext);
-        assertThat(targets).containsExactly(counter);
+        assertThat(targets).containsExactly((long)counter);
     }
 
     @Test
     @DisplayName("compose an `EventRoute` for `EntityStateChanged` events")
     void createEventRoute() {
         var counterKey = "test_key";
-        var routing = StateUpdateRouting.newInstance(Integer.class)
-                .route(LogState.class,
-                       (log, context) -> ImmutableSet.of(log.getCountersOrThrow(counterKey)));
+        var routing = StateUpdateRouting.newInstance(Long.class)
+                .route(LogState.class, (log, context) ->
+                               ImmutableSet.of((long) log.getCountersOrThrow(counterKey))
+                );
         var counter = 42;
         var builder = LogState.newBuilder()
                 .putCounters(counterKey, counter);
@@ -94,7 +96,7 @@ class StateUpdateRoutingTest {
                 .build();
         var eventRoute = routing.eventRoute();
         var targets = eventRoute.invoke(event, emptyContext);
-        assertThat(targets).containsExactly(counter);
+        assertThat(targets).containsExactly((long) counter);
     }
 
     @NonNull

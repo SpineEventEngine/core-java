@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.206</version>
+<version>2.0.0-SNAPSHOT.300</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -68,19 +68,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.240</version>
+    <version>2.0.0-SNAPSHOT.307</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base-types</artifactId>
-    <version>2.0.0-SNAPSHOT.126</version>
+    <version>2.0.0-SNAPSHOT.200</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-change</artifactId>
-    <version>2.0.0-SNAPSHOT.118</version>
+    <version>2.0.0-SNAPSHOT.200</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -104,13 +104,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-time</artifactId>
-    <version>2.0.0-SNAPSHOT.136</version>
+    <version>2.0.0-SNAPSHOT.200</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-runtime</artifactId>
-    <version>2.0.0-SNAPSHOT.186</version>
+    <version>2.0.0-SNAPSHOT.305</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -122,19 +122,19 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-reflect</artifactId>
-    <version>1.9.23</version>
+    <version>2.1.20</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
-    <artifactId>kotlin-stdlib-jdk8</artifactId>
-    <version>1.9.23</version>
+    <artifactId>kotlin-stdlib</artifactId>
+    <version>2.1.20</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlinx</groupId>
     <artifactId>kotlinx-coroutines-core</artifactId>
-    <version>1.9.0</version>
+    <version>1.10.1</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -156,12 +156,6 @@ all modules and does not describe the project structure per-subproject.
     <scope>test</scope>
   </dependency>
   <dependency>
-    <groupId>com.google.auto.service</groupId>
-    <artifactId>auto-service-annotations</artifactId>
-    <version>1.1.1</version>
-    <scope>test</scope>
-  </dependency>
-  <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty</artifactId>
     <version>1.59.0</version>
@@ -176,13 +170,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.184</version>
+    <version>2.0.0-SNAPSHOT.185</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-time-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.136</version>
+    <version>2.0.0-SNAPSHOT.200</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -192,9 +186,30 @@ all modules and does not describe the project structure per-subproject.
     <scope>test</scope>
   </dependency>
   <dependency>
+    <groupId>com.google.auto.service</groupId>
+    <artifactId>auto-service-annotations</artifactId>
+    <version>1.1.1</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.google.devtools.ksp</groupId>
+    <artifactId>symbol-processing</artifactId>
+    <version>2.1.20-1.0.31</version>
+  </dependency>
+  <dependency>
+    <groupId>com.google.devtools.ksp</groupId>
+    <artifactId>symbol-processing-api</artifactId>
+    <version>2.1.20-1.0.31</version>
+  </dependency>
+  <dependency>
+    <groupId>com.google.devtools.ksp</groupId>
+    <artifactId>symbol-processing-cmdline</artifactId>
+    <version>2.1.20-1.0.31</version>
+  </dependency>
+  <dependency>
     <groupId>com.google.errorprone</groupId>
     <artifactId>error_prone_core</artifactId>
-    <version>2.23.0</version>
+    <version>2.36.0</version>
   </dependency>
   <dependency>
     <groupId>com.google.errorprone</groupId>
@@ -212,9 +227,14 @@ all modules and does not describe the project structure per-subproject.
     <version>10.12.1</version>
   </dependency>
   <dependency>
+    <groupId>dev.zacsweers.autoservice</groupId>
+    <artifactId>auto-service-ksp</artifactId>
+    <version>1.2.0</version>
+  </dependency>
+  <dependency>
     <groupId>io.gitlab.arturbosch.detekt</groupId>
     <artifactId>detekt-cli</artifactId>
-    <version>1.23.0</version>
+    <version>1.23.8</version>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
@@ -224,12 +244,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-fat-cli</artifactId>
-    <version>0.91.0</version>
+    <version>0.93.6</version>
   </dependency>
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-protoc</artifactId>
-    <version>0.91.0</version>
+    <version>0.93.6</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
@@ -238,19 +258,18 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
-    <artifactId>spine-mc-java-checks</artifactId>
-    <version>2.0.0-SNAPSHOT.262</version>
-    <scope>provided</scope>
+    <artifactId>spine-mc-java-plugins</artifactId>
+    <version>2.0.0-SNAPSHOT.307</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
-    <artifactId>spine-mc-java-plugins</artifactId>
-    <version>2.0.0-SNAPSHOT.262</version>
+    <artifactId>spine-mc-java-routing</artifactId>
+    <version>2.0.0-SNAPSHOT.307</version>
   </dependency>
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-bundle</artifactId>
-    <version>2.0.0-SNAPSHOT.182</version>
+    <version>2.0.0-SNAPSHOT.305</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
@@ -260,12 +279,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.agent</artifactId>
-    <version>0.8.8</version>
+    <version>0.8.12</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.ant</artifactId>
-    <version>0.8.8</version>
+    <version>0.8.12</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
@@ -304,18 +323,23 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>kotlin-build-tools-impl</artifactId>
+    <version>2.1.20</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-compiler-embeddable</artifactId>
-    <version>1.8.22</version>
+    <version>2.1.20</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-klib-commonizer-embeddable</artifactId>
-    <version>1.8.22</version>
+    <version>2.1.20</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
     <artifactId>kotlin-scripting-compiler-embeddable</artifactId>
-    <version>1.8.22</version>
+    <version>2.1.20</version>
   </dependency>
 </dependencies>
 

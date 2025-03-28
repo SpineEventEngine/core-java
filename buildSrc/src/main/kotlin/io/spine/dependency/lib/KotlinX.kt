@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,17 @@ object KotlinX {
 
     const val group = "org.jetbrains.kotlinx"
 
+    @Deprecated(
+        message = "Pleaser use top level object `Coroutines` instead.",
+        ReplaceWith("Coroutines")
+    )
     object Coroutines {
 
         // https://github.com/Kotlin/kotlinx.coroutines
-        const val version = "1.9.0"
-        const val core = "$group:kotlinx-coroutines-core:$version"
+        const val version = "1.10.1"
         const val bom = "$group:kotlinx-coroutines-bom:$version"
+        const val core = "$group:kotlinx-coroutines-core:$version"
+        const val coreJvm = "$group:kotlinx-coroutines-core-jvm:$version"
         const val jdk8 = "$group:kotlinx-coroutines-jdk8:$version"
         const val test = "$group:kotlinx-coroutines-test:$version"
     }

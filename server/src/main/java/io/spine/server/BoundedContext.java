@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,6 +23,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -47,7 +48,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.IntegrationBroker;
-import io.spine.server.security.Security;
 import io.spine.server.stand.Stand;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.CommandEnvelope;
@@ -63,6 +63,7 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.security.Security.allowOnlyFrameworkServer;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
@@ -87,7 +88,7 @@ import static java.lang.String.format;
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
  *         Martin Fowler on Bounded Contexts</a>
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "NotJavadoc"})
 public abstract class BoundedContext
         implements Comparable<BoundedContext>,
                    Closeable,
@@ -286,7 +287,7 @@ public abstract class BoundedContext
      */
     protected void registerEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
-        Security.allowOnlyFrameworkServer();
+        allowOnlyFrameworkServer();
         registerIfAware(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             var eventBus = eventBus();
@@ -314,7 +315,7 @@ public abstract class BoundedContext
      */
     private void unregisterEventDispatcher(EventDispatcher dispatcher) {
         checkNotNull(dispatcher);
-        Security.allowOnlyFrameworkServer();
+        allowOnlyFrameworkServer();
         unregisterIfAware(dispatcher);
         if (dispatcher.dispatchesEvents()) {
             var eventBus = eventBus();
@@ -387,7 +388,7 @@ public abstract class BoundedContext
     /**
      * Verifies if this Bounded Context contains entities of the passed class.
      *
-     * <p>This method does not take into account visibility of entity states.
+     * <p>This method does not take into account the visibility of entity states.
      */
     public boolean hasEntitiesOfType(Class<? extends Entity<?, ?>> entityClass) {
         var cls = EntityClass.asEntityClass(entityClass);
@@ -398,7 +399,7 @@ public abstract class BoundedContext
     /**
      * Verifies if this Bounded Context has entities with the state of the passed class.
      *
-     * <p>This method does not take into account visibility of entity states.
+     * <p>This method does not take into account the visibility of entity states.
      */
     public boolean hasEntitiesWithState(Class<? extends EntityState<?>> stateClass) {
         var result = guard.hasRepository(stateClass);
@@ -542,7 +543,7 @@ public abstract class BoundedContext
      */
     @Internal
     public final InternalAccess internalAccess() {
-        Security.allowOnlyFrameworkServer();
+        allowOnlyFrameworkServer();
         return internalAccess;
     }
 

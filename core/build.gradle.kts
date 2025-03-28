@@ -24,13 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import io.spine.dependency.lib.KotlinX
+import io.spine.dependency.lib.Coroutines
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Logging
 import io.spine.dependency.local.Time
 import io.spine.dependency.local.Validation
-import io.spine.gradle.testing.exposeTestConfiguration
 
 plugins {
     `detekt-code-analysis`
@@ -43,7 +42,7 @@ dependencies {
     api(Time.lib)
     api(Validation.runtime)
     api(Logging.lib)
-    api(KotlinX.Coroutines.core)
+    api(Coroutines.core)
 
     testImplementation(project(":testutil-core"))
     testImplementation(Time.testLib)
@@ -64,8 +63,4 @@ modelCompiler {
             }
         }
     }
-}
-
-java {
-    exposeTestConfiguration()
 }

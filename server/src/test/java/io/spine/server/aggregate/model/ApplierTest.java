@@ -126,14 +126,13 @@ class ApplierTest {
         assertTrue(method.isPresent());
         var applier = method.get();
 
-        Void result = null;
         var event = Event.newBuilder()
                 .setId(GivenEvent.someId())
                 .setContext(GivenEvent.context())
                 .setMessage(pack(eventMessage()))
                 .build();
         var envelope = EventEnvelope.of(event);
-        var success = applier.toSuccessfulOutcome(result, applierObject, envelope);
+        var success = applier.toSuccessfulOutcome(null, applierObject, envelope);
         var assertSuccess = ProtoTruth.assertThat(success);
         assertSuccess.isNotNull();
         assertSuccess.isEqualToDefaultInstance();

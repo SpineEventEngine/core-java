@@ -37,9 +37,4 @@ dependencies {
     api(project(":server"))
     api(project(":testutil-client"))
     testImplementation(Grpc.netty)
-    testImplementation(project(path = ":testutil-client", configuration = "testArtifacts"))
-}
-
-java {
-    exposeTestConfiguration()
 }

@@ -27,14 +27,16 @@
 @file:Suppress("RemoveRedundantQualifierName")
 
 import io.spine.dependency.build.ErrorProne
+import io.spine.dependency.lib.Coroutines
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Guava
 import io.spine.dependency.lib.Kotlin
-import io.spine.dependency.lib.KotlinX
+import io.spine.dependency.lib.KotlinPoet
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Change
 import io.spine.dependency.local.Logging
+import io.spine.dependency.local.ProtoData
 import io.spine.dependency.local.Reflect
 import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Time
@@ -47,7 +49,6 @@ import io.spine.gradle.github.pages.updateGitHubPages
 import io.spine.gradle.javac.configureErrorProne
 import io.spine.gradle.javac.configureJavac
 import io.spine.gradle.javadoc.JavadocConfig
-import io.spine.gradle.kotlin.applyJvmToolchain
 import io.spine.gradle.kotlin.setFreeCompilerArgs
 import io.spine.gradle.publish.IncrementGuard
 import io.spine.gradle.publish.PublishingRepos
@@ -59,7 +60,6 @@ import io.spine.gradle.standardToSpineSdk
 import io.spine.gradle.testing.configureLogging
 import io.spine.gradle.testing.registerTestTasks
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
     standardSpineSdkRepositories()
@@ -71,8 +71,13 @@ buildscript {
             resolutionStrategy {
                 val logging = io.spine.dependency.local.Logging
                 force(
+                    io.spine.dependency.lib.Guava.lib,
                     io.spine.dependency.lib.Grpc.api,
                     io.spine.dependency.lib.Kotlin.stdLib,
+                    io.spine.dependency.lib.Coroutines.bom,
+                    io.spine.dependency.lib.Coroutines.core,
+                    io.spine.dependency.lib.Coroutines.coreJvm,
+                    io.spine.dependency.lib.Coroutines.jdk8,
                     "${protoData.module}:${protoData.dogfoodingVersion}",
                     io.spine.dependency.local.Base.lib,
                     io.spine.dependency.local.ToolBase.lib,
@@ -99,10 +104,6 @@ plugins {
     protobuf
     errorprone
     `gradle-doctor`
-}
-
-object BuildSettings {
-    const val JAVA_VERSION = 11
 }
 
 repositories.standardToSpineSdk()
@@ -150,9 +151,8 @@ subprojects {
     repositories.standardToSpineSdk()
     applyPlugins()
 
-    val javaVersion = JavaLanguageVersion.of(BuildSettings.JAVA_VERSION)
-    setupJava(javaVersion)
-    setupKotlin(javaVersion)
+    setupJava(BuildSettings.javaVersion)
+    setupKotlin()
 
     defineDependencies()
     forceConfigurations()
@@ -219,13 +219,11 @@ fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
 /**
  * Configures Kotlin tasks in this project.
  */
-fun Subproject.setupKotlin(javaVersion: JavaLanguageVersion) {
+fun Subproject.setupKotlin() {
     kotlin {
-        applyJvmToolchain(javaVersion.asInt())
         explicitApi()
-
-        tasks.withType<KotlinCompile>().configureEach {
-            kotlinOptions.jvmTarget = javaVersion.toString()
+        compilerOptions {
+            jvmTarget.set(BuildSettings.jvmTarget)
             setFreeCompilerArgs()
         }
     }
@@ -349,9 +347,12 @@ fun Subproject.forceConfigurations() {
                     Grpc.api,
                     JUnit.runner,
 
-                    KotlinX.Coroutines.core,
-                    KotlinX.Coroutines.bom,
-                    KotlinX.Coroutines.jdk8,
+                    Coroutines.core,
+                    Coroutines.coreJvm,
+                    Coroutines.bom,
+                    Coroutines.jdk8,
+
+                    KotlinPoet.lib,
 
                     Base.lib,
                     Validation.runtime,
@@ -365,6 +366,7 @@ fun Subproject.forceConfigurations() {
                     TestLib.lib,
                     ToolBase.lib,
                     ToolBase.pluginBase,
+                    ProtoData.api,
 
                     Grpc.core,
                     Grpc.protobuf,

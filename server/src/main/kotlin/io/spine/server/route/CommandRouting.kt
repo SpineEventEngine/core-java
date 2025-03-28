@@ -115,7 +115,7 @@ public class CommandRouting<I : Any> private constructor(
         /**
          * Creates a new command routing.
          *
-         * @param I The type of entity identifiers returned by new routing.
+         * @param I The type of entity identifiers returned by a new routing.
          * @param idClass The class of target entity identifiers.
          * @return new routing instance.
          */

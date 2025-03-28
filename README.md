@@ -36,13 +36,13 @@ the [Spine Examples][spine-examples] GitHub organization.
 
 ## Building from sources
 
-Starting version `2.0.0-SNAPSHOT.82` building Spine modules requires JDK 11. Prior versions
-could be built with JDK 8 only.
+Starting version `2.0.0-SNAPSHOT.210` building Spine modules requires JDK 17.
+Versions of the v1.x family could be built with JDK 8.
 
 Gradle is used as a build and dependency management system.
 
 This repository uses [configuration files][config] shared across several Spine libs. They are
-plugged in as a Git sub-module. Please use the following command to initialize it:
+plugged in as a Git submodule. Please use the following command to initialize it:
 
 ```sh
 git submodule update --init --recursive
@@ -52,8 +52,8 @@ Also, a `pull` script is located in the root of `core-java` repository. Use it t
 latest version of the configuration files.
 
 ## Important warnings
-* The code annotated with `@Internal` are not parts of public API of the framework, therefore should
-  not be used from outside of the framework.
+* The code annotated with `@Internal` are not parts of public API of the framework. 
+  Therefore, such API should not be used from the outside of the framework.
 
 * The public API marked as `@Experimental` may be used at own risk; it can change at any time, 
   and has no guarantee of API stability or backward-compatibility.

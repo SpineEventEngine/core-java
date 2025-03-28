@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ val manifestAttributes = mapOf(
  * when running tests. We cannot depend on the `Jar` from `resources` because it would
  * form a circular dependency.
  */
-val exposeManifestForTests by tasks.creating {
+val exposeManifestForTests by tasks.registering {
 
     val outputFile = layout.buildDirectory.file("resources/main/META-INF/MANIFEST.MF")
     outputs.file(outputFile).withPropertyName("manifestFile")

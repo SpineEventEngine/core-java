@@ -30,6 +30,7 @@ import io.spine.dependency.lib.Kotlin
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Change
 import io.spine.dependency.local.TestLib
+import io.spine.dependency.local.Time
 import io.spine.dependency.local.Validation
 
 plugins {
@@ -64,10 +65,18 @@ dependencies {
     testImplementation(BaseTypes.lib)
 
     testFixturesImplementation(TestLib.lib)
+    testFixturesImplementation(Time.testLib)
+    testFixturesImplementation(AutoService.annotations)
+    testFixturesImplementation(project(":testutil-server"))
 
-    testImplementation(project(path = ":core", configuration = "testArtifacts"))
-    testImplementation(project(path = ":client", configuration = "testArtifacts"))
+    testImplementation(Time.testLib)
     testImplementation(project(":testutil-server"))
+}
+
+afterEvaluate {
+    tasks.named("kspTestFixturesKotlin") {
+        dependsOn("launchTestFixturesProtoData")
+    }
 }
 
 // Copies the documentation files to the Javadoc output folder.
@@ -76,9 +85,15 @@ tasks.javadoc {
     doLast {
         copy {
             from("src/main/docs")
-            into("$buildDir/docs/javadoc")
+            into(layout.buildDirectory.dir("docs/javadoc"))
         }
     }
 }
 
-testProtoDataRemoteDebug(false)
+afterEvaluate {
+    testProtoDataRemoteDebug(false)
+
+    tasks.named("testJar").configure { this as Jar
+        from(sourceSets.testFixtures.get().output)
+    }
+}
