@@ -36,7 +36,7 @@ import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.event.CommandErrored;
 import io.spine.testing.server.blackbox.BlackBox;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND_VALUE;
 import static io.spine.server.commandbus.CommandException.ATTR_COMMAND_TYPE_NAME;

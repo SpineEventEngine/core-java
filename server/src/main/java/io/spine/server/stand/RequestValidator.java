@@ -33,7 +33,7 @@ import io.spine.type.TypeName;
 import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
 import io.spine.validate.diags.ViolationText;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static java.lang.String.format;
 

@@ -35,7 +35,7 @@ import io.spine.server.dispatch.Success;
 import io.spine.server.type.CommandClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link Receptor} which produces commands in response to a signal.

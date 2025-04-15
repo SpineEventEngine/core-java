@@ -30,7 +30,7 @@ import io.spine.base.Identifier;
 import io.spine.logging.WithLogging;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.transport.ChannelId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;

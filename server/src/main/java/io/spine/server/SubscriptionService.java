@@ -44,7 +44,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.logging.WithLogging;
 import io.spine.server.stand.SubscriptionCallback;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

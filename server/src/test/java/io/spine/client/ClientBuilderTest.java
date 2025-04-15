@@ -34,7 +34,7 @@ import io.spine.core.UserId;
 import io.spine.testing.TestValues;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.core.given.GivenUserId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

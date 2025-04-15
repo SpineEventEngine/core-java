@@ -32,7 +32,7 @@ import com.google.protobuf.Message;
 import io.spine.server.storage.AbstractColumnMapping;
 import io.spine.server.storage.ColumnTypeMapping;
 import io.spine.test.entity.TaskView;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Defines a mapping where all types are mapped to a {@code String}.

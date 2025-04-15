@@ -27,7 +27,7 @@
 package io.spine.server.delivery;
 
 import com.google.protobuf.Duration;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;

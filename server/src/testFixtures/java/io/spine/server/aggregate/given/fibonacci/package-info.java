@@ -29,9 +29,9 @@
  * {@link io.spine.server.aggregate.AggregateStorage#truncateOlderThan(int) truncation} test.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.aggregate.given.fibonacci;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

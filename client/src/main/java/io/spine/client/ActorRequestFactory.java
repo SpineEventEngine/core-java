@@ -35,7 +35,7 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.currentTime;

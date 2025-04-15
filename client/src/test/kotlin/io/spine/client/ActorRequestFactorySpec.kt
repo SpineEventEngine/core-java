@@ -111,10 +111,9 @@ internal class ActorRequestFactorySpec {
     @Test
     fun `require actor in 'Builder'`() {
         assertThrows<NullPointerException> {
-            requestFactoryBuilder().apply {
-                zoneId = ZoneIds.systemDefault()
-                build()
-            }
+            requestFactoryBuilder()
+                .setZoneId(ZoneIds.systemDefault())
+                .build()
         }
     }
 
@@ -122,7 +121,7 @@ internal class ActorRequestFactorySpec {
     fun `return values set in 'Builder'`() {
         val builder = requestFactoryBuilder().apply {
             actor = ACTOR
-            zoneId = ZONE_ID
+            setZoneId(ZONE_ID)
         }
         builder.actor shouldBe ACTOR
         builder.zoneId shouldBe ZONE_ID

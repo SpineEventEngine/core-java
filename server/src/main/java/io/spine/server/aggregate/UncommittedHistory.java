@@ -29,7 +29,7 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import io.spine.core.Event;
 import io.spine.server.type.EventEnvelope;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

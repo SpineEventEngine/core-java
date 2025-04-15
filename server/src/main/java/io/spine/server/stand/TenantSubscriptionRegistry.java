@@ -34,7 +34,7 @@ import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
 import io.spine.client.Topic;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;

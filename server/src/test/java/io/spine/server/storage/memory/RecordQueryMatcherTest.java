@@ -30,7 +30,7 @@ import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.given.GivenStorageProject.StgProjectColumns;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

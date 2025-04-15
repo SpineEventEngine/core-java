@@ -26,7 +26,7 @@
 
 package io.spine.server.commandbus.given;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;

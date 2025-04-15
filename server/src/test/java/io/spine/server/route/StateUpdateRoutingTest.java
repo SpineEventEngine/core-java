@@ -37,7 +37,7 @@ import io.spine.server.type.given.GivenEvent;
 import io.spine.system.server.event.EntityStateChanged;
 import io.spine.testing.core.given.GivenVersion;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

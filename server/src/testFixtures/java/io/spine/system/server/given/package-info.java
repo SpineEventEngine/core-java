@@ -29,8 +29,8 @@
  */
 
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.system.server.given;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

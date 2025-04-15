@@ -27,7 +27,7 @@
 package io.spine.server.delivery.given;
 
 import com.google.protobuf.Timestamp;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -39,7 +39,7 @@ import io.spine.server.type.CommandClass;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import io.spine.type.UnpublishedLanguageException;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;

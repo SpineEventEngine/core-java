@@ -32,7 +32,7 @@ import io.spine.server.delivery.CatchUp;
 import io.spine.server.delivery.CatchUpId;
 import io.spine.server.delivery.CatchUpStatus;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 

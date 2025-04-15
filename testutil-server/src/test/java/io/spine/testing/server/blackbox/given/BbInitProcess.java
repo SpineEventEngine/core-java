@@ -40,7 +40,7 @@ import io.spine.testing.server.blackbox.event.BbProjectDone;
 import io.spine.testing.server.blackbox.event.BbProjectInitialized;
 import io.spine.testing.server.blackbox.event.BbScrumMasterAssigned;
 import io.spine.testing.server.blackbox.event.BbTeamAssigned;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

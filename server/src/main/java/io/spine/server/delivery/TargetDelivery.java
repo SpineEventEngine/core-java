@@ -33,7 +33,7 @@ import io.spine.server.dispatch.DispatchOutcome;
 import io.spine.server.tenant.IdInTenant;
 import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.server.type.SignalEnvelope;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;

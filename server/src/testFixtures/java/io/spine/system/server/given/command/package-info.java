@@ -29,8 +29,8 @@
  * {@link io.spine.system.server.CommandLifecycleAggregate CommandLog} tests.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.system.server.given.command;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

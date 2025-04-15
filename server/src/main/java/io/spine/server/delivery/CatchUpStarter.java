@@ -35,7 +35,7 @@ import io.spine.server.delivery.event.CatchUpRequested;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.type.EventClass;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 

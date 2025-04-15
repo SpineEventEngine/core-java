@@ -26,10 +26,10 @@
 
 @BoundedContext("_System")
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.system.server.given.client;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContext;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

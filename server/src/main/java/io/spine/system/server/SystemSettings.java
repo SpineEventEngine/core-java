@@ -31,7 +31,7 @@ import io.spine.annotation.Internal;
 import io.spine.environment.Environment;
 import io.spine.environment.Tests;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;

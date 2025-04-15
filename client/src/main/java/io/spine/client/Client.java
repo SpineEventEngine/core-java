@@ -42,7 +42,7 @@ import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;

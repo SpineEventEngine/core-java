@@ -28,7 +28,7 @@ package io.spine.testing.server.blackbox;
 
 import io.spine.client.Client;
 import io.spine.core.TenantId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

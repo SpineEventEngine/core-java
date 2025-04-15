@@ -30,7 +30,7 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.client.Query;
 import io.spine.client.QueryValidationError;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;

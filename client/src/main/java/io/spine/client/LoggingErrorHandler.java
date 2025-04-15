@@ -27,7 +27,7 @@
 package io.spine.client;
 
 import io.spine.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static java.lang.String.format;
 

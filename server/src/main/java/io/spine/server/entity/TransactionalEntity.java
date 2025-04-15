@@ -31,7 +31,7 @@ import io.spine.base.EntityState;
 import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.validate.ValidatingBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;

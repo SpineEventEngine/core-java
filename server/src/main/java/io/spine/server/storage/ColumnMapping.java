@@ -26,7 +26,7 @@
 
 package io.spine.server.storage;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * The value mapping rules of record {@linkplain io.spine.query.Column columns}.

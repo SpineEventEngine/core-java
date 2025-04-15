@@ -37,8 +37,8 @@ import com.google.protobuf.Empty;
 import io.spine.core.Signal;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.SerializableMessage;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

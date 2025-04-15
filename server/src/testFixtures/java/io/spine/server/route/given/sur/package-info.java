@@ -30,10 +30,10 @@
 
 @BoundedContext("Surrealism")
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.route.given.sur;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContext;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

@@ -35,7 +35,7 @@ import io.spine.base.EventMessage;
 import io.spine.core.Command;
 import io.spine.core.Status;
 import io.spine.logging.WithLogging;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Consumer;

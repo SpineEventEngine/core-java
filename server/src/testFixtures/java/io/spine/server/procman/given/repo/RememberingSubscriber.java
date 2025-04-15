@@ -29,7 +29,7 @@ package io.spine.server.procman.given.repo;
 import io.spine.core.Subscribe;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.procman.event.PmTaskAdded;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Helper event subscriber which remembers an event message.

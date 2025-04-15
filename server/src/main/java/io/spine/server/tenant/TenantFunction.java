@@ -28,7 +28,7 @@ package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Function;
 

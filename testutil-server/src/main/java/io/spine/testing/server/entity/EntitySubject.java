@@ -35,7 +35,7 @@ import com.google.protobuf.Empty;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.LifecycleFlags;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Fact.simpleFact;

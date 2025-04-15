@@ -28,9 +28,9 @@
  * Test environment classes for {@code core} tests.
  */
 
-@ParametersAreNonnullByDefault
+@NullMarked
 @CheckReturnValue
 package io.spine.core.given;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

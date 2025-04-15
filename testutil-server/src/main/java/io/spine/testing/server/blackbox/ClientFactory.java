@@ -36,7 +36,7 @@ import io.spine.server.GrpcContainer;
 import io.spine.server.QueryService;
 import io.spine.server.SubscriptionService;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
