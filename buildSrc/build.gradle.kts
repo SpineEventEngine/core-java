@@ -83,7 +83,7 @@ val kotlinVersion = "2.1.20"
  * Always use the same version as the one specified in [io.spine.dependency.lib.Guava].
  * Otherwise, when testing Gradle plugins, clashes may occur.
  */
-val guavaVersion = "32.1.3-jre"
+val guavaVersion = "33.4.8-jre"
 
 /**
  * The version of ErrorProne Gradle plugin.
@@ -103,7 +103,7 @@ val errorPronePluginVersion = "4.1.0"
  * @see <a href="https://github.com/google/protobuf-gradle-plugin/releases">
  *     Protobuf Gradle Plugins Releases</a>
  */
-val protobufPluginVersion = "0.9.4"
+val protobufPluginVersion = "0.9.5"
 
 /**
  * The version of Dokka Gradle Plugins.
@@ -113,7 +113,7 @@ val protobufPluginVersion = "0.9.4"
  * @see <a href="https://github.com/Kotlin/dokka/releases">
  *     Dokka Releases</a>
  */
-val dokkaVersion = "1.9.20"
+val dokkaVersion = "2.0.0"
 
 /**
  * The version of Detekt Gradle Plugin.

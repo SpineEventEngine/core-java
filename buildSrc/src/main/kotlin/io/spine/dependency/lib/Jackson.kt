@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,24 +29,55 @@ package io.spine.dependency.lib
 // https://github.com/FasterXML/jackson/wiki/Jackson-Releases
 @Suppress("unused", "ConstPropertyName")
 object Jackson {
-    const val version = "2.15.3"
-    private const val databindVersion = "2.15.3"
+    const val version = "2.18.3"
+    private const val databindVersion = "2.18.3"
 
-    private const val coreGroup = "com.fasterxml.jackson.core"
-    private const val dataformatGroup = "com.fasterxml.jackson.dataformat"
-    private const val moduleGroup = "com.fasterxml.jackson.module"
+    private const val groupPrefix = "com.fasterxml.jackson"
+    private const val coreGroup = "$groupPrefix.core"
+    private const val moduleGroup = "$groupPrefix.module"
 
     // https://github.com/FasterXML/jackson-core
     const val core = "$coreGroup:jackson-core:$version"
+
     // https://github.com/FasterXML/jackson-databind
     const val databind = "$coreGroup:jackson-databind:$databindVersion"
+
     // https://github.com/FasterXML/jackson-annotations
     const val annotations = "$coreGroup:jackson-annotations:$version"
 
-    // https://github.com/FasterXML/jackson-dataformat-xml/releases
-    const val dataformatXml = "$dataformatGroup:jackson-dataformat-xml:$version"
-    // https://github.com/FasterXML/jackson-dataformats-text/releases
-    const val dataformatYaml = "$dataformatGroup:jackson-dataformat-yaml:$version"
+    object DataFormat {
+        private const val group = "$groupPrefix.dataformat"
+        private const val infix = "jackson-dataformat"
+
+        // https://github.com/FasterXML/jackson-dataformat-xml/releases
+        const val xml = "$group:$infix-xml:$version"
+
+        // https://github.com/FasterXML/jackson-dataformats-text/releases
+        const val yaml = "$group:$infix-yaml:$version"
+    }
+
+    object DataType {
+        private const val group = "$groupPrefix.datatype"
+        private const val infix = "jackson-datatype"
+
+        // https://github.com/FasterXML/jackson-modules-java8
+        const val jdk8 = "$group:$infix-jdk8:$version"
+
+        // https://github.com/FasterXML/jackson-modules-java8/tree/2.19/datetime
+        const val dateTime = "$group:$infix-jsr310:$version"
+
+        // https://github.com/FasterXML/jackson-datatypes-collections/blob/2.19/guava
+        const val guava = "$group:$infix-guava:$version"
+
+        // https://github.com/FasterXML/jackson-dataformats-binary/tree/2.19/protobuf
+        const val protobuf = "$group:$infix-protobuf:$version"
+
+        // https://github.com/FasterXML/jackson-datatypes-misc/tree/2.19/javax-money
+        const val javaXMoney = "$group:$infix-javax-money:$version"
+
+        // https://github.com/FasterXML/jackson-datatypes-misc/tree/2.19/moneta
+        const val moneta = "$group:jackson-datatype-moneta:$version"
+    }
 
     // https://github.com/FasterXML/jackson-module-kotlin/releases
     const val moduleKotlin = "$moduleGroup:jackson-module-kotlin:$version"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ package io.spine.dependency.lib
 @Suppress("unused", "ConstPropertyName")
 object JavaX {
     // This artifact, which used to be a part of J2EE, moved under the Eclipse EE4J project.
-    // https://github.com/eclipse-ee4j/common-annotations-api
+    // https://github.com/jakartaee/common-annotations-api
     const val annotationGroup = "javax.annotation"
     const val annotations = "$annotationGroup:javax.annotation-api:1.3.2"
 

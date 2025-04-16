@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ package io.spine.dependency.lib
  */
 @Suppress("unused", "ConstPropertyName")
 object Guava {
-    private const val version = "32.1.3-jre"
+    private const val version = "33.4.8-jre"
     const val group = "com.google.guava"
     const val lib     = "$group:guava:$version"
     const val testLib = "$group:guava-testlib:$version"

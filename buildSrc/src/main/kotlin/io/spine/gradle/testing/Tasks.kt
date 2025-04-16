@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ package io.spine.gradle.testing
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.withType
 
 /**
  * Registers [slowTest][SlowTest] and [fastTest][FastTest] tasks in this [TaskContainer].
@@ -45,10 +46,10 @@ import org.gradle.kotlin.dsl.register
  */
 @Suppress("unused")
 fun TaskContainer.registerTestTasks() {
-    withType(Test::class.java).configureEach {
+    withType<Test>().configureEach {
         filter {
-            // There could be cases with no matching tests. E.g. tests could be based on Kotest,
-            // which has custom task types and names.
+            // There could be cases with no matching tests.
+            // E.g., tests could be based on Kotest, which has custom task types and names.
             isFailOnNoMatchingTests = false
             includeTestsMatching("*Test")
             includeTestsMatching("*Spec")
