@@ -35,6 +35,7 @@ import io.spine.dependency.lib.KotlinPoet
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Change
+import io.spine.dependency.local.CoreJava
 import io.spine.dependency.local.Logging
 import io.spine.dependency.local.ProtoData
 import io.spine.dependency.local.Reflect
@@ -366,6 +367,7 @@ fun Subproject.forceConfigurations() {
                     TestLib.lib,
                     ToolBase.lib,
                     ToolBase.pluginBase,
+                    CoreJava.server,
                     ProtoData.api,
 
                     Grpc.core,
