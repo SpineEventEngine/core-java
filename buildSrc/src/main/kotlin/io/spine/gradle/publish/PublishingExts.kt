@@ -141,13 +141,36 @@ private fun TaskContainer.getOrCreatePublishTask(): TaskProvider<Task> =
     }
 
 private fun TaskContainer.registerCheckCredentialsTask(
-    destinations: Set<Repository>
-): TaskProvider<Task> =
-    register("checkCredentials") {
-        doLast {
-            destinations.forEach { it.ensureCredentials(project) }
-        }
+    destinations: Set<Repository>,
+): TaskProvider<Task> {
+    val checkCredentials = "checkCredentials"
+    try {
+        // The result of this call is ignored intentionally.
+        //
+        // We expect this line to fail with the exception
+        // in case the task with this name is NOT registered.
+        //
+        // Otherwise, we need to replace the existing task
+        // to avoid checking the credentials
+        // for some previously asked `destinations`.
+        named(checkCredentials)
+        val toConfigure = replace(checkCredentials)
+        toConfigure.doLastCredentialsCheck(destinations)
+        return named(checkCredentials)
+    } catch (e: Exception) {
+        return register(checkCredentials) { doLastCredentialsCheck(destinations) }
     }
+}
+
+private fun Task.doLastCredentialsCheck(destinations: Set<Repository>) {
+    doLast {
+        val destinationsStr = destinations.joinToString(", ") { it.name }
+        logger.debug(
+            "Project '${project.name}': checking the credentials for repos: $destinationsStr."
+        )
+        destinations.forEach { it.ensureCredentials(project) }
+    }
+}
 
 private fun Repository.ensureCredentials(project: Project) {
     val credentials = credentials(project)
@@ -275,4 +298,3 @@ internal fun Project.artifacts(jarFlags: JarFlags): Set<TaskProvider<Jar>> {
 
     return tasks
 }
-

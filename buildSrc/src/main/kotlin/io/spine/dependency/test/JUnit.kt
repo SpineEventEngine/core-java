@@ -29,7 +29,7 @@ package io.spine.dependency.test
 // https://junit.org/junit5/
 @Suppress("unused", "ConstPropertyName")
 object JUnit {
-    const val version = "5.12.2"
+    const val version = "5.11.4"
     private const val legacyVersion = "4.13.1"
 
     // https://github.com/apiguardian-team/apiguardian
@@ -47,14 +47,16 @@ object JUnit {
     )
     const val bom = "org.junit:junit-bom:$version"
 
-    const val runner = "org.junit.jupiter:junit-jupiter-engine:$version"
+//    const val runner = "org.junit.jupiter:junit-jupiter-runner:$version"
+    const val engine = "org.junit.jupiter:junit-jupiter-engine:$version"
+    const val launcher = "org.junit.jupiter:junit-jupiter-launcher:$version"
     const val params = "org.junit.jupiter:junit-jupiter-params:$version"
 
     const val pioneer = "org.junit-pioneer:junit-pioneer:$pioneerVersion"
 
     object Platform {
         // https://junit.org/junit5/
-        const val version = "1.12.2"
+        const val version = "1.11.4"
         internal const val group = "org.junit.platform"
         const val commons = "$group:junit-platform-commons:$version"
         const val launcher = "$group:junit-platform-launcher:$version"

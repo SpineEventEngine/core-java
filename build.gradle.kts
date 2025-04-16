@@ -252,8 +252,6 @@ fun Subproject.defineDependencies() {
             errorprone(core)
         }
         implementation(Validation.runtime)
-
-        testImplementation(JUnit.runner)
         testImplementation(TestLib.lib)
     }
 }
@@ -346,7 +344,7 @@ fun Subproject.forceConfigurations() {
                        .configureProtocPlugins()` method which sets the version from resources. */
                     Grpc.ProtocPlugin.artifact,
                     Grpc.api,
-                    JUnit.runner,
+                    JUnit.bom,
 
                     Coroutines.core,
                     Coroutines.coreJvm,

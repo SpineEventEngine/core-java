@@ -142,7 +142,6 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
         J2ObjC.annotations,
         JUnit.Platform.engine,
         JUnit.Platform.suiteApi,
-        JUnit.runner,
         Jackson.annotations,
         Jackson.bom,
         Jackson.core,

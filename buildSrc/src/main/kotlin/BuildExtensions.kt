@@ -29,6 +29,7 @@
 import io.spine.dependency.build.ErrorProne
 import io.spine.dependency.build.GradleDoctor
 import io.spine.dependency.build.Ksp
+import io.spine.dependency.build.PluginPublishPlugin
 import io.spine.dependency.lib.Protobuf
 import io.spine.dependency.local.McJava
 import io.spine.dependency.local.ProtoData
@@ -149,6 +150,9 @@ val PluginDependenciesSpec.kover: PluginDependencySpec
 
 val PluginDependenciesSpec.ksp: PluginDependencySpec
     get() = id(Ksp.id).version(Ksp.version)
+
+val PluginDependenciesSpec.`plugin-publish`: PluginDependencySpec
+    get() = id(PluginPublishPlugin.id).version(PluginPublishPlugin.version)
 
 /**
  * Configures the dependencies between third-party Gradle tasks

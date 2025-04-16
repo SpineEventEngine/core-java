@@ -55,7 +55,6 @@ package io.spine.dependency.local
     "unused" /* Some subprojects do not use ProtoData directly. */,
     "ConstPropertyName" /* We use custom convention for artifact properties. */,
     "MemberVisibilityCanBePrivate" /* The properties are used directly by other subprojects. */,
-    "KDocUnresolvedReference" /* Referencing private properties in constructor KDoc. */
 )
 object ProtoData {
     const val pluginGroup = Spine.group
