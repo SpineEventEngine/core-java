@@ -626,7 +626,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
      */
     public final <I, E extends Entity<I, ? extends EntityState<I>>>
     EntitySubject assertEntity(I id, Class<E> entityClass) {
-        @Nullable Entity<I, ?> found = findEntity(id, entityClass);
+        var found = findEntity(id, entityClass);
         return EntitySubject.assertEntity(found);
     }
 
@@ -641,7 +641,7 @@ public abstract class BlackBox implements WithLogging, Closeable {
      */
     public final <I, S extends EntityState<I>>
     EntitySubject assertEntityWithState(I id, Class<S> stateClass) {
-        @Nullable Entity<I, S> found = findByState(id, stateClass);
+        var found = findByState(id, stateClass);
         return EntitySubject.assertEntity(found);
     }
 
