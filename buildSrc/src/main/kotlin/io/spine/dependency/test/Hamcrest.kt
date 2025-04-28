@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,6 @@ package io.spine.dependency.test
 @Suppress("unused", "ConstPropertyName")
 object Hamcrest {
     // https://github.com/hamcrest/JavaHamcrest/releases
-    private const val version = "2.2"
+    private const val version = "3.0"
     const val core = "org.hamcrest:hamcrest-core:$version"
 }

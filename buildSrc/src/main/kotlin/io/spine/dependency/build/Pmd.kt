@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,5 @@ package io.spine.dependency.build
 // https://github.com/pmd/pmd/releases
 @Suppress("unused", "ConstPropertyName")
 object Pmd {
-    /**
-     * This is the last version in the 6.x series.
-     *
-     * There's a major update to 7.x series.
-     *
-     * @see <a href="https://docs.pmd-code.org/pmd-doc-7.0.0-rc3/pmd_release_notes_pmd7.html>PMD 7.0.0 release notes</a>
-     */
-    const val version = "6.55.0"
+    const val version = "7.12.0"
 }

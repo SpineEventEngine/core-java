@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.github.jk1.license.LicenseReportExtension
 import com.github.jk1.license.LicenseReportExtension.ALL
 import com.github.jk1.license.LicenseReportPlugin
 import io.spine.gradle.applyPlugin
-import io.spine.gradle.findTask
+import io.spine.gradle.getTask
 import java.io.File
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -98,7 +98,7 @@ object LicenseReporter {
     }
 
     /**
-     * Tells to merge all per-project reports which were previously [generated][generateReportIn]
+     * Tells to merge all per-project reports that were previously [generated][generateReportIn]
      * for each of the subprojects of the root Gradle project.
      *
      * The merge result is placed according to [Paths].
@@ -109,10 +109,10 @@ object LicenseReporter {
         val rootProject = project.rootProject
         val mergeTask = rootProject.tasks.register(mergeTaskName) {
             val consolidationTask = this
-            val assembleTask = project.findTask<Task>("assemble")
+            val assembleTask = project.getTask<Task>("assemble")
             val sourceProjects: Iterable<Project> = sourceProjects(rootProject)
             sourceProjects.forEach {
-                val perProjectTask = it.findTask<Task>(projectTaskName)
+                val perProjectTask = it.getTask<Task>(projectTaskName)
                 consolidationTask.dependsOn(perProjectTask)
                 perProjectTask.dependsOn(assembleTask)
             }
@@ -121,7 +121,7 @@ object LicenseReporter {
             }
             dependsOn(assembleTask)
         }
-        project.findTask<Task>("build")
+        project.getTask<Task>("build")
             .finalizedBy(mergeTask)
     }
 

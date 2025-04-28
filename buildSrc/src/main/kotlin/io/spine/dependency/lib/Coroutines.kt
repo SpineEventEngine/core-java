@@ -34,7 +34,7 @@ package io.spine.dependency.lib
 @Suppress("unused", "ConstPropertyName")
 object Coroutines {
     const val group = "org.jetbrains.kotlinx"
-    const val version = "1.10.1"
+    const val version = "1.10.2"
     const val bom = "$group:kotlinx-coroutines-bom:$version"
     const val core = "$group:kotlinx-coroutines-core:$version"
     const val coreJvm = "$group:kotlinx-coroutines-core-jvm:$version"

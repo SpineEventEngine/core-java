@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import io.spine.dependency.build.CheckerFramework
 import io.spine.dependency.build.Dokka
 import io.spine.dependency.build.ErrorProne
 import io.spine.dependency.build.FindBugs
+import io.spine.dependency.build.JSpecify
 import io.spine.dependency.lib.Asm
 import io.spine.dependency.lib.AutoCommon
 import io.spine.dependency.lib.AutoService
@@ -97,6 +98,7 @@ private fun ResolutionStrategy.forceProductionDependencies() {
         FindBugs.annotations,
         Gson.lib,
         Guava.lib,
+        JSpecify.annotations,
         Kotlin.reflect,
         Kotlin.stdLib,
         Kotlin.stdLibCommon,
@@ -140,13 +142,12 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
         J2ObjC.annotations,
         JUnit.Platform.engine,
         JUnit.Platform.suiteApi,
-        JUnit.runner,
         Jackson.annotations,
         Jackson.bom,
         Jackson.core,
         Jackson.databind,
-        Jackson.dataformatXml,
-        Jackson.dataformatYaml,
+        Jackson.DataFormat.xml,
+        Jackson.DataFormat.yaml,
         Jackson.moduleKotlin,
         JavaDiffUtils.lib,
         Kotlin.jetbrainsAnnotations,

@@ -24,13 +24,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle.dokka
-
-import org.gradle.api.tasks.TaskContainer
-import org.jetbrains.dokka.gradle.DokkaTask
-
 /**
- * Finds the `dokkaHtml` Gradle task.
+ * The documentation settings specific to this project.
+ *
+ * @see <a href="https://kotlinlang.org/docs/dokka-gradle.html#source-link-configuration">
+ *     Dokka source link configuration</a>
  */
-@Suppress("unused")
-fun TaskContainer.dokkaHtmlTask() = this.getByName("dokkaHtml") as DokkaTask
+@Suppress("ConstPropertyName")
+object DocumentationSettings {
+
+    /**
+     * Settings passed to Dokka for
+     * [sourceLink][[org.jetbrains.dokka.gradle.engine.parameters.DokkaSourceLinkSpec]
+     */
+    object SourceLink {
+
+        /**
+         * The URL of the remote source code
+         * [location][org.jetbrains.dokka.gradle.engine.parameters.DokkaSourceLinkSpec.remoteUrl].
+         */
+        const val url: String = "https://github.com/SpineEventEngine/base/tree/master/src"
+
+        /**
+         * The suffix used to append the source code line number to the URL.
+         *
+         * The suffix depends on the online code repository.
+         *
+         * @see <a href="https://kotlinlang.org/docs/dokka-gradle.html#fwor0d_534">
+         *     remoteLineSuffix</a>
+         */
+        const val lineSuffix: String = "#L"
+    }
+}

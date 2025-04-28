@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,14 @@ package io.spine.dependency.test
 // https://junit.org/junit5/
 @Suppress("unused", "ConstPropertyName")
 object JUnit {
-    const val version = "5.10.0"
+    const val version = "5.11.4"
     private const val legacyVersion = "4.13.1"
 
     // https://github.com/apiguardian-team/apiguardian
     private const val apiGuardianVersion = "1.1.2"
 
     // https://github.com/junit-pioneer/junit-pioneer
-    private const val pioneerVersion = "2.0.1"
+    private const val pioneerVersion = "2.3.0"
 
     const val legacy = "junit:junit:$legacyVersion"
 
@@ -47,14 +47,16 @@ object JUnit {
     )
     const val bom = "org.junit:junit-bom:$version"
 
-    const val runner = "org.junit.jupiter:junit-jupiter-engine:$version"
+//    const val runner = "org.junit.jupiter:junit-jupiter-runner:$version"
+    const val engine = "org.junit.jupiter:junit-jupiter-engine:$version"
+    const val launcher = "org.junit.jupiter:junit-jupiter-launcher:$version"
     const val params = "org.junit.jupiter:junit-jupiter-params:$version"
 
     const val pioneer = "org.junit-pioneer:junit-pioneer:$pioneerVersion"
 
     object Platform {
         // https://junit.org/junit5/
-        const val version = "1.10.0"
+        const val version = "1.11.4"
         internal const val group = "org.junit.platform"
         const val commons = "$group:junit-platform-commons:$version"
         const val launcher = "$group:junit-platform-launcher:$version"

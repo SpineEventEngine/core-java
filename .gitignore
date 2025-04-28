@@ -32,7 +32,7 @@
 .fleet/
 
 # Kotlin temp directories.
-**/.kotlin/**
+**/.kotlin/
 
 # IntelliJ IDEA modules and interim config files.
 *.iml

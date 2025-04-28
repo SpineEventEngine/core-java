@@ -24,13 +24,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle.dokka
-
-import org.gradle.api.tasks.TaskContainer
-import org.jetbrains.dokka.gradle.DokkaTask
+package io.spine.dependency.build
 
 /**
- * Finds the `dokkaHtml` Gradle task.
+ * An artifact of well-specified annotations to power static analysis
+ * checks and JVM language interop. Developed by consensus of the partner
+ * organizations listed at [the project site](https://jspecify.org).
+ *
+ * @see <a href="https://github.com/jspecify/jspecify">JSpecify at GitHub</a>
  */
-@Suppress("unused")
-fun TaskContainer.dokkaHtmlTask() = this.getByName("dokkaHtml") as DokkaTask
+@Suppress("ConstPropertyName")
+object JSpecify {
+    const val version = "1.0.0"
+    const val annotations = "org.jspecify:jspecify:$version"
+}
