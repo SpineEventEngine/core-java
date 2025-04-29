@@ -95,11 +95,11 @@ internal class ActorRequestFactorySpec {
         val tester = NullPointerTester()
         tester.setDefault<Message>(TestEntity.getDefaultInstance())
             .setDefault(
-                object : TypeToken<Class<out Message?>?>() {}.rawType,
+                object : TypeToken<Class<out Message>>() {}.rawType,
                 TestEntity::class.java
             )
             .setDefault(
-                object : TypeToken<Set<Message?>?>() {}.rawType,
+                object : TypeToken<Set<Message>>() {}.rawType,
                 newHashSet(Any.getDefaultInstance())
             )
             .setDefault<io.spine.time.ZoneId>(ZoneIds.systemDefault())
