@@ -253,6 +253,7 @@ fun Subproject.defineDependencies() {
         }
         implementation(Validation.runtime)
         testImplementation(TestLib.lib)
+        testRuntimeOnly(JUnit.engine)
     }
 }
 
