@@ -25,6 +25,7 @@
  */
 
 import io.gitlab.arturbosch.detekt.Detekt
+import io.spine.dependency.lib.Kotlin
 
 /**
  * This script-plugin sets up Kotlin code analyzing with Detekt.
@@ -83,3 +84,14 @@ tasks {
         }
     }
 }
+
+configurations
+    .matching { it.name.contains("detekt", ignoreCase = true) }
+    .configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == Kotlin.group) {
+                useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
+                because("Force Kotlin version in Detekt configurations.")
+            }
+        }
+    }

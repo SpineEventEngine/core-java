@@ -26,11 +26,10 @@
 
 @file:Suppress("RemoveRedundantQualifierName")
 
+import io.spine.dependency.boms.BomsPlugin
 import io.spine.dependency.build.ErrorProne
-import io.spine.dependency.lib.Coroutines
 import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Guava
-import io.spine.dependency.lib.Kotlin
 import io.spine.dependency.lib.KotlinPoet
 import io.spine.dependency.local.Base
 import io.spine.dependency.local.BaseTypes
@@ -57,9 +56,7 @@ import io.spine.gradle.publish.spinePublishing
 import io.spine.gradle.report.coverage.JacocoConfig
 import io.spine.gradle.report.license.LicenseReporter
 import io.spine.gradle.report.pom.PomGenerator
-import io.spine.gradle.standardToSpineSdk
-import io.spine.gradle.testing.configureLogging
-import io.spine.gradle.testing.registerTestTasks
+import io.spine.gradle.repo.standardToSpineSdk
 import org.gradle.jvm.tasks.Jar
 
 buildscript {
@@ -74,11 +71,6 @@ buildscript {
                 force(
                     io.spine.dependency.lib.Guava.lib,
                     io.spine.dependency.lib.Grpc.api,
-                    io.spine.dependency.lib.Kotlin.stdLib,
-                    io.spine.dependency.lib.Coroutines.bom,
-                    io.spine.dependency.lib.Coroutines.core,
-                    io.spine.dependency.lib.Coroutines.coreJvm,
-                    io.spine.dependency.lib.Coroutines.jdk8,
                     "${protoData.module}:${protoData.dogfoodingVersion}",
                     io.spine.dependency.local.Base.lib,
                     io.spine.dependency.local.ToolBase.lib,
@@ -94,6 +86,7 @@ buildscript {
     }
 
     dependencies {
+        classpath(enforcedPlatform(io.spine.dependency.kotlinx.Coroutines.bom))
         classpath(mcJava.pluginLib)
     }
 }
@@ -106,6 +99,7 @@ plugins {
     errorprone
     `gradle-doctor`
 }
+apply<BomsPlugin>()
 
 repositories.standardToSpineSdk()
 
@@ -160,7 +154,6 @@ subprojects {
 
     val generated = "$projectDir/generated"
     applyGeneratedDirectories(generated)
-    setupTestTasks()
     setupPublishing()
     configureTaskDependencies()
 }
@@ -189,8 +182,9 @@ fun Subproject.applyPlugins() {
         plugin("pmd-settings")
         plugin("dokka-for-java")
         plugin("io.spine.mc-java")
+        plugin("module-testing")
     }
-
+    apply<BomsPlugin>()
     apply<IncrementGuard>()
     apply<VersionWriter>()
 
@@ -231,19 +225,6 @@ fun Subproject.setupKotlin() {
 }
 
 /**
- * Configures test tasks in this project.
- */
-fun Subproject.setupTestTasks() {
-    tasks {
-        registerTestTasks()
-        test {
-            useJUnitPlatform { includeEngines("junit-jupiter") }
-            configureLogging()
-        }
-    }
-}
-
-/**
  * Defines dependencies of this subproject.
  */
 fun Subproject.defineDependencies() {
@@ -252,8 +233,6 @@ fun Subproject.defineDependencies() {
             errorprone(core)
         }
         implementation(Validation.runtime)
-        testImplementation(TestLib.lib)
-        testRuntimeOnly(JUnit.engine)
     }
 }
 
@@ -334,9 +313,7 @@ fun Subproject.forceConfigurations() {
             exclude(group = "io.spine", module = "spine-validate")
 
             resolutionStrategy {
-
                 force(
-                    Kotlin.stdLib,
                     Guava.lib,
                     /* Force the version of gRPC used by the `:client` module over the one
                        set by `mc-java` in the `:core` module when specifying compiler artifact
@@ -346,11 +323,6 @@ fun Subproject.forceConfigurations() {
                     Grpc.ProtocPlugin.artifact,
                     Grpc.api,
                     JUnit.bom,
-
-                    Coroutines.core,
-                    Coroutines.coreJvm,
-                    Coroutines.bom,
-                    Coroutines.jdk8,
 
                     KotlinPoet.lib,
 

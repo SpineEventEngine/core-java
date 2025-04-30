@@ -75,7 +75,7 @@ val grGitVersion = "4.1.1"
  * This version may change from the [version of Kotlin][io.spine.dependency.lib.Kotlin.version]
  * used by the project.
  */
-val kotlinVersion = "2.1.20"
+val kotlinEmbeddedVersion = "2.1.20"
 
 /**
  * The version of Guava used in `buildSrc`.
@@ -93,7 +93,7 @@ val guavaVersion = "33.4.8-jre"
  * @see <a href="https://github.com/tbroyer/gradle-errorprone-plugin/releases">
  *     Error Prone Gradle Plugin Releases</a>
  */
-val errorPronePluginVersion = "4.1.0"
+val errorPronePluginVersion = "4.2.0"
 
 /**
  * The version of Protobuf Gradle Plugin.
@@ -148,9 +148,9 @@ configurations.all {
             "com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion",
 
             // Force Kotlin lib versions avoiding using those bundled with Gradle.
-            "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
-            "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion",
-            "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+            "org.jetbrains.kotlin:kotlin-stdlib:$kotlinEmbeddedVersion",
+            "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinEmbeddedVersion",
+            "org.jetbrains.kotlin:kotlin-reflect:$kotlinEmbeddedVersion"
         )
     }
 }
@@ -167,6 +167,7 @@ kotlin {
 
 dependencies {
     api("com.github.jk1:gradle-license-report:$licenseReportVersion")
+    api(platform("org.jetbrains.kotlin:kotlin-bom:$kotlinEmbeddedVersion"))
     dependOnAuthCommon()
 
     listOf(
@@ -175,17 +176,17 @@ dependencies {
         "com.github.jk1:gradle-license-report:$licenseReportVersion",
         "com.google.guava:guava:$guavaVersion",
         "com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion",
-        "gradle.plugin.com.github.johnrengelman:shadow:${shadowVersion}",
+        "gradle.plugin.com.github.johnrengelman:shadow:$shadowVersion",
         "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion",
         "io.kotest:kotest-gradle-plugin:$kotestJvmPluginVersion",
         // https://github.com/srikanth-lingala/zip4j
         "net.lingala.zip4j:zip4j:2.10.0",
-        "net.ltgt.gradle:gradle-errorprone-plugin:${errorPronePluginVersion}",
-        "org.ajoberstar.grgit:grgit-core:${grGitVersion}",
-        "org.jetbrains.dokka:dokka-base:${dokkaVersion}",
+        "net.ltgt.gradle:gradle-errorprone-plugin:$errorPronePluginVersion",
+        "org.ajoberstar.grgit:grgit-core:$grGitVersion",
+        "org.jetbrains.dokka:dokka-base:$dokkaVersion",
         "org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}",
-        "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
-        "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+        "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinEmbeddedVersion",
+        "org.jetbrains.kotlin:kotlin-reflect:$kotlinEmbeddedVersion",
         "org.jetbrains.kotlinx:kover-gradle-plugin:$koverVersion"
     ).forEach {
         implementation(it)

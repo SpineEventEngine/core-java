@@ -24,23 +24,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
+package io.spine.gradle.repo
+
+import org.gradle.api.GradleException
 
 /**
- * Artifacts of the `tool-base` module.
- *
- * @see <a href="https://github.com/SpineEventEngine/tool-base">spine-tool-base</a>
+ * A name of a repository.
  */
-@Suppress("ConstPropertyName", "unused")
-object ToolBase {
-    const val group = Spine.toolsGroup
-    const val version = "2.0.0-SNAPSHOT.321"
+@Suppress("unused")
+class RepoSlug(val value: String) {
 
-    const val lib = "$group:spine-tool-base:$version"
-    const val pluginBase = "$group:spine-plugin-base:$version"
-    const val pluginTestlib = "$group:spine-plugin-testlib:$version"
+    companion object {
 
-    const val intellijPlatformJava = "$group:intellij-platform-java:$version"
+        /**
+         * The name of the environment variable containing the repository slug, for which
+         * the Gradle build is performed.
+         */
+        private const val environmentVariable = "REPO_SLUG"
 
-    const val psiJava = "$group:spine-psi-java:$version"
+        /**
+         * Reads `REPO_SLUG` environment variable and returns its value.
+         *
+         * In case it is not set, a [org.gradle.api.GradleException] is thrown.
+         */
+        fun fromVar(): RepoSlug {
+            val envValue = System.getenv(environmentVariable)
+            if (envValue.isNullOrEmpty()) {
+                throw GradleException("`REPO_SLUG` environment variable is not set.")
+            }
+            return RepoSlug(envValue)
+        }
+    }
+
+    override fun toString(): String = value
+
+    /**
+     * Returns the GitHub URL to the project repository.
+     */
+    fun gitHost(): String {
+        return "git@github.com-publish:${value}.git"
+    }
 }

@@ -24,43 +24,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle
-
-import org.gradle.api.GradleException
+package io.spine.dependency.kotlinx
 
 /**
- * A name of a repository.
+ * The [KotlinX Serialization](https://github.com/Kotlin/kotlinx.serialization) library.
  */
-class RepoSlug(val value: String) {
+@Suppress("ConstPropertyName") // https://bit.ly/kotlin-prop-names
+object Serialization {
 
-    companion object {
-
-        /**
-         * The name of the environment variable containing the repository slug, for which
-         * the Gradle build is performed.
-         */
-        private const val environmentVariable = "REPO_SLUG"
-
-        /**
-         * Reads `REPO_SLUG` environment variable and returns its value.
-         *
-         * In case it is not set, a [GradleException] is thrown.
-         */
-        fun fromVar(): RepoSlug {
-            val envValue = System.getenv(environmentVariable)
-            if (envValue.isNullOrEmpty()) {
-                throw GradleException("`REPO_SLUG` environment variable is not set.")
-            }
-            return RepoSlug(envValue)
-        }
-    }
-
-    override fun toString(): String = value
+    const val group = KotlinX.group
 
     /**
-     * Returns the GitHub URL to the project repository.
+     * The version of the library.
+     *
+     * @see <a href="https://github.com/Kotlin/kotlinx.serialization/releases">Releases</a>
      */
-    fun gitHost(): String {
-        return "git@github.com-publish:${value}.git"
+    const val version = "1.8.1"
+
+    private const val infix = "kotlinx-serialization"
+    const val bom = "$group:$infix-bom:$version"
+    const val coreJvm = "$group:$infix-core-jvm"
+    const val json = "$group:$infix-json"
+
+    /**
+     * The [Gradle plugin](https://github.com/Kotlin/kotlinx.serialization/tree/master?tab=readme-ov-file#gradle)
+     * for using the serialization library.
+     *
+     * Usage:
+     * ```kotlin
+     * plugins {
+     *     // ...
+     *     kotlin(Serialization.GradlePlugin.shortId) version Kotlin.version
+     * }
+     * ```
+     */
+    object GradlePlugin {
+
+        /**
+         * The ID to be used with the `kotlin(shortId)` DSL under the`plugins { }` block.
+         */
+        const val shortId = "plugin.serialization"
+
+        /**
+         * The full ID of the plugin.
+         */
+        const val id = "org.jetbrains.kotlin.$shortId"
     }
 }

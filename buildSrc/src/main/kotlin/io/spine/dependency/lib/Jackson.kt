@@ -30,30 +30,40 @@ package io.spine.dependency.lib
 @Suppress("unused", "ConstPropertyName")
 object Jackson {
     const val version = "2.18.3"
-    private const val databindVersion = "2.18.3"
 
     private const val groupPrefix = "com.fasterxml.jackson"
     private const val coreGroup = "$groupPrefix.core"
     private const val moduleGroup = "$groupPrefix.module"
 
+    // https://github.com/FasterXML/jackson-bom
+    const val bom = "com.fasterxml.jackson:jackson-bom:$version"
+
+    // Constants coming below without `$version` are covered by the BOM.
+
     // https://github.com/FasterXML/jackson-core
-    const val core = "$coreGroup:jackson-core:$version"
+    const val core = "$coreGroup:jackson-core"
 
     // https://github.com/FasterXML/jackson-databind
-    const val databind = "$coreGroup:jackson-databind:$databindVersion"
+    const val databind = "$coreGroup:jackson-databind"
 
     // https://github.com/FasterXML/jackson-annotations
-    const val annotations = "$coreGroup:jackson-annotations:$version"
+    const val annotations = "$coreGroup:jackson-annotations"
+
+    // https://github.com/FasterXML/jackson-module-kotlin/releases
+    const val moduleKotlin = "$moduleGroup:jackson-module-kotlin"
 
     object DataFormat {
         private const val group = "$groupPrefix.dataformat"
         private const val infix = "jackson-dataformat"
 
         // https://github.com/FasterXML/jackson-dataformat-xml/releases
-        const val xml = "$group:$infix-xml:$version"
+        const val xml = "$group:$infix-xml"
 
         // https://github.com/FasterXML/jackson-dataformats-text/releases
-        const val yaml = "$group:$infix-yaml:$version"
+        const val yaml = "$group:$infix-yaml"
+
+        const val xmlArtifact = "$xml:$version"
+        const val yamlArtifact = "$yaml:$version"
     }
 
     object DataType {
@@ -61,34 +71,28 @@ object Jackson {
         private const val infix = "jackson-datatype"
 
         // https://github.com/FasterXML/jackson-modules-java8
-        const val jdk8 = "$group:$infix-jdk8:$version"
+        const val jdk8 = "$group:$infix-jdk8"
 
         // https://github.com/FasterXML/jackson-modules-java8/tree/2.19/datetime
-        const val dateTime = "$group:$infix-jsr310:$version"
+        const val dateTime = "$group:$infix-jsr310"
 
         // https://github.com/FasterXML/jackson-datatypes-collections/blob/2.19/guava
-        const val guava = "$group:$infix-guava:$version"
+        const val guava = "$group:$infix-guava"
 
         // https://github.com/FasterXML/jackson-dataformats-binary/tree/2.19/protobuf
-        const val protobuf = "$group:$infix-protobuf:$version"
+        const val protobuf = "$group:$infix-protobuf"
 
         // https://github.com/FasterXML/jackson-datatypes-misc/tree/2.19/javax-money
-        const val javaXMoney = "$group:$infix-javax-money:$version"
+        const val javaXMoney = "$group:$infix-javax-money"
 
         // https://github.com/FasterXML/jackson-datatypes-misc/tree/2.19/moneta
-        const val moneta = "$group:jackson-datatype-moneta:$version"
+        const val moneta = "$group:jackson-datatype-moneta"
     }
-
-    // https://github.com/FasterXML/jackson-module-kotlin/releases
-    const val moduleKotlin = "$moduleGroup:jackson-module-kotlin:$version"
-
-    // https://github.com/FasterXML/jackson-bom
-    const val bom = "com.fasterxml.jackson:jackson-bom:$version"
 
     // https://github.com/FasterXML/jackson-jr
     object Junior {
         const val version = Jackson.version
         const val group = "com.fasterxml.jackson.jr"
-        const val objects = "$group:jackson-jr-objects:$version"
+        const val objects = "$group:jackson-jr-objects"
     }
 }

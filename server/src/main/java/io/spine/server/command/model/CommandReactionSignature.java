@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -83,7 +83,7 @@ public class CommandReactionSignature
 
     /**
      * Tells that the method may state that a reaction isn't needed by returning
-     * {@link io.spine.server.model.DoNothing DoNothing}.
+     * {@link io.spine.server.command.DoNothing DoNothing}.
      */
     @Override
     public boolean mayReturnIgnored() {
@@ -92,13 +92,14 @@ public class CommandReactionSignature
 
     /**
      * {@inheritDoc}
-     * <p>
-     * @implNote This method distinguishes {@linkplain Command Commander} methods one from another,
-     * as they use the same annotation, but have different parameter list. It skips the methods
-     * which first parameter {@linkplain MethodParams#firstIsCommand(Method) is }
-     * a {@code Command} message.
+     *
+     * <p>@implNote This method distinguishes {@linkplain Command Commander} methods
+     * one from another, as they use the same annotation, but have a different parameter list.
+     * It skips the methods which first parameter
+     * {@linkplain MethodParams#firstIsCommand(Method) is} a {@code Command} message.
      */
     @Override
+    @SuppressWarnings("PMD.SimplifyBooleanReturns" /* Keep this way for better readability. */ )
     protected boolean skipMethod(Method method) {
         var parentResult = !super.skipMethod(method);
         if (parentResult) {
@@ -108,8 +109,8 @@ public class CommandReactionSignature
     }
 
     /**
-     * Allowed combinations of parameters for {@linkplain CommandingReaction Command reaction}
-     * methods.
+     * Allowed combinations of parameters for
+     * {@linkplain CommandingReaction Command reaction} methods.
      */
     @Immutable
     private enum CommandReactionParams implements ParameterSpec<EventEnvelope> {

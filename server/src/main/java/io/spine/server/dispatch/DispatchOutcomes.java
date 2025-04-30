@@ -31,6 +31,7 @@ import io.spine.core.MessageId;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
+import io.spine.validate.ValidationException;
 
 import java.util.Optional;
 import java.util.Set;

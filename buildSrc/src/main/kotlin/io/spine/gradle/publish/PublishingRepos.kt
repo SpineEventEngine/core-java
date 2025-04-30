@@ -26,7 +26,7 @@
 
 package io.spine.gradle.publish
 
-import io.spine.gradle.Repository
+import io.spine.gradle.repo.Repository
 
 /**
  * Repositories to which we may publish.

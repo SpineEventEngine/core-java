@@ -52,33 +52,53 @@ object Kotlin {
      */
     private const val annotationsVersion = "26.0.2"
 
-    private const val group = "org.jetbrains.kotlin"
+    const val group = "org.jetbrains.kotlin"
 
-    const val scriptRuntime = "$group:kotlin-script-runtime:$runtimeVersion"
-    const val stdLib       = "$group:kotlin-stdlib:$runtimeVersion"
-    const val stdLibCommon = "$group:kotlin-stdlib-common:$runtimeVersion"
+    const val bom = "$group:kotlin-bom:$runtimeVersion"
 
-    const val toolingCore = "$group:kotlin-tooling-core:$runtimeVersion"
+    const val scriptRuntime = "$group:kotlin-script-runtime"
 
-    @Deprecated("Please use `stdLib` instead.")
-    const val stdLibJdk7   = "$group:kotlin-stdlib-jdk7:$runtimeVersion"
+    object StdLib {
+        private const val infix = "kotlin-stdlib"
+        const val itself = "$group:$infix"
+        const val common = "$group:$infix-common"
+        const val jdk7 = "$group:$infix-jdk7"
+        const val jdk8 = "$group:$infix-jdk8"
 
-    @Deprecated("Please use `stdLib` instead.")
-    const val stdLibJdk8   = "$group:kotlin-stdlib-jdk8:$runtimeVersion"
+        val artefacts = setOf(itself, common, jdk7, jdk8).map { "$it:$runtimeVersion" }
+    }
 
-    const val reflect    = "$group:kotlin-reflect:$runtimeVersion"
-    const val testJUnit5 = "$group:kotlin-test-junit5:$runtimeVersion"
+    @Deprecated("Please use `StdLib.itself` instead.", ReplaceWith("StdLib.itself"))
+    const val stdLib       = StdLib.itself
+
+    @Deprecated("Please use `StdLib.common` instead.", ReplaceWith("StdLib.common"))
+    const val stdLibCommon = StdLib.common
+
+    @Deprecated("Please use `StdLib.jdk7` instead.", ReplaceWith("StdLib.jdk7"))
+    const val stdLibJdk7   = StdLib.jdk7
+
+    @Deprecated("Please use `StdLib.jdk8` instead.")
+    const val stdLibJdk8   = StdLib.jdk8
+
+    const val toolingCore = "$group:kotlin-tooling-core"
+    const val reflect    = "$group:kotlin-reflect"
+    const val testJUnit5 = "$group:kotlin-test-junit5"
+
+    /**
+     * The artefacts that do not belong to [StdLib].
+     */
+    val artefacts = listOf(toolingCore, reflect, testJUnit5).map { "$it:$runtimeVersion" }
 
     @Deprecated(message = "Please use `GradlePlugin.api` instead.", ReplaceWith("GradlePlugin.api"))
-    const val gradlePluginApi = "$group:kotlin-gradle-plugin-api:$runtimeVersion"
+    const val gradlePluginApi = "$group:kotlin-gradle-plugin-api"
 
     @Deprecated(message = "Please use `GradlePlugin.lib` instead.", ReplaceWith("GradlePlugin.lib"))
-    const val gradlePluginLib = "$group:kotlin-gradle-plugin:$runtimeVersion"
+    const val gradlePluginLib = "$group:kotlin-gradle-plugin"
 
     const val jetbrainsAnnotations = "org.jetbrains:annotations:$annotationsVersion"
 
     object Compiler {
-        const val embeddable = "$group:kotlin-compiler-embeddable:$runtimeVersion"
+        const val embeddable = "$group:kotlin-compiler-embeddable:$embeddedVersion"
     }
 
     object GradlePlugin {

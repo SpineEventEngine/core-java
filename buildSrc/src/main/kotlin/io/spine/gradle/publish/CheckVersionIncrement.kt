@@ -28,7 +28,7 @@ package io.spine.gradle.publish
 
 import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import io.spine.gradle.Repository
+import io.spine.gradle.repo.Repository
 import java.io.FileNotFoundException
 import java.net.URL
 import org.gradle.api.DefaultTask
@@ -58,10 +58,11 @@ open class CheckVersionIncrement : DefaultTask() {
     @TaskAction
     fun fetchAndCheck() {
         val artifact = "${project.artifactPath()}/${MavenMetadata.FILE_NAME}"
-        checkInRepo(repository.snapshots, artifact)
+        val snapshots = repository.target(snapshots = true)
+        checkInRepo(snapshots, artifact)
 
-        if (repository.releases != repository.snapshots) {
-            checkInRepo(repository.releases, artifact)
+        if (!repository.hasOneTarget()) {
+            checkInRepo(repository.target(snapshots = false), artifact)
         }
     }
 
@@ -135,7 +136,7 @@ private data class MavenMetadata(var versioning: Versioning = Versioning()) {
             return try {
                 val metadata = mapper.readValue(url, MavenMetadata::class.java)
                 metadata
-            } catch (ignored: FileNotFoundException) {
+            } catch (_: FileNotFoundException) {
                 null
             }
         }

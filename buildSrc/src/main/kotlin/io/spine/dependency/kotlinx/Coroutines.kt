@@ -24,23 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
+package io.spine.dependency.kotlinx
 
 /**
- * Artifacts of the `tool-base` module.
- *
- * @see <a href="https://github.com/SpineEventEngine/tool-base">spine-tool-base</a>
+ * Kotlin Coroutines.
+ * 
+ * @see <a href="https://github.com/Kotlin/kotlinx.coroutines">GitHub project</a>
  */
-@Suppress("ConstPropertyName", "unused")
-object ToolBase {
-    const val group = Spine.toolsGroup
-    const val version = "2.0.0-SNAPSHOT.321"
+@Suppress("unused", "ConstPropertyName")
+object Coroutines {
+    const val group = KotlinX.group
+    const val version = "1.10.2"
+    const val infix = "kotlinx-coroutines"
+    const val bom = "$group:$infix-bom:$version"
 
-    const val lib = "$group:spine-tool-base:$version"
-    const val pluginBase = "$group:spine-plugin-base:$version"
-    const val pluginTestlib = "$group:spine-plugin-testlib:$version"
+    const val core = "$group:$infix-core"
+    const val coreJvm = "$group:$infix-core-jvm"
+    const val jdk7 = "$group:$infix-jdk7"
+    const val jdk8 = "$group:$infix-jdk8"
+    const val debug = "$group:$infix-debug"
+    const val test = "$group:$infix-test"
+    const val testJvm = "$group:$infix-test-jvm"
 
-    const val intellijPlatformJava = "$group:intellij-platform-java:$version"
-
-    const val psiJava = "$group:spine-psi-java:$version"
+    val artefacts = listOf(core, coreJvm, jdk8, debug, test, testJvm).map { "$it:$version"}
 }

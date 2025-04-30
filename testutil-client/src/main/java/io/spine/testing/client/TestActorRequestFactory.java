@@ -47,6 +47,10 @@ import java.time.Instant;
  * An {@code ActorRequestFactory} for running tests.
  */
 @VisibleForTesting
+@SuppressWarnings({
+        "PMD.UnnecessaryFullyQualifiedName", "UnnecessarilyQualifiedStaticUsage"
+        // These are in conflict with https://errorprone.info/bugpattern/BadImport.
+})
 public class TestActorRequestFactory extends ActorRequestFactory {
 
     public TestActorRequestFactory(UserId actor, ZoneId zoneId) {

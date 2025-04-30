@@ -26,10 +26,10 @@
 
 package io.spine.gradle.github.pages
 
-import io.spine.gradle.RepoSlug
 import io.spine.gradle.git.Branch
 import io.spine.gradle.git.Repository
 import io.spine.gradle.git.UserInfo
+import io.spine.gradle.repo.RepoSlug
 
 /**
  * Clones the current project repository with the branch dedicated to publishing
