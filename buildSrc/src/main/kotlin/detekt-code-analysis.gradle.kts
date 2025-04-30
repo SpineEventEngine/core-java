@@ -68,6 +68,17 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 
+configurations
+    .matching { it.name.contains("detekt", ignoreCase = true) }
+    .configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == Kotlin.group) {
+                useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
+                because("Force Kotlin version in Detekt configurations.")
+            }
+        }
+    }
+
 detekt {
     buildUponDefaultConfig = true
     config.from(files("${rootDir}/config/quality/detekt-config.yml"))
@@ -85,13 +96,3 @@ tasks {
     }
 }
 
-configurations
-    .matching { it.name.contains("detekt", ignoreCase = true) }
-    .configureEach {
-        resolutionStrategy.eachDependency {
-            if (requested.group == Kotlin.group) {
-                useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
-                because("Force Kotlin version in Detekt configurations.")
-            }
-        }
-    }
