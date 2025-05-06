@@ -30,7 +30,9 @@ package io.spine.dependency.lib
  * A [high performance](https://github.com/ben-manes/caffeine/wiki/Benchmarks),
  * [near optimal](https://github.com/ben-manes/caffeine/wiki/Efficiency) caching library.
  *
- * This library is a transitive dependency for us via ErrorProne.
+ * This library is a transitive dependency for us via
+ * [io.spine.dependency.lib.Aedile] and
+ * [io.spine.dependency.build.ErrorProne].
  *
  * @see <a href="https://github.com/ben-manes/caffeine">Caffeine at GitHub</a>
  */

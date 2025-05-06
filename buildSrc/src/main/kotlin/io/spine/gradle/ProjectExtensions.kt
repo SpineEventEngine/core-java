@@ -41,6 +41,15 @@ import org.gradle.kotlin.dsl.getByType
  */
 
 /**
+ * Logs the result of the function using the project logger at `INFO` level.
+ */
+fun Project.log(message: () -> String) {
+    if (logger.isInfoEnabled) {
+        logger.info(message.invoke())
+    }
+}
+
+/**
  * Obtains the Java plugin extension of the project.
  */
 val Project.javaPluginExtension: JavaPluginExtension
