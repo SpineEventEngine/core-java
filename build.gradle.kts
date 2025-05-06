@@ -42,7 +42,6 @@ import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Time
 import io.spine.dependency.local.ToolBase
 import io.spine.dependency.local.Validation
-import io.spine.dependency.test.JUnit
 import io.spine.gradle.VersionWriter
 import io.spine.gradle.checkstyle.CheckStyleConfig
 import io.spine.gradle.github.pages.updateGitHubPages
@@ -53,10 +52,10 @@ import io.spine.gradle.kotlin.setFreeCompilerArgs
 import io.spine.gradle.publish.IncrementGuard
 import io.spine.gradle.publish.PublishingRepos
 import io.spine.gradle.publish.spinePublishing
+import io.spine.gradle.repo.standardToSpineSdk
 import io.spine.gradle.report.coverage.JacocoConfig
 import io.spine.gradle.report.license.LicenseReporter
 import io.spine.gradle.report.pom.PomGenerator
-import io.spine.gradle.repo.standardToSpineSdk
 import org.gradle.jvm.tasks.Jar
 
 buildscript {
@@ -70,7 +69,6 @@ buildscript {
                 val logging = io.spine.dependency.local.Logging
                 force(
                     io.spine.dependency.lib.Guava.lib,
-                    io.spine.dependency.lib.Grpc.api,
                     "${protoData.module}:${protoData.dogfoodingVersion}",
                     io.spine.dependency.local.Base.lib,
                     io.spine.dependency.local.ToolBase.lib,
@@ -313,19 +311,17 @@ fun Subproject.forceConfigurations() {
             exclude(group = "io.spine", module = "spine-validate")
 
             resolutionStrategy {
+                /* Force the version of gRPC used by the `:client` module over the one
+                   set by `mc-java` in the `:core` module when specifying compiler artifact
+                   for the gRPC plugin.
+                   See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
+                   .configureProtocPlugins()` method which sets the version from resources. */
+                Grpc.forceArtifacts(project, this@all, this@resolutionStrategy)
+                force(Grpc.ProtocPlugin.artifact)
+
                 force(
                     Guava.lib,
-                    /* Force the version of gRPC used by the `:client` module over the one
-                       set by `mc-java` in the `:core` module when specifying compiler artifact
-                       for the gRPC plugin.
-                       See `io.spine.tools.mc.java.gradle.plugins.JavaProtocConfigurationPlugin
-                       .configureProtocPlugins()` method which sets the version from resources. */
-                    Grpc.ProtocPlugin.artifact,
-                    Grpc.api,
-                    JUnit.bom,
-
                     KotlinPoet.lib,
-
                     Base.lib,
                     Validation.runtime,
                     Time.lib,
@@ -340,10 +336,6 @@ fun Subproject.forceConfigurations() {
                     ToolBase.pluginBase,
                     CoreJava.server,
                     ProtoData.api,
-
-                    Grpc.core,
-                    Grpc.protobuf,
-                    Grpc.stub
                 )
             }
         }
