@@ -46,7 +46,7 @@ object AggregateTestSupport : WithLogging {
      * @return the list of produced event messages.
      */
     @JvmStatic
-    fun <I, A : Aggregate<I, S, *>, S : EntityState<I>> dispatchCommand(
+    fun <I : Any, A : Aggregate<I, S, *>, S : EntityState<I>> dispatchCommand(
         repository: AggregateRepository<I, A, S>,
         aggregate: A,
         command: CommandEnvelope
@@ -67,7 +67,7 @@ object AggregateTestSupport : WithLogging {
      * @return the list of produced event messages.
      */
     @JvmStatic
-    fun <I, A : Aggregate<I, S, *>, S : EntityState<I>> dispatchEvent(
+    fun <I : Any, A : Aggregate<I, S, *>, S : EntityState<I>> dispatchEvent(
         repository: AggregateRepository<I, A, S>,
         aggregate: A,
         event: EventEnvelope
@@ -79,7 +79,7 @@ object AggregateTestSupport : WithLogging {
         return outcome
     }
 
-    private fun <I, A : Aggregate<I, *, *>> dispatchAndCollect(
+    private fun <I : Any, A : Aggregate<I, *, *>> dispatchAndCollect(
         endpoint: AggregateEndpoint<I, A, *>,
         aggregate: A
     ): DispatchOutcome = endpoint.handleAndApplyEvents(aggregate)

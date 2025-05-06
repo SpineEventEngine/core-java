@@ -26,7 +26,6 @@
 
 package io.spine.server.delivery;
 
-import com.google.protobuf.Duration;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.memory.InMemoryShardedWorkRegistry;
 import io.spine.server.storage.StorageFactory;
@@ -35,12 +34,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.protobuf.util.Durations.fromMinutes;
 import static io.spine.testing.Assertions.assertIllegalArgument;
 import static io.spine.testing.Assertions.assertNpe;
 import static io.spine.testing.TestValues.nullRef;
 
+@SuppressWarnings("WriteOnlyObject") /* Some test methods call `builder()` only for writing. */
 @DisplayName("`DeliveryBuilder` should")
 class DeliveryBuilderTest {
 

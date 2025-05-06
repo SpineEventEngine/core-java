@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.client.Client.connectTo;
 import static io.spine.client.Client.usingChannel;
 import static org.junit.jupiter.api.Assertions.assertThrows;

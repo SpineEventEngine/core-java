@@ -48,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.protobuf.util.Durations.fromDays;
 import static com.google.protobuf.util.Durations.fromMinutes;
 import static com.google.protobuf.util.Timestamps.add;

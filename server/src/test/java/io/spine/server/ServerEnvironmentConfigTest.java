@@ -295,8 +295,8 @@ class ServerEnvironmentConfigTest {
             assertTracer(factory);
         }
 
-        private void assertTracer(TracerFactory expected) {
-            Truth8.assertThat(serverEnvironment.tracing())
+        private static void assertTracer(TracerFactory expected) {
+            assertThat(serverEnvironment.tracing())
                   .hasValue(expected);
         }
 

@@ -224,7 +224,7 @@ internal class BoundedContextSpec {
          * Registers a [DefaultRepository] for the given entity class and asserts that
          * the context has entities of the given type.
          */
-        private fun <I, E : Entity<I, *>> registerAndAssertRepository(cls: Class<E>) {
+        private fun <I : Any, E : Entity<I, *>> registerAndAssertRepository(cls: Class<out E>) {
             context.register(DefaultRepository.of(cls))
             context.hasEntitiesOfType(cls) shouldBe true
         }
@@ -632,8 +632,8 @@ private class EmptyProbe : BoundedContext.Probe {
         this.context = context
     }
     override fun isRegistered(): Boolean = this::context.isInitialized
-    override fun commandListener(): Listener<CommandEnvelope> = Listener<CommandEnvelope> { _ -> }
-    override fun eventListener(): Listener<EventEnvelope> = Listener<EventEnvelope> { _ -> }
+    override fun commandListener(): Listener<CommandEnvelope> = Listener { _ -> }
+    override fun eventListener(): Listener<EventEnvelope> = Listener { _ -> }
     override fun eventDispatchers(): Set<EventDispatcher> = mutableSetOf(
             StubPolicy1(), StubPolicy2(), StubPolicy3()
         )

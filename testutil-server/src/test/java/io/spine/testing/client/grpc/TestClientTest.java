@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Optional;
 
-import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.client.Client.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.core.Responses.statusOk;

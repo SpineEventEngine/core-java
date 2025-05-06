@@ -77,7 +77,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Time.currentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.Messages.isNotDefault;

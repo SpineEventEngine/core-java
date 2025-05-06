@@ -54,7 +54,6 @@ import java.util.concurrent.Callable;
 import java.util.stream.IntStream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.CatchUpStatus.COMPLETED;

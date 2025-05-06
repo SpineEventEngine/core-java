@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.given.service.GivenCommandService.noOpCommandService;
 import static io.spine.testing.TestValues.randomString;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;

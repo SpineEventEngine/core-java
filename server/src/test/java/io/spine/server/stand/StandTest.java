@@ -79,7 +79,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.client.EntityQueryToProto.transformWith;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;

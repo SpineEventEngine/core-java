@@ -26,6 +26,7 @@
 
 package io.spine.testing.server.blackbox
 
+import io.spine.base.EntityState
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.entity.Entity
 import io.spine.server.entity.Repository
@@ -54,7 +55,9 @@ public fun blackBoxWith(vararg repository: Repository<*, *>): BlackBox {
 /**
  * Creates a [BlackBox] with the given classes of entities.
  */
-public fun <I : Any, E : Entity<I, Any>> blackBoxWith(vararg entityClass: KClass<out E>): BlackBox {
+public fun <I : Any, S : EntityState<I>, E : Entity<I, out S>> blackBoxWith(
+    vararg entityClass: KClass<out E>
+): BlackBox {
     val context = BoundedContextBuilder.assumingTests()
     entityClass.forEach {
         context.add(it.java)

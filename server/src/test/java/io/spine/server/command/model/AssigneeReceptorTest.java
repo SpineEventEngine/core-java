@@ -64,7 +64,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;

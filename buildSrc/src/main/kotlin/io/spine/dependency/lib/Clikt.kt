@@ -29,6 +29,6 @@ package io.spine.dependency.lib
 // https://ajalt.github.io/clikt/
 @Suppress("unused")
 object Clikt {
-    private const val version = "5.0.3"
+    private const val version = "3.5.2"
     const val lib = "com.github.ajalt.clikt:clikt:$version"
 }

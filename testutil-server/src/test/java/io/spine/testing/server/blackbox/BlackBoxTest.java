@@ -86,7 +86,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.truth.extensions.proto.ProtoTruth.assertThat;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.core.given.GivenUserId.newUuid;
@@ -188,7 +187,7 @@ abstract class BlackBoxTest<T extends BlackBox> {
                    .assertState(createProject.getProjectId(), expectedProject);
         }
 
-        private BbProjectView createProjectView(BbCreateProject createProject) {
+        private static BbProjectView createProjectView(BbCreateProject createProject) {
             return BbProjectView
                     .newBuilder()
                     .setId(createProject.getProjectId())

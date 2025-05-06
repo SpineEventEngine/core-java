@@ -66,7 +66,6 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
