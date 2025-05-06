@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.301</version>
+<version>2.0.0-SNAPSHOT.310</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -24,51 +24,39 @@ all modules and does not describe the project structure per-subproject.
 
 <dependencies>
   <dependency>
-    <groupId>com.google.truth</groupId>
-    <artifactId>truth</artifactId>
-    <version>1.1.5</version>
-    <scope>compile</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.google.truth.extensions</groupId>
-    <artifactId>truth-java8-extension</artifactId>
-    <version>1.1.5</version>
-    <scope>compile</scope>
-  </dependency>
-  <dependency>
-    <groupId>com.google.truth.extensions</groupId>
-    <artifactId>truth-proto-extension</artifactId>
-    <version>1.1.5</version>
+    <groupId>io.grpc</groupId>
+    <artifactId>grpc-bom</artifactId>
+    <version>1.72.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-core</artifactId>
-    <version>1.59.0</version>
+    <version>1.72.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-inprocess</artifactId>
-    <version>1.59.0</version>
+    <version>1.72.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-protobuf</artifactId>
-    <version>1.59.0</version>
+    <version>1.72.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-stub</artifactId>
-    <version>1.59.0</version>
+    <version>1.72.0</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-base</artifactId>
-    <version>2.0.0-SNAPSHOT.307</version>
+    <version>2.0.0-SNAPSHOT.316</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -110,13 +98,13 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-runtime</artifactId>
-    <version>2.0.0-SNAPSHOT.305</version>
+    <version>2.0.0-SNAPSHOT.332</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
-    <groupId>org.apiguardian</groupId>
-    <artifactId>apiguardian-api</artifactId>
-    <version>1.1.2</version>
+    <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>kotlin-bom</artifactId>
+    <version>2.1.20</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -133,20 +121,14 @@ all modules and does not describe the project structure per-subproject.
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlinx</groupId>
+    <artifactId>kotlinx-coroutines-bom</artifactId>
+    <version>1.10.2</version>
+    <scope>compile</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.kotlinx</groupId>
     <artifactId>kotlinx-coroutines-core</artifactId>
-    <version>1.10.1</version>
-    <scope>compile</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter-api</artifactId>
-    <version>5.10.0</version>
-    <scope>compile</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.junit.jupiter</groupId>
-    <artifactId>junit-jupiter-params</artifactId>
-    <version>5.10.0</version>
+    <version>1.10.2</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -156,21 +138,39 @@ all modules and does not describe the project structure per-subproject.
     <scope>test</scope>
   </dependency>
   <dependency>
+    <groupId>com.google.guava</groupId>
+    <artifactId>guava-testlib</artifactId>
+    <version>33.4.8-jre</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty</artifactId>
-    <version>1.59.0</version>
+    <version>1.72.0</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>grpc-netty-shaded</artifactId>
-    <version>1.59.0</version>
+    <version>1.72.0</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.kotest</groupId>
+    <artifactId>kotest-assertions-core</artifactId>
+    <version>5.9.1</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>io.kotest</groupId>
+    <artifactId>kotest-framework-datatest</artifactId>
+    <version>5.9.1</version>
     <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-testlib</artifactId>
-    <version>2.0.0-SNAPSHOT.185</version>
+    <version>2.0.0-SNAPSHOT.202</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -180,9 +180,33 @@ all modules and does not describe the project structure per-subproject.
     <scope>test</scope>
   </dependency>
   <dependency>
+    <groupId>org.junit</groupId>
+    <artifactId>junit-bom</artifactId>
+    <version>5.12.2</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.junit-pioneer</groupId>
+    <artifactId>junit-pioneer</artifactId>
+    <version>2.3.0</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>5.12.2</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
     <groupId>org.junit.jupiter</groupId>
     <artifactId>junit-jupiter-engine</artifactId>
-    <version>5.10.0</version>
+    <version>5.12.2</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-params</artifactId>
+    <version>5.12.2</version>
     <scope>test</scope>
   </dependency>
   <dependency>
@@ -194,17 +218,17 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.devtools.ksp</groupId>
     <artifactId>symbol-processing</artifactId>
-    <version>2.1.20-1.0.31</version>
+    <version>2.1.20-2.0.0</version>
   </dependency>
   <dependency>
     <groupId>com.google.devtools.ksp</groupId>
     <artifactId>symbol-processing-api</artifactId>
-    <version>2.1.20-1.0.31</version>
+    <version>2.1.20-2.0.0</version>
   </dependency>
   <dependency>
     <groupId>com.google.devtools.ksp</groupId>
     <artifactId>symbol-processing-cmdline</artifactId>
-    <version>2.1.20-1.0.31</version>
+    <version>2.1.20-2.0.0</version>
   </dependency>
   <dependency>
     <groupId>com.google.errorprone</groupId>
@@ -219,7 +243,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>com.google.protobuf</groupId>
     <artifactId>protoc</artifactId>
-    <version>3.25.1</version>
+    <version>3.25.7</version>
   </dependency>
   <dependency>
     <groupId>com.puppycrawl.tools</groupId>
@@ -239,87 +263,87 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.grpc</groupId>
     <artifactId>protoc-gen-grpc-java</artifactId>
-    <version>1.59.0</version>
+    <version>1.72.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-fat-cli</artifactId>
-    <version>0.93.6</version>
+    <version>0.94.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-protoc</artifactId>
-    <version>0.93.6</version>
+    <version>0.94.0</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-dokka-extensions</artifactId>
-    <version>2.0.0-SNAPSHOT.6</version>
+    <version>2.0.0-SNAPSHOT.7</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-plugins</artifactId>
-    <version>2.0.0-SNAPSHOT.307</version>
+    <version>2.0.0-SNAPSHOT.310</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
     <artifactId>spine-mc-java-routing</artifactId>
-    <version>2.0.0-SNAPSHOT.307</version>
+    <version>2.0.0-SNAPSHOT.310</version>
   </dependency>
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-bundle</artifactId>
-    <version>2.0.0-SNAPSHOT.305</version>
+    <version>2.0.0-SNAPSHOT.316</version>
+  </dependency>
+  <dependency>
+    <groupId>net.sourceforge.pmd</groupId>
+    <artifactId>pmd-ant</artifactId>
+    <version>7.12.0</version>
   </dependency>
   <dependency>
     <groupId>net.sourceforge.pmd</groupId>
     <artifactId>pmd-java</artifactId>
-    <version>6.55.0</version>
+    <version>7.12.0</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.agent</artifactId>
-    <version>0.8.12</version>
+    <version>0.8.13</version>
   </dependency>
   <dependency>
     <groupId>org.jacoco</groupId>
     <artifactId>org.jacoco.ant</artifactId>
-    <version>0.8.12</version>
+    <version>0.8.13</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.dokka</groupId>
+    <artifactId>all-modules-page-plugin</artifactId>
+    <version>2.0.0</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
     <artifactId>analysis-kotlin-descriptors</artifactId>
-    <version>1.9.20</version>
+    <version>2.0.0</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
     <artifactId>dokka-base</artifactId>
-    <version>1.9.20</version>
+    <version>2.0.0</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
     <artifactId>dokka-core</artifactId>
-    <version>1.9.20</version>
-  </dependency>
-  <dependency>
-    <groupId>org.jetbrains.dokka</groupId>
-    <artifactId>gfm-plugin</artifactId>
-    <version>1.9.20</version>
-  </dependency>
-  <dependency>
-    <groupId>org.jetbrains.dokka</groupId>
-    <artifactId>javadoc-plugin</artifactId>
-    <version>1.9.20</version>
-  </dependency>
-  <dependency>
-    <groupId>org.jetbrains.dokka</groupId>
-    <artifactId>jekyll-plugin</artifactId>
-    <version>1.9.20</version>
+    <version>2.0.0</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.dokka</groupId>
     <artifactId>kotlin-as-java-plugin</artifactId>
-    <version>1.9.20</version>
+    <version>2.0.0</version>
+  </dependency>
+  <dependency>
+    <groupId>org.jetbrains.dokka</groupId>
+    <artifactId>templating-plugin</artifactId>
+    <version>2.0.0</version>
   </dependency>
   <dependency>
     <groupId>org.jetbrains.kotlin</groupId>
