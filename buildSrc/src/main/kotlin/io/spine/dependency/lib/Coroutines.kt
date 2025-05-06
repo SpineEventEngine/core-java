@@ -41,12 +41,12 @@ package io.spine.dependency.lib
 )
 object Coroutines {
     const val group = "org.jetbrains.kotlinx"
-    const val version = io.spine.dependency.kotlinx.Coroutines.version
-    const val bom = "$group:kotlinx-coroutines-bom:$version"
-    const val core = "$group:kotlinx-coroutines-core:$version"
-    const val coreJvm = "$group:kotlinx-coroutines-core-jvm:$version"
-    const val jdk8 = "$group:kotlinx-coroutines-jdk8:$version"
-    const val debug = "$group:kotlinx-coroutines-debug:$version"
-    const val test = "$group:kotlinx-coroutines-test:$version"
-    const val testJvm = "$group:kotlinx-coroutines-test-jvm:$version"
+    val version = io.spine.dependency.kotlinx.Coroutines.version
+    val bom = "$group:kotlinx-coroutines-bom:$version"
+    val core = "$group:kotlinx-coroutines-core:$version"
+    val coreJvm = "$group:kotlinx-coroutines-core-jvm:$version"
+    val jdk8 = "$group:kotlinx-coroutines-jdk8:$version"
+    val debug = "$group:kotlinx-coroutines-debug:$version"
+    val test = "$group:kotlinx-coroutines-test:$version"
+    val testJvm = "$group:kotlinx-coroutines-test-jvm:$version"
 }

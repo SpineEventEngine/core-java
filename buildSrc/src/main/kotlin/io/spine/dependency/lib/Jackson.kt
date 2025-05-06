@@ -26,73 +26,102 @@
 
 package io.spine.dependency.lib
 
-// https://github.com/FasterXML/jackson/wiki/Jackson-Releases
-@Suppress("unused", "ConstPropertyName")
-object Jackson {
-    const val version = "2.18.3"
+import io.spine.dependency.Dependency
+import io.spine.dependency.DependencyWithBom
 
-    private const val groupPrefix = "com.fasterxml.jackson"
-    private const val coreGroup = "$groupPrefix.core"
-    private const val moduleGroup = "$groupPrefix.module"
+// https://github.com/FasterXML/jackson/wiki/Jackson-Releases
+@Suppress("unused")
+object Jackson : DependencyWithBom() {
+    override val group = "com.fasterxml.jackson"
+    override val version = "2.18.3"
 
     // https://github.com/FasterXML/jackson-bom
-    const val bom = "com.fasterxml.jackson:jackson-bom:$version"
+    override val bom = "$group:jackson-bom:$version"
+
+    private val groupPrefix = group
+    private val coreGroup = "$groupPrefix.core"
+    private val moduleGroup = "$groupPrefix.module"
 
     // Constants coming below without `$version` are covered by the BOM.
 
     // https://github.com/FasterXML/jackson-core
-    const val core = "$coreGroup:jackson-core"
+    val core = "$coreGroup:jackson-core"
 
     // https://github.com/FasterXML/jackson-databind
-    const val databind = "$coreGroup:jackson-databind"
+    val databind = "$coreGroup:jackson-databind"
 
     // https://github.com/FasterXML/jackson-annotations
-    const val annotations = "$coreGroup:jackson-annotations"
+    val annotations = "$coreGroup:jackson-annotations"
 
     // https://github.com/FasterXML/jackson-module-kotlin/releases
-    const val moduleKotlin = "$moduleGroup:jackson-module-kotlin"
+    val moduleKotlin = "$moduleGroup:jackson-module-kotlin"
 
-    object DataFormat {
-        private const val group = "$groupPrefix.dataformat"
+    override val modules = listOf(
+        core,
+        databind,
+        annotations,
+        moduleKotlin
+    )
+
+    object DataFormat : Dependency() {
+        override val version = Jackson.version
+        override val group = "$groupPrefix.dataformat"
+
         private const val infix = "jackson-dataformat"
 
         // https://github.com/FasterXML/jackson-dataformat-xml/releases
-        const val xml = "$group:$infix-xml"
+        val xml = "$group:$infix-xml"
 
         // https://github.com/FasterXML/jackson-dataformats-text/releases
-        const val yaml = "$group:$infix-yaml"
+        val yaml = "$group:$infix-yaml"
 
-        const val xmlArtifact = "$xml:$version"
-        const val yamlArtifact = "$yaml:$version"
+        val xmlArtifact = "$xml:$version"
+        val yamlArtifact = "$yaml:$version"
+
+        override val modules = listOf(xml, yaml)
     }
 
-    object DataType {
-        private const val group = "$groupPrefix.datatype"
+    object DataType : Dependency() {
+        override val version = Jackson.version
+        override val group = "$groupPrefix.datatype"
+
         private const val infix = "jackson-datatype"
 
         // https://github.com/FasterXML/jackson-modules-java8
-        const val jdk8 = "$group:$infix-jdk8"
+        val jdk8 = "$group:$infix-jdk8"
 
         // https://github.com/FasterXML/jackson-modules-java8/tree/2.19/datetime
-        const val dateTime = "$group:$infix-jsr310"
+        val dateTime = "$group:$infix-jsr310"
 
         // https://github.com/FasterXML/jackson-datatypes-collections/blob/2.19/guava
-        const val guava = "$group:$infix-guava"
+        val guava = "$group:$infix-guava"
 
         // https://github.com/FasterXML/jackson-dataformats-binary/tree/2.19/protobuf
-        const val protobuf = "$group:$infix-protobuf"
+        val protobuf = "$group:$infix-protobuf"
 
         // https://github.com/FasterXML/jackson-datatypes-misc/tree/2.19/javax-money
-        const val javaXMoney = "$group:$infix-javax-money"
+        val javaXMoney = "$group:$infix-javax-money"
 
         // https://github.com/FasterXML/jackson-datatypes-misc/tree/2.19/moneta
-        const val moneta = "$group:jackson-datatype-moneta"
+        val moneta = "$group:jackson-datatype-moneta"
+
+        override val modules = listOf(
+            jdk8,
+            dateTime,
+            guava,
+            protobuf,
+            javaXMoney,
+            moneta
+        )
     }
 
     // https://github.com/FasterXML/jackson-jr
-    object Junior {
-        const val version = Jackson.version
-        const val group = "com.fasterxml.jackson.jr"
-        const val objects = "$group:jackson-jr-objects"
+    object Junior : Dependency() {
+        override val version = Jackson.version
+        override val group = "com.fasterxml.jackson.jr"
+
+        val objects = "$group:jackson-jr-objects"
+
+        override val modules = listOf(objects)
     }
 }

@@ -26,37 +26,41 @@
 
 package io.spine.dependency.boms
 
+import io.spine.dependency.DependencyWithBom
 import io.spine.dependency.kotlinx.Coroutines
 import io.spine.dependency.lib.Jackson
 import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.lib.Grpc
 import io.spine.dependency.test.JUnit
 
 /**
  * The collection of references to BOMs applied by [BomsPlugin].
+ *
+ * @see <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Bill_of_Materials_.28BOM.29_POMs">
+ * Maven Bill of Materials</a>
  */
 object Boms {
 
     /**
      * The base production BOMs.
      */
-    val core = listOf(
-        Kotlin.bom,
-        Coroutines.bom
+    val core: List<DependencyWithBom> = listOf(
+        Kotlin,
+        Coroutines
     )
 
     /**
      * The BOMs for testing dependencies.
      */
-    val testing = listOf(
-        JUnit.bom
+    val testing: List<DependencyWithBom> = listOf(
+        JUnit
     )
 
     /**
      * Technology-based BOMs.
      */
     object Optional {
-        val jackson = listOf(
-            Jackson.bom
-        )
+        val jackson = Jackson.bom
+        val grpc = Grpc.bom
     }
 }

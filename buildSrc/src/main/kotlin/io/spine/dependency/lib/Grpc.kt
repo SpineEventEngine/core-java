@@ -26,23 +26,42 @@
 
 package io.spine.dependency.lib
 
+import io.spine.dependency.DependencyWithBom
+
 // https://github.com/grpc/grpc-java
-@Suppress("unused", "ConstPropertyName")
-object Grpc {
-    @Suppress("MemberVisibilityCanBePrivate")
-    const val version        = "1.72.0"
-    const val group          = "io.grpc"
-    const val api            = "$group:grpc-api:$version"
-    const val auth           = "$group:grpc-auth:$version"
-    const val core           = "$group:grpc-core:$version"
-    const val context        = "$group:grpc-context:$version"
-    const val inProcess      = "$group:grpc-inprocess:$version"
-    const val stub           = "$group:grpc-stub:$version"
-    const val okHttp         = "$group:grpc-okhttp:$version"
-    const val protobuf       = "$group:grpc-protobuf:$version"
-    const val protobufLite   = "$group:grpc-protobuf-lite:$version"
-    const val netty          = "$group:grpc-netty:$version"
-    const val nettyShaded    = "$group:grpc-netty-shaded:$version"
+@Suppress("unused")
+object Grpc : DependencyWithBom() {
+
+    override val version = "1.72.0"
+    override val group = "io.grpc"
+    override val bom = "$group:grpc-bom:$version"
+
+    val api            = "$group:grpc-api"
+    val auth           = "$group:grpc-auth"
+    val core           = "$group:grpc-core"
+    val context        = "$group:grpc-context"
+    val inProcess      = "$group:grpc-inprocess"
+    val stub           = "$group:grpc-stub"
+    val okHttp         = "$group:grpc-okhttp"
+    val protobuf       = "$group:grpc-protobuf"
+    val protobufLite   = "$group:grpc-protobuf-lite"
+    val netty          = "$group:grpc-netty"
+    val nettyShaded    = "$group:grpc-netty-shaded"
+
+    override val modules = listOf(
+        api,
+        auth,
+        core,
+        context,
+        inProcess,
+        stub,
+        okHttp,
+        protobuf,
+        protobufLite,
+        netty,
+        nettyShaded
+    )
+
 
     object ProtocPlugin {
         const val id = "grpc"
@@ -51,7 +70,7 @@ object Grpc {
             replaceWith = ReplaceWith("GrpcKotlin.ProtocPlugin.artifact")
         )
         const val kotlinPluginVersion = GrpcKotlin.version
-        const val artifact = "$group:protoc-gen-grpc-java:$version"
+        val artifact = "$group:protoc-gen-grpc-java:$version"
 
         // https://github.com/grpc/grpc-kotlin
         // https://repo.maven.apache.org/maven2/io/grpc/protoc-gen-grpc-kotlin/

@@ -26,11 +26,17 @@
 
 package io.spine.dependency.boms
 
+import io.gitlab.arturbosch.detekt.getSupportedKotlinVersion
+import io.spine.dependency.DependencyWithBom
+import io.spine.dependency.diagSuffix
 import io.spine.dependency.kotlinx.Coroutines
 import io.spine.dependency.lib.Kotlin
+import io.spine.dependency.test.JUnit
+import io.spine.gradle.log
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
 
 /**
  * The plugin which forces versions of platforms declared in the [Boms] object.
@@ -50,8 +56,8 @@ import org.gradle.api.artifacts.Configuration
  *
  *  In addition to forcing BOM-based dependencies,
  *  the plugin [forces][org.gradle.api.artifacts.ResolutionStrategy.force] the versions
- *  of [Kotlin.StdLib.artefacts] for all configurations because even through Kotlin
- *  artefacts are forced with BOM, the `variants` in the dependencies cannot be
+ *  of [Kotlin.StdLib.artifacts] for all configurations because even through Kotlin
+ *  artifacts are forced with BOM, the `variants` in the dependencies cannot be
  *  picked by Gradle.
  *
  *  Run Gradle with the [INFO][org.gradle.api.logging.Logger.isInfoEnabled] logging level
@@ -68,90 +74,112 @@ class BomsPlugin : Plugin<Project>  {
 
     override fun apply(project: Project) = with(project) {
 
-        fun log(message: () -> String) {
-            val logger = project.logger
-            if (logger.isInfoEnabled) {
-                logger.info(message.invoke())
-            }
-        }
-
-        fun Configuration.applyBoms(boms: List<String>) {
-            boms.forEach { bom ->
-                withDependencies {
-                    val platform = project.dependencies.enforcedPlatform(bom)
-                    addLater(provider { platform })
-                    log { "Applied BOM: `$bom` to the configuration: `${this@applyBoms.name}`." }
-                }
-            }
-        }
-
         configurations.run {
             matching { isCompilationConfig(it.name) }.all {
-                applyBoms(Boms.core)
+                applyBoms(project, Boms.core)
             }
             matching { isKspConfig(it.name) }.all {
-                applyBoms(Boms.core)
+                applyBoms(project, Boms.core)
             }
             matching { it.name in productionConfigs }.all {
-                applyBoms(Boms.core)
+                applyBoms(project, Boms.core)
             }
             matching { isTestConfig(it.name) }.all {
-                applyBoms(Boms.core + Boms.testing)
+                applyBoms(project, Boms.core + Boms.testing)
             }
-
-            fun Configuration.diagSuffix(): String =
-                "the configuration `$name` in the project: `${project.path}`."
 
             matching { !supportsBom(it.name) }.all {
                 resolutionStrategy.eachDependency {
                     if (requested.group == Kotlin.group) {
                         val kotlinVersion = Kotlin.runtimeVersion
                         useVersion(kotlinVersion)
-                        log { "Forced Kotlin version `$kotlinVersion` in " + this@all.diagSuffix() }
+                        val suffix = this@all.diagSuffix(project)
+                        log { "Forced Kotlin version `$kotlinVersion` in $suffix" }
                     }
                 }
             }
 
+            selectKotlinCompilerForDetekt()
+            project.forceArtifacts()
+        }
+    }
+}
 
-            all {
-                resolutionStrategy {
-                    fun forceWithLoggign(artefact: String) {
-                        force(artefact)
-                        log { "Forced the version of `$artefact` in " + this@all.diagSuffix() }
-                    }
-                    fun forceAll(artefacts: Iterable<String>) = artefacts.forEach { artefact ->
-                        forceWithLoggign(artefact)
-                    }
-
-                    // The versions for Kotlin are resoled above correctly.
-                    // But that does not guarantees that Gradle picks up a correct `variant`.
-                    forceAll(Kotlin.artefacts)
-                    forceAll(Kotlin.StdLib.artefacts)
-                    forceAll(Coroutines.artefacts)
-                }
+private fun Configuration.applyBoms(project: Project, deps: List<DependencyWithBom>) {
+    deps.forEach { dep ->
+        withDependencies {
+            val platform = project.dependencies.platform(dep.bom)
+            addLater(project.provider { platform })
+            project.log {
+                "Applied BOM: `${dep.bom}` to the configuration: `${this@applyBoms.name}`."
             }
         }
     }
-
-    private fun isCompilationConfig(name: String) =
-        name.contains("compile", ignoreCase = true) &&
-                // `comileProtoPath` or `compileTestProtoPath`.
-                !name.contains("ProtoPath", ignoreCase = true)
-
-    private fun isKspConfig(name: String) =
-        name.startsWith("ksp", ignoreCase = true)
-
-    private fun isTestConfig(name: String) =
-        name.startsWith("test", ignoreCase = true)
-
-    /**
-     * Tells if the configuration with the given [name] supports forcing
-     * versions via the BOM mechanism.
-     *
-     * Not all configurations supports forcing via BOM. E.g., the configurations created
-     * by Protobuf Gradle Plugin such as `compileProtoPath` or `extractIncludeProto` do
-     * not pick up versions of dependencies set via `enforcedPlatform(myBom)`.
-     */
-    private fun supportsBom(name: String) =
-        (isCompilationConfig(name) || isKspConfig(name) || isTestConfig(name))
 }
+
+private val Configuration.isDetekt: Boolean
+    get() = name.contains("detekt", ignoreCase = true)
+
+@Suppress("UnstableApiUsage") // `io.gitlab.arturbosch.detekt.getSupportedKotlinVersion`
+private fun ConfigurationContainer.selectKotlinCompilerForDetekt() =
+    matching { it.isDetekt }
+        .configureEach {
+            resolutionStrategy.eachDependency {
+                if (requested.group == Kotlin.group) {
+                    val supportedVersion = getSupportedKotlinVersion()
+                    useVersion(supportedVersion)
+                    because("Force Kotlin version $supportedVersion in Detekt configurations.")
+                }
+            }
+        }
+
+private fun isCompilationConfig(name: String) =
+    name.contains("compile", ignoreCase = true) &&
+            // `compileProtoPath` or `compileTestProtoPath`.
+            !name.contains("ProtoPath", ignoreCase = true)
+
+private fun isKspConfig(name: String) =
+    name.startsWith("ksp", ignoreCase = true)
+
+private fun isTestConfig(name: String) =
+    name.startsWith("test", ignoreCase = true)
+
+/**
+ * Tells if the configuration with the given [name] supports forcing
+ * versions via the BOM mechanism.
+ *
+ * Not all configurations support forcing via BOM. E.g., the configurations created
+ * by Protobuf Gradle Plugin such as `compileProtoPath` or `extractIncludeProto` do
+ * not pick up versions of dependencies set via `enforcedPlatform(myBom)`.
+ */
+private fun supportsBom(name: String) =
+    (isCompilationConfig(name) || isKspConfig(name) || isTestConfig(name))
+
+/**
+ * Forces the versions of the artifacts that are even being correctly selected by BOMs
+ * are not guaranteed to be handled correctly when Gradle picks up a `variant`.
+ *
+ * The function forces the versions for all configurations but [detekt][isDetekt], because
+ * it requires a compatible version of the Kotlin compiler.
+ *
+ * @see Kotlin.artifacts
+ * @see Kotlin.StdLib.artifacts
+ * @see Coroutines.artifacts
+ * @see selectKotlinCompilerForDetekt
+ */
+private fun Project.forceArtifacts() =
+    configurations.all {
+        resolutionStrategy {
+            if (!isDetekt) {
+                val rs = this@resolutionStrategy
+                val project = this@forceArtifacts
+                val cfg = this@all
+                Kotlin.forceArtifacts(project, cfg, rs)
+                Kotlin.StdLib.forceArtifacts(project, cfg, rs)
+                Coroutines.forceArtifacts(project, cfg, rs)
+                JUnit.Jupiter.forceArtifacts(project, cfg, rs) /*
+                    for configurations like `testFixturesCompileProtoPath`.
+                 */
+            }
+        }
+    }

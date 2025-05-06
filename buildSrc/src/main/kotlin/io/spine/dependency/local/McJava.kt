@@ -26,6 +26,9 @@
 
 package io.spine.dependency.local
 
+import io.spine.dependency.local.McJava.dogfoodingVersion
+import io.spine.dependency.local.McJava.version
+
 /**
  * Dependencies on Spine Model Compiler for Java.
  *
@@ -42,12 +45,12 @@ object McJava {
     /**
      * The version used to in the build classpath.
      */
-    const val dogfoodingVersion = "2.0.0-SNAPSHOT.307"
+    const val dogfoodingVersion = "2.0.0-SNAPSHOT.310"
 
     /**
      * The version to be used for integration tests.
      */
-    const val version = "2.0.0-SNAPSHOT.307"
+    const val version = "2.0.0-SNAPSHOT.310"
 
     /**
      * The ID of the Gradle plugin.

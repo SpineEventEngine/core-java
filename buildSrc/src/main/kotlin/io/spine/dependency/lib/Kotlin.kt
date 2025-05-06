@@ -26,10 +26,13 @@
 
 package io.spine.dependency.lib
 
+import io.spine.dependency.Dependency
+import io.spine.dependency.DependencyWithBom
+
 // https://github.com/JetBrains/kotlin
 // https://github.com/Kotlin
-@Suppress("unused", "ConstPropertyName")
-object Kotlin {
+@Suppress("unused")
+object Kotlin : DependencyWithBom() {
 
     /**
      * This is the version of Kotlin we use for writing code which does not
@@ -38,11 +41,15 @@ object Kotlin {
     @Suppress("MemberVisibilityCanBePrivate") // used directly from the outside.
     const val runtimeVersion = "2.1.20"
 
+    override val version = runtimeVersion
+    override val group = "org.jetbrains.kotlin"
+    override val bom = "$group:kotlin-bom:$runtimeVersion"
+
     /**
      * This is the version of
      * [Kotlin embedded into Gradle](https://docs.gradle.org/current/userguide/compatibility.html#kotlin).
      */
-    const val embeddedVersion = "2.0.21"
+    const val embeddedVersion = "2.1.20"
 
     /**
      * The version of the JetBrains annotations library, which is a transitive
@@ -52,59 +59,62 @@ object Kotlin {
      */
     private const val annotationsVersion = "26.0.2"
 
-    const val group = "org.jetbrains.kotlin"
+    val scriptRuntime = "$group:kotlin-script-runtime:$runtimeVersion"
 
-    const val bom = "$group:kotlin-bom:$runtimeVersion"
+    object StdLib : Dependency() {
+        override val version = runtimeVersion
+        override val group = Kotlin.group
 
-    const val scriptRuntime = "$group:kotlin-script-runtime"
-
-    object StdLib {
         private const val infix = "kotlin-stdlib"
-        const val itself = "$group:$infix"
-        const val common = "$group:$infix-common"
-        const val jdk7 = "$group:$infix-jdk7"
-        const val jdk8 = "$group:$infix-jdk8"
+        val itself = "$group:$infix"
+        val common = "$group:$infix-common"
+        val jdk7 = "$group:$infix-jdk7"
+        val jdk8 = "$group:$infix-jdk8"
 
-        val artefacts = setOf(itself, common, jdk7, jdk8).map { "$it:$runtimeVersion" }
+        override val modules = listOf(itself, common, jdk7, jdk8)
     }
 
     @Deprecated("Please use `StdLib.itself` instead.", ReplaceWith("StdLib.itself"))
-    const val stdLib       = StdLib.itself
+    val stdLib       = StdLib.itself
 
     @Deprecated("Please use `StdLib.common` instead.", ReplaceWith("StdLib.common"))
-    const val stdLibCommon = StdLib.common
+    val stdLibCommon = StdLib.common
 
     @Deprecated("Please use `StdLib.jdk7` instead.", ReplaceWith("StdLib.jdk7"))
-    const val stdLibJdk7   = StdLib.jdk7
+    val stdLibJdk7   = StdLib.jdk7
 
     @Deprecated("Please use `StdLib.jdk8` instead.")
-    const val stdLibJdk8   = StdLib.jdk8
+    val stdLibJdk8   = StdLib.jdk8
 
-    const val toolingCore = "$group:kotlin-tooling-core"
-    const val reflect    = "$group:kotlin-reflect"
-    const val testJUnit5 = "$group:kotlin-test-junit5"
+    val toolingCore = "$group:kotlin-tooling-core"
+    val reflect    = "$group:kotlin-reflect"
+    val testJUnit5 = "$group:kotlin-test-junit5"
 
     /**
-     * The artefacts that do not belong to [StdLib].
+     * The modules our interest that do not belong to [StdLib].
      */
-    val artefacts = listOf(toolingCore, reflect, testJUnit5).map { "$it:$runtimeVersion" }
+    override val modules = listOf(reflect, testJUnit5)
 
     @Deprecated(message = "Please use `GradlePlugin.api` instead.", ReplaceWith("GradlePlugin.api"))
-    const val gradlePluginApi = "$group:kotlin-gradle-plugin-api"
+    val gradlePluginApi = "$group:kotlin-gradle-plugin-api"
 
     @Deprecated(message = "Please use `GradlePlugin.lib` instead.", ReplaceWith("GradlePlugin.lib"))
-    const val gradlePluginLib = "$group:kotlin-gradle-plugin"
+    val gradlePluginLib = "$group:kotlin-gradle-plugin"
 
     const val jetbrainsAnnotations = "org.jetbrains:annotations:$annotationsVersion"
 
     object Compiler {
-        const val embeddable = "$group:kotlin-compiler-embeddable:$embeddedVersion"
+        val embeddable = "$group:kotlin-compiler-embeddable:$embeddedVersion"
     }
 
-    object GradlePlugin {
-        const val version = runtimeVersion
-        const val api = "$group:kotlin-gradle-plugin-api:$version"
-        const val lib = "$group:kotlin-gradle-plugin:$version"
-        const val model = "$group:kotlin-gradle-model:$version"
+    object GradlePlugin : Dependency() {
+        override val version = runtimeVersion
+        override val group = Kotlin.group
+
+        val api = "$group:kotlin-gradle-plugin-api:$version"
+        val lib = "$group:kotlin-gradle-plugin:$version"
+        val model = "$group:kotlin-gradle-model:$version"
+
+        override val modules = listOf(api, lib, model)
     }
 }
