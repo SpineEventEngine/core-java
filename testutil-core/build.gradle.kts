@@ -26,7 +26,6 @@
 
 import io.spine.dependency.local.TestLib
 import io.spine.dependency.test.JUnit
-import io.spine.dependency.test.Truth
 
 group = "io.spine.tools"
 
