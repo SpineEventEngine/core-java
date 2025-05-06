@@ -104,6 +104,7 @@ public interface TypeMatcher extends Predicate<Class<?>> {
      *      <li> Generic parameters with wildcard are <em>not</em> supported.
      * </ul>
      */
+    @SuppressWarnings("PMD.SimplifyBooleanReturns") // Here we chose readability over compactness.
     static boolean matches(TypeToken<?> expected, TypeToken<?> actual) {
         checkNotNull(expected);
         checkNotNull(actual);
