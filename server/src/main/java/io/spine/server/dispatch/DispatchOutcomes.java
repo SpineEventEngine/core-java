@@ -31,7 +31,6 @@ import io.spine.core.MessageId;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.EventEnvelope;
 import io.spine.server.type.SignalEnvelope;
-import io.spine.validate.ValidationException;
 
 import java.util.Optional;
 import java.util.Set;
@@ -83,7 +82,7 @@ public final class DispatchOutcomes {
     }
 
     /**
-     * Returns an outcome, which tells about a successful dispatching
+     * Returns an outcome which tells about a successful dispatching
      * of the passed command envelope.
      *
      * @param command
@@ -150,7 +149,7 @@ public final class DispatchOutcomes {
      * @param event
      *         the event which has been sent to inboxes
      * @param entityIds
-     *         identifiers of entities, to which inboxes the event
+     *         identifiers of entities to which inboxes the event
      *         has been sent
      */
     public static <I> DispatchOutcome sentToInbox(EventEnvelope event, Set<I> entityIds) {
@@ -201,7 +200,7 @@ public final class DispatchOutcomes {
     }
 
     /**
-     * Returns an outcome telling that during the dispatching there were no target entities
+     * Returns an outcome telling that during the dispatching, there were no target entities
      * to route the signal to.
      *
      * @param signal
@@ -218,7 +217,7 @@ public final class DispatchOutcomes {
     /**
      * Returns an outcome telling that the event was ignored by the target.
      *
-     * <p>Such a scenario is typical for cases, in which target has a filter set
+     * <p>Such a scenario is typical for cases in which a target has a filter set
      * for incoming events, which the event does not pass.
      *
      * @param reason
