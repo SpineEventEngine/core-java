@@ -32,7 +32,7 @@ import io.spine.base.EntityState;
 import io.spine.query.ColumnName;
 import io.spine.query.EntityColumn;
 import io.spine.query.RecordColumn;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;

@@ -35,7 +35,7 @@ import io.spine.client.actorRequestFactory
 import io.spine.core.userId
 import io.spine.protobuf.AnyPacker
 import io.spine.server.BoundedContext
-import io.spine.util.theOnly
+import io.spine.collect.theOnly
 import java.util.*
 
 /**

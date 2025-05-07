@@ -29,7 +29,7 @@ package io.spine.testing.server.blackbox.probe;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 

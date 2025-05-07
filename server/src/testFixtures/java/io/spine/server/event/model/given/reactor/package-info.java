@@ -29,9 +29,9 @@
  * {@link io.spine.server.event.model.EventReactorMethodTest}.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.event.model.given.reactor;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

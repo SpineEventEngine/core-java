@@ -36,6 +36,7 @@ plugins {
 }
 
 dependencies {
+    api(platform(Grpc.bom))
     api(Grpc.core)
     api(Grpc.stub)
     api(Grpc.protobuf)
@@ -47,7 +48,6 @@ dependencies {
     // Since we depend on gRPC, we can use the implementation of the context based on gRPC.
     implementation(Logging.grpcContext)
 
-    testImplementation(TestLib.lib)
     testImplementation(Time.testLib)
     testImplementation(project(":testutil-client"))
 }

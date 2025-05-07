@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**

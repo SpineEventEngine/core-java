@@ -28,7 +28,7 @@
  * Test environment classes for {@linkplain io.spine.server.aggregate.AggregateTest
  * Aggregate tests}.
  */
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.aggregate.given.aggregate;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

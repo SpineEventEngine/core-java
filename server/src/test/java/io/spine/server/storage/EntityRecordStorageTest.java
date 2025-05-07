@@ -44,7 +44,7 @@ import io.spine.server.storage.given.EntityRecordStorageTestEnv.TestCounterEntit
 import io.spine.server.storage.given.GivenStorageProject;
 import io.spine.test.storage.StgProject;
 import io.spine.test.storage.StgProjectId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

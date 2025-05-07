@@ -40,7 +40,7 @@ import io.spine.server.event.EventOrigin;
 import io.spine.server.type.CommandEnvelope;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;

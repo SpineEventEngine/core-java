@@ -50,7 +50,6 @@ import java.util.stream.IntStream;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.base.Time.currentTime;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;

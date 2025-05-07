@@ -39,7 +39,7 @@ import io.spine.testing.client.command.TestCommandMessage;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
@@ -47,6 +47,10 @@ import java.time.Instant;
  * An {@code ActorRequestFactory} for running tests.
  */
 @VisibleForTesting
+@SuppressWarnings({
+        "PMD.UnnecessaryFullyQualifiedName", "UnnecessarilyQualifiedStaticUsage"
+        // These are in conflict with https://errorprone.info/bugpattern/BadImport.
+})
 public class TestActorRequestFactory extends ActorRequestFactory {
 
     public TestActorRequestFactory(UserId actor, ZoneId zoneId) {

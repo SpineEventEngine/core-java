@@ -45,7 +45,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.testing.logging.mute.MuteLogging;
 import io.spine.testing.server.model.ModelTests;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

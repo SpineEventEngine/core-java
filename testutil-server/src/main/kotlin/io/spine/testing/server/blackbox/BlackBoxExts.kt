@@ -26,6 +26,7 @@
 
 package io.spine.testing.server.blackbox
 
+import io.spine.base.EntityState
 import io.spine.server.BoundedContextBuilder
 import io.spine.server.entity.Entity
 import io.spine.server.entity.Repository
@@ -35,7 +36,9 @@ import kotlin.reflect.KClass
 /**
  * Creates [EntitySubject] for the entity of the type [E] with the given ID of type [I].
  */
-public inline fun <reified E: Entity<I, *>, I> BlackBox.assertEntity(id: I): EntitySubject =
+public inline fun <reified E : Entity<I, out Any>, I : Any> BlackBox.assertEntity(
+    id: I
+): EntitySubject =
     assertEntity(id, E::class.java)
 
 /**
@@ -52,7 +55,9 @@ public fun blackBoxWith(vararg repository: Repository<*, *>): BlackBox {
 /**
  * Creates a [BlackBox] with the given classes of entities.
  */
-public fun <I, E : Entity<I, *>> blackBoxWith(vararg entityClass: KClass<out E>): BlackBox {
+public fun <I : Any, S : EntityState<I>, E : Entity<I, out S>> blackBoxWith(
+    vararg entityClass: KClass<out E>
+): BlackBox {
     val context = BoundedContextBuilder.assumingTests()
     entityClass.forEach {
         context.add(it.java)

@@ -148,7 +148,7 @@ message PickUpOutcome {
     option (is).java_type = "io.spine.server.delivery.PickUpOutcomeMixin";
 
     oneof value {
-        option (is_required) = true;
+        option (choice).required = true;
 
         // Shard was picked up successfully, and this value points to the
         // delivery session owned by the node requested to pick up the shard.

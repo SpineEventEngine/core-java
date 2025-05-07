@@ -38,7 +38,7 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.SystemWriteSide;
 import io.spine.type.MessageClass;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.testing.Assertions.assertNpe;
 
 @DisplayName("`EnvSetting` should")

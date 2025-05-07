@@ -29,7 +29,7 @@ package io.spine.testing.server.blackbox;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.CommandMessage;
 import io.spine.server.BoundedContextBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 

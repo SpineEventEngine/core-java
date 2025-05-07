@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ package io.spine.gradle.report.coverage
 
 import io.spine.dependency.test.Jacoco
 import io.spine.gradle.applyPlugin
-import io.spine.gradle.findTask
+import io.spine.gradle.getTask
 import io.spine.gradle.report.coverage.TaskName.check
 import io.spine.gradle.report.coverage.TaskName.copyReports
 import io.spine.gradle.report.coverage.TaskName.jacocoRootReport
@@ -181,7 +181,7 @@ class JacocoConfig(
     private fun registerCopy(tasks: TaskContainer): TaskProvider<Copy> {
         val everyExecData = mutableListOf<ConfigurableFileCollection>()
         projects.forEach { project ->
-            val jacocoTestReport = project.findTask<JacocoReport>(jacocoTestReport.name)
+            val jacocoTestReport = project.getTask<JacocoReport>(jacocoTestReport.name)
             val executionData = jacocoTestReport.executionData
             everyExecData.add(executionData)
         }
@@ -194,7 +194,7 @@ class JacocoConfig(
             rename {
                 "${UUID.randomUUID()}.exec"
             }
-            dependsOn(projects.map { it.findTask<JacocoReport>(jacocoTestReport.name) })
+            dependsOn(projects.map { it.getTask<JacocoReport>(jacocoTestReport.name) })
         }
         return copyReports
     }

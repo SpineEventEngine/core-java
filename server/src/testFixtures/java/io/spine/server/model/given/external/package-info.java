@@ -30,9 +30,9 @@
 
 
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.model.given.external;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

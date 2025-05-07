@@ -38,7 +38,7 @@ import io.spine.annotation.Internal;
 import io.spine.query.Column;
 import io.spine.query.ColumnName;
 import io.spine.query.RecordColumn;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

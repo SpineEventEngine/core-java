@@ -55,7 +55,7 @@ import io.spine.server.type.EventEnvelope;
 import io.spine.system.server.SystemClient;
 import io.spine.system.server.SystemContext;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;

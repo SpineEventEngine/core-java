@@ -38,7 +38,7 @@ import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ExceptionFactory;
 import io.spine.validate.ValidationError;
 import io.spine.validate.ValidationException;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Map;

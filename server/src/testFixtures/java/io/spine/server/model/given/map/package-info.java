@@ -28,9 +28,9 @@
  * Test environment for {@link io.spine.server.model.HandlerMapTest}.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.model.given.map;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

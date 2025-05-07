@@ -48,7 +48,7 @@ import io.spine.server.enrich.Enricher;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.EventEnvelope;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;

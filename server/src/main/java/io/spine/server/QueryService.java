@@ -34,7 +34,7 @@ import io.spine.logging.WithLogging;
 import io.spine.server.model.UnknownEntityStateTypeException;
 import io.spine.server.stand.InvalidRequestException;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.TextFormat.shortDebugString;

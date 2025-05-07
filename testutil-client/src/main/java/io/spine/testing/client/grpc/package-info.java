@@ -29,9 +29,9 @@
  * use gRPC for sending commands and querying the backend.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.testing.client.grpc;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

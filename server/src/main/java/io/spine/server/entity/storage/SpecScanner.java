@@ -43,8 +43,8 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordSpec.ExtractId;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;

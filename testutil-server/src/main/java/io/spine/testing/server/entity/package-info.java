@@ -28,9 +28,9 @@
  * This package contains utilities for building test instances of the entities.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.testing.server.entity;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

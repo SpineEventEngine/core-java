@@ -28,11 +28,11 @@
  * Testing environment for {@link io.spine.client.ClientSpec}.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 @BoundedContext(ClientTestContext.USERS_NAME)
 package io.spine.test.client;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContext;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

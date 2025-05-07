@@ -48,8 +48,8 @@ import io.spine.server.type.SignalEnvelope;
 import io.spine.system.server.RoutingFailed;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.checkerframework.dataflow.qual.Pure;
 
 import java.util.Iterator;

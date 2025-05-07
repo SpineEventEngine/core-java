@@ -32,6 +32,7 @@ import io.spine.dependency.local.Change
 import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Time
 import io.spine.dependency.local.Validation
+import io.spine.protodata.gradle.plugin.LaunchProtoData
 
 plugins {
     `java-test-fixtures`
@@ -90,8 +91,27 @@ tasks.javadoc {
     }
 }
 
+/**
+ * Sets remote debug options for the `launchTestFixturesProtoData` task.
+ *
+ * @param enabled if `true` the task will be suspended.
+ *
+ * @see remoteDebug
+ */
+fun Project.testFixturesProtoDataRemoteDebug(enabled: Boolean = false) {
+    val taskName = "launchTestFixturesProtoData"
+    val tasks = tasks.withType<LaunchProtoData>()
+    tasks.configureEach {
+        if (this.name == taskName) {
+            println("Configuring `$taskName` with the remote debug: $enabled.")
+            this.remoteDebug(enabled)
+        }
+    }
+}
+
 afterEvaluate {
     testProtoDataRemoteDebug(false)
+    testFixturesProtoDataRemoteDebug(false)
 
     tasks.named("testJar").configure { this as Jar
         from(sourceSets.testFixtures.get().output)

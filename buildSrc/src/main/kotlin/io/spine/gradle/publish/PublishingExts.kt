@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@
 package io.spine.gradle.publish
 
 import dokkaKotlinJar
-import io.spine.gradle.Repository
+import io.spine.gradle.isSnapshot
+import io.spine.gradle.repo.Repository
 import io.spine.gradle.sourceSets
 import java.util.*
 import org.gradle.api.InvalidUserDataException
@@ -58,6 +59,13 @@ internal val Project.publications: PublicationContainer
     get() = publishingExtension.publications
 
 /**
+ * Obtains an instance, if available, of [SpinePublishing] extension
+ * applied to this project.
+ */
+internal val Project.localSpinePublishing: SpinePublishing?
+    get() = extensions.findByType<SpinePublishing>()
+
+/**
  * Obtains [SpinePublishing] extension from this [Project].
  *
  * If this [Project] doesn't have one, it returns [SpinePublishing]
@@ -65,7 +73,7 @@ internal val Project.publications: PublicationContainer
  */
 internal val Project.spinePublishing: SpinePublishing
     get() {
-        val local = this.extensions.findByType<SpinePublishing>()
+        val local = localSpinePublishing
         if (local != null) {
             return local
         }
@@ -78,9 +86,16 @@ internal val Project.spinePublishing: SpinePublishing
 
 /**
  * Tells if this project has custom publishing.
+ *
+ * For a multi-module project this is checked by presence of this project
+ * in the list of [SpinePublishing.modulesWithCustomPublishing] of the root project.
+ *
+ * In a single-module project, the value of the [SpinePublishing.customPublishing]
+ * property is returned.
  */
 internal val Project.hasCustomPublishing: Boolean
-    get() = spinePublishing.modulesWithCustomPublishing.contains(name)
+    get() = rootProject.spinePublishing.modulesWithCustomPublishing.contains(name)
+            || spinePublishing.customPublishing
 
 private const val PUBLISH_TASK = "publish"
 
@@ -93,7 +108,7 @@ private const val PUBLISH_TASK = "publish"
  * Please note, task execution would not copy publications to the local Maven cache.
  *
  * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks">
- *     Tasks | Maven Publish Plugin</a>
+ *     Tasks | The Maven Publish Plugin</a>
  */
 internal val TaskContainer.publish: TaskProvider<Task>
     get() = named(PUBLISH_TASK)
@@ -140,14 +155,45 @@ private fun TaskContainer.getOrCreatePublishTask(): TaskProvider<Task> =
         register(PUBLISH_TASK)
     }
 
+@Suppress(
+    /* Several types of exceptions may be thrown,
+       and Kotlin does not have a multi-catch support yet. */
+    "TooGenericExceptionCaught"
+)
 private fun TaskContainer.registerCheckCredentialsTask(
-    destinations: Set<Repository>
-): TaskProvider<Task> =
-    register("checkCredentials") {
-        doLast {
-            destinations.forEach { it.ensureCredentials(project) }
-        }
+    destinations: Set<Repository>,
+): TaskProvider<Task> {
+    val checkCredentials = "checkCredentials"
+    try {
+        // The result of this call is ignored intentionally.
+        //
+        // We expect this line to fail with the exception
+        // in case the task with this name is NOT registered.
+        //
+        // Otherwise, we need to replace the existing task
+        // to avoid checking the credentials
+        // for some previously asked `destinations`.
+        named(checkCredentials)
+        val toConfigure = replace(checkCredentials)
+        toConfigure.doLastCredentialsCheck(destinations)
+        return named(checkCredentials)
+    } catch (_: Exception) {
+        return register(checkCredentials) { doLastCredentialsCheck(destinations) }
     }
+}
+
+private fun Task.doLastCredentialsCheck(destinations: Set<Repository>) {
+    doLast {
+        if (logger.isDebugEnabled) {
+            val isSnapshot = project.version.toString().isSnapshot()
+            val destinationsStr = destinations.joinToString(", ") { it.target(isSnapshot) }
+            logger.debug(
+                "Project '${project.name}': checking the credentials for repos: $destinationsStr."
+            )
+        }
+        destinations.forEach { it.ensureCredentials(project) }
+    }
+}
 
 private fun Repository.ensureCredentials(project: Project) {
     val credentials = credentials(project)
@@ -175,8 +221,8 @@ fun TaskContainer.excludeGoogleProtoFromArtifacts() {
  * Locates or creates `sourcesJar` task in this [Project].
  *
  * The output of this task is a `jar` archive. The archive contains sources from `main` source set.
- * The task makes sure that sources from the directories below will be included into
- * a resulted archive:
+ * The task makes sure that sources from the directories below will be included
+ * in the resulting archive:
  *
  *  - Kotlin
  *  - Java
@@ -220,8 +266,8 @@ internal fun Project.testJar(): TaskProvider<Jar> = tasks.getOrCreate("testJar")
  * Locates or creates `javadocJar` task in this [Project].
  *
  * The output of this task is a `jar` archive. The archive contains Javadoc,
- * generated upon Java sources from `main` source set. If javadoc for Kotlin is also needed,
- * apply Dokka plugin. It tunes `javadoc` task to generate docs upon Kotlin sources as well.
+ * generated upon Java sources from `main` source set. If Javadoc for Kotlin is also needed,
+ * apply the Dokka plugin. It tunes `javadoc` task to generate docs upon Kotlin sources as well.
  */
 fun Project.javadocJar(): TaskProvider<Jar> = tasks.getOrCreate("javadocJar") {
     archiveClassifier.set("javadoc")
@@ -275,4 +321,3 @@ internal fun Project.artifacts(jarFlags: JarFlags): Set<TaskProvider<Jar>> {
 
     return tasks
 }
-

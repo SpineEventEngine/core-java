@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,14 @@ package io.spine.dependency.lib
  * A [high performance](https://github.com/ben-manes/caffeine/wiki/Benchmarks),
  * [near optimal](https://github.com/ben-manes/caffeine/wiki/Efficiency) caching library.
  *
- * This library is a transitive dependency for us via ErrorProne.
+ * This library is a transitive dependency for us via
+ * [io.spine.dependency.lib.Aedile] and
+ * [io.spine.dependency.build.ErrorProne].
  *
  * @see <a href="https://github.com/ben-manes/caffeine">Caffeine at GitHub</a>
  */
 @Suppress("unused")
 object Caffeine {
-    private const val version = "3.0.5"
+    private const val version = "3.2.0"
     const val lib = "com.github.ben-manes.caffeine:caffeine:$version"
 }

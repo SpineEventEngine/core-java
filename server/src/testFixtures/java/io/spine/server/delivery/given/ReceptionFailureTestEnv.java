@@ -40,7 +40,7 @@ import io.spine.server.tenant.TenantAwareRunner;
 import io.spine.test.delivery.Receptionist;
 import io.spine.test.delivery.command.TurnConditionerOn;
 import io.spine.testing.server.blackbox.BlackBox;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Optional;

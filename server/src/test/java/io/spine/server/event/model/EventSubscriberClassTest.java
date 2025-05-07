@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.testing.server.Assertions.assertEventClassesExactly;
 import static io.spine.testing.server.model.ModelTests.getMethod;

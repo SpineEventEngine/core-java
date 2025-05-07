@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@
 package io.spine.dependency.lib
 
 /**
- * A Kotlin wrapper over [Caffeine].
+ * A Kotlin wrapper over [io.spine.dependency.lib.Caffeine].
  *
  * @see <a href="https://github.com/sksamuel/aedile">Aedile at GitHub</a>
  */
 @Suppress("unused")
 object Aedile {
-    private const val version = "1.3.1"
+    private const val version = "2.1.2"
     const val lib = "com.sksamuel.aedile:aedile-core:$version"
 }

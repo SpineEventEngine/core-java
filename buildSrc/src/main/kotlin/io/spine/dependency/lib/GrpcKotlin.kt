@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,12 @@ package io.spine.dependency.lib
  */
 @Suppress("unused")
 object GrpcKotlin {
-    const val version = "1.3.0"
+    const val version = "1.4.1"
     const val stub = "io.grpc:grpc-kotlin-stub:$version"
 
     object ProtocPlugin {
         const val id = "grpckt"
+        // https://central.sonatype.com/artifact/io.grpc/protoc-gen-grpc-kotlin
         const val artifact = "io.grpc:protoc-gen-grpc-kotlin:$version:jdk8@jar"
     }
 }

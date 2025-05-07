@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@
 
 package io.spine.gradle.github.pages
 
-import io.spine.gradle.RepoSlug
 import io.spine.gradle.git.Branch
 import io.spine.gradle.git.Repository
 import io.spine.gradle.git.UserInfo
+import io.spine.gradle.repo.RepoSlug
 
 /**
  * Clones the current project repository with the branch dedicated to publishing

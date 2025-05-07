@@ -29,9 +29,9 @@
  * {@link io.spine.server.event.model.EventSubscriberMethodTest}.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.event.model.given.subscriber;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

@@ -34,7 +34,7 @@ import io.spine.base.Field;
 import io.spine.base.FieldPath;
 import io.spine.base.SignalMessage;
 import io.spine.core.Where;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

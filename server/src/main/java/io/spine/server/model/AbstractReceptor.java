@@ -38,7 +38,7 @@ import io.spine.server.dispatch.Success;
 import io.spine.server.log.ReceptorLifecycle;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

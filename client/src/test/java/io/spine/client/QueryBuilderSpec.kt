@@ -89,7 +89,7 @@ internal class QueryBuilderSpec {
         }
 
         fun requestFactory(): ActorRequestFactory = ActorRequestFactory.newBuilder().apply {
-            zoneId = ZONE_ID
+            setZoneId(ZONE_ID)
             actor = ACTOR
         }.build()
     }

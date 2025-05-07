@@ -30,7 +30,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.EntityState;
 import io.spine.core.EmptyContext;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.Filters.extractFilters;
 
 /**
- * Allows to subscribe to updates of entity states using filtering conditions.
+ * Allows subscribing to updates of entity states using filtering conditions.
  *
  * @param <S>
  *         the type of entity state to subscribe
@@ -88,13 +88,13 @@ public final class SubscriptionRequest<S extends EntityState<?>>
      * <p>The consumer is fed with the ID of the entity in the use-cases which follow:
      *
      * <ul>
-     *     <li>the value of entity fields is changed, so that the entity state does not pass
+     *     <li>the value of entity fields is changed so that the entity state does not pass
      *     the subscription filters;
      *     <li>entity is deleted;
      *     <li>entity is archived.</li>
      * </ul>
      *
-     * <p>It is a responsibility of callee to provide a correct type of entity identifiers.
+     * <p>It is the responsibility of callee to provide a correct type of entity identifiers.
      *
      * @param consumer
      *         the consumer to notify

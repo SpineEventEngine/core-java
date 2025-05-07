@@ -29,8 +29,8 @@
  * {@link io.spine.system.server.EntityHistoryTest}.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.system.server.given.entity;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

@@ -46,7 +46,7 @@ import io.spine.server.entity.storage.ToEntityRecordQuery;
 import io.spine.server.storage.QueryConverter;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;

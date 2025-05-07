@@ -33,7 +33,7 @@ import io.spine.server.dispatch.Success;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.lang.reflect.Method;
 import java.util.Set;
 

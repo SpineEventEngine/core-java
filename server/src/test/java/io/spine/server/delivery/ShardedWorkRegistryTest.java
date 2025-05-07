@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.DeliveryStrategy.newIndex;
 import static io.spine.server.delivery.given.DeliveryTestEnv.generateNodeId;

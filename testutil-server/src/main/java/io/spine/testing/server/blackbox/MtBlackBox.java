@@ -37,7 +37,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.blackbox.probe.CommandCollector;
 import io.spine.testing.server.blackbox.probe.EventCollector;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.function.Supplier;
 

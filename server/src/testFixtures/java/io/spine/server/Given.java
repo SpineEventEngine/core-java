@@ -74,7 +74,7 @@ import io.spine.test.projection.BankAccount;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.Now;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;

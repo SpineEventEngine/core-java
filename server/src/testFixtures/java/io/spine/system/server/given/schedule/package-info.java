@@ -28,8 +28,8 @@
  * This package provides test environment for {@link io.spine.system.server.ScheduledCommandTest}.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.system.server.given.schedule;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

@@ -26,7 +26,7 @@
 
 package io.spine.system.server;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.Objects;
 import java.util.concurrent.Executor;

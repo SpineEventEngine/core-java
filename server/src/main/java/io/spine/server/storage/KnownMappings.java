@@ -55,19 +55,6 @@ final class KnownMappings<R> {
     private final FindMapping<R> findCustomMapping;
 
     /**
-     * Creates a new instance.
-     *
-     * @param findStandardMapping
-     *         function searching for the mapping in standard column mappings
-     * @param findCustomMapping
-     *         function searching for the mapping among custom mappings
-     */
-    KnownMappings(FindMapping<R> findStandardMapping, FindMapping<R> findCustomMapping) {
-        this.findStandardMapping = checkNotNull(findStandardMapping);
-        this.findCustomMapping = checkNotNull(findCustomMapping);
-    }
-
-    /**
      * Cached column mappings per type.
      *
      * <p>Without caching, this operation may be executed for too many times
@@ -86,6 +73,19 @@ final class KnownMappings<R> {
                     return result;
                 }
             });
+
+    /**
+     * Creates a new instance.
+     *
+     * @param findStandardMapping
+     *         function searching for the mapping in standard column mappings
+     * @param findCustomMapping
+     *         function searching for the mapping among custom mappings
+     */
+    KnownMappings(FindMapping<R> findStandardMapping, FindMapping<R> findCustomMapping) {
+        this.findStandardMapping = checkNotNull(findStandardMapping);
+        this.findCustomMapping = checkNotNull(findCustomMapping);
+    }
 
     /**
      * Obtains the type mapping for the given value and returns it as {@code Optional}.

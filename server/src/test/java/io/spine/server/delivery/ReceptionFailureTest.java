@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.blackBox;
 import static io.spine.server.delivery.given.ReceptionFailureTestEnv.configureDelivery;

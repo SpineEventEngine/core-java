@@ -42,7 +42,7 @@ import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

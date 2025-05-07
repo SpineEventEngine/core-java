@@ -57,6 +57,6 @@ message Color {
 }
 
 message Pen {
-    float width = 1 [(min).value = "0.01", (max).value = "10"];
+    float width = 1 [(min).value = "0.01", (max).value = "10.0"];
     Color color = 2; // pure black, if not specified.
 }

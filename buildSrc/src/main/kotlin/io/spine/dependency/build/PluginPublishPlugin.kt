@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.gradle.javadoc
+@file:Suppress("unused")
 
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.javadoc.Javadoc
-
-/**
- * Finds a [Javadoc] Gradle task by the passed name.
- */
-fun TaskContainer.javadocTask(named: String) = this.getByName(named) as Javadoc
+package io.spine.dependency.build
 
 /**
- * Finds a default [Javadoc] Gradle task.
+ * The Gradle plugin for publishing Gradle plugins to the Gradle Plugin Portal.
+ *
+ * @see <a href="https://plugins.gradle.org/plugin/com.gradle.plugin-publish">
+ *     The plugin page at the Portal</a>
+ * @see <a href="https://plugins.gradle.org/docs/publish-plugin">Publishing Rules</a>
  */
-fun TaskContainer.javadocTask() = this.getByName("javadoc") as Javadoc
+@Suppress("ConstPropertyName")
+object PluginPublishPlugin {
+    const val version = "1.3.1"
+    const val id = "com.gradle.plugin-publish"
+}

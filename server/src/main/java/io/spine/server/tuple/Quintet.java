@@ -33,7 +33,7 @@ import io.spine.server.tuple.Element.BValue;
 import io.spine.server.tuple.Element.CValue;
 import io.spine.server.tuple.Element.DValue;
 import io.spine.server.tuple.Element.EValue;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

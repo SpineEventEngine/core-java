@@ -36,7 +36,7 @@ import io.spine.logging.WithLogging;
 import io.spine.system.server.event.MigrationApplied;
 import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Function;

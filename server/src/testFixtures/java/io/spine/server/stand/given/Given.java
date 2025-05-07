@@ -40,7 +40,7 @@ import io.spine.server.route.EventRouting;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;

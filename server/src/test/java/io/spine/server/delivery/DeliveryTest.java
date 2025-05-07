@@ -56,7 +56,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.common.util.concurrent.Uninterruptibles.sleepUninterruptibly;
 import static io.spine.server.delivery.given.DeliveryTestEnv.manyTargets;
 import static io.spine.server.delivery.given.DeliveryTestEnv.singleTarget;

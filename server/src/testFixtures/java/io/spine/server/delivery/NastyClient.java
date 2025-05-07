@@ -38,7 +38,7 @@ import io.spine.test.delivery.Calc;
 import io.spine.test.delivery.NumberImported;
 import io.spine.test.delivery.NumberReacted;
 import io.spine.testing.server.blackbox.BlackBox;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;

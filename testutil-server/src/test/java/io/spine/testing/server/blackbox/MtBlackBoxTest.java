@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.google.common.truth.Truth8.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static io.spine.testing.core.given.GivenTenantId.generate;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createdProjectState;

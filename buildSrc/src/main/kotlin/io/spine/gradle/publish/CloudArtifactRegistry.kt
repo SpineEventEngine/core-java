@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ package io.spine.gradle.publish
 
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.artifactregistry.auth.DefaultCredentialProvider
-import io.spine.gradle.Credentials
-import io.spine.gradle.Repository
+import io.spine.gradle.repo.Credentials
+import io.spine.gradle.repo.Repository
 import java.io.IOException
 import org.gradle.api.Project
 
@@ -51,13 +51,15 @@ import org.gradle.api.Project
  * Ordering said hooks is a non-trivial operation and the result is usually quite fragile.
  * Thus, we choose to do this small piece of configuration manually.
  */
+@Suppress("ConstPropertyName") // https://bit.ly/kotlin-prop-names
 internal object CloudArtifactRegistry {
 
     private const val spineRepoLocation = "https://europe-maven.pkg.dev/spine-event-engine"
 
     val repository = Repository(
-        releases = "${spineRepoLocation}/releases",
-        snapshots = "${spineRepoLocation}/snapshots",
+        name = "CloudArtifactRegistry",
+        releases = "$spineRepoLocation/releases",
+        snapshots = "$spineRepoLocation/snapshots",
         credentialValues = this::fetchGoogleCredentials
     )
 

@@ -31,10 +31,10 @@
 
 @BoundedContext("Stock")
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.bus.given.stock;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContext;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

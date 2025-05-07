@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,16 @@
 
 package io.spine.gradle.publish
 
-import io.spine.gradle.Repository
+import io.spine.gradle.repo.Repository
 
 /**
  * CloudRepo Maven repository.
  *
  * There is a special treatment for this repository. Usually, fetching and publishing of artifacts
  * is performed via the same URL. But it is not true for CloudRepo. Fetching is performed via
- * the public repository, and publishing via the private one. Their URLs differ in `/public` infix.
+ * the public repository and publishing via the private one. Their URLs differ in `/public` infix.
  */
+@Deprecated(message = "Please use `PublishingRepos.cloudArtifactRegistry` instead.")
 internal object CloudRepo {
 
     private const val name = "CloudRepo"

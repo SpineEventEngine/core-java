@@ -28,9 +28,9 @@
  * Test environment classes for {@link io.spine.server.procman.ProcessManagerRepositoryTest}.
  */
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.procman.given.repo;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

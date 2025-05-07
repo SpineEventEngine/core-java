@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.base.CommandMessage;
 import io.spine.server.event.model.SubscriberMethod;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.List;

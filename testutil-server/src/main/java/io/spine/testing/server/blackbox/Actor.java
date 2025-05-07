@@ -33,7 +33,7 @@ import io.spine.core.UserId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.ZoneId;
 import io.spine.time.ZoneIds;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.check;

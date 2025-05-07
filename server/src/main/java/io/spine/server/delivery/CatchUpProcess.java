@@ -65,7 +65,7 @@ import io.spine.server.tuple.EitherOf3;
 import io.spine.server.type.EventEnvelope;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;

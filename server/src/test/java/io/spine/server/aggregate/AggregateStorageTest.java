@@ -58,7 +58,7 @@ import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;

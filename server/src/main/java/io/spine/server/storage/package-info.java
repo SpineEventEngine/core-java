@@ -29,10 +29,10 @@
  */
 @SPI
 @CheckReturnValue
-@ParametersAreNonnullByDefault
+@NullMarked
 package io.spine.server.storage;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.SPI;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

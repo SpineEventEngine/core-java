@@ -27,7 +27,7 @@
 package io.spine.client;
 
 import com.google.protobuf.FieldMask;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

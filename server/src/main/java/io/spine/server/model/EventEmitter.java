@@ -36,7 +36,7 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.type.EventClass;
 import io.spine.server.type.MessageEnvelope;
 import io.spine.type.MessageClass;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link Receptor} which produces events in response to a signal.

@@ -30,7 +30,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import io.spine.base.CommandMessage;
 import io.spine.core.Command;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.truth.Truth.assertAbout;
 

@@ -32,7 +32,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.logging.WithLogging;
 import io.spine.type.TypeUrl;
 import io.spine.type.UnpublishedLanguageException;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

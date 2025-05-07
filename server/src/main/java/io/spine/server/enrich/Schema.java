@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.EnrichableMessageContext;
 import io.spine.logging.WithLogging;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

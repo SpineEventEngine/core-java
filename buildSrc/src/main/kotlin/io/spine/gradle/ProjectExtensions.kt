@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,15 @@ import org.gradle.kotlin.dsl.getByType
  */
 
 /**
+ * Logs the result of the function using the project logger at `INFO` level.
+ */
+fun Project.log(message: () -> String) {
+    if (logger.isInfoEnabled) {
+        logger.info(message.invoke())
+    }
+}
+
+/**
  * Obtains the Java plugin extension of the project.
  */
 val Project.javaPluginExtension: JavaPluginExtension
@@ -68,7 +77,7 @@ fun Project.applyPlugin(cls: Class<out Plugin<*>>) {
  * the generic parameter `T`.
  */
 @Suppress("UNCHECKED_CAST")     /* See the method docs. */
-fun <T : Task> Project.findTask(name: String): T {
+fun <T : Task> Project.getTask(name: String): T {
     val task = this.tasks.findByName(name)
         ?: error("Unable to find a task named `$name` in the project `${this.name}`.")
     return task as T

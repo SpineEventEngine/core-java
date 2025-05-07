@@ -31,7 +31,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.ActorContext;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;

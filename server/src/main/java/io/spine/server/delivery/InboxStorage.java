@@ -33,7 +33,7 @@ import io.spine.query.RecordQueryBuilder;
 import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.MessageStorage;
 import io.spine.server.storage.StorageFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 

@@ -38,6 +38,7 @@ import io.spine.server.type.EnvelopeWithOrigin;
 import io.spine.server.type.SignalEnvelope;
 import io.spine.type.MessageClass;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
@@ -66,6 +67,7 @@ public final class ReceptorMap<M extends MessageClass<?>,
                                R extends Receptor<?, M, ?, P>>
         implements Serializable, WithLogging {
 
+    @Serial
     private static final long serialVersionUID = 0L;
 
     private final ImmutableSetMultimap<DispatchKey, R> map;

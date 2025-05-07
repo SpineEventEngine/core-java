@@ -34,7 +34,7 @@ import io.spine.base.RejectionMessage;
 import io.spine.server.event.NoReaction;
 import io.spine.server.command.DoNothing;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
