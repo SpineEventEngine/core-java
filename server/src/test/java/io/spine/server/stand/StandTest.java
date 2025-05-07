@@ -23,9 +23,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.stand;
 
-import com.google.common.truth.Truth8;
 import com.google.protobuf.FieldMask;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -624,12 +624,12 @@ class StandTest extends TenantAwareTest {
 
         var actualFilter = repository.memoizedFilters();
         assertThat(actualFilter).isPresent();
-        Truth8.assertThat(actualFilter)
+        assertThat(actualFilter)
               .hasValue(query.filters());
 
         var actualFormat = repository.memoizedFormat();
         assertThat(actualFormat).isPresent();
-        Truth8.assertThat(actualFormat)
+        assertThat(actualFormat)
               .hasValue(query.getFormat());
     }
 
