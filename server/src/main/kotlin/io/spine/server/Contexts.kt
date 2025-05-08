@@ -58,4 +58,3 @@ public inline fun <reified E: Entity<*, *>> BoundedContext.hasEntitiesOfType(): 
  */
 public inline fun <reified S: EntityState<*>> BoundedContext.hasEntitiesWithState(): Boolean =
     hasEntitiesWithState(S::class.java)
-
