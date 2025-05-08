@@ -43,5 +43,5 @@ message ActiveUsers {
 
     ActiveUsersId id = 1;
 
-    uint64 count = 2 [(min).value = "0"];
+    int64 count = 2 [(min).value = "0"];
 }

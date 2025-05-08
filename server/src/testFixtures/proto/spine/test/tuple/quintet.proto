@@ -50,7 +50,7 @@ option java_multiple_files = true;
 message InstrumentNumber {
 
     // Valid values are `1` and `2`.
-    uint32 value = 1 [(min).value = "1", (max).value = "2"];
+    int32 value = 1 [(min).value = "1", (max).value = "2"];
 }
 
 message Viola {
