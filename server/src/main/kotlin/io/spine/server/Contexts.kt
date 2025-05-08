@@ -33,7 +33,7 @@ import io.spine.server.entity.Entity
 import kotlin.reflect.KClass
 
 /**
- * Adds specified entity class to this `BoundedContextBuilder`.
+ * Adds the specified entity class to this `BoundedContextBuilder`.
  *
  * A default repository instance will be created for this class.
  * This instance will be added to the repository registration list for
