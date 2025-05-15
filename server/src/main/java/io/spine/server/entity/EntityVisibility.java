@@ -37,6 +37,7 @@ import io.spine.code.proto.EntityStateOption;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.type.TypeName;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Optional;
 
@@ -67,6 +68,7 @@ import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
 @Internal
 public final class EntityVisibility implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0L;
 
     /**
@@ -98,10 +100,6 @@ public final class EntityVisibility implements Serializable {
      */
     public static Optional<EntityVisibility> of(Class<? extends EntityState<?>> stateClass) {
         checkNotNull(stateClass);
-
-        if (!GeneratedMessageV3.class.isAssignableFrom(stateClass)) {
-            return Optional.empty();
-        }
 
         var descriptor = TypeName.of(stateClass)
                                  .messageDescriptor();
