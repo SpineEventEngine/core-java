@@ -27,7 +27,6 @@
 package io.spine.server;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.common.truth.Truth8;
 import io.spine.environment.DefaultMode;
 import io.spine.environment.Environment;
 import io.spine.environment.EnvironmentType;
@@ -308,7 +307,7 @@ class ServerEnvironmentConfigTest {
             TracerFactory factory = new MemoizingTracerFactory();
             when(Local.class).use(factory);
 
-            Truth8.assertThat(serverEnvironment.tracing())
+            assertThat(serverEnvironment.tracing())
                   .isEmpty();
         }
 
