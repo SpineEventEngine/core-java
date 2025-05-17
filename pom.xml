@@ -10,7 +10,7 @@ all modules and does not describe the project structure per-subproject.
  -->
 <groupId>io.spine</groupId>
 <artifactId>spine-core-java</artifactId>
-<version>2.0.0-SNAPSHOT.313</version>
+<version>2.0.0-SNAPSHOT.314</version>
 
 <inceptionYear>2015</inceptionYear>
 
@@ -98,7 +98,7 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.validation</groupId>
     <artifactId>spine-validation-java-runtime</artifactId>
-    <version>2.0.0-SNAPSHOT.332</version>
+    <version>2.0.0-SNAPSHOT.335</version>
     <scope>compile</scope>
   </dependency>
   <dependency>
@@ -268,12 +268,12 @@ all modules and does not describe the project structure per-subproject.
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-fat-cli</artifactId>
-    <version>0.94.0</version>
+    <version>0.95.1</version>
   </dependency>
   <dependency>
     <groupId>io.spine.protodata</groupId>
     <artifactId>protodata-protoc</artifactId>
-    <version>0.94.0</version>
+    <version>0.95.1</version>
   </dependency>
   <dependency>
     <groupId>io.spine.tools</groupId>
