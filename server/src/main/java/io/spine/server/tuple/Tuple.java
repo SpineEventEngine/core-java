@@ -147,15 +147,12 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     @Override
-    @SuppressWarnings("PMD.SimplifyBooleanReturns")
     public final boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Tuple other)) {
-            return false;
-        }
-        return Objects.equals(this.values, other.values);
+        return (obj instanceof Tuple other) &&
+                Objects.equals(this.values, other.values);
     }
 
     /**
