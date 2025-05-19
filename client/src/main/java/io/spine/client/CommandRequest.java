@@ -41,8 +41,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.client.EventsAfterCommand.subscribe;
+import static io.spine.type.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**

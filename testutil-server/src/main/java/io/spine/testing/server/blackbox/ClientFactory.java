@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.protobuf.TextFormat.shortDebugString;
+import static io.spine.type.shortDebugString;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.util.Objects.isNull;
 

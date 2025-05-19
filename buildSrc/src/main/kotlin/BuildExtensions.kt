@@ -74,6 +74,12 @@ fun ScriptHandlerScope.standardSpineSdkRepositories() {
 }
 
 /**
+ * Shortcut to [Protobuf] dependency object for using under `buildScript`.
+ */
+val ScriptHandlerScope.protobuf: Protobuf
+    get() = Protobuf
+
+/**
  * Shortcut to [McJava] dependency object for using under `buildScript`.
  */
 val ScriptHandlerScope.mcJava: McJava

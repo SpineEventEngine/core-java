@@ -37,8 +37,8 @@ import io.spine.type.TypeUrl;
 import org.jspecify.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.type.shortDebugString;
 import static java.lang.String.format;
 
 /**

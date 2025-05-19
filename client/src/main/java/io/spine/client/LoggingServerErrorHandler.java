@@ -30,8 +30,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.logging.Logger;
 
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static java.lang.String.format;
+import static io.spine.type.shortDebugString;
 
 /**
  * A posting handler which logs the error.
