@@ -37,6 +37,7 @@ import io.spine.testing.server.blackbox.probe.CommandCollector;
 import io.spine.testing.server.blackbox.probe.EventCollector;
 
 import static io.spine.type.ProtoTexts.shortDebugString;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Test fixture for single-tenant Bounded Contexts.
