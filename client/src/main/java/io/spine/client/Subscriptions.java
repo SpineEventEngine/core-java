@@ -46,7 +46,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.type.shortDebugString;
+import static io.spine.type.ProtoTexts.shortDebugString;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedSet;
 

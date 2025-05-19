@@ -42,7 +42,7 @@ import io.spine.validate.ExceptionFactory;
 
 import java.util.Map;
 
-import static io.spine.type.shortDebugString;
+import static io.spine.type.ProtoTexts.shortDebugString;
 import static java.lang.String.format;
 
 /**

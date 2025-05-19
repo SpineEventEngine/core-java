@@ -42,7 +42,7 @@ import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.client.EventsAfterCommand.subscribe;
-import static io.spine.type.shortDebugString;
+import static io.spine.type.ProtoTexts.shortDebugString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**

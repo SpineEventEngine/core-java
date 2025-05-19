@@ -29,7 +29,8 @@ package io.spine.core;
 import io.spine.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.type.shortDebugString;
+import static io.spine.type.ProtoTexts.shortDebugString;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Utilities for working with {@linkplain Ack acknowledgements}.
@@ -49,13 +50,12 @@ public final class Acks {
     public static CommandId toCommandId(Ack ack) {
         checkNotNull(ack);
         var unpacked = AnyPacker.unpack(ack.getMessageId());
-        if (!(unpacked instanceof CommandId)) {
+        if (!(unpacked instanceof CommandId commandId)) {
             throw newIllegalArgumentException(
                     "Unable to get a command ID from the acknowledgement: `%s`.",
                     shortDebugString(ack)
             );
         }
-        var commandId = (CommandId) unpacked;
         return commandId;
     }
 }

@@ -36,7 +36,7 @@ import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.blackbox.probe.CommandCollector;
 import io.spine.testing.server.blackbox.probe.EventCollector;
 
-import static io.spine.type.shortDebugString;
+import static io.spine.type.ProtoTexts.shortDebugString;
 
 /**
  * Test fixture for single-tenant Bounded Contexts.
