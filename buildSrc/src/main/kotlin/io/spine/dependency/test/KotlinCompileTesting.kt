@@ -33,7 +33,7 @@ package io.spine.dependency.test
  */
 @Suppress("unused", "ConstPropertyName")
 object KotlinCompileTesting {
-    private const val version = "0.7.0"
+    private const val version = "0.7.1"
     private const val group = "dev.zacsweers.kctfork"
     const val libCore = "$group:core:$version"
     const val libKsp = "$group:ksp:$version"

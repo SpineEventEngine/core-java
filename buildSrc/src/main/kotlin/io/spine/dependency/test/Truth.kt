@@ -29,7 +29,7 @@ package io.spine.dependency.test
 // https://github.com/google/truth
 @Suppress("unused", "ConstPropertyName")
 object Truth {
-    private const val version = "1.4.2"
+    private const val version = "1.4.4"
     val libs = listOf(
         "com.google.truth:truth:$version",
         "com.google.truth.extensions:truth-java8-extension:$version",
