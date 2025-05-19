@@ -147,6 +147,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
     }
 
     @Override
+    @SuppressWarnings("PMD.SimplifyBooleanReturns")
     public final boolean equals(Object obj) {
         if (this == obj) {
             return true;
