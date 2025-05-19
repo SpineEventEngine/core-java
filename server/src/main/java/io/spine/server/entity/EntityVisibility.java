@@ -30,7 +30,6 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.ImmutableGraph;
 import com.google.common.graph.MutableGraph;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.GeneratedMessageV3;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.code.proto.EntityStateOption;
