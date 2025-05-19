@@ -160,10 +160,9 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      */
     static boolean isOptionalPresent(Object value) {
         checkNotNull(value);
-        if(!(value instanceof Optional)) {
+        if(!(value instanceof Optional<?> asOptional)) {
             return true;
         }
-        var asOptional = (Optional<?>) value;
         return asOptional.isPresent();
     }
 
