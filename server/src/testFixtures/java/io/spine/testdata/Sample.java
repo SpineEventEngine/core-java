@@ -29,13 +29,13 @@ package io.spine.testdata;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
+import java.io.Serializable;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Random;
@@ -44,7 +44,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.Messages.builderFor;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.UUID.randomUUID;
 
@@ -138,7 +137,7 @@ public final class Sample {
     private static void checkClass(Class<? extends Message> clazz) {
         checkNotNull(clazz);
         // Support only generated protobuf messages
-        checkArgument(GeneratedMessageV3.class.isAssignableFrom(clazz),
+        checkArgument(Serializable.class.isAssignableFrom(clazz),
                       "Only generated protobuf messages are allowed.");
     }
 
@@ -162,28 +161,19 @@ public final class Sample {
         var type = field.getType();
         var javaType = type.getJavaType();
         Random random = new SecureRandom();
-        switch (javaType) {
-            case INT:
-            case LONG:
-                return positiveInt(random);
-            case FLOAT:
-                return random.nextFloat();
-            case DOUBLE:
-                return random.nextDouble();
-            case BOOLEAN:
-                return random.nextBoolean();
-            case STRING:
-                return randomString();
-            case BYTE_STRING:
+        return switch (javaType) {
+            case INT, LONG -> positiveInt(random);
+            case FLOAT -> random.nextFloat();
+            case DOUBLE -> random.nextDouble();
+            case BOOLEAN -> random.nextBoolean();
+            case STRING -> randomString();
+            case BYTE_STRING -> {
                 var randomString = randomString();
-                return ByteString.copyFrom(randomString, UTF_8);
-            case ENUM:
-                return enumValueFor(field, random);
-            case MESSAGE:
-                return messageValueFor(field);
-            default:
-                throw new IllegalArgumentException(format("Field type %s is not supported.", type));
-        }
+                yield ByteString.copyFrom(randomString, UTF_8);
+            }
+            case ENUM -> enumValueFor(field, random);
+            case MESSAGE -> messageValueFor(field);
+        };
     }
 
     private static String randomString() {

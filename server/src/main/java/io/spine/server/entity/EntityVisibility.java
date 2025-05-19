@@ -30,7 +30,6 @@ import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.ImmutableGraph;
 import com.google.common.graph.MutableGraph;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.GeneratedMessageV3;
 import io.spine.annotation.Internal;
 import io.spine.base.EntityState;
 import io.spine.code.proto.EntityStateOption;
@@ -61,8 +60,9 @@ import static io.spine.option.EntityOption.Visibility.SUBSCRIBE;
  *     <li>{@code FULL} - the entity is visible for both subscription and querying.
  * </ol>
  *
- * <p>The visibility of an entity is defined by the {@code (entity)} option. By default, any entity
- * is has the {@code NONE} level except for projections, which have the {@code FULL} level.
+ * <p>The visibility of an entity is defined by the {@code (entity)} option.
+ * By default, any entity has the {@code NONE} level except for projections,
+ * which have the {@code FULL} level.
  */
 @Immutable
 @Internal
@@ -195,7 +195,7 @@ public final class EntityVisibility implements Serializable {
     }
 
     /**
-     * Builds the graph of the visibilities hierarchy.
+     * Builds the graph of the visibility hierarchy.
      *
      * @see #VISIBILITIES
      */
