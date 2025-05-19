@@ -30,11 +30,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
-import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
@@ -49,14 +49,13 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 public abstract class Tuple implements Iterable<Message>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 0L;
 
     /**
      * Immutable list of tuple values.
      *
-     * <p>The first entry must be a {@link GeneratedMessageV3}.
-     *
-     * <p>Other entries can be either {@link GeneratedMessageV3} or {@link Optional}.
+     * <p>Other entries can be either {@link Message} or {@link Optional}.
      */
     private final List<Element> values;
 
@@ -152,10 +151,9 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Tuple)) {
+        if (!(obj instanceof Tuple other)) {
             return false;
         }
-        var other = (Tuple) obj;
         return Objects.equals(this.values, other.values);
     }
 
