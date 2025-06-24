@@ -28,7 +28,7 @@ package io.spine.server.route
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.spine.protobuf.unpackGuessingType
+import io.spine.protobuf.unpackKnownType
 import io.spine.server.given.context.drawing.Classifier
 import io.spine.server.given.context.drawing.Classifier.LIFECYCLE
 import io.spine.server.given.context.drawing.Classifier.LOCATION
@@ -47,8 +47,8 @@ import io.spine.server.given.context.drawing.event.LineSelected
 import io.spine.server.given.context.drawing.event.LineStyleChanged
 import io.spine.server.given.context.drawing.event.LineUnselected
 import io.spine.server.given.context.drawing.event.lineAdded
-import io.spine.server.given.context.drawing.event.lineRemoved
 import io.spine.server.given.context.drawing.event.lineMoved
+import io.spine.server.given.context.drawing.event.lineRemoved
 import io.spine.server.given.context.drawing.event.lineSelected
 import io.spine.server.given.context.drawing.event.lineStyleChanged
 import io.spine.server.given.context.drawing.event.lineUnselected
@@ -127,6 +127,6 @@ private inline fun <reified E: LineEvent> Iterable<LineEvent>.shouldNotContain()
 
 private fun events(c: Classifier, context: BlackBox): List<LineEvent> {
     val log = context.assertEntity(c.name, DrawingEvents::class.java).actual()?.state() as Log
-    val events = log.eventList.map { it.unpackGuessingType() as LineEvent }
+    val events = log.eventList.map { it.unpackKnownType() as LineEvent }
     return events
 }
