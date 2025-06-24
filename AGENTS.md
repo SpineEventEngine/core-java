@@ -469,7 +469,7 @@ Leverage GPT-4o's advanced capabilities with prompts like these:
  - Stay consistent, stay clear, and help this Kotlin/Java codebase become more robust,
    elegant, and maintainable.
 
-<!-- External links -->
+[//]: # (External links)
 [spine-docs]: https://github.com/SpineEventEngine/documentation/wiki
 [kotest-assertions]: https://kotest.io/docs/assertions/assertions.html
 [todo-comments]: https://github.com/SpineEventEngine/documentation/wiki/TODO-comments
