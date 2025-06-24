@@ -146,7 +146,7 @@ subprojects {
     repositories.standardToSpineSdk()
     applyPlugins()
 
-    setupJava(BuildSettings.javaVersion)
+    setupJava()
     setupKotlin()
 
     defineDependencies()
@@ -196,12 +196,14 @@ fun Subproject.applyPlugins() {
 /**
  * Configures Java tasks in this project.
  */
-fun Subproject.setupJava(javaVersion: JavaLanguageVersion) {
+fun Subproject.setupJava() {
     java {
-        toolchain.languageVersion.set(javaVersion)
+        sourceCompatibility = BuildSettings.javaVersionCompat
+        targetCompatibility = BuildSettings.javaVersionCompat
     }
     tasks {
         withType<JavaCompile>().configureEach {
+            options.release.set(BuildSettings.JVM_VERSION)
             configureJavac()
             configureErrorProne()
         }

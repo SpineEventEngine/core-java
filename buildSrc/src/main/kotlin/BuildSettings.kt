@@ -33,7 +33,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  * throughout the project.
  */
 object BuildSettings {
-    private const val JVM_VERSION = 17
+    const val JVM_VERSION = 17
     val javaVersion: JavaLanguageVersion = JavaLanguageVersion.of(JVM_VERSION)
     @Suppress("unused")
     val javaVersionCompat = JavaVersion.toVersion(JVM_VERSION)
