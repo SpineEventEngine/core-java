@@ -26,7 +26,6 @@
 package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -35,8 +34,8 @@ import io.spine.logging.WithLogging;
 import io.spine.server.ContextSpec;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -51,9 +50,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.event.EventComparator.chronological;
+import static io.spine.type.ProtoTexts.shortDebugString;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
-
 /**
  * Default implementation of {@link EventStore}.
  */
@@ -68,7 +67,7 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
     private final Log log;
 
     /**
-     * Constructs new instance.
+     * Constructs a new instance.
      */
     public DefaultEventStore(ContextSpec context, StorageFactory factory) {
         super(context, factory.createRecordStorage(context, spec()));
@@ -76,8 +75,12 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
     }
 
     private static RecordSpec<EventId, Event> spec() {
-        var spec = new RecordSpec<>(EventId.class, Event.class, Signal::id,
-                                    EventColumn.definitions());
+        var spec = new RecordSpec<>(
+                EventId.class,
+                Event.class,
+                Signal::id,
+                EventColumn.definitions()
+        );
         return spec;
     }
 
@@ -189,7 +192,8 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
 
         private void stored(Event event) {
             logger().atDebug().log(() -> format(
-                    "Stored: %s.", TextFormat.shortDebugString(event)));
+                    "Stored: %s.", shortDebugString(event)
+            ));
         }
 
         private void stored(Iterable<Event> events) {
@@ -203,13 +207,15 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
         private void readingStart(EventStreamQuery query, StreamObserver<Event> observer) {
             logger().atDebug().log(() -> format(
                     "Creating stream on request: `%s` for observer: `%s`.",
-                      TextFormat.shortDebugString(query),
-                      observer));
+                      shortDebugString(query),
+                      observer
+            ));
         }
 
         private void readingComplete(StreamObserver<Event> observer) {
             logger().atDebug().log(() -> format(
-                    "Observer `%s` got all queried events.", observer));
+                    "Observer `%s` got all queried events.", observer
+            ));
         }
     }
 }
