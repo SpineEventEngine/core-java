@@ -24,8 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 /**
  * This script uses two declarations of the constant [licenseReportVersion] because
  * currently there is no way to define a constant _before_ a build script of `buildSrc`.
@@ -139,7 +137,7 @@ val koverVersion = "0.9.1"
  *
  * @see <a href="https://github.com/johnrengelman/shadow/releases">Shadow Plugin releases</a>
  */
-val shadowVersion = "7.1.2"
+val shadowVersion = "8.3.6"
 
 configurations.all {
     resolutionStrategy {
@@ -155,16 +153,6 @@ configurations.all {
     }
 }
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-    }
-}
-
 dependencies {
     api("com.github.jk1:gradle-license-report:$licenseReportVersion")
     api(platform("org.jetbrains.kotlin:kotlin-bom:$kotlinEmbeddedVersion"))
@@ -176,7 +164,7 @@ dependencies {
         "com.github.jk1:gradle-license-report:$licenseReportVersion",
         "com.google.guava:guava:$guavaVersion",
         "com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion",
-        "gradle.plugin.com.github.johnrengelman:shadow:$shadowVersion",
+        "com.gradleup.shadow:shadow-gradle-plugin:$shadowVersion",
         "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion",
         "io.kotest:kotest-gradle-plugin:$kotestJvmPluginVersion",
         // https://github.com/srikanth-lingala/zip4j

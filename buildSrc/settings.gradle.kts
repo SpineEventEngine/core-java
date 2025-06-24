@@ -24,20 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.local
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenLocal()
+        mavenCentral()
+    }
+}
 
-/**
- * Spine Base module.
- *
- * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
- */
-@Suppress("ConstPropertyName")
-object Base {
-    const val version = "2.0.0-SNAPSHOT.322"
-    const val versionForBuildScript = "2.0.0-SNAPSHOT.317"
-    const val group = Spine.group
-    const val artifact = "spine-base"
-    const val lib = "$group:$artifact:$version"
-    const val format = "$group:spine-format:$version"
-    const val libForBuildScript = "$group:$artifact:$versionForBuildScript"
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention").version("1.0.0")
 }

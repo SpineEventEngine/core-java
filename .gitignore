@@ -31,6 +31,9 @@
 #
 # Therefore, instructions below are superset of instructions required for all the projects.
 
+# Temporary output of AI agents.
+.output
+
 # `jenv` local configuration.
 .java-version
 
@@ -55,11 +58,17 @@
 !.idea/codeStyles/
 !.idea/copyright/
 
+# Ignore IDEA config files under `tests`
+/tests/.idea/**
+
 # Gradle interim configs
 **/.gradle/**
 
 # Temp directory for Gradle TestKit runners
 **/.gradle-test-kit/**
+
+# Integration test log files
+/tests/_out/**
 
 # Generated source code
 **/generated/**
@@ -67,6 +76,9 @@
 **/*.pbenum.dart
 **/*.pbserver.dart
 **/*.pbjson.dart
+
+# Generated source code with custom path under `tests`
+/tests/**/proto-gen/**
 
 # Gradle build files
 **/build/**

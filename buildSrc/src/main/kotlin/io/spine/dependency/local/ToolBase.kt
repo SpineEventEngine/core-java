@@ -29,7 +29,7 @@ package io.spine.dependency.local
 /**
  * Artifacts of the `tool-base` module.
  *
- * @see <a href="https://github.com/SpineEventEngine/tool-base">spine-tool-base</a>
+ * @see <a href="https://github.com/SpineEventEngine/tool-base">tool-base</a>
  */
 @Suppress("ConstPropertyName", "unused")
 object ToolBase {
@@ -40,7 +40,16 @@ object ToolBase {
     const val pluginBase = "$group:spine-plugin-base:$version"
     const val pluginTestlib = "$group:spine-plugin-testlib:$version"
 
+    const val intellijPlatform = "$group:intellij-platform:$version"
     const val intellijPlatformJava = "$group:intellij-platform-java:$version"
 
+    const val psi = "$group:spine-psi:$version"
     const val psiJava = "$group:spine-psi-java:$version"
+
+    const val gradleRootPlugin = "$group:gradle-root-plugin:$version"
+    const val gradlePluginApi = "$group:gradle-plugin-api:$version"
+    const val gradlePluginApiTestFixtures = "$group:gradle-plugin-api-test-fixtures:$version"
+
+    const val jvmTools = "$group:jvm-tools:$version"
+    const val jvmToolPlugins = "$group:jvm-tool-all-plugins:$version"
 }
