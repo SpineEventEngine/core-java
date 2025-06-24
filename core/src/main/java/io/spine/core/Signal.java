@@ -37,6 +37,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.type.KnownMessage;
 import io.spine.type.SerializableMessage;
 import io.spine.type.TypeUrl;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
@@ -88,7 +89,7 @@ public interface Signal<I extends SignalId,
     /**
      * Obtains the identifier of the message.
      */
-    default I id() {
+    default @NonNull I id() {
         return getId();
     }
 
