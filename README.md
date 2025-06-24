@@ -12,7 +12,7 @@ applications that are accessed by clients built with JavaScript, Java Nano (Andr
 
 ## Releases
 
-The project is under active ongoing development. 
+The project is under active ongoing development.
 You are welcome to experiment and [provide your feedback][email-developers].
 
 The latest stable version is [1.9.0][latest-release].
@@ -23,14 +23,13 @@ This repository contains the code of:
  - core types;
  - client API;
  - server API;
- - testing utilities for the client- and server-side code.
-  
+- testing utilities for the client- and server-side code.
 
 ## Quick start and examples
 
 Please see the [“Quick Start” guide][quick-start] which goes through a Hello World project showing
 how to create a Spine-based project.
- 
+
 More introductory application examples are available from
 the [Spine Examples][spine-examples] GitHub organization.
 
@@ -46,20 +45,20 @@ plugged in as a Git submodule. Please use the following command to initialize it
 
 ```sh
 git submodule update --init --recursive
-```  
+```
 
-Also, a `pull` script is located in the root of `core-java` repository. Use it to update to the 
+Also, a `pull` script is located in the root of `core-java` repository. Use it to update to the
 latest version of the configuration files.
 
 ## Important warnings
-* The code annotated with `@Internal` are not parts of public API of the framework. 
+* The code annotated with `@Internal` are not parts of public API of the framework.
   Therefore, such API should not be used from the outside of the framework.
 
-* The public API marked as `@Experimental` may be used at own risk; it can change at any time, 
+* The public API marked as `@Experimental` may be used at own risk; it can change at any time,
   and has no guarantee of API stability or backward-compatibility.
 
-* The API annotated with `@SPI` is for those who intend to extend the framework, 
-  or provide custom storage implementations. 
+* The API annotated with `@SPI` is for those who intend to extend the framework or
+  provide custom storage implementations.
 
 If you need to use API with one of these annotations, please [contact us][email-developers].
 
