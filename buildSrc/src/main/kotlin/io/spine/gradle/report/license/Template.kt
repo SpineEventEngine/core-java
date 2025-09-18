@@ -28,7 +28,7 @@ package io.spine.gradle.report.license
 
 import io.spine.docs.MarkdownDocument
 import io.spine.gradle.artifactId
-import java.util.*
+import java.util.Date
 import org.gradle.api.Project
 
 /**
@@ -40,32 +40,33 @@ internal class Template(
 ) {
 
     private companion object {
+        @Suppress("ConstPropertyName")
         private const val longBreak = "\n\n"
     }
 
-    internal fun writeHeader() {
+    internal fun writeHeader() = with(project) {
         out.nl()
-            .h1(
-                "Dependencies of " +
-                        "`${project.group}:${project.artifactId}:${project.version}`"
-            )
-            .nl()
+           .h1("Dependencies of `$group:$artifactId:$version`")
+           .nl()
     }
 
     internal fun writeFooter() {
+        val currentTime = Date()
         out.text(longBreak)
             .text("The dependencies distributed under several licenses, ")
             .text("are used according their commercial-use-friendly license.")
             .text(longBreak)
             .text("This report was generated on ")
-            .bold("${Date()}")
+            .bold("$currentTime")
             .text(" using ")
+            .nl()
             .link(
                 "Gradle-License-Report plugin",
                 "https://github.com/jk1/Gradle-License-Report"
             )
             .text(" by Evgeny Naumenko, ")
             .text("licensed under ")
+            .nl()
             .link(
                 "Apache 2.0 License",
                 "https://github.com/jk1/Gradle-License-Report/blob/master/LICENSE"
