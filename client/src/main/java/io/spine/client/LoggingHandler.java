@@ -1,11 +1,11 @@
 /*
- * Copyright 2023, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,26 +34,21 @@ import io.spine.logging.LoggingApi;
  *
  * <p>The handler always uses {@linkplain Logger#atError() ERROR} level.
  */
-@SuppressWarnings("NonApiType") // https://github.com/SpineEventEngine/core-java/issues/1526
 abstract class LoggingHandler {
 
-    private final Logger<?> logger;
+    private final Logger logger;
     private final String messageFormat;
 
     /**
-     * Creates new instance of the logging handler.
+     * Creates a new instance of the logging handler.
      *  @param logger
      *         the instance of the logger to use for reporting the error
      * @param messageFormat
      *         the formatting message for an error text
      */
-    LoggingHandler(Logger<?> logger, String messageFormat) {
+    LoggingHandler(Logger logger, String messageFormat) {
         this.logger = logger;
         this.messageFormat = messageFormat;
-    }
-
-    final Logger<?> logger() {
-        return logger;
     }
 
     final String messageFormat() {
@@ -62,7 +57,7 @@ abstract class LoggingHandler {
 
     /** Obtains logging API at {@code sever} level. */
     protected final LoggingApi<?> error() {
-        return logger().atError();
+        return logger.atError();
     }
 
     /** Obtains logging API at {@code sever} level and initializes it with the passed cause. */

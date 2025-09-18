@@ -91,7 +91,6 @@ private fun MarkdownDocument.print(
     return this
 }
 
-
 /**
  * Prints the URL to the project which provides the dependency.
  *

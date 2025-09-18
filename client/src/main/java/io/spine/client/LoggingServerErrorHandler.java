@@ -38,7 +38,7 @@ import static java.lang.String.format;
  */
 final class LoggingServerErrorHandler extends LoggingHandler implements ServerErrorHandler {
 
-    LoggingServerErrorHandler(Logger<?> logger, String messageFormat) {
+    LoggingServerErrorHandler(Logger logger, String messageFormat) {
         super(logger, messageFormat);
     }
 

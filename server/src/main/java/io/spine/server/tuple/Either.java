@@ -72,6 +72,7 @@ public abstract class Either implements Iterable<Message>, Serializable {
     /**
      * Obtains the value of the element by its index and casts it to the type {@code <T>}.
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals") // We save on casts, internally.
     static <T> T get(Either either, IndexOf index) {
         var requestedIdx = index.value();
         if (requestedIdx != either.index()) {
