@@ -25,11 +25,10 @@
  */
 
 import io.spine.dependency.lib.Grpc
+import io.spine.dependency.lib.JavaX
 import io.spine.dependency.local.Logging
 import io.spine.dependency.local.Reflect
-import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Time
-import io.spine.gradle.testing.exposeTestConfiguration
 
 plugins {
     `detekt-code-analysis`
@@ -42,6 +41,9 @@ dependencies {
     api(Grpc.protobuf)
     api(project(":core"))
     api(Reflect.lib)
+
+    // `@javax.annotation.Generated` is still being used by gRPC.
+    api(JavaX.annotations)
 
     implementation(Grpc.inProcess)
     // This dependency is needed for Logging contexts to work.
