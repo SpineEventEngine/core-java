@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,6 +30,7 @@ import com.google.common.base.Objects;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.logging.LogSite;
 import io.spine.server.model.Receptor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
@@ -45,7 +46,7 @@ import static java.util.stream.Collectors.joining;
  * The site never provides a line number or a file name.
  */
 @Immutable
-final class ReceptorSite implements LogSite {
+final class ReceptorSite extends LogSite {
 
     @SuppressWarnings("Immutable")
     private final Method method;
@@ -81,15 +82,19 @@ final class ReceptorSite implements LogSite {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ReceptorSite)) {
+        if (!(o instanceof ReceptorSite site)) {
             return false;
         }
-        var site = (ReceptorSite) o;
         return Objects.equal(method, site.method);
     }
 
     @Override
     public int hashCode() {
         return Objects.hashCode(method);
+    }
+
+    @Override
+    public @Nullable String getFileName() {
+        return null;
     }
 }
