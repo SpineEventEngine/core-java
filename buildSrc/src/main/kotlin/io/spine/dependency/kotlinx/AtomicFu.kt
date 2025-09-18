@@ -26,7 +26,29 @@
 
 package io.spine.dependency.kotlinx
 
-@Suppress("ConstPropertyName", "unused") // https://bit.ly/kotlin-prop-names
-object KotlinX {
-    const val group = "org.jetbrains.kotlinx"
+import io.spine.dependency.Dependency
+
+/**
+ * Kotlin/Multiplatform AtomicFU library.
+ *
+ * https://github.com/Kotlin/kotlinx.atomicfu
+ */
+object AtomicFu : Dependency() {
+
+    override val version: String = "0.29.0"
+
+    override val group: String = KotlinX.group
+
+    @Suppress("ConstPropertyName") // https://bit.ly/kotlin-prop-names
+    const val module = "atomicfu"
+
+    /**
+     * The base artifact without platform classifier.
+     */
+    val std = "$group:$module"
+
+    override val modules: List<String> = listOf(std)
+
+    /** Convenience: full coordinates with the version for the standard artifact. */
+    val lib: String get() = artifact(std)
 }

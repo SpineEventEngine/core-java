@@ -24,9 +24,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.dependency.kotlinx
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenLocal()
+        mavenCentral()
+    }
+}
 
-@Suppress("ConstPropertyName", "unused") // https://bit.ly/kotlin-prop-names
-object KotlinX {
-    const val group = "org.jetbrains.kotlinx"
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention").version("1.0.0")
 }

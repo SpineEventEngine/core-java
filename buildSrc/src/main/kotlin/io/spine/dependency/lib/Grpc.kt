@@ -62,7 +62,6 @@ object Grpc : DependencyWithBom() {
         nettyShaded
     )
 
-
     object ProtocPlugin {
         const val id = "grpc"
         @Deprecated(

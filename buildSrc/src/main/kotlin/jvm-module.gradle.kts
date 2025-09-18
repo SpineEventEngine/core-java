@@ -24,7 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import BuildSettings.javaVersion
+import io.spine.dependency.boms.BomsPlugin
 import io.spine.dependency.build.CheckerFramework
 import io.spine.dependency.build.Dokka
 import io.spine.dependency.build.ErrorProne
@@ -38,7 +38,6 @@ import io.spine.gradle.github.pages.updateGitHubPages
 import io.spine.gradle.javac.configureErrorProne
 import io.spine.gradle.javac.configureJavac
 import io.spine.gradle.javadoc.JavadocConfig
-import io.spine.gradle.kotlin.applyJvmToolchain
 import io.spine.gradle.kotlin.setFreeCompilerArgs
 import io.spine.gradle.report.license.LicenseReporter
 
@@ -50,18 +49,19 @@ plugins {
     id("dokka-for-java")
     kotlin("jvm")
     id("io.kotest")
-    id("org.jetbrains.kotlinx.kover")
     id("detekt-code-analysis")
     id("dokka-for-kotlin")
+    id("org.jetbrains.kotlinx.kover")
+    id("module-testing")
 }
-
+apply<BomsPlugin>()
 LicenseReporter.generateReportIn(project)
 JavadocConfig.applyTo(project)
 CheckStyleConfig.applyTo(project)
 
 project.run {
-    configureJava(javaVersion)
-    configureKotlin(javaVersion)
+    configureJava()
+    configureKotlin()
     addDependencies()
     forceConfigurations()
 
@@ -73,9 +73,10 @@ project.run {
 
 typealias Module = Project
 
-fun Module.configureJava(javaVersion: JavaLanguageVersion) {
+fun Module.configureJava() {
     java {
-        toolchain.languageVersion.set(javaVersion)
+        sourceCompatibility = BuildSettings.javaVersionCompat
+        targetCompatibility = BuildSettings.javaVersionCompat
     }
 
     tasks {
@@ -86,21 +87,13 @@ fun Module.configureJava(javaVersion: JavaLanguageVersion) {
     }
 }
 
-fun Module.configureKotlin(javaVersion: JavaLanguageVersion) {
+fun Module.configureKotlin() {
     kotlin {
-        applyJvmToolchain(javaVersion.asInt())
         explicitApi()
         compilerOptions {
             jvmTarget.set(BuildSettings.jvmTarget)
             setFreeCompilerArgs()
         }
-    }
-
-    // See:
-    // https://github.com/Kotlin/kotlinx-kover?tab=readme-ov-file#to-create-report-combining-coverage-info-from-different-gradle-projects
-    // https://github.com/Kotlin/kotlinx-kover/blob/main/kover-gradle-plugin/examples/jvm/merged/build.gradle.kts
-    rootProject.dependencies {
-        kover(this@configureKotlin)
     }
 
     kover {

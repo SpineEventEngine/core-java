@@ -26,7 +26,9 @@
 
 package io.spine.dependency.kotlinx
 
-@Suppress("ConstPropertyName", "unused") // https://bit.ly/kotlin-prop-names
-object KotlinX {
-    const val group = "org.jetbrains.kotlinx"
+// https://github.com/Kotlin/kotlinx-datetime
+@Suppress("ConstPropertyName", "unused")
+object DateTime {
+    const val group = KotlinX.group
+    const val lib = "$group:kotlinx-datetime:0.7.1"
 }

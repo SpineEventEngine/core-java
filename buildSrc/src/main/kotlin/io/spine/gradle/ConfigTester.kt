@@ -195,7 +195,7 @@ class GitRepository(
      * to the specified [destinationFolder].
      *
      * The source code is put to the sub-folder named after the repository.
-     * E.g. for `https://github.com/acme-org/foobar` the code is placed under
+     * E.g., for `https://github.com/acme-org/foobar` the code is placed under
      * the `destinationFolder/foobar` folder.
      *
      * If the supplied folder does not exist, it is created.
