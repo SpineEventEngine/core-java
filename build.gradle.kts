@@ -43,6 +43,7 @@ import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Time
 import io.spine.dependency.local.ToolBase
 import io.spine.dependency.local.Validation
+import io.spine.dependency.test.JUnit
 import io.spine.gradle.VersionWriter
 import io.spine.gradle.checkstyle.CheckStyleConfig
 import io.spine.gradle.github.pages.updateGitHubPages
@@ -77,7 +78,7 @@ buildscript {
                     io.spine.dependency.local.Reflect.lib,
                     logging.lib,
                     logging.libJvm,
-                    logging.middleware,
+                    logging.grpcContext,
                     io.spine.dependency.local.Validation.runtime,
                 )
             }
@@ -321,7 +322,13 @@ fun Subproject.forceConfigurations() {
                 Grpc.forceArtifacts(project, this@all, this@resolutionStrategy)
                 force(Grpc.ProtocPlugin.artifact)
 
+                // Substitute the legacy artifact coordinates with the new `ToolBase.lib` alias.
+                dependencySubstitution {
+                    substitute(module("io.spine.tools:spine-tool-base")).using(module(ToolBase.lib))
+                }
+
                 force(
+                    JUnit.bom,
                     Kotlin.bom,
                     Guava.lib,
                     KotlinPoet.lib,
@@ -330,13 +337,15 @@ fun Subproject.forceConfigurations() {
                     Time.lib,
                     Logging.lib,
                     Logging.libJvm,
-                    Logging.middleware,
+                    Logging.grpcContext,
                     BaseTypes.lib,
                     Change.lib,
                     Reflect.lib,
                     TestLib.lib,
                     ToolBase.lib,
                     ToolBase.pluginBase,
+                    ToolBase.intellijPlatform,
+                    ToolBase.intellijPlatformJava,
                     CoreJava.server,
                     ProtoData.api,
                 )

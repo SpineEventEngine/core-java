@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -594,10 +594,12 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
      */
     @OverridingMethodsMustInvokeSuper
     @Override
+    @SuppressWarnings("MustBeClosedChecker") // We close the `loggingContext` in `afterInvoke()`.
     public void beforeInvoke(Receptor<AbstractEntity<I, S>, ?, ?, ?> method) {
         checkNotNull(method);
         var paramTypes = method.params().simpleNames();
-        loggingContext = ScopedLoggingContext.newContext()
+        loggingContext = ScopedLoggingContext.getInstance()
+            .newContext()
             .withMetadata(RECEPTOR_PARAM_TYPES, paramTypes)
             .install();
     }
@@ -626,10 +628,9 @@ public abstract class AbstractEntity<I, S extends EntityState<I>>
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AbstractEntity)) {
+        if (!(o instanceof AbstractEntity<?, ?> that)) {
             return false;
         }
-        var that = (AbstractEntity<?, ?>) o;
         return Objects.equals(id(), that.id()) &&
                 Objects.equals(state(), that.state()) &&
                 Objects.equals(version(), that.version()) &&
