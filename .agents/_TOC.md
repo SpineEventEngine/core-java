@@ -1,0 +1,18 @@
+# Table of Contents
+
+1. [Quick Reference Card](quick-reference-card.md)
+2. [Purpose](purpose.md)
+3. [Project overview](project-overview.md)
+4. [Coding guidelines](coding-guidelines.md)
+5. [Documentation & comments](documentation-guidelines.md)
+6. [Documentation typography & structure](documentation-typography-and-structure.md)
+7. [Documentation tasks](documentation-tasks.md)
+8. [Running builds](running-builds.md)
+9. [Version policy](version-policy.md)
+10. [Project structure expectations](project-structure-expectations.md)
+11. [Testing](testing.md)
+12. [Safety rules](safety-rules.md)
+13. [Advanced safety rules](advanced-safety-rules.md)
+14. [Refactoring guidelines](refactoring-guidelines.md)
+15. [Common tasks](common-tasks.md)
+16. [Java to Kotlin conversion](java-kotlin-conversion.md)

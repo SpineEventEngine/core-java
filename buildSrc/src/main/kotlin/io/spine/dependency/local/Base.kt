@@ -31,12 +31,14 @@ package io.spine.dependency.local
  *
  * @see <a href="https://github.com/SpineEventEngine/base">spine-base</a>
  */
-@Suppress("ConstPropertyName")
+@Suppress("ConstPropertyName", "unused")
 object Base {
-    const val version = "2.0.0-SNAPSHOT.320"
-    const val versionForBuildScript = "2.0.0-SNAPSHOT.320"
+    const val version = "2.0.0-SNAPSHOT.360"
+    const val versionForBuildScript = "2.0.0-SNAPSHOT.360"
     const val group = Spine.group
     const val artifact = "spine-base"
     const val lib = "$group:$artifact:$version"
+    const val annotations = "$group:spine-annotations:$version"
+    const val format = "$group:spine-format:$version"
     const val libForBuildScript = "$group:$artifact:$versionForBuildScript"
 }

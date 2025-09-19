@@ -29,7 +29,7 @@ import io.gitlab.arturbosch.detekt.Detekt
 /**
  * This script-plugin sets up Kotlin code analyzing with Detekt.
  *
- * After applying, Detekt is configured to use `${rootDir}/config/quality/detekt-config.yml` file.
+ * After applying, Detekt is configured to use `${rootDir}/buildSrc/quality/detekt-config.yml` file.
  * Projects can append their own config files to override some parts of the default one or drop
  * it at all in a favor of their own one.
  *
@@ -69,7 +69,7 @@ plugins {
 
 detekt {
     buildUponDefaultConfig = true
-    config.from(files("${rootDir}/config/quality/detekt-config.yml"))
+    config.from(files("${rootDir}/buildSrc/quality/detekt-config.yml"))
 }
 
 tasks {

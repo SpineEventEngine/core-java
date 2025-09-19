@@ -163,10 +163,10 @@ object ProtoData {
                 -----------------------------------------
                     Regular version     = v$version
                     Dogfooding version  = v$dogfoodingVersion
-                
+
                     ProtoData Gradle plugin can now be loaded from Maven Local.
-                    
-                    To reset the versions, erase the `$$VERSION_ENV` and `$$DF_VERSION_ENV` environment variables. 
+
+                    To reset the versions, erase the `$$VERSION_ENV` and `$$DF_VERSION_ENV` environment variables.
 
             """.trimIndent())
         } else {

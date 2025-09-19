@@ -42,7 +42,7 @@ pmd {
     ruleSets = listOf()
 
     // Load PMD settings.
-    val pmdSettings = file("$rootDir/config/quality/pmd.xml")
+    val pmdSettings = file("$rootDir/buildSrc/quality/pmd.xml")
     val textResource: TextResource = resources.text.fromFile(pmdSettings)
     ruleSetConfig = textResource
 

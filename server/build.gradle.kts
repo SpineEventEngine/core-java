@@ -29,6 +29,7 @@ import io.spine.dependency.lib.Grpc
 import io.spine.dependency.lib.Kotlin
 import io.spine.dependency.local.BaseTypes
 import io.spine.dependency.local.Change
+import io.spine.dependency.local.McJava
 import io.spine.dependency.local.TestLib
 import io.spine.dependency.local.Time
 import io.spine.dependency.local.Validation
@@ -64,6 +65,8 @@ dependencies {
 
     testImplementation(TestLib.lib)
     testImplementation(BaseTypes.lib)
+
+    kspTestFixtures(McJava.pluginLib)
 
     testFixturesImplementation(TestLib.lib)
     testFixturesImplementation(Time.testLib)

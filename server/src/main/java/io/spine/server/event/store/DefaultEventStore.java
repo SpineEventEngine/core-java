@@ -1,11 +1,11 @@
 /*
- * Copyright 2022, TeamDev. All rights reserved.
+ * Copyright 2025, TeamDev. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,7 +26,6 @@
 package io.spine.server.event.store;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.TextFormat;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.core.EventId;
@@ -35,8 +34,8 @@ import io.spine.logging.WithLogging;
 import io.spine.server.ContextSpec;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.MessageStorage;
+import io.spine.server.storage.RecordSpec;
 import io.spine.server.storage.RecordWithColumns;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -51,6 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Streams.stream;
 import static io.spine.server.event.EventComparator.chronological;
+import static io.spine.type.ProtoTexts.shortDebugString;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
@@ -189,7 +189,7 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
 
         private void stored(Event event) {
             logger().atDebug().log(() -> format(
-                    "Stored: %s.", TextFormat.shortDebugString(event)));
+                    "Stored: %s.", shortDebugString(event)));
         }
 
         private void stored(Iterable<Event> events) {
@@ -203,7 +203,7 @@ public final class DefaultEventStore extends MessageStorage<EventId, Event>
         private void readingStart(EventStreamQuery query, StreamObserver<Event> observer) {
             logger().atDebug().log(() -> format(
                     "Creating stream on request: `%s` for observer: `%s`.",
-                      TextFormat.shortDebugString(query),
+                      shortDebugString(query),
                       observer));
         }
 

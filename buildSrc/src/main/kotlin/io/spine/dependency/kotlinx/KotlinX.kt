@@ -26,7 +26,7 @@
 
 package io.spine.dependency.kotlinx
 
-@Suppress("ConstPropertyName") // https://bit.ly/kotlin-prop-names
+@Suppress("ConstPropertyName", "unused") // https://bit.ly/kotlin-prop-names
 object KotlinX {
     const val group = "org.jetbrains.kotlinx"
 }

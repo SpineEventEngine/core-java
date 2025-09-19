@@ -33,7 +33,7 @@ import io.spine.dependency.DependencyWithBom
 @Suppress("unused", "ConstPropertyName")
 object JUnit : DependencyWithBom() {
 
-    override val version = "5.12.2"
+    override val version = "5.13.2"
     override val group: String = "org.junit"
 
     /**
@@ -105,7 +105,7 @@ object JUnit : DependencyWithBom() {
          * So when we use JUnit as a platform, this property should be picked up
          * for the dependencies automatically.
          */
-        override val version: String = "1.12.2"
+        override val version: String = "1.13.2"
         override val group = "org.junit.platform"
 
         private const val infix = "junit-platform"

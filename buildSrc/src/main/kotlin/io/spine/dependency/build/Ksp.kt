@@ -35,7 +35,7 @@ import io.spine.dependency.Dependency
  */
 @Suppress("unused")
 object Ksp : Dependency() {
-    override val version = "2.1.21-2.0.1"
+    override val version = "2.1.21-2.0.2"
     override val group = "com.google.devtools.ksp"
 
     const val id = "com.google.devtools.ksp"

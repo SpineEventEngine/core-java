@@ -56,7 +56,7 @@ object CheckStyleConfig {
             plugin(CheckstylePlugin::class.java)
         }
 
-        val configDir = project.rootDir.resolve("config/quality/")
+        val configDir = project.rootDir.resolve("buildSrc/quality/")
 
         with(project.the<CheckstyleExtension>()) {
             toolVersion = CheckStyle.version

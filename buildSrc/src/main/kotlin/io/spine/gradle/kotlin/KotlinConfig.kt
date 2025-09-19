@@ -27,7 +27,7 @@
 package io.spine.gradle.kotlin
 
 import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
+import org.jetbrains.kotlin.gradle.dsl.KotlinCommonCompilerOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 /**
@@ -52,12 +52,14 @@ fun KotlinJvmProjectExtension.applyJvmToolchain(version: String) =
  * Opts-in to experimental features that we use in our codebase.
  */
 @Suppress("unused")
-fun KotlinJvmCompilerOptions.setFreeCompilerArgs() {
+fun KotlinCommonCompilerOptions.setFreeCompilerArgs() {
     freeCompilerArgs.addAll(
         listOf(
             "-Xskip-prerelease-check",
             "-Xjvm-default=all",
             "-Xinline-classes",
+            "-Xexpect-actual-classes",
+            "-Xcontext-receivers",
             "-opt-in=" +
                     "kotlin.contracts.ExperimentalContracts," +
                     "kotlin.io.path.ExperimentalPathApi," +

@@ -257,7 +257,7 @@ public final class Subscriptions implements WithLogging {
                            ));
         }
 
-        private Logger<?> logger() {
+        private Logger logger() {
             return Subscriptions.this.logger();
         }
     }
